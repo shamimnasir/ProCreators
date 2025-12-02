@@ -47,9 +47,9 @@ export default function OnboardingPage() {
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Sparkles className="h-16 w-16 text-primary" />
+            <Logo variant="icon" className="h-20 w-20" />
           </div>
-          <CardTitle className="text-3xl">{steps[currentStep].title}</CardTitle>
+          <CardTitle className="text-3xl text-white">{steps[currentStep].title}</CardTitle>
           <CardDescription className="text-lg">
             {steps[currentStep].description}
           </CardDescription>
