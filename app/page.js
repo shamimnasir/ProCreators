@@ -107,12 +107,8 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-[#0a0e27]/80 backdrop-blur-xl">
         <div className="container flex h-20 items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <Sparkles className="h-8 w-8 text-[#7c3aed] group-hover:text-[#a78bfa] transition-colors" />
-              <div className="absolute inset-0 blur-xl bg-[#7c3aed]/30 group-hover:bg-[#7c3aed]/50 transition-all"></div>
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">ProCreators</span>
+          <Link href="/">
+            <Logo variant="full" className="h-10 w-10" />
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
