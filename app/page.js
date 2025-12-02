@@ -237,8 +237,8 @@ export default function Home() {
                   viewport={{ once: true }}
                   className="group relative rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-8 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20"
                 >
-                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 text-[#a78bfa] transition-all group-hover:from-[#7c3aed]/40 group-hover:to-[#a78bfa]/40 group-hover:scale-110">
-                    <feature.icon className="h-7 w-7" />
+                  <div className="mb-6">
+                    <FeatureIcon icon={feature.icon} />
                   </div>
                   <h3 className="mb-3 text-xl font-bold text-white">{feature.title}</h3>
                   <p className="text-gray-400">{feature.description}</p>
