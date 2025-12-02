@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Logo } from '@/components/ui/Logo'
+import { FeatureIcon } from '@/components/ui/FeatureIcon'
 
 const features = [
   {
