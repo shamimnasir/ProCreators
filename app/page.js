@@ -172,8 +172,7 @@ export default function Home() {
             >
               {/* Logo/Icon */}
               <div className="relative inline-block">
-                <Sparkles className="h-24 w-24 text-[#7c3aed] mx-auto" />
-                <div className="absolute inset-0 blur-3xl bg-[#7c3aed]/40 animate-pulse"></div>
+                <Logo variant="icon" className="h-32 w-32 mx-auto" />
               </div>
 
               {/* Main Logo Text */}
