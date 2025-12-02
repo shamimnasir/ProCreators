@@ -109,12 +109,13 @@ export function Sidebar() {
     )}>
       <div className="flex h-20 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="relative">
-              <Sparkles className="h-6 w-6 text-[#7c3aed] group-hover:text-[#a78bfa] transition-colors" />
-              <div className="absolute inset-0 blur-lg bg-[#7c3aed]/30 group-hover:bg-[#7c3aed]/50 transition-all"></div>
-            </div>
-            <span className="font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">ProCreators</span>
+          <Link href="/dashboard">
+            <Logo variant="full" className="h-8 w-8" />
+          </Link>
+        )}
+        {collapsed && (
+          <Link href="/dashboard" className="mx-auto">
+            <Logo variant="icon" className="h-8 w-8" />
           </Link>
         )}
         <Button
