@@ -103,14 +103,17 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      "relative flex h-screen flex-col border-r bg-card transition-all duration-300",
+      "relative flex h-screen flex-col border-r border-white/10 bg-gradient-to-b from-[#0a0e27] to-[#1a1147] transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
-      <div className="flex h-16 items-center justify-between border-b px-4">
+      <div className="flex h-20 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="font-bold">ProCreators</span>
+          <Link href="/dashboard" className="flex items-center gap-2 group">
+            <div className="relative">
+              <Sparkles className="h-6 w-6 text-[#7c3aed] group-hover:text-[#a78bfa] transition-colors" />
+              <div className="absolute inset-0 blur-lg bg-[#7c3aed]/30 group-hover:bg-[#7c3aed]/50 transition-all"></div>
+            </div>
+            <span className="font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">ProCreators</span>
           </Link>
         )}
         <Button
