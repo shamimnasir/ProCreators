@@ -357,10 +357,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 bg-[#0a0e27]/80 backdrop-blur-xl">
         <div className="container px-6">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-6 w-6 text-[#7c3aed]" />
-              <span className="font-bold text-white">ProCreators</span>
-            </div>
+            <Logo variant="full" className="h-8 w-8" />
             <p className="text-sm text-gray-500">
               © 2025 ProCreators. All rights reserved.
             </p>
