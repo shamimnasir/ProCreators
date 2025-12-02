@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'ProCreators - AI-Powered Content Creation Platform',
   description: 'Create viral content, ebooks, videos, and more with AI',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }) {
