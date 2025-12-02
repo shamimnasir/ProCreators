@@ -75,6 +75,15 @@ const navigation = [
     children: [
       { name: 'Image Editor', href: '/dashboard/tools/image-editor', icon: ImageIcon },
       { name: 'Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
+      { name: 'Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
+      { name: 'Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
+    ]
+  },
+  {
+    name: 'AI Generators',
+    icon: Sparkles,
+    children: [
+      { name: 'Script to Ad', href: '/dashboard/tools/script-to-ad', icon: Film },
     ]
   },
   {
