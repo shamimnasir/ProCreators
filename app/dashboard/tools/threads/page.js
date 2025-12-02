@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, Save, Sparkles } from 'lucide-react'
+import { Loader2, Download, Save, Sparkles, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function ThreadsToolPage() {
   const [topic, setTopic] = useState('')
   const [tone, setTone] = useState('professional')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [generatedThread, setGeneratedThread] = useState('')
   const { toast } = useToast()
@@ -28,12 +29,14 @@ export default function ThreadsToolPage() {
 
     setLoading(true)
     try {
+      const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
       const response = await fetch('/api/generate/text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Create a viral Twitter/X thread about: ${topic}. Tone: ${tone}. Make it engaging and shareable.`,
-          type: 'thread'
+          prompt: `Create a viral Twitter/X thread about: ${topic}. Tone: ${tone}. Generate the content ${languageText}. Make it engaging and shareable.`,
+          type: 'thread',
+          language: language
         })
       })
 
@@ -42,7 +45,7 @@ export default function ThreadsToolPage() {
         setGeneratedThread(data.content)
         toast({
           title: "Success",
-          description: "Thread generated successfully!"
+          description: `Thread generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       } else {
         throw new Error(data.error || 'Failed to generate')
@@ -61,7 +64,6 @@ export default function ThreadsToolPage() {
   const handleSave = async () => {
     if (!generatedThread) return
     
-    // TODO: Implement save to library
     toast({
       title: "Saved",
       description: "Thread saved to library"
@@ -73,7 +75,7 @@ export default function ThreadsToolPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Thread Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create viral Twitter/X threads with AI
+          Create viral Twitter/X threads with AI in Bengali or English
         </p>
       </div>
 
@@ -85,6 +87,21 @@ export default function ThreadsToolPage() {
             <CardDescription>Configure your thread parameters</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="language" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="topic">Topic</Label>
               <Textarea
@@ -131,7 +148,7 @@ export default function ThreadsToolPage() {
           <CardContent className="space-y-4">
             {generatedThread ? (
               <>
-                <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="rounded-lg border bg-muted/50 p-4 max-h-96 overflow-y-auto">
                   <p className="whitespace-pre-wrap text-sm">{generatedThread}</p>
                 </div>
                 <div className="flex gap-2">

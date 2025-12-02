@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Quote } from 'lucide-react'
+import { Loader2, Quote, Globe, Save, Download } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function QuotesPage() {
   const [topic, setTopic] = useState('')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [generatedQuote, setGeneratedQuote] = useState('')
   const { toast } = useToast()
@@ -18,18 +20,20 @@ export default function QuotesPage() {
     if (!topic.trim()) return
     setLoading(true)
     try {
+      const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
       const response = await fetch('/api/generate/text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Generate an inspiring quote about: ${topic}`,
-          type: 'quote'
+          prompt: `Generate an inspiring quote about: ${topic}. Generate the content ${languageText}.`,
+          type: 'quote',
+          language: language
         })
       })
       const data = await response.json()
       if (data.success) {
         setGeneratedQuote(data.content)
-        toast({ title: "Success", description: "Quote generated!" })
+        toast({ title: "Success", description: `Quote generated in ${language === 'bengali' ? 'Bengali' : 'English'}!` })
       }
     } catch (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" })
@@ -42,7 +46,7 @@ export default function QuotesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Quote Generator</h1>
-        <p className="text-muted-foreground mt-1">Create viral quotes with AI</p>
+        <p className="text-muted-foreground mt-1">Create viral quotes with AI in Bengali or English</p>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -50,6 +54,21 @@ export default function QuotesPage() {
             <CardTitle>Input</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Topic</Label>
               <Textarea
@@ -72,8 +91,20 @@ export default function QuotesPage() {
           </CardHeader>
           <CardContent>
             {generatedQuote ? (
-              <div className="rounded-lg border bg-muted/50 p-4">
-                <p className="text-lg italic">{generatedQuote}</p>
+              <div className="space-y-4">
+                <div className="rounded-lg border bg-muted/50 p-6">
+                  <p className="text-lg italic text-center">{generatedQuote}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="flex-1">
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">

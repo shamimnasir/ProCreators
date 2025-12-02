@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, BookOpen } from 'lucide-react'
+import { Loader2, Download, BookOpen, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function EbookMakerPage() {
   const [title, setTitle] = useState('')
   const [outline, setOutline] = useState('')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(null)
   const { toast } = useToast()
@@ -28,12 +30,14 @@ export default function EbookMakerPage() {
 
     setLoading(true)
     try {
+      const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
       const response = await fetch('/api/generate/text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Create an ebook outline and content for: "${title}". Chapters: ${outline}`,
-          type: 'ebook'
+          prompt: `Create an ebook outline and content for: "${title}". Chapters: ${outline}. Generate the content ${languageText}.`,
+          type: 'ebook',
+          language: language
         })
       })
 
@@ -42,7 +46,7 @@ export default function EbookMakerPage() {
         setGenerated(data.content)
         toast({
           title: "Success",
-          description: "Ebook content generated!"
+          description: `Ebook content generated in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       }
     } catch (error) {
@@ -61,7 +65,7 @@ export default function EbookMakerPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Ebook Maker</h1>
         <p className="text-muted-foreground mt-1">
-          Create professional ebooks with AI
+          Create professional ebooks with AI in Bengali or English
         </p>
       </div>
 
@@ -72,6 +76,21 @@ export default function EbookMakerPage() {
             <CardDescription>Configure your ebook</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Title</Label>
               <Input
