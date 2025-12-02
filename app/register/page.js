@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
+import { Logo } from '@/components/ui/Logo'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -45,21 +46,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20 p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#0a0e27] to-[#1a1147] p-4">
+      <Card className="w-full max-w-md border-white/10 bg-[#0a0e27]/50 backdrop-blur-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <Sparkles className="h-12 w-12 text-primary" />
+            <Logo variant="icon" className="h-16 w-16" />
           </div>
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl text-white">Create an account</CardTitle>
+          <CardDescription className="text-gray-400">
             Start creating amazing content with AI
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name" className="text-white">Name</Label>
               <Input
                 id="name"
                 type="text"
@@ -67,10 +68,11 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -78,10 +80,11 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-white">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -89,16 +92,17 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-4 text-center text-sm text-gray-400">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-[#a78bfa] hover:text-[#7c3aed] hover:underline">
               Sign in
             </Link>
           </div>
