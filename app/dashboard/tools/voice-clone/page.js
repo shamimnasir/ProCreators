@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Mic, Volume2 } from 'lucide-react'
+import { Loader2, Mic, Volume2, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function VoiceClonePage() {
   const [text, setText] = useState('')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
   const { toast } = useToast()
@@ -29,7 +31,11 @@ export default function VoiceClonePage() {
       const response = await fetch('/api/generate/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, type: 'generate' })
+        body: JSON.stringify({ 
+          text: text,
+          type: 'generate',
+          language: language
+        })
       })
 
       const data = await response.json()
@@ -56,7 +62,7 @@ export default function VoiceClonePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Voice Cloning</h1>
         <p className="text-muted-foreground mt-1">
-          Generate realistic voice-overs
+          Generate realistic voice-overs in Bengali or English
         </p>
       </div>
 
@@ -67,6 +73,21 @@ export default function VoiceClonePage() {
             <CardDescription>Enter text to convert to speech</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Text</Label>
               <Textarea

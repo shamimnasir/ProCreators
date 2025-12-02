@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Video, Play } from 'lucide-react'
+import { Loader2, Video, Play, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function ReelsPage() {
   const [script, setScript] = useState('')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [videoUrl, setVideoUrl] = useState(null)
   const { toast } = useToast()
@@ -26,10 +28,14 @@ export default function ReelsPage() {
 
     setLoading(true)
     try {
+      const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
       const response = await fetch('/api/generate/video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: script })
+        body: JSON.stringify({ 
+          prompt: `${script}. Generate video ${languageText}.`,
+          language: language
+        })
       })
 
       const data = await response.json()
@@ -56,7 +62,7 @@ export default function ReelsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Reels / Shorts Creator</h1>
         <p className="text-muted-foreground mt-1">
-          Create engaging short-form videos
+          Create engaging short-form videos in Bengali or English
         </p>
       </div>
 
@@ -67,6 +73,21 @@ export default function ReelsPage() {
             <CardDescription>Enter your video script or idea</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Language
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Script</Label>
               <Textarea

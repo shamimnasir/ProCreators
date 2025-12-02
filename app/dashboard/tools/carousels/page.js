@@ -5,12 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, Save, Image as ImageIcon } from 'lucide-react'
+import { Loader2, Download, Save, Image as ImageIcon, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Image from 'next/image'
 
 export default function CarouselsToolPage() {
   const [prompt, setPrompt] = useState('')
+  const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
   const [generatedImages, setGeneratedImages] = useState([])
   const { toast } = useToast()
@@ -27,10 +29,15 @@ export default function CarouselsToolPage() {
 
     setLoading(true)
     try {
+      // For image generation, language mainly affects any text in the image
+      const languageText = language === 'bengali' ? 'with Bengali text if any text is included' : 'with English text if any text is included'
       const response = await fetch('/api/generate/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ 
+          prompt: `${prompt}. ${languageText}`,
+          language: language
+        })
       })
 
       const data = await response.json()
@@ -38,7 +45,7 @@ export default function CarouselsToolPage() {
         setGeneratedImages([data.imageUrl])
         toast({
           title: "Success",
-          description: "Image generated successfully!"
+          description: `Image generated successfully!`
         })
       } else {
         throw new Error(data.error || 'Failed to generate')
@@ -71,6 +78,21 @@ export default function CarouselsToolPage() {
             <CardDescription>Describe the image you want to create</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Text Language (if applicable)
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="prompt">Image Description</Label>
               <Textarea
