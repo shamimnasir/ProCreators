@@ -52,7 +52,7 @@ if __name__ == "__main__":
             }))
             sys.exit(1)
         
-        result = generate_image(prompt, model)
+        result = asyncio.run(generate_image(prompt, model))
         print(json.dumps(result))
         
     except Exception as e:
