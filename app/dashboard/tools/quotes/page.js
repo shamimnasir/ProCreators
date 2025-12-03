@@ -154,11 +154,11 @@ export default function QuotesPage() {
                   <p className="text-lg italic text-center">{generatedQuote}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={handleSave}>
                     <Save className="mr-2 h-4 w-4" />
                     Save
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
