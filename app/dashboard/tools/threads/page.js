@@ -64,9 +64,58 @@ export default function ThreadsToolPage() {
   const handleSave = async () => {
     if (!generatedThread) return
     
+    try {
+      const response = await fetch('/api/library/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: generatedThread,
+          type: 'thread',
+          title: `Thread: ${topic.substring(0, 50)}`,
+          description: generatedThread.substring(0, 100),
+          metadata: {
+            topic,
+            tone,
+            language
+          }
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Saved",
+          description: "Thread saved to library successfully!"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save thread",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDownload = () => {
+    if (!generatedThread) return
+    
+    const blob = new Blob([generatedThread], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `thread-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
     toast({
-      title: "Saved",
-      description: "Thread saved to library"
+      title: "Downloaded",
+      description: "Thread downloaded successfully"
     })
   }
 
