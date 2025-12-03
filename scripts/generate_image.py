@@ -3,9 +3,10 @@ import sys
 import json
 import os
 import asyncio
-from emergentintegrations.llm.gemeni.image_generation import GeminiImageGeneration
+import base64
+from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
 
-async def generate_image(prompt, model="nano-banana"):
+async def generate_image(prompt, model="gpt-image-1", quality="medium"):
     try:
         api_key = os.getenv('EMERGENT_LLM_KEY')
         
@@ -16,14 +17,26 @@ async def generate_image(prompt, model="nano-banana"):
                 "error": "EMERGENT_LLM_KEY not found in environment"
             }
         
-        generator = GeminiImageGeneration(api_key=api_key)
-        response = await generator.generate_images(prompt=prompt, model=model)
+        generator = OpenAIImageGeneration(api_key=api_key)
+        response = await generator.generate_images(prompt=prompt, model=model, number_of_images=1, quality=quality)
         
-        return {
-            "success": True,
-            "imageUrl": response,
-            "error": None
-        }
+        # Response is a list of bytes, convert first image to base64 data URL
+        if response and len(response) > 0:
+            image_bytes = response[0]
+            base64_image = base64.b64encode(image_bytes).decode('utf-8')
+            image_url = f"data:image/png;base64,{base64_image}"
+            
+            return {
+                "success": True,
+                "imageUrl": image_url,
+                "error": None
+            }
+        else:
+            return {
+                "success": False,
+                "imageUrl": None,
+                "error": "No image generated"
+            }
     except Exception as e:
         return {
             "success": False,
