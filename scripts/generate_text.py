@@ -27,7 +27,7 @@ async def generate_text(prompt, system_message="You are a helpful AI assistant s
         ).with_model("gemini", "gemini-2.0-flash")
         
         user_message = UserMessage(text=prompt)
-        response = chat.send_message(user_message)
+        response = await chat.send_message(user_message)
         
         return {
             "success": True,
