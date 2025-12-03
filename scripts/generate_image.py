@@ -2,9 +2,10 @@
 import sys
 import json
 import os
-from emergentintegrations.images.generator import ImageGenerator, GenerateImageRequest
+import asyncio
+from emergentintegrations.llm.gemeni.image_generation import GeminiImageGeneration
 
-def generate_image(prompt, model="nano-banana"):
+async def generate_image(prompt, model="nano-banana"):
     try:
         api_key = os.getenv('EMERGENT_LLM_KEY')
         
@@ -15,10 +16,8 @@ def generate_image(prompt, model="nano-banana"):
                 "error": "EMERGENT_LLM_KEY not found in environment"
             }
         
-        generator = ImageGenerator(api_key=api_key).with_model("gemini", model)
-        
-        request = GenerateImageRequest(prompt=prompt)
-        response = generator.generate(request)
+        generator = GeminiImageGeneration(api_key=api_key)
+        response = await generator.generate_image(prompt=prompt, model=model)
         
         return {
             "success": True,
