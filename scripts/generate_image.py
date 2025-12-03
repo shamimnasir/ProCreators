@@ -93,8 +93,9 @@ if __name__ == "__main__":
         
         input_data = json.loads(sys.argv[1])
         prompt = input_data.get('prompt')
-        model = input_data.get('model', 'gpt-image-1')
-        quality = input_data.get('quality', 'medium')
+        model = input_data.get('model', 'dall-e-3')
+        quality = input_data.get('quality', 'standard')
+        size = input_data.get('size', '1024x1024')
         
         if not prompt:
             print(json.dumps({
@@ -103,7 +104,7 @@ if __name__ == "__main__":
             }))
             sys.exit(1)
         
-        result = asyncio.run(generate_image(prompt, model, quality))
+        result = asyncio.run(generate_image(prompt, model, quality, size))
         print(json.dumps(result))
         
     except Exception as e:
