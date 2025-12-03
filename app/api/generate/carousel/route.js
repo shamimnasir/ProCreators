@@ -24,13 +24,13 @@ For the topic provided, create ${slideCount} slides with:
 For each slide, provide:
 - Slide number
 - Text content (15-25 words, punchy and engaging) in ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
-- Image description (detailed VISUAL-ONLY prompt - NO TEXT, NO LETTERS, NO WORDS in the image itself)
+- Image description (background scene/visual elements for the image - the text will be overlaid automatically)
 
 IMPORTANT for Image Prompts:
-- Describe only visual elements: objects, scenes, colors, composition
-- DO NOT include any text, words, or letters in the image description
-- Focus on metaphors, symbols, and visual representations
-- Example: Instead of "text saying 'Step 1'", use "numbered icon, first in sequence"
+- Describe the background visual: colors, gradients, objects, scenes, mood
+- Keep it suitable for text overlay (not too busy or cluttered)
+- Examples: "vibrant purple gradient background", "minimalist workspace scene", "colorful abstract shapes"
+- The text content will be added as overlay automatically using DALL-E 3
 
 Format your response as JSON array:
 [
