@@ -42,6 +42,64 @@ export default function QuotesPage() {
     }
   }
 
+  const handleSave = async () => {
+    if (!generatedQuote) return
+    
+    try {
+      const response = await fetch('/api/library/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: generatedQuote,
+          type: 'quote',
+          title: `Quote: ${topic.substring(0, 50)}`,
+          description: generatedQuote.substring(0, 100),
+          metadata: {
+            topic,
+            language
+          }
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Saved",
+          description: "Quote saved to library successfully!"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save quote",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDownload = () => {
+    if (!generatedQuote) return
+    
+    const blob = new Blob([generatedQuote], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `quote-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    toast({
+      title: "Downloaded",
+      description: "Quote downloaded successfully"
+    })
+  }
+
+
   return (
     <div className="space-y-6">
       <div>
