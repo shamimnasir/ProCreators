@@ -4,9 +4,10 @@ import json
 import os
 import asyncio
 import base64
-from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
+import litellm
+import requests
 
-async def generate_image(prompt, model="gpt-image-1", quality="medium"):
+async def generate_image(prompt, model="dall-e-3", quality="standard", size="1024x1024"):
     try:
         api_key = os.getenv('EMERGENT_LLM_KEY')
         
@@ -17,20 +18,56 @@ async def generate_image(prompt, model="gpt-image-1", quality="medium"):
                 "error": "EMERGENT_LLM_KEY not found in environment"
             }
         
-        generator = OpenAIImageGeneration(api_key=api_key)
-        response = await generator.generate_images(prompt=prompt, model=model, number_of_images=1, quality=quality)
+        proxy_url = "https://integrations.emergentagent.com/llm"
         
-        # Response is a list of bytes, convert first image to base64 data URL
-        if response and len(response) > 0:
-            image_bytes = response[0]
-            base64_image = base64.b64encode(image_bytes).decode('utf-8')
-            image_url = f"data:image/png;base64,{base64_image}"
+        # Use litellm with DALL-E 3 through Emergent proxy
+        response = litellm.image_generation(
+            model=model,
+            prompt=prompt,
+            api_base=proxy_url,
+            api_key=api_key,
+            custom_llm_provider="openai",
+            n=1,
+            quality=quality,
+            size=size
+        )
+        
+        if hasattr(response, 'data') and len(response.data) > 0:
+            img = response.data[0]
             
-            return {
-                "success": True,
-                "imageUrl": image_url,
-                "error": None
-            }
+            # Get image URL
+            if hasattr(img, 'url') and img.url:
+                # Download image and convert to base64 for embedding
+                image_response = requests.get(img.url, timeout=30)
+                if image_response.status_code == 200:
+                    base64_image = base64.b64encode(image_response.content).decode('utf-8')
+                    image_url = f"data:image/png;base64,{base64_image}"
+                    
+                    return {
+                        "success": True,
+                        "imageUrl": image_url,
+                        "error": None
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "imageUrl": None,
+                        "error": f"Failed to download image: HTTP {image_response.status_code}"
+                    }
+            elif hasattr(img, 'b64_json') and img.b64_json:
+                # Already base64
+                image_url = f"data:image/png;base64,{img.b64_json}"
+                return {
+                    "success": True,
+                    "imageUrl": image_url,
+                    "error": None
+                }
+            else:
+                return {
+                    "success": False,
+                    "imageUrl": None,
+                    "error": "No image URL or base64 in response"
+                }
         else:
             return {
                 "success": False,
