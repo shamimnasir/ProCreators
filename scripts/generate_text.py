@@ -6,6 +6,7 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 def generate_text(prompt, system_message="You are a helpful AI assistant specialized in creating engaging content.", session_id=None):
     try:
+        import uuid
         api_key = os.getenv('EMERGENT_LLM_KEY')
         
         if not api_key:
@@ -15,15 +16,14 @@ def generate_text(prompt, system_message="You are a helpful AI assistant special
                 "error": "EMERGENT_LLM_KEY not found in environment"
             }
         
-        chat_config = {
-            "api_key": api_key,
-            "system_message": system_message
-        }
+        if not session_id:
+            session_id = str(uuid.uuid4())
         
-        if session_id:
-            chat_config["session_id"] = session_id
-        
-        chat = LlmChat(**chat_config).with_model("gemini", "gemini-2.0-flash")
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=session_id,
+            system_message=system_message
+        ).with_model("gemini", "gemini-2.0-flash")
         
         user_message = UserMessage(text=prompt)
         response = chat.send_message(user_message)
