@@ -17,7 +17,7 @@ async def generate_image(prompt, model="nano-banana"):
             }
         
         generator = GeminiImageGeneration(api_key=api_key)
-        response = await generator.generate_image(prompt=prompt, model=model)
+        response = await generator.generate_images(prompt=prompt, model=model)
         
         return {
             "success": True,
