@@ -5,10 +5,10 @@ import os
 import base64
 import google.generativeai as genai
 
-def generate_image_nano_banana(prompt, model="gemini-2.5-flash-image"):
+def generate_image_nano_banana(prompt, model="gemini-3-pro-image-preview"):
     """
-    Generate image using Google Gemini with Bengali text support
-    Uses gemini-2.5-flash-image which supports generateContent with image generation
+    Generate image using Google Gemini 3 Pro Image Preview with perfect Bengali text support
+    This model is specifically optimized for text rendering in images
     """
     try:
         # Use Google API key
@@ -24,11 +24,13 @@ def generate_image_nano_banana(prompt, model="gemini-2.5-flash-image"):
         # Configure Google Generative AI
         genai.configure(api_key=api_key)
         
-        # Use Gemini 2.5 Flash Image model which supports text overlays
+        # Use Gemini 3 Pro Image Preview - best for text rendering
         model_instance = genai.GenerativeModel(model)
         
-        # Generate image with text
-        response = model_instance.generate_content(prompt)
+        # Generate image with explicit instruction for clear text rendering
+        enhanced_prompt = f"Create a high-quality image. IMPORTANT: Render all text EXACTLY as written, character by character, without any changes or interpretation. {prompt}"
+        
+        response = model_instance.generate_content(enhanced_prompt)
         
         # Extract image from response - check all parts for inline_data
         if hasattr(response, 'candidates'):
