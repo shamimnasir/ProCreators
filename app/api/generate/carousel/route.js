@@ -76,9 +76,13 @@ Keep text concise and visual. Make each slide self-contained but part of a story
       
       console.log(`Generating image ${i + 1}/${carouselSequence.length}...`)
       
+      // Modify image prompt to avoid text rendering (especially for non-English)
+      // Focus on visual elements only
+      const visualOnlyPrompt = `${slide.imagePrompt}. No text, no words, no letters. Pure visual illustration only.`
+      
       // Generate image for this slide
       const imageResult = await generateImage(
-        slide.imagePrompt,
+        visualOnlyPrompt,
         'gpt-image-1',
         'low' // Use low quality for faster generation
       )
