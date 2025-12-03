@@ -29,27 +29,36 @@ export default function CarouselsToolPage() {
     }
 
     setLoading(true)
+    setCarouselSlides([])
+    setCurrentSlide(0)
+    
     try {
-      // For image generation, language mainly affects any text in the image
-      const languageText = language === 'bengali' ? 'with Bengali text if any text is included' : 'with English text if any text is included'
-      const response = await fetch('/api/generate/image', {
+      toast({
+        title: "Generating...",
+        description: "Creating carousel sequence and slides. This may take 30-60 seconds..."
+      })
+
+      // Call the carousel generation API
+      const response = await fetch('/api/generate/carousel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          prompt: `${prompt}. ${languageText}`,
-          language: language
+          prompt,
+          language,
+          slideCount: 5
         })
       })
 
       const data = await response.json()
+      
       if (data.success) {
-        setGeneratedImages([data.imageUrl])
+        setCarouselSlides(data.slides)
         toast({
           title: "Success",
-          description: `Image generated successfully!`
+          description: `Generated ${data.slides.length} carousel slides successfully!`
         })
       } else {
-        throw new Error(data.error || 'Failed to generate')
+        throw new Error(data.error || 'Failed to generate carousel')
       }
     } catch (error) {
       toast({
@@ -60,6 +69,74 @@ export default function CarouselsToolPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSave = async () => {
+    if (carouselSlides.length === 0) return
+    
+    try {
+      const response = await fetch('/api/library/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: JSON.stringify(carouselSlides),
+          type: 'carousel',
+          title: `Carousel: ${prompt.substring(0, 50)}`,
+          description: `${carouselSlides.length} slides`,
+          metadata: {
+            prompt,
+            language,
+            slideCount: carouselSlides.length
+          }
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Saved",
+          description: "Carousel saved to library successfully!"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save carousel",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDownload = () => {
+    if (carouselSlides.length === 0) return
+    
+    // Download as JSON with all slides data
+    const dataStr = JSON.stringify(carouselSlides, null, 2)
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `carousel-${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    toast({
+      title: "Downloaded",
+      description: "Carousel data downloaded successfully"
+    })
+  }
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)
   }
 
   return (
