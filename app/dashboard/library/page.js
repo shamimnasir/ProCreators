@@ -35,9 +35,47 @@ export default function LibraryPage() {
   }
 
   const handleDelete = async (id) => {
+    try {
+      const response = await fetch('/api/library/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setItems(items.filter(item => item.id !== id))
+        toast({
+          title: "Deleted",
+          description: "Item removed from library"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete item",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDownload = (item) => {
+    const blob = new Blob([item.content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${item.type}-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
     toast({
-      title: "Deleted",
-      description: "Item removed from library"
+      title: "Downloaded",
+      description: "Content downloaded successfully"
     })
   }
 
