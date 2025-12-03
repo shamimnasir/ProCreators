@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { isSupabaseConfigured } from '@/lib/supabase'
+import { getCollection } from '@/lib/mongodb'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request) {
   try {
-    const { content, type, metadata } = await request.json()
+    const { content, type, metadata, title, description } = await request.json()
     
     if (!content || !type) {
       return NextResponse.json(
@@ -12,23 +13,25 @@ export async function POST(request) {
       )
     }
 
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { success: false, error: 'Supabase not configured. Add credentials to .env' },
-        { status: 500 }
-      )
+    const libraryCollection = await getCollection('library')
+    
+    const item = {
+      id: uuidv4(),
+      content,
+      type,
+      title: title || `${type.charAt(0).toUpperCase() + type.slice(1)} - ${new Date().toLocaleDateString()}`,
+      description: description || content.substring(0, 100),
+      metadata: metadata || {},
+      createdAt: new Date().toISOString(),
+      userId: 'default-user' // TODO: Replace with actual user ID when auth is implemented
     }
 
-    // TODO: Implement Supabase storage
-    // const { data, error } = await supabase
-    //   .from('library')
-    //   .insert([
-    //     { content, type, metadata, userId, createdAt: new Date().toISOString() }
-    //   ])
+    await libraryCollection.insertOne(item)
 
     return NextResponse.json({
       success: true,
-      message: 'Save placeholder - Supabase integration pending'
+      message: 'Content saved successfully',
+      itemId: item.id
     })
   } catch (error) {
     console.error('Save error:', error)
