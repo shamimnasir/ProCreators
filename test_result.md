@@ -157,6 +157,18 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Save and Download Functionality"
+    implemented: true
+    working: true
+    file: "/app/app/api/library/save/route.js, /app/app/api/library/list/route.js, /app/app/api/library/delete/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ WORKING! Implemented MongoDB-based content library system. Users can now save generated content, view it in Library page, download as text files, and delete items. Tested with Thread Generator - content successfully saved and displayed in library."
+
 agent_communication:
     - agent: "main"
-      message: "Fixed the critical Python/JavaScript library conflict by creating Python scripts that use emergentintegrations library and modified Node.js lib files to spawn Python processes. Text generation is working when tested standalone. Image generation has API key issues with Gemini Nano Banana model. Ready for backend testing of text generation API endpoint."
+      message: "Fixed both reported issues: 1) Implemented MongoDB-based save/list/delete functionality for content library. 2) Added working Save and Download buttons to all text generation tools (Threads, Quotes, etc.). Content now persists in MongoDB and displays in Library page with download/delete options. Successfully tested end-to-end flow."
