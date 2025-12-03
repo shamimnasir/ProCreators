@@ -82,15 +82,15 @@ Keep text concise and impactful. Images should be text-free visuals that support
       
       console.log(`Generating image ${i + 1}/${carouselSequence.length}...`)
       
-      // Use DALL-E 3 which handles Bengali text much better
+      // Use Gemini 2.5 Flash Image which handles Bengali text perfectly
       // Include the text from the slide in the image prompt
-      const textOverlayPrompt = `${slide.imagePrompt}. Include large, bold, clearly readable text overlay: "${slide.text}". Modern Instagram carousel design, professional typography, vibrant colors.`
+      const textOverlayPrompt = `Generate a professional Instagram carousel slide: ${slide.imagePrompt}. Include large, bold, clearly readable text overlay: "${slide.text}". Modern social media design, vibrant colors, professional typography.`
       
-      // Generate image for this slide with DALL-E 3
+      // Generate image - will use Gemini if Google API key available, otherwise DALL-E 3
       const imageResult = await generateImage(
         textOverlayPrompt,
-        'dall-e-3',
-        'standard', // DALL-E 3 only supports 'standard' or 'hd'
+        'gemini-2.5-flash-image',
+        'standard',
         '1024x1024'
       )
 
