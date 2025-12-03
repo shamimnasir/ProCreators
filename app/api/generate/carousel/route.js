@@ -82,15 +82,16 @@ Keep text concise and impactful. Images should be text-free visuals that support
       
       console.log(`Generating image ${i + 1}/${carouselSequence.length}...`)
       
-      // Modify image prompt to avoid text rendering (especially for non-English)
-      // Focus on visual elements only
-      const visualOnlyPrompt = `${slide.imagePrompt}. No text, no words, no letters. Pure visual illustration only.`
+      // Use DALL-E 3 which handles Bengali text much better
+      // Include the text from the slide in the image prompt
+      const textOverlayPrompt = `${slide.imagePrompt}. Include large, bold, clearly readable text overlay: "${slide.text}". Modern Instagram carousel design, professional typography, vibrant colors.`
       
-      // Generate image for this slide
+      // Generate image for this slide with DALL-E 3
       const imageResult = await generateImage(
-        visualOnlyPrompt,
-        'gpt-image-1',
-        'low' // Use low quality for faster generation
+        textOverlayPrompt,
+        'dall-e-3',
+        'standard', // DALL-E 3 only supports 'standard' or 'hd'
+        '1024x1024'
       )
 
       if (imageResult.success) {
