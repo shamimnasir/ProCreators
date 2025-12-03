@@ -22,7 +22,7 @@ export default function CarouselsToolPage() {
     if (!prompt.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a topic",
+        description: "Please enter a description",
         variant: "destructive"
       })
       return
@@ -38,6 +38,7 @@ export default function CarouselsToolPage() {
         description: "Creating carousel sequence and slides. This may take 30-60 seconds..."
       })
 
+      // Call the carousel generation API
       const response = await fetch('/api/generate/carousel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,6 +113,7 @@ export default function CarouselsToolPage() {
   const handleDownload = () => {
     if (carouselSlides.length === 0) return
     
+    // Download as JSON with all slides data
     const dataStr = JSON.stringify(carouselSlides, null, 2)
     const blob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -147,6 +149,7 @@ export default function CarouselsToolPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Input Card */}
         <Card>
           <CardHeader>
             <CardTitle>Input</CardTitle>
@@ -195,6 +198,7 @@ export default function CarouselsToolPage() {
           </CardContent>
         </Card>
 
+        {/* Output Card */}
         <Card>
           <CardHeader>
             <CardTitle>Generated Carousel</CardTitle>
@@ -208,6 +212,7 @@ export default function CarouselsToolPage() {
             {carouselSlides.length > 0 ? (
               <>
                 <div className="space-y-4">
+                  {/* Slide Image */}
                   <div className="rounded-lg border overflow-hidden bg-black">
                     <Image
                       src={carouselSlides[currentSlide].imageUrl}
@@ -218,11 +223,13 @@ export default function CarouselsToolPage() {
                     />
                   </div>
 
+                  {/* Slide Text Content */}
                   <div className="rounded-lg border p-4 bg-muted/30">
                     <h3 className="font-semibold mb-2">Slide {currentSlide + 1} Content:</h3>
                     <p className="text-sm whitespace-pre-wrap">{carouselSlides[currentSlide].text}</p>
                   </div>
 
+                  {/* Navigation */}
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
@@ -244,6 +251,7 @@ export default function CarouselsToolPage() {
                     </Button>
                   </div>
 
+                  {/* Slide Indicators */}
                   <div className="flex justify-center gap-2">
                     {carouselSlides.map((_, idx) => (
                       <button
@@ -256,6 +264,7 @@ export default function CarouselsToolPage() {
                     ))}
                   </div>
 
+                  {/* Actions */}
                   <div className="flex gap-2">
                     <Button className="flex-1" onClick={handleSave}>
                       <Save className="mr-2 h-4 w-4" />
