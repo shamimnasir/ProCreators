@@ -2,9 +2,10 @@
 import sys
 import json
 import os
+import asyncio
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
-def generate_text(prompt, system_message="You are a helpful AI assistant specialized in creating engaging content.", session_id=None):
+async def generate_text(prompt, system_message="You are a helpful AI assistant specialized in creating engaging content.", session_id=None):
     try:
         import uuid
         api_key = os.getenv('EMERGENT_LLM_KEY')
