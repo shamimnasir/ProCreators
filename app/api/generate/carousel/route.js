@@ -82,14 +82,14 @@ Keep text concise and impactful. Images should be text-free visuals that support
       
       console.log(`Generating image ${i + 1}/${carouselSequence.length}...`)
       
-      // Use Gemini 2.5 Flash Image which handles Bengali text perfectly
-      // Include the text from the slide in the image prompt
-      const textOverlayPrompt = `Generate a professional Instagram carousel slide: ${slide.imagePrompt}. Include large, bold, clearly readable text overlay: "${slide.text}". Modern social media design, vibrant colors, professional typography.`
+      // Use Gemini 3 Pro Image Preview - best for Bengali text rendering
+      // Include the exact text to be displayed
+      const textOverlayPrompt = `Create a professional Instagram carousel image. Background: ${slide.imagePrompt}. TEXT TO DISPLAY (render EXACTLY as written): "${slide.text}". Use large, bold typography. Make the text clearly readable with high contrast. Modern social media design.`
       
-      // Generate image - will use Gemini if Google API key available, otherwise DALL-E 3
+      // Generate image - will use Gemini 3 Pro if Google API key available, otherwise DALL-E 3
       const imageResult = await generateImage(
         textOverlayPrompt,
-        'gemini-2.5-flash-image',
+        'gemini-3-pro-image-preview',
         'standard',
         '1024x1024'
       )
