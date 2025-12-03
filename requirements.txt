@@ -1,0 +1,2 @@
+emergentintegrations==0.1.60
+requests==2.32.3
