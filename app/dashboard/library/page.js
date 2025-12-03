@@ -129,7 +129,12 @@ export default function LibraryPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleDownload(item)}
+                      >
                         <Download className="mr-2 h-4 w-4" />
                         Download
                       </Button>
