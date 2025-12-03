@@ -1,26 +1,19 @@
 import { NextResponse } from 'next/server'
-import { isSupabaseConfigured } from '@/lib/supabase'
+import { getCollection } from '@/lib/mongodb'
 
 export async function GET(request) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { success: false, error: 'Supabase not configured. Add credentials to .env' },
-        { status: 500 }
-      )
-    }
-
-    // TODO: Implement Supabase query
-    // const { data, error } = await supabase
-    //   .from('library')
-    //   .select('*')
-    //   .eq('userId', userId)
-    //   .order('createdAt', { ascending: false })
+    const libraryCollection = await getCollection('library')
+    
+    // TODO: Replace 'default-user' with actual user ID when auth is implemented
+    const items = await libraryCollection
+      .find({ userId: 'default-user' })
+      .sort({ createdAt: -1 })
+      .toArray()
 
     return NextResponse.json({
       success: true,
-      items: [],
-      message: 'Library placeholder - Supabase integration pending'
+      items: items
     })
   } catch (error) {
     console.error('List error:', error)
