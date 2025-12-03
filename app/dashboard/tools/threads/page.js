@@ -205,7 +205,7 @@ export default function ThreadsToolPage() {
                     <Save className="mr-2 h-4 w-4" />
                     Save to Library
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
