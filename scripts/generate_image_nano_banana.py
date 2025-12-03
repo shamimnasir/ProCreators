@@ -30,34 +30,25 @@ def generate_image_nano_banana(prompt, model="gemini-2.5-flash-image"):
         # Generate image with text
         response = model_instance.generate_content(prompt)
         
-        # Extract image from response
-        if hasattr(response, '_result') and hasattr(response._result, 'candidates'):
-            for candidate in response._result.candidates:
+        # Extract image from response - check all parts for inline_data
+        if hasattr(response, 'candidates'):
+            for candidate in response.candidates:
                 if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
                     for part in candidate.content.parts:
-                        if hasattr(part, 'inline_data'):
-                            # Found inline image data
-                            image_bytes = part.inline_data.data
-                            base64_image = base64.b64encode(image_bytes).decode('utf-8')
-                            image_url = f"data:image/png;base64,{base64_image}"
-                            
-                            return {
-                                "success": True,
-                                "imageUrl": image_url,
-                                "error": None
-                            }
-        
-        # Fallback: check if there's a direct image attribute
-        if hasattr(response, 'image'):
-            image_bytes = response.image
-            base64_image = base64.b64encode(image_bytes).decode('utf-8')
-            image_url = f"data:image/png;base64,{base64_image}"
-            
-            return {
-                "success": True,
-                "imageUrl": image_url,
-                "error": None
-            }
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            # Check if mime_type is image and data exists
+                            if part.inline_data.mime_type and 'image' in part.inline_data.mime_type:
+                                if part.inline_data.data and len(part.inline_data.data) > 0:
+                                    # Found image data
+                                    image_bytes = part.inline_data.data
+                                    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+                                    image_url = f"data:image/png;base64,{base64_image}"
+                                    
+                                    return {
+                                        "success": True,
+                                        "imageUrl": image_url,
+                                        "error": None
+                                    }
         
         return {
             "success": False,
