@@ -2,16 +2,16 @@
 import sys
 import json
 import os
-import asyncio
 import base64
-from emergentintegrations.llm.gemeni.image_generation import GeminiImageGeneration
+import google.generativeai as genai
 
-async def generate_image_nano_banana(prompt, model="nano-banana"):
+def generate_image_nano_banana(prompt, model="gemini-2.5-flash-image"):
     """
-    Generate image using Google Gemini Nano Banana directly with Google API key
+    Generate image using Google Gemini with Bengali text support
+    Uses gemini-2.5-flash-image which supports generateContent with image generation
     """
     try:
-        # Use Google API key directly (not Emergent key)
+        # Use Google API key
         api_key = os.getenv('GOOGLE_API_KEY')
         
         if not api_key:
@@ -21,19 +21,35 @@ async def generate_image_nano_banana(prompt, model="nano-banana"):
                 "error": "GOOGLE_API_KEY not found in environment"
             }
         
-        # Use GeminiImageGeneration with Google API key
-        generator = GeminiImageGeneration(api_key=api_key)
+        # Configure Google Generative AI
+        genai.configure(api_key=api_key)
         
-        # Generate images - returns list of bytes
-        image_bytes_list = await generator.generate_images(
-            prompt=prompt,
-            model=model,
-            number_of_images=1
-        )
+        # Use Gemini 2.5 Flash Image model which supports text overlays
+        model_instance = genai.GenerativeModel(model)
         
-        if image_bytes_list and len(image_bytes_list) > 0:
-            # Convert first image to base64
-            image_bytes = image_bytes_list[0]
+        # Generate image with text
+        response = model_instance.generate_content(prompt)
+        
+        # Extract image from response
+        if hasattr(response, '_result') and hasattr(response._result, 'candidates'):
+            for candidate in response._result.candidates:
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'inline_data'):
+                            # Found inline image data
+                            image_bytes = part.inline_data.data
+                            base64_image = base64.b64encode(image_bytes).decode('utf-8')
+                            image_url = f"data:image/png;base64,{base64_image}"
+                            
+                            return {
+                                "success": True,
+                                "imageUrl": image_url,
+                                "error": None
+                            }
+        
+        # Fallback: check if there's a direct image attribute
+        if hasattr(response, 'image'):
+            image_bytes = response.image
             base64_image = base64.b64encode(image_bytes).decode('utf-8')
             image_url = f"data:image/png;base64,{base64_image}"
             
@@ -42,12 +58,12 @@ async def generate_image_nano_banana(prompt, model="nano-banana"):
                 "imageUrl": image_url,
                 "error": None
             }
-        else:
-            return {
-                "success": False,
-                "imageUrl": None,
-                "error": "No image generated"
-            }
+        
+        return {
+            "success": False,
+            "imageUrl": None,
+            "error": f"No image found in response. Response type: {type(response)}"
+        }
             
     except Exception as e:
         return {
