@@ -64,7 +64,7 @@ if __name__ == "__main__":
             }))
             sys.exit(1)
         
-        result = generate_text(prompt, system_message, session_id)
+        result = asyncio.run(generate_text(prompt, system_message, session_id))
         print(json.dumps(result))
         
     except Exception as e:
