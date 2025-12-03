@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
+import { SYSTEM_PROMPTS } from '@/lib/system-prompts'
+import { getCollection } from '@/lib/mongodb'
 
 export async function POST(request) {
   try {
@@ -12,9 +14,37 @@ export async function POST(request) {
       )
     }
 
+    // Get system prompt for the tool type
+    let finalSystemMessage = systemMessage
+    
+    if (!finalSystemMessage && type) {
+      // Try to get custom prompt from database
+      try {
+        const settingsCollection = await getCollection('settings')
+        const customPrompt = await settingsCollection.findOne({ 
+          type: 'system-prompt',
+          tool: type 
+        })
+        
+        if (customPrompt?.prompt) {
+          finalSystemMessage = customPrompt.prompt
+        } else {
+          // Use default from config
+          finalSystemMessage = SYSTEM_PROMPTS[type]?.prompt || "You are a helpful AI assistant specialized in creating engaging content."
+        }
+      } catch (dbError) {
+        console.log('Database not available, using default prompts')
+        finalSystemMessage = SYSTEM_PROMPTS[type]?.prompt || "You are a helpful AI assistant specialized in creating engaging content."
+      }
+    }
+    
+    if (!finalSystemMessage) {
+      finalSystemMessage = "You are a helpful AI assistant specialized in creating engaging content."
+    }
+
     const result = await generateText(
       prompt,
-      systemMessage || "You are a helpful AI assistant specialized in creating engaging content."
+      finalSystemMessage
     )
     
     if (!result.success) {
