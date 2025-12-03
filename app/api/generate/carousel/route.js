@@ -23,21 +23,27 @@ For the topic provided, create ${slideCount} slides with:
 
 For each slide, provide:
 - Slide number
-- Text content (15-25 words, punchy and engaging)
-- Image description (detailed visual prompt for AI image generation)
+- Text content (15-25 words, punchy and engaging) in ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
+- Image description (detailed VISUAL-ONLY prompt - NO TEXT, NO LETTERS, NO WORDS in the image itself)
+
+IMPORTANT for Image Prompts:
+- Describe only visual elements: objects, scenes, colors, composition
+- DO NOT include any text, words, or letters in the image description
+- Focus on metaphors, symbols, and visual representations
+- Example: Instead of "text saying 'Step 1'", use "numbered icon, first in sequence"
 
 Format your response as JSON array:
 [
   {
     "slideNumber": 1,
-    "text": "Hook or title text here",
-    "imagePrompt": "Detailed description for image generation"
+    "text": "Hook or title text here (in ${language === 'bengali' ? 'Bengali' : 'English'})",
+    "imagePrompt": "Pure visual description with NO TEXT AT ALL"
   },
   ...
 ]
 
-Language: ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
-Keep text concise and visual. Make each slide self-contained but part of a story.`
+Language for text content: ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
+Keep text concise and impactful. Images should be text-free visuals that support the text.`
 
     console.log('Step 1: Generating carousel sequence...')
     const sequenceResult = await generateText(
