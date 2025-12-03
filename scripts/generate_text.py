@@ -31,7 +31,7 @@ def generate_text(prompt, system_message="You are a helpful AI assistant special
         return {
             "success": True,
             "content": response,
-            "sessionId": chat.session_id if hasattr(chat, 'session_id') else session_id,
+            "sessionId": session_id,
             "error": None
         }
     except Exception as e:
