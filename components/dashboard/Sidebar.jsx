@@ -97,6 +97,13 @@ const navigation = [
   { name: 'Library', href: '/dashboard/library', icon: Library },
   { name: 'Profile', href: '/dashboard/profile', icon: User },
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
+  {
+    name: 'Admin',
+    icon: Settings,
+    children: [
+      { name: 'System Prompts', href: '/dashboard/admin/system-prompts', icon: Settings },
+    ]
+  },
 ]
 
 export function Sidebar() {
