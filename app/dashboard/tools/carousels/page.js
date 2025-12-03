@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, Save, Image as ImageIcon, Globe } from 'lucide-react'
+import { Loader2, Download, Save, Image as ImageIcon, Globe, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Image from 'next/image'
@@ -14,7 +14,8 @@ export default function CarouselsToolPage() {
   const [prompt, setPrompt] = useState('')
   const [language, setLanguage] = useState('english')
   const [loading, setLoading] = useState(false)
-  const [generatedImages, setGeneratedImages] = useState([])
+  const [carouselSlides, setCarouselSlides] = useState([])
+  const [currentSlide, setCurrentSlide] = useState(0)
   const { toast } = useToast()
 
   const handleGenerate = async () => {
