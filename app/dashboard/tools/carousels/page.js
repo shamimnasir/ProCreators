@@ -48,10 +48,16 @@ export default function CarouselsToolPage() {
         })
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
       
-      if (data.success) {
+      if (data.success && data.slides && Array.isArray(data.slides)) {
+        console.log('Received slides:', data.slides.length)
         setCarouselSlides(data.slides)
+        setCurrentSlide(0)
         toast({
           title: "Success",
           description: `Generated ${data.slides.length} carousel slides successfully!`
@@ -60,11 +66,13 @@ export default function CarouselsToolPage() {
         throw new Error(data.error || 'Failed to generate carousel')
       }
     } catch (error) {
+      console.error('Generation error:', error)
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive"
       })
+      setCarouselSlides([])
     } finally {
       setLoading(false)
     }
