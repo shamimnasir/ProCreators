@@ -144,7 +144,7 @@ export default function CarouselsToolPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Carousel Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create stunning carousel images with AI
+          Create 5-slide carousels with AI-generated images and content
         </p>
       </div>
 
@@ -153,13 +153,13 @@ export default function CarouselsToolPage() {
         <Card>
           <CardHeader>
             <CardTitle>Input</CardTitle>
-            <CardDescription>Describe the image you want to create</CardDescription>
+            <CardDescription>Describe your carousel topic - AI will create 5 slides</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                Text Language (if applicable)
+                Language
               </Label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger>
@@ -172,10 +172,10 @@ export default function CarouselsToolPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="prompt">Image Description</Label>
+              <Label htmlFor="prompt">Carousel Topic</Label>
               <Textarea
                 id="prompt"
-                placeholder="Describe the carousel image you want to generate..."
+                placeholder="E.g., '5 tips for productivity', 'How to start a business', 'Benefits of meditation'..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={6}
@@ -188,38 +188,93 @@ export default function CarouselsToolPage() {
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <ImageIcon className="mr-2 h-4 w-4" />
-              Generate Image
+              {loading ? 'Generating 5 Slides...' : 'Generate Carousel (5 Slides)'}
             </Button>
+            {loading && (
+              <p className="text-xs text-muted-foreground text-center">
+                This may take 30-60 seconds...
+              </p>
+            )}
           </CardContent>
         </Card>
 
         {/* Output Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Generated Image</CardTitle>
-            <CardDescription>Your AI-generated carousel</CardDescription>
+            <CardTitle>Generated Carousel</CardTitle>
+            <CardDescription>
+              {carouselSlides.length > 0 
+                ? `Slide ${currentSlide + 1} of ${carouselSlides.length}`
+                : 'Your AI-generated carousel will appear here'}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {generatedImages.length > 0 ? (
+            {carouselSlides.length > 0 ? (
               <>
-                <div className="rounded-lg border overflow-hidden">
-                  <Image
-                    src={generatedImages[0]}
-                    alt="Generated carousel"
-                    width={500}
-                    height={500}
-                    className="w-full h-auto"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button className="flex-1">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save to Library
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
+                <div className="space-y-4">
+                  {/* Slide Image */}
+                  <div className="rounded-lg border overflow-hidden bg-black">
+                    <Image
+                      src={carouselSlides[currentSlide].imageUrl}
+                      alt={`Slide ${currentSlide + 1}`}
+                      width={500}
+                      height={500}
+                      className="w-full h-auto"
+                    />
+                  </div>
+
+                  {/* Slide Text Content */}
+                  <div className="rounded-lg border p-4 bg-muted/30">
+                    <h3 className="font-semibold mb-2">Slide {currentSlide + 1} Content:</h3>
+                    <p className="text-sm whitespace-pre-wrap">{carouselSlides[currentSlide].text}</p>
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={prevSlide}
+                      disabled={carouselSlides.length <= 1}
+                      className="flex-1"
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" />
+                      Previous
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={nextSlide}
+                      disabled={carouselSlides.length <= 1}
+                      className="flex-1"
+                    >
+                      Next
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Slide Indicators */}
+                  <div className="flex justify-center gap-2">
+                    {carouselSlides.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`h-2 rounded-full transition-all ${
+                          idx === currentSlide ? 'w-8 bg-primary' : 'w-2 bg-muted-foreground/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button className="flex-1" onClick={handleSave}>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save to Library
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleDownload}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download JSON
+                    </Button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -227,7 +282,10 @@ export default function CarouselsToolPage() {
                 <div className="text-center">
                   <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Generated image will appear here
+                    Generated carousel slides will appear here
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Each carousel will have 5 slides with images and text
                   </p>
                 </div>
               </div>
