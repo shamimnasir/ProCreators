@@ -213,6 +213,9 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "IMPLEMENTED: Full Photocard generator with AI image generation, style options (modern, minimalist, vibrant, professional, creative), language support, and save/download functionality."
+        - working: "NA"
+          agent: "main"
+          comment: "REDESIGNED per user request: Changed from AI generation to viral Facebook/Instagram news card style. Now includes: image upload, brand/channel name editor, date field, headline & subheadline text, customizable text and background colors. Uses HTML5 Canvas to composite uploaded images with text overlays. Perfect for viral news posts."
 
   - task: "Tutorial Generator"
     implemented: true
