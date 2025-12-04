@@ -88,6 +88,25 @@ export default function NewsPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedNews(data.content)
+        
+        // Auto-save to library
+        try {
+          await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: data.content,
+              type: 'text',
+              title: `News: ${topic.substring(0, 50)}`,
+              description: data.content.substring(0, 100),
+              metadata: { topic, style, language, contextUrl, contentType: 'news' }
+            })
+          })
+          console.log('News auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save:', saveError)
+        }
+        
         toast({
           title: "Success",
           description: `News article generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
