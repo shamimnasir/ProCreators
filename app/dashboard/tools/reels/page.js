@@ -39,7 +39,7 @@ export default function ReelsPage() {
   const [contrast, setContrast] = useState(100)
   const [saturation, setSaturation] = useState(100)
 
-  const handleImageUpload = (e, type) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -53,13 +53,8 @@ export default function ReelsPage() {
 
       const reader = new FileReader()
       reader.onloadend = () => {
-        if (type === 'object') {
-          setObjectImage(file)
-          setObjectImagePreview(reader.result)
-        } else if (type === 'talking') {
-          setTalkingHeadImage(file)
-          setTalkingHeadPreview(reader.result)
-        }
+        setObjectImage(file)
+        setObjectImagePreview(reader.result)
       }
       reader.readAsDataURL(file)
     }
