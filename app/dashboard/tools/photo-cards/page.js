@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function PhotoCardsPage() {
   const [uploadedImage, setUploadedImage] = useState(null)
+  const [uploadedLogo, setUploadedLogo] = useState(null)
   const [brandName, setBrandName] = useState('বাংলা সংবাদ')
   const [date, setDate] = useState(new Date().toLocaleDateString('bn-BD'))
   const [headline, setHeadline] = useState('')
@@ -19,9 +20,14 @@ export default function PhotoCardsPage() {
   const [language, setLanguage] = useState('bengali')
   const [textColor, setTextColor] = useState('#ffffff')
   const [bgColor, setBgColor] = useState('#dc2626')
+  const [brightness, setBrightness] = useState(100)
+  const [contrast, setContrast] = useState(100)
+  const [saturation, setSaturation] = useState(100)
+  const [blur, setBlur] = useState(0)
   const [generatedCard, setGeneratedCard] = useState(null)
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
+  const logoInputRef = useRef(null)
   const { toast } = useToast()
 
   const handleImageUpload = (e) => {
