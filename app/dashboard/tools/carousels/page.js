@@ -50,13 +50,18 @@ export default function CarouselsToolPage() {
         description: "Creating carousel sequence and slides. This may take 30-60 seconds..."
       })
 
+      const selectedSize = platformSizes[platform]
+      
       const response = await fetch('/api/generate/carousel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt,
           language,
-          slideCount: 5
+          slideCount: 5,
+          width: selectedSize.width,
+          height: selectedSize.height,
+          platform: platform
         })
       })
 
