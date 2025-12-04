@@ -677,105 +677,59 @@ export default function ReelsPage() {
         </Card>
       </div>
 
-      {/* Video Preview & Editing Section */}
+      {/* Video Preview Section */}
       {videoData?.videoUrl && (
         <Card>
           <CardHeader>
-            <CardTitle>Step 3: Preview & Edit</CardTitle>
-            <CardDescription>Trim, crop, and apply filters to your video</CardDescription>
+            <CardTitle>Step 3: Your Video is Ready!</CardTitle>
+            <CardDescription>Preview your generated video and download it</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-4">
-                <video className="w-full rounded-lg" controls style={{
-                  filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`
-                }}>
-                  <source src={videoData.videoUrl} type="video/mp4" />
-                </video>
-                
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleSaveToLibrary}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Save to Library
-                  </Button>
+            <div className="space-y-6">
+              {/* Large Video Preview */}
+              <div className="w-full max-w-2xl mx-auto">
+                <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '600px' }}>
+                  <video 
+                    className="w-full h-full object-contain" 
+                    controls 
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src={videoData.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
                 </div>
               </div>
-
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Scissors className="h-4 w-4" />
-                    <Label>Trim Video</Label>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Start: {trimStart}%</Label>
-                    <Slider
-                      value={[trimStart]}
-                      onValueChange={(value) => setTrimStart(value[0])}
-                      min={0}
-                      max={100}
-                      step={1}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">End: {trimEnd}%</Label>
-                    <Slider
-                      value={[trimEnd]}
-                      onValueChange={(value) => setTrimEnd(value[0])}
-                      min={0}
-                      max={100}
-                      step={1}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Wand2 className="h-4 w-4" />
-                    <Label>Filters</Label>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Brightness: {brightness}%</Label>
-                    <Slider
-                      value={[brightness]}
-                      onValueChange={(value) => setBrightness(value[0])}
-                      min={50}
-                      max={150}
-                      step={5}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Contrast: {contrast}%</Label>
-                    <Slider
-                      value={[contrast]}
-                      onValueChange={(value) => setContrast(value[0])}
-                      min={50}
-                      max={150}
-                      step={5}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Saturation: {saturation}%</Label>
-                    <Slider
-                      value={[saturation]}
-                      onValueChange={(value) => setSaturation(value[0])}
-                      min={0}
-                      max={200}
-                      step={10}
-                    />
-                  </div>
-                </div>
-
-                <Button className="w-full" onClick={handleApplyChanges} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Apply Changes
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+                <Button className="flex-1" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Video
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={handleSaveToLibrary}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Save to Library
                 </Button>
               </div>
+              
+              {/* Video Info */}
+              {videoData.provider && (
+                <div className="max-w-2xl mx-auto">
+                  <Card className="bg-muted/50">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Provider:</span>
+                        <span className="font-medium">{videoData.provider}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-2">
+                        <span className="text-muted-foreground">Job ID:</span>
+                        <span className="font-mono text-xs">{videoData.jobId}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
