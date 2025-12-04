@@ -278,47 +278,6 @@ export default function PhotoCardsPage() {
     img.src = uploadedImage
   }
 
-  const handleSave = async () => {
-    if (!generatedCard) return
-    
-    try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: generatedCard,
-          type: 'photocard',
-          title: `Photo Card: ${headline.substring(0, 50)}`,
-          description: headline,
-          metadata: {
-            brandName,
-            headline,
-            subheadline,
-            date,
-            language
-          }
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast({
-          title: "Saved",
-          description: "Photo card saved to library successfully!"
-        })
-      } else {
-        throw new Error(data.error)
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save photo card",
-        variant: "destructive"
-      })
-    }
-  }
-
   const handleDownload = () => {
     if (!generatedCard) return
     
