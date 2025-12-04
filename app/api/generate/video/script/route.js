@@ -13,20 +13,21 @@ export async function POST(request) {
     }
 
     const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
-    const input = imageDescription 
-      ? `Image/Object Description: ${imageDescription}. Create a viral reel/short video script based on this.`
-      : `Topic: ${topic}. Create a viral reel/short video script.`
-
+    
     const systemMessage = `You are a viral video script writer specializing in TikTok, Instagram Reels, and YouTube Shorts.
 
-CREATE A VIRAL REEL/SHORT SCRIPT ${languageText} following this structure:
+CRITICAL INSTRUCTION: You MUST create a script about the EXACT topic provided by the user. DO NOT create content about any other topic.
+
+Language: ${languageText}
+
+CREATE A VIRAL REEL/SHORT SCRIPT following this structure:
 
 **VIRAL HOOK FORMAT (First 3 seconds - CRITICAL):**
 - Line 1: Shocking statement, question, or pattern interrupt (e.g., "Stop scrolling! This changed my life...")
 - Line 2: Promise or intrigue (e.g., "Watch until the end for the secret")
 
 **MAIN CONTENT (Next 12-22 seconds):**
-- Quick value delivery
+- Quick value delivery about the EXACT topic provided
 - 3-5 key points maximum
 - Fast-paced, no fluff
 - Use numbers and specific details
@@ -46,7 +47,13 @@ CREATE A VIRAL REEL/SHORT SCRIPT ${languageText} following this structure:
 
 Generate a complete viral reel script with scene-by-scene breakdown including dialogue, visual descriptions, and text overlay suggestions.`
 
-    const result = await generateText(input, systemMessage)
+    const userPrompt = imageDescription 
+      ? `Create a viral reel/short video script about this image/object: ${imageDescription}. Stay strictly on this topic. Do not deviate to other topics.`
+      : `Create a viral reel/short video script about this EXACT topic: "${topic}". 
+
+IMPORTANT: The script MUST be about "${topic}" and NOTHING ELSE. Do not create content about any other subject. Stay 100% focused on: ${topic}`
+
+    const result = await generateText(userPrompt, systemMessage)
 
     if (result.success) {
       return NextResponse.json({
