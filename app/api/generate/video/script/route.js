@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { generateText } from '@/lib/gemini-text'
 
 export async function POST(request) {
   try {
@@ -12,20 +12,12 @@ export async function POST(request) {
       )
     }
 
-    // Use Emergent Universal Key for Claude
-    const isEmergentKey = process.env.EMERGENT_LLM_KEY && process.env.EMERGENT_LLM_KEY.startsWith('sk-emergent')
-    
-    const client = new Anthropic({
-      apiKey: process.env.EMERGENT_LLM_KEY || process.env.ANTHROPIC_API_KEY,
-      baseURL: isEmergentKey ? 'https://api.emergentmethods.ai/anthropic/v1' : undefined,
-    })
-
     const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
     const input = imageDescription 
       ? `Image/Object Description: ${imageDescription}. Create a viral reel/short video script based on this.`
       : `Topic: ${topic}. Create a viral reel/short video script.`
 
-    const prompt = `You are a viral video script writer specializing in TikTok, Instagram Reels, and YouTube Shorts.
+    const systemMessage = `You are a viral video script writer specializing in TikTok, Instagram Reels, and YouTube Shorts.
 
 CREATE A VIRAL REEL/SHORT SCRIPT ${languageText} following this structure:
 
@@ -52,28 +44,19 @@ CREATE A VIRAL REEL/SHORT SCRIPT ${languageText} following this structure:
 **DURATION:** 15-30 seconds total
 **FORMAT:** Vertical 9:16 (1080x1920)
 
-Input: ${input}
-
 Generate a complete viral reel script with scene-by-scene breakdown including dialogue, visual descriptions, and text overlay suggestions.`
 
-    const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-    })
+    const result = await generateText(input, systemMessage)
 
-    const scriptContent = message.content[0].text
-
-    return NextResponse.json({
-      success: true,
-      script: scriptContent,
-      language
-    })
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        script: result.content,
+        language
+      })
+    } else {
+      throw new Error(result.error || 'Failed to generate script')
+    }
 
   } catch (error) {
     console.error('Script generation error:', error)
