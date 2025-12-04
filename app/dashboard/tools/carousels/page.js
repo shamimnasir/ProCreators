@@ -45,13 +45,27 @@ export default function CarouselsToolPage() {
   }
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a topic",
-        variant: "destructive"
-      })
-      return
+    // Validation
+    if (generationMode === 'auto') {
+      if (!prompt.trim()) {
+        toast({
+          title: "Error",
+          description: "Please enter a topic",
+          variant: "destructive"
+        })
+        return
+      }
+    } else {
+      // Manual mode - check if at least one slide has text
+      const hasContent = manualSlides.some(slide => slide.text.trim())
+      if (!hasContent) {
+        toast({
+          title: "Error",
+          description: "Please enter text for at least one slide",
+          variant: "destructive"
+        })
+        return
+      }
     }
 
     setLoading(true)
@@ -61,22 +75,33 @@ export default function CarouselsToolPage() {
     try {
       toast({
         title: "Generating...",
-        description: "Creating carousel sequence and slides. This may take 30-60 seconds..."
+        description: generationMode === 'auto' 
+          ? "Creating carousel sequence and slides. This may take 30-60 seconds..."
+          : "Generating images for your slides. This may take 30-60 seconds..."
       })
 
       const selectedSize = platformSizes[platform]
       
+      const requestBody = {
+        language,
+        slideCount: 5,
+        width: selectedSize.width,
+        height: selectedSize.height,
+        platform: platform,
+        generationMode: generationMode
+      }
+
+      if (generationMode === 'auto') {
+        requestBody.prompt = prompt
+      } else {
+        // Filter out empty slides in manual mode
+        requestBody.manualSlides = manualSlides.filter(slide => slide.text.trim())
+      }
+      
       const response = await fetch('/api/generate/carousel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt,
-          language,
-          slideCount: 5,
-          width: selectedSize.width,
-          height: selectedSize.height,
-          platform: platform
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (!response.ok) {
