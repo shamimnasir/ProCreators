@@ -149,9 +149,9 @@ export default function ListsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">List Generator</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Viral Listicle Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create engaging list-based content with AI in Bengali or English
+          Create viral list posts for Facebook, LinkedIn, X/Twitter & blogs in English/Bengali
         </p>
       </div>
 
