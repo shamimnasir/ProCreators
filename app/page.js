@@ -709,7 +709,7 @@ export default function Home() {
                 <li><Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors text-sm">Dashboard</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">API Access</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Integrations</Link></li>
-                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Roadmap</Link></li>
+                <li><Link href="/roadmap" className="text-gray-400 hover:text-white transition-colors text-sm">Roadmap</Link></li>
               </ul>
             </div>
 
