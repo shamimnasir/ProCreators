@@ -145,6 +145,6 @@ export default function RoadmapPage() {
           </div>
         </div>
       </section>
-    </div>
+    </PublicLayout>
   )
 }
