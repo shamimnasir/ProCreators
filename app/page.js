@@ -187,6 +187,8 @@ export default function Home() {
             <Link href="#features" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Features</Link>
             <Link href="#tools" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Tools</Link>
             <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Pricing</Link>
+            <Link href="/roadmap" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Roadmap</Link>
+            <Link href="/blog" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Blog</Link>
             <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Dashboard</Link>
           </nav>
 
