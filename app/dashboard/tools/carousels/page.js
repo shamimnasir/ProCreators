@@ -48,6 +48,30 @@ export default function CarouselsToolPage() {
     setManualSlides(updated)
   }
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please upload an image file",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setUploadedLogo(event.target.result)
+      toast({
+        title: "Success",
+        description: "Logo uploaded successfully!"
+      })
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleGenerate = async () => {
     // Validation
     if (generationMode === 'auto') {
