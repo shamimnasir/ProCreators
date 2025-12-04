@@ -291,15 +291,14 @@ export default function NewsPage() {
                 <div className="rounded-lg border bg-muted/50 p-4 max-h-96 overflow-y-auto">
                   <p className="whitespace-pre-wrap text-sm">{generatedNews}</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button onClick={handleSave} className="flex-1">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save to Library
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    ✓ Automatically saved to Library
+                  </p>
                 </div>
               </>
             ) : (
