@@ -3,73 +3,16 @@ import { generateText } from '@/lib/gemini-text'
 
 export async function POST(request) {
   try {
-    const { topic, imageDescription, language } = await request.json()
+    const { topic, hasObjectImage, hasTalkingHead, language } = await request.json()
 
-    if (!topic && !imageDescription) {
+    if (!topic && !hasObjectImage && !hasTalkingHead) {
       return NextResponse.json(
-        { success: false, error: 'Please provide a topic or image description' },
+        { success: false, error: 'Please provide at least a topic or upload an image' },
         { status: 400 }
       )
     }
 
     const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
     
-    const systemMessage = `You are a viral video script writer specializing in TikTok, Instagram Reels, and YouTube Shorts.
-
-CRITICAL INSTRUCTION: You MUST create a script about the EXACT topic provided by the user. DO NOT create content about any other topic.
-
-Language: ${languageText}
-
-CREATE A VIRAL REEL/SHORT SCRIPT following this structure:
-
-**VIRAL HOOK FORMAT (First 3 seconds - CRITICAL):**
-- Line 1: Shocking statement, question, or pattern interrupt (e.g., "Stop scrolling! This changed my life...")
-- Line 2: Promise or intrigue (e.g., "Watch until the end for the secret")
-
-**MAIN CONTENT (Next 12-22 seconds):**
-- Quick value delivery about the EXACT topic provided
-- 3-5 key points maximum
-- Fast-paced, no fluff
-- Use numbers and specific details
-- Visual cues for each point
-
-**CALL-TO-ACTION (Last 3-5 seconds):**
-- Clear next step (Follow, Like, Share, Comment)
-- Create FOMO or urgency
-
-**VISUAL SUGGESTIONS:**
-- Describe key visual elements for each scene
-- Suggest transitions and effects
-- Recommend text overlays
-
-**DURATION:** 15-30 seconds total
-**FORMAT:** Vertical 9:16 (1080x1920)
-
-Generate a complete viral reel script with scene-by-scene breakdown including dialogue, visual descriptions, and text overlay suggestions.`
-
-    const userPrompt = imageDescription 
-      ? `Create a viral reel/short video script about this image/object: ${imageDescription}. Stay strictly on this topic. Do not deviate to other topics.`
-      : `Create a viral reel/short video script about this EXACT topic: "${topic}". 
-
-IMPORTANT: The script MUST be about "${topic}" and NOTHING ELSE. Do not create content about any other subject. Stay 100% focused on: ${topic}`
-
-    const result = await generateText(userPrompt, systemMessage)
-
-    if (result.success) {
-      return NextResponse.json({
-        success: true,
-        script: result.content,
-        language
-      })
-    } else {
-      throw new Error(result.error || 'Failed to generate script')
-    }
-
-  } catch (error) {
-    console.error('Script generation error:', error)
-    return NextResponse.json(
-      { success: false, error: error.message || 'Failed to generate script' },
-      { status: 500 }
-    )
-  }
-}
+    // Determine script type based on inputs
+    let scriptType = 'Text-Based'\n    let scriptInstructions = ''\n    \n    if (hasTalkingHead && hasObjectImage && topic) {\n      scriptType = 'Talking Head + Object + Topic'\n      scriptInstructions = `\nSCRIPT TYPE: TALKING HEAD WITH OBJECT\n- The video features a PERSON (talking head) explaining/showcasing an object\n- Person narrates and demonstrates about: "${topic}"\n- Include direct-to-camera dialogue\n- Show the object being discussed\n- Use personal pronouns (I, we, you)\n- Engaging presentation style\n- Person-object interaction moments\n`\n    } else if (hasTalkingHead && topic) {\n      scriptType = 'Talking Head'\n      scriptInstructions = `\nSCRIPT TYPE: TALKING HEAD (PERSON NARRATION)\n- The video features a PERSON speaking directly to camera\n- Person talks about: "${topic}"\n- Include direct-to-camera dialogue\n- Use personal pronouns (I, we, you)\n- Conversational and engaging tone\n- Person's expressions and gestures are key\n`\n    } else if (hasObjectImage && topic) {\n      scriptType = 'Object-Based'\n      scriptInstructions = `\nSCRIPT TYPE: OBJECT-FOCUSED VIDEO\n- The video focuses on showcasing an object/product\n- Topic: "${topic}"\n- Use voiceover narration (no person on camera)\n- Focus on object details, features, benefits\n- Close-up shots and demonstrations\n- Professional product showcase style\n`\n    } else if (topic) {\n      scriptType = 'Topic-Based'\n      scriptInstructions = `\nSCRIPT TYPE: TEXT/TOPIC-BASED VIDEO\n- Pure topic explanation: "${topic}"\n- Use voiceover or text overlays\n- Stock footage and animations\n- Visual storytelling through b-roll\n- No specific person or object\n`\n    }\n    \n    const systemMessage = `You are a viral video script writer specializing in TikTok, Instagram Reels, and YouTube Shorts.\n\nCRITICAL INSTRUCTION: You MUST create a script about the EXACT topic provided. DO NOT create content about any other topic.\n\nLanguage: ${languageText}\n${scriptInstructions}\n\nCREATE A VIRAL REEL/SHORT SCRIPT following this structure:\n\n**VIRAL HOOK FORMAT (First 3 seconds - CRITICAL):**\n- Line 1: Shocking statement, question, or pattern interrupt (e.g., "Stop scrolling! This changed my life...")\n- Line 2: Promise or intrigue (e.g., "Watch until the end for the secret")\n\n**MAIN CONTENT (Next 12-22 seconds):**\n- Quick value delivery about the EXACT topic provided\n- 3-5 key points maximum\n- Fast-paced, no fluff\n- Use numbers and specific details\n- Visual cues for each point\n${hasTalkingHead ? '- Include what the person says on camera\n' : ''}\n${hasObjectImage ? '- Describe how the object is shown/used\n' : ''}\n\n**CALL-TO-ACTION (Last 3-5 seconds):**\n- Clear next step (Follow, Like, Share, Comment)\n- Create FOMO or urgency\n\n**VISUAL SUGGESTIONS:**\n- Describe key visual elements for each scene\n- Suggest transitions and effects\n- Recommend text overlays\n${hasTalkingHead ? '- Describe person\'s actions and expressions\n' : ''}\n${hasObjectImage ? '- Describe object shots and angles\n' : ''}\n\n**DURATION:** 15-30 seconds total\n**FORMAT:** Vertical 9:16 (1080x1920)\n\nGenerate a complete viral reel script with scene-by-scene breakdown including dialogue, visual descriptions, and text overlay suggestions.`\n\n    const userPrompt = `Create a viral reel/short video script about this EXACT topic: "${topic}"\n\nIMPORTANT: The script MUST be about "${topic}" and NOTHING ELSE. Do not create content about any other subject. Stay 100% focused on: ${topic}\n\n${hasTalkingHead ? 'REMEMBER: Include dialogue for the person speaking on camera.\\n' : ''}\n${hasObjectImage ? 'REMEMBER: Include visual descriptions of the object being shown.\\n' : ''}\n${hasTalkingHead && hasObjectImage ? 'REMEMBER: Show interaction between the person and the object.\\n' : ''}`\n\n    const result = await generateText(userPrompt, systemMessage)\n\n    if (result.success) {\n      return NextResponse.json({\n        success: true,\n        script: result.content,\n        scriptType: `${scriptType} script generated successfully!`,\n        language\n      })\n    } else {\n      throw new Error(result.error || 'Failed to generate script')\n    }\n\n  } catch (error) {\n    console.error('Script generation error:', error)\n    return NextResponse.json(\n      { success: false, error: error.message || 'Failed to generate script' },\n      { status: 500 }\n    )\n  }\n}
