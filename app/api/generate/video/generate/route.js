@@ -7,25 +7,18 @@ export const maxDuration = 300 // 5 minutes timeout for video generation
 const VIDEO_MODELS = {
   budget: [
     // Best budget options - fast and cost-effective
-    { id: 'wan-video/wan-2.5-t2v-fast', type: 'text', priority: 1, cost: 'lowest' },
-    { id: 'wan-video/wan-2.5-i2v-fast', type: 'image', priority: 1, cost: 'lowest' },
-    { id: 'wavespeedai/wan-2.1-t2v-480p', type: 'text', priority: 2, cost: 'lowest' },
-    { id: 'pixverse/pixverse-v4', type: 'both', priority: 3, cost: 'low' },
+    { id: 'stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438', type: 'image', priority: 1, cost: 'lowest', description: 'SVD - Best for image-to-video' },
+    { id: 'anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351', type: 'text', priority: 2, cost: 'lowest', description: 'ZeroScope - Fast text-to-video' },
   ],
   fast: [
     // Fast quality options - good balance
-    { id: 'pixverse/pixverse-v5', type: 'both', priority: 1, cost: 'medium' },
-    { id: 'bytedance/seedance-1-pro-fast', type: 'both', priority: 2, cost: 'medium' },
-    { id: 'luma/ray-flash-2-720p', type: 'both', priority: 3, cost: 'medium' },
-    { id: 'wan-video/wan-2.5-t2v', type: 'text', priority: 4, cost: 'medium' },
+    { id: 'stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438', type: 'image', priority: 1, cost: 'medium', description: 'SVD - Quality image-to-video' },
+    { id: 'anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351', type: 'text', priority: 2, cost: 'medium', description: 'ZeroScope XL - High quality' },
   ],
   pro: [
     // Premium quality options - best results
-    { id: 'google/veo-3.1-fast', type: 'both', priority: 1, cost: 'high' },
-    { id: 'google/veo-3.1', type: 'both', priority: 2, cost: 'high' },
-    { id: 'kwaivgi/kling-v2.5-turbo-pro', type: 'both', priority: 3, cost: 'high' },
-    { id: 'minimax/hailuo-2.3', type: 'both', priority: 4, cost: 'high' },
-    { id: 'openai/sora-2', type: 'both', priority: 5, cost: 'highest' },
+    { id: 'stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438', type: 'image', priority: 1, cost: 'high', description: 'SVD XT - Premium image animation' },
+    { id: 'anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351', type: 'text', priority: 2, cost: 'high', description: 'ZeroScope - Pro text-to-video' },
   ]
 }
 
