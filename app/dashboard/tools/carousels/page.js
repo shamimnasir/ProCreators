@@ -26,6 +26,8 @@ export default function CarouselsToolPage() {
   const [logoSize, setLogoSize] = useState(80)
   const [logoPosition, setLogoPosition] = useState('top-right')
   const [loading, setLoading] = useState(false)
+  const [contentMap, setContentMap] = useState(null)
+  const [showContentMap, setShowContentMap] = useState(false)
   const [carouselSlides, setCarouselSlides] = useState([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const logoInputRef = useRef(null)
