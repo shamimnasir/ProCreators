@@ -4,10 +4,18 @@ import { getCollection } from '@/lib/mongodb'
 export async function GET(request) {
   try {
     const libraryCollection = await getCollection('library')
+    const now = new Date().toISOString()
     
     // TODO: Replace 'default-user' with actual user ID when auth is implemented
+    // Only fetch items that haven't expired
     const items = await libraryCollection
-      .find({ userId: 'default-user' })
+      .find({ 
+        userId: 'default-user',
+        $or: [
+          { expiresAt: { $gte: now } },
+          { expiresAt: { $exists: false } } // For backwards compatibility with old items
+        ]
+      })
       .sort({ createdAt: -1 })
       .toArray()
 
