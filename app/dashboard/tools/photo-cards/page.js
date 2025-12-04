@@ -112,88 +112,129 @@ export default function PhotoCardsPage() {
       ctx.fillStyle = '#f0f0f0'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Draw top bar with brand and date
-      ctx.fillStyle = '#1a1a1a'
-      ctx.fillRect(0, 0, canvas.width, 80)
-      
-      // Brand name
-      ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 36px Arial, sans-serif'
-      ctx.fillText(brandName, 30, 52)
-      
-      // Date
-      ctx.font = '24px Arial, sans-serif'
-      ctx.fillText(date, canvas.width - 250, 52)
+      // Apply image filters
+      ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
 
-      // Calculate image dimensions to fit nicely
-      const maxImageHeight = 700
-      const imageAspect = img.width / img.height
-      let drawWidth = canvas.width - 60
-      let drawHeight = drawWidth / imageAspect
+      // Calculate image dimensions to fit VERTICALLY (fill height)
+      const topBarHeight = 80
+      const textBoxHeight = 200
+      const availableHeight = canvas.height - topBarHeight - textBoxHeight
       
-      if (drawHeight > maxImageHeight) {
-        drawHeight = maxImageHeight
-        drawWidth = drawHeight * imageAspect
+      const imageAspect = img.width / img.height
+      let drawHeight = availableHeight
+      let drawWidth = drawHeight * imageAspect
+      
+      // If image is too wide, fit by width instead
+      if (drawWidth > canvas.width) {
+        drawWidth = canvas.width
+        drawHeight = drawWidth / imageAspect
       }
 
       const imageX = (canvas.width - drawWidth) / 2
-      const imageY = 100
+      const imageY = topBarHeight
 
-      // Draw uploaded image
+      // Draw uploaded image with filters
       ctx.drawImage(img, imageX, imageY, drawWidth, drawHeight)
 
-      // Draw text overlay box at bottom
-      const textBoxHeight = 200
-      const textBoxY = canvas.height - textBoxHeight
-      
-      // Gradient or solid background
-      const gradient = ctx.createLinearGradient(0, textBoxY, 0, canvas.height)
-      gradient.addColorStop(0, bgColor + 'dd')
-      gradient.addColorStop(1, bgColor)
-      
-      ctx.fillStyle = gradient
-      ctx.fillRect(0, textBoxY, canvas.width, textBoxHeight)
+      // Reset filter for other elements
+      ctx.filter = 'none'
 
-      // Draw headline
-      ctx.fillStyle = textColor
-      ctx.font = 'bold 42px Arial, sans-serif'
-      ctx.textAlign = 'center'
+      // Draw top bar with brand and date
+      ctx.fillStyle = '#1a1a1a'
+      ctx.fillRect(0, 0, canvas.width, topBarHeight)
       
-      // Word wrap for headline
-      const maxWidth = canvas.width - 60
-      const words = headline.split(' ')
-      let line = ''
-      let y = textBoxY + 60
-      
-      for (let i = 0; i < words.length; i++) {
-        const testLine = line + words[i] + ' '
-        const metrics = ctx.measureText(testLine)
-        
-        if (metrics.width > maxWidth && i > 0) {
-          ctx.fillText(line, canvas.width / 2, y)
-          line = words[i] + ' '
-          y += 50
-        } else {
-          line = testLine
+      // If logo exists, draw it
+      if (uploadedLogo) {
+        const logoImg = new window.Image()
+        logoImg.onload = () => {
+          // Draw logo on left
+          const logoSize = 50
+          const logoPadding = 15
+          ctx.drawImage(logoImg, logoPadding, logoPadding, logoSize, logoSize)
+          
+          // Draw brand name next to logo
+          ctx.fillStyle = '#ffffff'
+          ctx.font = 'bold 36px Arial, sans-serif'
+          ctx.textAlign = 'left'
+          ctx.fillText(brandName, logoPadding + logoSize + 15, 52)
+          
+          // Draw date on right
+          ctx.font = '24px Arial, sans-serif'
+          ctx.textAlign = 'right'
+          ctx.fillText(date, canvas.width - 30, 52)
+          
+          // Continue with text overlay
+          drawTextOverlay()
         }
+        logoImg.src = uploadedLogo
+      } else {
+        // No logo, just draw brand name
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 36px Arial, sans-serif'
+        ctx.textAlign = 'left'
+        ctx.fillText(brandName, 30, 52)
+        
+        // Date
+        ctx.font = '24px Arial, sans-serif'
+        ctx.textAlign = 'right'
+        ctx.fillText(date, canvas.width - 30, 52)
+        
+        drawTextOverlay()
       }
-      ctx.fillText(line, canvas.width / 2, y)
 
-      // Draw subheadline if exists
-      if (subheadline) {
-        ctx.font = '28px Arial, sans-serif'
-        y += 50
-        ctx.fillText(subheadline, canvas.width / 2, y)
+      function drawTextOverlay() {
+        // Draw text overlay box at bottom
+        const textBoxY = canvas.height - textBoxHeight
+        
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, textBoxY, 0, canvas.height)
+        gradient.addColorStop(0, bgColor + 'dd')
+        gradient.addColorStop(1, bgColor)
+        
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, textBoxY, canvas.width, textBoxHeight)
+
+        // Draw headline
+        ctx.fillStyle = textColor
+        ctx.font = 'bold 42px Arial, sans-serif'
+        ctx.textAlign = 'center'
+        
+        // Word wrap for headline
+        const maxWidth = canvas.width - 60
+        const words = headline.split(' ')
+        let line = ''
+        let y = textBoxY + 60
+        
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i] + ' '
+          const metrics = ctx.measureText(testLine)
+          
+          if (metrics.width > maxWidth && i > 0) {
+            ctx.fillText(line, canvas.width / 2, y)
+            line = words[i] + ' '
+            y += 50
+          } else {
+            line = testLine
+          }
+        }
+        ctx.fillText(line, canvas.width / 2, y)
+
+        // Draw subheadline if exists
+        if (subheadline) {
+          ctx.font = '28px Arial, sans-serif'
+          y += 50
+          ctx.fillText(subheadline, canvas.width / 2, y)
+        }
+
+        // Convert canvas to data URL
+        const cardDataUrl = canvas.toDataURL('image/png', 0.95)
+        setGeneratedCard(cardDataUrl)
+        
+        toast({
+          title: "Success",
+          description: "Photo card generated successfully!"
+        })
       }
-
-      // Convert canvas to data URL
-      const cardDataUrl = canvas.toDataURL('image/png', 0.95)
-      setGeneratedCard(cardDataUrl)
-      
-      toast({
-        title: "Success",
-        description: "Photo card generated successfully!"
-      })
     }
 
     img.src = uploadedImage
