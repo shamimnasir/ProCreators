@@ -229,19 +229,45 @@ export default function PhotoCardsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Photo Card Generator</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Viral Photo Card Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create beautiful photo cards with text overlays using AI
+          Create viral Facebook/Instagram news-style photo cards with custom text overlay
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Input</CardTitle>
-            <CardDescription>Configure your photo card parameters</CardDescription>
+            <CardTitle>Card Editor</CardTitle>
+            <CardDescription>Upload image and customize your viral news card</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label>Upload Image</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="w-full"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                {uploadedImage ? 'Change Image' : 'Upload Image'}
+              </Button>
+              {uploadedImage && (
+                <div className="rounded-lg border overflow-hidden">
+                  <img src={uploadedImage} alt="Preview" className="w-full h-32 object-cover" />
+                </div>
+              )}
+            </div>
+
+            {/* Language */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
@@ -258,66 +284,113 @@ export default function PhotoCardsPage() {
               </Select>
             </div>
 
+            {/* Brand Name */}
             <div className="space-y-2">
-              <Label>Card Style</Label>
-              <Select value={style} onValueChange={setStyle}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="modern">Modern</SelectItem>
-                  <SelectItem value="minimalist">Minimalist</SelectItem>
-                  <SelectItem value="vibrant">Vibrant</SelectItem>
-                  <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="text">Card Text</Label>
-              <Textarea
-                id="text"
-                placeholder="Enter the text for your photo card (e.g., 'Stay Positive', 'Dream Big', a quote)..."
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={6}
+              <Label htmlFor="brand">Brand/Channel Name</Label>
+              <Input
+                id="brand"
+                placeholder="e.g., বাংলা সংবাদ or News24"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
               />
             </div>
 
+            {/* Date */}
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                placeholder="e.g., ০৪ ডিসেম্বর ২০২৫"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
+
+            {/* Headline */}
+            <div className="space-y-2">
+              <Label htmlFor="headline">Main Headline</Label>
+              <Textarea
+                id="headline"
+                placeholder="Enter main headline text..."
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            {/* Subheadline */}
+            <div className="space-y-2">
+              <Label htmlFor="subheadline">Subheadline (Optional)</Label>
+              <Input
+                id="subheadline"
+                placeholder="Additional text..."
+                value={subheadline}
+                onChange={(e) => setSubheadline(e.target.value)}
+              />
+            </div>
+
+            {/* Colors */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="textColor">Text Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="textColor"
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="h-10 w-20"
+                  />
+                  <Input
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bgColor">Overlay Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="bgColor"
+                    type="color"
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="h-10 w-20"
+                  />
+                  <Input
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+
             <Button 
-              onClick={handleGenerate} 
-              disabled={loading || !text.trim()}
+              onClick={generateCard} 
+              disabled={!uploadedImage || !headline.trim()}
               className="w-full"
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <ImageIcon className="mr-2 h-4 w-4" />
-              {loading ? 'Generating Card...' : 'Generate Photo Card'}
+              Generate Card
             </Button>
-            {loading && (
-              <p className="text-xs text-muted-foreground text-center">
-                This may take 15-30 seconds...
-              </p>
-            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Generated Card</CardTitle>
+            <CardTitle>Preview</CardTitle>
             <CardDescription>
-              {generatedCard ? 'Your AI-generated photo card' : 'Your photo card will appear here'}
+              {generatedCard ? 'Your viral news card is ready!' : 'Card preview will appear here'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {generatedCard ? (
               <>
-                <div className="rounded-lg border overflow-hidden bg-black">
-                  <Image
-                    src={generatedCard.imageUrl}
-                    alt="Generated Photo Card"
-                    width={500}
-                    height={500}
+                <div className="rounded-lg border overflow-hidden bg-muted">
+                  <img
+                    src={generatedCard}
+                    alt="Generated Card"
                     className="w-full h-auto"
                   />
                 </div>
@@ -329,19 +402,19 @@ export default function PhotoCardsPage() {
                   </Button>
                   <Button variant="outline" className="flex-1" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Image
+                    Download
                   </Button>
                 </div>
               </>
             ) : (
               <div className="flex h-96 items-center justify-center rounded-lg border border-dashed">
                 <div className="text-center">
-                  <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Generated photo card will appear here
+                    Upload an image and fill in the details
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Perfect for social media sharing
+                    Perfect for viral Facebook & Instagram posts
                   </p>
                 </div>
               </div>
@@ -349,6 +422,9 @@ export default function PhotoCardsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Hidden canvas for image generation */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   )
 }
