@@ -15,11 +15,9 @@ import { Badge } from '@/components/ui/badge'
 export default function ReelsPage() {
   const [topic, setTopic] = useState('')
   
-  // Three separate image states
+  // Single image state for main visual
   const [objectImage, setObjectImage] = useState(null)
   const [objectImagePreview, setObjectImagePreview] = useState(null)
-  const [talkingHeadImage, setTalkingHeadImage] = useState(null)
-  const [talkingHeadPreview, setTalkingHeadPreview] = useState(null)
   
   const [language, setLanguage] = useState('english')
   const [mode, setMode] = useState('budget')
@@ -33,7 +31,6 @@ export default function ReelsPage() {
   const { toast } = useToast()
   
   const objectFileRef = useRef(null)
-  const talkingHeadRef = useRef(null)
 
   // Video editing states
   const [trimStart, setTrimStart] = useState(0)
