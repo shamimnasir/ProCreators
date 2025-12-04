@@ -286,7 +286,80 @@ export default function CarouselsToolPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* Logo Upload Section */}
+            <div className="space-y-3 border-t pt-4">
+              <Label className="text-base font-semibold">Brand Logo (Optional)</Label>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {uploadedLogo ? 'Change Logo' : 'Upload Logo'}
+                </Button>
+                {uploadedLogo && (
+                  <Button
+                    type="button"
+                    onClick={() => setUploadedLogo(null)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              
+              {uploadedLogo && (
+                <>
+                  <div className="rounded-lg border overflow-hidden bg-white p-2">
+                    <img src={uploadedLogo} alt="Logo" className="h-16 w-auto mx-auto" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label htmlFor="logoSize" className="text-sm">Logo Size</Label>
+                      <span className="text-xs text-muted-foreground">{logoSize}px</span>
+                    </div>
+                    <Input
+                      id="logoSize"
+                      type="range"
+                      min="40"
+                      max="150"
+                      value={logoSize}
+                      onChange={(e) => setLogoSize(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Logo Position</Label>
+                    <Select value={logoPosition} onValueChange={setLogoPosition}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top-left">Top Left</SelectItem>
+                        <SelectItem value="top-right">Top Right</SelectItem>
+                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                        <SelectItem value="center">Center</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="space-y-2 border-t pt-4">
               <Label className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
                 Platform & Size
