@@ -222,20 +222,43 @@ export default function ReelsPage() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!videoData?.videoUrl) return
     
-    const a = document.createElement('a')
-    a.href = videoData.videoUrl
-    a.download = `viral-reel-${Date.now()}.mp4`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    
-    toast({
-      title: "Downloading",
-      description: "Your video is being downloaded..."
-    })
+    try {
+      toast({
+        title: "Preparing Download",
+        description: "Fetching your video..."
+      })
+      
+      // Fetch the video as a blob to trigger proper download
+      const response = await fetch(videoData.videoUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = `viral-reel-${platform}-${Date.now()}.mp4`
+      document.body.appendChild(a)
+      a.click()
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      toast({
+        title: "Download Started",
+        description: "Your video is downloading..."
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "Please try again or right-click the video to save.",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleSaveToLibrary = async () => {
