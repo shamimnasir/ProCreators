@@ -215,20 +215,28 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   
   const output = await replicate.run(modelId, { input })
   
+  console.log(`[${modelId}] Output type:`, typeof output)
+  console.log(`[${modelId}] Output:`, JSON.stringify(output).substring(0, 300))
+  
   // Handle different output formats
   if (Array.isArray(output)) {
+    console.log(`[${modelId}] Returning array[0]:`, output[0])
     return output[0]
   }
   if (typeof output === 'string') {
+    console.log(`[${modelId}] Returning string:`, output)
     return output
   }
   if (output && output.video) {
+    console.log(`[${modelId}] Returning output.video:`, output.video)
     return output.video
   }
   if (output && output.url) {
+    console.log(`[${modelId}] Returning output.url:`, output.url)
     return output.url
   }
   
+  console.log(`[${modelId}] Returning raw output:`, output)
   return output
 }
 
