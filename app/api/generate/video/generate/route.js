@@ -59,19 +59,30 @@ export async function POST(request) {
       auth: replicateKey,
     })
 
-    // Smart model selection
-    const hasImage = !!image
+    // Determine which image to use (prefer objectImage, fallback to talkingHead)
+    const imageToUse = objectImage || talkingHeadImage
+    const hasImage = !!imageToUse
+    
+    console.log('[Video Generation] Has image input:', hasImage)
+    console.log('[Video Generation] Image type:', objectImage ? 'object' : talkingHeadImage ? 'talking head' : 'none')
+    
     const models = VIDEO_MODELS[mode] || VIDEO_MODELS.budget
     
     // Try models in priority order
     for (const model of models) {
       // Skip if model doesn't support required input type
-      if (hasImage && model.type === 'text') continue
-      if (!hasImage && model.type === 'image') continue
+      if (hasImage && model.type === 'text') {
+        console.log(`[Video Generation] Skipping ${model.id} - requires image but model is text-only`)
+        continue
+      }
+      if (!hasImage && model.type === 'image') {
+        console.log(`[Video Generation] Skipping ${model.id} - no image but model requires one`)
+        continue
+      }
       
       try {
-        console.log(`[Video Generation] Attempting ${model.id} for ${mode} mode...`)
-        const result = await generateWithModel(replicate, model.id, script, duration, image)
+        console.log(`[Video Generation] Attempting ${model.id} for ${mode} mode with${hasImage ? '' : 'out'} image...`)
+        const result = await generateWithModel(replicate, model.id, script, duration, imageToUse)
         
         return NextResponse.json({
           success: true,
