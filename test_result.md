@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix carousel display bug and implement missing tools (News, List, Photocard, Tutorial generators). Add URL context feature to News and Tutorial generators."
+user_problem_statement: "Implement automatic content saving to library for all tools. Remove manual 'Save to Library' buttons. Content should auto-save after successful generation with tier-based expiration (7 days for free users, 3 months for paid users)."
 
 backend:
   - task: "Text Generation API"
