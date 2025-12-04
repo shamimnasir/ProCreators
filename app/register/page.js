@@ -47,20 +47,20 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#0a0e27] to-[#1a1147] p-4">
-      <Card className="w-full max-w-md border-white/10 bg-[#0a0e27]/50 backdrop-blur-xl">
+      <Card className="w-full max-w-md border-border bg-background/50 backdrop-blur-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <Logo variant="icon" className="h-16 w-16" />
           </div>
-          <CardTitle className="text-2xl text-white">Create an account</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-2xl text-foreground">Create an account</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Start creating amazing content with AI
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">Name</Label>
+              <Label htmlFor="name" className="text-foreground">Name</Label>
               <Input
                 id="name"
                 type="text"
@@ -68,11 +68,11 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-white/5 border-border text-foreground placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -80,11 +80,11 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-white/5 border-border text-foreground placeholder:text-gray-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white">Password</Label>
+              <Label htmlFor="password" className="text-foreground">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -92,15 +92,15 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-white/5 border-border text-foreground placeholder:text-gray-500"
               />
             </div>
-            <Button type="submit" className="w-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white" disabled={loading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-foreground" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-400">
+          <div className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link href="/login" className="text-[#a78bfa] hover:text-[#7c3aed] hover:underline">
               Sign in
