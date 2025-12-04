@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, Video, Globe, Upload, Sparkles, Download, CheckCircle, Image as ImageIconLucide } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
