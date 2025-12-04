@@ -216,6 +216,9 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "REDESIGNED per user request: Changed from AI generation to viral Facebook/Instagram news card style. Now includes: image upload, brand/channel name editor, date field, headline & subheadline text, customizable text and background colors. Uses HTML5 Canvas to composite uploaded images with text overlays. Perfect for viral news posts."
+        - working: "NA"
+          agent: "main"
+          comment: "ENHANCED with advanced features: 1) Logo upload with resizable slider (30-80px), 2) Vertical image fitting to fill full height, 3) 4 image filters (brightness, contrast, saturation, blur), 4) LIVE filter preview - users see color corrections in real-time on uploaded image before generating final card. All filter adjustments show instant preview using CSS filters."
 
   - task: "Tutorial Generator"
     implemented: true
