@@ -13,8 +13,11 @@ export async function POST(request) {
     }
 
     // Use Emergent Universal Key for Claude
+    const isEmergentKey = process.env.EMERGENT_LLM_KEY && process.env.EMERGENT_LLM_KEY.startsWith('sk-emergent')
+    
     const client = new Anthropic({
       apiKey: process.env.EMERGENT_LLM_KEY || process.env.ANTHROPIC_API_KEY,
+      baseURL: isEmergentKey ? 'https://api.emergentmethods.ai/anthropic/v1' : undefined,
     })
 
     const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
