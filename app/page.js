@@ -174,6 +174,7 @@ const pricingTiers = [
 
 export default function Home() {
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
