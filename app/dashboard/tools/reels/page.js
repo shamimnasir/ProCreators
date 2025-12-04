@@ -145,6 +145,9 @@ export default function ReelsPage() {
         })
       }, 1000)
       
+      // Determine which image to use: prioritize talking head if present
+      const imageToUse = talkingHeadPreview || objectImagePreview
+      
       const response = await fetch('/api/generate/video/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,7 +157,9 @@ export default function ReelsPage() {
           duration,
           platform,
           language,
-          image: objectImagePreview || talkingHeadPreview
+          image: imageToUse,
+          hasTalkingHead: !!talkingHeadImage,
+          hasObjectImage: !!objectImage
         })
       })
 
