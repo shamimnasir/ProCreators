@@ -54,9 +54,30 @@ export async function POST(request) {
       )
     }
     
+    // Clean up formatting: Replace asterisks with dashes, remove emojis
+    let cleanedContent = result.content
+    
+    // Replace ** bold markers ** with nothing (just keep the text)
+    cleanedContent = cleanedContent.replace(/\*\*([^*]+)\*\*/g, '$1')
+    
+    // Replace single asterisks used as bullets with dashes
+    cleanedContent = cleanedContent.replace(/^[\s]*\*[\s]+/gm, '- ')
+    cleanedContent = cleanedContent.replace(/\n[\s]*\*[\s]+/g, '\n- ')
+    
+    // Remove any remaining asterisks
+    cleanedContent = cleanedContent.replace(/\*/g, '')
+    
+    // Remove common emojis (basic cleanup)
+    cleanedContent = cleanedContent.replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
+    cleanedContent = cleanedContent.replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc Symbols and Pictographs
+    cleanedContent = cleanedContent.replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport and Map
+    cleanedContent = cleanedContent.replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // Flags
+    cleanedContent = cleanedContent.replace(/[\u{2600}-\u{26FF}]/gu, '')   // Misc symbols
+    cleanedContent = cleanedContent.replace(/[\u{2700}-\u{27BF}]/gu, '')   // Dingbats
+    
     return NextResponse.json({
       success: true,
-      content: result.content,
+      content: cleanedContent,
       sessionId: result.sessionId
     })
   } catch (error) {
