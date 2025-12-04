@@ -1,21 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, Save, Image as ImageIcon, Globe } from 'lucide-react'
+import { Loader2, Download, Save, Upload, Globe } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import Image from 'next/image'
 
 export default function PhotoCardsPage() {
-  const [text, setText] = useState('')
-  const [language, setLanguage] = useState('english')
-  const [style, setStyle] = useState('modern')
-  const [loading, setLoading] = useState(false)
+  const [uploadedImage, setUploadedImage] = useState(null)
+  const [brandName, setBrandName] = useState('বাংলা সংবাদ')
+  const [date, setDate] = useState(new Date().toLocaleDateString('bn-BD'))
+  const [headline, setHeadline] = useState('')
+  const [subheadline, setSubheadline] = useState('')
+  const [language, setLanguage] = useState('bengali')
+  const [textColor, setTextColor] = useState('#ffffff')
+  const [bgColor, setBgColor] = useState('#dc2626')
   const [generatedCard, setGeneratedCard] = useState(null)
+  const canvasRef = useRef(null)
+  const fileInputRef = useRef(null)
   const { toast } = useToast()
 
   const handleGenerate = async () => {
