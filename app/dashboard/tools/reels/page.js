@@ -32,13 +32,6 @@ export default function ReelsPage() {
   
   const objectFileRef = useRef(null)
 
-  // Video editing states
-  const [trimStart, setTrimStart] = useState(0)
-  const [trimEnd, setTrimEnd] = useState(100)
-  const [brightness, setBrightness] = useState(100)
-  const [contrast, setContrast] = useState(100)
-  const [saturation, setSaturation] = useState(100)
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
