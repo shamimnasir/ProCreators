@@ -171,7 +171,7 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     input = {
       prompt: visualPrompt,
       duration: duration,
-      aspect_ratio: '9:16',
+      aspect_ratio: aspectRatio,
     }
     if (inputImage) {
       console.log(`[${modelId}] Using image as reference frame`)
