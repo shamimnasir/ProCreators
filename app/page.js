@@ -217,6 +217,8 @@ export default function Home() {
               <Link href="#features" className="block text-gray-300 hover:text-white transition-colors">Features</Link>
               <Link href="#tools" className="block text-gray-300 hover:text-white transition-colors">Tools</Link>
               <Link href="#pricing" className="block text-gray-300 hover:text-white transition-colors">Pricing</Link>
+              <Link href="/roadmap" className="block text-gray-300 hover:text-white transition-colors">Roadmap</Link>
+              <Link href="/blog" className="block text-gray-300 hover:text-white transition-colors">Blog</Link>
               <Link href="/dashboard" className="block text-gray-300 hover:text-white transition-colors">Dashboard</Link>
               <div className="pt-4 border-t border-white/10 space-y-3">
                 <Link href="/login" className="block">
