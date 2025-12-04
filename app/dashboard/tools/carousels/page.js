@@ -74,6 +74,66 @@ export default function CarouselsToolPage() {
     reader.readAsDataURL(file)
   }
 
+  const handleGenerateContentMap = async () => {
+    // Validation
+    if (!prompt.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a topic",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setLoading(true)
+    setContentMap(null)
+    setShowContentMap(false)
+    
+    try {
+      toast({
+        title: "Creating Content Map...",
+        description: "Analyzing your topic and planning carousel structure..."
+      })
+
+      // Step 1: Generate content map
+      const response = await fetch('/api/generate/carousel/content-map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt,
+          language,
+          slideCount: 5
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      if (data.success && data.contentMap) {
+        setContentMap(data.contentMap)
+        setShowContentMap(true)
+        toast({
+          title: "Content Map Ready!",
+          description: "Review your carousel structure below"
+        })
+      } else {
+        throw new Error(data.error || 'Failed to generate content map')
+      }
+    } catch (error) {
+      console.error('Content map error:', error)
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleGenerate = async () => {
     // Validation
     if (generationMode === 'auto') {
@@ -101,6 +161,7 @@ export default function CarouselsToolPage() {
     setLoading(true)
     setCarouselSlides([])
     setCurrentSlide(0)
+    setShowContentMap(false)
     
     try {
       toast({
