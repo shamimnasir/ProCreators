@@ -66,18 +66,18 @@ Format your response as JSON array:
 Language for text content: ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
 Keep text concise and impactful. Images should be text-free visuals that support the text.`
 
-    console.log('Step 1: Generating carousel sequence...')
-    const sequenceResult = await generateText(
-      `Create a ${slideCount}-slide carousel about: ${prompt}`,
-      carouselSystemPrompt
-    )
+      console.log('Step 1: Generating carousel sequence...')
+      const sequenceResult = await generateText(
+        `Create a ${slideCount}-slide carousel about: ${prompt}`,
+        carouselSystemPrompt
+      )
 
-    if (!sequenceResult.success) {
-      throw new Error('Failed to generate carousel sequence')
-    }
+      if (!sequenceResult.success) {
+        throw new Error('Failed to generate carousel sequence')
+      }
 
-    // Parse the carousel sequence
-    let carouselSequence
+      // Parse the carousel sequence
+      let parsedSequence
     try {
       // Try to extract JSON from the response
       const jsonMatch = sequenceResult.content.match(/\[[\s\S]*\]/)
