@@ -218,6 +218,24 @@ export default function CarouselsToolPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <Label>Generation Mode</Label>
+              <Select value={generationMode} onValueChange={setGenerationMode}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto-Generate (AI creates content)</SelectItem>
+                  <SelectItem value="manual">Manual (You provide text for each slide)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {generationMode === 'auto' 
+                  ? 'AI will create text content for all 5 slides based on your topic'
+                  : 'You define the exact text for each slide, AI generates images'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 Language
