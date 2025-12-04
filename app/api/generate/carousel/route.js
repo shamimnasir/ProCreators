@@ -80,18 +80,26 @@ Keep text concise and impactful. Images should be text-free visuals that support
     for (let i = 0; i < carouselSequence.length; i++) {
       const slide = carouselSequence[i]
       
-      console.log(`Generating image ${i + 1}/${carouselSequence.length}...`)
+      console.log(`Generating image ${i + 1}/${carouselSequence.length} for ${platform} (${width}x${height})...`)
+      
+      // Determine aspect ratio description
+      const aspectRatio = width / height
+      let aspectDesc = 'square'
+      if (aspectRatio > 1.5) aspectDesc = 'wide landscape'
+      else if (aspectRatio > 1.1) aspectDesc = 'landscape'
+      else if (aspectRatio < 0.9) aspectDesc = 'portrait'
+      else if (aspectRatio < 0.7) aspectDesc = 'tall portrait'
       
       // Use Gemini 3 Pro Image Preview - best for Bengali text rendering
-      // Include the exact text to be displayed
-      const textOverlayPrompt = `Create a professional Instagram carousel image. Background: ${slide.imagePrompt}. TEXT TO DISPLAY (render EXACTLY as written): "${slide.text}". Use large, bold typography. Make the text clearly readable with high contrast. Modern social media design.`
+      // Include the exact text to be displayed with size optimization
+      const textOverlayPrompt = `Create a professional ${platform.includes('instagram') ? 'Instagram' : platform.includes('facebook') ? 'Facebook' : 'LinkedIn'} carousel image in ${aspectDesc} ${width}x${height} format. Background: ${slide.imagePrompt}. TEXT TO DISPLAY (render EXACTLY as written): "${slide.text}". Use large, bold typography optimized for ${aspectDesc} format. Make the text clearly readable with high contrast. Modern social media design.`
       
       // Generate image - will use Gemini 3 Pro if Google API key available, otherwise DALL-E 3
       const imageResult = await generateImage(
         textOverlayPrompt,
         'gemini-3-pro-image-preview',
         'standard',
-        '1024x1024'
+        `${width}x${height}`
       )
 
       if (imageResult.success) {
