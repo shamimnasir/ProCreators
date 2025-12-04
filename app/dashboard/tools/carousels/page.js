@@ -208,24 +208,71 @@ export default function CarouselsToolPage() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownloadAllImages = async () => {
     if (carouselSlides.length === 0) return
     
-    const dataStr = JSON.stringify(carouselSlides, null, 2)
-    const blob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `carousel-${Date.now()}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    toast({
+      title: "Downloading...",
+      description: `Preparing ${carouselSlides.length} images for download...`
+    })
+    
+    // Download each slide image
+    for (let i = 0; i < carouselSlides.length; i++) {
+      const slide = carouselSlides[i]
+      await downloadSingleImage(slide.imageUrl, `carousel-slide-${i + 1}-${Date.now()}.png`)
+      // Small delay between downloads
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
     
     toast({
       title: "Downloaded",
-      description: "Carousel data downloaded successfully"
+      description: `All ${carouselSlides.length} images downloaded successfully!`
     })
+  }
+
+  const handleDownloadCurrentImage = async () => {
+    if (carouselSlides.length === 0) return
+    
+    const currentSlideData = carouselSlides[currentSlide]
+    await downloadSingleImage(currentSlideData.imageUrl, `carousel-slide-${currentSlide + 1}-${Date.now()}.png`)
+    
+    toast({
+      title: "Downloaded",
+      description: `Slide ${currentSlide + 1} downloaded successfully!`
+    })
+  }
+
+  const downloadSingleImage = async (imageUrl, filename) => {
+    try {
+      // If it's a base64 data URL, convert directly
+      if (imageUrl.startsWith('data:')) {
+        const link = document.createElement('a')
+        link.href = imageUrl
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } else {
+        // If it's a regular URL, fetch and download
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to download image",
+        variant: "destructive"
+      })
+    }
   }
 
   const nextSlide = () => {
