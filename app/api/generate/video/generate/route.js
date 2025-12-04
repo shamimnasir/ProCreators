@@ -138,86 +138,129 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   // Build input based on model type
   let input = {}
   
+  // Create a concise visual prompt from the script
+  const visualPrompt = inputImage 
+    ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. 9:16 aspect ratio.`
+    : script.substring(0, 500)
+  
+  console.log(`[${modelId}] Using prompt:`, visualPrompt.substring(0, 100))
+  console.log(`[${modelId}] Has input image:`, !!inputImage)
+  
   // Model-specific configurations
   if (modelId.includes('wan-video')) {
-    // Wan models
+    // Wan models - support both text and image input
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       num_frames: Math.min(duration * 8, 80),
     }
-    if (inputImage && isImageModel) {
+    if (inputImage) {
+      console.log(`[${modelId}] Adding reference image for image-to-video`)
       input.image = inputImage
+      input.motion_bucket_id = 127
+      input.cond_aug = 0.02
     }
   } else if (modelId.includes('pixverse')) {
-    // PixVerse models
+    // PixVerse models - excellent for image-to-video
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       duration: duration,
       aspect_ratio: '9:16',
     }
     if (inputImage) {
+      console.log(`[${modelId}] Using image as reference frame`)
       input.image = inputImage
       input.motion_strength = 0.8
+      input.seed = Math.floor(Math.random() * 1000000)
     }
   } else if (modelId.includes('veo')) {
     // Google Veo models
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       duration: duration,
       aspect_ratio: '9:16',
     }
     if (inputImage) {
+      console.log(`[${modelId}] Using reference image`)
       input.image = inputImage
     }
   } else if (modelId.includes('kling')) {
     // Kling models
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       duration: `${duration}`,
       aspect_ratio: '9:16',
     }
     if (inputImage) {
+      console.log(`[${modelId}] Using image as starting frame`)
       input.image = inputImage
+      input.creativity = 0.7
     }
   } else if (modelId.includes('hailuo') || modelId.includes('minimax')) {
     // Minimax/Hailuo models
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
     }
     if (inputImage) {
+      console.log(`[${modelId}] Setting first frame from image`)
       input.first_frame_image = inputImage
     }
   } else if (modelId.includes('luma')) {
     // Luma Ray models
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
     }
     if (inputImage) {
-      input.image = inputImage
+      console.log(`[${modelId}] Using keyframe image`)
+      input.keyframes = {
+        frame0: {
+          type: 'image',
+          url: inputImage
+        }
+      }
     }
   } else if (modelId.includes('sora')) {
     // OpenAI Sora
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       duration: duration,
       aspect_ratio: '9:16',
+    }
+    if (inputImage) {
+      console.log(`[${modelId}] Using reference image`)
+      input.image = inputImage
     }
   } else if (modelId.includes('seedance')) {
     // ByteDance Seedance
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
       duration: `${duration}s`,
       resolution: '1080p',
     }
     if (inputImage) {
+      console.log(`[${modelId}] Adding reference image`)
       input.image = inputImage
+    }
+  } else if (modelId.includes('stable-video')) {
+    // Stable Video Diffusion - image-to-video
+    if (!inputImage) {
+      throw new Error('This model requires an input image')
+    }
+    console.log(`[${modelId}] SVD image-to-video mode`)
+    input = {
+      input_image: inputImage,
+      video_length: '25_frames_with_svd_xt',
+      sizing_strategy: 'maintain_aspect_ratio',
+      frames_per_second: 6,
+      motion_bucket_id: 127,
+      cond_aug: 0.02
     }
   } else {
     // Generic fallback
     input = {
-      prompt: script.substring(0, 500),
+      prompt: visualPrompt,
     }
     if (inputImage) {
+      console.log(`[${modelId}] Adding image (generic)`)
       input.image = inputImage
     }
   }
