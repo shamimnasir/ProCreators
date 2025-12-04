@@ -36,6 +36,7 @@ export async function POST(request) {
 
     const document = {
       id: randomUUID(),
+      userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
       content: content || '',
       videoUrl: videoUrl || null,
       script: script || null,
