@@ -180,6 +180,6 @@ export default function DocsPage() {
           </Card>
         </div>
       </section>
-    </div>
+    </PublicLayout>
   )
 }
