@@ -14,6 +14,14 @@ export default function CarouselsToolPage() {
   const [prompt, setPrompt] = useState('')
   const [language, setLanguage] = useState('english')
   const [platform, setPlatform] = useState('instagram-square')
+  const [generationMode, setGenerationMode] = useState('auto') // 'auto' or 'manual'
+  const [manualSlides, setManualSlides] = useState([
+    { slideNumber: 1, text: '' },
+    { slideNumber: 2, text: '' },
+    { slideNumber: 3, text: '' },
+    { slideNumber: 4, text: '' },
+    { slideNumber: 5, text: '' }
+  ])
   const [loading, setLoading] = useState(false)
   const [carouselSlides, setCarouselSlides] = useState([])
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -28,6 +36,12 @@ export default function CarouselsToolPage() {
     'facebook-square': { width: 1080, height: 1080, name: 'Facebook Square (1:1)' },
     'linkedin-post': { width: 1200, height: 627, name: 'LinkedIn Post (1.91:1)' },
     'linkedin-square': { width: 1104, height: 736, name: 'LinkedIn Square (3:2)' },
+  }
+
+  const updateManualSlide = (index, text) => {
+    const updated = [...manualSlides]
+    updated[index] = { ...updated[index], text }
+    setManualSlides(updated)
   }
 
   const handleGenerate = async () => {
