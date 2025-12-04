@@ -63,12 +63,12 @@ export async function POST(request) {
       auth: replicateKey,
     })
 
-    // Determine which image to use (prefer objectImage, fallback to talkingHead)
-    const imageToUse = objectImage || talkingHeadImage
+    // Determine which image to use
+    const imageToUse = image
     const hasImage = !!imageToUse
     
     console.log('[Video Generation] Has image input:', hasImage)
-    console.log('[Video Generation] Image type:', objectImage ? 'object' : talkingHeadImage ? 'talking head' : 'none')
+    console.log('[Video Generation] Image type:', image ? 'provided' : 'none')
     
     const models = VIDEO_MODELS[mode] || VIDEO_MODELS.budget
     
