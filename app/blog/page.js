@@ -1,9 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Calendar, User, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Calendar, User, ArrowRight } from 'lucide-react'
+import { PublicLayout } from '@/components/shared/PublicLayout'
 
 export default function BlogPage() {
   const blogPosts = [
