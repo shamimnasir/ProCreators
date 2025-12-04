@@ -72,16 +72,10 @@ export default function BlogPage() {
   const categories = ['All', 'Content Strategy', 'AI Technology', 'Tutorials', 'Design', 'Video']
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-[#0a0e27]/80 backdrop-blur-xl">
-        <div className="container mx-auto px-6 py-6">
-          <Link href="/">
-            <Button variant="ghost" className="text-white mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
+    <PublicLayout>
+      {/* Header Section */}
+      <section className="border-b border-white/10 bg-[#0a0e27]/80 backdrop-blur-xl">
+        <div className="container mx-auto px-6 py-12">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
             Blog & Resources
           </h1>
@@ -89,7 +83,7 @@ export default function BlogPage() {
             Tips, tutorials, and insights to help you master content creation with AI.
           </p>
         </div>
-      </header>
+      </section>
 
       {/* Categories */}
       <section className="py-8 border-b border-white/10">
