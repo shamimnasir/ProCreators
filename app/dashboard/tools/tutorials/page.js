@@ -88,10 +88,47 @@ export default function TutorialsPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedTutorial(data.content)
-        toast({
-          title: "Success",
-          description: `Tutorial generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
-        })
+        
+        // Auto-save to library
+        try {
+          const saveResponse = await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: data.content,
+              type: 'tutorial',
+              title: `Tutorial: ${topic.substring(0, 50)}`,
+              description: data.content.substring(0, 100),
+              metadata: {
+                topic,
+                level,
+                language,
+                contextUrl
+              }
+            })
+          })
+          
+          const saveData = await saveResponse.json()
+          
+          if (saveData.success) {
+            toast({
+              title: "Success",
+              description: `Tutorial generated and saved to library!`
+            })
+          } else {
+            toast({
+              title: "Generated",
+              description: `Tutorial generated but couldn't save to library`,
+              variant: "destructive"
+            })
+          }
+        } catch (saveError) {
+          toast({
+            title: "Generated",
+            description: `Tutorial generated but couldn't save to library`,
+            variant: "destructive"
+          })
+        }
       } else {
         throw new Error(data.error || 'Failed to generate')
       }
