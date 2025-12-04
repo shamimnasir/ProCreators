@@ -172,15 +172,14 @@ export default function QuotesPage() {
                 <div className="rounded-lg border bg-muted/50 p-6">
                   <p className="text-lg italic text-center">{generatedQuote}</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button className="flex-1" onClick={handleSave}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    ✓ Automatically saved to Library
+                  </p>
                 </div>
               </div>
             ) : (
