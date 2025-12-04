@@ -125,6 +125,13 @@ export default function CarouselsToolPage() {
         // Filter out empty slides in manual mode
         requestBody.manualSlides = manualSlides.filter(slide => slide.text.trim())
       }
+
+      // Add logo data if uploaded
+      if (uploadedLogo) {
+        requestBody.logo = uploadedLogo
+        requestBody.logoSize = logoSize
+        requestBody.logoPosition = logoPosition
+      }
       
       const response = await fetch('/api/generate/carousel', {
         method: 'POST',
