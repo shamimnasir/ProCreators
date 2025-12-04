@@ -219,6 +219,9 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "ENHANCED with advanced features: 1) Logo upload with resizable slider (30-80px), 2) Vertical image fitting to fill full height, 3) 4 image filters (brightness, contrast, saturation, blur), 4) LIVE filter preview - users see color corrections in real-time on uploaded image before generating final card. All filter adjustments show instant preview using CSS filters."
+        - working: "NA"
+          agent: "main"
+          comment: "AUTO-SAVE IMPLEMENTED: Removed manual 'Save to Library' button. Content now automatically saves to library after successful generation in the drawTextOverlay function. Made function async to handle save API call. User sees single toast notification when card is generated and saved."
 
   - task: "Tutorial Generator"
     implemented: true
@@ -234,6 +237,21 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "IMPLEMENTED: Full Tutorial generator with URL context feature, difficulty levels (beginner, intermediate, advanced), language support, and save/download functionality."
+        - working: "NA"
+          agent: "main"
+          comment: "AUTO-SAVE IMPLEMENTED: Removed manual 'Save to Library' button and handleSave function. Content now automatically saves to library after successful text generation in handleGenerate. User sees single toast notification when tutorial is generated and saved."
+  
+  - task: "Library Save API with Expiration"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/library/save/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "API endpoint handles auto-save with tier-based expiration. Free users: 7 days, Paid users: 3 months. Currently using hardcoded tier (free/paid) since auth not implemented yet. Saves all content types with metadata and calculated expiresAt timestamp."
 
 metadata:
   created_by: "main_agent"
