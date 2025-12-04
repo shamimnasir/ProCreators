@@ -470,21 +470,32 @@ export default function ReelsPage() {
               Generate Video
             </Button>
 
-            {videoData && (
-              <Card className="bg-blue-500/10 border-blue-500/20">
+            {loading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Generating video...</span>
+                  <span className="font-medium">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  This may take 1-3 minutes depending on video complexity
+                </p>
+              </div>
+            )}
+
+            {videoData && !loading && (
+              <Card className={videoData.videoUrl ? "bg-green-500/10 border-green-500/20" : "bg-blue-500/10 border-blue-500/20"}>
                 <CardContent className="pt-4">
-                  <p className="text-sm font-medium mb-2">{videoData.message}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    {videoData.videoUrl && <CheckCircle className="h-5 w-5 text-green-500" />}
+                    <p className="text-sm font-medium">{videoData.message}</p>
+                  </div>
                   <p className="text-xs text-muted-foreground">Job ID: {videoData.jobId}</p>
-                  <p className="text-xs text-muted-foreground">Estimated: {videoData.estimatedTime}</p>
+                  <p className="text-xs text-muted-foreground">Mode: {videoData.provider}</p>
                   {videoData.note && (
                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
                       ℹ️ {videoData.note}
                     </p>
-                  )}
-                  {videoData.videoUrl && (
-                    <div className="mt-3">
-                      <video src={videoData.videoUrl} controls className="w-full rounded-lg" />
-                    </div>
                   )}
                 </CardContent>
               </Card>
