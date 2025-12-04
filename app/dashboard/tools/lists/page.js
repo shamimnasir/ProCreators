@@ -51,6 +51,25 @@ export default function ListsPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedList(data.content)
+        
+        // Auto-save to library
+        try {
+          await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: data.content,
+              type: 'text',
+              title: `List: ${topic.substring(0, 50)}`,
+              description: data.content.substring(0, 100),
+              metadata: { topic, listType, language, contentType: 'list' }
+            })
+          })
+          console.log('List auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save:', saveError)
+        }
+        
         toast({
           title: "Success",
           description: `List generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
