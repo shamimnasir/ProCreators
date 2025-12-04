@@ -336,8 +336,86 @@ export default function Home() {
         </div>
       </section>
 
+      {/* All Tools Section */}
+      <section id="tools" className="py-20 md:py-32 relative">
+        <div className="container px-6 relative z-10">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                22 Powerful Tools. Endless Possibilities.
+              </h2>
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                Everything you need to create, automate, and scale your content across every platform
+              </p>
+            </div>
+
+            {/* Tool Categories */}
+            <div className="flex flex-wrap justify-center gap-3 mb-12">
+              <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">All Tools (22)</Button>
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">Video & Audio (6)</Button>
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">Image & Design (6)</Button>
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">Text Content (6)</Button>
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">Digital Products (2)</Button>
+            </div>
+
+            {/* Tools Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
+              {[
+                { name: 'Auto Subtitles & Captions', desc: 'Add AI-powered subtitles to any video', icon: MessageSquare, color: 'from-cyan-500 to-blue-500' },
+                { name: 'Script-to-Ad Generator', desc: 'Generate complete ads with script & voiceover', icon: Film, color: 'from-pink-500 to-rose-500' },
+                { name: 'Reels & Short Videos', desc: 'Create viral reels with AI scenes & voiceover', icon: Video, color: 'from-orange-500 to-red-500' },
+                { name: 'Talking Head Videos', desc: 'AI avatars that speak your script', icon: Users, color: 'from-green-500 to-emerald-500' },
+                { name: 'Video Editor', desc: 'Trim, merge, and enhance videos', icon: Film, color: 'from-yellow-500 to-orange-500' },
+                { name: 'Voice Clone', desc: 'Clone any voice for unlimited TTS', icon: Mic, color: 'from-purple-500 to-pink-500' },
+                { name: 'AI Thumbnail Maker', desc: 'Platform-optimized thumbnails with AI', icon: ImageIcon, color: 'from-pink-500 to-purple-500' },
+                { name: 'Photo Cards', desc: 'Beautiful social media cards', icon: ImageIcon, color: 'from-purple-500 to-indigo-500' },
+                { name: 'Learning Cards', desc: 'Educational flashcards & study materials', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
+                { name: 'Carousels', desc: 'Multi-slide social media carousels', icon: ImageIcon, color: 'from-cyan-500 to-teal-500' },
+                { name: 'Image Editor', desc: 'AI-powered image editing & enhancement', icon: ImageIcon, color: 'from-green-500 to-lime-500' },
+                { name: 'Slides Maker', desc: 'Full presentation decks in minutes', icon: Presentation, color: 'from-orange-500 to-amber-500' },
+                { name: 'Quotes Generator', desc: 'Inspiring quotes for social media', icon: Quote, color: 'from-purple-500 to-violet-500' },
+                { name: 'Thread Creator', desc: 'Engaging Twitter/X threads', icon: MessageSquare, color: 'from-blue-500 to-indigo-500' },
+                { name: 'List Maker', desc: 'Comprehensive lists & listicles', icon: FileText, color: 'from-cyan-500 to-sky-500' },
+                { name: 'News Articles', desc: 'Professional news-style content', icon: FileText, color: 'from-red-500 to-pink-500' },
+                { name: 'Long-Form Articles', desc: '1500+ word in-depth content', icon: FileText, color: 'from-amber-500 to-yellow-500' },
+                { name: 'Tutorials', desc: 'Step-by-step how-to guides', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
+                { name: 'Ebook Generator', desc: 'Complete ebooks with chapters & cover', icon: BookOpen, color: 'from-indigo-500 to-blue-500' },
+                { name: 'Storybook Maker', desc: "Children's stories with illustrations", icon: BookOpen, color: 'from-pink-500 to-fuchsia-500' },
+              ].map((tool, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: (i % 8) * 0.05 }}
+                  viewport={{ once: true }}
+                  className="group relative rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
+                  onClick={() => router.push('/dashboard')}
+                >
+                  <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                    <tool.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-white">{tool.name}</h3>
+                  <p className="text-sm text-gray-400">{tool.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="text-center">
+              <Button 
+                size="lg"
+                onClick={() => router.push('/dashboard')}
+                className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-white font-bold"
+              >
+                Access All 22 Tools Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section id="features" className="py-20 md:py-32 relative">
+      <section id="features" className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] to-[#1a1147]">
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
