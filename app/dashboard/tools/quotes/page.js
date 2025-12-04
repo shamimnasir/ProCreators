@@ -33,6 +33,25 @@ export default function QuotesPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedQuote(data.content)
+        
+        // Auto-save to library
+        try {
+          await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: data.content,
+              type: 'text',
+              title: `Quote: ${topic.substring(0, 50)}`,
+              description: data.content.substring(0, 100),
+              metadata: { topic, language, contentType: 'quote' }
+            })
+          })
+          console.log('Quote auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save:', saveError)
+        }
+        
         toast({ title: "Success", description: `Quote generated in ${language === 'bengali' ? 'Bengali' : 'English'}!` })
       }
     } catch (error) {
