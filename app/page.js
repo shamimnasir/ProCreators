@@ -25,10 +25,13 @@ import {
   Rocket,
   Star,
   BarChart3,
-  FileText
+  FileText,
+  Moon,
+  Sun
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { Logo } from '@/components/ui/Logo'
 import { FeatureIcon } from '@/components/ui/FeatureIcon'
 
