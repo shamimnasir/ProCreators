@@ -586,6 +586,53 @@ export default function ReelsPage() {
             </div>
 
             <div className="space-y-2">
+              <Label>Target Platform</Label>
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Instagram Reels</div>
+                        <div className="text-xs text-muted-foreground">9:16 vertical • Max 90s</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="tiktok">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">TikTok</div>
+                        <div className="text-xs text-muted-foreground">9:16 vertical • Max 60s</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="youtube">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">YouTube Shorts</div>
+                        <div className="text-xs text-muted-foreground">9:16 vertical • Max 60s</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="facebook">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      <div>
+                        <div className="font-medium">Facebook Reels</div>
+                        <div className="text-xs text-muted-foreground">9:16 vertical • Max 90s</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label>Video Duration: {duration} seconds</Label>
               <Slider
                 value={[duration]}
