@@ -183,7 +183,7 @@ export default function PhotoCardsPage() {
         drawTextOverlay()
       }
 
-      function drawTextOverlay() {
+      async function drawTextOverlay() {
         // Draw text overlay box at bottom
         const textBoxY = canvas.height - textBoxHeight
         
@@ -231,10 +231,47 @@ export default function PhotoCardsPage() {
         const cardDataUrl = canvas.toDataURL('image/png', 0.95)
         setGeneratedCard(cardDataUrl)
         
-        toast({
-          title: "Success",
-          description: "Photo card generated successfully!"
-        })
+        // Auto-save to library
+        try {
+          const saveResponse = await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: cardDataUrl,
+              type: 'photocard',
+              title: `Photo Card: ${headline.substring(0, 50)}`,
+              description: headline,
+              metadata: {
+                brandName,
+                headline,
+                subheadline,
+                date,
+                language
+              }
+            })
+          })
+          
+          const saveData = await saveResponse.json()
+          
+          if (saveData.success) {
+            toast({
+              title: "Success",
+              description: "Photo card generated and saved to library!"
+            })
+          } else {
+            toast({
+              title: "Generated",
+              description: "Photo card generated but couldn't save to library",
+              variant: "destructive"
+            })
+          }
+        } catch (saveError) {
+          toast({
+            title: "Generated",
+            description: "Photo card generated but couldn't save to library",
+            variant: "destructive"
+          })
+        }
       }
     }
 
