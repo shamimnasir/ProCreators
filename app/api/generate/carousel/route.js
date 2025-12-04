@@ -4,7 +4,7 @@ import { generateImage } from '@/lib/gemini-image'
 
 export async function POST(request) {
   try {
-    const { prompt, language, slideCount = 5, width = 1080, height = 1080, platform = 'instagram-square', generationMode = 'auto', manualSlides = [] } = await request.json()
+    const { prompt, language, slideCount = 5, width = 1080, height = 1080, platform = 'instagram-square', generationMode = 'auto', manualSlides = [], logo = null, logoSize = 80, logoPosition = 'top-right' } = await request.json()
     
     // Validation based on mode
     if (generationMode === 'auto' && !prompt) {
