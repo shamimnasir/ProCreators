@@ -165,9 +165,9 @@ export default function TutorialsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tutorial Maker</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Viral Tutorial Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create step-by-step educational tutorials with AI, optionally using URL context
+          Create viral step-by-step tutorials for YouTube, LinkedIn & blogs in English/Bengali
         </p>
       </div>
 
