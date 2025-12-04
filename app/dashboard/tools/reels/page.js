@@ -127,6 +127,7 @@ export default function ReelsPage() {
 
     setLoading(true)
     setVideoData(null) // Clear previous video
+    setProgress(0)
     
     try {
       // Show progress notification
@@ -134,6 +135,14 @@ export default function ReelsPage() {
         title: "Generating Video",
         description: "This may take 1-3 minutes depending on the mode selected..."
       })
+      
+      // Simulate progress bar
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) return prev
+          return prev + Math.random() * 10
+        })
+      }, 1000)
       
       const response = await fetch('/api/generate/video/generate', {
         method: 'POST',
@@ -148,6 +157,9 @@ export default function ReelsPage() {
         })
       })
 
+      clearInterval(progressInterval)
+      setProgress(100)
+
       const data = await response.json()
       if (data.success) {
         setVideoData(data)
@@ -155,7 +167,7 @@ export default function ReelsPage() {
         if (data.videoUrl) {
           toast({
             title: "Video Ready!",
-            description: "Your video has been generated. Check the preview below."
+            description: "Your video has been generated. Scroll down to preview."
           })
         } else {
           toast({
@@ -167,6 +179,7 @@ export default function ReelsPage() {
         throw new Error(data.error)
       }
     } catch (error) {
+      setProgress(0)
       toast({
         title: "Error",
         description: error.message,
