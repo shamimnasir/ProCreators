@@ -333,8 +333,20 @@ export default function PhotoCardsPage() {
                 {uploadedImage ? 'Change Image' : 'Upload Image'}
               </Button>
               {uploadedImage && (
-                <div className="rounded-lg border overflow-hidden">
-                  <img src={uploadedImage} alt="Preview" className="w-full h-32 object-cover" />
+                <div className="space-y-2">
+                  <div className="rounded-lg border overflow-hidden">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Preview" 
+                      className="w-full h-32 object-cover"
+                      style={{
+                        filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    ↑ Live filter preview
+                  </p>
                 </div>
               )}
             </div>
