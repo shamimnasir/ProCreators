@@ -22,9 +22,13 @@ export default function CarouselsToolPage() {
     { slideNumber: 4, text: '' },
     { slideNumber: 5, text: '' }
   ])
+  const [uploadedLogo, setUploadedLogo] = useState(null)
+  const [logoSize, setLogoSize] = useState(80)
+  const [logoPosition, setLogoPosition] = useState('top-right')
   const [loading, setLoading] = useState(false)
   const [carouselSlides, setCarouselSlides] = useState([])
   const [currentSlide, setCurrentSlide] = useState(0)
+  const logoInputRef = useRef(null)
   const { toast } = useToast()
 
   // Platform size configurations
