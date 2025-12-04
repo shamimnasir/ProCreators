@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement automatic content saving to library for all tools. Remove manual 'Save to Library' buttons. Content should auto-save after successful generation with tier-based expiration (7 days for free users, 3 months for paid users)."
+user_problem_statement: "Fix 3 critical bugs in Reels/Shorts Creator: 1) Video editing not applying (FFmpeg issue), 2) Download button not working, 3) Talking head feature broken. Also ensure all videos are auto-saved to library."
 
 backend:
   - task: "Text Generation API"
