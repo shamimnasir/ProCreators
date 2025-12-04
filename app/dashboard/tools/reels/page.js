@@ -61,7 +61,7 @@ export default function ReelsPage() {
   }
 
   const handleGenerateScript = async () => {
-    if (!topic.trim() && !objectImage && !talkingHeadImage) {
+    if (!topic.trim() && !objectImage) {
       toast({
         title: "Error",
         description: "Please provide at least a topic or upload an image",
@@ -75,9 +75,7 @@ export default function ReelsPage() {
       const formData = {
         topic: topic.trim(),
         hasObjectImage: !!objectImage,
-        hasTalkingHead: !!talkingHeadImage,
         objectImageUrl: objectImagePreview,
-        talkingHeadUrl: talkingHeadPreview,
         language
       }
 
