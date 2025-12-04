@@ -305,11 +305,23 @@ export default function ReelsPage() {
   const handleApplyChanges = async () => {
     if (!videoData?.videoUrl) return
     
+    // Check if any changes were made
+    const hasChanges = trimStart !== 0 || trimEnd !== 100 || 
+                       brightness !== 100 || contrast !== 100 || saturation !== 100
+    
+    if (!hasChanges) {
+      toast({
+        title: "No Changes",
+        description: "Please adjust the sliders to make changes to your video."
+      })
+      return
+    }
+    
     setLoading(true)
     try {
       toast({
         title: "Applying Changes",
-        description: "Processing video with your edits..."
+        description: "Processing video with your edits... This may take 30-60 seconds."
       })
       
       const response = await fetch('/api/generate/video/edit', {
@@ -321,21 +333,24 @@ export default function ReelsPage() {
           trimEnd,
           brightness,
           contrast,
-          saturation
+          saturation,
+          platform
         })
       })
       
       const data = await response.json()
       
       if (data.success) {
+        // Update video with edited version
         setVideoData({
           ...videoData,
-          videoUrl: data.videoUrl
+          videoUrl: data.videoUrl,
+          isEdited: true
         })
         
         toast({
           title: "Changes Applied!",
-          description: "Your video has been edited successfully."
+          description: "Your video has been edited. You can download the edited version now."
         })
       } else {
         throw new Error(data.error)
@@ -343,7 +358,7 @@ export default function ReelsPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to apply changes",
         variant: "destructive"
       })
     } finally {
