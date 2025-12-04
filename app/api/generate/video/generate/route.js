@@ -240,7 +240,8 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   if (output && typeof output.url === 'function') {
     const videoUrl = output.url()
     console.log(`[${modelId}] Got URL from url() method:`, videoUrl)
-    return videoUrl
+    // URL might be a URL object, convert to string
+    return typeof videoUrl === 'string' ? videoUrl : videoUrl.href
   }
   
   // If output has url property
