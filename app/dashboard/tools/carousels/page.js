@@ -13,10 +13,22 @@ import Image from 'next/image'
 export default function CarouselsToolPage() {
   const [prompt, setPrompt] = useState('')
   const [language, setLanguage] = useState('english')
+  const [platform, setPlatform] = useState('instagram-square')
   const [loading, setLoading] = useState(false)
   const [carouselSlides, setCarouselSlides] = useState([])
   const [currentSlide, setCurrentSlide] = useState(0)
   const { toast } = useToast()
+
+  // Platform size configurations
+  const platformSizes = {
+    'instagram-square': { width: 1080, height: 1080, name: 'Instagram Square (1:1)' },
+    'instagram-portrait': { width: 1080, height: 1350, name: 'Instagram Portrait (4:5)' },
+    'instagram-landscape': { width: 1080, height: 566, name: 'Instagram Landscape (1.91:1)' },
+    'facebook-post': { width: 1200, height: 630, name: 'Facebook Post (1.91:1)' },
+    'facebook-square': { width: 1080, height: 1080, name: 'Facebook Square (1:1)' },
+    'linkedin-post': { width: 1200, height: 627, name: 'LinkedIn Post (1.91:1)' },
+    'linkedin-square': { width: 1104, height: 736, name: 'LinkedIn Square (3:2)' },
+  }
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
