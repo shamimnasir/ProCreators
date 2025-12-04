@@ -617,16 +617,10 @@ export default function PhotoCardsPage() {
                   />
                 </div>
 
-                <div className="flex gap-2">
-                  <Button className="flex-1" onClick={handleSave}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save to Library
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                </div>
+                <Button variant="outline" className="w-full" onClick={handleDownload}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
               </>
             ) : (
               <div className="flex h-96 items-center justify-center rounded-lg border border-dashed">
