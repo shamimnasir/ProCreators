@@ -1,56 +1,65 @@
 import { NextResponse } from 'next/server'
-import { getCollection } from '@/lib/mongodb'
-import { v4 as uuidv4 } from 'uuid'
+import { MongoClient } from 'mongodb'
+import { randomUUID } from 'crypto'
+
+const client = new MongoClient(process.env.MONGO_URL)
 
 export async function POST(request) {
   try {
-    const { content, type, metadata, title, description } = await request.json()
-    
-    if (!content || !type) {
+    const { content, type, title, description, metadata, videoUrl, script } = await request.json()
+
+    if (!content && !videoUrl) {
       return NextResponse.json(
-        { success: false, error: 'Content and type are required' },
+        { success: false, error: 'Content or video URL is required' },
         { status: 400 }
       )
     }
 
-    const libraryCollection = await getCollection('library')
-    
-    // Determine expiration based on user tier
-    // TODO: Get actual user tier from auth when implemented
-    const userTier = 'free' // 'free' or 'paid'
-    const now = new Date()
-    const expiresAt = new Date(now)
-    
-    if (userTier === 'free') {
-      // Free users: 7 days retention
-      expiresAt.setDate(expiresAt.getDate() + 7)
-    } else {
-      // Paid users: 3 months retention
-      expiresAt.setMonth(expiresAt.getMonth() + 3)
-    }
-    
-    const item = {
-      id: uuidv4(),
-      content,
-      type,
-      title: title || `${type.charAt(0).toUpperCase() + type.slice(1)} - ${new Date().toLocaleDateString()}`,
-      description: description || content.substring(0, 100),
-      metadata: metadata || {},
-      createdAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-      userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
-      userTier: userTier
+    await client.connect()
+    const db = client.db('procreators')
+    const collection = db.collection('library')
+
+    // Determine content category
+    let category = 'text'
+    if (type === 'video' || type === 'reel' || type === 'short') {
+      category = 'video'
+    } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
+      category = 'image'
     }
 
-    await libraryCollection.insertOne(item)
+    // Calculate expiration based on user tier
+    // TODO: Get actual user tier from session/auth
+    const userTier = 'free' // or 'paid'
+    const expirationDays = userTier === 'free' ? 7 : 90
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + expirationDays)
+
+    const document = {
+      id: randomUUID(),
+      content: content || '',
+      videoUrl: videoUrl || null,
+      script: script || null,
+      type,
+      category,
+      title,
+      description,
+      metadata: metadata || {},
+      userTier,
+      createdAt: new Date(),
+      expiresAt,
+    }
+
+    await collection.insertOne(document)
 
     return NextResponse.json({
       success: true,
-      message: 'Content saved successfully',
-      itemId: item.id
+      message: 'Content saved to library successfully',
+      itemId: document.id,
+      category,
+      expiresAt
     })
   } catch (error) {
-    console.error('Save error:', error)
+    console.error('Library save error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to save content' },
       { status: 500 }
