@@ -21,8 +21,21 @@ export async function POST(request) {
       )
     }
 
-    // Step 1: Generate carousel sequence with text for each slide
-    const carouselSystemPrompt = `You are a social media carousel content expert. Create a ${slideCount}-slide carousel sequence.
+    let carouselSequence = []
+
+    // Step 1: Get carousel text content (either generate or use manual input)
+    if (generationMode === 'manual') {
+      // Manual mode - use user-provided text
+      console.log('Manual mode: Using user-provided slide text')
+      carouselSequence = manualSlides.map((slide, index) => ({
+        slideNumber: slide.slideNumber || (index + 1),
+        text: slide.text,
+        imagePrompt: `modern professional social media background for ${platform.includes('instagram') ? 'Instagram' : platform.includes('facebook') ? 'Facebook' : 'LinkedIn'} carousel slide`
+      }))
+    } else {
+      // Auto mode - generate text with AI
+      console.log('Auto mode: Generating carousel text content with AI')
+      const carouselSystemPrompt = `You are a social media carousel content expert. Create a ${slideCount}-slide carousel sequence.
 
 For the topic provided, create ${slideCount} slides with:
 1. A hook/title slide
