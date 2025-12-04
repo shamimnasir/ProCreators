@@ -5,17 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
-import { Loader2, Video, Play, Globe, Upload, Sparkles, Download, Scissors, Crop, Wand2 } from 'lucide-react'
+import { Loader2, Video, Globe, Upload, Sparkles, Download, Scissors, Wand2, User, Image as ImageIconLucide } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 
 export default function ReelsPage() {
   const [topic, setTopic] = useState('')
-  const [uploadedImage, setUploadedImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
+  
+  // Three separate image states
+  const [objectImage, setObjectImage] = useState(null)
+  const [objectImagePreview, setObjectImagePreview] = useState(null)
+  const [talkingHeadImage, setTalkingHeadImage] = useState(null)
+  const [talkingHeadPreview, setTalkingHeadPreview] = useState(null)
+  
   const [language, setLanguage] = useState('english')
   const [mode, setMode] = useState('budget')
   const [duration, setDuration] = useState(15)
@@ -24,7 +28,9 @@ export default function ReelsPage() {
   const [generatedScript, setGeneratedScript] = useState('')
   const [videoData, setVideoData] = useState(null)
   const { toast } = useToast()
-  const fileInputRef = useRef(null)
+  
+  const objectFileRef = useRef(null)
+  const talkingHeadRef = useRef(null)
 
   // Video editing states
   const [trimStart, setTrimStart] = useState(0)
@@ -33,7 +39,7 @@ export default function ReelsPage() {
   const [contrast, setContrast] = useState(100)
   const [saturation, setSaturation] = useState(100)
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e, type) => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -45,20 +51,25 @@ export default function ReelsPage() {
         return
       }
 
-      setUploadedImage(file)
       const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result)
+        if (type === 'object') {
+          setObjectImage(file)
+          setObjectImagePreview(reader.result)
+        } else if (type === 'talking') {
+          setTalkingHeadImage(file)
+          setTalkingHeadPreview(reader.result)
+        }
       }
       reader.readAsDataURL(file)
     }
   }
 
   const handleGenerateScript = async () => {
-    if (!topic.trim() && !uploadedImage) {
+    if (!topic.trim() && !objectImage && !talkingHeadImage) {
       toast({
         title: "Error",
-        description: "Please enter a topic or upload an image",
+        description: "Please provide at least a topic or upload an image",
         variant: "destructive"
       })
       return
@@ -68,7 +79,10 @@ export default function ReelsPage() {
     try {
       const formData = {
         topic: topic.trim(),
-        imageDescription: uploadedImage ? `Image uploaded for reel generation` : null,
+        hasObjectImage: !!objectImage,
+        hasTalkingHead: !!talkingHeadImage,
+        objectImageUrl: objectImagePreview,
+        talkingHeadUrl: talkingHeadPreview,
         language
       }
 
@@ -83,7 +97,7 @@ export default function ReelsPage() {
         setGeneratedScript(data.script)
         toast({
           title: "Success",
-          description: "Viral script generated! Review and generate video."
+          description: data.scriptType || "Viral script generated!"
         })
       } else {
         throw new Error(data.error)
@@ -118,7 +132,9 @@ export default function ReelsPage() {
           script: generatedScript,
           mode,
           duration,
-          language
+          language,
+          objectImage: objectImagePreview,
+          talkingHeadImage: talkingHeadPreview
         })
       })
 
@@ -147,21 +163,21 @@ export default function ReelsPage() {
     const modes = {
       pro: {
         name: 'Pro Edit / Quality Mode',
-        provider: 'Runway Gen-3',
+        provider: 'Premium Models',
         quality: 'Highest Quality',
         time: '2-3 minutes',
         description: 'Best quality, cinematic results with advanced controls'
       },
       fast: {
         name: 'Fast Social Mode',
-        provider: 'Pika Labs',
+        provider: 'Optimized Models',
         quality: 'High Quality',
         time: '1-2 minutes',
         description: 'Quick generation with great quality for social media'
       },
       budget: {
         name: 'Budget Mode',
-        provider: 'Stability AI (SVD)',
+        provider: 'Cost-Effective Models',
         quality: 'Good Quality',
         time: '40-100 seconds',
         description: 'Cost-effective, good quality for high volume content'
@@ -171,6 +187,14 @@ export default function ReelsPage() {
   }
 
   const currentMode = getModeDetails(mode)
+  
+  // Determine script type for display
+  const getScriptTypeLabel = () => {
+    if (talkingHeadImage && objectImage) return 'Talking Head + Object'
+    if (talkingHeadImage) return 'Talking Head Script'
+    if (objectImage) return 'Object-Based Script'
+    return 'Text-Based Script'
+  }
 
   return (
     <div className="space-y-6">
@@ -186,7 +210,7 @@ export default function ReelsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Step 1: Input & Script Generation</CardTitle>
-            <CardDescription>Provide a topic or upload an image to generate a viral script</CardDescription>
+            <CardDescription>Provide topic and/or upload images to generate a viral script</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -205,53 +229,103 @@ export default function ReelsPage() {
               </Select>
             </div>
 
-            <Tabs defaultValue="topic" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="topic">Topic/Idea</TabsTrigger>
-                <TabsTrigger value="image">Upload Image</TabsTrigger>
-              </TabsList>
+            {/* Topic/Idea Input */}
+            <div className="space-y-2">
+              <Label>Video Topic or Idea</Label>
+              <Textarea
+                placeholder="e.g., 'How to make money with AI in 2025' or '5 productivity hacks for entrepreneurs'"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            {/* Image Uploads - Three Options */}
+            <div className="space-y-4 pt-2 border-t">
+              <Label className="text-base font-semibold">Visual Elements (Optional)</Label>
               
-              <TabsContent value="topic" className="space-y-2 mt-4">
-                <Label>Video Topic or Idea</Label>
-                <Textarea
-                  placeholder="e.g., 'How to make money with AI in 2025' or '5 productivity hacks for entrepreneurs'"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  rows={4}
-                />
-              </TabsContent>
-              
-              <TabsContent value="image" className="space-y-2 mt-4">
-                <Label>Upload Image (Object or Person)</Label>
+              {/* Object/Main Character Image */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <ImageIconLucide className="h-4 w-4" />
+                  <Label className="text-sm">Main Object/Character Image</Label>
+                </div>
                 <div 
-                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                  onClick={() => objectFileRef.current?.click()}
                 >
-                  {imagePreview ? (
+                  {objectImagePreview ? (
                     <div className="space-y-2">
-                      <img src={imagePreview} alt="Preview" className="mx-auto max-h-48 rounded-lg" />
-                      <p className="text-sm text-muted-foreground">Click to change image</p>
+                      <img src={objectImagePreview} alt="Object" className="mx-auto max-h-32 rounded-lg" />
+                      <p className="text-xs text-muted-foreground">Click to change</p>
                     </div>
                   ) : (
-                    <div>
-                      <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">Click to upload image (max 10MB)</p>
+                    <div className="py-2">
+                      <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-1" />
+                      <p className="text-xs text-muted-foreground">Upload main visual element</p>
                     </div>
                   )}
                 </div>
                 <input
-                  ref={fileInputRef}
+                  ref={objectFileRef}
                   type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
+                  onChange={(e) => handleImageUpload(e, 'object')}
                   className="hidden"
                 />
-              </TabsContent>
-            </Tabs>
+              </div>
+
+              {/* Talking Head Image */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <Label className="text-sm">Talking Head (Person) Image</Label>
+                  <Badge variant="secondary" className="text-xs">Optional</Badge>
+                </div>
+                <div 
+                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                  onClick={() => talkingHeadRef.current?.click()}
+                >
+                  {talkingHeadPreview ? (
+                    <div className="space-y-2">
+                      <img src={talkingHeadPreview} alt="Talking Head" className="mx-auto max-h-32 rounded-lg" />
+                      <p className="text-xs text-muted-foreground">Click to change</p>
+                    </div>
+                  ) : (
+                    <div className="py-2">
+                      <User className="mx-auto h-8 w-8 text-muted-foreground mb-1" />
+                      <p className="text-xs text-muted-foreground">Upload person for talking head video</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={talkingHeadRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, 'talking')}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Info Box */}
+              <Card className="bg-muted/50">
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs text-muted-foreground">
+                    💡 <strong>Smart Logic:</strong>
+                  </p>
+                  <ul className="text-xs text-muted-foreground mt-1 space-y-1 ml-4">
+                    <li>• Talking Head only: Person-narrated video</li>
+                    <li>• Object only: Object-focused video</li>
+                    <li>• Both: Talking head explains the object</li>
+                    <li>• None: Text/topic-based video</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
 
             <Button 
               onClick={handleGenerateScript} 
-              disabled={scriptLoading || (!topic.trim() && !uploadedImage)} 
+              disabled={scriptLoading || (!topic.trim() && !objectImage && !talkingHeadImage)} 
               className="w-full"
             >
               {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -261,7 +335,10 @@ export default function ReelsPage() {
 
             {generatedScript && (
               <div className="space-y-2 pt-4 border-t">
-                <Label>Generated Script</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Generated Script</Label>
+                  <Badge variant="outline">{getScriptTypeLabel()}</Badge>
+                </div>
                 <Textarea
                   value={generatedScript}
                   onChange={(e) => setGeneratedScript(e.target.value)}
@@ -293,7 +370,7 @@ export default function ReelsPage() {
                       <Wand2 className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Pro Edit / Quality Mode</div>
-                        <div className="text-xs text-muted-foreground">Runway Gen-3 - Highest Quality</div>
+                        <div className="text-xs text-muted-foreground">Premium Models - Highest Quality</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -302,7 +379,7 @@ export default function ReelsPage() {
                       <Sparkles className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Fast Social Mode</div>
-                        <div className="text-xs text-muted-foreground">Pika Labs - Quick & High Quality</div>
+                        <div className="text-xs text-muted-foreground">Optimized Models - Quick & High Quality</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -311,7 +388,7 @@ export default function ReelsPage() {
                       <Video className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Budget Mode</div>
-                        <div className="text-xs text-muted-foreground">Stability AI - Cost Effective</div>
+                        <div className="text-xs text-muted-foreground">Cost-Effective Models</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -372,6 +449,11 @@ export default function ReelsPage() {
                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
                       ℹ️ {videoData.note}
                     </p>
+                  )}
+                  {videoData.videoUrl && (
+                    <div className="mt-3">
+                      <video src={videoData.videoUrl} controls className="w-full rounded-lg" />
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -474,7 +556,7 @@ export default function ReelsPage() {
                 </div>
 
                 <Button className="w-full">
-                  <Crop className="mr-2 h-4 w-4" />
+                  <Wand2 className="mr-2 h-4 w-4" />
                   Apply Changes
                 </Button>
               </div>
