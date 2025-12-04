@@ -592,15 +592,27 @@ export default function CarouselsToolPage() {
               </div>
             )}
             
-            <Button 
-              onClick={handleGenerate} 
-              disabled={loading || (generationMode === 'auto' && !prompt.trim())}
-              className="w-full"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <ImageIcon className="mr-2 h-4 w-4" />
-              {loading ? 'Generating Slides...' : `Generate Carousel ${generationMode === 'manual' ? 'Images' : '(5 Slides)'}`}
-            </Button>
+            {generationMode === 'auto' ? (
+              <Button 
+                onClick={handleGenerateContentMap} 
+                disabled={loading || !prompt.trim()}
+                className="w-full"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <ImageIcon className="mr-2 h-4 w-4" />
+                {loading ? 'Creating Content Map...' : 'Step 1: Generate Content Map'}
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleGenerate} 
+                disabled={loading}
+                className="w-full"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <ImageIcon className="mr-2 h-4 w-4" />
+                {loading ? 'Generating Images...' : 'Generate Carousel Images'}
+              </Button>
+            )}
             {loading && (
               <p className="text-xs text-muted-foreground text-center">
                 This may take 30-60 seconds...
