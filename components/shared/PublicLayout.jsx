@@ -5,7 +5,7 @@ import { Footer } from './Footer'
 
 export function PublicLayout({ children }) {
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <div className="pt-20">
         {children}
