@@ -35,16 +35,35 @@ export async function POST(request) {
 
     let generationInfo = {}
     
-    switch(mode) {
-      case 'pro':
-        generationInfo = await generateWithRunway(replicate, script, duration)
-        break
-      case 'fast':
-        generationInfo = await generateWithPika(replicate, script, duration)
-        break
-      case 'budget':
-      default:
-        generationInfo = await generateWithStability(replicate, script, duration, image)
+    try {
+      switch(mode) {
+        case 'pro':
+          generationInfo = await generateWithRunway(replicate, script, duration)
+          break
+        case 'fast':
+          generationInfo = await generateWithPika(replicate, script, duration)
+          break
+        case 'budget':
+        default:
+          generationInfo = await generateWithStability(replicate, script, duration, image)
+      }
+    } catch (error) {
+      // If API fails due to insufficient credits or other issues, return demo mode
+      if (error.message.includes('Insufficient credit') || error.message.includes('402')) {
+        return NextResponse.json({
+          success: true,
+          status: 'demo_mode',
+          message: `${getModeInfo(mode).name} - Demo Mode (Requires Replicate Credits)`,
+          estimatedTime: getModeInfo(mode).time,
+          videoUrl: 'https://replicate.delivery/pbxt/KswiwJ0g0C93PvMNcWlIQlAzDViCvLl7bCyHIoSQIHjHuEir/video.mp4',
+          jobId: `${mode}_${Date.now()}`,
+          provider: getModeInfo(mode).provider,
+          note: 'This is a demo video. To generate custom videos, please add credits to your Replicate account at replicate.com/account/billing',
+          mode,
+          language
+        })
+      }
+      throw error
     }
 
     return NextResponse.json({
@@ -61,6 +80,27 @@ export async function POST(request) {
       { status: 500 }
     )
   }
+}
+
+function getModeInfo(mode) {
+  const modes = {
+    pro: {
+      name: 'Pro Edit / Quality Mode',
+      provider: 'Runway Gen-3',
+      time: '2-3 minutes'
+    },
+    fast: {
+      name: 'Fast Social Mode',
+      provider: 'Pika Labs',
+      time: '1-2 minutes'
+    },
+    budget: {
+      name: 'Budget Mode',
+      provider: 'Stability AI SVD',
+      time: '40-100 seconds'
+    }
+  }
+  return modes[mode] || modes.budget
 }
 
 // Runway Gen-3 Integration (Pro Mode) via Replicate
