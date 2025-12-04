@@ -3,6 +3,32 @@ import Replicate from 'replicate'
 
 export const maxDuration = 300 // 5 minutes timeout for video generation
 
+// Smart model selection based on mode
+const VIDEO_MODELS = {
+  budget: [
+    // Best budget options - fast and cost-effective
+    { id: 'wan-video/wan-2.5-t2v-fast', type: 'text', priority: 1, cost: 'lowest' },
+    { id: 'wan-video/wan-2.5-i2v-fast', type: 'image', priority: 1, cost: 'lowest' },
+    { id: 'wavespeedai/wan-2.1-t2v-480p', type: 'text', priority: 2, cost: 'lowest' },
+    { id: 'pixverse/pixverse-v4', type: 'both', priority: 3, cost: 'low' },
+  ],
+  fast: [
+    // Fast quality options - good balance
+    { id: 'pixverse/pixverse-v5', type: 'both', priority: 1, cost: 'medium' },
+    { id: 'bytedance/seedance-1-pro-fast', type: 'both', priority: 2, cost: 'medium' },
+    { id: 'luma/ray-flash-2-720p', type: 'both', priority: 3, cost: 'medium' },
+    { id: 'wan-video/wan-2.5-t2v', type: 'text', priority: 4, cost: 'medium' },
+  ],
+  pro: [
+    // Premium quality options - best results
+    { id: 'google/veo-3.1-fast', type: 'both', priority: 1, cost: 'high' },
+    { id: 'google/veo-3.1', type: 'both', priority: 2, cost: 'high' },
+    { id: 'kwaivgi/kling-v2.5-turbo-pro', type: 'both', priority: 3, cost: 'high' },
+    { id: 'minimax/hailuo-2.3', type: 'both', priority: 4, cost: 'high' },
+    { id: 'openai/sora-2', type: 'both', priority: 5, cost: 'highest' },
+  ]
+}
+
 export async function POST(request) {
   try {
     const { script, mode, duration, language, image } = await request.json()
@@ -33,45 +59,57 @@ export async function POST(request) {
       auth: replicateKey,
     })
 
-    let generationInfo = {}
+    // Smart model selection
+    const hasImage = !!image
+    const models = VIDEO_MODELS[mode] || VIDEO_MODELS.budget
     
-    try {
-      switch(mode) {
-        case 'pro':
-          generationInfo = await generateWithRunway(replicate, script, duration)
-          break
-        case 'fast':
-          generationInfo = await generateWithPika(replicate, script, duration)
-          break
-        case 'budget':
-        default:
-          generationInfo = await generateWithStability(replicate, script, duration, image)
-      }
-    } catch (error) {
-      // If API fails due to insufficient credits or other issues, return demo mode
-      if (error.message.includes('Insufficient credit') || error.message.includes('402')) {
+    // Try models in priority order
+    for (const model of models) {
+      // Skip if model doesn't support required input type
+      if (hasImage && model.type === 'text') continue
+      if (!hasImage && model.type === 'image') continue
+      
+      try {
+        console.log(`[Video Generation] Attempting ${model.id} for ${mode} mode...`)
+        const result = await generateWithModel(replicate, model.id, script, duration, image)
+        
         return NextResponse.json({
           success: true,
-          status: 'demo_mode',
-          message: `${getModeInfo(mode).name} - Demo Mode (Requires Replicate Credits)`,
+          status: 'completed',
+          message: `${getModeInfo(mode).name} - Video generated successfully`,
           estimatedTime: getModeInfo(mode).time,
-          videoUrl: 'https://replicate.delivery/pbxt/KswiwJ0g0C93PvMNcWlIQlAzDViCvLl7bCyHIoSQIHjHuEir/video.mp4',
+          videoUrl: result,
           jobId: `${mode}_${Date.now()}`,
           provider: getModeInfo(mode).provider,
-          note: 'This is a demo video. To generate custom videos, please add credits to your Replicate account at replicate.com/account/billing',
           mode,
           language
         })
+      } catch (error) {
+        console.error(`[Video Generation] ${model.id} failed:`, error.message)
+        
+        // If it's an insufficient credit error and we're on the last model, return demo
+        if (error.message.includes('Insufficient credit') && model === models[models.length - 1]) {
+          return NextResponse.json({
+            success: true,
+            status: 'demo_mode',
+            message: `${getModeInfo(mode).name} - Demo Mode (Requires Replicate Credits)`,
+            estimatedTime: getModeInfo(mode).time,
+            videoUrl: 'https://replicate.delivery/pbxt/KswiwJ0g0C93PvMNcWlIQlAzDViCvLl7bCyHIoSQIHjHuEir/video.mp4',
+            jobId: `${mode}_${Date.now()}`,
+            provider: getModeInfo(mode).provider,
+            note: 'This is a demo video. To generate custom videos, please add credits to your Replicate account at replicate.com/account/billing',
+            mode,
+            language
+          })
+        }
+        
+        // Try next model in the list
+        continue
       }
-      throw error
     }
-
-    return NextResponse.json({
-      success: true,
-      ...generationInfo,
-      mode,
-      language
-    })
+    
+    // If all models failed
+    throw new Error('All video generation models failed. Please try again later.')
 
   } catch (error) {
     console.error('Video generation error:', error)
@@ -82,125 +120,135 @@ export async function POST(request) {
   }
 }
 
+async function generateWithModel(replicate, modelId, script, duration = 5, inputImage = null) {
+  const isTextModel = modelId.includes('t2v') || modelId.includes('text')
+  const isImageModel = modelId.includes('i2v') || modelId.includes('image')
+  
+  // Build input based on model type
+  let input = {}
+  
+  // Model-specific configurations
+  if (modelId.includes('wan-video')) {
+    // Wan models
+    input = {
+      prompt: script.substring(0, 500),
+      num_frames: Math.min(duration * 8, 80),
+    }
+    if (inputImage && isImageModel) {
+      input.image = inputImage
+    }
+  } else if (modelId.includes('pixverse')) {
+    // PixVerse models
+    input = {
+      prompt: script.substring(0, 500),
+      duration: duration,
+      aspect_ratio: '9:16',
+    }
+    if (inputImage) {
+      input.image = inputImage
+      input.motion_strength = 0.8
+    }
+  } else if (modelId.includes('veo')) {
+    // Google Veo models
+    input = {
+      prompt: script.substring(0, 500),
+      duration: duration,
+      aspect_ratio: '9:16',
+    }
+    if (inputImage) {
+      input.image = inputImage
+    }
+  } else if (modelId.includes('kling')) {
+    // Kling models
+    input = {
+      prompt: script.substring(0, 500),
+      duration: `${duration}`,
+      aspect_ratio: '9:16',
+    }
+    if (inputImage) {
+      input.image = inputImage
+    }
+  } else if (modelId.includes('hailuo') || modelId.includes('minimax')) {
+    // Minimax/Hailuo models
+    input = {
+      prompt: script.substring(0, 500),
+    }
+    if (inputImage) {
+      input.first_frame_image = inputImage
+    }
+  } else if (modelId.includes('luma')) {
+    // Luma Ray models
+    input = {
+      prompt: script.substring(0, 500),
+    }
+    if (inputImage) {
+      input.image = inputImage
+    }
+  } else if (modelId.includes('sora')) {
+    // OpenAI Sora
+    input = {
+      prompt: script.substring(0, 500),
+      duration: duration,
+      aspect_ratio: '9:16',
+    }
+  } else if (modelId.includes('seedance')) {
+    // ByteDance Seedance
+    input = {
+      prompt: script.substring(0, 500),
+      duration: `${duration}s`,
+      resolution: '1080p',
+    }
+    if (inputImage) {
+      input.image = inputImage
+    }
+  } else {
+    // Generic fallback
+    input = {
+      prompt: script.substring(0, 500),
+    }
+    if (inputImage) {
+      input.image = inputImage
+    }
+  }
+  
+  console.log(`[${modelId}] Running with input:`, JSON.stringify(input).substring(0, 200))
+  
+  const output = await replicate.run(modelId, { input })
+  
+  // Handle different output formats
+  if (Array.isArray(output)) {
+    return output[0]
+  }
+  if (typeof output === 'string') {
+    return output
+  }
+  if (output && output.video) {
+    return output.video
+  }
+  if (output && output.url) {
+    return output.url
+  }
+  
+  return output
+}
+
 function getModeInfo(mode) {
   const modes = {
     pro: {
       name: 'Pro Edit / Quality Mode',
-      provider: 'Runway Gen-3',
+      provider: 'Premium Models',
       time: '2-3 minutes'
     },
     fast: {
       name: 'Fast Social Mode',
-      provider: 'Pika Labs',
+      provider: 'Optimized Models',
       time: '1-2 minutes'
     },
     budget: {
       name: 'Budget Mode',
-      provider: 'Stability AI SVD',
+      provider: 'Cost-Effective Models',
       time: '40-100 seconds'
     }
   }
   return modes[mode] || modes.budget
-}
-
-// Runway Gen-3 Integration (Pro Mode) via Replicate
-async function generateWithRunway(replicate, script, duration = 5) {
-  try {
-    console.log('[Runway Gen-3] Starting video generation...')
-    
-    // Note: Runway models on Replicate might have different identifiers
-    // Check replicate.com for the latest Runway model
-    const output = await replicate.run(
-      "stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438",
-      {
-        input: {
-          video_length: "25_frames_with_svd_xt",
-          sizing_strategy: "maintain_aspect_ratio",
-          frames_per_second: 6,
-          motion_bucket_id: 127,
-          cond_aug: 0.02,
-          decoding_t: 14,
-          input_image: "https://replicate.delivery/pbxt/JvWMp7pqNuGfjYaMW0wpP3V8lHxTlSBncx8JI6gzRJMUkEir/rocket.png"
-        }
-      }
-    )
-    
-    return {
-      status: 'completed',
-      message: 'Pro Mode (High Quality) - Video generated successfully',
-      estimatedTime: '2-3 minutes',
-      videoUrl: output,
-      jobId: 'runway_' + Date.now(),
-      provider: 'Stability AI (Pro Quality)'
-    }
-  } catch (error) {
-    console.error('[Runway] Error:', error)
-    throw new Error(`Runway generation failed: ${error.message}`)
-  }
-}
-
-// Pika Labs Integration (Fast Mode) via Replicate
-async function generateWithPika(replicate, script, duration = 5) {
-  try {
-    console.log('[Pika Labs] Starting video generation...')
-    
-    // Using a fast text-to-video model on Replicate
-    const output = await replicate.run(
-      "anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351",
-      {
-        input: {
-          prompt: script.substring(0, 500),
-          num_frames: Math.min(duration * 6, 30),
-          num_inference_steps: 20,
-          fps: 6
-        }
-      }
-    )
-    
-    return {
-      status: 'completed',
-      message: 'Fast Mode - Video generated successfully',
-      estimatedTime: '1-2 minutes',
-      videoUrl: output,
-      jobId: 'pika_' + Date.now(),
-      provider: 'ZeroScope (Fast Mode)'
-    }
-  } catch (error) {
-    console.error('[Pika] Error:', error)
-    throw new Error(`Pika generation failed: ${error.message}`)
-  }
-}
-
-// Stability AI Video (Budget Mode) via Replicate
-async function generateWithStability(replicate, script, duration = 5, inputImage = null) {
-  try {
-    console.log('[Stability AI] Starting SVD video generation...')
-    
-    // Use Stable Video Diffusion
-    const output = await replicate.run(
-      "stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438",
-      {
-        input: {
-          input_image: inputImage || "https://replicate.delivery/pbxt/JvWMp7pqNuGfjYaMW0wpP3V8lHxTlSBncx8JI6gzRJMUkEir/rocket.png",
-          video_length: "14_frames_with_svd",
-          sizing_strategy: "maintain_aspect_ratio",
-          frames_per_second: 6,
-          motion_bucket_id: 127,
-          cond_aug: 0.02
-        }
-      }
-    )
-    
-    return {
-      status: 'completed',
-      message: 'Budget Mode (Stability AI SVD) - Video generated successfully',
-      estimatedTime: '40-100 seconds',
-      videoUrl: output,
-      jobId: 'stability_' + Date.now(),
-      provider: 'Stability AI SVD'
-    }
-  } catch (error) {
-    console.error('[Stability AI] Error:', error)
-    throw new Error(`Stability AI generation failed: ${error.message}`)
-  }
 }
