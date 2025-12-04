@@ -156,7 +156,8 @@ export default function PhotoCardsPage() {
           ctx.fillStyle = '#ffffff'
           ctx.font = 'bold 36px Arial, sans-serif'
           ctx.textAlign = 'left'
-          ctx.fillText(brandName, logoPadding + logoSize + 15, 52)
+          const brandNameX = logoPadding + logoSize + 15
+          ctx.fillText(brandName, brandNameX, 52)
           
           // Draw date on right
           ctx.font = '24px Arial, sans-serif'
