@@ -210,6 +210,6 @@ export default function BlogPage() {
           </Card>
         </div>
       </section>
-    </div>
+    </PublicLayout>
   )
 }
