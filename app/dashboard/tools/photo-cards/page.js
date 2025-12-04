@@ -20,6 +20,7 @@ export default function PhotoCardsPage() {
   const [language, setLanguage] = useState('bengali')
   const [textColor, setTextColor] = useState('#ffffff')
   const [bgColor, setBgColor] = useState('#dc2626')
+  const [logoSize, setLogoSize] = useState(50)
   const [brightness, setBrightness] = useState(100)
   const [contrast, setContrast] = useState(100)
   const [saturation, setSaturation] = useState(100)
