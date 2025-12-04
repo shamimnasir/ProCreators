@@ -193,6 +193,66 @@ export default function CarouselsToolPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Platform & Size
+              </Label>
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram-square">
+                    <div className="flex flex-col">
+                      <span>Instagram Square</span>
+                      <span className="text-xs text-muted-foreground">1080x1080 (1:1)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="instagram-portrait">
+                    <div className="flex flex-col">
+                      <span>Instagram Portrait</span>
+                      <span className="text-xs text-muted-foreground">1080x1350 (4:5)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="instagram-landscape">
+                    <div className="flex flex-col">
+                      <span>Instagram Landscape</span>
+                      <span className="text-xs text-muted-foreground">1080x566 (1.91:1)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="facebook-post">
+                    <div className="flex flex-col">
+                      <span>Facebook Post</span>
+                      <span className="text-xs text-muted-foreground">1200x630 (1.91:1)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="facebook-square">
+                    <div className="flex flex-col">
+                      <span>Facebook Square</span>
+                      <span className="text-xs text-muted-foreground">1080x1080 (1:1)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="linkedin-post">
+                    <div className="flex flex-col">
+                      <span>LinkedIn Post</span>
+                      <span className="text-xs text-muted-foreground">1200x627 (1.91:1)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="linkedin-square">
+                    <div className="flex flex-col">
+                      <span>LinkedIn Square</span>
+                      <span className="text-xs text-muted-foreground">1104x736 (3:2)</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Optimized sizes for each platform
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="prompt">Carousel Topic</Label>
               <Textarea
