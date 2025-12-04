@@ -24,6 +24,7 @@ export default function ReelsPage() {
   const [language, setLanguage] = useState('english')
   const [mode, setMode] = useState('budget')
   const [duration, setDuration] = useState(15)
+  const [platform, setPlatform] = useState('instagram') // instagram, tiktok, youtube, facebook
   const [loading, setLoading] = useState(false)
   const [scriptLoading, setScriptLoading] = useState(false)
   const [generatedScript, setGeneratedScript] = useState('')
