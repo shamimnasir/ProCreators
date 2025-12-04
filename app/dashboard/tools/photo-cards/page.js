@@ -24,63 +24,149 @@ export default function PhotoCardsPage() {
   const fileInputRef = useRef(null)
   const { toast } = useToast()
 
-  const handleGenerate = async () => {
-    if (!text.trim()) {
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
-        description: "Please enter text for the card",
+        description: "Please upload an image file",
         variant: "destructive"
       })
       return
     }
 
-    setLoading(true)
-    setGeneratedCard(null)
-    
-    try {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setUploadedImage(event.target.result)
       toast({
-        title: "Generating...",
-        description: "Creating your photo card with text overlay..."
+        title: "Success",
+        description: "Image uploaded successfully!"
       })
+    }
+    reader.readAsDataURL(file)
+  }
 
-      const response = await fetch('/api/generate/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt: `Create a ${style} photo card with the text: "${text}". Language: ${language}. Make it visually appealing and shareable on social media.`,
-          language,
-          style
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      if (data.success && data.imageUrl) {
-        setGeneratedCard({
-          imageUrl: data.imageUrl,
-          text: text
-        })
-        toast({
-          title: "Success",
-          description: "Photo card generated successfully!"
-        })
-      } else {
-        throw new Error(data.error || 'Failed to generate photo card')
-      }
-    } catch (error) {
-      console.error('Generation error:', error)
+  const generateCard = () => {
+    if (!uploadedImage) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Please upload an image first",
         variant: "destructive"
       })
-    } finally {
-      setLoading(false)
+      return
     }
+
+    if (!headline.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a headline",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    const img = new window.Image()
+
+    img.onload = () => {
+      // Set canvas size (Instagram/Facebook post size)
+      canvas.width = 1080
+      canvas.height = 1080
+
+      // Draw background
+      ctx.fillStyle = '#f0f0f0'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // Draw top bar with brand and date
+      ctx.fillStyle = '#1a1a1a'
+      ctx.fillRect(0, 0, canvas.width, 80)
+      
+      // Brand name
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 36px Arial, sans-serif'
+      ctx.fillText(brandName, 30, 52)
+      
+      // Date
+      ctx.font = '24px Arial, sans-serif'
+      ctx.fillText(date, canvas.width - 250, 52)
+
+      // Calculate image dimensions to fit nicely
+      const maxImageHeight = 700
+      const imageAspect = img.width / img.height
+      let drawWidth = canvas.width - 60
+      let drawHeight = drawWidth / imageAspect
+      
+      if (drawHeight > maxImageHeight) {
+        drawHeight = maxImageHeight
+        drawWidth = drawHeight * imageAspect
+      }
+
+      const imageX = (canvas.width - drawWidth) / 2
+      const imageY = 100
+
+      // Draw uploaded image
+      ctx.drawImage(img, imageX, imageY, drawWidth, drawHeight)
+
+      // Draw text overlay box at bottom
+      const textBoxHeight = 200
+      const textBoxY = canvas.height - textBoxHeight
+      
+      // Gradient or solid background
+      const gradient = ctx.createLinearGradient(0, textBoxY, 0, canvas.height)
+      gradient.addColorStop(0, bgColor + 'dd')
+      gradient.addColorStop(1, bgColor)
+      
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, textBoxY, canvas.width, textBoxHeight)
+
+      // Draw headline
+      ctx.fillStyle = textColor
+      ctx.font = 'bold 42px Arial, sans-serif'
+      ctx.textAlign = 'center'
+      
+      // Word wrap for headline
+      const maxWidth = canvas.width - 60
+      const words = headline.split(' ')
+      let line = ''
+      let y = textBoxY + 60
+      
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' '
+        const metrics = ctx.measureText(testLine)
+        
+        if (metrics.width > maxWidth && i > 0) {
+          ctx.fillText(line, canvas.width / 2, y)
+          line = words[i] + ' '
+          y += 50
+        } else {
+          line = testLine
+        }
+      }
+      ctx.fillText(line, canvas.width / 2, y)
+
+      // Draw subheadline if exists
+      if (subheadline) {
+        ctx.font = '28px Arial, sans-serif'
+        y += 50
+        ctx.fillText(subheadline, canvas.width / 2, y)
+      }
+
+      // Convert canvas to data URL
+      const cardDataUrl = canvas.toDataURL('image/png', 0.95)
+      setGeneratedCard(cardDataUrl)
+      
+      toast({
+        title: "Success",
+        description: "Photo card generated successfully!"
+      })
+    }
+
+    img.src = uploadedImage
   }
 
   const handleSave = async () => {
