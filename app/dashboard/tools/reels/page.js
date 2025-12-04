@@ -472,50 +472,12 @@ export default function ReelsPage() {
                 />
               </div>
 
-              {/* Talking Head Image */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <Label className="text-sm">Talking Head (Person) Image</Label>
-                  <Badge variant="secondary" className="text-xs">Optional</Badge>
-                </div>
-                <div 
-                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => talkingHeadRef.current?.click()}
-                >
-                  {talkingHeadPreview ? (
-                    <div className="space-y-2">
-                      <img src={talkingHeadPreview} alt="Talking Head" className="mx-auto max-h-32 rounded-lg" />
-                      <p className="text-xs text-muted-foreground">Click to change</p>
-                    </div>
-                  ) : (
-                    <div className="py-2">
-                      <User className="mx-auto h-8 w-8 text-muted-foreground mb-1" />
-                      <p className="text-xs text-muted-foreground">Upload person for talking head video</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  ref={talkingHeadRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, 'talking')}
-                  className="hidden"
-                />
-              </div>
-
               {/* Info Box */}
               <Card className="bg-muted/50">
                 <CardContent className="pt-4 pb-3">
                   <p className="text-xs text-muted-foreground">
-                    💡 <strong>Smart Logic:</strong>
+                    💡 <strong>Tip:</strong> Upload an image to use image-to-video generation for better quality videos, or leave empty for text-only video generation.
                   </p>
-                  <ul className="text-xs text-muted-foreground mt-1 space-y-1 ml-4">
-                    <li>• Talking Head only: Person-narrated video</li>
-                    <li>• Object only: Object-focused video</li>
-                    <li>• Both: Talking head explains the object</li>
-                    <li>• None: Text/topic-based video</li>
-                  </ul>
                 </CardContent>
               </Card>
             </div>
