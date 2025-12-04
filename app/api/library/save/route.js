@@ -15,6 +15,20 @@ export async function POST(request) {
 
     const libraryCollection = await getCollection('library')
     
+    // Determine expiration based on user tier
+    // TODO: Get actual user tier from auth when implemented
+    const userTier = 'free' // 'free' or 'paid'
+    const now = new Date()
+    const expiresAt = new Date(now)
+    
+    if (userTier === 'free') {
+      // Free users: 7 days retention
+      expiresAt.setDate(expiresAt.getDate() + 7)
+    } else {
+      // Paid users: 3 months retention
+      expiresAt.setMonth(expiresAt.getMonth() + 3)
+    }
+    
     const item = {
       id: uuidv4(),
       content,
@@ -22,8 +36,10 @@ export async function POST(request) {
       title: title || `${type.charAt(0).toUpperCase() + type.slice(1)} - ${new Date().toLocaleDateString()}`,
       description: description || content.substring(0, 100),
       metadata: metadata || {},
-      createdAt: new Date().toISOString(),
-      userId: 'default-user' // TODO: Replace with actual user ID when auth is implemented
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
+      userTier: userTier
     }
 
     await libraryCollection.insertOne(item)
