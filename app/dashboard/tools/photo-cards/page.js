@@ -149,7 +149,6 @@ export default function PhotoCardsPage() {
         const logoImg = new window.Image()
         logoImg.onload = () => {
           // Draw logo on left
-          const logoSize = 50
           const logoPadding = 15
           ctx.drawImage(logoImg, logoPadding, logoPadding, logoSize, logoSize)
           
