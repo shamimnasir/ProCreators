@@ -730,10 +730,10 @@ export default function Home() {
             <div>
               <h3 className="text-white font-semibold mb-4">Resources</h3>
               <ul className="space-y-3">
-                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Help Center</Link></li>
-                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Documentation</Link></li>
+                <li><Link href="/docs" className="text-gray-400 hover:text-white transition-colors text-sm">Help Center</Link></li>
+                <li><Link href="/docs" className="text-gray-400 hover:text-white transition-colors text-sm">Documentation</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Video Tutorials</Link></li>
-                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Blog</Link></li>
+                <li><Link href="/blog" className="text-gray-400 hover:text-white transition-colors text-sm">Blog</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Community</Link></li>
                 <li><Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Status</Link></li>
               </ul>
