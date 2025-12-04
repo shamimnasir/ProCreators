@@ -436,8 +436,91 @@ export default function PhotoCardsPage() {
               />
             </div>
 
+            {/* Image Filters */}
+            <div className="space-y-3 border-t pt-4">
+              <Label className="text-base font-semibold">Image Filters</Label>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="brightness" className="text-sm">Brightness</Label>
+                  <span className="text-xs text-muted-foreground">{brightness}%</span>
+                </div>
+                <Input
+                  id="brightness"
+                  type="range"
+                  min="50"
+                  max="150"
+                  value={brightness}
+                  onChange={(e) => setBrightness(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="contrast" className="text-sm">Contrast</Label>
+                  <span className="text-xs text-muted-foreground">{contrast}%</span>
+                </div>
+                <Input
+                  id="contrast"
+                  type="range"
+                  min="50"
+                  max="150"
+                  value={contrast}
+                  onChange={(e) => setContrast(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="saturation" className="text-sm">Saturation</Label>
+                  <span className="text-xs text-muted-foreground">{saturation}%</span>
+                </div>
+                <Input
+                  id="saturation"
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={saturation}
+                  onChange={(e) => setSaturation(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="blur" className="text-sm">Blur</Label>
+                  <span className="text-xs text-muted-foreground">{blur}px</span>
+                </div>
+                <Input
+                  id="blur"
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={blur}
+                  onChange={(e) => setBlur(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <Button
+                onClick={() => {
+                  setBrightness(100)
+                  setContrast(100)
+                  setSaturation(100)
+                  setBlur(0)
+                }}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                Reset Filters
+              </Button>
+            </div>
+
             {/* Colors */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 border-t pt-4">
               <div className="space-y-2">
                 <Label htmlFor="textColor">Text Color</Label>
                 <div className="flex gap-2">
