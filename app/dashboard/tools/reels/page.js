@@ -484,7 +484,7 @@ export default function ReelsPage() {
 
             <Button 
               onClick={handleGenerateScript} 
-              disabled={scriptLoading || (!topic.trim() && !objectImage && !talkingHeadImage)} 
+              disabled={scriptLoading || (!topic.trim() && !objectImage)} 
               className="w-full"
             >
               {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
