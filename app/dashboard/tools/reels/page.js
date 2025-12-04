@@ -165,10 +165,41 @@ export default function ReelsPage() {
         setVideoData(data)
         
         if (data.videoUrl) {
-          toast({
-            title: "Video Ready!",
-            description: "Your video has been generated. Scroll down to preview."
-          })
+          // Auto-save to library
+          try {
+            const saveResponse = await fetch('/api/library/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                videoUrl: data.videoUrl,
+                script: generatedScript,
+                type: 'video',
+                title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
+                description: generatedScript.substring(0, 150),
+                metadata: {
+                  mode,
+                  duration,
+                  language,
+                  provider: data.provider,
+                  hasObjectImage: !!objectImage,
+                  hasTalkingHead: !!talkingHeadImage
+                }
+              })
+            })
+            
+            const saveData = await saveResponse.json()
+            
+            toast({
+              title: "Video Ready & Saved!",
+              description: saveData.success ? "Video generated and saved to library!" : "Video generated! (Save to library manually)"
+            })
+          } catch (saveError) {
+            console.error('Auto-save failed:', saveError)
+            toast({
+              title: "Video Ready!",
+              description: "Video generated. Scroll down to preview and save."
+            })
+          }
         } else {
           toast({
             title: "Processing",
@@ -180,6 +211,112 @@ export default function ReelsPage() {
       }
     } catch (error) {
       setProgress(0)
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDownload = () => {
+    if (!videoData?.videoUrl) return
+    
+    const a = document.createElement('a')
+    a.href = videoData.videoUrl
+    a.download = `viral-reel-${Date.now()}.mp4`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    
+    toast({
+      title: "Downloading",
+      description: "Your video is being downloaded..."
+    })
+  }
+
+  const handleSaveToLibrary = async () => {
+    if (!videoData?.videoUrl) return
+    
+    try {
+      const response = await fetch('/api/library/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoUrl: videoData.videoUrl,
+          script: generatedScript,
+          type: 'video',
+          title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
+          description: generatedScript.substring(0, 150),
+          metadata: {
+            mode,
+            duration,
+            language,
+            provider: videoData.provider
+          }
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Saved!",
+          description: "Video saved to library successfully!"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleApplyChanges = async () => {
+    if (!videoData?.videoUrl) return
+    
+    setLoading(true)
+    try {
+      toast({
+        title: "Applying Changes",
+        description: "Processing video with your edits..."
+      })
+      
+      const response = await fetch('/api/generate/video/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoUrl: videoData.videoUrl,
+          trimStart,
+          trimEnd,
+          brightness,
+          contrast,
+          saturation
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setVideoData({
+          ...videoData,
+          videoUrl: data.videoUrl
+        })
+        
+        toast({
+          title: "Changes Applied!",
+          description: "Your video has been edited successfully."
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
       toast({
         title: "Error",
         description: error.message,
