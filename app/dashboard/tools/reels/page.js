@@ -154,8 +154,7 @@ export default function ReelsPage() {
           duration,
           platform,
           language,
-          objectImage: objectImagePreview,
-          talkingHeadImage: talkingHeadPreview
+          image: objectImagePreview || talkingHeadPreview
         })
       })
 
