@@ -332,24 +332,30 @@ export default function PhotoCardsPage() {
                 <Upload className="mr-2 h-4 w-4" />
                 {uploadedImage ? 'Change Image' : 'Upload Image'}
               </Button>
-              {uploadedImage && (
-                <div className="space-y-2">
-                  <div className="rounded-lg border overflow-hidden">
-                    <img 
-                      src={uploadedImage} 
-                      alt="Preview" 
-                      className="w-full h-32 object-cover"
-                      style={{
-                        filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center">
-                    ↑ Live filter preview
-                  </p>
-                </div>
-              )}
             </div>
+
+            {/* Live Filter Preview - Large and Prominent */}
+            {uploadedImage && (
+              <div className="space-y-2 border-2 border-primary/20 rounded-lg p-3 bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-primary">Live Filter Preview</Label>
+                  <span className="text-xs text-muted-foreground">Real-time updates</span>
+                </div>
+                <div className="rounded-lg border-2 border-border overflow-hidden bg-black">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Live Preview with Filters" 
+                    className="w-full h-80 object-contain"
+                    style={{
+                      filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  Adjust filters below to see instant changes
+                </p>
+              </div>
+            )}
 
             {/* Language */}
             <div className="space-y-2">
