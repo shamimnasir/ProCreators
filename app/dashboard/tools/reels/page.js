@@ -206,39 +206,50 @@ export default function ReelsPage() {
   }
 
   const handleDownload = async () => {
-    if (!videoData?.videoUrl) return
+    if (!videoData?.videoUrl) {
+      toast({
+        title: "Error",
+        description: "No video available to download",
+        variant: "destructive"
+      })
+      return
+    }
     
     try {
       toast({
-        title: "Preparing Download",
-        description: "Fetching your video..."
+        title: "Downloading...",
+        description: "Your video download will start shortly"
       })
       
-      // Fetch the video as a blob to trigger proper download
-      const response = await fetch(videoData.videoUrl)
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
+      // Create a temporary link and trigger download
+      const link = document.createElement('a')
+      link.href = videoData.videoUrl
+      link.download = `viral-reel-${platform}-${Date.now()}.mp4`
+      link.target = '_blank'
       
-      const a = document.createElement('a')
-      a.style.display = 'none'
-      a.href = url
-      a.download = `viral-reel-${platform}-${Date.now()}.mp4`
-      document.body.appendChild(a)
-      a.click()
-      
-      // Cleanup
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      
-      toast({
-        title: "Download Started",
-        description: "Your video is downloading..."
-      })
+      // For cross-origin URLs, open in new tab
+      if (videoData.videoUrl.startsWith('http') && !videoData.videoUrl.startsWith(window.location.origin)) {
+        window.open(videoData.videoUrl, '_blank')
+        toast({
+          title: "Opening Video",
+          description: "Right-click the video and select 'Save video as...' to download"
+        })
+      } else {
+        // For same-origin or data URLs, trigger direct download
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        toast({
+          title: "Download Started",
+          description: "Your video is downloading..."
+        })
+      }
     } catch (error) {
       console.error('Download error:', error)
       toast({
-        title: "Download Failed",
-        description: "Please try again or right-click the video to save.",
+        title: "Download Error",
+        description: "Please right-click the video and select 'Save video as...'",
         variant: "destructive"
       })
     }
