@@ -149,6 +149,35 @@ export default function CarouselsToolPage() {
         console.log('Received slides:', data.slides.length)
         setCarouselSlides(data.slides)
         setCurrentSlide(0)
+        
+        // Auto-save to library
+        try {
+          const saveResponse = await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: JSON.stringify(data.slides),
+              type: 'carousel',
+              title: `Carousel: ${generationMode === 'auto' ? prompt.substring(0, 50) : 'Custom carousel'}`,
+              description: `${data.slides.length} slides for ${platform}`,
+              metadata: {
+                prompt: generationMode === 'auto' ? prompt : undefined,
+                slideCount: data.slides.length,
+                platform,
+                language,
+                generationMode,
+                hasLogo: !!uploadedLogo
+              }
+            })
+          })
+          
+          if (saveResponse.ok) {
+            console.log('Carousel auto-saved to library')
+          }
+        } catch (saveError) {
+          console.error('Failed to auto-save:', saveError)
+        }
+        
         toast({
           title: "Success",
           description: `Generated ${data.slides.length} carousel slides successfully!`
