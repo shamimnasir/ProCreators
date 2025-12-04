@@ -152,11 +152,14 @@ export default function ReelsPage() {
         if (data.videoUrl) {
           // Auto-save to library
           try {
+            // Ensure videoUrl is a string
+            const videoUrlString = typeof data.videoUrl === 'string' ? data.videoUrl : String(data.videoUrl)
+            
             const saveResponse = await fetch('/api/library/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                videoUrl: data.videoUrl,
+                videoUrl: videoUrlString,
                 script: generatedScript,
                 type: 'video',
                 title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
