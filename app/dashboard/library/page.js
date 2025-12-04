@@ -92,8 +92,8 @@ export default function LibraryPage() {
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="text">Text</TabsTrigger>
-          <TabsTrigger value="images">Images</TabsTrigger>
-          <TabsTrigger value="videos">Videos</TabsTrigger>
+          <TabsTrigger value="image">Images</TabsTrigger>
+          <TabsTrigger value="video">Videos</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-6">
           {items.length === 0 ? (
