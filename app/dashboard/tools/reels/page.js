@@ -152,6 +152,7 @@ export default function ReelsPage() {
           script: generatedScript,
           mode,
           duration,
+          platform,
           language,
           objectImage: objectImagePreview,
           talkingHeadImage: talkingHeadPreview
