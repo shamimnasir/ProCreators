@@ -467,7 +467,7 @@ export default function ReelsPage() {
                   ref={objectFileRef}
                   type="file"
                   accept="image/*"
-                  onChange={(e) => handleImageUpload(e, 'object')}
+                  onChange={handleImageUpload}
                   className="hidden"
                 />
               </div>
