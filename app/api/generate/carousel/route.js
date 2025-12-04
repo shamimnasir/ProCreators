@@ -4,7 +4,7 @@ import { generateImage } from '@/lib/gemini-image'
 
 export async function POST(request) {
   try {
-    const { prompt, language, slideCount = 5 } = await request.json()
+    const { prompt, language, slideCount = 5, width = 1080, height = 1080, platform = 'instagram-square' } = await request.json()
     
     if (!prompt) {
       return NextResponse.json(
