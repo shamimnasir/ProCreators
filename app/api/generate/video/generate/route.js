@@ -215,28 +215,47 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   
   const output = await replicate.run(modelId, { input })
   
-  console.log(`[${modelId}] Output type:`, typeof output)
-  console.log(`[${modelId}] Output:`, JSON.stringify(output).substring(0, 300))
+  console.log(`[${modelId}] Raw output:`, output)
+  console.log(`[${modelId}] Output keys:`, output ? Object.keys(output) : 'null')
   
+  // Replicate returns a FileOutput object with url() method
   // Handle different output formats
-  if (Array.isArray(output)) {
-    console.log(`[${modelId}] Returning array[0]:`, output[0])
-    return output[0]
+  if (!output) {
+    throw new Error('No output received from model')
   }
+  
+  // If output is a string URL
   if (typeof output === 'string') {
-    console.log(`[${modelId}] Returning string:`, output)
+    console.log(`[${modelId}] Direct URL:`, output)
     return output
   }
-  if (output && output.video) {
-    console.log(`[${modelId}] Returning output.video:`, output.video)
-    return output.video
+  
+  // If output is an array
+  if (Array.isArray(output)) {
+    console.log(`[${modelId}] Array output, taking first element`)
+    return output[0]
   }
-  if (output && output.url) {
-    console.log(`[${modelId}] Returning output.url:`, output.url)
+  
+  // If output has url() method (Replicate FileOutput)
+  if (output && typeof output.url === 'function') {
+    const videoUrl = output.url()
+    console.log(`[${modelId}] Got URL from url() method:`, videoUrl)
+    return videoUrl
+  }
+  
+  // If output has url property
+  if (output && typeof output.url === 'string') {
+    console.log(`[${modelId}] URL from property:`, output.url)
     return output.url
   }
   
-  console.log(`[${modelId}] Returning raw output:`, output)
+  // If output has video property
+  if (output && output.video) {
+    console.log(`[${modelId}] URL from video property:`, output.video)
+    return output.video
+  }
+  
+  console.warn(`[${modelId}] Unexpected output format, returning as-is`)
   return output
 }
 
