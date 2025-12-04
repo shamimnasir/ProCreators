@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, BookOpen, Video, MessageSquare, Settings, Zap, Image, FileText, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Search, BookOpen, Video, MessageSquare, Settings, Zap, Image, FileText, ChevronRight } from 'lucide-react'
+import { PublicLayout } from '@/components/shared/PublicLayout'
 
 export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState('')
