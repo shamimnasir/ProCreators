@@ -355,6 +355,42 @@ export default function PhotoCardsPage() {
               </Select>
             </div>
 
+            {/* Logo Upload */}
+            <div className="space-y-2">
+              <Label>Brand Logo (Optional)</Label>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => logoInputRef.current?.click()}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {uploadedLogo ? 'Change Logo' : 'Upload Logo'}
+                </Button>
+                {uploadedLogo && (
+                  <Button
+                    onClick={() => setUploadedLogo(null)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              {uploadedLogo && (
+                <div className="rounded-lg border overflow-hidden bg-white p-2">
+                  <img src={uploadedLogo} alt="Logo" className="h-12 w-auto mx-auto" />
+                </div>
+              )}
+            </div>
+
             {/* Brand Name */}
             <div className="space-y-2">
               <Label htmlFor="brand">Brand/Channel Name</Label>
