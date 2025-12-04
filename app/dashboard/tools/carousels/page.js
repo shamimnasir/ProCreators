@@ -310,24 +310,49 @@ export default function CarouselsToolPage() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Carousel Topic</Label>
-              <Textarea
-                id="prompt"
-                placeholder="E.g., '5 tips for productivity', 'How to start a business', 'Benefits of meditation'..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                rows={6}
-              />
-            </div>
+            {generationMode === 'auto' ? (
+              <div className="space-y-2">
+                <Label htmlFor="prompt">Carousel Topic</Label>
+                <Textarea
+                  id="prompt"
+                  placeholder="E.g., '5 tips for productivity', 'How to start a business', 'Benefits of meditation'..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={6}
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label>Slide Content (Enter text for each slide)</Label>
+                {manualSlides.map((slide, index) => (
+                  <div key={index} className="space-y-1">
+                    <Label htmlFor={`slide-${index}`} className="text-xs text-muted-foreground">
+                      Slide {index + 1}
+                    </Label>
+                    <Textarea
+                      id={`slide-${index}`}
+                      placeholder={`Text for slide ${index + 1}...`}
+                      value={slide.text}
+                      onChange={(e) => updateManualSlide(index, e.target.value)}
+                      rows={2}
+                      className="resize-none"
+                    />
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">
+                  Leave slides empty if you want fewer than 5 slides
+                </p>
+              </div>
+            )}
+            
             <Button 
               onClick={handleGenerate} 
-              disabled={loading || !prompt.trim()}
+              disabled={loading || (generationMode === 'auto' && !prompt.trim())}
               className="w-full"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <ImageIcon className="mr-2 h-4 w-4" />
-              {loading ? 'Generating 5 Slides...' : 'Generate Carousel (5 Slides)'}
+              {loading ? 'Generating Slides...' : `Generate Carousel ${generationMode === 'manual' ? 'Images' : '(5 Slides)'}`}
             </Button>
             {loading && (
               <p className="text-xs text-muted-foreground text-center">
