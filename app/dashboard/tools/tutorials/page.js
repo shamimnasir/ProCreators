@@ -143,46 +143,6 @@ export default function TutorialsPage() {
     }
   }
 
-  const handleSave = async () => {
-    if (!generatedTutorial) return
-    
-    try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: generatedTutorial,
-          type: 'tutorial',
-          title: `Tutorial: ${topic.substring(0, 50)}`,
-          description: generatedTutorial.substring(0, 100),
-          metadata: {
-            topic,
-            level,
-            language,
-            contextUrl
-          }
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        toast({
-          title: "Saved",
-          description: "Tutorial saved to library successfully!"
-        })
-      } else {
-        throw new Error(data.error)
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save tutorial",
-        variant: "destructive"
-      })
-    }
-  }
-
   const handleDownload = () => {
     if (!generatedTutorial) return
     
