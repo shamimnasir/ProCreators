@@ -173,8 +173,7 @@ export default function ReelsPage() {
                   duration,
                   language,
                   provider: data.provider,
-                  hasObjectImage: !!objectImage,
-                  hasTalkingHead: !!talkingHeadImage
+                  hasObjectImage: !!objectImage
                 }
               })
             })
