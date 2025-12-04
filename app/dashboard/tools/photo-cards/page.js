@@ -177,14 +177,16 @@ export default function PhotoCardsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: JSON.stringify(generatedCard),
+          content: generatedCard,
           type: 'photocard',
-          title: `Photo Card: ${text.substring(0, 50)}`,
-          description: text.substring(0, 100),
+          title: `Photo Card: ${headline.substring(0, 50)}`,
+          description: headline,
           metadata: {
-            text,
-            language,
-            style
+            brandName,
+            headline,
+            subheadline,
+            date,
+            language
           }
         })
       })
@@ -211,9 +213,8 @@ export default function PhotoCardsPage() {
   const handleDownload = () => {
     if (!generatedCard) return
     
-    // Download the image
     const link = document.createElement('a')
-    link.href = generatedCard.imageUrl
+    link.href = generatedCard
     link.download = `photocard-${Date.now()}.png`
     document.body.appendChild(link)
     link.click()
