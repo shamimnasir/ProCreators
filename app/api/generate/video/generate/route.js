@@ -24,7 +24,7 @@ const VIDEO_MODELS = {
 
 export async function POST(request) {
   try {
-    const { script, mode, duration, language, image } = await request.json()
+    const { script, mode, duration, language, platform, image } = await request.json()
 
     if (!script) {
       return NextResponse.json(
@@ -32,6 +32,17 @@ export async function POST(request) {
         { status: 400 }
       )
     }
+
+    // Platform-specific configurations
+    const platformConfig = {
+      instagram: { aspectRatio: '9:16', orientation: 'portrait', maxDuration: 90, name: 'Instagram Reels' },
+      tiktok: { aspectRatio: '9:16', orientation: 'portrait', maxDuration: 60, name: 'TikTok' },
+      youtube: { aspectRatio: '9:16', orientation: 'portrait', maxDuration: 60, name: 'YouTube Shorts' },
+      facebook: { aspectRatio: '9:16', orientation: 'portrait', maxDuration: 90, name: 'Facebook Reels' }
+    }
+    
+    const targetPlatform = platformConfig[platform] || platformConfig.instagram
+    console.log('[Video Generation] Target platform:', targetPlatform.name, '| Aspect:', targetPlatform.aspectRatio)
 
     // Check if API keys are available
     const replicateKey = process.env.REPLICATE_API_TOKEN
