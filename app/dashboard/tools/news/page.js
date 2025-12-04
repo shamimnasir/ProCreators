@@ -189,7 +189,7 @@ export default function NewsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Viral News Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create engaging news articles with AI, optionally using URL context
+          Create viral news articles for Facebook, LinkedIn & news platforms in English/Bengali
         </p>
       </div>
 
