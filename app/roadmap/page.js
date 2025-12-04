@@ -1,9 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { CheckCircle2, Clock, Sparkles, ArrowLeft } from 'lucide-react'
+import { CheckCircle2, Clock, Sparkles } from 'lucide-react'
+import { PublicLayout } from '@/components/shared/PublicLayout'
 
 export default function RoadmapPage() {
   const roadmapItems = [
