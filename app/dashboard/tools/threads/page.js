@@ -141,9 +141,9 @@ export default function ThreadsToolPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Thread Generator</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Viral Thread Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create viral Twitter/X threads with AI in Bengali or English
+          Create viral Facebook/X/Threads.com and LinkedIn Threads in English/Bengali
         </p>
       </div>
 
