@@ -658,11 +658,11 @@ export default function ReelsPage() {
                 </video>
                 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={handleSaveToLibrary}>
                     <Upload className="mr-2 h-4 w-4" />
                     Save to Library
                   </Button>
