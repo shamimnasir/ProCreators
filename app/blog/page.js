@@ -32,7 +32,7 @@ export default function BlogPage() {
     },
     {
       id: 3,
-      title: 'Beginner's Guide to Thread Writing',
+      title: 'Beginner Guide to Thread Writing',
       excerpt: 'Master the art of Twitter/X threads that capture attention and drive engagement.',
       category: 'Tutorials',
       author: 'ProCreators Team',
