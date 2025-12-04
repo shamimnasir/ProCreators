@@ -220,15 +220,14 @@ export default function ThreadsToolPage() {
                   <p className="whitespace-pre-wrap text-sm">{generatedThread}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleSave} className="flex-1">
-                    <Save className="mr-2 h-4 w-4" />
-                    Save to Library
-                  </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleDownload}>
+                  <Button variant="outline" className="w-full" onClick={handleDownload}>
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
                 </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  ✓ Automatically saved to Library
+                </p>
               </>
             ) : (
               <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
