@@ -197,8 +197,8 @@ frontend:
           comment: "Download button implementation reviewed. It should work correctly once video editing API is fixed. Downloads from videoData.videoUrl which gets updated after editing. No changes needed to frontend code."
   
   - task: "Reels/Shorts Creator - Talking Head Feature"
-    implemented: false
-    working: false
+    implemented: true
+    working: "NA"
     file: "/app/app/dashboard/tools/reels/page.js"
     stuck_count: 0
     priority: "high"
@@ -210,6 +210,9 @@ frontend:
         - working: false
           agent: "main"
           comment: "ISSUE IDENTIFIED: Current implementation only sends ONE image (object OR talking head) to video generation. Line 157: 'image: objectImagePreview || talkingHeadPreview'. The video generation models (SVD, ZeroScope) don't support talking head/lip-sync. Need to implement proper talking head solution."
+        - working: "NA"
+          agent: "main"
+          comment: "PARTIAL FIX: Changed priority logic to use talking head image first when present (line 148-149). Now sends: talkingHeadPreview || objectImagePreview (reversed priority). Added hasTalkingHead and hasObjectImage flags to API call. NOTE: Full lip-sync talking head would require TTS + SadTalker model, which needs audio input. Current fix ensures talking head image is used as the main visual element in generated videos."
   
   - task: "Carousel Display"
     implemented: true
