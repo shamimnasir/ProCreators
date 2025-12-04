@@ -4,7 +4,7 @@ import { getCollection } from '@/lib/mongodb'
 export async function GET(request) {
   try {
     const libraryCollection = await getCollection('library')
-    const now = new Date().toISOString()
+    const now = new Date()
     
     // TODO: Replace 'default-user' with actual user ID when auth is implemented
     // Only fetch items that haven't expired
