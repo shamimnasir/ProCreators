@@ -261,16 +261,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Carousel Display"
-    - "News Generator"
-    - "List Generator"
-    - "Photo Cards Generator"
     - "Tutorial Generator"
-    - "URL Scraping API"
+    - "Photo Cards Generator"
+    - "Library Save API with Expiration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "Implemented all requested features: 1) Fixed carousel display bug with enhanced state management. 2) Created URL scraping API for context-aware generation. 3) Fully implemented News generator with URL context. 4) Fully implemented List generator with 5 list types. 5) Fully implemented Photocard generator with image generation. 6) Fully implemented Tutorial generator with URL context. All tools now have proper UI, language support, and save/download functionality. Ready for testing."
+      message: "AUTO-SAVE IMPLEMENTATION COMPLETE: 1) Updated tutorials/page.js to auto-save after text generation in handleGenerate function. 2) Updated photo-cards/page.js to auto-save after card generation in drawTextOverlay function. 3) Removed all manual 'Save to Library' buttons and handleSave functions from both files. 4) Users now see a single toast notification when content is generated AND saved. 5) Previously completed: threads, quotes, news, lists already have auto-save. 6) All tools now automatically save to library with tier-based expiration. Ready for backend testing to verify the auto-save functionality works correctly for tutorials and photo cards."
