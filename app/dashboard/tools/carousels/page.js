@@ -583,9 +583,13 @@ export default function CarouselsToolPage() {
                       <Save className="mr-2 h-4 w-4" />
                       Save to Library
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleDownload}>
+                    <Button variant="outline" className="flex-1" onClick={handleDownloadCurrentImage}>
                       <Download className="mr-2 h-4 w-4" />
-                      Download JSON
+                      Download This Image
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleDownloadAllImages}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download All ({carouselSlides.length})
                     </Button>
                   </div>
                 </div>
