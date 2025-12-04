@@ -181,6 +181,36 @@ backend:
           comment: "Image generation using Gemini Nano Banana model with direct Google API key. Used by Carousel and Photocard generators."
 
 frontend:
+  - task: "Reels/Shorts Creator - Download Button"
+    implemented: true
+    working: "NA"
+    file: "/app/app/dashboard/tools/reels/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: Download button not working correctly."
+        - working: "NA"
+          agent: "main"
+          comment: "Download button implementation reviewed. It should work correctly once video editing API is fixed. Downloads from videoData.videoUrl which gets updated after editing. No changes needed to frontend code."
+  
+  - task: "Reels/Shorts Creator - Talking Head Feature"
+    implemented: false
+    working: false
+    file: "/app/app/dashboard/tools/reels/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: Talking head feature not working. Video doesn't follow script or incorporate talking head image."
+        - working: false
+          agent: "main"
+          comment: "ISSUE IDENTIFIED: Current implementation only sends ONE image (object OR talking head) to video generation. Line 157: 'image: objectImagePreview || talkingHeadPreview'. The video generation models (SVD, ZeroScope) don't support talking head/lip-sync. Need to implement proper talking head solution."
+  
   - task: "Carousel Display"
     implemented: true
     working: "NA"
