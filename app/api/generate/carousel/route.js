@@ -77,21 +77,21 @@ Keep text concise and impactful. Images should be text-free visuals that support
       }
 
       // Parse the carousel sequence
-      let parsedSequence
-    try {
-      // Try to extract JSON from the response
-      const jsonMatch = sequenceResult.content.match(/\[[\s\S]*\]/)
-      if (jsonMatch) {
-        carouselSequence = JSON.parse(jsonMatch[0])
-      } else {
-        throw new Error('No JSON array found in response')
+      try {
+        // Try to extract JSON from the response
+        const jsonMatch = sequenceResult.content.match(/\[[\s\S]*\]/)
+        if (jsonMatch) {
+          carouselSequence = JSON.parse(jsonMatch[0])
+        } else {
+          throw new Error('No JSON array found in response')
+        }
+      } catch (parseError) {
+        console.error('Failed to parse carousel sequence:', parseError)
+        return NextResponse.json(
+          { success: false, error: 'Failed to parse carousel sequence. Please try again.' },
+          { status: 500 }
+        )
       }
-    } catch (parseError) {
-      console.error('Failed to parse carousel sequence:', parseError)
-      return NextResponse.json(
-        { success: false, error: 'Failed to parse carousel sequence. Please try again.' },
-        { status: 500 }
-      )
     }
 
     console.log(`Step 2: Generating ${carouselSequence.length} images...`)
