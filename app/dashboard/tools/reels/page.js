@@ -28,6 +28,7 @@ export default function ReelsPage() {
   const [scriptLoading, setScriptLoading] = useState(false)
   const [generatedScript, setGeneratedScript] = useState('')
   const [videoData, setVideoData] = useState(null)
+  const [progress, setProgress] = useState(0)
   const { toast } = useToast()
   
   const objectFileRef = useRef(null)
