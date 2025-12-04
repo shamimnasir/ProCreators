@@ -86,7 +86,7 @@ export async function POST(request) {
       
       try {
         console.log(`[Video Generation] Attempting ${model.id} for ${mode} mode with${hasImage ? '' : 'out'} image...`)
-        const result = await generateWithModel(replicate, model.id, script, duration, imageToUse)
+        const result = await generateWithModel(replicate, model.id, script, duration, imageToUse, targetPlatform)
         
         return NextResponse.json({
           success: true,
