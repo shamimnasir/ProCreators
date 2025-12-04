@@ -387,10 +387,8 @@ export default function ReelsPage() {
   
   // Determine script type for display
   const getScriptTypeLabel = () => {
-    if (talkingHeadImage && objectImage) return 'Talking Head + Object'
-    if (talkingHeadImage) return 'Talking Head Script'
-    if (objectImage) return 'Object-Based Script'
-    return 'Text-Based Script'
+    if (objectImage) return 'Image-to-Video Script'
+    return 'Text-to-Video Script'
   }
 
   return (
