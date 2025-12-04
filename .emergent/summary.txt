@@ -1,94 +1,92 @@
 <analysis>
-The trajectory details a multi-stage development process for the ProCreators SaaS application. The initial task was to fix a critical compilation error caused by incorrectly importing a Python library () into a Next.js file. This was resolved by creating a Node.js-to-Python bridge using  to execute Python scripts for AI tasks.
+The trajectory documents an extensive, multi-sprint development effort on the ProCreators SaaS application. The work began with fixing a critical bug preventing carousel image generation and evolved into a series of significant feature implementations and enhancements based on iterative user feedback.
 
-The engineer then successfully implemented text generation using this bridge and the Emergent LLM key. However, image generation with Gemini via the Emergent proxy failed due to a lack of support. After several attempts with different models (including DALL-E 3), the user provided a direct Google API key. This enabled the engineer to build a custom Python script using the  library, successfully integrating the desired Gemini 3 Pro Image model.
+The initial phase involved creating and refining several core content generation tools (News, List, Photocard, Tutorial) and adding a URL scraping feature for context-aware generation. A major focus was the Photo Card generator, which underwent multiple revisions to add advanced features like image upload, logo overlay, text editing, image filters, logo resizing, and a live preview.
 
-Subsequent user requests led to the implementation of significant new features:
-1.  **MongoDB-backed Content Library:** A full CRUD system (, , ) for users to store and manage their generated content.
-2.  **Admin System Prompts:** A new admin-only section to configure default prompts for each AI tool, ensuring consistent output quality.
-3.  **Advanced Carousel Generator:** An API that orchestrates both text and image generation to create a 5-slide carousel from a single user prompt.
+Subsequently, the engineer addressed several platform-wide issues. This included restoring a lost homepage layout, creating placeholder pages for Roadmap, Blog, and Docs to satisfy the user without incurring AI content costs, and fixing navigation links. The system prompts for all AI tools were updated to enforce a consistent output style (using dashes instead of asterisks).
 
-The final problem identified is a frontend state management issue on the carousel page, where the successfully generated slides are not being displayed to the user.
+The most recent work cycle centered on the Carousel generator, adding platform-specific sizing, auto/manual content modes, logo overlays, and a two-step Content Map generation process.
 
-The user's primary language is English. The next agent must respond in English only.
+The final user request, which is currently in progress, is to make content saving to the library automatic for all tools, remove the manual Save buttons, and implement a tier-based content expiration policy. The engineer has already implemented this for the Threads, Quotes, News, and Lists tools and was about to continue with the remaining ones. The user's primary language is English. The next agent must respond in English only.
 </analysis>
 
 <product_requirements>
-The project is to build ProCreators, a full-stack SaaS application for AI-powered content creation.
+The project is ProCreators, an AI-powered SaaS platform for content creators. The primary goal is to provide a suite of tools for generating multi-format content (text, image, carousels) with support for English and Bengali.
 
-**Core Features:**
-*   **AI Tools:** A dashboard with numerous tools for generating text (threads, quotes), images (carousels, photo cards), video, and voice content.
-*   **Multi-language Support:** Content generation in both English and Bengali.
-*   **Content Library:** A MongoDB-backed library where users can save, view, download, and delete their generated content.
-*   **Admin Customization:** An admin-facing settings page to define system-level prompts for each AI tool, controlling the style and format of the generated output.
-*   **User & Payment System:** Placeholder functionality for user authentication (Supabase) and subscription payments (Stripe).
-
-**Implementation Status:**
-The application has a complete frontend UI with a dark, modern theme. The core AI text and image generation functionalities are now working. The text tools use the Emergent LLM key, while the image generation tools (specifically for carousels with Bengali text) use a direct Google API key provided by the user to access the  model. A content library and an admin system-prompt editor have been fully implemented.
+**Core features implemented:**
+*   **AI Tools:** Generators for Threads, Quotes, News, Lists, Tutorials, Photo Cards, and multi-slide Carousels.
+*   **Content Sourcing:** Tools can generate content from a simple prompt or from the context of a provided URL.
+*   **Advanced Photo Card Editor:** A highly-customizable tool for creating viral social media cards with image/logo uploads, text overlays, color pickers, and live-preview image filters.
+*   **Advanced Carousel Generator:** A multi-step tool that can auto-generate a 5-slide content plan, create slides manually or automatically, and add a brand logo.
+*   **Content Library:** A MongoDB-backed section where all generated content is automatically saved. Content has a time-based expiration (7 days for free users, 3 months for paid), and expired content is hidden.
+*   **Admin System Prompts:** A feature for admins to configure the default AI instructions for each tool.
+*   **Public Pages:** A full homepage and placeholder pages for Roadmap, Blog, and Docs have been created with a consistent layout and navigation.
 </product_requirements>
 
 <key_technical_concepts>
-*   **Framework:** Next.js 14 (App Router).
-*   **Styling:** TailwindCSS with shadcn/ui.
-*   **Backend:** Next.js API Routes acting as a backend-for-frontend (BFF).
-*   **AI Integration Bridge:** Node.js  to execute Python scripts from Next.js API routes.
-*   **AI Libraries:**  (for text via proxy) and  (for direct image generation).
-*   **Database:** MongoDB for storing user-generated content and admin settings.
-*   **AI Models:** Gemini (for text) and  (for images).
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** TailwindCSS with shadcn/ui
+- **Backend:** Next.js API Routes
+- **Database:** MongoDB
+- **AI Integration:**
+    - Node.js  to execute Python scripts.
+    -  for image generation.
+    -  (PIL) Python library for image manipulation (logo compositing).
+- **State Management:** React Hooks (, , ).  was installed but its implementation was deferred/removed.
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a standard Next.js App Router structure with API routes, pages, components, and library files. A key architectural pattern is the use of Node.js  to call Python scripts for AI inference, creating a bridge between the JavaScript backend and Python AI libraries.
+The application follows a standard Next.js structure, separating frontend pages, API routes, components, and utility functions. A key architectural choice is the use of Python scripts executed via Node.js  to handle complex AI and image processing tasks, keeping the Next.js backend as an orchestrator.
 
 **Directory Structure:**
 
 
-- ****
-    - **Importance:** This script directly calls the Google Generative AI API using the  library and a user-provided API key. It was created to solve the issue of generating images with Bengali text, as the Emergent proxy did not support the required Gemini image models.
-    - **Changes:** Created to bypass the limitations of the  library for image generation. It uses the  model.
+- ** (All Tool Pages)**
+  - **Importance:** These files contain the UI and client-side logic for each content generation tool.
+  - **Summary of Changes:** Initially placeholders, these were built out with forms, loading states, and result displays. The Save to Library button and its handler () are currently being removed from each file, and an auto-save call is being added to the  function.
 
 - ****
-    - **Importance:** This complex API route orchestrates the entire carousel creation process. It first calls the text generation AI to create content for 5 slides, then iterates through them, calling the image generation script for each slide.
-    - **Changes:** Created to fulfill the user's request for a multi-slide carousel generator. It now calls the  script.
+  - **Importance:** This API endpoint is responsible for saving generated content to the MongoDB database.
+  - **Summary of Changes:** It was created for the library feature and later modified to add an  field to each document. It calculates the expiration date based on a placeholder user tier (hardcoded as 'free' or 'paid' for now).
 
 - ****
-    - **Importance:** The frontend component for the carousel generator. It contains the UI and the client-side logic to call the generation API.
-    - **Changes:** This file was heavily modified to add a new UI for carousel generation, including loading states and slide navigation. It currently has a state management bug that prevents the final generated slides from being displayed.
+  - **Importance:** A complex backend orchestrator that handles the multi-step carousel generation process.
+  - **Summary of Changes:** It was heavily modified to support auto/manual modes, platform-specific sizing, logo upload processing (by calling ), and auto-saving the final result to the library.
+
+- **{"success": false, "error": "Script error: Expecting value: line 1 column 1 (char 0)"}**
+  - **Importance:** A new Python script created to handle image composition. It uses the Pillow library to open a generated image, resize a logo, and overlay it at a corner.
+  - **Summary of Changes:** Created from scratch to fulfill the logo upload requirement for carousels.
 
 - ****
-    - **Importance:** A crucial utility file that handles the connection to the MongoDB database, allowing data persistence.
-    - **Changes:** This file was created from scratch to implement the Content Library and Admin System Prompts features.
-
-- ** & **
-    - **Importance:** These files constitute the admin feature for customizing AI behavior.  holds the default prompts, and the API routes handle fetching and saving custom prompts to MongoDB.
-    - **Changes:** These were all newly created to add the admin customization functionality.
+  - **Importance:** Centralizes all default prompts sent to the AI, allowing for consistent control over output style.
+  - **Summary of Changes:** All prompts were updated to explicitly instruct the AI to use dashes () for lists and avoid using asterisks () or emojis, ensuring cleaner, more professional content.
 </code_architecture>
 
 <pending_tasks>
-- Fix the frontend state management bug in .
-- Implement user authentication using Supabase.
-- Implement subscription payments using Stripe.
-- Build out the backend functionality for placeholder tools (e.g., video and voice generation).
+- Complete the auto-save implementation for the remaining tools: Tutorials and Photo Cards.
+- Implement the Usage Statistics update on the user profile page.
+- Implement the full Content Management System (CMS) for the blog, docs, and homepage, which the user has deferred for later.
+- Wire up the library auto-refresh hook () to the UI to provide real-time updates after generation.
+- Implement user authentication (Supabase) and payments (Stripe) as originally planned.
 </pending_tasks>
 
 <current_work>
-The most recent work was focused on fixing the Carousel tool to generate high-quality images with accurate Bengali text, as per the user's explicit request to use Gemini Nano Banana.
+The immediate task being worked on is the full implementation of **automatic content saving** to the library for all generator tools, as requested by the user. The goal is to remove all manual Save to Library buttons and ensure that any successfully generated content is automatically persisted in the database.
 
-**Problem:** The initial image generation model ( via Emergent proxy) produced corrupted Bengali text. The user insisted on using a specific Gemini model not available through the proxy.
+**Progress so far:**
+- The  endpoint has been updated to handle the saving logic, including setting a tier-based expiration date.
+- The auto-save functionality has been successfully implemented on the following tool pages by modifying their  function and removing the save button:
+  - 
+  - 
+  - 
+  - 
 
-**Solution Implemented:**
-1.  **Direct API Integration:** A new Python script () was created to call the Google Generative AI API directly, using a Google API key provided by the user.
-2.  **Model Upgrade:** The script was configured to use the  model, which was found to handle Bengali text correctly.
-3.  **API Orchestration:** The carousel API () was updated to use this new script.
-
-**Current Status:** The backend is fully functional. Backend logs and direct script tests confirm that the API successfully generates 5 carousel slides with text and images using the specified Gemini model. However, a **frontend bug** prevents the results from being displayed. The React state on the  page appears to reset after the long-running API call finishes, causing the generated carousel to vanish before the user can see it. The immediate task is to debug and fix this frontend state management issue.
+The work stopped right after finishing the  file. The next logical step was to apply the same pattern of changes to the remaining tool pages:  and .
 </current_work>
 
 <optional_next_step>
-Fix the frontend state management issue in  to ensure the generated carousel slides are correctly displayed to the user after the API call completes.
+Continue the current task by applying the auto-save logic and removing the manual save button from the Tutorials generator page ().
 </optional_next_step>
-
-<quotes>
-**User:** no. the text is still broken. what was the issue? please find out.
-**Assistant's diagnosis:** The carousel was reset. The issue is that the frontend state is not persisting the generated slides. But the backend says Carousel generation complete! Generated 5 slides. This is a frontend state management issue, not an image generation issue.
-</quotes>
+<direct_quotes>
+**User Request:** user contents are not still being automatically saved into the library. Remove the Save to library button and make the contents saved to the library automatically in the respective All, Text, Image, Video sections. (from Chat Message 446)
+</direct_quotes>
