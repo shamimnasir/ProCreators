@@ -386,9 +386,26 @@ export default function PhotoCardsPage() {
                 )}
               </div>
               {uploadedLogo && (
-                <div className="rounded-lg border overflow-hidden bg-white p-2">
-                  <img src={uploadedLogo} alt="Logo" className="h-12 w-auto mx-auto" />
-                </div>
+                <>
+                  <div className="rounded-lg border overflow-hidden bg-white p-2">
+                    <img src={uploadedLogo} alt="Logo" className="h-12 w-auto mx-auto" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label htmlFor="logoSize" className="text-sm">Logo Size</Label>
+                      <span className="text-xs text-muted-foreground">{logoSize}px</span>
+                    </div>
+                    <Input
+                      id="logoSize"
+                      type="range"
+                      min="30"
+                      max="80"
+                      value={logoSize}
+                      onChange={(e) => setLogoSize(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                </>
               )}
             </div>
 
