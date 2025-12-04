@@ -124,10 +124,66 @@ Keep text concise and impactful. Images should be text-free visuals that support
       )
 
       if (imageResult.success) {
+        let finalImageUrl = imageResult.imageUrl
+        
+        // Add logo if provided
+        if (logo) {
+          console.log(`Adding logo to slide ${i + 1}...`)
+          try {
+            const logoResult = await new Promise((resolve, reject) => {
+              const pythonProcess = spawn('/root/.venv/bin/python3', [
+                '/app/scripts/add_logo_to_image.py'
+              ])
+
+              let stdout = ''
+              let stderr = ''
+
+              pythonProcess.stdout.on('data', (data) => {
+                stdout += data.toString()
+              })
+
+              pythonProcess.stderr.on('data', (data) => {
+                stderr += data.toString()
+              })
+
+              pythonProcess.on('close', (code) => {
+                if (code !== 0) {
+                  reject(new Error(`Logo script exited with code ${code}: ${stderr}`))
+                  return
+                }
+
+                try {
+                  const result = JSON.parse(stdout)
+                  resolve(result)
+                } catch (e) {
+                  reject(new Error(`Failed to parse logo script output: ${e.message}`))
+                }
+              })
+
+              // Send input data
+              pythonProcess.stdin.write(JSON.stringify({
+                image: finalImageUrl,
+                logo: logo,
+                logoSize: logoSize,
+                logoPosition: logoPosition
+              }))
+              pythonProcess.stdin.end()
+            })
+
+            if (logoResult.success) {
+              finalImageUrl = logoResult.image
+              console.log(`Logo added successfully to slide ${i + 1}`)
+            }
+          } catch (logoError) {
+            console.error(`Failed to add logo to slide ${i + 1}:`, logoError.message)
+            // Continue with original image if logo fails
+          }
+        }
+        
         slides.push({
           slideNumber: slide.slideNumber || (i + 1),
           text: slide.text,
-          imageUrl: imageResult.imageUrl,
+          imageUrl: finalImageUrl,
           imagePrompt: slide.imagePrompt
         })
       } else {
