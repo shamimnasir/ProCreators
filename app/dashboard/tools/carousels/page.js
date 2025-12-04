@@ -378,9 +378,9 @@ export default function CarouselsToolPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Carousel Generator</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Viral Carousel Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create 5-slide carousels with AI-generated images and content
+          Create viral carousel posts for Instagram, LinkedIn & Facebook in English/Bengali
         </p>
       </div>
 
