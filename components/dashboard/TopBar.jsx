@@ -18,13 +18,13 @@ export function TopBar() {
   const router = useRouter()
 
   return (
-    <div className="flex h-20 items-center gap-4 border-b border-white/10 bg-[#0a0e27]/80 backdrop-blur-xl px-6">
+    <div className="flex h-20 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-xl px-6">
       <div className="flex-1">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search tools, content..."
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+            className="pl-10 bg-muted/50 border-border"
           />
         </div>
       </div>

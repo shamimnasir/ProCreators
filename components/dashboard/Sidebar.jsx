@@ -120,10 +120,10 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      "relative flex h-screen flex-col border-r border-white/10 bg-gradient-to-b from-[#0a0e27] to-[#1a1147] transition-all duration-300",
+      "relative flex h-screen flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
-      <div className="flex h-20 items-center justify-between border-b border-white/10 px-4">
+      <div className="flex h-20 items-center justify-between border-b border-border px-4">
         {!collapsed && (
           <Link href="/dashboard">
             <Logo variant="full" className="h-8 w-8" />
