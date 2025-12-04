@@ -631,7 +631,44 @@ export default function CarouselsToolPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {carouselSlides.length > 0 ? (
+            {showContentMap && contentMap ? (
+              <>
+                <div className="rounded-lg border p-6 bg-gradient-to-b from-primary/10 to-transparent">
+                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Content Map - Review Your Carousel Structure
+                  </h3>
+                  <div className="space-y-3">
+                    {contentMap.map((slide, index) => (
+                      <div key={index} className="flex gap-3 p-3 rounded-lg bg-card border">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm mb-1">{slide.title}</h4>
+                          <p className="text-xs text-muted-foreground">{slide.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Review the structure above. When ready, click below to generate images.
+                    </p>
+                    <Button 
+                      onClick={handleGenerate}
+                      disabled={loading}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <ImageIcon className="mr-2 h-5 w-5" />
+                      {loading ? 'Generating Images...' : 'Step 2: Generate Images'}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : carouselSlides.length > 0 ? (
               <>
                 <div className="space-y-4">
                   <div className="rounded-lg border overflow-hidden bg-black">
