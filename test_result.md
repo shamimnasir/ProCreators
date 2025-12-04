@@ -105,6 +105,33 @@
 user_problem_statement: "Fix 3 critical bugs in Reels/Shorts Creator: 1) Video editing not applying (FFmpeg issue), 2) Download button not working, 3) Talking head feature broken. Also ensure all videos are auto-saved to library."
 
 backend:
+  - task: "Video Editing API (FFmpeg)"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/generate/video/edit/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: Video editing (trim, filters) not applying to downloaded video. FFmpeg processing 0 frames."
+        - working: "NA"
+          agent: "main"
+          comment: "FIXED: 1) Installed ffmpeg. 2) Replaced hardcoded 30-second assumption with ffprobe to get actual video duration. 3) Changed from execSync to async execAsync for better error handling. 4) Fixed trim calculation to use actual video duration. 5) Added comprehensive logging and error handling. 6) Returns edited video as base64 data URL."
+  
+  - task: "Video Generation API"
+    implemented: true
+    working: true
+    file: "/app/app/api/generate/video/generate/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Multi-model video generation working with Replicate. Supports Budget/Fast/Pro modes, platform-specific aspect ratios (9:16), and image-to-video."
+  
   - task: "Text Generation API"
     implemented: true
     working: true
