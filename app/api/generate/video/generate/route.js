@@ -135,16 +135,19 @@ export async function POST(request) {
   }
 }
 
-async function generateWithModel(replicate, modelId, script, duration = 5, inputImage = null) {
+async function generateWithModel(replicate, modelId, script, duration = 5, inputImage = null, platformConfig = null) {
   const isTextModel = modelId.includes('t2v') || modelId.includes('text')
   const isImageModel = modelId.includes('i2v') || modelId.includes('image')
   
   // Build input based on model type
   let input = {}
   
+  // Use platform-specific aspect ratio or default to 9:16
+  const aspectRatio = platformConfig?.aspectRatio || '9:16'
+  
   // Create a concise visual prompt from the script
   const visualPrompt = inputImage 
-    ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. 9:16 aspect ratio.`
+    ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. ${aspectRatio} aspect ratio.`
     : script.substring(0, 500)
   
   console.log(`[${modelId}] Using prompt:`, visualPrompt.substring(0, 100))
