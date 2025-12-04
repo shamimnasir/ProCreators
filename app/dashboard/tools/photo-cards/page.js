@@ -299,7 +299,7 @@ export default function PhotoCardsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Viral Photo Card Generator</h1>
         <p className="text-muted-foreground mt-1">
-          Create viral Facebook/Instagram news-style photo cards with custom text overlay
+          Create viral photo cards for Instagram, Facebook, Pinterest & LinkedIn in English/Bengali
         </p>
       </div>
 
