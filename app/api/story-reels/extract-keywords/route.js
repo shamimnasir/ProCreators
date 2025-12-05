@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { generateText } from '@/lib/gemini-text'
 
 export async function POST(request) {
   try {
@@ -18,51 +19,92 @@ export async function POST(request) {
     console.log('[Keyword Extraction] Duration:', duration, 'seconds')
     console.log('[Keyword Extraction] Target segments:', segmentCount)
 
-    // Simple keyword extraction without heavy NLP libraries
-    const stopWords = new Set([
-      // English stop words
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-      'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during',
-      'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
-      'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might',
-      'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
-      'what', 'when', 'where', 'who', 'why', 'how', 'can', 'if', 'then', 'than',
-      // Bengali stop words (common ones)
-      'এবং', 'বা', 'কিন্তু', 'তবে', 'যে', 'যা', 'যেটি', 'এটা', 'এটি', 'সে', 'তার',
-      'আমি', 'তুমি', 'তোমার', 'আমার', 'আমরা', 'তারা', 'হয়', 'ছিল', 'থাকা', 'করা',
-      'একটি', 'একজন', 'কিছু', 'সব', 'অনেক', 'কয়েক', 'প্রতি', 'সাথে', 'মধ্যে'
-    ])
+    // Use AI to extract thematic English keywords for stock video search
+    const systemMessage = `You are an expert at analyzing stories and extracting visual keywords for stock video search.
 
-    // Simple tokenization: split by whitespace and punctuation
-    const tokens = script
-      .toLowerCase()
-      .replace(/[।!?।\n.,;:""''()[\]{}]/g, ' ')
-      .split(/\s+/)
-      .filter(word => word.length > 3 && !stopWords.has(word) && !/^\d+$/.test(word))
+CRITICAL TASK:
+1. Read the story/script (may be in English, Bengali, or any language)
+2. Understand the THEME and VISUAL CONCEPTS
+3. Extract EXACTLY ${segmentCount} English keywords
+4. Keywords must be visually descriptive for stock video search
+5. Keywords should represent different scenes/moments in the story
 
-    // Count word frequency
-    const wordFreq = {}
-    tokens.forEach(token => {
-      wordFreq[token] = (wordFreq[token] || 0) + 1
-    })
+OUTPUT RULES:
+- Return ONLY a JSON array of ${segmentCount} keywords
+- Each keyword should be 1-3 words maximum
+- Use simple, searchable terms (e.g., "sunset", "happy family", "city street", "ocean waves")
+- Avoid abstract concepts - focus on VISUAL elements
+- Keywords should be in ENGLISH regardless of script language
+- No explanations, no additional text, ONLY the JSON array
 
-    // Sort by frequency and get top keywords
-    let keywords = Object.entries(wordFreq)
-      .sort((a, b) => b[1] - a[1])
-      .map(([word]) => word)
-      .slice(0, segmentCount)
+EXAMPLE OUTPUT FORMAT:
+["sunset beach", "happy family", "city skyline", "forest path", "smiling child"]`
 
-    console.log('[Keyword Extraction] Keywords from frequency:', keywords.length)
+    const userPrompt = `Analyze this story and extract EXACTLY ${segmentCount} English keywords for stock video search:
 
-    // If we don't have enough keywords, add generic visual keywords
+Story/Script:
+"""
+${script}
+"""
+
+Remember: Return ONLY a JSON array of ${segmentCount} English keywords that represent visual scenes for this story.`
+
+    console.log('[Keyword Extraction] Calling AI for thematic analysis...')
+
+    const result = await generateText(userPrompt, systemMessage)
+
+    if (!result.success) {
+      throw new Error(result.error || 'AI keyword extraction failed')
+    }
+
+    console.log('[Keyword Extraction] AI response:', result.content)
+
+    // Parse AI response to extract keywords array
+    let keywords = []
+    try {
+      // Try to parse as JSON array
+      const cleanedResponse = result.content
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .replace(/^[^[]*/, '') // Remove text before first [
+        .replace(/[^\]]*$/, '') // Remove text after last ]
+        .trim()
+      
+      keywords = JSON.parse(cleanedResponse)
+      
+      if (!Array.isArray(keywords)) {
+        throw new Error('Response is not an array')
+      }
+
+      // Clean and validate keywords
+      keywords = keywords
+        .map(k => String(k).trim().toLowerCase())
+        .filter(k => k.length > 0 && k.length < 50)
+        .slice(0, segmentCount)
+
+    } catch (parseError) {
+      console.error('[Keyword Extraction] Parse error:', parseError)
+      console.log('[Keyword Extraction] Trying fallback extraction...')
+      
+      // Fallback: extract words that look like keywords from the response
+      const matches = result.content.match(/"([^"]+)"/g)
+      if (matches && matches.length > 0) {
+        keywords = matches
+          .map(m => m.replace(/"/g, '').trim().toLowerCase())
+          .filter(k => k.length > 2 && k.length < 50)
+          .slice(0, segmentCount)
+      }
+    }
+
+    // If still not enough keywords, add generic visual keywords
     if (keywords.length < segmentCount) {
-      console.log('[Keyword Extraction] Adding generic keywords...')
+      console.log('[Keyword Extraction] Adding fallback keywords...')
       
       const genericKeywords = [
-        'nature', 'landscape', 'people', 'city', 'sky', 'hands', 'face', 'smile',
-        'sunset', 'ocean', 'mountain', 'forest', 'river', 'beach', 'flowers',
-        'technology', 'business', 'success', 'happiness', 'love', 'family',
-        'প্রকৃতি', 'মানুষ', 'শহর', 'আকাশ', 'সূর্যাস্ত', 'নদী', 'পরিবার', 'ভালোবাসা'
+        'nature landscape', 'people walking', 'city street', 'blue sky', 
+        'sunset', 'ocean waves', 'mountain view', 'forest trees', 
+        'happy family', 'smiling person', 'business meeting', 'technology',
+        'celebration', 'sunrise', 'beach', 'flowers blooming'
       ]
       
       for (const word of genericKeywords) {
@@ -82,11 +124,11 @@ export async function POST(request) {
       success: true,
       keywords,
       segmentCount,
-      message: `Extracted ${keywords.length} keywords for ${segmentCount} video segments`
+      message: `Extracted ${keywords.length} thematic keywords for ${segmentCount} video segments`
     })
 
   } catch (error) {
-    console.error('Keyword extraction error:', error)
+    console.error('[Keyword Extraction] Error:', error)
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to extract keywords' },
       { status: 500 }
