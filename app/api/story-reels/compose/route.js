@@ -76,8 +76,9 @@ export async function POST(request) {
           ? 'pNInz6obpgDQGcFmaJgB' // Adam (works for multiple languages)
           : 'EXAVITQu4vr4xnSDxMaL' // Sarah
         
-        const audio = await elevenlabs.generate({
-          voice: voiceId,
+        console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
+        
+        const audio = await elevenlabs.textToSpeech.convert(voiceId, {
           text: script,
           model_id: 'eleven_multilingual_v2'
         })
@@ -90,7 +91,7 @@ export async function POST(request) {
         const audioBuffer = Buffer.concat(chunks)
         await writeFile(audioPath, audioBuffer)
         
-        console.log(`[${jobId}] TTS generated successfully`)
+        console.log(`[${jobId}] TTS generated successfully, size:`, audioBuffer.length)
       } else {
         // Google TTS fallback - simple implementation
         console.log(`[${jobId}] Using simple TTS fallback...`)
