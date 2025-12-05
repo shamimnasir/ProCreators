@@ -71,35 +71,54 @@ export async function POST(request) {
       console.log(`[${jobId}] Generating TTS with ${ttsProvider}...`)
       
       if (ttsProvider === 'elevenlabs') {
-        const elevenlabs = new ElevenLabsClient({
-          apiKey: process.env.ELEVENLABS_API_KEY
-        })
+        try {
+          const elevenlabs = new ElevenLabsClient({
+            apiKey: process.env.ELEVENLABS_API_KEY
+          })
 
-        // Use appropriate voice based on language
-        const voiceId = ttsLanguage === 'bn' 
-          ? 'pNInz6obpgDQGcFmaJgB' // Adam (works for multiple languages)
-          : 'EXAVITQu4vr4xnSDxMaL' // Sarah
-        
-        console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
-        
-        const audio = await elevenlabs.textToSpeech.convert(voiceId, {
-          text: script,
-          model_id: 'eleven_multilingual_v2'
-        })
+          // Use appropriate voice based on language
+          const voiceId = ttsLanguage === 'bn' 
+            ? 'pNInz6obpgDQGcFmaJgB' // Adam (works for multiple languages)
+            : 'EXAVITQu4vr4xnSDxMaL' // Sarah
+          
+          console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
+          
+          const audio = await elevenlabs.textToSpeech.convert(voiceId, {
+            text: script,
+            model_id: 'eleven_multilingual_v2'
+          })
 
-        // Convert audio stream to buffer
-        const chunks = []
-        for await (const chunk of audio) {
-          chunks.push(chunk)
+          // Convert audio stream to buffer
+          const chunks = []
+          for await (const chunk of audio) {
+            chunks.push(chunk)
+          }
+          const audioBuffer = Buffer.concat(chunks)
+          await writeFile(audioPath, audioBuffer)
+          
+          console.log(`[${jobId}] TTS generated successfully, size:`, audioBuffer.length)
+        } catch (elevenLabsError) {
+          console.error(`[${jobId}] ElevenLabs TTS failed:`, elevenLabsError.message)
+          console.log(`[${jobId}] Falling back to silent audio...`)
+          
+          // Fallback to silent audio if ElevenLabs fails
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input('anullsrc=r=44100:cl=stereo')
+              .inputFormat('lavfi')
+              .duration(duration)
+              .audioCodec('libmp3lame')
+              .save(audioPath)
+              .on('end', () => {
+                console.log(`[${jobId}] Silent audio fallback created`)
+                resolve()
+              })
+              .on('error', reject)
+          })
         }
-        const audioBuffer = Buffer.concat(chunks)
-        await writeFile(audioPath, audioBuffer)
-        
-        console.log(`[${jobId}] TTS generated successfully, size:`, audioBuffer.length)
       } else {
-        // Google TTS fallback - simple implementation
-        console.log(`[${jobId}] Using simple TTS fallback...`)
-        // For now, create a silent audio file as placeholder
+        // Google TTS or silent fallback
+        console.log(`[${jobId}] Using silent audio fallback...`)
         await new Promise((resolve, reject) => {
           ffmpeg()
             .input('anullsrc=r=44100:cl=stereo')
@@ -107,7 +126,10 @@ export async function POST(request) {
             .duration(duration)
             .audioCodec('libmp3lame')
             .save(audioPath)
-            .on('end', resolve)
+            .on('end', () => {
+              console.log(`[${jobId}] Silent audio created`)
+              resolve()
+            })
             .on('error', reject)
         })
       }
