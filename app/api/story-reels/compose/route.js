@@ -216,8 +216,7 @@ export async function POST(request) {
 
     // Step 6: Save video to public folder
     console.log(`[${jobId}] Step 6: Saving video to public folder...`)
-    const outputPath = existsSync(finalVideoPath) ? finalVideoPath : concatVideoPath
-    const videoBuffer = await require('fs/promises').readFile(outputPath)
+    const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
     
     // Save to public folder
     const publicVideoPath = `/app/public/story-reels/${jobId}.mp4`
