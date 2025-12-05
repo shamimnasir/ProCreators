@@ -243,7 +243,6 @@ export async function POST(request) {
         await unlink(file).catch(() => {})
       }
       await unlink(audioPath).catch(() => {})
-      await unlink(concatVideoPath).catch(() => {})
       await unlink(finalVideoPath).catch(() => {})
       await unlink(captionsPath).catch(() => {})
       await unlink(clipListPath).catch(() => {})
