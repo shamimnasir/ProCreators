@@ -294,7 +294,30 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   // If output is an array
   if (Array.isArray(output)) {
     console.log(`[${modelId}] Array output, taking first element`)
-    return output[0]
+    const firstOutput = output[0]
+    
+    // Check if it's a FileOutput object with url() method
+    if (firstOutput && typeof firstOutput.url === 'function') {
+      const videoUrl = firstOutput.url()
+      console.log(`[${modelId}] Got URL from array element url() method:`, videoUrl)
+      return typeof videoUrl === 'string' ? videoUrl : videoUrl.toString()
+    }
+    
+    // Check if it's a FileOutput with toString()
+    if (firstOutput && typeof firstOutput.toString === 'function') {
+      const videoUrl = firstOutput.toString()
+      console.log(`[${modelId}] Got URL from array element toString():`, videoUrl)
+      return videoUrl
+    }
+    
+    // If it's already a string
+    if (typeof firstOutput === 'string') {
+      console.log(`[${modelId}] Array element is string:`, firstOutput)
+      return firstOutput
+    }
+    
+    // Fallback: return as-is
+    return firstOutput
   }
   
   // If output has url() method (Replicate FileOutput)
