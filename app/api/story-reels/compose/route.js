@@ -11,6 +11,8 @@ ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
 ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
 export const maxDuration = 300 // 5 minutes timeout
+export const dynamic = 'force-dynamic'
+export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
 
 export async function POST(request) {
   const jobId = randomUUID()
