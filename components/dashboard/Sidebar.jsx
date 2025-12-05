@@ -53,7 +53,8 @@ const navigation = [
     name: 'Video Tools',
     icon: Video,
     children: [
-      { name: 'Reels / Shorts', href: '/dashboard/tools/reels', icon: Film },
+      { name: 'Story Video Reels', href: '/dashboard/tools/story-reels', icon: Sparkles, badge: 'New' },
+      { name: 'Quick Video Generator', href: '/dashboard/tools/reels', icon: Film },
       { name: 'Long Form', href: '/dashboard/tools/long-form', icon: VideoIcon },
       { name: 'Auto Reels', href: '/dashboard/tools/auto-reels', icon: Zap },
       { name: 'Auto Long Form', href: '/dashboard/tools/auto-longform', icon: Zap },
