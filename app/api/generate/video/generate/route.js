@@ -139,6 +139,8 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   const isTextModel = modelId.includes('t2v') || modelId.includes('text')
   const isImageModel = modelId.includes('i2v') || modelId.includes('image')
   
+  console.log(`[${modelId}] generateWithModel called with inputImage:`, !!inputImage)
+  
   // Build input based on model type
   let input = {}
   
