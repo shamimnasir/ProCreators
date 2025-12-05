@@ -276,22 +276,29 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   
   console.log(`[${modelId}] Running with input:`, JSON.stringify(input).substring(0, 200))
   
-  //  Use predictions API instead of run() for better control
-  const prediction = await replicate.predictions.create({
-    version: modelId.split(':')[1], // Extract version ID from model string
+  // Use predictions.create and wait for completion
+  let prediction = await replicate.predictions.create({
+    version: modelId.split(':')[1], // Extract version ID from model string  
     input: input
   })
   
-  console.log(`[${modelId}] Prediction created:`, prediction.id)
-  console.log(`[${modelId}] Prediction status:`, prediction.status)
+  console.log(`[${modelId}] Prediction created:`, prediction.id, '- Status:', prediction.status)
   
-  // Wait for prediction to complete
-  const finalPrediction = await replicate.predictions.get(prediction.id)
+  // Poll until prediction completes
+  while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
+    await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+    prediction = await replicate.predictions.get(prediction.id)
+    console.log(`[${modelId}] Prediction status:`, prediction.status)
+  }
   
-  console.log(`[${modelId}] Final status:`, finalPrediction.status)
-  console.log(`[${modelId}] Output:`, finalPrediction.output)
+  if (prediction.status !== 'succeeded') {
+    throw new Error(`Prediction failed with status: ${prediction.status}`)
+  }
   
-  const output = finalPrediction.output
+  console.log(`[${modelId}] Prediction succeeded! Output type:`, typeof prediction.output)
+  console.log(`[${modelId}] Output:`, prediction.output)
+  
+  const output = prediction.output
   
   // Replicate returns a FileOutput object with url() method
   // Handle different output formats
