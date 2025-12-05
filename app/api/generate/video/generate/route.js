@@ -276,20 +276,22 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   
   console.log(`[${modelId}] Running with input:`, JSON.stringify(input).substring(0, 200))
   
-  const output = await replicate.run(modelId, { input })
+  //  Use predictions API instead of run() for better control
+  const prediction = await replicate.predictions.create({
+    version: modelId.split(':')[1], // Extract version ID from model string
+    input: input
+  })
   
-  console.log(`[${modelId}] Raw output:`, output)
-  console.log(`[${modelId}] Output type:`, typeof output)
-  console.log(`[${modelId}] Output keys:`, output ? Object.keys(output) : 'null')
-  console.log(`[${modelId}] Is array:`, Array.isArray(output))
+  console.log(`[${modelId}] Prediction created:`, prediction.id)
+  console.log(`[${modelId}] Prediction status:`, prediction.status)
   
-  // If output is an array, log details about first element
-  if (Array.isArray(output) && output.length > 0) {
-    console.log(`[${modelId}] First element type:`, typeof output[0])
-    console.log(`[${modelId}] First element keys:`, output[0] ? Object.keys(output[0]) : 'null')
-    console.log(`[${modelId}] Has url method:`, typeof output[0]?.url)
-    console.log(`[${modelId}] Has toString method:`, typeof output[0]?.toString)
-  }
+  // Wait for prediction to complete
+  const finalPrediction = await replicate.predictions.get(prediction.id)
+  
+  console.log(`[${modelId}] Final status:`, finalPrediction.status)
+  console.log(`[${modelId}] Output:`, finalPrediction.output)
+  
+  const output = finalPrediction.output
   
   // Replicate returns a FileOutput object with url() method
   // Handle different output formats
