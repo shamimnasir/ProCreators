@@ -6,6 +6,10 @@ import { randomUUID } from 'crypto'
 import ffmpeg from 'fluent-ffmpeg'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 
+// Set ffmpeg path
+ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
+ffmpeg.setFfprobePath('/usr/bin/ffprobe')
+
 export const maxDuration = 300 // 5 minutes timeout
 
 export async function POST(request) {
