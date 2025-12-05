@@ -277,7 +277,17 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   const output = await replicate.run(modelId, { input })
   
   console.log(`[${modelId}] Raw output:`, output)
+  console.log(`[${modelId}] Output type:`, typeof output)
   console.log(`[${modelId}] Output keys:`, output ? Object.keys(output) : 'null')
+  console.log(`[${modelId}] Is array:`, Array.isArray(output))
+  
+  // If output is an array, log details about first element
+  if (Array.isArray(output) && output.length > 0) {
+    console.log(`[${modelId}] First element type:`, typeof output[0])
+    console.log(`[${modelId}] First element keys:`, output[0] ? Object.keys(output[0]) : 'null')
+    console.log(`[${modelId}] Has url method:`, typeof output[0]?.url)
+    console.log(`[${modelId}] Has toString method:`, typeof output[0]?.toString)
+  }
   
   // Replicate returns a FileOutput object with url() method
   // Handle different output formats
