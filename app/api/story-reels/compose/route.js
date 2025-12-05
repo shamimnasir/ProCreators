@@ -231,12 +231,28 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 6: Read final video
-    console.log(`[${jobId}] Step 6: Finalizing...`)
+    // Step 6: Save video to public folder
+    console.log(`[${jobId}] Step 6: Saving video to public folder...`)
     const outputPath = existsSync(finalVideoPath) ? finalVideoPath : concatVideoPath
     const videoBuffer = await require('fs/promises').readFile(outputPath)
-    const base64Video = videoBuffer.toString('base64')
-    const videoDataUrl = `data:video/mp4;base64,${base64Video}`
+    
+    // Save to public folder
+    const publicVideoPath = `/app/public/story-reels/${jobId}.mp4`
+    await writeFile(publicVideoPath, videoBuffer)
+    console.log(`[${jobId}] Video saved to:`, publicVideoPath)
+    
+    // Generate public URL
+    const videoUrl = `/story-reels/${jobId}.mp4`
+
+    // Save captions to public folder
+    let captionsUrl = null
+    if (existsSync(captionsPath)) {
+      const captionsPublicPath = `/app/public/story-reels/${jobId}.srt`
+      const captionsBuffer = await require('fs/promises').readFile(captionsPath)
+      await writeFile(captionsPublicPath, captionsBuffer)
+      captionsUrl = `/story-reels/${jobId}.srt`
+      console.log(`[${jobId}] Captions saved to:`, captionsPublicPath)
+    }
 
     // Cleanup temp files
     console.log(`[${jobId}] Cleaning up temp files...`)
@@ -253,16 +269,17 @@ export async function POST(request) {
       console.log(`[${jobId}] Cleanup warning:`, e.message)
     }
 
-    console.log(`[${jobId}] Video composition complete!`)
+    console.log(`[${jobId}] Video composition complete! Size:`, videoBuffer.length, 'bytes')
 
     return NextResponse.json({
       success: true,
-      videoUrl: videoDataUrl,
-      captionsUrl: null, // Would be a URL to uploaded SRT file
+      videoUrl,
+      captionsUrl,
       jobId,
       duration,
       resolution,
       clipCount: videoFiles.length,
+      videoSize: videoBuffer.length,
       message: 'Story video created successfully!'
     })
 
