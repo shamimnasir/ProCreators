@@ -164,10 +164,26 @@ export async function POST(request) {
     const clipListContent = videoFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
 
-    // Step 4: Concatenate videos and add audio
-    console.log(`[${jobId}] Step 4: Composing final video...`)
-    const concatVideoPath = join(tempDir, 'concat.mp4')
+    // Step 4: Generate SRT captions
+    console.log(`[${jobId}] Step 4: Generating captions...`)
+    const captionsPath = join(tempDir, 'captions.srt')
+    const captionLines = generateCaptions(script, duration)
+    await writeFile(captionsPath, captionLines)
+
+    // Step 5: Concatenate videos, add audio, scale, and add captions in ONE pass
+    console.log(`[${jobId}] Step 5: Composing final video (optimized single-pass)...`)
+    const finalVideoPath = join(tempDir, 'final.mp4')
     
+    // Determine target height based on resolution
+    const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
+    
+    // Caption style mapping (simplified for better performance)
+    const captionFilters = {
+      'bold-outline': "FontName=Arial:FontSize=24:Bold=1:OutlineColour=&H80000000&:BorderStyle=1",
+      'karaoke': "FontName=Arial:FontSize=24:Bold=1:PrimaryColour=&H00FFFF&",
+      'animated': "FontName=Arial:FontSize=24:Bold=1:PrimaryColour=&H00FFFFFF&"
+    }
+
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(clipListPath)
@@ -175,15 +191,17 @@ export async function POST(request) {
         .input(audioPath)
         .outputOptions([
           '-c:v', 'libx264',
-          '-preset', 'fast',
-          '-crf', '23',
+          '-preset', 'ultrafast', // Much faster encoding
+          '-crf', '28', // Slightly lower quality but much faster
           '-c:a', 'aac',
+          '-b:a', '128k',
           '-shortest', // Cut video to audio length
-          '-vf', `scale=-2:${resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'}`
+          '-vf', `scale=-2:${targetHeight},subtitles=${captionsPath}:force_style='${captionFilters[captionStyle] || captionFilters['bold-outline']}'`,
+          '-movflags', '+faststart' // Web optimization
         ])
-        .output(concatVideoPath)
+        .output(finalVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video concatenation complete`)
+          console.log(`[${jobId}] Video composition complete (single-pass)`)
           resolve()
         })
         .on('error', (err) => {
@@ -192,41 +210,6 @@ export async function POST(request) {
         })
         .on('progress', (progress) => {
           console.log(`[${jobId}] Processing: ${Math.round(progress.percent || 0)}%`)
-        })
-        .run()
-    })
-
-    // Step 5: Add captions
-    console.log(`[${jobId}] Step 5: Adding captions...`)
-    const finalVideoPath = join(tempDir, 'final.mp4')
-    
-    // Generate SRT captions
-    const captionsPath = join(tempDir, 'captions.srt')
-    const captionLines = generateCaptions(script, duration)
-    await writeFile(captionsPath, captionLines)
-
-    // Caption style mapping
-    const captionFilters = {
-      'bold-outline': "FontName=Arial,FontSize=24,Bold=1,Outline=2,OutlineColour=&H00000000,BorderStyle=1",
-      'karaoke': "FontName=Arial,FontSize=28,Bold=1,PrimaryColour=&H00FFFF00,Karaoke=1",
-      'animated': "FontName=Arial,FontSize=26,Bold=1,PrimaryColour=&H00FFFFFF,Outline=2"
-    }
-
-    await new Promise((resolve, reject) => {
-      ffmpeg(concatVideoPath)
-        .outputOptions([
-          '-vf', `subtitles=${captionsPath}:force_style='${captionFilters[captionStyle] || captionFilters['bold-outline']}'`,
-          '-c:a', 'copy'
-        ])
-        .output(finalVideoPath)
-        .on('end', () => {
-          console.log(`[${jobId}] Captions added successfully`)
-          resolve()
-        })
-        .on('error', (err) => {
-          console.error(`[${jobId}] Caption error:`, err.message)
-          // If captions fail, use video without captions
-          resolve()
         })
         .run()
     })
