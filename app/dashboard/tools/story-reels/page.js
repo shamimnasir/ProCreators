@@ -571,9 +571,9 @@ export default function StoryReelsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="elevenlabs">ElevenLabs (Recommended)</SelectItem>
+                      <SelectItem value="google">Google TTS (Free, Recommended)</SelectItem>
+                      <SelectItem value="elevenlabs">ElevenLabs (Premium)</SelectItem>
                       <SelectItem value="openai">OpenAI TTS</SelectItem>
-                      <SelectItem value="google">Google TTS</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
