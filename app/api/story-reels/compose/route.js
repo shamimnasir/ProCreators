@@ -5,6 +5,7 @@ import { join } from 'path'
 import { randomUUID } from 'crypto'
 import ffmpeg from 'fluent-ffmpeg'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+import OpenAI from 'openai'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
