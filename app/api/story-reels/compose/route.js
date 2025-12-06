@@ -118,9 +118,75 @@ export async function POST(request) {
               .on('error', reject)
           })
         }
+      } else if (ttsProvider === 'google') {
+        // Google Cloud Text-to-Speech
+        try {
+          console.log(`[${jobId}] Calling Google Cloud TTS...`)
+          
+          // Determine language code
+          const languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
+          const voiceName = ttsLanguage === 'bn' ? 'bn-IN-Wavenet-A' : 'en-US-Wavenet-D'
+          
+          const response = await fetch(
+            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${process.env.GOOGLE_API_KEY}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                input: { text: script },
+                voice: {
+                  languageCode,
+                  name: voiceName,
+                  ssmlGender: 'NEUTRAL'
+                },
+                audioConfig: {
+                  audioEncoding: 'MP3',
+                  speakingRate: 1.0,
+                  pitch: 0.0
+                }
+              })
+            }
+          )
+
+          if (!response.ok) {
+            throw new Error(`Google TTS API failed: ${response.status} ${response.statusText}`)
+          }
+
+          const data = await response.json()
+          
+          if (!data.audioContent) {
+            throw new Error('No audio content in Google TTS response')
+          }
+
+          // Google returns base64 encoded audio
+          const audioBuffer = Buffer.from(data.audioContent, 'base64')
+          await writeFile(audioPath, audioBuffer)
+          
+          console.log(`[${jobId}] Google TTS generated successfully, size:`, audioBuffer.length)
+        } catch (googleTTSError) {
+          console.error(`[${jobId}] Google TTS failed:`, googleTTSError.message)
+          console.log(`[${jobId}] Falling back to silent audio...`)
+          
+          // Fallback to silent audio if Google TTS fails
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input('anullsrc=r=44100:cl=stereo')
+              .inputFormat('lavfi')
+              .duration(duration)
+              .audioCodec('libmp3lame')
+              .save(audioPath)
+              .on('end', () => {
+                console.log(`[${jobId}] Silent audio fallback created`)
+                resolve()
+              })
+              .on('error', reject)
+          })
+        }
       } else {
-        // Google TTS or silent fallback
-        console.log(`[${jobId}] Using silent audio fallback...`)
+        // Unknown provider - use silent fallback
+        console.log(`[${jobId}] Unknown TTS provider: ${ttsProvider}, using silent audio...`)
         await new Promise((resolve, reject) => {
           ffmpeg()
             .input('anullsrc=r=44100:cl=stereo')
