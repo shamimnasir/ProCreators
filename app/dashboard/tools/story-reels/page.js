@@ -663,15 +663,15 @@ export default function StoryReelsPage() {
             <TabsContent value="tts" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>TTS Provider</Label>
+                  <Label>Voice Provider</Label>
                   <Select value={ttsProvider} onValueChange={setTtsProvider}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="elevenlabs">ElevenLabs (Recommended - Standard Plan)</SelectItem>
-                      <SelectItem value="google">Google TTS (Free)</SelectItem>
-                      <SelectItem value="openai">OpenAI TTS</SelectItem>
+                      <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
+                      <SelectItem value="google">Google</SelectItem>
+                      <SelectItem value="openai">OpenAI</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
