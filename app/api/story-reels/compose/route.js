@@ -291,6 +291,12 @@ export async function POST(request) {
       for (const file of videoFiles) {
         await unlink(file).catch(() => {})
       }
+      // Clean up normalized files if they exist
+      if (normalizedFiles && normalizedFiles.length > 0) {
+        for (const file of normalizedFiles) {
+          await unlink(file).catch(() => {})
+        }
+      }
       await unlink(audioPath).catch(() => {})
       await unlink(concatVideoPath).catch(() => {})
       await unlink(finalVideoPath).catch(() => {})
