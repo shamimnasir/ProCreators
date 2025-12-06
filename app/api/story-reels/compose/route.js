@@ -219,8 +219,8 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 4: Trim concatenated video to audio duration and add audio
-    console.log(`[${jobId}] Step 4: Adding audio and trimming to ${duration} seconds...`)
+    // Step 4: Add audio to the concatenated video
+    console.log(`[${jobId}] Step 4: Adding audio...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     await new Promise((resolve, reject) => {
@@ -228,18 +228,13 @@ export async function POST(request) {
         .input(concatVideoPath)
         .input(audioPath)
         .outputOptions([
-          '-t', String(duration), // FORCE duration limit
-          '-c:v', 'libx264',
-          '-preset', 'ultrafast',
-          '-crf', '28',
+          '-c:v', 'copy', // Video is already processed, just copy
           '-c:a', 'aac',
           '-b:a', '128k',
-          '-vf', `scale=-2:${targetHeight}`,
           '-movflags', '+faststart',
-          '-pix_fmt', 'yuv420p',
           '-map', '0:v:0', // Map video from first input
           '-map', '1:a:0', // Map audio from second input
-          '-shortest' // Safety: stop at shortest stream
+          '-shortest' // Stop at shortest stream (audio or video)
         ])
         .output(finalVideoPath)
         .on('end', () => {
