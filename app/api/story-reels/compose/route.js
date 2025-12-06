@@ -164,31 +164,13 @@ export async function POST(request) {
     const clipListContent = videoFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
 
-    // Step 4: Generate SRT captions
-    console.log(`[${jobId}] Step 4: Generating captions...`)
-    const captionsPath = join(tempDir, 'captions.srt')
-    const captionLines = generateCaptions(script, duration)
-    await writeFile(captionsPath, captionLines)
-
-    // Step 5: Concatenate videos, add audio, scale, and add captions in ONE pass
-    console.log(`[${jobId}] Step 5: Composing final video (optimized single-pass)...`)
+    // Step 4: Concatenate videos and add audio (NO CAPTIONS FOR NOW - SIMPLIFIED)
+    console.log(`[${jobId}] Step 4: Composing final video...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     // Determine target height based on resolution
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
     
-    // Try to add captions, but don't fail if it doesn't work
-    let videoFilter = `scale=-2:${targetHeight}`
-    
-    try {
-      // Escape the captions path for FFmpeg
-      const escapedCaptionsPath = captionsPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:')
-      videoFilter = `scale=-2:${targetHeight},subtitles=${escapedCaptionsPath}`
-      console.log(`[${jobId}] Using video filter with captions:`, videoFilter)
-    } catch (e) {
-      console.log(`[${jobId}] Captions will be skipped, using scale only`)
-    }
-
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(clipListPath)
@@ -201,53 +183,30 @@ export async function POST(request) {
           '-c:a', 'aac',
           '-b:a', '128k',
           '-shortest', // Cut video to audio length
-          '-vf', videoFilter,
-          '-movflags', '+faststart' // Web optimization
+          '-vf', `scale=-2:${targetHeight}`,
+          '-movflags', '+faststart', // Web optimization
+          '-pix_fmt', 'yuv420p' // Ensure compatibility
         ])
         .output(finalVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video composition complete (single-pass)`)
+          console.log(`[${jobId}] Video composition complete`)
           resolve()
         })
         .on('error', (err) => {
           console.error(`[${jobId}] FFmpeg error:`, err.message)
-          
-          // If captions failed, try without them
-          if (videoFilter.includes('subtitles')) {
-            console.log(`[${jobId}] Retrying without captions...`)
-            ffmpeg()
-              .input(clipListPath)
-              .inputOptions(['-f', 'concat', '-safe', '0'])
-              .input(audioPath)
-              .outputOptions([
-                '-c:v', 'libx264',
-                '-preset', 'ultrafast',
-                '-crf', '28',
-                '-c:a', 'aac',
-                '-b:a', '128k',
-                '-shortest',
-                '-vf', `scale=-2:${targetHeight}`,
-                '-movflags', '+faststart'
-              ])
-              .output(finalVideoPath)
-              .on('end', () => {
-                console.log(`[${jobId}] Video composition complete (without captions)`)
-                resolve()
-              })
-              .on('error', (err2) => {
-                console.error(`[${jobId}] FFmpeg retry error:`, err2.message)
-                reject(err2)
-              })
-              .run()
-          } else {
-            reject(err)
-          }
+          reject(err)
         })
         .on('progress', (progress) => {
           console.log(`[${jobId}] Processing: ${Math.round(progress.percent || 0)}%`)
         })
         .run()
     })
+
+    // Step 5: Generate SRT captions file separately
+    console.log(`[${jobId}] Step 5: Generating captions file...`)
+    const captionsPath = join(tempDir, 'captions.srt')
+    const captionLines = generateCaptions(script, duration)
+    await writeFile(captionsPath, captionLines)
 
     // Step 6: Save video to public folder
     console.log(`[${jobId}] Step 6: Saving video to public folder...`)
