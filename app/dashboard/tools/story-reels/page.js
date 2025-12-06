@@ -591,6 +591,28 @@ export default function StoryReelsPage() {
                   </Select>
                 </div>
               </div>
+              
+              {/* Bengali Voice Selection - Only show for ElevenLabs + Bengali */}
+              {ttsProvider === 'elevenlabs' && ttsLanguage === 'bn' && (
+                <div className="space-y-2">
+                  <Label>Bengali Voice (Bangladeshi Accent)</Label>
+                  <Select value={bengaliVoice} onValueChange={setBengaliVoice}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="female-1">Bengali Female 1 (Natural, Expressive)</SelectItem>
+                      <SelectItem value="female-2">Bengali Female 2 (Soft, Calm)</SelectItem>
+                      <SelectItem value="male-1">Bengali Male 1 (Clear, Professional)</SelectItem>
+                      <SelectItem value="male-2">Bengali Male 2 (Deep, Storytelling)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Using Eleven Multilingual v2 model optimized for Bengali (Bangladeshi) accent
+                  </p>
+                </div>
+              )}
+              
               <p className="text-sm text-muted-foreground">
                 AI will generate voice narration for your script using {ttsProvider === 'elevenlabs' ? 'ElevenLabs' : ttsProvider === 'openai' ? 'OpenAI TTS' : 'Google TTS'}
               </p>
