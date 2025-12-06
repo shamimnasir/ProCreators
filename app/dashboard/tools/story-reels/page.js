@@ -244,6 +244,42 @@ export default function StoryReelsPage() {
     }
   }
 
+  // Load Bengali Voices from ElevenLabs
+  const handleLoadBengaliVoices = async () => {
+    setLoadingVoices(true)
+    try {
+      const response = await fetch('/api/story-reels/list-bengali-voices')
+      const data = await response.json()
+      
+      if (data.success && data.voices.length > 0) {
+        setAvailableVoices(data.voices)
+        // Set first voice as default if none selected
+        if (!bengaliVoice && data.voices.length > 0) {
+          setBengaliVoice(data.voices[0].voice_id)
+        }
+        toast({
+          title: "Voices Loaded",
+          description: `Found ${data.voices.length} Bengali/Multilingual voices`
+        })
+      } else {
+        toast({
+          title: "No Voices Found",
+          description: "Using default voice settings",
+          variant: "default"
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load voices. Using defaults.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingVoices(false)
+    }
+  }
+
+
   // Compose Final Video
   const handleCompose = async () => {
     // Validation
