@@ -171,52 +171,25 @@ export async function POST(request) {
           })
         }
       } else if (ttsProvider === 'google') {
-        // Google Cloud Text-to-Speech
+        // Google TTS (using gtts library - free, no API key needed)
         try {
-          console.log(`[${jobId}] Calling Google Cloud TTS...`)
+          console.log(`[${jobId}] Generating TTS with Google (gtts library)...`)
           
           // Determine language code
-          const languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
-          const voiceName = ttsLanguage === 'bn' ? 'bn-IN-Wavenet-A' : 'en-US-Wavenet-D'
+          const lang = ttsLanguage === 'bn' ? 'bn' : 'en'
           
-          const response = await fetch(
-            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${process.env.GOOGLE_API_KEY}`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                input: { text: script },
-                voice: {
-                  languageCode,
-                  name: voiceName,
-                  ssmlGender: 'NEUTRAL'
-                },
-                audioConfig: {
-                  audioEncoding: 'MP3',
-                  speakingRate: 1.0,
-                  pitch: 0.0
-                }
-              })
-            }
-          )
-
-          if (!response.ok) {
-            throw new Error(`Google TTS API failed: ${response.status} ${response.statusText}`)
-          }
-
-          const data = await response.json()
+          const speech = new gtts(script, lang)
           
-          if (!data.audioContent) {
-            throw new Error('No audio content in Google TTS response')
-          }
-
-          // Google returns base64 encoded audio
-          const audioBuffer = Buffer.from(data.audioContent, 'base64')
-          await writeFile(audioPath, audioBuffer)
-          
-          console.log(`[${jobId}] Google TTS generated successfully, size:`, audioBuffer.length)
+          await new Promise((resolve, reject) => {
+            speech.save(audioPath, (err) => {
+              if (err) {
+                reject(err)
+              } else {
+                console.log(`[${jobId}] Google TTS generated successfully`)
+                resolve()
+              }
+            })
+          })
         } catch (googleTTSError) {
           console.error(`[${jobId}] Google TTS failed:`, googleTTSError.message)
           console.log(`[${jobId}] Falling back to silent audio...`)
