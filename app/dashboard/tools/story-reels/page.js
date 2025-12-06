@@ -591,7 +591,7 @@ export default function StoryReelsPage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                AI will generate voice narration for your script using {ttsProvider === 'elevenlabs' ? 'ElevenLabs' : 'Google TTS'}
+                AI will generate voice narration for your script using {ttsProvider === 'openai' ? 'OpenAI TTS' : ttsProvider === 'elevenlabs' ? 'ElevenLabs' : 'Google TTS'}
               </p>
             </TabsContent>
 
