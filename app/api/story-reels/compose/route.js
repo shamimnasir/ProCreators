@@ -160,22 +160,49 @@ export async function POST(request) {
 
     // Step 3: Concatenate video clips first without audio
     console.log(`[${jobId}] Step 3: Concatenating video clips...`)
-    const clipListPath = join(tempDir, 'clips.txt')
-    const clipListContent = videoFiles.map(file => `file '${file}'`).join('\n')
-    await writeFile(clipListPath, clipListContent)
-    
-    const concatVideoPath = join(tempDir, 'concat.mp4')
     
     // Determine target height based on resolution
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
     
-    // First, concatenate videos
+    // Calculate duration per clip
+    const durationPerClip = duration / videoFiles.length
+    console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds`)
+    
+    const concatVideoPath = join(tempDir, 'concat.mp4')
+    
+    // Normalize and concatenate all clips
+    // We need to re-encode to ensure all clips have same codec/resolution
     await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(clipListPath)
-        .inputOptions(['-f', 'concat', '-safe', '0'])
+      const command = ffmpeg()
+      
+      // Add all video files as inputs
+      videoFiles.forEach(file => {
+        command.input(file)
+      })
+      
+      // Build filter_complex to normalize, trim, and concatenate all clips
+      const filterParts = []
+      
+      // For each clip: scale, trim to equal duration, set format
+      for (let i = 0; i < videoFiles.length; i++) {
+        filterParts.push(`[${i}:v]scale=-2:${targetHeight},trim=0:${durationPerClip},setpts=PTS-STARTPTS,fps=30,format=yuv420p[v${i}]`)
+      }
+      
+      // Concatenate all normalized clips
+      const concatInputs = videoFiles.map((_, i) => `[v${i}]`).join('')
+      filterParts.push(`${concatInputs}concat=n=${videoFiles.length}:v=1:a=0[outv]`)
+      
+      const filterComplex = filterParts.join(';')
+      
+      command
+        .complexFilter(filterComplex)
         .outputOptions([
-          '-c', 'copy', // Copy codec (fast, no re-encoding)
+          '-map', '[outv]',
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p',
+          '-movflags', '+faststart'
         ])
         .output(concatVideoPath)
         .on('end', () => {
@@ -185,6 +212,9 @@ export async function POST(request) {
         .on('error', (err) => {
           console.error(`[${jobId}] Concat error:`, err.message)
           reject(err)
+        })
+        .on('progress', (progress) => {
+          console.log(`[${jobId}] Concatenating: ${Math.round(progress.percent || 0)}%`)
         })
         .run()
     })
