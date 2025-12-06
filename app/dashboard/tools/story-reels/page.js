@@ -36,7 +36,10 @@ export default function StoryReelsPage() {
   const [recordedAudio, setRecordedAudio] = useState(null)
   const [ttsProvider, setTtsProvider] = useState('elevenlabs')
   const [ttsLanguage, setTtsLanguage] = useState('bn')
-  const [bengaliVoice, setBengaliVoice] = useState('female-1') // Bengali voice selection
+  const [bengaliVoice, setBengaliVoice] = useState('') // Bengali voice ID
+  const [availableVoices, setAvailableVoices] = useState([]) // Dynamically loaded voices
+  const [loadingVoices, setLoadingVoices] = useState(false)
+  const [useCustomVoice, setUseCustomVoice] = useState(false) // Toggle between preset and custom
   
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
