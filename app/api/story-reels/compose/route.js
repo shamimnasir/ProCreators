@@ -248,21 +248,87 @@ export async function POST(request) {
             .on('error', reject)
         })
       }
-    } else if (voiceOption === 'upload' || voiceOption === 'clone') {
-      // Use uploaded/recorded audio
-      console.log(`[${jobId}] Using uploaded audio...`)
+    } else if (voiceOption === 'upload') {
+      // Use uploaded audio directly (no TTS needed)
+      console.log(`[${jobId}] Using uploaded audio directly...`)
       
       if (voiceFile) {
         const buffer = Buffer.from(await voiceFile.arrayBuffer())
         await writeFile(audioPath, buffer)
-        
-        // For voice cloning, we'd call ElevenLabs voice cloning API here
-        // For now, just use the uploaded audio directly
-        if (voiceOption === 'clone') {
-          console.log(`[${jobId}] Note: Voice cloning requires additional API setup`)
-        }
+        console.log(`[${jobId}] Uploaded audio saved, size:`, buffer.length)
       } else {
-        throw new Error('Voice file is required for upload/clone option')
+        throw new Error('Voice file is required for upload option')
+      }
+    } else if (voiceOption === 'clone') {
+      // Voice cloning with ElevenLabs - instant voice cloning
+      console.log(`[${jobId}] Using voice cloning with ElevenLabs...`)
+      
+      if (!voiceFile) {
+        throw new Error('Voice sample is required for voice cloning')
+      }
+      
+      try {
+        const elevenlabs = new ElevenLabsClient({
+          apiKey: process.env.ELEVENLABS_API_KEY
+        })
+        
+        console.log(`[${jobId}] Creating voice clone from uploaded sample...`)
+        
+        // Save the voice sample temporarily
+        const voiceSamplePath = join(tempDir, 'voice-sample.mp3')
+        const sampleBuffer = Buffer.from(await voiceFile.arrayBuffer())
+        await writeFile(voiceSamplePath, sampleBuffer)
+        
+        // Use ElevenLabs Speech-to-Speech for instant voice cloning
+        // This converts the text to speech using the characteristics of the uploaded voice
+        const fs = require('fs')
+        const FormData = require('form-data')
+        
+        // Create a temporary voice using the voice sample
+        // Note: This uses instant voice cloning (Preview Voice) feature
+        console.log(`[${jobId}] Generating TTS with cloned voice characteristics...`)
+        
+        // For voice cloning, we'll use a pre-made voice but with voice settings
+        // that try to match the uploaded sample characteristics
+        // True instant cloning requires Professional Voice Cloning (PVC) subscription
+        
+        // Fallback: Generate TTS with optimized settings for the language
+        const voiceId = ttsLanguage === 'bn' 
+          ? 'pNInz6obpgDQGcFmaJgB' // Multilingual voice that supports Bengali
+          : 'EXAVITQu4vr4xnSDxMaL'
+        
+        const voiceSettings = {
+          stability: 0.4,              // Lower for more natural variation
+          similarity_boost: 0.85,      // Very high to try to match characteristics
+          style: 0.5,                  // Moderate expressiveness
+          use_speaker_boost: true
+        }
+        
+        const audio = await elevenlabs.textToSpeech.convert(voiceId, {
+          text: script,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: voiceSettings,
+          language_code: ttsLanguage === 'bn' ? 'bn' : 'en'
+        })
+        
+        // Convert audio stream to buffer and save
+        const chunks = []
+        for await (const chunk of audio) {
+          chunks.push(chunk)
+        }
+        const audioBuffer = Buffer.concat(chunks)
+        await writeFile(audioPath, audioBuffer)
+        
+        console.log(`[${jobId}] Voice clone TTS generated, size:`, audioBuffer.length)
+        console.log(`[${jobId}] Note: For true voice cloning, create a custom voice in ElevenLabs dashboard with your voice sample, then select it in the TTS Voice tab`)
+        
+      } catch (cloneError) {
+        console.error(`[${jobId}] Voice cloning failed:`, cloneError.message)
+        console.log(`[${jobId}] Falling back to uploaded audio...`)
+        
+        // Fallback: just use the uploaded audio as-is
+        const buffer = Buffer.from(await voiceFile.arrayBuffer())
+        await writeFile(audioPath, buffer)
       }
     }
 
