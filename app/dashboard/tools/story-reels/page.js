@@ -272,6 +272,7 @@ export default function StoryReelsPage() {
       formData.append('voiceOption', voiceOption)
       formData.append('ttsProvider', ttsProvider)
       formData.append('ttsLanguage', ttsLanguage)
+      formData.append('bengaliVoice', bengaliVoice)
       formData.append('captionStyle', captionStyle)
       formData.append('musicTrack', musicTrack)
       formData.append('resolution', resolution)
