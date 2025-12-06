@@ -73,7 +73,46 @@ export async function POST(request) {
       // Generate TTS
       console.log(`[${jobId}] Generating TTS with ${ttsProvider}...`)
       
-      if (ttsProvider === 'elevenlabs') {
+      if (ttsProvider === 'openai') {
+        // OpenAI TTS
+        try {
+          console.log(`[${jobId}] Calling OpenAI TTS...`)
+          
+          const openai = new OpenAI({
+            apiKey: process.env.EMERGENT_LLM_KEY,
+            baseURL: 'https://api.openai.com/v1'
+          })
+
+          const mp3 = await openai.audio.speech.create({
+            model: "tts-1",
+            voice: "alloy",
+            input: script,
+          })
+
+          const buffer = Buffer.from(await mp3.arrayBuffer())
+          await writeFile(audioPath, buffer)
+          
+          console.log(`[${jobId}] OpenAI TTS generated successfully, size:`, buffer.length)
+        } catch (openaiError) {
+          console.error(`[${jobId}] OpenAI TTS failed:`, openaiError.message)
+          console.log(`[${jobId}] Falling back to silent audio...`)
+          
+          // Fallback to silent audio
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input('anullsrc=r=44100:cl=stereo')
+              .inputFormat('lavfi')
+              .duration(duration)
+              .audioCodec('libmp3lame')
+              .save(audioPath)
+              .on('end', () => {
+                console.log(`[${jobId}] Silent audio fallback created`)
+                resolve()
+              })
+              .on('error', reject)
+          })
+        }
+      } else if (ttsProvider === 'elevenlabs') {
         try {
           const elevenlabs = new ElevenLabsClient({
             apiKey: process.env.ELEVENLABS_API_KEY
