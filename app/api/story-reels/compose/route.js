@@ -42,7 +42,7 @@ export async function POST(request) {
     console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsProvider, captionStyle, resolution })
     console.log(`[${jobId}] Stock videos:`, stockVideos.length)
 
-    // Step 1: Download stock videos
+    // Step 1: Download stock videos using streams to save memory
     console.log(`[${jobId}] Step 1: Downloading ${stockVideos.length} stock videos...`)
     const videoFiles = []
     
@@ -52,8 +52,19 @@ export async function POST(request) {
       
       try {
         const response = await fetch(video.url)
-        const buffer = Buffer.from(await response.arrayBuffer())
-        await writeFile(videoPath, buffer)
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        
+        // Stream the response directly to file to avoid loading entire video in memory
+        const fileStream = require('fs').createWriteStream(videoPath)
+        await new Promise((resolve, reject) => {
+          response.body.pipe(fileStream)
+          response.body.on('error', reject)
+          fileStream.on('finish', resolve)
+          fileStream.on('error', reject)
+        })
+        
         videoFiles.push(videoPath)
         console.log(`[${jobId}] Downloaded clip ${i + 1}/${stockVideos.length}`)
       } catch (error) {
