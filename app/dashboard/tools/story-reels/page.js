@@ -332,7 +332,7 @@ export default function StoryReelsPage() {
   }
 
   // Load saved voices on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     handleLoadSavedVoices()
   }, [])
 
