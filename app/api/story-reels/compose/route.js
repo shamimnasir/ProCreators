@@ -45,6 +45,8 @@ export async function POST(request) {
     // Step 1: Download stock videos using streams to save memory
     console.log(`[${jobId}] Step 1: Downloading ${stockVideos.length} stock videos...`)
     const videoFiles = []
+    const { Readable } = require('stream')
+    const { pipeline } = require('stream/promises')
     
     for (let i = 0; i < stockVideos.length; i++) {
       const video = stockVideos[i]
@@ -56,14 +58,12 @@ export async function POST(request) {
           throw new Error(`HTTP ${response.status}`)
         }
         
-        // Stream the response directly to file to avoid loading entire video in memory
+        // Convert Web Stream to Node Stream and pipe to file
         const fileStream = require('fs').createWriteStream(videoPath)
-        await new Promise((resolve, reject) => {
-          response.body.pipe(fileStream)
-          response.body.on('error', reject)
-          fileStream.on('finish', resolve)
-          fileStream.on('error', reject)
-        })
+        await pipeline(
+          Readable.fromWeb(response.body),
+          fileStream
+        )
         
         videoFiles.push(videoPath)
         console.log(`[${jobId}] Downloaded clip ${i + 1}/${stockVideos.length}`)
