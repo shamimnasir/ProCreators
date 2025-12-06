@@ -247,40 +247,94 @@ export default function StoryReelsPage() {
     }
   }
 
-  // Load Bengali Voices from ElevenLabs
-  const handleLoadBengaliVoices = async () => {
-    setLoadingVoices(true)
+  // Load Saved Voices
+  const handleLoadSavedVoices = async () => {
     try {
-      const response = await fetch('/api/story-reels/list-bengali-voices')
+      const response = await fetch('/api/story-reels/save-voice')
       const data = await response.json()
       
-      if (data.success && data.voices.length > 0) {
-        setAvailableVoices(data.voices)
-        // Set first voice as default if none selected
-        if (!bengaliVoice && data.voices.length > 0) {
-          setBengaliVoice(data.voices[0].voice_id)
-        }
+      if (data.success) {
+        setSavedVoices(data.voices)
+      }
+    } catch (error) {
+      console.error('Error loading saved voices:', error)
+    }
+  }
+
+  // Save Voice Clone Permanently
+  const handleSaveVoiceClone = async () => {
+    if (!newVoiceName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a name for your voice",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!voiceFile && !recordedAudio) {
+      toast({
+        title: "Error",
+        description: "Please record or upload audio first",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setSavingVoice(true)
+    try {
+      const formData = new FormData()
+      formData.append('voiceName', newVoiceName)
+      formData.append('language', ttsLanguage)
+      
+      if (voiceFile) {
+        formData.append('voiceFile', voiceFile)
+      } else if (recordedAudio) {
+        const audioBlob = await fetch(recordedAudio).then(r => r.blob())
+        formData.append('voiceFile', audioBlob, 'recording.wav')
+      }
+
+      const response = await fetch('/api/story-reels/save-voice', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
         toast({
-          title: "Voices Loaded",
-          description: `Found ${data.voices.length} Bengali/Multilingual voices`
+          title: "Voice Saved!",
+          description: `"${newVoiceName}" is now available for all future videos`
         })
+        
+        // Reload saved voices
+        await handleLoadSavedVoices()
+        
+        // Select the newly saved voice
+        setBengaliVoice(data.voice_id)
+        
+        // Reset dialog
+        setShowSaveVoiceDialog(false)
+        setNewVoiceName('')
+        setVoiceOption('tts') // Switch to TTS tab to use the saved voice
       } else {
-        toast({
-          title: "No Voices Found",
-          description: "Using default voice settings",
-          variant: "default"
-        })
+        throw new Error(data.error)
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load voices. Using defaults.",
+        description: error.message || "Failed to save voice",
         variant: "destructive"
       })
     } finally {
-      setLoadingVoices(false)
+      setSavingVoice(false)
     }
   }
+
+  // Load saved voices on component mount
+  React.useEffect(() => {
+    handleLoadSavedVoices()
+  }, [])
 
 
   // Compose Final Video
