@@ -33,6 +33,7 @@ export async function POST(request) {
     const voiceOption = formData.get('voiceOption')
     const ttsProvider = formData.get('ttsProvider')
     const ttsLanguage = formData.get('ttsLanguage')
+    const bengaliVoice = formData.get('bengaliVoice') || 'female-1'
     const captionStyle = formData.get('captionStyle')
     const musicTrack = formData.get('musicTrack')
     const resolution = formData.get('resolution')
