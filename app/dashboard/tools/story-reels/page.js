@@ -755,26 +755,20 @@ export default function StoryReelsPage() {
             <TabsContent value="clone" className="space-y-4 mt-4">
               <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
                 <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                  🎯 Best Solution for Natural Bengali Voice
+                  🎯 Create Your Custom Bengali Voice
                 </h4>
-                <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                  For the most natural Bangladeshi accent, record or upload audio from a native Bengali speaker:
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Record or upload 1-2 minutes of native Bengali speech to create a reusable voice for all future videos.
                 </p>
-                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-4 list-disc">
-                  <li>Record at least 1-2 minutes of clear Bengali speech</li>
-                  <li>Use a quiet environment with minimal background noise</li>
-                  <li>Speak naturally with emotion and expression</li>
-                  <li>This voice will be used for this video only (instant voice cloning)</li>
-                </ul>
               </div>
               
-              <div className="space-y-2">
-                <Label>Record Voice Sample (1-2 minutes recommended)</Label>
+              <div className="space-y-3">
+                <Label>Step 1: Record or Upload Audio</Label>
                 <div className="flex gap-2">
                   {!recording && !recordedAudio && (
                     <Button onClick={startRecording} className="flex-1">
                       <Mic className="mr-2 h-4 w-4" />
-                      Start Recording
+                      Record Voice
                     </Button>
                   )}
                   {recording && (
@@ -797,14 +791,58 @@ export default function StoryReelsPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Record native Bengali speech for instant voice cloning. The AI will use this voice for narration.
-                </p>
               </div>
-              
-              <div className="text-xs text-muted-foreground p-3 bg-muted rounded">
-                <strong>Note:</strong> This uses instant voice cloning. For a permanent custom voice in your ElevenLabs library, create a voice in your ElevenLabs dashboard, then load it using the "TTS Voice" tab.
-              </div>
+
+              {(voiceFile || recordedAudio) && !showSaveVoiceDialog && (
+                <div className="space-y-3">
+                  <Label>Step 2: Save Your Voice</Label>
+                  <Button 
+                    onClick={() => setShowSaveVoiceDialog(true)} 
+                    className="w-full"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Save Voice for Future Use
+                  </Button>
+                </div>
+              )}
+
+              {showSaveVoiceDialog && (
+                <div className="space-y-3 p-4 border rounded-lg">
+                  <Label>Give Your Voice a Name</Label>
+                  <input
+                    type="text"
+                    value={newVoiceName}
+                    onChange={(e) => setNewVoiceName(e.target.value)}
+                    placeholder="e.g., My Bengali Voice"
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleSaveVoiceClone}
+                      disabled={savingVoice || !newVoiceName.trim()}
+                      className="flex-1"
+                    >
+                      {savingVoice ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Save Voice
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      onClick={() => setShowSaveVoiceDialog(false)}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
