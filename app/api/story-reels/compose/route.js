@@ -309,6 +309,7 @@ export async function POST(request) {
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
+    console.log(`[${jobId}] Concat list created with ${normalizedFiles.length} files`)
     
     const concatVideoPath = join(tempDir, 'concat.mp4')
     
