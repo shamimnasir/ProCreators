@@ -131,22 +131,20 @@ export async function POST(request) {
             apiKey: process.env.ELEVENLABS_API_KEY
           })
 
-          // Bengali Voice Mapping - Optimized for Bangladeshi accent
-          // Note: Replace these IDs with actual Bengali voice IDs from your ElevenLabs Voice Library
-          const bengaliVoiceMap = {
-            'female-1': 'Xb7hH8MSUJpSbSDYk0k2', // Female - Natural, Expressive (Rachel - multilingual)
-            'female-2': 'EXAVITQu4vr4xnSDxMaL', // Female - Soft, Calm (Sarah - multilingual)
-            'male-1': 'pNInz6obpgDQGcFmaJgB', // Male - Clear, Professional (Adam - multilingual)
-            'male-2': 'TxGEqnHWrfWFTfGW9XjX', // Male - Deep, Storytelling (Josh - multilingual)
-          }
-
           // Select voice based on language and user selection
           let voiceId
           if (ttsLanguage === 'bn') {
-            voiceId = bengaliVoiceMap[bengaliVoice] || bengaliVoiceMap['female-1']
-            console.log(`[${jobId}] Using Bengali voice: ${bengaliVoice} (${voiceId})`)
+            // If bengaliVoice is provided and looks like a voice ID (long alphanumeric), use it directly
+            if (bengaliVoice && bengaliVoice.length > 15) {
+              voiceId = bengaliVoice
+              console.log(`[${jobId}] Using user-selected Bengali voice ID: ${voiceId}`)
+            } else {
+              // Fallback to default multilingual voice if no selection
+              voiceId = 'pNInz6obpgDQGcFmaJgB' // Adam - multilingual default
+              console.log(`[${jobId}] Using default multilingual voice (no Bengali voice selected)`)
+            }
           } else {
-            voiceId = 'EXAVITQu4vr4xnSDxMaL' // Default English voice
+            voiceId = 'EXAVITQu4vr4xnSDxMaL' // Default English voice (Sarah)
           }
           
           console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
