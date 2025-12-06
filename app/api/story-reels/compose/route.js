@@ -177,11 +177,16 @@ export async function POST(request) {
     // Determine target height based on resolution
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
     
-    // Caption style mapping (simplified for better performance)
-    const captionFilters = {
-      'bold-outline': "FontName=Arial:FontSize=24:Bold=1:OutlineColour=&H80000000&:BorderStyle=1",
-      'karaoke': "FontName=Arial:FontSize=24:Bold=1:PrimaryColour=&H00FFFF&",
-      'animated': "FontName=Arial:FontSize=24:Bold=1:PrimaryColour=&H00FFFFFF&"
+    // Try to add captions, but don't fail if it doesn't work
+    let videoFilter = `scale=-2:${targetHeight}`
+    
+    try {
+      // Escape the captions path for FFmpeg
+      const escapedCaptionsPath = captionsPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:')
+      videoFilter = `scale=-2:${targetHeight},subtitles=${escapedCaptionsPath}`
+      console.log(`[${jobId}] Using video filter with captions:`, videoFilter)
+    } catch (e) {
+      console.log(`[${jobId}] Captions will be skipped, using scale only`)
     }
 
     await new Promise((resolve, reject) => {
@@ -196,7 +201,7 @@ export async function POST(request) {
           '-c:a', 'aac',
           '-b:a', '128k',
           '-shortest', // Cut video to audio length
-          '-vf', `scale=-2:${targetHeight},subtitles=${captionsPath}:force_style='${captionFilters[captionStyle] || captionFilters['bold-outline']}'`,
+          '-vf', videoFilter,
           '-movflags', '+faststart' // Web optimization
         ])
         .output(finalVideoPath)
@@ -206,7 +211,37 @@ export async function POST(request) {
         })
         .on('error', (err) => {
           console.error(`[${jobId}] FFmpeg error:`, err.message)
-          reject(err)
+          
+          // If captions failed, try without them
+          if (videoFilter.includes('subtitles')) {
+            console.log(`[${jobId}] Retrying without captions...`)
+            ffmpeg()
+              .input(clipListPath)
+              .inputOptions(['-f', 'concat', '-safe', '0'])
+              .input(audioPath)
+              .outputOptions([
+                '-c:v', 'libx264',
+                '-preset', 'ultrafast',
+                '-crf', '28',
+                '-c:a', 'aac',
+                '-b:a', '128k',
+                '-shortest',
+                '-vf', `scale=-2:${targetHeight}`,
+                '-movflags', '+faststart'
+              ])
+              .output(finalVideoPath)
+              .on('end', () => {
+                console.log(`[${jobId}] Video composition complete (without captions)`)
+                resolve()
+              })
+              .on('error', (err2) => {
+                console.error(`[${jobId}] FFmpeg retry error:`, err2.message)
+                reject(err2)
+              })
+              .run()
+          } else {
+            reject(err)
+          }
         })
         .on('progress', (progress) => {
           console.log(`[${jobId}] Processing: ${Math.round(progress.percent || 0)}%`)
