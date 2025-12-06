@@ -738,8 +738,23 @@ export default function StoryReelsPage() {
             </TabsContent>
 
             <TabsContent value="clone" className="space-y-4 mt-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  🎯 Best Solution for Natural Bengali Voice
+                </h4>
+                <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                  For the most natural Bangladeshi accent, record or upload audio from a native Bengali speaker:
+                </p>
+                <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1 ml-4 list-disc">
+                  <li>Record at least 1-2 minutes of clear Bengali speech</li>
+                  <li>Use a quiet environment with minimal background noise</li>
+                  <li>Speak naturally with emotion and expression</li>
+                  <li>This voice will be used for this video only (instant voice cloning)</li>
+                </ul>
+              </div>
+              
               <div className="space-y-2">
-                <Label>Record Voice Sample (30 seconds)</Label>
+                <Label>Record Voice Sample (1-2 minutes recommended)</Label>
                 <div className="flex gap-2">
                   {!recording && !recordedAudio && (
                     <Button onClick={startRecording} className="flex-1">
@@ -768,8 +783,12 @@ export default function StoryReelsPage() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Record a 30-second sample of your voice. AI will clone it for the full narration.
+                  Record native Bengali speech for instant voice cloning. The AI will use this voice for narration.
                 </p>
+              </div>
+              
+              <div className="text-xs text-muted-foreground p-3 bg-muted rounded">
+                <strong>Note:</strong> This uses instant voice cloning. For a permanent custom voice in your ElevenLabs library, create a voice in your ElevenLabs dashboard, then load it using the "TTS Voice" tab.
               </div>
             </TabsContent>
           </Tabs>
