@@ -39,7 +39,10 @@ export default function StoryReelsPage() {
   const [bengaliVoice, setBengaliVoice] = useState('') // Bengali voice ID
   const [availableVoices, setAvailableVoices] = useState([]) // Dynamically loaded voices
   const [loadingVoices, setLoadingVoices] = useState(false)
-  const [useCustomVoice, setUseCustomVoice] = useState(false) // Toggle between preset and custom
+  const [savedVoices, setSavedVoices] = useState([]) // User's saved voices
+  const [showSaveVoiceDialog, setShowSaveVoiceDialog] = useState(false)
+  const [newVoiceName, setNewVoiceName] = useState('')
+  const [savingVoice, setSavingVoice] = useState(false)
   
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
