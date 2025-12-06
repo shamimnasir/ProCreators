@@ -34,7 +34,7 @@ export default function StoryReelsPage() {
   const [voiceFilePreview, setVoiceFilePreview] = useState(null)
   const [recording, setRecording] = useState(false)
   const [recordedAudio, setRecordedAudio] = useState(null)
-  const [ttsProvider, setTtsProvider] = useState('google')
+  const [ttsProvider, setTtsProvider] = useState('elevenlabs')
   const [ttsLanguage, setTtsLanguage] = useState('bn')
   
   // Composition state
