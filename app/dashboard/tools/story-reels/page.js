@@ -36,6 +36,7 @@ export default function StoryReelsPage() {
   const [recordedAudio, setRecordedAudio] = useState(null)
   const [ttsProvider, setTtsProvider] = useState('elevenlabs')
   const [ttsLanguage, setTtsLanguage] = useState('bn')
+  const [bengaliVoice, setBengaliVoice] = useState('female-1') // Bengali voice selection
   
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
