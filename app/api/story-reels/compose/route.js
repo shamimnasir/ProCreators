@@ -131,16 +131,39 @@ export async function POST(request) {
             apiKey: process.env.ELEVENLABS_API_KEY
           })
 
-          // Use appropriate voice based on language
-          const voiceId = ttsLanguage === 'bn' 
-            ? 'pNInz6obpgDQGcFmaJgB' // Adam (works for multiple languages)
-            : 'EXAVITQu4vr4xnSDxMaL' // Sarah
+          // Bengali Voice Mapping - Optimized for Bangladeshi accent
+          // Note: Replace these IDs with actual Bengali voice IDs from your ElevenLabs Voice Library
+          const bengaliVoiceMap = {
+            'female-1': 'Xb7hH8MSUJpSbSDYk0k2', // Female - Natural, Expressive (Rachel - multilingual)
+            'female-2': 'EXAVITQu4vr4xnSDxMaL', // Female - Soft, Calm (Sarah - multilingual)
+            'male-1': 'pNInz6obpgDQGcFmaJgB', // Male - Clear, Professional (Adam - multilingual)
+            'male-2': 'TxGEqnHWrfWFTfGW9XjX', // Male - Deep, Storytelling (Josh - multilingual)
+          }
+
+          // Select voice based on language and user selection
+          let voiceId
+          if (ttsLanguage === 'bn') {
+            voiceId = bengaliVoiceMap[bengaliVoice] || bengaliVoiceMap['female-1']
+            console.log(`[${jobId}] Using Bengali voice: ${bengaliVoice} (${voiceId})`)
+          } else {
+            voiceId = 'EXAVITQu4vr4xnSDxMaL' // Default English voice
+          }
           
           console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
           
+          // Voice settings optimized for natural Bengali speech
+          const voiceSettings = {
+            stability: 0.5,        // Moderate stability for natural variation
+            similarity_boost: 0.75, // High similarity to maintain voice character
+            style: 0.3,             // Moderate style for expressiveness
+            use_speaker_boost: true // Enhanced clarity
+          }
+          
           const audio = await elevenlabs.textToSpeech.convert(voiceId, {
             text: script,
-            model_id: 'eleven_multilingual_v2'
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: voiceSettings,
+            language_code: ttsLanguage === 'bn' ? 'bn' : 'en' // Explicit language code
           })
 
           // Convert audio stream to buffer
