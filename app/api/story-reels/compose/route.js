@@ -158,8 +158,8 @@ export async function POST(request) {
       throw new Error('Audio file was not created')
     }
 
-    // Step 3: Concatenate video clips first without audio
-    console.log(`[${jobId}] Step 3: Concatenating video clips...`)
+    // Step 3: Normalize each clip individually, then concatenate
+    console.log(`[${jobId}] Step 3: Processing and concatenating video clips...`)
     
     // Determine target height based on resolution
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
@@ -168,41 +168,50 @@ export async function POST(request) {
     const durationPerClip = duration / videoFiles.length
     console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds`)
     
+    // Step 3a: Normalize each clip individually
+    const normalizedFiles = []
+    for (let i = 0; i < videoFiles.length; i++) {
+      const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
+      
+      await new Promise((resolve, reject) => {
+        ffmpeg(videoFiles[i])
+          .outputOptions([
+            '-vf', `scale=-2:${targetHeight},fps=30`,
+            '-t', String(durationPerClip),
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-crf', '28',
+            '-pix_fmt', 'yuv420p',
+            '-an' // Remove audio from individual clips
+          ])
+          .output(normalizedPath)
+          .on('end', () => {
+            normalizedFiles.push(normalizedPath)
+            console.log(`[${jobId}] Normalized clip ${i + 1}/${videoFiles.length}`)
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[${jobId}] Error normalizing clip ${i}:`, err.message)
+            reject(err)
+          })
+          .run()
+      })
+    }
+    
+    // Step 3b: Concatenate normalized clips
+    console.log(`[${jobId}] Concatenating ${normalizedFiles.length} normalized clips...`)
+    const clipListPath = join(tempDir, 'clips.txt')
+    const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
+    await writeFile(clipListPath, clipListContent)
+    
     const concatVideoPath = join(tempDir, 'concat.mp4')
     
-    // Normalize and concatenate all clips
-    // We need to re-encode to ensure all clips have same codec/resolution
     await new Promise((resolve, reject) => {
-      const command = ffmpeg()
-      
-      // Add all video files as inputs
-      videoFiles.forEach(file => {
-        command.input(file)
-      })
-      
-      // Build filter_complex to normalize, trim, and concatenate all clips
-      const filterParts = []
-      
-      // For each clip: scale, trim to equal duration, set format
-      for (let i = 0; i < videoFiles.length; i++) {
-        filterParts.push(`[${i}:v]scale=-2:${targetHeight},trim=0:${durationPerClip},setpts=PTS-STARTPTS,fps=30,format=yuv420p[v${i}]`)
-      }
-      
-      // Concatenate all normalized clips
-      const concatInputs = videoFiles.map((_, i) => `[v${i}]`).join('')
-      filterParts.push(`${concatInputs}concat=n=${videoFiles.length}:v=1:a=0[outv]`)
-      
-      const filterComplex = filterParts.join(';')
-      
-      command
-        .complexFilter(filterComplex)
+      ffmpeg()
+        .input(clipListPath)
+        .inputOptions(['-f', 'concat', '-safe', '0'])
         .outputOptions([
-          '-map', '[outv]',
-          '-c:v', 'libx264',
-          '-preset', 'ultrafast',
-          '-crf', '28',
-          '-pix_fmt', 'yuv420p',
-          '-movflags', '+faststart'
+          '-c', 'copy' // Now we can safely copy since all clips are normalized
         ])
         .output(concatVideoPath)
         .on('end', () => {
@@ -212,9 +221,6 @@ export async function POST(request) {
         .on('error', (err) => {
           console.error(`[${jobId}] Concat error:`, err.message)
           reject(err)
-        })
-        .on('progress', (progress) => {
-          console.log(`[${jobId}] Concatenating: ${Math.round(progress.percent || 0)}%`)
         })
         .run()
     })
