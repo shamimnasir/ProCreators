@@ -80,7 +80,7 @@ export async function POST(request) {
           
           const openai = new OpenAI({
             apiKey: process.env.EMERGENT_LLM_KEY,
-            baseURL: 'https://api.openai.com/v1'
+            baseURL: 'https://api.emergentagi.com/v1'
           })
 
           const mp3 = await openai.audio.speech.create({
