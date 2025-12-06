@@ -317,16 +317,24 @@ export async function POST(request) {
         .input(clipListPath)
         .inputOptions(['-f', 'concat', '-safe', '0'])
         .outputOptions([
-          '-c', 'copy' // Now we can safely copy since all clips are normalized
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '28',
+          '-pix_fmt', 'yuv420p'
         ])
         .output(concatVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video clips concatenated`)
+          console.log(`[${jobId}] Video clips concatenated successfully`)
           resolve()
         })
         .on('error', (err) => {
           console.error(`[${jobId}] Concat error:`, err.message)
           reject(err)
+        })
+        .on('progress', (progress) => {
+          if (progress.percent) {
+            console.log(`[${jobId}] Concat progress: ${Math.round(progress.percent)}%`)
+          }
         })
         .run()
     })
