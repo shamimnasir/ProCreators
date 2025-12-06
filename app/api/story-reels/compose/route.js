@@ -158,34 +158,58 @@ export async function POST(request) {
       throw new Error('Audio file was not created')
     }
 
-    // Step 3: Create video clips list for concatenation
-    console.log(`[${jobId}] Step 3: Preparing video clips...`)
+    // Step 3: Concatenate video clips first without audio
+    console.log(`[${jobId}] Step 3: Concatenating video clips...`)
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = videoFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
-
-    // Step 4: Concatenate videos and add audio (NO CAPTIONS FOR NOW - SIMPLIFIED)
-    console.log(`[${jobId}] Step 4: Composing final video...`)
-    const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    const concatVideoPath = join(tempDir, 'concat.mp4')
     
     // Determine target height based on resolution
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
     
+    // First, concatenate videos
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(clipListPath)
         .inputOptions(['-f', 'concat', '-safe', '0'])
+        .outputOptions([
+          '-c', 'copy', // Copy codec (fast, no re-encoding)
+        ])
+        .output(concatVideoPath)
+        .on('end', () => {
+          console.log(`[${jobId}] Video clips concatenated`)
+          resolve()
+        })
+        .on('error', (err) => {
+          console.error(`[${jobId}] Concat error:`, err.message)
+          reject(err)
+        })
+        .run()
+    })
+
+    // Step 4: Trim concatenated video to audio duration and add audio
+    console.log(`[${jobId}] Step 4: Adding audio and trimming to ${duration} seconds...`)
+    const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(concatVideoPath)
         .input(audioPath)
         .outputOptions([
+          '-t', String(duration), // FORCE duration limit
           '-c:v', 'libx264',
-          '-preset', 'ultrafast', // Much faster encoding
-          '-crf', '28', // Slightly lower quality but much faster
+          '-preset', 'ultrafast',
+          '-crf', '28',
           '-c:a', 'aac',
           '-b:a', '128k',
-          '-shortest', // Cut video to audio length
           '-vf', `scale=-2:${targetHeight}`,
-          '-movflags', '+faststart', // Web optimization
-          '-pix_fmt', 'yuv420p' // Ensure compatibility
+          '-movflags', '+faststart',
+          '-pix_fmt', 'yuv420p',
+          '-map', '0:v:0', // Map video from first input
+          '-map', '1:a:0', // Map audio from second input
+          '-shortest' // Safety: stop at shortest stream
         ])
         .output(finalVideoPath)
         .on('end', () => {
