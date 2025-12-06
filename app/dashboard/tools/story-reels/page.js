@@ -723,8 +723,8 @@ export default function StoryReelsPage() {
             </TabsContent>
 
             <TabsContent value="upload" className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Upload Your Voice Recording</Label>
+              <div className="space-y-3">
+                <Label>Upload Bengali Voice Recording</Label>
                 <div 
                   className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
                   onClick={() => audioFileRef.current?.click()}
@@ -738,7 +738,8 @@ export default function StoryReelsPage() {
                   ) : (
                     <div>
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">Click to upload voice file (MP3, WAV)</p>
+                      <p className="text-sm text-muted-foreground">Click to upload (MP3, WAV, M4A)</p>
+                      <p className="text-xs text-muted-foreground mt-1">1-2 minutes recommended</p>
                     </div>
                   )}
                 </div>
@@ -750,6 +751,54 @@ export default function StoryReelsPage() {
                   className="hidden"
                 />
               </div>
+
+              {voiceFile && !showSaveVoiceDialog && (
+                <Button 
+                  onClick={() => setShowSaveVoiceDialog(true)} 
+                  className="w-full"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Save Voice for Future Use
+                </Button>
+              )}
+
+              {showSaveVoiceDialog && (
+                <div className="space-y-3 p-4 border rounded-lg">
+                  <Label>Give Your Voice a Name</Label>
+                  <input
+                    type="text"
+                    value={newVoiceName}
+                    onChange={(e) => setNewVoiceName(e.target.value)}
+                    placeholder="e.g., My Bengali Voice"
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleSaveVoiceClone}
+                      disabled={savingVoice || !newVoiceName.trim()}
+                      className="flex-1"
+                    >
+                      {savingVoice ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Save Voice
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      onClick={() => setShowSaveVoiceDialog(false)}
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="clone" className="space-y-4 mt-4">
