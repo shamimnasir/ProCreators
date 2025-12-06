@@ -634,22 +634,71 @@ export default function StoryReelsPage() {
               
               {/* Bengali Voice Selection - Only show for ElevenLabs + Bengali */}
               {ttsProvider === 'elevenlabs' && ttsLanguage === 'bn' && (
-                <div className="space-y-2">
-                  <Label>Bengali Voice (Bangladeshi Accent)</Label>
-                  <Select value={bengaliVoice} onValueChange={setBengaliVoice}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="female-1">Bengali Female 1 (Natural, Expressive)</SelectItem>
-                      <SelectItem value="female-2">Bengali Female 2 (Soft, Calm)</SelectItem>
-                      <SelectItem value="male-1">Bengali Male 1 (Clear, Professional)</SelectItem>
-                      <SelectItem value="male-2">Bengali Male 2 (Deep, Storytelling)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Using Eleven Multilingual v2 model optimized for Bengali (Bangladeshi) accent
-                  </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Bengali Voice Selection</Label>
+                    <Button
+                      onClick={handleLoadBengaliVoices}
+                      disabled={loadingVoices}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {loadingVoices ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-3 w-3" />
+                          Load Available Voices
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {availableVoices.length > 0 ? (
+                    <div className="space-y-2">
+                      <Select value={bengaliVoice} onValueChange={setBengaliVoice}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a voice..." />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                          {availableVoices.map((voice) => (
+                            <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{voice.name}</span>
+                                {voice.description && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {voice.description.substring(0, 60)}
+                                    {voice.description.length > 60 ? '...' : ''}
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        ✅ {availableVoices.length} voices loaded from your ElevenLabs account
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-4 border border-dashed rounded-lg text-center">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Click "Load Available Voices" to see voices from your ElevenLabs account
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        💡 Tip: For best Bengali quality, clone a native Bengali speaker's voice
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <p className="text-xs text-amber-900 dark:text-amber-100">
+                      <strong>⚠️ Important:</strong> For natural Bengali (Bangladeshi) accent, use the "Voice Clone" tab to upload a sample from a native Bengali speaker, or create a custom voice in your ElevenLabs account.
+                    </p>
+                  </div>
                 </div>
               )}
               
