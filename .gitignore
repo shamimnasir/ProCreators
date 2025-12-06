@@ -100,3 +100,11 @@ node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
 *.env
 *.env.*
 public/story-reels/cd222af9-03c7-4cf3-aad3-0a6edfa98148.mp4
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*

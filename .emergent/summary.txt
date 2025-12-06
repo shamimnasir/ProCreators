@@ -1,91 +1,102 @@
 <analysis>
-The trajectory chronicles a comprehensive development cycle for the ProCreators application, moving from bug fixes to major feature implementations. The initial work involved implementing an auto-save feature across all content generation tools, which required refactoring each tool's frontend page to remove manual save buttons and integrate API calls into the generation flow.
+The trajectory details a complex development journey, starting with bug fixes for an existing Reels/Shorts Creator and evolving into the creation of a new, sophisticated Story Video Reels feature. The initial work involved removing a non-functional talking head feature, simplifying the UI, and fixing a critical video generation bug caused by an updated Replicate SDK.
 
-A significant portion of the work was dedicated to a major UI fix for the application's light mode. The engineer diagnosed that hardcoded dark-theme colors were causing components like the sidebar, header, and footer to become invisible. The fix involved systematically updating multiple layout components, page files, and  to use semantic, theme-aware TailwindCSS classes and CSS variables.
+The core of the work was building the new Story Video Reels feature from the ground up, based on user specifications. This involved integrating Pexels for stock videos, ElevenLabs and Google for TTS, and using Gemini for AI-driven script and keyword generation.
 
-Following the UI fix, the engineer enhanced the AI's content quality by integrating viral hooks into the system prompts () and updated the UI text on tool pages to better reflect their purpose.
+The most significant challenge was the server-side video composition using FFmpeg. The engineer battled numerous issues:
+1.  **Performance bottlenecks**: Initial FFmpeg commands were extremely slow, causing frontend timeouts.
+2.  **Environment instability**: The development pod crashed due to memory limits and had to be upgraded. Key dependencies like FFmpeg needed re-installation after system restarts.
+3.  **API issues**: The ElevenLabs API key hit its free-tier limit, requiring the implementation of fallback logic.
+4.  **FFmpeg errors**: Incorrect command syntax for subtitles and concatenation led to failures and faulty outputs (e.g., a 2.38-hour video instead of 30 seconds).
 
-The most substantial effort was building the Reels/Shorts Creator from scratch. This involved installing , integrating multiple video generation APIs via Replicate (handling API keys, credit issues, and a demo mode), implementing a smart multi-model backend, and building a complex UI with multi-input support (text, object image, talking head image). The final interactions involved debugging video generation, implementing video previews with progress bars, adding platform-specific aspect ratios, and starting to fix bugs related to video editing, downloading, and the talking head feature.
+The engineer systematically debugged these issues by analyzing logs, optimizing FFmpeg commands, and adapting to environment changes. The final action was a major refactor of the FFmpeg logic to fix the video duration and composition issue.
 
 The user's primary language is English. The next agent must respond in English only.
 </analysis>
-
 <product_requirements>
-The project is ProCreators, an AI-powered SaaS platform designed to help content creators generate a variety of social media assets.
+The project is ProCreators, an AI-powered SaaS platform for social media content. The primary goal was to build a new feature, **Story Video Reels,** to replace a simpler, bug-ridden video generator.
 
-**Core Features Implemented:**
-*   **AI Content Tools:** Generators for Threads, Quotes, News, Lists, Photo Cards, and Carousels.
-*   **Automatic Content Library:** All generated content is automatically saved to a MongoDB-backed library with a tier-based expiration policy. Manual save buttons have been removed.
-*   **Viral Content Enhancement:** System prompts have been engineered to include viral hooks at the beginning of generated text content to increase engagement.
-*   **Advanced Reels/Shorts Creator:** A sophisticated tool for generating vertical videos.
-    *   **Multi-Input System:** Accepts a text topic, a main character/object image, and an optional talking head image, with smart logic to create scripts based on the provided inputs.
-    *   **Multi-Model Backend:** Uses Replicate to intelligently select from various video generation models (e.g., SVD, Luma) based on user-selected quality modes (Budget, Pro), abstracting the underlying model from the user.
-    *   **Platform-Specific Aspect Ratios:** Allows users to select a target platform (TikTok, YouTube Shorts, Instagram Reels) to generate videos in the correct 9:16 vertical format.
-    *   **Basic Editing:** UI for trimming and applying filters.
-    *   **UI/UX:** Features a video preview, download button, and a progress bar during generation.
-*   **Theming:** Supports both light and dark modes across the entire application, including public-facing pages and the user dashboard.
+**Feature Requirements:**
+
+1.  **Core Workflow:** The user provides a script (manually or AI-generated). The system then automatically creates a short video (10-60 seconds) by:
+    *   Extracting thematic **English** keywords from the script (regardless of script language, e.g., Bengali).
+    *   Fetching short stock video clips from Pexels based on these keywords.
+    *   Generating a voiceover using TTS (ElevenLabs/Google) or allowing user voice upload/cloning (deferred).
+    *   Compositing the video clips, voiceover, background music, and viral-style captions.
+
+2.  **User Interface:**
+    *   A dedicated page at .
+    *   Inputs for script, duration (10-60s), resolution (720p-4k), and voice options.
+    *   UI to show extracted keywords and preview fetched video clips.
+    *   A final video preview with a download button.
+
+3.  **Technical Constraints:**
+    *   Must handle video composition on the server-side using FFmpeg.
+    *   The final output should be a downloadable MP4 file.
+    *   The feature should be robust and performant enough to avoid frontend timeouts.
+    *   Initial implementation should defer the credit system and focus on core functionality.
 </product_requirements>
-
 <key_technical_concepts>
 - **Framework:** Next.js 14 (App Router)
-- **Styling:** TailwindCSS with shadcn/ui, using semantic colors for theming.
-- **Backend:** Next.js API Routes orchestrating Python scripts and external APIs.
-- **Database:** MongoDB for storing user-generated content in a library collection.
-- **AI/Video Integration:**
-  - Replicate API for multi-model video generation (SVD, Luma, etc.).
-  - Gemini API for AI text/script generation.
-  -  for server-side video editing (trimming, filters).
-- **State Management:** React Hooks (, ).
+- **Styling:** TailwindCSS, shadcn/ui
+- **Backend:** Next.js API Routes
+- **Video/Audio Processing:**
+  - **FFmpeg:** Core technology for server-side video composition (concatenation, scaling, adding audio, burning subtitles).
+  - **fluent-ffmpeg:** Node.js wrapper for FFmpeg.
+- **Third-Party APIs:**
+  - **Pexels API:** For fetching stock videos.
+  - **ElevenLabs API & Google TTS:** For text-to-speech generation.
+  - **Gemini API:** For AI script generation and thematic keyword extraction.
+- **Libraries:**  (initially for NLP, removed due to memory issues).
 </key_technical_concepts>
-
 <code_architecture>
-The application uses a standard Next.js App Router structure, with server-side logic in API routes and frontend components in the  and  directories. A key pattern is using Node.js API routes to call external services (like Replicate) and local Python scripts for processing.
+The architecture is a standard Next.js application, with a clear separation between frontend pages and backend API routes. The new Story Video Reels feature added a significant number of new files.
 
 **Directory Structure:**
 
-   - ****
-      - **Importance:** This file contains the entire complex frontend for the Reels/Shorts Creator. It manages state for the three-input system, script generation, video generation progress, video preview, and editing controls.
-      - **Summary of Changes:** It was created from a basic placeholder and evolved to include a multi-tab input form, a video generation mode selector, a platform aspect ratio selector, a progress bar, a video preview player, and download/edit buttons.
 
-   - ****
-      - **Importance:** The core backend orchestrator for video generation. It receives requests from the frontend, prepares data (including uploaded images), and uses the Replicate API to run video models.
-      - **Summary of Changes:** It was created and heavily modified to implement a smart multi-model selection system based on the user's chosen mode (Budget, Quality, etc.). It was updated to handle image inputs and pass platform-specific aspect ratio parameters to the models. Logic was also added to correctly parse the video URL from various Replicate response structures.
+- ****
+  - **Importance:** This is the heart of the feature. It's a complex, long-running endpoint that orchestrates the entire video creation process: fetching Pexels videos, generating TTS audio, and executing a multi-stage FFmpeg pipeline to compose the final video.
+  - **Summary of Changes:** Created from scratch. It underwent numerous, critical revisions to solve performance bottlenecks and FFmpeg errors. The logic was refactored multiple times, moving from a single, slow FFmpeg command to a more robust two-pass system (fast concatenation, then audio/trim pass). It was also modified to save the final video to the  directory instead of returning a large base64 string.
 
-   - ****
-      - **Importance:** This endpoint generates the viral video script based on the user's multiple inputs (text, object image, talking head image).
-      - **Summary of Changes:** Initially created to call an Anthropic model, it was refactored to use the working Gemini API. The system prompt within this file was significantly improved to prevent AI hallucination and to handle the complex logic of the three-input system, generating a tailored script for each scenario.
+- ****
+  - **Importance:** This file contains the complete frontend for the Story Video Reels feature. It manages all user inputs (script, duration, etc.) and the UI state for the multi-step generation process, including showing progress and the final video preview.
+  - **Summary of Changes:** Created from scratch to provide the full user interface as specified in the requirements. It makes API calls to the various  endpoints.
 
-    - ****
-      - **Importance:** A new endpoint created to handle server-side video editing using FFmpeg.
-      - **Summary of Changes:** This file was just created in response to the user's request to fix the non-functional Apply Changes button for video edits. It is intended to take a video URL and editing parameters (trim, filter) and produce an edited video.
+- ****
+  - **Importance:** Responsible for analyzing the user's script to find keywords for Pexels.
+  - **Summary of Changes:** Initially implemented with the  NLP library, but it caused the server to crash due to high memory usage. It was then refactored to use the Gemini API to intelligently extract thematic *English* keywords from scripts of any language, which resolved both the performance and video relevance issues.
 
-   - **, , **
-      - **Importance:** These files control the global styling and layout of the application.
-      - **Summary of Changes:** They were all modified to fix a major light-mode UI bug by replacing hardcoded dark colors (e.g., ) with semantic theme variables (e.g., , ), ensuring the UI is legible in both light and dark themes.
+- ****
+  - **Importance:** This was the original, simpler video generator.
+  - **Summary of Changes:** Was heavily modified to first remove the talking head feature and later to remove video editing/trimming controls to simplify the UI, per user requests.
+
+- ****
+  - **Importance:** The main navigation component for the dashboard.
+  - **Summary of Changes:** A link to the new Story Video Reels page was added to make the feature accessible to users.
 </code_architecture>
-
 <pending_tasks>
-- Fix the Apply changes button for video editing to ensure FFmpeg correctly processes trims/filters.
-- Fix the video download button to download the *edited* video, not the original.
-- Implement the talking head video generation functionality, as it currently does not work as intended.
-- Ensure all generated videos are automatically saved to the library with correct categorization.
-- Implement the Usage Statistics update on the user profile page.
-- Implement the full CMS for blog/docs.
-- Implement user authentication and payments.
+- **Implement Voice Features:** The user explicitly deferred implementing the voice cloning and user voice upload functionalities.
+- **Implement Credit System:** The credit cost structure and integration were deferred to be handled before final deployment.
+- **Fix Frontend Timeout:** The frontend still gets stuck at 90% because it's not designed to handle long-running backend jobs. A polling system or webhooks are needed.
+- **Re-enable Captions:** Captions were disabled in the FFmpeg command to isolate and fix a more critical composition bug. They need to be re-implemented correctly.
+- **Implement Background Music:** The UI and backend logic for selecting and adding background music needs to be completed.
 </pending_tasks>
-
 <current_work>
-The immediate task is to fix three critical bugs in the Reels/Shorts Creator tool, as reported by the user in Chat Message 475. The AI engineer had just started tackling these issues.
+The engineer was actively debugging a critical failure in the Story Video Reels FFmpeg pipeline. A previously successful video generation resulted in a faulty 2.38-hour video file that only contained the first 3-second clip, with no additional scenes, audio, or music.
 
-1.  **Video Edits Not Applying:** The user reported that settings applied in the Video Editing section (like trim) are not reflected in the final downloaded video. The engineer created a new API endpoint at  to handle FFmpeg processing, but the initial logs showed it was not working correctly (processing 0 frames).
+**Diagnosis:**
+The root cause was an incorrect and inefficient FFmpeg command. The  flag, intended to trim the video to the audio's length, was not functioning as expected during the complex single-pass concatenation, leading to an uncontrolled video duration.
 
-2.  **Broken Download Button:** The download button under the video preview is not functioning correctly. This is likely tied to the editing issue, as the desired behavior is to download the *edited* video.
+**Immediate Last Action:**
+To fix this, the engineer refactored the FFmpeg logic in . The single, complex command was replaced with a more reliable two-step process:
 
-3.  **Talking Head Functionality Broken:** The feature to generate a video with a talking head is not working. The generated video does not follow the script or incorporate the uploaded talking head image.
+1.  **Fast Concatenation:** First, all downloaded Pexels video clips are concatenated into a single intermediate video file using a fast, stream-copy method (). This avoids slow re-encoding.
+    
+2.  **Audio & Trim:** Second, a new FFmpeg command takes the intermediate video, adds the generated audio (TTS), and uses the  flag to strictly trim the final output to the user-specified duration (e.g., 30 seconds).
 
-The work was paused immediately after identifying an issue with the FFmpeg logic in the newly created . The next step was to debug and correctly implement the server-side video editing.
+This change was just completed, and the server was ready for the next test run to verify if this new approach correctly assembles the video to the specified length with all its components.
 </current_work>
-
 <optional_next_step>
-Fix the video editing logic in  to correctly apply trims and filters using FFmpeg and ensure it returns the URL of the edited video.
+Test the newly implemented two-pass FFmpeg logic in  to confirm it generates a correctly timed video (10-60s) with all video clips and audio, resolving the 2.38-hour video bug.
 </optional_next_step>
