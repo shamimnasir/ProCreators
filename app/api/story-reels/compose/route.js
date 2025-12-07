@@ -453,25 +453,88 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight) {
   const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
   
   // Style based on caption style
-  let primaryColor = '&H00FFFFFF' // White
+  let primaryColor = '&H00FFFFFF' // White (default)
   let outlineColor = '&H00000000' // Black
   let outline = 2
   let shadow = 1
+  let bold = -1 // -1 = bold
+  let fontName = 'Noto Sans Bengali UI'
+  let alignment = 2 // 2 = bottom center, 5 = middle center, 8 = top center
   
   switch (captionStyle) {
     case 'karaoke':
-      primaryColor = '&H0000FFFF' // Yellow/Cyan
-      outline = 2
+      primaryColor = '&H0000FFFF' // Yellow
+      outlineColor = '&H00000000' // Black outline
+      outline = 3
       shadow = 1
+      bold = -1
+      alignment = 2 // Bottom
       break
     case 'animated':
-      outline = 1
+      primaryColor = '&H00FFFFFF' // White
+      outlineColor = '&H00000000' // Black outline
+      outline = 2
       shadow = 3
+      bold = -1
+      alignment = 2 // Bottom
+      break
+    case 'neon-glow':
+      primaryColor = '&H00FF00FF' // Magenta/Pink
+      outlineColor = '&H00FF00FF' // Same color for glow effect
+      outline = 4
+      shadow = 6
+      bold = -1
+      alignment = 2 // Bottom
+      break
+    case 'yellow-highlight':
+      primaryColor = '&H00000000' // Black text
+      outlineColor = '&H0000FFFF' // Yellow outline/background
+      outline = 8 // Thick outline for highlight effect
+      shadow = 0
+      bold = -1
+      alignment = 2 // Bottom
+      break
+    case 'zoomed-in':
+      primaryColor = '&H00FFFFFF' // White
+      outlineColor = '&H00000000' // Black outline
+      outline = 4
+      shadow = 2
+      bold = -1
+      fontSize = Math.floor(fontSize * 1.5) // 50% larger
+      alignment = 5 // Center of screen
+      break
+    case 'gradient-pop':
+      primaryColor = '&H00FFD700' // Gold
+      outlineColor = '&H00FF1493' // Deep pink outline
+      outline = 3
+      shadow = 4
+      bold = -1
+      alignment = 2 // Bottom
+      break
+    case 'minimal-clean':
+      primaryColor = '&H00FFFFFF' // White
+      outlineColor = '&H00000000' // Black outline
+      outline = 1
+      shadow = 0
+      bold = 0 // Not bold
+      alignment = 8 // Top
+      break
+    case 'tiktok-style':
+      primaryColor = '&H00FFFFFF' // White
+      outlineColor = '&H000000FF' // Red outline (TikTok vibe)
+      outline = 3
+      shadow = 2
+      bold = -1
+      alignment = 2 // Bottom
       break
     case 'bold-outline':
     default:
+      primaryColor = '&H00FFFFFF' // White
+      outlineColor = '&H00000000' // Black
       outline = 2
       shadow = 1
+      bold = -1
+      alignment = 2 // Bottom
   }
   
   // ASS Header
