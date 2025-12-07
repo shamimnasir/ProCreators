@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix 3 critical bugs in Reels/Shorts Creator: 1) Video editing not applying (FFmpeg issue), 2) Download button not working, 3) Talking head feature broken. Also ensure all videos are auto-saved to library."
+user_problem_statement: "Replace ElevenLabs TTS with Google Cloud Text-to-Speech API using language_code parameter (bn for Bengali) to ensure proper Bengali text normalization and authentic Bangladeshi accent."
 
 backend:
   - task: "Video Editing API (FFmpeg)"
