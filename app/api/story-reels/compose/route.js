@@ -267,8 +267,8 @@ export async function POST(request) {
     const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight)
     await writeFile(captionsPath, captionContent, 'utf8')
 
-    // Step 5: Add background music if requested
-    console.log(`[${jobId}] Step 5: Processing audio and music...`)
+    // Step 6: Add background music if requested
+    console.log(`[${jobId}] Step 6: Processing audio and music...`)
     let finalAudioPath = audioPath
     
     if (musicTrack !== 'none') {
