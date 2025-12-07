@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
-import FormData from 'form-data'
-import fs from 'fs'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -24,46 +22,33 @@ export async function POST(request) {
 
     console.log(`[Voice Clone] Creating voice clone: ${voiceName}`)
 
-    // Save voice sample temporarily
-    const tempId = randomUUID()
-    const tempPath = join('/tmp', `voice-sample-${tempId}.mp3`)
+    // Convert the uploaded file to buffer
     const buffer = Buffer.from(await voiceFile.arrayBuffer())
-    await writeFile(tempPath, buffer)
-
-    console.log(`[Voice Clone] Voice sample saved, size: ${buffer.length} bytes`)
+    console.log(`[Voice Clone] Voice sample received, size: ${buffer.length} bytes`)
 
     try {
-      // Create form data for ElevenLabs API
+      // Create new FormData for ElevenLabs API
       const elevenLabsFormData = new FormData()
       elevenLabsFormData.append('name', voiceName)
       elevenLabsFormData.append('description', description)
       
-      // Ensure the file exists before creating stream
-      if (!fs.existsSync(tempPath)) {
-        throw new Error(`Voice sample file not found at ${tempPath}`)
-      }
-      
-      const stats = fs.statSync(tempPath)
-      console.log(`[Voice Clone] File stats: size=${stats.size}, exists=true`)
-      
-      // Add the audio file - the key is 'files' not 'file'
-      elevenLabsFormData.append('files', fs.createReadStream(tempPath), {
-        filename: `voice_sample.mp3`,
-        contentType: 'audio/mpeg'
-      })
+      // Create a new Blob from the buffer and append it as 'files'
+      const audioBlob = new Blob([buffer], { type: voiceFile.type || 'audio/mpeg' })
+      elevenLabsFormData.append('files', audioBlob, voiceFile.name || 'voice_sample.mp3')
 
       console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API with data:`, {
         name: voiceName,
         description: description,
-        fileSize: stats.size
+        fileSize: buffer.length,
+        fileName: voiceFile.name || 'voice_sample.mp3'
       })
 
       // Make direct API call to ElevenLabs
       const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
         method: 'POST',
         headers: {
-          'xi-api-key': process.env.ELEVENLABS_API_KEY,
-          ...elevenLabsFormData.getHeaders()
+          'xi-api-key': process.env.ELEVENLABS_API_KEY
+          // Don't set Content-Type, let the browser set it for FormData
         },
         body: elevenLabsFormData
       })
@@ -79,9 +64,6 @@ export async function POST(request) {
       const result = await response.json()
       console.log(`[Voice Clone] Voice cloned successfully! Voice ID: ${result.voice_id}`)
 
-      // Cleanup temp file
-      await unlink(tempPath).catch(() => {})
-
       return NextResponse.json({
         success: true,
         voiceId: result.voice_id,
@@ -91,10 +73,6 @@ export async function POST(request) {
 
     } catch (cloneError) {
       console.error(`[Voice Clone] ElevenLabs API error:`, cloneError)
-      
-      // Cleanup temp file
-      await unlink(tempPath).catch(() => {})
-      
       throw new Error(cloneError.message || 'Failed to clone voice')
     }
 
