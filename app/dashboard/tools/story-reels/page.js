@@ -184,7 +184,7 @@ export default function StoryReelsPage() {
       return
     }
     if (!selectedVoiceId) {
-      toast({ title: "Error", description: "Please select a voice", variant: "destructive" })
+      toast({ title: "Error", description: "Please select a voice or upload your recording", variant: "destructive" })
       return
     }
 
@@ -196,15 +196,25 @@ export default function StoryReelsPage() {
       const formData = new FormData()
       formData.append('script', script)
       formData.append('duration', duration)
-      formData.append('voiceOption', 'tts') // Always use TTS with selected voice
-      formData.append('ttsProvider', 'elevenlabs')
-      formData.append('ttsLanguage', ttsLanguage)
-      formData.append('bengaliVoice', selectedVoiceId) // Use selected voice ID (premade or cloned)
       formData.append('captionStyle', captionStyle)
       formData.append('musicTrack', musicTrack)
       formData.append('resolution', resolution)
       formData.append('stockVideos', JSON.stringify(stockVideos))
       formData.append('keywords', JSON.stringify(keywords))
+
+      // Handle different voice options
+      if (selectedVoiceId === 'use-original-recording') {
+        // Use original recording - no AI processing
+        formData.append('voiceOption', 'upload')
+        formData.append('voiceFile', voiceFile)
+        console.log('Using original recording - perfect Bangladeshi accent preservation!')
+      } else {
+        // Use TTS with selected voice (premade or cloned)
+        formData.append('voiceOption', 'tts')
+        formData.append('ttsProvider', 'elevenlabs')
+        formData.append('ttsLanguage', ttsLanguage)
+        formData.append('bengaliVoice', selectedVoiceId)
+      }
 
       // Simulate progress for better UX
       const progressInterval = setInterval(() => {
