@@ -280,7 +280,7 @@ export async function POST(request) {
     // Step 5: Generate ASS captions file synced with actual audio duration
     console.log(`[${jobId}] Step 5: Generating captions synced with audio...`)
     const captionsPath = join(tempDir, 'captions.ass')
-    const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight)
+    const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight, captionFontSize, captionPosition)
     await writeFile(captionsPath, captionContent, 'utf8')
 
     // Step 6: Add background music if requested
