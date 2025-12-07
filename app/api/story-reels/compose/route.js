@@ -149,19 +149,23 @@ export async function POST(request) {
           
           console.log(`[${jobId}] Calling ElevenLabs TTS with voice:`, voiceId)
           
-          // Voice settings optimized for natural Bengali speech
+          // Voice settings optimized for authentic Bangladeshi Bengali pronunciation
           const voiceSettings = {
-            stability: 0.5,        // Moderate stability for natural variation
-            similarity_boost: 0.75, // High similarity to maintain voice character
-            style: 0.3,             // Moderate style for expressiveness
-            use_speaker_boost: true // Enhanced clarity
+            stability: 0.8,        // Higher stability for consistent Bangladeshi accent patterns
+            similarity_boost: 0.95, // Very high similarity to preserve natural pronunciation
+            style: 0.2,             // Lower style to reduce AI interpretation, maintain natural speech
+            use_speaker_boost: true // Enhanced clarity for better accent clarity
           }
+          
+          console.log(`[${jobId}] Using Bangladeshi-optimized voice settings for voice: ${voiceId}`)
           
           const audio = await elevenlabs.textToSpeech.convert(voiceId, {
             text: script,
             model_id: 'eleven_multilingual_v2',
             voice_settings: voiceSettings,
-            language_code: ttsLanguage === 'bn' ? 'bn' : 'en' // Explicit language code
+            language_code: 'bn', // Always use Bengali for better regional accent
+            optimize_streaming_latency: 0, // Highest quality over speed
+            output_format: 'mp3_44100_128' // High quality output for better accent clarity
           })
 
           // Convert audio stream to buffer
