@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, unlink } from 'fs/promises'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
+import { VoiceStorage } from '@/lib/voiceStorage'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -64,11 +62,30 @@ export async function POST(request) {
       const result = await response.json()
       console.log(`[Voice Clone] Voice cloned successfully! Voice ID: ${result.voice_id}`)
 
+      // Save voice metadata to our database for permanent storage
+      console.log(`[Voice Clone] Saving voice metadata to database...`)
+      const dbResult = await VoiceStorage.saveVoice({
+        voice_id: result.voice_id,
+        voice_name: voiceName,
+        description: description,
+        language: 'bn', // Default to Bengali
+        file_size: buffer.length,
+        user_id: 'default' // For future multi-user support
+      })
+
+      if (dbResult.success) {
+        console.log(`[Voice Clone] Voice metadata saved to database successfully`)
+      } else {
+        console.error(`[Voice Clone] Failed to save voice metadata:`, dbResult.error)
+        // Don't fail the entire operation if DB save fails
+      }
+
       return NextResponse.json({
         success: true,
         voiceId: result.voice_id,
         voiceName: voiceName,
-        message: 'Voice cloned successfully! You can now use it for text-to-speech.'
+        message: 'Voice cloned and saved successfully! You can now use it for all future videos.',
+        dbSaved: dbResult.success
       })
 
     } catch (cloneError) {
