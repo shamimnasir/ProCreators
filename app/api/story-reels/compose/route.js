@@ -334,14 +334,8 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 5: Generate SRT captions file separately
-    console.log(`[${jobId}] Step 5: Generating captions file...`)
-    const captionsPath = join(tempDir, 'captions.srt')
-    const captionLines = generateCaptions(script, duration)
-    await writeFile(captionsPath, captionLines)
-
-    // Step 6: Save video to public folder
-    console.log(`[${jobId}] Step 6: Saving video to public folder...`)
+    // Step 7: Save video to public folder
+    console.log(`[${jobId}] Step 7: Saving video to public folder...`)
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
     
     // Ensure public directory exists
