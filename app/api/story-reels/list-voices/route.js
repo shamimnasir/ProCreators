@@ -23,11 +23,25 @@ export async function GET(request) {
     
     // Filter voices by language code
     // For Bengali, Google uses 'bn-IN' (Indian Bengali) - no 'bn-BD' yet
-    const languageCodes = language === 'bn' ? ['bn-IN'] : [`${language}-US`, `${language}-GB`]
+    const languageCodes = language === 'bn' ? ['bn-IN'] : [`${language}-US`, `${language}-GB`, `${language}-AU`, `${language}-IN`]
     
-    const filteredVoices = voices.filter(voice => 
+    let filteredVoices = voices.filter(voice => 
       languageCodes.some(code => voice.languageCodes.includes(code))
     )
+    
+    // IMPORTANT: Filter out simple star name voices (like "Iapetus", "Rasalgethi")
+    // These voices fail with Google TTS API even with model parameter
+    // Only keep voices that have the language code in their name (e.g., "en-US-Chirp3-HD-Iapetus")
+    // or traditional format voices (e.g., "en-US-Neural2-A", "en-US-Wavenet-B")
+    filteredVoices = filteredVoices.filter(voice => {
+      const name = voice.name
+      // Keep voices that have language code pattern (e.g., "en-US-", "bn-IN-")
+      const hasLanguagePrefix = /^[a-z]{2}-[A-Z]{2}-/.test(name)
+      // Or keep if it's a simple name but NOT a star name (star names are typically capitalized single words)
+      const isStarName = /^[A-Z][a-z]+$/.test(name) && !name.includes('-')
+      
+      return hasLanguagePrefix && !isStarName
+    })
     
     console.log(`[List Voices] Filtered voices for ${language}: ${filteredVoices.length}`)
     
