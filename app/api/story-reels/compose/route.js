@@ -90,10 +90,11 @@ export async function POST(request) {
         })
 
         // Determine language code based on selection
-        // CRITICAL: Use bn-IN for Bengali (Google requires region-specific code)
+        // Use bn-IN for Bengali, en-US for English
         const languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
+        const languageName = ttsLanguage === 'bn' ? 'Bengali (India)' : 'English (US)'
         
-        console.log(`[${jobId}] Using language code: ${languageCode} (Bengali with Indian locale)`)
+        console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
         
         // Parse voice selection
         let voiceName = selectedVoice
