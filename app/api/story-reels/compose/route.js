@@ -458,9 +458,9 @@ function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
   // Properly escape the captions path for ffmpeg filter
   const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
-  // Base font settings
-  const fontSize = targetHeight === '2160' ? 72 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 48 : 36
-  const marginV = targetHeight === '2160' ? 150 : targetHeight === '1440' ? 100 : targetHeight === '1080' ? 80 : 50
+  // Much smaller font sizes - reduced by 50%
+  const fontSize = targetHeight === '2160' ? 36 : targetHeight === '1440' ? 30 : targetHeight === '1080' ? 24 : 18
+  const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
   
   // Build the force_style string based on caption style
   let forceStyle = ''
@@ -468,25 +468,25 @@ function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
   switch (captionStyle) {
     case 'bold-outline':
       // White text with black outline (most readable)
-      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     case 'karaoke':
       // Yellow text with black outline for visibility
-      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     case 'animated':
       // White text with heavy shadow
-      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=5,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=1,Shadow=3,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     default:
       // Default: simple white with black outline
-      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
   }
   
-  return `subtitles=${escapedPath}:force_style='${forceStyle}'`
+  return `subtitles=${escapedPath}:force_style='${forceStyle}':charenc=UTF-8`
 }
 
 // Helper function to get music file path based on track selection
