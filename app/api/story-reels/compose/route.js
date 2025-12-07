@@ -444,13 +444,46 @@ export async function POST(request) {
 }
 
 // Helper function to generate ASS captions with Bengali support
-function generateASSCaptions(script, duration, captionStyle, targetHeight) {
+function generateASSCaptions(script, duration, captionStyle, targetHeight, fontSizeOption = 'medium', positionOption = 'bottom') {
   const words = script.split(/\s+/).filter(w => w.length > 0)
   const wordsPerSecond = words.length / duration
   
-  // Font size based on resolution - increased for better visibility
-  let fontSize = targetHeight === '2160' ? 52 : targetHeight === '1440' ? 42 : targetHeight === '1080' ? 32 : 24
-  const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
+  // Base font size based on resolution
+  const baseFontSize = targetHeight === '2160' ? 52 : targetHeight === '1440' ? 42 : targetHeight === '1080' ? 32 : 24
+  
+  // Adjust font size based on user preference
+  let fontSizeMultiplier = 1
+  switch (fontSizeOption) {
+    case 'small':
+      fontSizeMultiplier = 0.8
+      break
+    case 'medium':
+      fontSizeMultiplier = 1.2  // Default is now 20% larger
+      break
+    case 'large':
+      fontSizeMultiplier = 1.5
+      break
+    case 'extra-large':
+      fontSizeMultiplier = 1.8
+      break
+  }
+  
+  let fontSize = Math.round(baseFontSize * fontSizeMultiplier)
+  
+  // Margin (vertical position) based on user preference
+  let marginV
+  switch (positionOption) {
+    case 'top':
+      marginV = 50  // High position
+      break
+    case 'center':
+      marginV = Math.round(targetHeight / 2)  // Middle of screen
+      break
+    case 'bottom':
+    default:
+      marginV = targetHeight === '2160' ? 150 : targetHeight === '1440' ? 120 : targetHeight === '1080' ? 100 : 80
+      break
+  }
   
   // Style based on caption style
   let primaryColor = '&H00FFFFFF' // White (default)
