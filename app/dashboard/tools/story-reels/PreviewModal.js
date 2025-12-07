@@ -208,7 +208,7 @@ export default function PreviewModal({
       case 'zoomed-in':
         return {
           ...baseStyles,
-          fontSize: '42px',
+          fontSize: `${Math.round(baseFontSize * 1.5)}px`,  // 50% larger than selected size
           color: '#ffffff',
           textShadow: '3px 3px 6px rgba(0,0,0,0.9), -3px -3px 6px rgba(0,0,0,0.9)',
         }
