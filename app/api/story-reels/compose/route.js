@@ -91,7 +91,6 @@ export async function POST(request) {
 
         // Parse voice selection to extract language code
         let voiceName = selectedVoice
-        let ssmlGender = 'NEUTRAL'
         let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US' // Default
         
         // If voice name is provided, extract language code from it
@@ -102,22 +101,15 @@ export async function POST(request) {
             // Extract language code (e.g., "en-US", "bn-IN", "en-GB")
             languageCode = `${parts[0]}-${parts[1]}`
           }
-          
-          // Extract gender from voice name if present
-          if (selectedVoice.toLowerCase().includes('female')) {
-            ssmlGender = 'FEMALE'
-          } else if (selectedVoice.toLowerCase().includes('male')) {
-            ssmlGender = 'MALE'
-          }
         }
         
         const languageName = ttsLanguage === 'bn' ? 'Bengali' : 'English'
         console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
 
-        // Construct the request
+        // Construct the request - omit ssmlGender when using specific voice name
+        // Google TTS will use the voice's natural gender
         const voiceConfig = {
-          languageCode: languageCode,
-          ssmlGender: ssmlGender,
+          languageCode: languageCode
         }
         
         // Add voice name if provided
