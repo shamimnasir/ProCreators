@@ -151,8 +151,25 @@ export default function PreviewModal({
 
   // Get caption style CSS
   const getCaptionStyleCSS = (style) => {
+    // Calculate font size based on user selection
+    let baseFontSize = 28
+    switch (captionFontSize) {
+      case 'small':
+        baseFontSize = 22
+        break
+      case 'medium':
+        baseFontSize = 34  // 20% larger
+        break
+      case 'large':
+        baseFontSize = 42  // 50% larger
+        break
+      case 'extra-large':
+        baseFontSize = 50  // 80% larger
+        break
+    }
+
     const baseStyles = {
-      fontSize: '28px',
+      fontSize: `${baseFontSize}px`,
       fontWeight: 'bold',
       padding: '8px 16px',
       borderRadius: '4px',
