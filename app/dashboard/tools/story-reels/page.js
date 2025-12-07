@@ -359,7 +359,130 @@ export default function StoryReelsPage() {
     }
   }
 
-  // Compose Final Video
+  // Generate Preview
+  const handleGeneratePreview = async () => {
+    // Validation
+    if (!script.trim()) {
+      toast({ title: "Error", description: "Script is required", variant: "destructive" })
+      return
+    }
+    if (stockVideos.length === 0) {
+      toast({ title: "Error", description: "Please search and select stock videos", variant: "destructive" })
+      return
+    }
+    if (voiceOption === 'tts' && !selectedVoice && availableVoices.length > 0) {
+      toast({ title: "Error", description: "Please select a voice", variant: "destructive" })
+      return
+    }
+
+    setGeneratingPreview(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('script', script)
+      formData.append('duration', duration)
+      formData.append('ttsLanguage', ttsLanguage)
+      formData.append('selectedVoice', selectedVoice || '')
+      formData.append('stockVideos', JSON.stringify(stockVideos))
+
+      const response = await fetch('/api/story-reels/generate-preview', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setPreviewData(data)
+        setShowPreview(true)
+        toast({
+          title: "Preview Ready!",
+          description: "Make your adjustments and generate the final video"
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate preview",
+        variant: "destructive"
+      })
+    } finally {
+      setGeneratingPreview(false)
+    }
+  }
+
+  // Generate Final Video from Preview
+  const handleGenerateFinalFromPreview = async (previewSettings) => {
+    setShowPreview(false)
+    setComposing(true)
+    setProgress(0)
+
+    try {
+      const formData = new FormData()
+      formData.append('script', previewSettings.captions.map(c => c.text).join(' '))
+      formData.append('duration', duration)
+      formData.append('captionStyle', previewSettings.captionStyle)
+      formData.append('musicTrack', previewSettings.selectedMusic)
+      formData.append('resolution', resolution)
+      formData.append('stockVideos', JSON.stringify(stockVideos))
+      formData.append('keywords', JSON.stringify(keywords))
+      formData.append('voiceOption', 'tts')
+      formData.append('ttsLanguage', ttsLanguage)
+      formData.append('selectedVoice', previewSettings.selectedVoice || selectedVoice)
+
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 5, 90))
+      }, 2000)
+
+      const response = await fetch('/api/story-reels/compose', {
+        method: 'POST',
+        body: formData
+      })
+
+      clearInterval(progressInterval)
+
+      const data = await response.json()
+      if (data.success) {
+        setProgress(100)
+        setVideoData(data)
+        toast({
+          title: "Success!",
+          description: "Your final HD video is ready!"
+        })
+        
+        // Auto-save to library
+        await fetch('/api/library/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'story-reel',
+            title: script.substring(0, 50) + '...',
+            content: data.videoUrl,
+            metadata: {
+              duration,
+              resolution,
+              captionStyle: previewSettings.captionStyle,
+              voiceOption: 'tts',
+              keywords: keywords.slice(0, 5)
+            }
+          })
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate final video",
+        variant: "destructive"
+      })
+    } finally {
+      setComposing(false)
+    }
+  }
+
+  // Compose Final Video (Direct - without preview)
   const handleCompose = async () => {
     // Validation
     if (!script.trim()) {
