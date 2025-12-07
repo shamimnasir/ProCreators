@@ -383,7 +383,12 @@ export default function VoiceSection({
 
                 {voices.cloned.length > 0 && (
                   <div className="space-y-2 pt-4 border-t">
-                    <Label>Your Cloned Voices</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>Your Cloned Voices</Label>
+                      <Badge variant="secondary" className="text-xs">
+                        {voices.cloned.length} saved
+                      </Badge>
+                    </div>
                     <div className="grid gap-2">
                       {voices.cloned.map((voice) => (
                         <div
@@ -407,6 +412,21 @@ export default function VoiceSection({
                                 )}
                               </div>
                               <p className="text-sm text-muted-foreground">{voice.description}</p>
+                              <div className="flex gap-1 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                  Bangladeshi
+                                </Badge>
+                                {voice.labels?.usage_count > 0 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Used {voice.labels.usage_count} times
+                                  </Badge>
+                                )}
+                                {voice.created_at && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {new Date(voice.created_at).toLocaleDateString()}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                             <Button
                               size="sm"
@@ -423,6 +443,13 @@ export default function VoiceSection({
                           </div>
                         </div>
                       ))}
+                    </div>
+                    
+                    <div className="bg-muted p-3 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        ✨ Your cloned voices are permanently saved and can be used for all future videos. 
+                        They're stored both in ElevenLabs and our secure database for reliable access.
+                      </p>
                     </div>
                   </div>
                 )}
