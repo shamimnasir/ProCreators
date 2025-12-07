@@ -275,6 +275,16 @@ export async function POST(request) {
         
         console.log(`[${jobId}] Using cloned voice ID: ${bengaliVoice}`)
         
+        // Track voice usage in database
+        try {
+          const { VoiceStorage } = require('@/lib/voiceStorage')
+          await VoiceStorage.incrementUsage(bengaliVoice)
+          console.log(`[${jobId}] Voice usage tracked for: ${bengaliVoice}`)
+        } catch (usageError) {
+          console.error(`[${jobId}] Failed to track voice usage:`, usageError.message)
+          // Don't fail TTS generation if usage tracking fails
+        }
+        
         // Generate TTS using the cloned voice
         const voiceSettings = {
           stability: 0.5,              // Moderate stability for natural speech
