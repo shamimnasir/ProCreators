@@ -481,14 +481,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
   return ass
 }
 
-// Helper function to format time in SRT format (00:00:00,000)
-function formatSRTTime(seconds) {
+// Helper function to format time in ASS format (0:00:00.00)
+function formatASSTime(seconds) {
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = Math.floor(seconds % 60)
-  const ms = Math.floor((seconds % 1) * 1000)
+  const centisecs = Math.floor((seconds % 1) * 100)
 
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`
+  return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centisecs).padStart(2, '0')}`
 }
 
 // Helper function to build caption filter for ASS format
