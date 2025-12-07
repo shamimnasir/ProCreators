@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 import { writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
+import FormData from 'form-data'
+import fs from 'fs'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -23,10 +24,6 @@ export async function POST(request) {
 
     console.log(`[Voice Clone] Creating voice clone: ${voiceName}`)
 
-    const elevenlabs = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY
-    })
-
     // Save voice sample temporarily
     const tempId = randomUUID()
     const tempPath = join('/tmp', `voice-sample-${tempId}.mp3`)
@@ -36,24 +33,40 @@ export async function POST(request) {
     console.log(`[Voice Clone] Voice sample saved, size: ${buffer.length} bytes`)
 
     try {
-      // Create voice clone using ElevenLabs Instant Voice Cloning
-      console.log(`[Voice Clone] Calling ElevenLabs Clone API...`)
+      // Create form data for ElevenLabs API
+      const elevenLabsFormData = new FormData()
+      elevenLabsFormData.append('name', voiceName)
+      elevenLabsFormData.append('description', description)
+      elevenLabsFormData.append('consent', 'true')
+      elevenLabsFormData.append('files', fs.createReadStream(tempPath))
 
-      // Clone voice using the correct ElevenLabs SDK method
-      const voice = await elevenlabs.clone({
-        name: voiceName,
-        description: description,
-        files: [tempPath] // Pass file path directly
+      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API...`)
+
+      // Make direct API call to ElevenLabs
+      const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
+        method: 'POST',
+        headers: {
+          'xi-api-key': process.env.ELEVENLABS_API_KEY,
+          ...elevenLabsFormData.getHeaders()
+        },
+        body: elevenLabsFormData
       })
 
-      console.log(`[Voice Clone] Voice cloned successfully! Voice ID: ${voice.voice_id}`)
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`[Voice Clone] ElevenLabs API error: ${response.status} - ${errorText}`)
+        throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log(`[Voice Clone] Voice cloned successfully! Voice ID: ${result.voice_id}`)
 
       // Cleanup temp file
       await unlink(tempPath).catch(() => {})
 
       return NextResponse.json({
         success: true,
-        voiceId: voice.voice_id,
+        voiceId: result.voice_id,
         voiceName: voiceName,
         message: 'Voice cloned successfully! You can now use it for text-to-speech.'
       })
