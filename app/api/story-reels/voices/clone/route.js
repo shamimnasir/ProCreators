@@ -38,13 +38,25 @@ export async function POST(request) {
       elevenLabsFormData.append('name', voiceName)
       elevenLabsFormData.append('description', description)
       
+      // Ensure the file exists before creating stream
+      if (!fs.existsSync(tempPath)) {
+        throw new Error(`Voice sample file not found at ${tempPath}`)
+      }
+      
+      const stats = fs.statSync(tempPath)
+      console.log(`[Voice Clone] File stats: size=${stats.size}, exists=true`)
+      
       // Add the audio file - the key is 'files' not 'file'
       elevenLabsFormData.append('files', fs.createReadStream(tempPath), {
-        filename: `${voiceName.replace(/[^a-zA-Z0-9]/g, '_')}.mp3`,
+        filename: `voice_sample.mp3`,
         contentType: 'audio/mpeg'
       })
 
-      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API...`)
+      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API with data:`, {
+        name: voiceName,
+        description: description,
+        fileSize: stats.size
+      })
 
       // Make direct API call to ElevenLabs
       const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
@@ -55,6 +67,8 @@ export async function POST(request) {
         },
         body: elevenLabsFormData
       })
+
+      console.log(`[Voice Clone] API Response status: ${response.status}`)
 
       if (!response.ok) {
         const errorText = await response.text()
