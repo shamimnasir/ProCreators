@@ -360,22 +360,22 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.0"
-  test_sequence: 2
+  version: "3.0"
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Tutorial Generator"
-    - "Photo Cards Generator"
-    - "Library Save API with Expiration"
+    - "Google Cloud TTS API Integration"
+    - "List Google TTS Voices API"
+    - "Story Reels - Simplified Google TTS UI"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "REELS/SHORTS CREATOR - SIMPLIFIED & FIXED:
+      message: "ELEVENLABS REMOVED - GOOGLE CLOUD TTS IMPLEMENTED:
       
       **USER REQUEST: Removed talking head feature completely for better video generation**
       
