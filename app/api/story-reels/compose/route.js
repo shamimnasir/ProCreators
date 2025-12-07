@@ -454,41 +454,13 @@ function formatSRTTime(seconds) {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`
 }
 
-// Helper function to build caption filter based on style
+// Helper function to build caption filter for ASS format
 function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
-  // Properly escape the captions path for ffmpeg filter
+  // Escape path for ffmpeg
   const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
-  // Much smaller font sizes - reduced by 50%
-  const fontSize = targetHeight === '2160' ? 36 : targetHeight === '1440' ? 30 : targetHeight === '1080' ? 24 : 18
-  const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
-  
-  // Build the force_style string based on caption style
-  // Use Noto Sans Bengali UI for proper Bengali text rendering
-  let forceStyle = ''
-  
-  switch (captionStyle) {
-    case 'bold-outline':
-      // White text with black outline (most readable)
-      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
-      break
-    
-    case 'karaoke':
-      // Yellow text with black outline for visibility
-      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
-      break
-    
-    case 'animated':
-      // White text with heavy shadow
-      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=1,Shadow=3,Bold=1,Alignment=2,MarginV=${marginV}`
-      break
-    
-    default:
-      // Default: simple white with black outline
-      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
-  }
-  
-  return `subtitles=${escapedPath}:force_style='${forceStyle}'`
+  // ASS format handles styling internally, just load the file
+  return `ass=${escapedPath}`
 }
 
 // Helper function to get music file path based on track selection
