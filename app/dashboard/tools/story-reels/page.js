@@ -671,12 +671,14 @@ export default function StoryReelsPage() {
             {/* Google Cloud TTS Tab */}
             <TabsContent value="tts" className="space-y-4">
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                  🎯 Authentic {ttsLanguage === 'bn' ? 'Bengali' : 'English'} Text-to-Speech
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Premium Google Cloud TTS - Multiple Accents Available
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Using <strong>language_code="bn-IN"</strong> with Google Cloud TTS for authentic Bengali pronunciation. 
-                  Choose from 38 high-quality voices powered by Google's latest Chirp3-HD and Wavenet models.
+                  {Object.keys(voicesByVariant).length > 0 
+                    ? `${Object.keys(voicesByVariant).length} accent variants • ${availableVoices.length} voices • Premium quality`
+                    : 'High-quality text-to-speech with natural pronunciation'}
                 </p>
               </div>
 
@@ -685,24 +687,77 @@ export default function StoryReelsPage() {
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading voices...</span>
                 </div>
-              ) : availableVoices.length > 0 ? (
-                <div className="space-y-2">
-                  <Label>Select Voice</Label>
-                  <Select value={selectedVoice} onValueChange={setSelectedVoice}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a voice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableVoices.map((voice) => (
-                        <SelectItem key={voice.name} value={voice.name}>
-                          {voice.displayName}
-                        </SelectItem>
+              ) : Object.keys(voicesByVariant).length > 0 ? (
+                <div className="space-y-4">
+                  {/* Accent/Variant Selector */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">Step 1: Choose Accent / Region</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {Object.keys(voicesByVariant).map((variant) => (
+                        <button
+                          key={variant}
+                          onClick={() => {
+                            setLanguageVariant(variant)
+                            // Auto-select first voice in this variant
+                            if (voicesByVariant[variant].length > 0) {
+                              setSelectedVoice(voicesByVariant[variant][0].name)
+                            }
+                          }}
+                          className={`p-3 rounded-lg border-2 text-left transition-all ${
+                            languageVariant === variant
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="font-semibold">{getVariantDisplayName(variant)}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {voicesByVariant[variant].length} voices available
+                          </div>
+                        </button>
                       ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {availableVoices.length} {ttsLanguage === 'bn' ? 'Bengali' : 'English'} voices available
-                  </p>
+                    </div>
+                  </div>
+
+                  {/* Voice Selector for chosen variant */}
+                  {languageVariant && voicesByVariant[languageVariant] && (
+                    <div className="space-y-2">
+                      <Label className="text-base font-semibold">
+                        Step 2: Choose Voice ({voicesByVariant[languageVariant].length} available)
+                      </Label>
+                      <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                        <SelectTrigger className="h-auto py-3">
+                          <SelectValue placeholder="Choose a voice" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-80">
+                          {voicesByVariant[languageVariant].map((voice) => {
+                            const voiceType = getVoiceType(voice.name)
+                            return (
+                              <SelectItem key={voice.name} value={voice.name} className="py-3">
+                                <div className="flex items-center justify-between gap-4 w-full">
+                                  <div className="flex-1">
+                                    <div className="font-medium">
+                                      {voice.ssmlGender === 'MALE' ? '👨' : voice.ssmlGender === 'FEMALE' ? '👩' : '🗣️'} 
+                                      {' '}{voice.ssmlGender}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">{voiceType}</div>
+                                  </div>
+                                  {voiceType.includes('Best') && (
+                                    <Badge variant="default" className="text-xs">Best Quality</Badge>
+                                  )}
+                                  {voiceType.includes('Premium') && (
+                                    <Badge variant="secondary" className="text-xs">Premium</Badge>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        💡 Tip: "Neural" and "Chirp HD" voices offer the best quality and naturalness
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-muted p-4 rounded-lg text-center">
