@@ -37,8 +37,12 @@ export async function POST(request) {
       const elevenLabsFormData = new FormData()
       elevenLabsFormData.append('name', voiceName)
       elevenLabsFormData.append('description', description)
-      elevenLabsFormData.append('consent', 'true')
-      elevenLabsFormData.append('files', fs.createReadStream(tempPath))
+      
+      // Add the audio file - the key is 'files' not 'file'
+      elevenLabsFormData.append('files', fs.createReadStream(tempPath), {
+        filename: `${voiceName.replace(/[^a-zA-Z0-9]/g, '_')}.mp3`,
+        contentType: 'audio/mpeg'
+      })
 
       console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API...`)
 
