@@ -1030,22 +1030,45 @@ export default function StoryReelsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Play className="h-5 w-5" />
-            Step 5: Generate Your Story Video
+            Step 5: Preview & Generate Your Video
           </CardTitle>
           <CardDescription>
-            Create the final video with all your settings
+            Preview your video with customization options or generate directly
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Preview Button (Recommended) */}
           <Button 
-            onClick={handleCompose} 
-            disabled={composing || !script.trim() || stockVideos.length === 0}
+            onClick={handleGeneratePreview} 
+            disabled={generatingPreview || composing || !script.trim() || stockVideos.length === 0 || (voiceOption === 'tts' && !selectedVoice)}
             className="w-full"
             size="lg"
+            variant="default"
+          >
+            {generatingPreview ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Generating Preview...
+              </>
+            ) : (
+              <>
+                <Eye className="mr-2 h-5 w-5" />
+                Generate Preview & Customize
+              </>
+            )}
+          </Button>
+
+          {/* Direct Generation (Skip Preview) */}
+          <Button 
+            onClick={handleCompose} 
+            disabled={composing || generatingPreview || !script.trim() || stockVideos.length === 0}
+            className="w-full"
+            size="lg"
+            variant="outline"
           >
             {composing && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             <Video className="mr-2 h-5 w-5" />
-            Generate Story Video
+            Generate Final Video (Skip Preview)
           </Button>
 
           {composing && (
