@@ -87,10 +87,37 @@ export default function VoiceSection({
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast({
           title: "Browser Not Supported",
-          description: "Your browser doesn't support microphone access. Please use a modern browser.",
+          description: "Your browser doesn't support microphone access. Please use Chrome, Firefox, or Safari.",
           variant: "destructive"
         })
         return
+      }
+
+      // Check current permission status
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'microphone' })
+        console.log('[Voice Recording] Microphone permission status:', permissionStatus.state)
+        
+        if (permissionStatus.state === 'denied') {
+          toast({
+            title: "Microphone Permission Denied",
+            description: (
+              <div className="space-y-2">
+                <p>Please enable microphone access:</p>
+                <ol className="text-xs list-decimal list-inside space-y-1">
+                  <li>Click the 🎤 icon in your address bar</li>
+                  <li>Select "Always allow"</li>
+                  <li>Refresh page and try again</li>
+                </ol>
+              </div>
+            ),
+            variant: "destructive",
+            duration: 10000
+          })
+          return
+        }
+      } catch (permError) {
+        console.log('[Voice Recording] Could not check permission status:', permError)
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -131,8 +158,8 @@ export default function VoiceSection({
       setRecording(true)
       
       toast({
-        title: "Recording Started",
-        description: "Speak clearly for 10-30 seconds in your natural voice...",
+        title: "Recording Started! 🎙️",
+        description: "Speak clearly for 10-30 seconds in your natural Bengali voice...",
         duration: 3000
       })
       
@@ -142,23 +169,60 @@ export default function VoiceSection({
       console.error('[Voice Recording] Error accessing microphone:', error)
       
       let errorMessage = "Could not access microphone."
+      let actionSteps = []
       
       if (error.name === 'NotAllowedError') {
-        errorMessage = "Microphone permission denied. Please allow microphone access and try again."
+        errorMessage = "Microphone permission denied."
+        actionSteps = [
+          "1. Click the 🎤 microphone icon in your browser's address bar",
+          "2. Select 'Always allow' or 'Allow'", 
+          "3. Refresh the page and try again"
+        ]
       } else if (error.name === 'NotFoundError') {
-        errorMessage = "No microphone found. Please connect a microphone and try again."
+        errorMessage = "No microphone found."
+        actionSteps = [
+          "1. Connect a microphone to your device",
+          "2. Check your system audio settings",
+          "3. Try again"
+        ]
       } else if (error.name === 'NotReadableError') {
-        errorMessage = "Microphone is being used by another application. Please close other apps and try again."
+        errorMessage = "Microphone is being used by another application."
+        actionSteps = [
+          "1. Close other apps that might be using the microphone",
+          "2. Close other browser tabs with microphone access", 
+          "3. Try again"
+        ]
       } else if (error.name === 'OverconstrainedError') {
-        errorMessage = "Microphone doesn't support the required settings. Please try with a different microphone."
+        errorMessage = "Microphone doesn't support the required settings."
+        actionSteps = [
+          "1. Try with a different microphone",
+          "2. Check your audio drivers",
+          "3. Use the file upload option instead"
+        ]
       } else if (error.name === 'SecurityError') {
-        errorMessage = "Microphone access blocked by security settings. Please check your browser settings."
+        errorMessage = "Microphone access blocked by security settings."
+        actionSteps = [
+          "1. Check your browser's privacy settings",
+          "2. Make sure you're on localhost or HTTPS",
+          "3. Try a different browser"
+        ]
       }
       
       toast({
         title: "Microphone Error",
-        description: errorMessage,
-        variant: "destructive"
+        description: (
+          <div className="space-y-2">
+            <p className="font-medium">{errorMessage}</p>
+            <div className="text-xs space-y-1">
+              <p className="font-medium">How to fix:</p>
+              {actionSteps.map((step, i) => (
+                <p key={i}>{step}</p>
+              ))}
+            </div>
+          </div>
+        ),
+        variant: "destructive",
+        duration: 15000
       })
     }
   }
