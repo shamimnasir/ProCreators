@@ -29,21 +29,10 @@ export default function StoryReelsPage() {
   const [stockVideos, setStockVideos] = useState([])
   const [loadingVideos, setLoadingVideos] = useState(false)
   
-  // Voice state
-  const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'clone'
-  const [voiceFile, setVoiceFile] = useState(null)
-  const [voiceFilePreview, setVoiceFilePreview] = useState(null)
-  const [recording, setRecording] = useState(false)
-  const [recordedAudio, setRecordedAudio] = useState(null)
-  const [ttsProvider, setTtsProvider] = useState('elevenlabs')
+  // Voice state - simplified with new VoiceSection component
   const [ttsLanguage, setTtsLanguage] = useState('bn')
-  const [bengaliVoice, setBengaliVoice] = useState('') // Bengali voice ID
-  const [availableVoices, setAvailableVoices] = useState([]) // Dynamically loaded voices
-  const [loadingVoices, setLoadingVoices] = useState(false)
-  const [savedVoices, setSavedVoices] = useState([]) // User's saved voices
-  const [showSaveVoiceDialog, setShowSaveVoiceDialog] = useState(false)
-  const [newVoiceName, setNewVoiceName] = useState('')
-  const [savingVoice, setSavingVoice] = useState(false)
+  const [selectedVoiceId, setSelectedVoiceId] = useState('') // Selected voice ID from VoiceSection
+  const [voiceFile, setVoiceFile] = useState(null) // For voice cloning (if needed)
   
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
