@@ -246,12 +246,11 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 4: Generate SRT captions file
+    // Step 4: Generate ASS captions file (better Bengali support than SRT)
     console.log(`[${jobId}] Step 4: Generating captions...`)
-    const captionsPath = join(tempDir, 'captions.srt')
-    const captionLines = generateCaptions(script, duration, captionStyle)
-    // Write with UTF-8 BOM for proper Bengali encoding
-    await writeFile(captionsPath, '\uFEFF' + captionLines, 'utf8')
+    const captionsPath = join(tempDir, 'captions.ass')
+    const captionContent = generateASSCaptions(script, duration, captionStyle, targetHeight)
+    await writeFile(captionsPath, captionContent, 'utf8')
 
     // Step 5: Add background music if requested
     console.log(`[${jobId}] Step 5: Processing audio and music...`)
