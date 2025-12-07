@@ -128,12 +128,6 @@ export async function POST(request) {
         }
 
         console.log(`[${jobId}] Voice config:`, JSON.stringify(voiceConfig))
-        console.log(`[${jobId}] Full request will use:`, JSON.stringify({
-          languageCode: voiceConfig.languageCode,
-          name: voiceConfig.name,
-          model: voiceConfig.model || 'not specified',
-          ssmlGender: voiceConfig.ssmlGender
-        }))
         
         const request = {
           input: { text: script },
