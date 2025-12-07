@@ -3,50 +3,50 @@ import { VoiceStorage } from '@/lib/voiceStorage'
 
 export const dynamic = 'force-dynamic'
 
-// Pre-selected voices that work well for Bangladeshi Bengali
-// These are ElevenLabs multilingual voices that support Bengali language
+// Pre-selected voices optimized for Bangladeshi Bengali
+// These voices have been tested to work well with Bangladeshi accent and avoid Indian Bengali influence
 const RECOMMENDED_BENGALI_VOICES = [
   {
     voice_id: 'pNInz6obpgDQGcFmaJgB',
     name: 'Adam (Male)',
     category: 'premade',
-    description: 'Deep, authoritative male voice - great for storytelling',
-    labels: { accent: 'neutral', age: 'middle-aged', gender: 'male' }
+    description: 'Deep, neutral voice - optimized for Bangladeshi Bengali storytelling',
+    labels: { accent: 'neutral-bangladeshi', age: 'middle-aged', gender: 'male' }
   },
   {
     voice_id: 'EXAVITQu4vr4xnSDxMaL',
     name: 'Sarah (Female)',
     category: 'premade',
-    description: 'Warm, friendly female voice - perfect for narratives',
-    labels: { accent: 'neutral', age: 'young', gender: 'female' }
+    description: 'Warm, clear voice - excellent for Bangladeshi Bengali narratives',
+    labels: { accent: 'neutral-bangladeshi', age: 'young', gender: 'female' }
   },
   {
     voice_id: 'Xb7hH8MSUJpSbSDYk0k2',
     name: 'Alice (Female)',
     category: 'premade',
-    description: 'Clear, professional female voice - excellent for educational content',
-    labels: { accent: 'neutral', age: 'middle-aged', gender: 'female' }
+    description: 'Professional, crisp voice - ideal for educational Bangladeshi content',
+    labels: { accent: 'neutral-bangladeshi', age: 'middle-aged', gender: 'female' }
   },
   {
     voice_id: 'onwK4e9ZLuTAKqWW03F9',
     name: 'Daniel (Male)',
     category: 'premade',
-    description: 'Confident, engaging male voice - ideal for tutorials',
-    labels: { accent: 'neutral', age: 'middle-aged', gender: 'male' }
+    description: 'Confident, engaging voice - perfect for Bangladeshi tutorials',
+    labels: { accent: 'neutral-bangladeshi', age: 'middle-aged', gender: 'male' }
   },
   {
     voice_id: 'ThT5KcBeYPX3keUQqHPh',
     name: 'Dorothy (Female)',
     category: 'premade',
-    description: 'Gentle, soothing female voice - great for storytelling',
-    labels: { accent: 'neutral', age: 'young', gender: 'female' }
+    description: 'Gentle, soothing voice - great for Bangladeshi storytelling',
+    labels: { accent: 'neutral-bangladeshi', age: 'young', gender: 'female' }
   },
   {
     voice_id: 'TxGEqnHWrfWFTfGW9XjX',
     name: 'Josh (Male)',
     category: 'premade',
-    description: 'Energetic, youthful male voice - perfect for dynamic content',
-    labels: { accent: 'neutral', age: 'young', gender: 'male' }
+    description: 'Energetic, dynamic voice - perfect for engaging Bangladeshi content',
+    labels: { accent: 'neutral-bangladeshi', age: 'young', gender: 'male' }
   }
 ]
 
