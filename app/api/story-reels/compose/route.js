@@ -249,8 +249,9 @@ export async function POST(request) {
     // Step 4: Generate SRT captions file
     console.log(`[${jobId}] Step 4: Generating captions...`)
     const captionsPath = join(tempDir, 'captions.srt')
-    const captionLines = generateCaptions(script, duration)
-    await writeFile(captionsPath, captionLines)
+    const captionLines = generateCaptions(script, duration, captionStyle)
+    // Write with UTF-8 BOM for proper Bengali encoding
+    await writeFile(captionsPath, '\uFEFF' + captionLines, 'utf8')
 
     // Step 5: Add background music if requested
     console.log(`[${jobId}] Step 5: Processing audio and music...`)
