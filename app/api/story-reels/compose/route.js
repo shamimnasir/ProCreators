@@ -37,8 +37,10 @@ export async function POST(request) {
     const stockVideos = JSON.parse(formData.get('stockVideos'))
     const keywords = JSON.parse(formData.get('keywords'))
     const voiceFile = formData.get('voiceFile')
+    const captionFontSize = formData.get('captionFontSize') || 'medium'
+    const captionPosition = formData.get('captionPosition') || 'bottom'
 
-    console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution })
+    console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition })
     console.log(`[${jobId}] Stock videos:`, stockVideos.length)
 
     // Step 1: Download stock videos using streams to save memory
