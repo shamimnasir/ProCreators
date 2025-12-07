@@ -416,19 +416,20 @@ export async function POST(request) {
 }
 
 // Helper function to generate SRT captions
-function generateCaptions(script, duration) {
-  const words = script.split(/\s+/)
+function generateCaptions(script, duration, captionStyle) {
+  const words = script.split(/\s+/).filter(w => w.length > 0)
   const wordsPerSecond = words.length / duration
   const lines = []
   let currentTime = 0
   let lineIndex = 1
 
-  // Split into caption chunks (5-8 words per caption)
-  const wordsPerCaption = 6
+  // For karaoke: word-by-word, for others: 4-5 words per caption
+  const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 4
   
   for (let i = 0; i < words.length; i += wordsPerCaption) {
     const chunk = words.slice(i, i + wordsPerCaption).join(' ')
-    const chunkDuration = wordsPerCaption / wordsPerSecond
+    const wordCount = Math.min(wordsPerCaption, words.length - i)
+    const chunkDuration = wordCount / wordsPerSecond
     const startTime = currentTime
     const endTime = currentTime + chunkDuration
 
