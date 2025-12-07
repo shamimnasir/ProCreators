@@ -972,7 +972,7 @@ export default function StoryReelsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Caption Style</Label>
               <Select value={captionStyle} onValueChange={setCaptionStyle}>
@@ -989,6 +989,35 @@ export default function StoryReelsPage() {
                   <SelectItem value="gradient-pop">🌈 Gradient Pop (Gold & Pink)</SelectItem>
                   <SelectItem value="minimal-clean">⚪ Minimal Clean (Top)</SelectItem>
                   <SelectItem value="tiktok-style">🎵 TikTok Style (Red Outline)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Caption Font Size</Label>
+              <Select value={captionFontSize} onValueChange={setCaptionFontSize}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="small">Small (80%)</SelectItem>
+                  <SelectItem value="medium">Medium (120%) - Recommended</SelectItem>
+                  <SelectItem value="large">Large (150%)</SelectItem>
+                  <SelectItem value="extra-large">Extra Large (180%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Caption Position</Label>
+              <Select value={captionPosition} onValueChange={setCaptionPosition}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top">Top of Video</SelectItem>
+                  <SelectItem value="center">Center of Video</SelectItem>
+                  <SelectItem value="bottom">Bottom of Video (Default)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
