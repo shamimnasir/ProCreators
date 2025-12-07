@@ -14,8 +14,9 @@ import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Mic, Upload, Download, 
-  FileText, Film, Music, Type, Play, Edit, X, Check 
+  FileText, Film, Music, Type, Play, Edit, X, Check, Eye 
 } from 'lucide-react'
+import PreviewModal from './PreviewModal'
 
 export default function StoryReelsPage() {
   // Script state
@@ -47,6 +48,11 @@ export default function StoryReelsPage() {
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
+  
+  // Preview state
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewData, setPreviewData] = useState(null)
+  const [generatingPreview, setGeneratingPreview] = useState(false)
   
   // Output state
   const [videoData, setVideoData] = useState(null)
