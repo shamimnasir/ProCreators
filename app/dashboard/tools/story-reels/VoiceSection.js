@@ -166,12 +166,17 @@ export default function VoiceSection({
   // Stop recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && recording) {
+      console.log('[Voice Recording] Stopping recording...')
       mediaRecorderRef.current.stop()
       setRecording(false)
+      
       toast({
         title: "Recording Stopped",
-        description: "Your voice sample is ready for cloning"
+        description: "Your voice sample is ready for cloning",
+        duration: 2000
       })
+      
+      console.log('[Voice Recording] Recording stopped successfully')
     }
   }
 
