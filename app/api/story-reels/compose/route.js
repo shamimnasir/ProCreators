@@ -111,13 +111,19 @@ export async function POST(request) {
         console.log(`[${jobId}] Voice config: name=${voiceName}, gender=${ssmlGender}, language=${languageCode}`)
 
         // Construct the request
+        const voiceConfig = {
+          languageCode: languageCode,
+          ssmlGender: ssmlGender,
+        }
+        
+        // Add voice name if provided, otherwise let Google choose
+        if (voiceName) {
+          voiceConfig.name = voiceName
+        }
+        
         const request = {
           input: { text: script },
-          voice: {
-            languageCode: languageCode, // Use 'bn' to force Bengali normalization
-            name: voiceName || undefined, // Use specific voice if provided
-            ssmlGender: ssmlGender,
-          },
+          voice: voiceConfig,
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate: 1.0,
