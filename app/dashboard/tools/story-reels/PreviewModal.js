@@ -409,6 +409,37 @@ export default function PreviewModal({
                 </Select>
               </div>
 
+              {/* Caption Font Size */}
+              <div className="space-y-2">
+                <Label>Font Size</Label>
+                <Select value={captionFontSize} onValueChange={setCaptionFontSize}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium (Recommended)</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="extra-large">Extra Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Caption Position */}
+              <div className="space-y-2">
+                <Label>Position</Label>
+                <Select value={captionPosition} onValueChange={setCaptionPosition}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="top">Top</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="bottom">Bottom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Background Music */}
               <div className="space-y-2">
                 <Label>Background Music</Label>
