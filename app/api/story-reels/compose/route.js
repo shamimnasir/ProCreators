@@ -414,16 +414,57 @@ export async function POST(request) {
   }
 }
 
-// Helper function to generate SRT captions
-function generateCaptions(script, duration, captionStyle) {
+// Helper function to generate ASS captions with Bengali support
+function generateASSCaptions(script, duration, captionStyle, targetHeight) {
   const words = script.split(/\s+/).filter(w => w.length > 0)
   const wordsPerSecond = words.length / duration
-  const lines = []
-  let currentTime = 0
-  let lineIndex = 1
+  
+  // Font size based on resolution
+  const fontSize = targetHeight === '2160' ? 36 : targetHeight === '1440' ? 30 : targetHeight === '1080' ? 24 : 18
+  const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
+  
+  // Style based on caption style
+  let primaryColor = '&H00FFFFFF' // White
+  let outlineColor = '&H00000000' // Black
+  let outline = 2
+  let shadow = 1
+  
+  switch (captionStyle) {
+    case 'karaoke':
+      primaryColor = '&H0000FFFF' // Yellow/Cyan
+      outline = 2
+      shadow = 1
+      break
+    case 'animated':
+      outline = 1
+      shadow = 3
+      break
+    case 'bold-outline':
+    default:
+      outline = 2
+      shadow = 1
+  }
+  
+  // ASS Header
+  let ass = `[Script Info]
+Title: Story Reels Captions
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: 1080
+PlayResY: ${targetHeight}
+ScaledBorderAndShadow: yes
 
-  // For karaoke: word-by-word, for others: 4-5 words per caption
-  const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 4
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Noto Sans Bengali UI,${fontSize},${primaryColor},&H000000FF,${outlineColor},&H00000000,-1,0,0,0,100,100,0,0,1,${outline},${shadow},2,10,10,${marginV},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`
+
+  // For karaoke: word-by-word, for others: 3-4 words per caption
+  const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 3
+  let currentTime = 0
   
   for (let i = 0; i < words.length; i += wordsPerCaption) {
     const chunk = words.slice(i, i + wordsPerCaption).join(' ')
@@ -431,17 +472,13 @@ function generateCaptions(script, duration, captionStyle) {
     const chunkDuration = wordCount / wordsPerSecond
     const startTime = currentTime
     const endTime = currentTime + chunkDuration
-
-    lines.push(`${lineIndex}`)
-    lines.push(`${formatSRTTime(startTime)} --> ${formatSRTTime(endTime)}`)
-    lines.push(chunk)
-    lines.push('')
-
+    
+    ass += `Dialogue: 0,${formatASSTime(startTime)},${formatASSTime(endTime)},Default,,0,0,0,,${chunk}\n`
+    
     currentTime = endTime
-    lineIndex++
   }
-
-  return lines.join('\n')
+  
+  return ass
 }
 
 // Helper function to format time in SRT format (00:00:00,000)
