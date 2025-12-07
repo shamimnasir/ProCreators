@@ -226,6 +226,8 @@ export default function PreviewModal({
     onGenerateFinal({
       captions,
       captionStyle,
+      captionFontSize,
+      captionPosition,
       selectedVoice,
       selectedMusic
     })
