@@ -349,8 +349,8 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 7: Save video to public folder
-    console.log(`[${jobId}] Step 7: Saving video to public folder...`)
+    // Step 8: Save video to public folder
+    console.log(`[${jobId}] Step 8: Saving video to public folder...`)
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
     
     // Ensure public directory exists
