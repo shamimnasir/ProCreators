@@ -41,6 +41,8 @@ export default function PreviewModal({
   
   // Customization state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
+  const [captionFontSize, setCaptionFontSize] = useState('medium')
+  const [captionPosition, setCaptionPosition] = useState('bottom')
   const [selectedVoice, setSelectedVoice] = useState('')
   const [selectedMusic, setSelectedMusic] = useState('upbeat')
   const [isRegeneratingVoice, setIsRegeneratingVoice] = useState(false)
