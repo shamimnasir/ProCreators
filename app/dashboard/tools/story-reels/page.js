@@ -628,8 +628,8 @@ export default function StoryReelsPage() {
                   🎯 Authentic {ttsLanguage === 'bn' ? 'Bengali' : 'English'} Text-to-Speech
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Using <strong>language_code="{ttsLanguage}"</strong> forces Google to normalize text as {ttsLanguage === 'bn' ? 'Bengali' : 'English'}, 
-                  ensuring proper pronunciation and accent.
+                  Using <strong>language_code="bn-IN"</strong> with Google Cloud TTS for authentic Bengali pronunciation. 
+                  Choose from 38 high-quality voices powered by Google's latest Chirp3-HD and Wavenet models.
                 </p>
               </div>
 
