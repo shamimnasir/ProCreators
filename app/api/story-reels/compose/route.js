@@ -114,8 +114,6 @@ export async function POST(request) {
         const languageName = ttsLanguage === 'bn' ? 'Bengali' : 'English'
         console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
 
-        console.log(`[${jobId}] Voice config: name=${voiceName}, gender=${ssmlGender}, language=${languageCode}`)
-
         // Construct the request
         const voiceConfig = {
           languageCode: languageCode,
@@ -146,6 +144,8 @@ export async function POST(request) {
             voiceConfig.model = voiceName
           }
         }
+
+        console.log(`[${jobId}] Voice config:`, JSON.stringify(voiceConfig))
         
         const request = {
           input: { text: script },
