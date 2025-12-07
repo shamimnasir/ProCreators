@@ -388,11 +388,15 @@ export default function VoiceSection({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="premade" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="premade">Pre-made Voices</TabsTrigger>
+            <TabsTrigger value="original">
+              <Mic className="h-4 w-4 mr-1" />
+              Use Original Recording
+            </TabsTrigger>
             <TabsTrigger value="clone">
               <Sparkles className="h-4 w-4 mr-1" />
-              Clone Your Voice
+              Clone Voice
             </TabsTrigger>
           </TabsList>
 
