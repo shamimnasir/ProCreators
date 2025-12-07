@@ -37,17 +37,13 @@ export async function POST(request) {
 
     try {
       // Create voice clone using ElevenLabs Instant Voice Cloning
-      // This uses the Voice Lab API to create a new voice from the sample
-      const fs = require('fs')
-      const voiceStream = fs.createReadStream(tempPath)
+      console.log(`[Voice Clone] Calling ElevenLabs Clone API...`)
 
-      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API...`)
-
-      // Add voice using the voices API
-      const voice = await elevenlabs.voices.add({
+      // Clone voice using the correct ElevenLabs SDK method
+      const voice = await elevenlabs.clone({
         name: voiceName,
         description: description,
-        files: [voiceStream]
+        files: [tempPath] // Pass file path directly
       })
 
       console.log(`[Voice Clone] Voice cloned successfully! Voice ID: ${voice.voice_id}`)
