@@ -246,10 +246,25 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 4: Generate ASS captions file (better Bengali support than SRT)
-    console.log(`[${jobId}] Step 4: Generating captions...`)
+    // Step 4: Get actual audio duration for precise caption timing
+    console.log(`[${jobId}] Step 4: Getting actual audio duration...`)
+    const actualAudioDuration = await new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(audioPath, (err, metadata) => {
+        if (err) {
+          console.error(`[${jobId}] ffprobe error:`, err.message)
+          resolve(duration) // Fallback to target duration
+        } else {
+          const audioDuration = metadata.format.duration
+          console.log(`[${jobId}] Actual audio duration: ${audioDuration}s (target was ${duration}s)`)
+          resolve(audioDuration)
+        }
+      })
+    })
+
+    // Step 5: Generate ASS captions file synced with actual audio duration
+    console.log(`[${jobId}] Step 5: Generating captions synced with audio...`)
     const captionsPath = join(tempDir, 'captions.ass')
-    const captionContent = generateASSCaptions(script, duration, captionStyle, targetHeight)
+    const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight)
     await writeFile(captionsPath, captionContent, 'utf8')
 
     // Step 5: Add background music if requested
