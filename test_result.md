@@ -205,13 +205,25 @@ backend:
           comment: "Image generation using Gemini Nano Banana model with direct Google API key. Used by Carousel and Photocard generators."
 
 frontend:
+  - task: "Story Reels - Simplified Google TTS UI"
+    implemented: true
+    working: "NA"
+    file: "/app/app/dashboard/tools/story-reels/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "REDESIGNED: Removed ElevenLabs voice cloning UI. Created simplified interface with 2 tabs: 1) Google Cloud TTS - shows available voices filtered by language, 2) Use Original Recording - allows users to record/upload their own audio. Removed VoiceSection.js component. Language selector (বাংলা/English) drives voice selection."
+  
   - task: "Reels/Shorts Creator - Download Button"
     implemented: true
     working: "NA"
     file: "/app/app/dashboard/tools/reels/page.js"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: true
+    priority: "medium"
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
