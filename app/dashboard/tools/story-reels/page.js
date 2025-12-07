@@ -583,27 +583,91 @@ export default function StoryReelsPage() {
   }
 
   // Download Video
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!videoData?.videoUrl) return
 
-    const link = document.createElement('a')
-    link.href = videoData.videoUrl
-    link.download = `story-reel-${Date.now()}.mp4`
-    link.target = '_blank'
-    
-    if (videoData.videoUrl.startsWith('http') && !videoData.videoUrl.startsWith(window.location.origin)) {
-      window.open(videoData.videoUrl, '_blank')
+    try {
       toast({
-        title: "Opening Video",
-        description: "Right-click and select 'Save video as...' to download"
+        title: "Preparing Download",
+        description: "Please wait..."
       })
-    } else {
+
+      // Fetch the video file
+      const response = await fetch(videoData.videoUrl)
+      if (!response.ok) throw new Error('Failed to fetch video')
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `story-reel-${Date.now()}.mp4`
+      link.style.display = 'none'
+      
       document.body.appendChild(link)
       link.click()
-      document.body.removeChild(link)
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
       toast({
         title: "Download Started",
         description: "Your video is downloading..."
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "Please try right-clicking the video and select 'Save video as...'",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Download Captions
+  const handleDownloadCaptions = async () => {
+    if (!videoData?.captionsUrl) return
+
+    try {
+      toast({
+        title: "Preparing Download",
+        description: "Please wait..."
+      })
+
+      // Fetch the captions file
+      const response = await fetch(videoData.captionsUrl)
+      if (!response.ok) throw new Error('Failed to fetch captions')
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `story-reel-captions-${Date.now()}.srt`
+      link.style.display = 'none'
+      
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      toast({
+        title: "Download Started",
+        description: "Your captions file is downloading..."
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: error.message,
+        variant: "destructive"
       })
     }
   }
