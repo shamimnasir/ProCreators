@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+import { VoiceStorage } from '@/lib/voiceStorage'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,49 +52,53 @@ const RECOMMENDED_BENGALI_VOICES = [
 
 export async function GET(request) {
   try {
-    console.log('[Voice List] Fetching voices...')
+    console.log('[Voice List] Fetching voices from database...')
 
-    const elevenlabs = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY
-    })
-
-    // Get all voices from ElevenLabs (includes pre-made and cloned voices)
-    const allVoices = await elevenlabs.voices.getAll()
-
-    // Separate pre-made recommended voices and user's cloned voices
-    const premadeVoiceIds = RECOMMENDED_BENGALI_VOICES.map(v => v.voice_id)
+    // Get user's cloned voices from our database
+    const dbResult = await VoiceStorage.getVoices('default')
     
-    const voices = {
-      premade: RECOMMENDED_BENGALI_VOICES,
-      cloned: allVoices.voices
-        .filter(v => !premadeVoiceIds.includes(v.voice_id))
-        .map(v => ({
-          voice_id: v.voice_id,
-          name: v.name,
-          category: v.category || 'cloned',
-          description: v.description || 'Your cloned voice',
-          labels: v.labels || {}
-        }))
+    let clonedVoices = []
+    if (dbResult.success) {
+      clonedVoices = dbResult.voices.map(voice => ({
+        voice_id: voice.voice_id,
+        name: voice.voice_name,
+        category: 'cloned',
+        description: voice.description || 'Your cloned voice',
+        labels: { accent: 'bangladeshi', gender: 'custom', usage_count: voice.usage_count || 0 },
+        created_at: voice.created_at,
+        file_size: voice.file_size || 0
+      }))
+      console.log(`[Voice List] Found ${clonedVoices.length} saved voices in database`)
+    } else {
+      console.error('[Voice List] Error fetching from database:', dbResult.error)
     }
 
-    console.log(`[Voice List] Found ${voices.premade.length} premade and ${voices.cloned.length} cloned voices`)
+    const voices = {
+      premade: RECOMMENDED_BENGALI_VOICES,
+      cloned: clonedVoices
+    }
+
+    console.log(`[Voice List] Returning ${voices.premade.length} premade and ${voices.cloned.length} cloned voices`)
 
     return NextResponse.json({
       success: true,
-      voices
+      voices,
+      total_cloned: clonedVoices.length,
+      database_connected: dbResult.success
     })
 
   } catch (error) {
     console.error('[Voice List] Error:', error)
     
-    // Fallback to just recommended voices if API fails
+    // Fallback to just recommended voices if there's an error
     return NextResponse.json({
       success: true,
       voices: {
         premade: RECOMMENDED_BENGALI_VOICES,
         cloned: []
       },
-      warning: 'Could not fetch custom voices, showing premade voices only'
+      warning: 'Could not fetch saved voices from database, showing premade voices only',
+      error: error.message
     })
   }
 }
