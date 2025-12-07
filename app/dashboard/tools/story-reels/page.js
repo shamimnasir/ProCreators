@@ -513,6 +513,8 @@ export default function StoryReelsPage() {
       formData.append('script', script)
       formData.append('duration', duration)
       formData.append('captionStyle', captionStyle)
+      formData.append('captionFontSize', captionFontSize)
+      formData.append('captionPosition', captionPosition)
       formData.append('musicTrack', musicTrack)
       formData.append('resolution', resolution)
       formData.append('stockVideos', JSON.stringify(stockVideos))
