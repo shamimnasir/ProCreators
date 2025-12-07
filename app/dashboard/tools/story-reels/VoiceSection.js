@@ -525,6 +525,118 @@ export default function VoiceSection({
             )}
           </TabsContent>
 
+          {/* Use Original Recording */}
+          <TabsContent value="original" className="space-y-4">
+            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-2">
+              <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                🎯 Perfect Accent Preservation - Use Your Exact Voice!
+              </h4>
+              <p className="text-sm text-green-800 dark:text-green-200">
+                Record your script narration directly and use it EXACTLY as it is in the video. 
+                <strong> No AI processing, no accent modification - just your pure authentic Bangladeshi voice!</strong>
+              </p>
+              <div className="text-xs text-green-700 dark:text-green-300 mt-2">
+                ✅ Zero AI contamination • ✅ Perfect accent preservation • ✅ 100% authentic sound
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Step 1: Record Your Script Narration</Label>
+                <p className="text-sm text-muted-foreground">
+                  Record yourself reading your entire story script in your natural Bangladeshi voice.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={recording ? "destructive" : "outline"}
+                    onClick={recording ? stopRecording : startRecording}
+                    className="w-full"
+                  >
+                    <Mic className="mr-2 h-4 w-4" />
+                    {recording ? 'Stop Recording' : 'Record Script'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => audioFileRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Audio
+                  </Button>
+                  <input
+                    ref={audioFileRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                {(recordedBlob || uploadedFile) && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                        ✨ Original recording ready: {uploadedFile?.name || 'Your recorded narration'}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setRecordedBlob(null)
+                          setUploadedFile(null)
+                          // Use original recording mode
+                          onVoiceChange('use-original-recording')
+                          onVoiceFileChange(uploadedFile || recordedBlob)
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {(recordedBlob || uploadedFile) && (
+                      <div className="space-y-2">
+                        <audio 
+                          src={uploadedFile ? URL.createObjectURL(uploadedFile) : (recordedBlob ? URL.createObjectURL(recordedBlob) : '')} 
+                          controls 
+                          className="w-full"
+                        />
+                        <Button
+                          onClick={() => {
+                            // Set the voice option to use original recording
+                            onVoiceChange('use-original-recording')
+                            onVoiceFileChange(uploadedFile || recordedBlob)
+                            
+                            toast({
+                              title: "Perfect! ✨",
+                              description: "Your original recording will be used exactly as it is in the video - preserving your authentic Bangladeshi accent perfectly!",
+                              duration: 4000
+                            })
+                          }}
+                          className="w-full"
+                        >
+                          <Check className="mr-2 h-4 w-4" />
+                          Use This Recording (100% Original Voice)
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h5 className="font-medium text-blue-900 dark:text-blue-100 text-sm mb-2">📝 Recording Tips for Best Results:</h5>
+                <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+                  <li><strong>Read your entire script</strong> from start to finish in one recording</li>
+                  <li><strong>Speak naturally</strong> with your authentic Bangladeshi pronunciation</li>
+                  <li><strong>Match video timing</strong> - speak at a comfortable pace for your target duration</li>
+                  <li><strong>Use a quiet environment</strong> for crystal clear audio quality</li>
+                  <li><strong>Be expressive</strong> - this is YOUR natural voice, make it engaging!</li>
+                </ul>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Clone Voice */}
           <TabsContent value="clone" className="space-y-4">
             <div className="bg-muted p-4 rounded-lg space-y-2">
