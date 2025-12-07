@@ -105,13 +105,37 @@
 user_problem_statement: "Replace ElevenLabs TTS with Google Cloud Text-to-Speech API using language_code parameter (bn for Bengali) to ensure proper Bengali text normalization and authentic Bangladeshi accent."
 
 backend:
+  - task: "Google Cloud TTS API Integration"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/story-reels/compose/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Replaced ElevenLabs with Google Cloud Text-to-Speech API. Uses language_code='bn' for Bengali to force proper text normalization. Installed @google-cloud/text-to-speech package. Removed all ElevenLabs dependencies. API accepts voiceOption ('tts' or 'upload'), ttsLanguage ('bn' or 'en'), and selectedVoice (Google voice name)."
+  
+  - task: "List Google TTS Voices API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/story-reels/list-voices/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW: Created API to list available Google Cloud TTS voices filtered by language. Returns voice names, gender, and display names for frontend selection."
+  
   - task: "Video Editing API (FFmpeg)"
     implemented: true
     working: "NA"
     file: "/app/app/api/generate/video/edit/route.js"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: true
+    priority: "medium"
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
