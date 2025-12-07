@@ -455,30 +455,38 @@ function formatSRTTime(seconds) {
 
 // Helper function to build caption filter based on style
 function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
-  // Escape the captions path for ffmpeg
-  const escapedPath = captionsPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "'\\''")
+  // Properly escape the captions path for ffmpeg filter
+  const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
   // Base font settings
   const fontSize = targetHeight === '2160' ? 72 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 48 : 36
-  const yPosition = targetHeight === '2160' ? 1900 : targetHeight === '1440' ? 1250 : targetHeight === '1080' ? 950 : 620
+  const marginV = targetHeight === '2160' ? 150 : targetHeight === '1440' ? 100 : targetHeight === '1080' ? 80 : 50
+  
+  // Build the force_style string based on caption style
+  let forceStyle = ''
   
   switch (captionStyle) {
     case 'bold-outline':
       // White text with black outline (most readable)
-      return `subtitles='${escapedPath}':force_style='FontName=Arial Bold,FontSize=${fontSize},PrimaryColour=&HFFFFFF,OutlineColour=&H000000,BorderStyle=1,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${targetHeight - yPosition}'`
+      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      break
     
     case 'karaoke':
-      // Word-by-word highlighting effect (yellow highlight on white)
-      return `subtitles='${escapedPath}':force_style='FontName=Arial Bold,FontSize=${fontSize},PrimaryColour=&HFFFFFF,SecondaryColour=&HFFFF00,OutlineColour=&H000000,BorderStyle=1,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${targetHeight - yPosition}'`
+      // Yellow text with black outline for visibility
+      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      break
     
     case 'animated':
-      // Animated pop-in with shadow (white text, heavy shadow)
-      return `subtitles='${escapedPath}':force_style='FontName=Arial Black,FontSize=${fontSize},PrimaryColour=&HFFFFFF,OutlineColour=&H000000,BorderStyle=1,Outline=2,Shadow=4,Bold=1,Alignment=2,MarginV=${targetHeight - yPosition}'`
+      // White text with heavy shadow
+      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=5,Bold=1,Alignment=2,MarginV=${marginV}`
+      break
     
     default:
       // Default: simple white with black outline
-      return `subtitles='${escapedPath}':force_style='FontName=Arial Bold,FontSize=${fontSize},PrimaryColour=&HFFFFFF,OutlineColour=&H000000,BorderStyle=1,Outline=2,Bold=1,Alignment=2,MarginV=${targetHeight - yPosition}'`
+      forceStyle = `FontName=Arial,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
   }
+  
+  return `subtitles=${escapedPath}:force_style='${forceStyle}'`
 }
 
 // Helper function to get music file path based on track selection
