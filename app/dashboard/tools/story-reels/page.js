@@ -849,9 +849,15 @@ export default function StoryReelsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="bold-outline">Bold with Black Outline</SelectItem>
-                  <SelectItem value="karaoke">Word-by-Word Karaoke</SelectItem>
-                  <SelectItem value="animated">Animated Pop-in</SelectItem>
+                  <SelectItem value="bold-outline">🔷 Bold with Black Outline (Classic)</SelectItem>
+                  <SelectItem value="karaoke">🎤 Word-by-Word Karaoke (Yellow)</SelectItem>
+                  <SelectItem value="animated">✨ Animated Pop-in</SelectItem>
+                  <SelectItem value="neon-glow">💜 Neon Glow (Pink/Magenta)</SelectItem>
+                  <SelectItem value="yellow-highlight">⭐ Yellow Highlight (TikTok)</SelectItem>
+                  <SelectItem value="zoomed-in">🔍 Zoomed In (Center)</SelectItem>
+                  <SelectItem value="gradient-pop">🌈 Gradient Pop (Gold & Pink)</SelectItem>
+                  <SelectItem value="minimal-clean">⚪ Minimal Clean (Top)</SelectItem>
+                  <SelectItem value="tiktok-style">🎵 TikTok Style (Red Outline)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
