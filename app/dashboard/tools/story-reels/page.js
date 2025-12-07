@@ -1125,6 +1125,18 @@ export default function StoryReelsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Preview Modal */}
+      <PreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        previewData={previewData}
+        onGenerateFinal={handleGenerateFinalFromPreview}
+        availableVoices={availableVoices}
+        voicesByVariant={voicesByVariant}
+        languageVariant={languageVariant}
+        musicTracks={['none', 'upbeat', 'calm', 'epic', 'emotional']}
+      />
     </div>
   )
 }
