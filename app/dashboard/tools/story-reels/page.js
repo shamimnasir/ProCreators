@@ -1212,11 +1212,9 @@ export default function StoryReelsPage() {
 
               {videoData.captionsUrl && (
                 <div className="max-w-2xl mx-auto">
-                  <Button variant="outline" className="w-full" asChild>
-                    <a href={videoData.captionsUrl} download>
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download Captions (SRT)
-                    </a>
+                  <Button variant="outline" className="w-full" onClick={handleDownloadCaptions}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Download Captions (SRT)
                   </Button>
                 </div>
               )}
