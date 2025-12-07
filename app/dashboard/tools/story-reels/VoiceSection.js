@@ -67,32 +67,97 @@ export default function VoiceSection({
   // Start recording
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
+      console.log('[Voice Recording] Requesting microphone access...')
+      
+      // Check if we're on HTTPS or localhost
+      const isSecureContext = window.location.protocol === 'https:' || 
+                             window.location.hostname === 'localhost' ||
+                             window.location.hostname === '127.0.0.1'
+      
+      if (!isSecureContext) {
+        toast({
+          title: "Microphone Access Requires HTTPS",
+          description: "For security, microphone access requires HTTPS or localhost. Please use a secure connection.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast({
+          title: "Browser Not Supported",
+          description: "Your browser doesn't support microphone access. Please use a modern browser.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
+      })
+      
+      console.log('[Voice Recording] Microphone access granted')
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      })
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
 
       mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
       }
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
         setRecordedBlob(audioBlob)
         setUploadedFile(null)
-        stream.getTracks().forEach(track => track.stop())
+        
+        // Stop all tracks to free up the microphone
+        stream.getTracks().forEach(track => {
+          track.stop()
+          console.log(`[Voice Recording] Stopped track: ${track.kind}`)
+        })
       }
 
       mediaRecorder.start()
       setRecording(true)
+      
       toast({
         title: "Recording Started",
-        description: "Speak clearly for 10-30 seconds in your natural voice..."
+        description: "Speak clearly for 10-30 seconds in your natural voice...",
+        duration: 3000
       })
+      
+      console.log('[Voice Recording] Recording started successfully')
+      
     } catch (error) {
+      console.error('[Voice Recording] Error accessing microphone:', error)
+      
+      let errorMessage = "Could not access microphone."
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Microphone permission denied. Please allow microphone access and try again."
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No microphone found. Please connect a microphone and try again."
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Microphone is being used by another application. Please close other apps and try again."
+      } else if (error.name === 'OverconstrainedError') {
+        errorMessage = "Microphone doesn't support the required settings. Please try with a different microphone."
+      } else if (error.name === 'SecurityError') {
+        errorMessage = "Microphone access blocked by security settings. Please check your browser settings."
+      }
+      
       toast({
-        title: "Error",
-        description: "Could not access microphone",
+        title: "Microphone Error",
+        description: errorMessage,
         variant: "destructive"
       })
     }
