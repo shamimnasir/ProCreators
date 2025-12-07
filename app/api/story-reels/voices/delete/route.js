@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,12 +16,20 @@ export async function DELETE(request) {
 
     console.log(`[Voice Delete] Deleting voice: ${voiceId}`)
 
-    const elevenlabs = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY
+    // Make direct API call to ElevenLabs
+    const response = await fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, {
+      method: 'DELETE',
+      headers: {
+        'xi-api-key': process.env.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json'
+      }
     })
 
-    // Delete the voice
-    await elevenlabs.voices.delete(voiceId)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[Voice Delete] ElevenLabs API error: ${response.status} - ${errorText}`)
+      throw new Error(`Failed to delete voice: ${response.status} - ${errorText}`)
+    }
 
     console.log(`[Voice Delete] Voice deleted successfully`)
 
