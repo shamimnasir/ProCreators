@@ -285,19 +285,23 @@ export async function POST(request) {
           // Don't fail TTS generation if usage tracking fails
         }
         
-        // Generate TTS using the cloned voice
+        // Generate TTS using the cloned voice with OPTIMIZED SETTINGS FOR BANGLADESHI ACCENT
         const voiceSettings = {
-          stability: 0.5,              // Moderate stability for natural speech
-          similarity_boost: 0.8,       // High similarity to preserve voice characteristics
-          style: 0.4,                  // Moderate style for expressiveness
-          use_speaker_boost: true      // Enhanced clarity
+          stability: 0.8,              // High stability to maintain consistent Bangladeshi accent patterns
+          similarity_boost: 1.0,       // MAXIMUM similarity to preserve original Bangladeshi pronunciation
+          style: 0.3,                  // Lower style to reduce AI interpretation and maintain original accent
+          use_speaker_boost: true      // Enhanced clarity for better accent preservation
         }
+        
+        console.log(`[${jobId}] Using Bangladeshi-optimized voice settings:`, voiceSettings)
         
         const audio = await elevenlabs.textToSpeech.convert(bengaliVoice, {
           text: script,
-          model_id: 'eleven_multilingual_v2',
+          model_id: 'eleven_multilingual_v2',  // Best model for accent preservation
           voice_settings: voiceSettings,
-          language_code: ttsLanguage === 'bn' ? 'bn' : 'en'
+          language_code: 'bn',                 // Bengali language code
+          optimize_streaming_latency: 0,       // Highest quality over speed
+          output_format: 'mp3_44100_128'       // High quality output
         })
         
         // Convert audio stream to buffer and save
