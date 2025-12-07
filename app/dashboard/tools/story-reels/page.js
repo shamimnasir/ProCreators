@@ -15,6 +15,7 @@ import {
   Loader2, Sparkles, Video, Mic, Upload, Download, 
   FileText, Film, Music, Type, Play, Edit, X, Check 
 } from 'lucide-react'
+import VoiceSection from './VoiceSection'
 
 export default function StoryReelsPage() {
   // Script state
