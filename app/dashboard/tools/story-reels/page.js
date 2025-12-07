@@ -338,12 +338,8 @@ export default function StoryReelsPage() {
       toast({ title: "Error", description: "Please search and select stock videos", variant: "destructive" })
       return
     }
-    if (voiceOption === 'upload' && !voiceFile) {
-      toast({ title: "Error", description: "Please upload your voice file", variant: "destructive" })
-      return
-    }
-    if (voiceOption === 'clone' && !recordedAudio) {
-      toast({ title: "Error", description: "Please record your voice sample", variant: "destructive" })
+    if (!selectedVoiceId) {
+      toast({ title: "Error", description: "Please select a voice", variant: "destructive" })
       return
     }
 
@@ -355,23 +351,15 @@ export default function StoryReelsPage() {
       const formData = new FormData()
       formData.append('script', script)
       formData.append('duration', duration)
-      formData.append('voiceOption', voiceOption)
-      formData.append('ttsProvider', ttsProvider)
+      formData.append('voiceOption', 'tts') // Always use TTS with selected voice
+      formData.append('ttsProvider', 'elevenlabs')
       formData.append('ttsLanguage', ttsLanguage)
-      formData.append('bengaliVoice', bengaliVoice)
+      formData.append('bengaliVoice', selectedVoiceId) // Use selected voice ID (premade or cloned)
       formData.append('captionStyle', captionStyle)
       formData.append('musicTrack', musicTrack)
       formData.append('resolution', resolution)
       formData.append('stockVideos', JSON.stringify(stockVideos))
       formData.append('keywords', JSON.stringify(keywords))
-
-      if (voiceOption === 'upload' && voiceFile) {
-        formData.append('voiceFile', voiceFile)
-      } else if (voiceOption === 'clone' && recordedAudio) {
-        // Convert recorded audio blob to file
-        const audioBlob = await fetch(recordedAudio).then(r => r.blob())
-        formData.append('voiceFile', audioBlob, 'recording.wav')
-      }
 
       // Simulate progress for better UX
       const progressInterval = setInterval(() => {
