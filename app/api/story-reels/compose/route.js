@@ -84,9 +84,9 @@ export async function POST(request) {
       console.log(`[${jobId}] Generating TTS with Google Cloud Text-to-Speech...`)
       
       try {
-        // Initialize Google Cloud TTS client
+        // Initialize Google Cloud TTS client with service account
         const client = new textToSpeech.TextToSpeechClient({
-          apiKey: process.env.GOOGLE_CLOUD_API_KEY
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
         })
 
         // Determine language code based on selection
