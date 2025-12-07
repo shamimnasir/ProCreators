@@ -1,0 +1,452 @@
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/hooks/use-toast'
+import { 
+  Mic, Upload, Loader2, Sparkles, Check, X, Trash2, User
+} from 'lucide-react'
+
+export default function VoiceSection({ 
+  ttsLanguage, 
+  selectedVoiceId, 
+  onVoiceChange,
+  voiceFile,
+  onVoiceFileChange
+}) {
+  const [voices, setVoices] = useState({ premade: [], cloned: [] })
+  const [loadingVoices, setLoadingVoices] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [recordedBlob, setRecordedBlob] = useState(null)
+  const [cloning, setCloning] = useState(false)
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [newVoiceName, setNewVoiceName] = useState('')
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [deletingVoice, setDeletingVoice] = useState(null)
+  
+  const audioFileRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const { toast } = useToast()
+
+  // Load voices on component mount
+  useEffect(() => {
+    loadVoices()
+  }, [])
+
+  const loadVoices = async () => {
+    setLoadingVoices(true)
+    try {
+      const response = await fetch('/api/story-reels/voices/list')
+      const data = await response.json()
+      
+      if (data.success) {
+        setVoices(data.voices)
+        
+        // Auto-select first Bengali premade voice if none selected
+        if (!selectedVoiceId && data.voices.premade.length > 0) {
+          onVoiceChange(data.voices.premade[0].voice_id)
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not load voices",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingVoices(false)
+    }
+  }
+
+  // Start recording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data)
+      }
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        setRecordedBlob(audioBlob)
+        setUploadedFile(null)
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorder.start()
+      setRecording(true)
+      toast({
+        title: "Recording Started",
+        description: "Speak clearly for 10-30 seconds in your natural voice..."
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not access microphone",
+        variant: "destructive"
+      })
+    }
+  }
+
+  // Stop recording
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop()
+      setRecording(false)
+      toast({
+        title: "Recording Stopped",
+        description: "Your voice sample is ready for cloning"
+      })
+    }
+  }
+
+  // Handle file upload
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File must be less than 10MB",
+          variant: "destructive"
+        })
+        return
+      }
+
+      setUploadedFile(file)
+      setRecordedBlob(null)
+      toast({
+        title: "Success",
+        description: "Voice sample uploaded successfully"
+      })
+    }
+  }
+
+  // Clone voice
+  const handleCloneVoice = async () => {
+    if (!newVoiceName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a name for your voice",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!recordedBlob && !uploadedFile) {
+      toast({
+        title: "Error",
+        description: "Please record or upload a voice sample first",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setCloning(true)
+    try {
+      const formData = new FormData()
+      formData.append('voiceName', newVoiceName)
+      formData.append('description', `${ttsLanguage === 'bn' ? 'Bengali' : 'English'} cloned voice`)
+      
+      if (recordedBlob) {
+        formData.append('voiceFile', recordedBlob, 'recording.webm')
+      } else if (uploadedFile) {
+        formData.append('voiceFile', uploadedFile)
+      }
+
+      const response = await fetch('/api/story-reels/voices/clone', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Success!",
+          description: data.message
+        })
+        
+        // Reload voices and select the new one
+        await loadVoices()
+        onVoiceChange(data.voiceId)
+        
+        // Reset form
+        setShowCloneDialog(false)
+        setNewVoiceName('')
+        setRecordedBlob(null)
+        setUploadedFile(null)
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setCloning(false)
+    }
+  }
+
+  // Delete voice
+  const handleDeleteVoice = async (voiceId) => {
+    if (!confirm('Are you sure you want to delete this voice? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingVoice(voiceId)
+    try {
+      const response = await fetch(`/api/story-reels/voices/delete?voiceId=${voiceId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: "Voice deleted successfully"
+        })
+        
+        // Reload voices
+        await loadVoices()
+        
+        // If deleted voice was selected, select first premade voice
+        if (selectedVoiceId === voiceId && voices.premade.length > 0) {
+          onVoiceChange(voices.premade[0].voice_id)
+        }
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingVoice(null)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Mic className="h-5 w-5" />
+          Voice Selection
+        </CardTitle>
+        <CardDescription>
+          Choose a pre-made voice or clone your own for authentic {ttsLanguage === 'bn' ? 'Bangladeshi Bengali' : 'English'} narration
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="premade" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="premade">Pre-made Voices</TabsTrigger>
+            <TabsTrigger value="clone">
+              <Sparkles className="h-4 w-4 mr-1" />
+              Clone Your Voice
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Pre-made Voices */}
+          <TabsContent value="premade" className="space-y-4">
+            {loadingVoices ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label>Recommended {ttsLanguage === 'bn' ? 'Bengali' : 'English'} Voices</Label>
+                  <div className="grid gap-2">
+                    {voices.premade.map((voice) => (
+                      <div
+                        key={voice.voice_id}
+                        onClick={() => onVoiceChange(voice.voice_id)}
+                        className={`p-3 border rounded-lg cursor-pointer transition-all hover:border-primary ${
+                          selectedVoiceId === voice.voice_id 
+                            ? 'border-primary bg-primary/5' 
+                            : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{voice.name}</p>
+                              {selectedVoiceId === voice.voice_id && (
+                                <Check className="h-4 w-4 text-primary" />
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{voice.description}</p>
+                            <div className="flex gap-1 mt-1">
+                              {voice.labels?.gender && (
+                                <Badge variant="outline" className="text-xs">
+                                  {voice.labels.gender}
+                                </Badge>
+                              )}
+                              {voice.labels?.age && (
+                                <Badge variant="outline" className="text-xs">
+                                  {voice.labels.age}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {voices.cloned.length > 0 && (
+                  <div className="space-y-2 pt-4 border-t">
+                    <Label>Your Cloned Voices</Label>
+                    <div className="grid gap-2">
+                      {voices.cloned.map((voice) => (
+                        <div
+                          key={voice.voice_id}
+                          className={`p-3 border rounded-lg transition-all ${
+                            selectedVoiceId === voice.voice_id 
+                              ? 'border-primary bg-primary/5' 
+                              : ''
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div 
+                              className="flex-1 cursor-pointer"
+                              onClick={() => onVoiceChange(voice.voice_id)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                <p className="font-medium">{voice.name}</p>
+                                {selectedVoiceId === voice.voice_id && (
+                                  <Check className="h-4 w-4 text-primary" />
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{voice.description}</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteVoice(voice.voice_id)}
+                              disabled={deletingVoice === voice.voice_id}
+                            >
+                              {deletingVoice === voice.voice_id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* Clone Voice */}
+          <TabsContent value="clone" className="space-y-4">
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <h4 className="font-medium text-sm">How Voice Cloning Works:</h4>
+              <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Record or upload 10-30 seconds of clear speech in your natural voice</li>
+                <li>AI analyzes your voice characteristics (tone, pitch, accent)</li>
+                <li>Your cloned voice is ready to generate any text in {ttsLanguage === 'bn' ? 'Bengali' : 'English'}</li>
+                <li>Perfect for authentic Bangladeshi Bengali accent!</li>
+              </ol>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Voice Name</Label>
+                <Input
+                  placeholder="e.g., My Voice, Ahmed's Voice, Sarah's Voice"
+                  value={newVoiceName}
+                  onChange={(e) => setNewVoiceName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Voice Sample (10-30 seconds recommended)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant={recording ? "destructive" : "outline"}
+                    onClick={recording ? stopRecording : startRecording}
+                    className="w-full"
+                  >
+                    <Mic className="mr-2 h-4 w-4" />
+                    {recording ? 'Stop Recording' : 'Record Voice'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => audioFileRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Audio
+                  </Button>
+                  <input
+                    ref={audioFileRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                {(recordedBlob || uploadedFile) && (
+                  <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-600 dark:text-green-400">
+                      Voice sample ready: {uploadedFile?.name || 'Recorded audio'}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setRecordedBlob(null)
+                        setUploadedFile(null)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                onClick={handleCloneVoice}
+                disabled={cloning || (!recordedBlob && !uploadedFile) || !newVoiceName.trim()}
+                className="w-full"
+              >
+                {cloning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Sparkles className="mr-2 h-4 w-4" />
+                Clone Voice
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                ✨ Your cloned voice will appear in "Pre-made Voices" tab after creation
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  )
+}
