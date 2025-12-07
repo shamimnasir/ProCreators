@@ -25,20 +25,31 @@ export async function POST(request) {
     console.log(`[Voice Clone] Voice sample received, size: ${buffer.length} bytes`)
 
     try {
-      // Create new FormData for ElevenLabs API
+      // Create new FormData for ElevenLabs API with Bangladeshi accent optimization
       const elevenLabsFormData = new FormData()
       elevenLabsFormData.append('name', voiceName)
-      elevenLabsFormData.append('description', description)
+      elevenLabsFormData.append('description', `${description} - Bangladeshi Bengali voice`) // Specify regional accent
+      
+      // Add labels to help ElevenLabs understand this is Bangladeshi Bengali
+      const labels = JSON.stringify({
+        "accent": "bangladeshi",
+        "language": "bengali",
+        "region": "bangladesh",
+        "quality": "native"
+      })
+      elevenLabsFormData.append('labels', labels)
       
       // Create a new Blob from the buffer and append it as 'files'
       const audioBlob = new Blob([buffer], { type: voiceFile.type || 'audio/mpeg' })
-      elevenLabsFormData.append('files', audioBlob, voiceFile.name || 'voice_sample.mp3')
+      elevenLabsFormData.append('files', audioBlob, voiceFile.name || 'bangladeshi_voice_sample.mp3')
 
-      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API with data:`, {
+      console.log(`[Voice Clone] Calling ElevenLabs Voice Clone API with BANGLADESHI OPTIMIZATION:`, {
         name: voiceName,
         description: description,
         fileSize: buffer.length,
-        fileName: voiceFile.name || 'voice_sample.mp3'
+        fileName: voiceFile.name || 'bangladeshi_voice_sample.mp3',
+        accent: 'bangladeshi',
+        optimization: 'enabled'
       })
 
       // Make direct API call to ElevenLabs
