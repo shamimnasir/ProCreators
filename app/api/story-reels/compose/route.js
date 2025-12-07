@@ -120,32 +120,28 @@ export async function POST(request) {
           ssmlGender: ssmlGender,
         }
         
-        // Add voice name and model if provided
+        // Add voice name if provided
         if (voiceName) {
           voiceConfig.name = voiceName
           
-          // Some voices require a model parameter (e.g., Neural2, Studio voices)
-          // Extract model from voice name if present
-          if (voiceName.includes('Neural2')) {
-            // No model needed for Neural2 voices
-          } else if (voiceName.includes('Wavenet')) {
-            // No model needed for Wavenet voices
-          } else if (voiceName.includes('Studio')) {
-            // Studio voices need model
+          // Some voices require a model parameter
+          // Studio voices and full Chirp3-HD voices work better with model parameter
+          if (voiceName.includes('Studio')) {
             voiceConfig.model = voiceName
-          } else if (voiceName.includes('Standard')) {
-            // No model needed for Standard voices
-          } else if (voiceName.includes('Chirp')) {
-            // Chirp voices might need model
-            voiceConfig.model = voiceName
-          } else {
-            // For other voices (like star names: Iapetus, etc.), use the voice name as model
-            // These are newer generation voices that require model parameter
+          } else if (voiceName.includes('Chirp3-HD') || voiceName.includes('Chirp-HD')) {
+            // Chirp HD voices work with model parameter (optional but recommended)
             voiceConfig.model = voiceName
           }
+          // Other voices (Neural2, Wavenet, Standard) don't need model parameter
         }
 
         console.log(`[${jobId}] Voice config:`, JSON.stringify(voiceConfig))
+        console.log(`[${jobId}] Full request will use:`, JSON.stringify({
+          languageCode: voiceConfig.languageCode,
+          name: voiceConfig.name,
+          model: voiceConfig.model || 'not specified',
+          ssmlGender: voiceConfig.ssmlGender
+        }))
         
         const request = {
           input: { text: script },
