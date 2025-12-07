@@ -377,7 +377,44 @@ agent_communication:
     - agent: "main"
       message: "ELEVENLABS REMOVED - GOOGLE CLOUD TTS IMPLEMENTED:
       
-      **USER REQUEST: Removed talking head feature completely for better video generation**
+      **USER REQUEST: Replace ElevenLabs with Google Cloud TTS using language_code='bn' for proper Bengali text normalization**
+      
+      **Changes Made:**
+      
+      1) **Removed All ElevenLabs Integration:**
+         - Removed @elevenlabs/elevenlabs-js from package.json
+         - Removed gtts library (old Google Translate TTS)
+         - Deleted all voice cloning API routes (/voices/clone, /delete, /list, /manage)
+         - Deleted VoiceSection.js component
+         - Deleted lib/voiceStorage.js (MongoDB voice storage)
+         - Removed /api/story-reels/list-bengali-voices and /save-voice routes
+      
+      2) **Implemented Google Cloud Text-to-Speech API:**
+         - Installed @google-cloud/text-to-speech v5.7.0
+         - Created new /api/story-reels/compose/route.js using Google Cloud TTS
+         - Uses language_code='bn' (Bengali) to force proper text normalization
+         - Created /api/story-reels/list-voices/route.js to fetch available voices
+         - Supports both TTS and 'Upload Original Recording' options
+      
+      3) **Simplified Frontend UI:**
+         - Removed complex voice cloning interface
+         - Created clean 2-tab interface: 'Google Cloud TTS' and 'Use Original Recording'
+         - Language selector (বাংলা/English) dynamically loads appropriate voices
+         - Voice dropdown shows available Google TTS voices with gender info
+         - Microphone recording and file upload for original audio
+      
+      4) **Key Implementation Details:**
+         - API uses GOOGLE_CLOUD_API_KEY from .env
+         - language_code parameter set to 'bn' for Bengali (not 'bn-IN' or 'bn-BD')
+         - This forces Google to normalize text as Bengali instead of guessing
+         - Fallback to default system voice if no voices available
+         - Preserves 'Use Original Recording' option for 100% authenticity
+      
+      **Testing Required:**
+      - Test Bengali TTS generation with language_code='bn'
+      - Verify voice selection loads properly
+      - Test end-to-end video composition
+      - Compare Bengali accent quality vs ElevenLabs
       
       **Changes Made:**
       
