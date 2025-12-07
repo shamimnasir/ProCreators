@@ -463,30 +463,31 @@ function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
   const marginV = targetHeight === '2160' ? 80 : targetHeight === '1440' ? 60 : targetHeight === '1080' ? 50 : 30
   
   // Build the force_style string based on caption style
+  // Use Noto Sans Bengali UI for proper Bengali text rendering
   let forceStyle = ''
   
   switch (captionStyle) {
     case 'bold-outline':
       // White text with black outline (most readable)
-      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     case 'karaoke':
       // Yellow text with black outline for visibility
-      forceStyle = `FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Shadow=1,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     case 'animated':
       // White text with heavy shadow
-      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=1,Shadow=3,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=1,Shadow=3,Bold=1,Alignment=2,MarginV=${marginV}`
       break
     
     default:
       // Default: simple white with black outline
-      forceStyle = `FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
+      forceStyle = `FontName=Noto Sans Bengali UI,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Bold=1,Alignment=2,MarginV=${marginV}`
   }
   
-  return `subtitles=${escapedPath}:force_style='${forceStyle}':charenc=UTF-8`
+  return `subtitles=${escapedPath}:force_style='${forceStyle}'`
 }
 
 // Helper function to get music file path based on track selection
