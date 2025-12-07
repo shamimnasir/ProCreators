@@ -311,8 +311,8 @@ export async function POST(request) {
       }
     }
 
-    // Step 6: Add captions and audio to video
-    console.log(`[${jobId}] Step 6: Adding captions and audio to video...`)
+    // Step 7: Add captions and audio to video
+    console.log(`[${jobId}] Step 7: Adding captions and audio to video...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     // Build caption filter based on style
