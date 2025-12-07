@@ -246,26 +246,82 @@ export async function POST(request) {
         .run()
     })
 
-    // Step 4: Add audio to the concatenated video
-    console.log(`[${jobId}] Step 4: Adding audio...`)
+    // Step 4: Generate SRT captions file
+    console.log(`[${jobId}] Step 4: Generating captions...`)
+    const captionsPath = join(tempDir, 'captions.srt')
+    const captionLines = generateCaptions(script, duration)
+    await writeFile(captionsPath, captionLines)
+
+    // Step 5: Add background music if requested
+    console.log(`[${jobId}] Step 5: Processing audio and music...`)
+    let finalAudioPath = audioPath
+    
+    if (musicTrack !== 'none') {
+      console.log(`[${jobId}] Adding background music: ${musicTrack}`)
+      const musicPath = getMusicPath(musicTrack)
+      
+      if (musicPath && existsSync(musicPath)) {
+        const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
+        
+        await new Promise((resolve, reject) => {
+          ffmpeg()
+            .input(audioPath)
+            .input(musicPath)
+            .complexFilter([
+              '[0:a]volume=1.0[voice]',
+              '[1:a]volume=0.3,afade=t=out:st=' + (duration - 2) + ':d=2[music]',
+              '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
+            ])
+            .outputOptions([
+              '-map', '[out]',
+              '-ac', '2',
+              '-ar', '44100',
+              '-b:a', '128k'
+            ])
+            .output(mixedAudioPath)
+            .on('end', () => {
+              finalAudioPath = mixedAudioPath
+              console.log(`[${jobId}] Background music mixed successfully`)
+              resolve()
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] Music mixing error:`, err.message)
+              console.log(`[${jobId}] Continuing without background music`)
+              resolve() // Continue without music on error
+            })
+            .run()
+        })
+      } else {
+        console.log(`[${jobId}] Music file not found, continuing without background music`)
+      }
+    }
+
+    // Step 6: Add captions and audio to video
+    console.log(`[${jobId}] Step 6: Adding captions and audio to video...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    // Build caption filter based on style
+    const captionFilter = buildCaptionFilter(captionStyle, captionsPath, targetHeight)
     
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(concatVideoPath)
-        .input(audioPath)
+        .input(finalAudioPath)
         .outputOptions([
-          '-c:v', 'copy', // Video is already processed, just copy
+          '-vf', captionFilter,
+          '-c:v', 'libx264',
+          '-preset', 'fast',
+          '-crf', '23',
           '-c:a', 'aac',
           '-b:a', '128k',
           '-movflags', '+faststart',
-          '-map', '0:v:0', // Map video from first input
-          '-map', '1:a:0', // Map audio from second input
-          '-shortest' // Stop at shortest stream (audio or video)
+          '-map', '0:v:0',
+          '-map', '1:a:0',
+          '-shortest'
         ])
         .output(finalVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video composition complete`)
+          console.log(`[${jobId}] Video composition complete with captions`)
           resolve()
         })
         .on('error', (err) => {
@@ -273,7 +329,7 @@ export async function POST(request) {
           reject(err)
         })
         .on('progress', (progress) => {
-          console.log(`[${jobId}] Processing: ${Math.round(progress.percent || 0)}%`)
+          console.log(`[${jobId}] Final processing: ${Math.round(progress.percent || 0)}%`)
         })
         .run()
     })
