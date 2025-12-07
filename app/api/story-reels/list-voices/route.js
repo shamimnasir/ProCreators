@@ -10,9 +10,9 @@ export async function GET(request) {
     
     console.log(`[List Voices] Fetching voices for language: ${language}`)
     
-    // Initialize Google Cloud TTS client
+    // Initialize Google Cloud TTS client with service account
     const client = new textToSpeech.TextToSpeechClient({
-      apiKey: process.env.GOOGLE_CLOUD_API_KEY
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
     })
 
     // List all voices
