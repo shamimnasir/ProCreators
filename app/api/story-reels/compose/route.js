@@ -260,11 +260,12 @@ export async function POST(request) {
         throw new Error('Voice file is required for upload option')
       }
     } else if (voiceOption === 'clone') {
-      // Voice cloning with ElevenLabs - instant voice cloning
+      // Voice cloning with ElevenLabs - uses a pre-created cloned voice ID
       console.log(`[${jobId}] Using voice cloning with ElevenLabs...`)
       
-      if (!voiceFile) {
-        throw new Error('Voice sample is required for voice cloning')
+      // Check if bengaliVoice is provided (should be the cloned voice ID)
+      if (!bengaliVoice || bengaliVoice.length < 15) {
+        throw new Error('Cloned voice ID is required. Please clone your voice first using the Voice Clone feature.')
       }
       
       try {
@@ -272,39 +273,17 @@ export async function POST(request) {
           apiKey: process.env.ELEVENLABS_API_KEY
         })
         
-        console.log(`[${jobId}] Creating voice clone from uploaded sample...`)
+        console.log(`[${jobId}] Using cloned voice ID: ${bengaliVoice}`)
         
-        // Save the voice sample temporarily
-        const voiceSamplePath = join(tempDir, 'voice-sample.mp3')
-        const sampleBuffer = Buffer.from(await voiceFile.arrayBuffer())
-        await writeFile(voiceSamplePath, sampleBuffer)
-        
-        // Use ElevenLabs Speech-to-Speech for instant voice cloning
-        // This converts the text to speech using the characteristics of the uploaded voice
-        const fs = require('fs')
-        const FormData = require('form-data')
-        
-        // Create a temporary voice using the voice sample
-        // Note: This uses instant voice cloning (Preview Voice) feature
-        console.log(`[${jobId}] Generating TTS with cloned voice characteristics...`)
-        
-        // For voice cloning, we'll use a pre-made voice but with voice settings
-        // that try to match the uploaded sample characteristics
-        // True instant cloning requires Professional Voice Cloning (PVC) subscription
-        
-        // Fallback: Generate TTS with optimized settings for the language
-        const voiceId = ttsLanguage === 'bn' 
-          ? 'pNInz6obpgDQGcFmaJgB' // Multilingual voice that supports Bengali
-          : 'EXAVITQu4vr4xnSDxMaL'
-        
+        // Generate TTS using the cloned voice
         const voiceSettings = {
-          stability: 0.4,              // Lower for more natural variation
-          similarity_boost: 0.85,      // Very high to try to match characteristics
-          style: 0.5,                  // Moderate expressiveness
-          use_speaker_boost: true
+          stability: 0.5,              // Moderate stability for natural speech
+          similarity_boost: 0.8,       // High similarity to preserve voice characteristics
+          style: 0.4,                  // Moderate style for expressiveness
+          use_speaker_boost: true      // Enhanced clarity
         }
         
-        const audio = await elevenlabs.textToSpeech.convert(voiceId, {
+        const audio = await elevenlabs.textToSpeech.convert(bengaliVoice, {
           text: script,
           model_id: 'eleven_multilingual_v2',
           voice_settings: voiceSettings,
@@ -319,16 +298,11 @@ export async function POST(request) {
         const audioBuffer = Buffer.concat(chunks)
         await writeFile(audioPath, audioBuffer)
         
-        console.log(`[${jobId}] Voice clone TTS generated, size:`, audioBuffer.length)
-        console.log(`[${jobId}] Note: For true voice cloning, create a custom voice in ElevenLabs dashboard with your voice sample, then select it in the TTS Voice tab`)
+        console.log(`[${jobId}] Cloned voice TTS generated successfully, size:`, audioBuffer.length)
         
       } catch (cloneError) {
-        console.error(`[${jobId}] Voice cloning failed:`, cloneError.message)
-        console.log(`[${jobId}] Falling back to uploaded audio...`)
-        
-        // Fallback: just use the uploaded audio as-is
-        const buffer = Buffer.from(await voiceFile.arrayBuffer())
-        await writeFile(audioPath, buffer)
+        console.error(`[${jobId}] Voice cloning TTS failed:`, cloneError.message)
+        throw new Error(`Failed to generate TTS with cloned voice: ${cloneError.message}`)
       }
     }
 
