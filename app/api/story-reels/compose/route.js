@@ -89,18 +89,20 @@ export async function POST(request) {
           keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
         })
 
-        // Determine language code based on selection
-        // Use bn-IN for Bengali, en-US for English
-        const languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
-        const languageName = ttsLanguage === 'bn' ? 'Bengali (India)' : 'English (US)'
-        
-        console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
-        
-        // Parse voice selection
+        // Parse voice selection to extract language code
         let voiceName = selectedVoice
         let ssmlGender = 'NEUTRAL'
+        let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US' // Default
         
+        // If voice name is provided, extract language code from it
         if (selectedVoice && selectedVoice.includes('-')) {
+          // Voice names are like: "en-US-Neural2-A", "bn-IN-Wavenet-A", "en-GB-Studio-C"
+          const parts = selectedVoice.split('-')
+          if (parts.length >= 2) {
+            // Extract language code (e.g., "en-US", "bn-IN", "en-GB")
+            languageCode = `${parts[0]}-${parts[1]}`
+          }
+          
           // Extract gender from voice name if present
           if (selectedVoice.toLowerCase().includes('female')) {
             ssmlGender = 'FEMALE'
@@ -108,6 +110,9 @@ export async function POST(request) {
             ssmlGender = 'MALE'
           }
         }
+        
+        const languageName = ttsLanguage === 'bn' ? 'Bengali' : 'English'
+        console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
 
         console.log(`[${jobId}] Voice config: name=${voiceName}, gender=${ssmlGender}, language=${languageCode}`)
 
