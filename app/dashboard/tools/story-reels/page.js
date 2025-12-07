@@ -63,7 +63,7 @@ export default function StoryReelsPage() {
     }
   }, [ttsLanguage, voiceOption])
 
-  // Load available voices from Google Cloud TTS
+  // Load available voices from Google Cloud TTS and group by variant
   const loadVoices = async () => {
     setLoadingVoices(true)
     try {
@@ -72,16 +72,37 @@ export default function StoryReelsPage() {
       
       if (data.success && data.voices.length > 0) {
         setAvailableVoices(data.voices)
-        // Auto-select first voice
-        if (!selectedVoice) {
-          setSelectedVoice(data.voices[0].name)
+        
+        // Group voices by language variant (en-US, en-GB, bn-IN, etc.)
+        const grouped = {}
+        data.voices.forEach(voice => {
+          const variant = voice.languageCodes[0] // e.g., "en-US", "en-GB"
+          if (!grouped[variant]) {
+            grouped[variant] = []
+          }
+          grouped[variant].push(voice)
+        })
+        
+        setVoicesByVariant(grouped)
+        
+        // Auto-select first variant
+        const firstVariant = Object.keys(grouped)[0]
+        if (!languageVariant && firstVariant) {
+          setLanguageVariant(firstVariant)
         }
+        
+        // Auto-select first voice in variant
+        if (!selectedVoice && firstVariant && grouped[firstVariant].length > 0) {
+          setSelectedVoice(grouped[firstVariant][0].name)
+        }
+        
         toast({
           title: "Voices Loaded",
-          description: `Found ${data.voices.length} ${ttsLanguage === 'bn' ? 'Bengali' : 'English'} voices`
+          description: `Found ${Object.keys(grouped).length} accent variants with ${data.voices.length} voices`
         })
       } else {
         setAvailableVoices([])
+        setVoicesByVariant({})
         toast({
           title: "Note",
           description: data.message || "Using default system voice",
@@ -91,6 +112,7 @@ export default function StoryReelsPage() {
     } catch (error) {
       console.error('Error loading voices:', error)
       setAvailableVoices([])
+      setVoicesByVariant({})
       toast({
         title: "Warning",
         description: "Could not load voices. Will use default voice.",
@@ -99,6 +121,29 @@ export default function StoryReelsPage() {
     } finally {
       setLoadingVoices(false)
     }
+  }
+
+  // Get friendly name for language variant
+  const getVariantDisplayName = (variant) => {
+    const names = {
+      'en-US': '🇺🇸 American English',
+      'en-GB': '🇬🇧 British English',
+      'en-AU': '🇦🇺 Australian English',
+      'en-IN': '🇮🇳 Indian English',
+      'bn-IN': '🇮🇳 Bengali (India)',
+      'bn-BD': '🇧🇩 Bengali (Bangladesh)'
+    }
+    return names[variant] || variant
+  }
+
+  // Get friendly voice type from name
+  const getVoiceType = (voiceName) => {
+    if (voiceName.includes('Neural2')) return 'Neural (Best)'
+    if (voiceName.includes('Wavenet')) return 'Wavenet (High)'
+    if (voiceName.includes('Studio')) return 'Studio (Premium)'
+    if (voiceName.includes('Standard')) return 'Standard'
+    if (voiceName.includes('Chirp3-HD')) return 'Chirp HD (Best)'
+    return 'Voice'
   }
 
   // Generate AI Script
