@@ -526,11 +526,21 @@ export default function VoiceSection({
             <div className="bg-muted p-4 rounded-lg space-y-2">
               <h4 className="font-medium text-sm">How Voice Cloning Works:</h4>
               <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                <li>Record or upload 10-30 seconds of clear speech in your natural voice</li>
-                <li>AI analyzes your voice characteristics (tone, pitch, accent)</li>
-                <li>Your cloned voice is ready to generate any text in {ttsLanguage === 'bn' ? 'Bengali' : 'English'}</li>
-                <li>Perfect for authentic Bangladeshi Bengali accent!</li>
+                <li>Record or upload 10-30 seconds of clear speech in your natural Bangladeshi voice</li>
+                <li>AI analyzes your voice characteristics (tone, pitch, accent) with special optimization for Bangladeshi Bengali</li>
+                <li>Your cloned voice preserves your authentic Bangladeshi accent and pronunciation</li>
+                <li>Use it to generate any text with your exact voice and regional accent!</li>
               </ol>
+              
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded">
+                <h5 className="font-medium text-sm text-blue-900 dark:text-blue-100">📢 Bangladeshi Accent Tips:</h5>
+                <ul className="text-xs text-blue-800 dark:text-blue-200 mt-1 space-y-1 list-disc list-inside">
+                  <li>Speak naturally with your normal Bangladeshi pronunciation</li>
+                  <li>Include some common Bengali words: "আমি", "তুমি", "কেমন আছো", "ভালো"</li>
+                  <li>Record in a quiet environment for best accent capture</li>
+                  <li>Avoid copying Indian Bengali pronunciation - use YOUR natural accent!</li>
+                </ul>
+              </div>
             </div>
 
             <div className="space-y-4">
