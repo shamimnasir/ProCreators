@@ -32,7 +32,9 @@ export default function StoryReelsPage() {
   // Voice state - simplified with Google Cloud TTS
   const [ttsLanguage, setTtsLanguage] = useState('bn')
   const [voiceOption, setVoiceOption] = useState('tts') // 'tts' or 'upload'
+  const [languageVariant, setLanguageVariant] = useState('') // en-US, en-GB, bn-IN, etc.
   const [availableVoices, setAvailableVoices] = useState([])
+  const [voicesByVariant, setVoicesByVariant] = useState({}) // Grouped by variant
   const [selectedVoice, setSelectedVoice] = useState('')
   const [loadingVoices, setLoadingVoices] = useState(false)
   const [voiceFile, setVoiceFile] = useState(null)
