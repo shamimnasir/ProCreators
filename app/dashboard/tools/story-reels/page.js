@@ -343,7 +343,7 @@ export default function StoryReelsPage() {
   }
 
   // Handle file upload
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -357,10 +357,34 @@ export default function StoryReelsPage() {
 
       setVoiceFile(file)
       setRecordedBlob(null)
-      toast({
-        title: "Success",
-        description: "Audio file uploaded successfully"
-      })
+      
+      // Get audio duration and auto-adjust video duration
+      try {
+        const audio = new Audio(URL.createObjectURL(file))
+        audio.addEventListener('loadedmetadata', () => {
+          const audioDuration = Math.ceil(audio.duration)
+          if (audioDuration > duration) {
+            setDuration(Math.min(audioDuration, 60)) // Cap at 60 seconds max
+            toast({
+              title: "Audio Uploaded",
+              description: `Video duration auto-adjusted to ${Math.min(audioDuration, 60)} seconds to match your audio`,
+              duration: 4000
+            })
+          } else {
+            toast({
+              title: "Success",
+              description: "Audio file uploaded successfully"
+            })
+          }
+          URL.revokeObjectURL(audio.src)
+        })
+      } catch (error) {
+        console.error('Error detecting audio duration:', error)
+        toast({
+          title: "Success",
+          description: "Audio file uploaded successfully"
+        })
+      }
     }
   }
 
