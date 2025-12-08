@@ -127,63 +127,89 @@ export default function LibraryPage() {
           <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="videos">Videos</TabsTrigger>
         </TabsList>
-        <TabsContent value="all" className="mt-6">
-          {items.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <LibraryIcon className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Your library is empty</h3>
-                <p className="text-sm text-muted-foreground text-center mb-4">
-                  Start creating content to build your library
-                </p>
-                <Button onClick={() => window.location.href = '/dashboard/tools/threads'}>
-                  Create Content
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
-                <Card key={item.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      {item.type === 'text' && <FileText className="h-5 w-5" />}
-                      {item.type === 'image' && <ImageIcon className="h-5 w-5" />}
-                      {item.type === 'video' && <Video className="h-5 w-5" />}
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {item.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleDownload(item)}
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        Download
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+        
+        {['all', 'text', 'images', 'videos'].map(tab => (
+          <TabsContent key={tab} value={tab} className="mt-6">
+            {(() => {
+              const filteredItems = tab === 'all' 
+                ? items 
+                : items.filter(item => {
+                    if (tab === 'text') return item.category === 'text'
+                    if (tab === 'images') return item.category === 'image'
+                    if (tab === 'videos') return item.category === 'video'
+                    return true
+                  })
+              
+              return filteredItems.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-16">
+                    <LibraryIcon className="h-16 w-16 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      {tab === 'all' ? 'Your library is empty' : `No ${tab} content yet`}
+                    </h3>
+                    <p className="text-sm text-muted-foreground text-center mb-4">
+                      Start creating content to build your library
+                    </p>
+                    <Button onClick={() => window.location.href = '/dashboard/tools/story-reels'}>
+                      Create Content
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredItems.map((item) => (
+                    <Card key={item.id}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          {item.category === 'text' && <FileText className="h-5 w-5" />}
+                          {item.category === 'image' && <ImageIcon className="h-5 w-5" />}
+                          {item.category === 'video' && <Video className="h-5 w-5" />}
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <CardDescription className="line-clamp-2">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {item.category === 'video' && item.videoUrl && (
+                          <div className="mb-3">
+                            <video 
+                              src={item.videoUrl} 
+                              className="w-full h-32 object-cover rounded-md bg-black"
+                              controls={false}
+                              preload="metadata"
+                            />
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleDownload(item)}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )
+            })()}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   )
