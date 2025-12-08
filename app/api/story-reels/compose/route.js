@@ -331,7 +331,7 @@ export async function POST(request) {
               .input(trimmedMusicPath)
               .complexFilter([
                 '[0:a]volume=1.0[voice]',
-                `[1:a]volume=0.25,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2[music]`,
+                `[1:a]volume=0.20,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2[music]`,
                 '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
               ])
               .outputOptions([
