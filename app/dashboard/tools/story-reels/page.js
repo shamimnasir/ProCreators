@@ -1103,7 +1103,7 @@ export default function StoryReelsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{customMusic.name}</p>
-                      <p className="text-xs text-muted-foreground">Custom from Freesound</p>
+                      <p className="text-xs text-muted-foreground">From Freesound Library</p>
                     </div>
                     <Button
                       size="sm"
@@ -1115,19 +1115,9 @@ export default function StoryReelsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <Select value={musicTrack} onValueChange={setMusicTrack}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No Music</SelectItem>
-                      <SelectItem value="upbeat">Upbeat & Energetic</SelectItem>
-                      <SelectItem value="calm">Calm & Peaceful</SelectItem>
-                      <SelectItem value="epic">Epic & Dramatic</SelectItem>
-                      <SelectItem value="emotional">Emotional</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="text-center border-2 border-dashed rounded-lg p-6 space-y-2">
+                  <Music className="w-8 h-8 mx-auto text-muted-foreground opacity-50" />
+                  <p className="text-sm text-muted-foreground">No music selected</p>
                   <Button
                     variant="outline"
                     size="sm"
