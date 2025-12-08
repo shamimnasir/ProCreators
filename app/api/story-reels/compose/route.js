@@ -290,41 +290,72 @@ export async function POST(request) {
     
     if (musicTrack !== 'none') {
       console.log(`[${jobId}] Adding background music: ${musicTrack}`)
-      const musicPath = getMusicPath(musicTrack)
+      
+      // Determine music path (custom Freesound download or built-in)
+      let musicPath = customMusicPath ? `/app/public${customMusicPath}` : getMusicPath(musicTrack)
       
       if (musicPath && existsSync(musicPath)) {
-        const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
+        console.log(`[${jobId}] Music file found: ${musicPath}`)
+        
+        // Step 6a: Trim music to match video duration (auto-cut)
+        const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
         
         await new Promise((resolve, reject) => {
-          ffmpeg()
-            .input(audioPath)
-            .input(musicPath)
-            .complexFilter([
-              '[0:a]volume=1.0[voice]',
-              '[1:a]volume=0.3,afade=t=out:st=' + (duration - 2) + ':d=2[music]',
-              '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
-            ])
+          ffmpeg(musicPath)
+            .setStartTime(0)
+            .duration(actualAudioDuration) // Match exact audio duration
             .outputOptions([
-              '-map', '[out]',
-              '-ac', '2',
-              '-ar', '44100',
-              '-b:a', '128k'
+              '-acodec', 'libmp3lame',
+              '-b:a', '128k',
+              '-ar', '44100'
             ])
-            .output(mixedAudioPath)
+            .output(trimmedMusicPath)
             .on('end', () => {
-              finalAudioPath = mixedAudioPath
-              console.log(`[${jobId}] Background music mixed successfully`)
+              console.log(`[${jobId}] Music trimmed to ${actualAudioDuration}s`)
               resolve()
             })
             .on('error', (err) => {
-              console.error(`[${jobId}] Music mixing error:`, err.message)
-              console.log(`[${jobId}] Continuing without background music`)
+              console.error(`[${jobId}] Music trim error:`, err.message)
               resolve() // Continue without music on error
             })
             .run()
         })
+        
+        // Step 6b: Mix trimmed music with voice
+        if (existsSync(trimmedMusicPath)) {
+          const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
+          
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input(audioPath)
+              .input(trimmedMusicPath)
+              .complexFilter([
+                '[0:a]volume=1.0[voice]',
+                `[1:a]volume=0.25,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2[music]`,
+                '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
+              ])
+              .outputOptions([
+                '-map', '[out]',
+                '-ac', '2',
+                '-ar', '44100',
+                '-b:a', '128k'
+              ])
+              .output(mixedAudioPath)
+              .on('end', () => {
+                finalAudioPath = mixedAudioPath
+                console.log(`[${jobId}] Background music mixed successfully`)
+                resolve()
+              })
+              .on('error', (err) => {
+                console.error(`[${jobId}] Music mixing error:`, err.message)
+                console.log(`[${jobId}] Continuing without background music`)
+                resolve() // Continue without music on error
+              })
+              .run()
+          })
+        }
       } else {
-        console.log(`[${jobId}] Music file not found, continuing without background music`)
+        console.log(`[${jobId}] Music file not found: ${musicPath}, continuing without background music`)
       }
     }
 
