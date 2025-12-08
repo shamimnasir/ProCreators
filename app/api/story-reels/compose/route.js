@@ -170,13 +170,37 @@ export async function POST(request) {
         })
       }
     } else if (voiceOption === 'upload') {
-      // Use uploaded audio directly (original recording option)
-      console.log(`[${jobId}] Using uploaded audio directly...`)
+      // Use uploaded audio with volume boost (original recording option)
+      console.log(`[${jobId}] Processing uploaded audio with volume normalization...`)
       
       if (voiceFile) {
         const buffer = Buffer.from(await voiceFile.arrayBuffer())
-        await writeFile(audioPath, buffer)
+        const tempUploadPath = join(tempDir, 'uploaded-voice-raw.mp3')
+        await writeFile(tempUploadPath, buffer)
         console.log(`[${jobId}] Uploaded audio saved, size:`, buffer.length)
+        
+        // Normalize volume to match TTS loudness (boost by 6dB and normalize)
+        await new Promise((resolve, reject) => {
+          ffmpeg(tempUploadPath)
+            .audioFilters([
+              'loudnorm=I=-16:TP=-1.5:LRA=11',  // Loudness normalization
+              'volume=2.0'  // Additional 2x volume boost
+            ])
+            .audioCodec('libmp3lame')
+            .audioBitrate('128k')
+            .output(audioPath)
+            .on('end', () => {
+              console.log(`[${jobId}] Uploaded audio normalized and boosted`)
+              resolve()
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] Audio normalization error:`, err.message)
+              // Fallback: use original file if normalization fails
+              require('fs').copyFileSync(tempUploadPath, audioPath)
+              resolve()
+            })
+            .run()
+        })
       } else {
         throw new Error('Voice file is required for upload option')
       }
