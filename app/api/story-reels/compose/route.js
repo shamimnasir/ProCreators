@@ -547,10 +547,10 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, fontS
       alignment = 2 // Bottom
       break
     case 'neon-glow':
-      primaryColor = '&HFFFFFF&' // Pure white text
-      outlineColor = '&HFF00FF&' // Bright magenta outline
-      outline = 6 // Very thick outline for glow
-      shadow = 10 // Extra large shadow for intense glow
+      primaryColor = '&H00FFFFFF' // Pure white text (ASS format: &H00BBGGRR)
+      outlineColor = '&H00FF00FF' // Bright magenta outline (BGR format)
+      outline = 8 // Extra thick outline for intense glow
+      shadow = 12 // Very large shadow for maximum glow effect
       bold = -1
       alignment = 2 // Bottom
       break
