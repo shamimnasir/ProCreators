@@ -491,9 +491,14 @@ export default function StoryReelsPage() {
       formData.append('resolution', resolution)
       formData.append('stockVideos', JSON.stringify(stockVideos))
       formData.append('keywords', JSON.stringify(keywords))
-      formData.append('voiceOption', 'tts')
+      formData.append('voiceOption', voiceOption) // Use actual voice option (tts or upload)
       formData.append('ttsLanguage', ttsLanguage)
       formData.append('selectedVoice', previewSettings.selectedVoice || selectedVoice)
+      
+      // Include uploaded/recorded audio for final generation
+      if (voiceOption === 'upload' && voiceFile) {
+        formData.append('voiceFile', voiceFile)
+      }
 
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 5, 90))
