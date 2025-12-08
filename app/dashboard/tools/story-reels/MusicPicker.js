@@ -108,6 +108,14 @@ export default function MusicPicker({ open, onClose, onSelectMusic, videoDuratio
   }
 
   const handleSelectTrack = async (track) => {
+    // Stop audio preview immediately when selecting
+    if (audioPlayer) {
+      audioPlayer.pause()
+      audioPlayer.currentTime = 0
+      setPlayingId(null)
+      setAudioPlayer(null)
+    }
+
     setDownloading(true)
 
     try {
