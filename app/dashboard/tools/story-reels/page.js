@@ -1269,6 +1269,14 @@ export default function StoryReelsPage() {
         languageVariant={languageVariant}
         musicTracks={['none', 'upbeat', 'calm', 'epic', 'emotional']}
       />
+
+      {/* Music Picker Modal */}
+      <MusicPicker
+        open={showMusicPicker}
+        onClose={() => setShowMusicPicker(false)}
+        onSelectMusic={(music) => setCustomMusic(music)}
+        videoDuration={duration}
+      />
     </div>
   )
 }
