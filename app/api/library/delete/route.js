@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
+import { unlink } from 'fs/promises'
+import { existsSync } from 'fs'
+import { join } from 'path'
 
 export async function DELETE(request) {
   try {
@@ -14,16 +17,34 @@ export async function DELETE(request) {
 
     const libraryCollection = await getCollection('library')
     
-    const result = await libraryCollection.deleteOne({ 
+    // Get the item first to check if it has a file
+    const item = await libraryCollection.findOne({ 
       id,
       userId: 'default-user' // TODO: Replace with actual user ID when auth is implemented
     })
 
-    if (result.deletedCount === 0) {
+    if (!item) {
       return NextResponse.json(
         { success: false, error: 'Item not found' },
         { status: 404 }
       )
+    }
+
+    // Delete the database entry
+    await libraryCollection.deleteOne({ id, userId: 'default-user' })
+
+    // Delete the associated file if it exists
+    if (item.filePath) {
+      const fullPath = join('/app/public', item.filePath)
+      if (existsSync(fullPath)) {
+        try {
+          await unlink(fullPath)
+          console.log(`Deleted file: ${fullPath}`)
+        } catch (fileError) {
+          console.error('Failed to delete file:', fileError)
+          // Continue anyway, DB entry is deleted
+        }
+      }
     }
 
     return NextResponse.json({
