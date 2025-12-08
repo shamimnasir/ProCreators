@@ -1268,7 +1268,7 @@ export default function StoryReelsPage() {
         availableVoices={availableVoices}
         voicesByVariant={voicesByVariant}
         languageVariant={languageVariant}
-        musicTracks={['none', 'upbeat', 'calm', 'epic', 'emotional']}
+        customMusic={customMusic}
       />
 
       {/* Music Picker Modal */}
