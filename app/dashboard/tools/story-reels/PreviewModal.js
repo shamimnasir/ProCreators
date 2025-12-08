@@ -22,7 +22,7 @@ export default function PreviewModal({
   availableVoices,
   voicesByVariant,
   languageVariant,
-  musicTracks
+  customMusic
 }) {
   const { toast } = useToast()
   const videoRef = useRef(null)
