@@ -17,6 +17,7 @@ import {
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye 
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
+import MusicPicker from './MusicPicker'
 
 export default function StoryReelsPage() {
   // Script state
