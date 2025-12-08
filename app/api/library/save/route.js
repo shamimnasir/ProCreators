@@ -1,55 +1,67 @@
 import { NextResponse } from 'next/server'
-import { MongoClient } from 'mongodb'
+import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
-
-const client = new MongoClient(process.env.MONGO_URL)
 
 export async function POST(request) {
   try {
-    const { content, type, title, description, metadata, videoUrl, script } = await request.json()
+    const { content, type, title, description, metadata, videoUrl, script, filePath, fileSize } = await request.json()
 
-    if (!content && !videoUrl) {
+    if (!content && !videoUrl && !filePath) {
       return NextResponse.json(
-        { success: false, error: 'Content or video URL is required' },
+        { success: false, error: 'Content, video URL, or file path is required' },
         { status: 400 }
       )
     }
 
-    await client.connect()
-    const db = client.db('procreators')
-    const collection = db.collection('library')
+    const libraryCollection = await getCollection('library')
+    
+    // Create TTL index on first save (if it doesn't exist)
+    try {
+      await libraryCollection.createIndex(
+        { expiresAt: 1 },
+        { expireAfterSeconds: 0 }
+      )
+    } catch (indexError) {
+      // Index might already exist, that's okay
+      console.log('TTL index creation skipped (may already exist)')
+    }
 
     // Determine content category
     let category = 'text'
-    if (type === 'video' || type === 'reel' || type === 'short') {
+    if (type === 'video' || type === 'reel' || type === 'short' || type === 'story-reel') {
       category = 'video'
     } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
       category = 'image'
     }
 
-    // Calculate expiration based on user tier
-    // TODO: Get actual user tier from session/auth
-    const userTier = 'free' // or 'paid'
-    const expirationDays = userTier === 'free' ? 7 : 90
+    // Get session ID from cookie or generate one
+    // TODO: Replace with actual user ID when auth is implemented
+    const userId = 'default-user'
+
+    // Calculate expiration: 30 days from now
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + expirationDays)
+    expiresAt.setDate(expiresAt.getDate() + 30)
 
     const document = {
       id: randomUUID(),
+      userId,
       content: content || '',
       videoUrl: videoUrl || null,
+      filePath: filePath || null,
+      fileSize: fileSize || null,
       script: script || null,
       type,
       category,
       title,
-      description,
+      description: description || '',
       metadata: metadata || {},
-      userTier,
       createdAt: new Date(),
       expiresAt,
     }
 
-    await collection.insertOne(document)
+    await libraryCollection.insertOne(document)
+
+    console.log(`Library item saved: ${document.id} (${category}) - expires in 30 days`)
 
     return NextResponse.json({
       success: true,
