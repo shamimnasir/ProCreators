@@ -63,20 +63,52 @@ export default function LibraryPage() {
   }
 
   const handleDownload = (item) => {
-    const blob = new Blob([item.content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${item.type}-${Date.now()}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    
-    toast({
-      title: "Downloaded",
-      description: "Content downloaded successfully"
-    })
+    // Handle different content types
+    if (item.category === 'video' && item.videoUrl) {
+      // For videos, create a download link to the video URL
+      const a = document.createElement('a')
+      a.href = item.videoUrl
+      a.download = `${item.type}-${Date.now()}.mp4`
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      
+      toast({
+        title: "Downloading",
+        description: "Video download started"
+      })
+    } else if (item.category === 'image' && item.filePath) {
+      // For images, download the image file
+      const a = document.createElement('a')
+      a.href = item.filePath
+      a.download = `${item.type}-${Date.now()}.jpg`
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      
+      toast({
+        title: "Downloaded",
+        description: "Image downloaded successfully"
+      })
+    } else if (item.content) {
+      // For text content, create a blob
+      const blob = new Blob([item.content], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${item.type}-${Date.now()}.txt`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      toast({
+        title: "Downloaded",
+        description: "Content downloaded successfully"
+      })
+    }
   }
 
   return (
