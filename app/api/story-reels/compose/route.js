@@ -472,6 +472,57 @@ export async function POST(request) {
 
     console.log(`[${jobId}] Video composition complete! Size:`, videoBuffer.length, 'bytes')
 
+    // Step 9: Auto-save to Library
+    console.log(`[${jobId}] Step 9: Saving to library...`)
+    try {
+      const { getCollection } = await import('@/lib/mongodb')
+      const libraryCollection = await getCollection('library')
+      
+      // Create TTL index if it doesn't exist
+      try {
+        await libraryCollection.createIndex(
+          { expiresAt: 1 },
+          { expireAfterSeconds: 0 }
+        )
+      } catch (indexError) {
+        console.log('TTL index creation skipped (may already exist)')
+      }
+
+      // Calculate expiration: 30 days from now
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 30)
+
+      const libraryDoc = {
+        id: require('crypto').randomUUID(),
+        userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
+        content: script || '',
+        videoUrl,
+        filePath: videoUrl, // Same as videoUrl for backwards compatibility
+        fileSize: videoBuffer.length,
+        script: script || '',
+        type: 'story-reel',
+        category: 'video',
+        title: script ? `Story Reel: ${script.substring(0, 50)}...` : 'Story Reel Video',
+        description: script ? script.substring(0, 100) + '...' : 'AI-generated story reel video',
+        metadata: {
+          duration,
+          resolution,
+          clipCount: videoFiles.length,
+          voiceOption,
+          captionStyle,
+          jobId
+        },
+        createdAt: new Date(),
+        expiresAt,
+      }
+
+      await libraryCollection.insertOne(libraryDoc)
+      console.log(`[${jobId}] Video auto-saved to library (expires in 30 days)`)
+    } catch (saveError) {
+      console.error(`[${jobId}] Failed to auto-save to library:`, saveError)
+      // Don't fail the request if library save fails
+    }
+
     return NextResponse.json({
       success: true,
       videoUrl,
