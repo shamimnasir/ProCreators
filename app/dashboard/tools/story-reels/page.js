@@ -429,9 +429,15 @@ export default function StoryReelsPage() {
       const formData = new FormData()
       formData.append('script', script)
       formData.append('duration', duration)
+      formData.append('voiceOption', voiceOption)
       formData.append('ttsLanguage', ttsLanguage)
       formData.append('selectedVoice', selectedVoice || '')
       formData.append('stockVideos', JSON.stringify(stockVideos))
+      
+      // Include uploaded/recorded audio for preview
+      if (voiceOption === 'upload' && voiceFile) {
+        formData.append('voiceFile', voiceFile)
+      }
 
       const response = await fetch('/api/story-reels/generate-preview', {
         method: 'POST',
