@@ -48,6 +48,14 @@ export default function PreviewModal({
   const [isRegeneratingVoice, setIsRegeneratingVoice] = useState(false)
   const [isGeneratingFinal, setIsGeneratingFinal] = useState(false)
 
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setIsGeneratingFinal(false)
+      setIsPlaying(false)
+    }
+  }, [open])
+
   // Update captions from preview data
   useEffect(() => {
     if (previewData?.captionData) {
