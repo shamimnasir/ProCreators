@@ -305,6 +305,25 @@ export default function StoryReelsPage() {
         setRecordedBlob(audioBlob)
         setVoiceFile(audioBlob)
         
+        // Get audio duration and auto-adjust video duration
+        try {
+          const audio = new Audio(URL.createObjectURL(audioBlob))
+          audio.addEventListener('loadedmetadata', () => {
+            const audioDuration = Math.ceil(audio.duration)
+            if (audioDuration > duration) {
+              setDuration(Math.min(audioDuration, 60)) // Cap at 60 seconds max
+              toast({
+                title: "Recording Complete",
+                description: `Video duration auto-adjusted to ${Math.min(audioDuration, 60)} seconds to match your recording`,
+                duration: 4000
+              })
+            }
+            URL.revokeObjectURL(audio.src)
+          })
+        } catch (error) {
+          console.error('Error detecting audio duration:', error)
+        }
+        
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop())
       }
