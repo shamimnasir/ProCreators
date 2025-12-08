@@ -254,7 +254,8 @@ export default function PreviewModal({
       captionFontSize,
       captionPosition,
       selectedVoice,
-      selectedMusic
+      selectedMusic,
+      customMusicPath: customMusic?.path || null
     })
   }
 
