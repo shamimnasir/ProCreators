@@ -203,8 +203,8 @@ export default function PreviewModal({
       case 'neon-glow':
         return {
           ...baseStyles,
-          color: '#ff00ff',
-          textShadow: '0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 2px 2px 4px rgba(0,0,0,0.8)',
+          color: '#ffffff',
+          textShadow: '0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff, 2px 2px 6px rgba(0,0,0,0.9)',
         }
       case 'yellow-highlight':
         return {
