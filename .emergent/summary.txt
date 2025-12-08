@@ -1,158 +1,188 @@
 <analysis>
-The trajectory documents a complex and iterative process to improve the Bengali Text-to-Speech (TTS) feature for a Story Video Reels application. The user's core request was to fix the unnatural, non-native sounding Bengali audio produced by the initial ElevenLabs integration.
+<original_problem_statement>
+The user wants to enhance the video generation tool with several features and fixes:
+1.  **Permanent ffmpeg/Next.js solution:** The user reported that  is missing and Next.js is outdated on new forks. They requested a permanent solution to avoid manual re-installation and updates.
+2.  **Caption Customization & Preview:** The user requested a feature to preview the video before final generation. This preview should allow for editing text, changing caption styles, switching voices, and previewing music.
+3.  **Caption Sizing and Placement:** After the preview was implemented, the user noted that the final video's captions were too small and placed too low, unlike the preview. They requested options to control caption font size and placement (top, middle, bottom).
+4.  **Download Button Fix:** The Download Video and Download Captions buttons were not working correctly.
+5.  **Stuck Generation Button:** The Generate Final HD Video button in the preview modal would get stuck in a loading state.
+6.  **Background Music:** The user reported that background music was not working and requested integration with a free music API. They chose Freesound and asked for a music picker and for the music to be automatically trimmed to the video's length.
+7.  **Music Volume:** The background music was too loud and conflicted with the voiceover. The user requested the volume be lowered to 20%.
+8.  **Caption Visuals:** The user reported two final issues with captions: the neon-glow style was nearly invisible on some backgrounds, and Bengali captions were sometimes broken.
+</original_problem_statement>
+**User's preferred language**: English
+**what currently exists?**
+The application is a full-stack Next.js video creation tool. It uses Google Cloud TTS for voice generation and  for video processing. Key features include:
+- A multi-step UI for generating videos.
+- Voice selection for multiple languages, including Bengali and English.
+- Integration with the Freesound API to search for and use royalty-free background music, which is automatically trimmed to the video length.
+- A variety of viral caption styles (e.g., neon, highlight, gradient).
+- A video preview modal that allows for live editing of caption text, styles, voice, and music before final generation.
+- Customization options for final caption font size (small, medium, large) and vertical placement (top, middle, bottom).
+- A persistent setup script () that automatically installs  on application start, solving the recurring issue of it being missing on new forks.
+- The Next.js version has been updated to .
 
-The AI engineer's first attempt involved adding UI selectors for different ElevenLabs multilingual voices, which failed to solve the accent problem. The second attempt pivoted to a more robust solution: dynamically fetching voices from the ElevenLabs API and providing a UI for voice cloning. This introduced UI clutter, which was addressed in a third iteration that cleaned up the interface and added stubs for saving cloned voices.
+**Last working item**:
+- Last item agent was working: The agent was addressing two user-reported caption issues:
+    1.  The  caption style was hard to see. The agent modified the style to use white text with a magenta outline/glow to improve contrast and visibility.
+    2.  Bengali captions were sometimes rendering incorrectly. The agent improved the word-splitting logic to be more unicode-aware and explicitly set UTF-8 encoding in the ASS subtitle file generation process to better handle the script.
+- Status: USER VERIFICATION PENDING
+- Agent Testing Done: N
+- Which testing method agent to use? manual testing by curl
+- User Testing Done: N
 
-A significant shift occurred when the user requested a local, free alternative to ElevenLabs to reduce costs. The engineer researched and proposed IndicF5, an open-source model. The subsequent trajectory details a lengthy, collaborative, and ultimately failed attempt to manually guide the user through setting up an IndicF5 server on a Google Cloud VM. The failure stemmed from installing an incorrect Python package ( instead of the full  with Bengali support) and the inability to debug it remotely.
+**All Pending/In progress Issue list**:
+- Issue 1: Verify fixes for caption visibility and rendering (P0)
 
-The final state is an abandoned local server setup and a recommendation to revert to a correctly implemented, reliable (but paid) ElevenLabs zero-shot cloning workflow.
+  Issues Detail:
+  - Issue 1:
+     - **Description:** The user reported that the neon-glow caption style is difficult to see and that Bengali captions sometimes appear broken. The agent has implemented fixes for both issues, but they have not been verified by the user.
+     - **Attempted fixes:**
+        - **Neon Glow:** The  function in  and the corresponding CSS in  were updated. The new style uses a primary color of white () and an outline color of magenta () to create a more visible effect.
+        - **Bengali Captions:** In , the word-splitting logic was changed from a simple  to  to better preserve whitespace and handle complex scripts. The ASS header was also explicitly set to include  and  definitions, with UTF-8 encoding enforced during file write.
+     - **Next debug checklist:**
+        - Ask the user to generate a video using the Neon Glow caption style to confirm it is now visible.
+        - Ask the user to generate a video with Bengali text to confirm the words are no longer broken.
+        - If issues persist, review the generated  file content in  to debug styling and encoding.
+     - **Why fix this issue and what will be achieved with the fix?** To ensure all caption styles are visually appealing and functional, and to provide reliable support for non-Latin scripts like Bengali, which is a core requirement of the application.
+     - **Status:** USER VERIFICATION PENDING
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** User needs to test the final video output.
+     - **Blocked on other issue:** None
 
-The user's primary language is English. The next agent must respond in English only.
+**In progress Task List**:
+- No in-progress tasks.
+
+**Upcoming and Future Tasks**
+- There are no outstanding feature requests from the user. The next agent should focus on verifying the last fix and then ask the user for any further enhancements.
+
+**Completed work in this session**
+- **Permanent Dependency Solution:** Created a  script to install  and added it to 's  hook, ensuring it's installed automatically on every startup. (DONE)
+- **Next.js Upgrade:** Updated Next.js from  to  and updated  to be compatible with the new version. (DONE)
+- **Video Preview Feature:** Implemented a comprehensive preview system () with a new backend endpoint () that allows users to edit text, change voices, styles, and music before final generation. (DONE)
+- **Caption Customization:** Added UI controls and backend logic for selecting caption font size and vertical placement, fixing the discrepancy between preview and final output. (DONE)
+- **Freesound API Integration:** Integrated Freesound for background music. This involved creating search () and download () endpoints, a  component, and updating the  route to auto-trim music to the video's length. (DONE)
+- **Bug Fix - Stuck Generation Button:** Fixed a state management issue in  that caused the Generate Final HD Video button to get stuck. (DONE)
+- **Bug Fix - Download Buttons:** Re-implemented the download logic in  to use  and  to correctly trigger browser downloads for the final video and caption files. (DONE)
+- **Bug Fix - Freesound 401 Error:** Corrected the music download logic to use preview URLs, bypassing the OAuth2 requirement that was causing  errors. (DONE)
+- **Audio Balance:** Reduced the background music volume to 20% in the  command within  for better voice clarity. (DONE)
+- **Bug Fix - Caption Preview Styling:** Fixed the preview modal CSS to correctly apply font size and position changes live. (DONE)
+- **Bug Fix - English Audio (Chirp Voices):** Resolved issues with Google TTS Chirp voices by filtering the voice list and adjusting the API call parameters. (DONE)
+- **Bug Fix - Gender Neutral Voices:** Fixed a bug where a 'NEUTRAL' gender default caused TTS to fail. (DONE)
+
+**Earlier issues found/mentioned but not fixed**
+- **UI Screenshot Failures:** Throughout the session, the agent repeatedly failed to capture screenshots of the lower sections of the  page. It kept capturing only the top part. The agent gave up on taking a proper screenshot multiple times. This could indicate a subtle front-end rendering issue (e.g., a scrolling problem or an element with a fixed height/overflow issue) or a limitation of the screenshot tool's interaction with the page. This was never investigated.
+   - **Debug checklist:**
+     - Manually inspect the page layout in a browser's developer tools, looking for , fixed heights, or other CSS properties that might prevent the page from scrolling correctly for the screenshot tool.
+     - Check the browser console for any rendering-related errors when interacting with the page.
+   - **Why to solve this issue and what will be achieved with this?** It hinders the agent's ability to verify its own UI changes and can mask other potential UI bugs.
+   - **Should Test frontend/backend/both after fix:** Frontend
+   - **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+  - **Issue recurrence in previous fork**:  was not installed in new environments/forks. This happened multiple times.
+  - **Recurrence count**: 3+
+  - **Status**: RESOLVED. A permanent fix was implemented by creating 🔧 Checking system dependencies...
+📦 ffmpeg not found. Installing...
+✅ ffmpeg installed successfully (version 5.1.7-0+deb12u1)
+✅ ffprobe available
+✅ All dependencies ready! to install  and adding  to the  in . This ensures  is installed automatically before the Next.js server starts.
+
+**Code Architecture**
+
+**Key Technical Concepts**
+- **Framework:** Next.js 15.1.0 (App Router)
+- **Backend:** Next.js API Routes
+- **Video/Audio Processing:**  (for mixing audio, burning subtitles, trimming) and  (for getting audio duration).
+- **Text-to-Speech:** Google Cloud Text-to-Speech API ().
+- **Subtitles:** Advanced SubStation Alpha (.ass) format for styled, word-by-word karaoke captions.
+- **Music Source:** Freesound API for searching and downloading royalty-free music.
+- **Environment:** A startup script () run via  to ensure  is always present.
+
+**key DB schema**
+- No database is used in the current architecture.
+
+**changes in tech stack**
+- **Freesound API:** Integrated as the primary source for background music.
+
+**All files of reference**
+- **Created Files:**
+  - : Backend for creating the video preview.
+  - : Backend for searching Freesound.
+  - : Backend for downloading and caching Freesound music.
+  - : Frontend UI for the preview feature.
+  - : Frontend UI for the music search/selection feature.
+  - 🔧 Checking system dependencies...
+✅ ffmpeg already installed (version 5.1.7-0+deb12u1)
+✅ ffprobe available
+✅ All dependencies ready!: Shell script to ensure  is installed on startup.
+  - , , etc.: Documentation files.
+- **Updated Files:**
+  - : Heavily modified to support custom music paths, auto-trimming, new caption styles, font size/position options, and bug fixes.
+  - : Heavily modified to integrate the preview modal, music picker, and new caption customization controls.
+  - : Upgraded Next.js and added the  script to run .
+  - : Updated for compatibility with Next.js 15.
+  - : Added .
+
+**Areas that need refactoring**
+-  has become excessively large (over 1200 lines). It manages state and logic for the entire multi-step process. It should be broken down into smaller, more manageable components for each step (e.g., Scripting, VoiceSelection, VideoCustomization).
+
+**key api endpoints**
+- : Generates the final high-resolution video.
+- : Generates a low-resolution preview video and audio.
+- : Fetches available TTS voices from Google Cloud.
+- : Searches for music on Freesound.
+- : Downloads a selected track from Freesound.
+
+**Critical Info for New Agent**
+- ** is now persistent:** The  script runs automatically before the app starts, so you should not need to install  manually.
+- **Freesound API Key is Required:** The application requires a  in the  file to search for and download music.
+- **Music Caching:** Downloaded music from Freesound is cached in the  directory.
+- **ASS Subtitles:** Captions are generated as  files, which allows for advanced styling defined in . All styling changes for the final video must be made there.
+- **State Management:** Be mindful of the complex state in  and . A bug was caused by state not being reset when a modal closed.
+
+**documents created in this job**
+- 
+- 
+- 
+- 
+- 
+
+**Last 10 User Messages and any pending user messages**
+1.  **User:** The Generate Final Video button on the preview tab is stuck loading. (Issue reported)
+2.  **Agent:** Fixes the state management issue in . (Completed)
+3.  **User:** The background music isn't working. Research free music APIs. (Issue reported)
+4.  **Agent:** Researches APIs and proposes options. (Completed)
+5.  **User:** Integrate Freesound, add a music picker, and auto-trim the music. (Feature request)
+6.  **Agent:** Implements Freesound integration. (Completed)
+7.  **User:** Provides Freesound API key. (Input provided)
+8.  **Agent:** Adds key to  and restarts. (Completed)
+9.  **User:** Music picker shows an error when trying to select music. (Issue reported)
+10. **Agent:** Fixes the Freesound download authorization error. (Completed)
+11. **User:** Make the music volume 20%. (Tweak request)
+12. **Agent:** Reduces music volume in  command. (Completed)
+13. **User:** Reports two new issues: Neon captions are invisible, and Bengali captions are broken. (PENDING VERIFICATION)
+
+**Project Health Check:**
+- Broken: None known. Caption fixes are pending user verification.
+- Mocked: None.
+
+**3rd Party Integrations**
+- **Google Cloud Text-to-Speech:** Used for voiceover generation. Requires  service account file.
+- **Freesound:** Used for searching and downloading background music. Requires a User API Key () in the  file.
+- **Pexels:** Used implicitly by the original template for stock videos. The agent did not directly interact with its API but the frontend logic may still rely on it.
+
+**Testing status**
+- Testing agent used after significant changes: NO
+- Troubleshoot agent used after agent stuck in loop: NO
+- Test files created: , , , ,  were created and removed during debugging cycles. No permanent test files remain.
+- Known regressions: None.
+
+**Credentials to test flow:**
+- **Google Cloud TTS:** The  file is present in the  directory and configured via .
+- **Freesound:** The user-provided API key  has been added to the  file as .
+
+**What agent forgot to execute**
+- The agent never resolved why the  was unable to capture the full height of the main application page, repeatedly only capturing the top section. The agent abandoned attempts to get a full screenshot and moved on, leaving a potential UI rendering issue uninvestigated.
+
 </analysis>
-
-<product_requirements>
-The primary goal is to generate video reels with high-quality, natural-sounding Bengali voiceovers that are authentic for a Bangladeshi audience. The initial implementation using ElevenLabs' generic multilingual models produced robotic and incorrect accents, leading to user dissatisfaction.
-
-The system must support voice cloning, allowing users to record or upload their own voice to be used for generating the video's narration. To enhance usability and reduce recurring effort, these cloned voices must be saved and be reusable for future video projects.
-
-Furthermore, a key business requirement emerged to make the TTS functionality cost-effective by exploring free, self-hosted open-source alternatives like IndicF5, thereby eliminating the reliance on paid services like ElevenLabs.
-
-The user interface for voice selection and cloning must be minimalistic, intuitive, and hide technical details (like model names) from the end-user.
-</product_requirements>
-
-<key_technical_concepts>
-- **Framework:** Next.js (App Router)
-- **Styling:** TailwindCSS, shadcn/ui
-- **Backend:** Next.js API Routes, FastAPI (for external service)
-- **TTS APIs:**
-  - **ElevenLabs:** Used for high-quality TTS and voice cloning (zero-shot). The primary working, albeit paid, solution.
-  - **IndicF5/F5-TTS:** An open-source, self-hosted alternative that was attempted but failed to be correctly installed.
-- **Infrastructure:** Google Cloud Platform (Compute Engine VM for hosting the Python TTS service).
-- **Python Ecosystem:** , 
-Usage:   
-  pip <command> [options]
-
-Commands:
-  install                     Install packages.
-  lock                        Generate a lock file.
-  download                    Download packages.
-  uninstall                   Uninstall packages.
-  freeze                      Output installed packages in requirements format.
-  inspect                     Inspect the python environment.
-  list                        List installed packages.
-  show                        Show information about installed packages.
-  check                       Verify installed packages have compatible dependencies.
-  config                      Manage local and global configuration.
-  search                      Search PyPI for packages.
-  cache                       Inspect and manage pip's wheel cache.
-  index                       Inspect information available from package indexes.
-  wheel                       Build wheels from your requirements.
-  hash                        Compute hashes of package archives.
-  completion                  A helper command used for command completion.
-  debug                       Show information useful for debugging.
-  help                        Show help for commands.
-
-General Options:
-  -h, --help                  Show help.
-  --debug                     Let unhandled exceptions propagate outside the
-                              main subroutine, instead of logging them to
-                              stderr.
-  --isolated                  Run pip in an isolated mode, ignoring
-                              environment variables and user configuration.
-  --require-virtualenv        Allow pip to only run in a virtual environment;
-                              exit with an error otherwise.
-  --python <python>           Run pip with the specified Python interpreter.
-  -v, --verbose               Give more output. Option is additive, and can be
-                              used up to 3 times.
-  -V, --version               Show version and exit.
-  -q, --quiet                 Give less output. Option is additive, and can be
-                              used up to 3 times (corresponding to WARNING,
-                              ERROR, and CRITICAL logging levels).
-  --log <path>                Path to a verbose appending log.
-  --no-input                  Disable prompting for input.
-  --keyring-provider <keyring_provider>
-                              Enable the credential lookup via the keyring
-                              library if user input is allowed. Specify which
-                              mechanism to use [auto, disabled, import,
-                              subprocess]. (default: auto)
-  --proxy <proxy>             Specify a proxy in the form
-                              scheme://[user:passwd@]proxy.server:port.
-  --retries <retries>         Maximum attempts to establish a new HTTP
-                              connection. (default: 5)
-  --timeout <sec>             Set the socket timeout (default 15 seconds).
-  --exists-action <action>    Default action when a path already exists:
-                              (s)witch, (i)gnore, (w)ipe, (b)ackup, (a)bort.
-  --trusted-host <hostname>   Mark this host or host:port pair as trusted,
-                              even though it does not have valid or any HTTPS.
-  --cert <path>               Path to PEM-encoded CA certificate bundle. If
-                              provided, overrides the default. See 'SSL
-                              Certificate Verification' in pip documentation
-                              for more information.
-  --client-cert <path>        Path to SSL client certificate, a single file
-                              containing the private key and the certificate
-                              in PEM format.
-  --cache-dir <dir>           Store the cache data in <dir>.
-  --no-cache-dir              Disable the cache.
-  --disable-pip-version-check
-                              Don't periodically check PyPI to determine
-                              whether a new version of pip is available for
-                              download. Implied with --no-index.
-  --no-color                  Suppress colored output.
-  --use-feature <feature>     Enable new functionality, that may be backward
-                              incompatible.
-  --use-deprecated <feature>  Enable deprecated functionality, that will be
-                              removed in the future.
-  --resume-retries <resume_retries>
-                              Maximum attempts to resume or restart an
-                              incomplete download. (default: 5), ,  (for model downloads/authentication).
-</key_technical_concepts>
-
-<code_architecture>
-The architecture consists of a primary Next.js application and an attempted external Python microservice for local TTS.
-
-**Codebase Tree Structure:**
-
-
--   ****
-    -   **Importance:** This is the main user interface for the feature. It handles all user input for script, language, and voice selection.
-    -   **Summary of Changes:** This file underwent massive changes across multiple iterations. It was modified to:
-        1.  Add a static dropdown for pre-selected ElevenLabs voices.
-        2.  Be refactored to dynamically fetch and display voices from a new API endpoint.
-        3.  Incorporate a Load Voices button and state management (, ) for the dynamic list.
-        4.  Be completely redesigned to have a cleaner, tab-based layout for Pre-made Voices, Voice Clone, and Upload Voice.
-        5.  Add UI elements for saving a cloned/uploaded voice.
-
--   ****
-    -   **Importance:** The core backend route that orchestrates video creation.
-    -   **Summary of Changes:** It was updated to receive a  from the frontend and pass it directly to the ElevenLabs API, enabling the use of dynamically selected or cloned voices instead of a hardcoded one.
-
--   ****
-    -   **Importance:** A new API route created to proxy requests to the ElevenLabs API, fetching a list of available voices.
-    -   **Summary of Changes:** Created to support the dynamic voice selection UI.
-
--   ****
-    -   **Importance:** A new API route intended to save user-created voice clones to a persistent store.
-    -   **Summary of Changes:** The file was created, but the implementation logic was not completed. It serves as a placeholder.
-
--   ** (On Google Cloud VM)**
-    -   **Importance:** This file represents the attempt to create a self-hosted, local TTS service using Python (FastAPI) and F5-TTS.
-    -   **Summary of Changes:** Created from scratch and iterated upon multiple times. It was designed to expose a  endpoint that would take text and a reference audio file, and return a cloned voice audio. The implementation failed due to incorrect package dependencies and model loading errors.
-</code_architecture>
-
-<pending_tasks>
-- **Properly implement a local Bengali TTS solution:** The IndicF5 setup must be revisited. This requires finding the correct package, ensuring all dependencies are met, deploying it on a server, and thoroughly testing its voice cloning capabilities for Bengali.
-- **Implement Save Voice functionality:** The  API needs to be implemented to store voice metadata. The frontend needs to be able to list and use these saved voices.
-- **Integrate ProCreators with the local TTS service:** Once the local TTS server is working, the Next.js app must be updated to call its API instead of ElevenLabs.
-</pending_tasks>
-
-<current_work>
-The most recent work was an intensive, multi-hour, and ultimately unsuccessful attempt to set up a self-hosted Bengali voice cloning service using IndicF5 on a Google Cloud VM provided by the user. The AI engineer, unable to SSH directly, guided the user through a manual, command-by-command installation process.
-
-This process involved setting up the Python environment, installing dependencies like PyTorch and FFmpeg, authenticating with Hugging Face, and downloading the model. A FastAPI server () was created to serve the model.
-
-The effort failed during the implementation phase. A critical error was made when the  command for IndicF5 installed a generic  package instead of the intended Bengali-specific version. This led to a cascade of model loading errors () that could not be resolved. The final action was the AI engineer acknowledging the failure, explaining the package mismatch, and recommending a pivot back to a more reliable, albeit paid, ElevenLabs-based solution. The user was left frustrated by the significant time spent on the failed setup.
-</current_work>
-
-<optional_next_step>
-Implement the reliable ElevenLabs zero-shot cloning approach within ProCreators, which involves storing the user's reference audio file locally and passing it to the API for on-the-fly cloning.
-</optional_next_step>
