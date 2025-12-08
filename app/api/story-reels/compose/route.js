@@ -493,7 +493,7 @@ export async function POST(request) {
       expiresAt.setDate(expiresAt.getDate() + 30)
 
       const libraryDoc = {
-        id: require('crypto').randomUUID(),
+        id: randomUUID(),
         userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
         content: script || '',
         videoUrl,
