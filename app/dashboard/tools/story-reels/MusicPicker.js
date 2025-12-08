@@ -118,7 +118,8 @@ export default function MusicPicker({ open, onClose, onSelectMusic, videoDuratio
         body: JSON.stringify({
           soundId: track.id,
           name: track.name,
-          duration: videoDuration
+          duration: videoDuration,
+          previewUrl: track.previewUrl
         })
       })
 
