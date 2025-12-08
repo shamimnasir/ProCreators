@@ -63,43 +63,75 @@ export async function POST(request) {
       throw new Error('Failed to download any stock videos')
     }
 
-    // Step 2: Generate TTS audio
-    console.log(`[Preview ${jobId}] Generating TTS audio...`)
+    // Step 2: Generate or use audio
+    console.log(`[Preview ${jobId}] Processing audio (${voiceOption})...`)
     const audioPath = join(tempDir, 'voice.mp3')
     
-    try {
-      const client = new textToSpeech.TextToSpeechClient({
-        keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+    if (voiceOption === 'upload' && voiceFile) {
+      // Use uploaded audio
+      console.log(`[Preview ${jobId}] Using uploaded audio...`)
+      const buffer = Buffer.from(await voiceFile.arrayBuffer())
+      const tempUploadPath = join(tempDir, 'uploaded-voice-raw.mp3')
+      await writeFile(tempUploadPath, buffer)
+      
+      // Normalize volume for preview
+      await new Promise((resolve, reject) => {
+        ffmpeg(tempUploadPath)
+          .audioFilters([
+            'loudnorm=I=-16:TP=-1.5:LRA=11',
+            'volume=2.0'
+          ])
+          .audioCodec('libmp3lame')
+          .audioBitrate('128k')
+          .output(audioPath)
+          .on('end', () => {
+            console.log(`[Preview ${jobId}] Uploaded audio normalized`)
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[Preview ${jobId}] Audio normalization error:`, err.message)
+            require('fs').copyFileSync(tempUploadPath, audioPath)
+            resolve()
+          })
+          .run()
       })
-
-      let voiceName = selectedVoice
-      let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
+    } else {
+      // Generate TTS audio
+      console.log(`[Preview ${jobId}] Generating TTS audio...`)
       
-      if (selectedVoice && selectedVoice.includes('-')) {
-        const parts = selectedVoice.split('-')
-        if (parts.length >= 2) {
-          languageCode = `${parts[0]}-${parts[1]}`
-        }
-      }
+      try {
+        const client = new textToSpeech.TextToSpeechClient({
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        })
 
-      const voiceConfig = { languageCode }
-      
-      if (voiceName) {
-        voiceConfig.name = voiceName
-        if (voiceName.includes('Studio') || voiceName.includes('Chirp3-HD') || voiceName.includes('Chirp-HD')) {
-          voiceConfig.model = voiceName
+        let voiceName = selectedVoice
+        let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
+        
+        if (selectedVoice && selectedVoice.includes('-')) {
+          const parts = selectedVoice.split('-')
+          if (parts.length >= 2) {
+            languageCode = `${parts[0]}-${parts[1]}`
+          }
         }
-      }
 
-      const request = {
-        input: { text: script },
-        voice: voiceConfig,
-        audioConfig: {
-          audioEncoding: 'MP3',
-          speakingRate: 1.0,
-          pitch: 0.0,
-          volumeGainDb: 0.0,
-        },
+        const voiceConfig = { languageCode }
+        
+        if (voiceName) {
+          voiceConfig.name = voiceName
+          if (voiceName.includes('Studio') || voiceName.includes('Chirp3-HD') || voiceName.includes('Chirp-HD')) {
+            voiceConfig.model = voiceName
+          }
+        }
+
+        const request = {
+          input: { text: script },
+          voice: voiceConfig,
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: 1.0,
+            pitch: 0.0,
+            volumeGainDb: 0.0,
+          },
       }
 
       console.log(`[Preview ${jobId}] Calling Google Cloud TTS...`)
