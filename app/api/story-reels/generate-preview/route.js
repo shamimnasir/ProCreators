@@ -27,11 +27,13 @@ export async function POST(request) {
     const formData = await request.formData()
     const script = formData.get('script')
     const duration = parseInt(formData.get('duration'))
+    const voiceOption = formData.get('voiceOption') || 'tts'
     const ttsLanguage = formData.get('ttsLanguage')
     const selectedVoice = formData.get('selectedVoice')
+    const voiceFile = formData.get('voiceFile')
     const stockVideos = JSON.parse(formData.get('stockVideos'))
 
-    console.log(`[Preview ${jobId}] Config:`, { duration, ttsLanguage, selectedVoice })
+    console.log(`[Preview ${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice })
 
     // Step 1: Download stock videos (using streams)
     console.log(`[Preview ${jobId}] Downloading ${stockVideos.length} videos...`)
