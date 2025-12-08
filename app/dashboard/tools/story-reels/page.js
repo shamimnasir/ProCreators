@@ -48,6 +48,8 @@ export default function StoryReelsPage() {
   const [captionFontSize, setCaptionFontSize] = useState('medium')
   const [captionPosition, setCaptionPosition] = useState('bottom')
   const [musicTrack, setMusicTrack] = useState('upbeat')
+  const [customMusic, setCustomMusic] = useState(null) // For Freesound downloads
+  const [showMusicPicker, setShowMusicPicker] = useState(false)
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
