@@ -430,7 +430,15 @@ export default function StoryReelsPage() {
       formData.append('captionStyle', previewSettings.captionStyle)
       formData.append('captionFontSize', previewSettings.captionFontSize || captionFontSize)
       formData.append('captionPosition', previewSettings.captionPosition || captionPosition)
-      formData.append('musicTrack', previewSettings.selectedMusic)
+      // Send music properly from preview
+      if (previewSettings.customMusicPath) {
+        formData.append('musicTrack', 'custom')
+        formData.append('customMusicPath', previewSettings.customMusicPath)
+      } else if (previewSettings.selectedMusic && previewSettings.selectedMusic !== 'none') {
+        formData.append('musicTrack', previewSettings.selectedMusic)
+      } else {
+        formData.append('musicTrack', 'none')
+      }
       formData.append('resolution', resolution)
       formData.append('stockVideos', JSON.stringify(stockVideos))
       formData.append('keywords', JSON.stringify(keywords))
