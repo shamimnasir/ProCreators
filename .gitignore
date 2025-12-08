@@ -128,3 +128,7 @@ public/story-reels/cd222af9-03c7-4cf3-aad3-0a6edfa98148.mp4
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
