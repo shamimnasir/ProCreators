@@ -10,7 +10,7 @@ const FREESOUND_API_KEY = process.env.FREESOUND_API_KEY || ''
 
 export async function POST(request) {
   try {
-    const { soundId, name, duration: videoDuration } = await request.json()
+    const { soundId, name, duration: videoDuration, previewUrl } = await request.json()
     
     if (!FREESOUND_API_KEY) {
       return NextResponse.json({
@@ -42,14 +42,30 @@ export async function POST(request) {
       })
     }
 
-    // Download from Freesound
-    const downloadUrl = `https://freesound.org/apiv2/sounds/${soundId}/download/?token=${FREESOUND_API_KEY}`
+    // Use preview URL (HQ MP3) instead of download endpoint
+    // Download endpoint requires OAuth2, but preview URLs work with API key
+    const downloadUrl = previewUrl || `https://freesound.org/apiv2/sounds/${soundId}/?token=${FREESOUND_API_KEY}`
     
-    console.log(`[Freesound Download] Fetching from Freesound...`)
-    const response = await fetch(downloadUrl)
+    console.log(`[Freesound Download] Fetching preview from Freesound...`)
+    
+    // If we don't have previewUrl, fetch sound details first
+    let audioUrl = previewUrl
+    if (!audioUrl) {
+      const detailsResponse = await fetch(downloadUrl)
+      if (detailsResponse.ok) {
+        const details = await detailsResponse.json()
+        audioUrl = details.previews['preview-hq-mp3'] || details.previews['preview-lq-mp3']
+      }
+    }
+    
+    if (!audioUrl) {
+      throw new Error('No preview URL available')
+    }
+    
+    const response = await fetch(audioUrl)
     
     if (!response.ok) {
-      throw new Error(`Failed to download: ${response.status}`)
+      throw new Error(`Failed to download preview: ${response.status}`)
     }
 
     // Save to cache
