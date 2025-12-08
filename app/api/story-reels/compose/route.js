@@ -476,7 +476,6 @@ export async function POST(request) {
     // Step 9: Auto-save to Library
     console.log(`[${jobId}] Step 9: Saving to library...`)
     try {
-      const { getCollection } = await import('@/lib/mongodb')
       const libraryCollection = await getCollection('library')
       
       // Create TTL index if it doesn't exist
