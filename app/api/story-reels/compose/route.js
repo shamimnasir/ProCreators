@@ -39,8 +39,9 @@ export async function POST(request) {
     const voiceFile = formData.get('voiceFile')
     const captionFontSize = formData.get('captionFontSize') || 'medium'
     const captionPosition = formData.get('captionPosition') || 'bottom'
+    const customMusicPath = formData.get('customMusicPath') || null // For Freesound downloads
 
-    console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition })
+    console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
     console.log(`[${jobId}] Stock videos:`, stockVideos.length)
 
     // Step 1: Download stock videos using streams to save memory
