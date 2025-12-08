@@ -1098,18 +1098,47 @@ export default function StoryReelsPage() {
 
             <div className="space-y-2">
               <Label>Background Music</Label>
-              <Select value={musicTrack} onValueChange={setMusicTrack}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No Music</SelectItem>
-                  <SelectItem value="upbeat">Upbeat & Energetic</SelectItem>
-                  <SelectItem value="calm">Calm & Peaceful</SelectItem>
-                  <SelectItem value="epic">Epic & Dramatic</SelectItem>
-                  <SelectItem value="emotional">Emotional</SelectItem>
-                </SelectContent>
-              </Select>
+              {customMusic ? (
+                <div className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{customMusic.name}</p>
+                      <p className="text-xs text-muted-foreground">Custom from Freesound</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setCustomMusic(null)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Select value={musicTrack} onValueChange={setMusicTrack}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Music</SelectItem>
+                      <SelectItem value="upbeat">Upbeat & Energetic</SelectItem>
+                      <SelectItem value="calm">Calm & Peaceful</SelectItem>
+                      <SelectItem value="epic">Epic & Dramatic</SelectItem>
+                      <SelectItem value="emotional">Emotional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setShowMusicPicker(true)}
+                  >
+                    <Music className="w-3 h-3 mr-2" />
+                    Browse Freesound Library
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
