@@ -808,7 +808,21 @@ export default function StoryReelsPage() {
           <Textarea
             placeholder="Enter your story script here or click 'Generate AI Story' below..."
             value={script}
-            onChange={(e) => setScript(e.target.value)}
+            onChange={(e) => {
+              const newScript = e.target.value
+              setScript(newScript)
+              
+              // Auto-suggest duration based on word count (avg speaking: 2.5 words/sec)
+              if (newScript.trim()) {
+                const wordCount = newScript.trim().split(/\s+/).length
+                const estimatedSeconds = Math.ceil(wordCount / 2.5)
+                
+                // Only auto-adjust if estimated time is longer than current duration
+                if (estimatedSeconds > duration && estimatedSeconds <= 60) {
+                  setDuration(estimatedSeconds)
+                }
+              }
+            }}
             rows={8}
             className="font-mono text-sm"
           />
