@@ -138,20 +138,21 @@ export async function POST(request) {
       const [response] = await client.synthesizeSpeech(request)
       await writeFile(audioPath, response.audioContent, 'binary')
       
-      console.log(`[Preview ${jobId}] TTS generated successfully`)
-    } catch (error) {
-      console.error(`[Preview ${jobId}] TTS failed:`, error.message)
-      // Create silent audio as fallback
-      await new Promise((resolve, reject) => {
-        ffmpeg()
-          .input('anullsrc=r=44100:cl=stereo')
-          .inputFormat('lavfi')
-          .duration(duration)
-          .audioCodec('libmp3lame')
-          .save(audioPath)
-          .on('end', resolve)
-          .on('error', reject)
-      })
+        console.log(`[Preview ${jobId}] TTS generated successfully`)
+      } catch (error) {
+        console.error(`[Preview ${jobId}] TTS failed:`, error.message)
+        // Create silent audio as fallback
+        await new Promise((resolve, reject) => {
+          ffmpeg()
+            .input('anullsrc=r=44100:cl=stereo')
+            .inputFormat('lavfi')
+            .duration(duration)
+            .audioCodec('libmp3lame')
+            .save(audioPath)
+            .on('end', resolve)
+            .on('error', reject)
+        })
+      }
     }
 
     // Step 3: Get actual audio duration
