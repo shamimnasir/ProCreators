@@ -767,8 +767,8 @@ function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
   const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
   // ASS format with multiple fonts directories for robust Bengali font support
-  // Include both system fonts and local fonts directory
-  return `ass=${escapedPath}:fontsdir=/app/fonts\\:/usr/share/fonts/truetype/noto\\:/usr/share/fonts/truetype/lohit-bengali`
+  // Include local fonts, system fonts, and custom Bengali fonts
+  return `ass=${escapedPath}:fontsdir=/app/fonts\\:/usr/share/fonts/truetype/custom-bengali\\:/usr/share/fonts/truetype/noto\\:/usr/share/fonts/truetype/lohit-bengali`
 }
 
 // Helper function to get music file path based on track selection
