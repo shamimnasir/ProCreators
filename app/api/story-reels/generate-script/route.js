@@ -72,7 +72,7 @@ The script should be exactly ${duration} seconds when read at normal speaking pa
       'comedy': 'comedy or relatable humor content',
       'kids-stories': 'a playful moral story for children',
       'kids-learning': 'educational learning content (ABC, 123, colors, shapes)',
-      'business-promo': 'a promotional script for a business or service',
+      'business-promo': customTopic ? `a promotional script for the business/product/service named: ${customTopic}. You MUST use this exact name in the script` : 'a promotional script for a business or service',
       'horror': 'an atmospheric horror micro-story',
       'relationship': 'relationship advice or emotional guidance',
       'documentary': 'a historical or factual documentary-style script',
