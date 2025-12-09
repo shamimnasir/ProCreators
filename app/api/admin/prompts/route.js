@@ -43,7 +43,7 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
-    const db = await connectDB()
+    const { db } = await connectToDatabase()
     const promptsCollection = db.collection('custom_prompts')
     
     // Upsert the custom prompt
