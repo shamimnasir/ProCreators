@@ -1,5 +1,18 @@
 'use client'
 
+/**
+ * Quick Reels - Dynamic Niche Page
+ * 
+ * This page displays the full Story Reels interface but with niche-specific
+ * AI prompts for script generation. Each niche (Horror, Motivational, etc.)
+ * uses the same UI but generates contextually appropriate content.
+ * 
+ * NOTE: This currently uses a simplified ReelGenerator component.
+ * For full functionality matching Story Reels, the component needs to be
+ * expanded to include all workflow steps (keyword extraction, video search,
+ * voice selection, preview, and final composition).
+ */
+
 import React from 'react'
 import { useParams } from 'next/navigation'
 import { getNicheBySlug } from '@/config/quick-reels-niches'
