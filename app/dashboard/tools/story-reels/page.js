@@ -14,7 +14,8 @@ import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Mic, Upload, Download, 
-  FileText, Film, Music, Type, Play, Edit, X, Check, Eye 
+  FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
+  GripVertical, Trash2, Plus, ArrowUp, ArrowDown, ImagePlus
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import MusicPicker from './MusicPicker'
