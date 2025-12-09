@@ -22,10 +22,47 @@ export async function POST(request) {
 
     console.log('[Pexels] Searching for', keywords.length, 'keywords:', keywords)
 
+    // Helper function to translate Bengali keywords to English for better search results
+    const translateKeywordToEnglish = async (keyword) => {
+      // Check if keyword contains Bengali characters
+      const hasBengali = /[\u0980-\u09FF]/.test(keyword)
+      
+      if (!hasBengali) {
+        return keyword // Already in English or Roman script
+      }
+
+      // Use Google Translate via Gemini API (lightweight translation)
+      try {
+        const translateResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `Translate this Bengali word/phrase to English (single word or short phrase only, no explanation): ${keyword}`
+              }]
+            }]
+          })
+        })
+
+        const translateData = await translateResponse.json()
+        const translation = translateData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || keyword
+        
+        console.log(`[Translation] ${keyword} → ${translation}`)
+        return translation
+      } catch (error) {
+        console.error('[Translation] Error:', error.message)
+        return keyword // Fallback to original
+      }
+    }
+
     // Search for videos for each keyword
     for (const keyword of keywords) {
       try {
-        console.log('[Pexels] Searching keyword:', keyword)
+        // Translate Bengali keywords to English for better Pexels search
+        const searchKeyword = await translateKeywordToEnglish(keyword)
+        
+        console.log('[Pexels] Searching keyword:', keyword, '→', searchKeyword)
         
         const response = await client.videos.search({
           query: keyword,
