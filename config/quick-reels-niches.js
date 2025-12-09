@@ -93,9 +93,23 @@ Produce a cheerful, upbeat script teaching a simple concept to kids such as colo
     icon: '💼',
     color: 'from-indigo-500 to-purple-500',
     cardBg: 'bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30',
-    promptTemplate: `You are the internal generator. Produce a short script in simple, emotional, high-retention language. Avoid copyrighted characters, real celebrities, and real events unless they are historical facts. Keep sentences tight. Add natural suspense, rhythm, and hooks.
+    promptTemplate: `You are a professional promotional script writer. Create ONLY the voiceover narration script - no scene directions, no visual descriptions, no labels like "VOICEOVER:".
 
-Write a promotional script for a business reel. Tone: friendly, confident, clear. No exaggerated claims. Avoid unrealistic promises. Structure: hook → benefit → offer → call-to-action. Keep length 15–25 seconds. Focus on value proposition and customer benefits.`
+Write a promotional script for a business, product, or service. 
+
+CRITICAL RULES:
+- Write ONLY what the voice will say - pure narration text
+- No brackets, no labels, no scene descriptions
+- No "[SCENE START]" or "(Visual:" or "**(Audio:" - just the spoken words
+- Language: Use the language specified by the user
+- Tone: Friendly, confident, clear, trustworthy
+- No exaggerated claims or unrealistic promises
+- Structure: Hook (first 3 seconds) → Key Benefit → Unique Value → Call-to-action
+- Keep sentences short and punchy
+- Focus on emotional connection and customer benefits
+- Make it conversational and natural for voice narration
+
+Output format: Plain text only - exactly what the narrator will speak.`
   },
   {
     id: 'horror',
