@@ -566,7 +566,7 @@ export async function POST(request) {
 }
 
 // Helper function to generate ASS captions with Bengali support
-function generateASSCaptions(script, duration, captionStyle, targetHeight, fontSizeOption = 'medium', positionOption = 'bottom') {
+function generateASSCaptions(script, duration, captionStyle, targetHeight, targetWidth, fontSizeOption = 'medium', positionOption = 'bottom') {
   // Better word splitting for Bengali - split on spaces but preserve Unicode characters
   const words = script.trim().split(/\s+/).filter(w => w.length > 0)
   const wordsPerSecond = words.length / duration
