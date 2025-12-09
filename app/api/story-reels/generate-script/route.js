@@ -167,9 +167,29 @@ Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.
     const result = await generateText(userPrompt, finalSystemMessage)
 
     if (result.success) {
+      // Clean up the script - remove any timing references that might have slipped through
+      let cleanedScript = result.content
+      
+      // Remove common timing patterns in both English and Bengali
+      cleanedScript = cleanedScript
+        // Remove patterns like "(30 seconds)", "[30 seconds]", "30 seconds:", etc.
+        .replace(/\[?\(?\d+\s*(seconds?|সেকেন্ড|সে\.)\)?\.?\]?:?\s*/gi, '')
+        // Remove patterns like "Hook (first 3 seconds):" or "Introduction (10 seconds)"
+        .replace(/\([^)]*\d+\s*(seconds?|সেকেন্ড)[^)]*\)\s*:?\s*/gi, '')
+        // Remove standalone time markers
+        .replace(/^\s*\d+\s*(seconds?|সেকেন্ড)\s*[:—-]?\s*/gim, '')
+        // Remove "Duration:" or "সময়:" lines
+        .replace(/^(duration|সময়|time|টাইম)\s*[:：]\s*\d+.*$/gim, '')
+        // Remove section headers with timing
+        .replace(/^(hook|intro|opening|শুরু)\s*\(\s*\d+.*?\)\s*:?\s*/gim, '')
+        // Clean up any double spaces or newlines left behind
+        .replace(/\n{3,}/g, '\n\n')
+        .replace(/  +/g, ' ')
+        .trim()
+      
       return NextResponse.json({
         success: true,
-        script: result.content,
+        script: cleanedScript,
         language,
         duration,
         niche: niche || 'story-reels'
