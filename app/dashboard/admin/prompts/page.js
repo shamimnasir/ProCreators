@@ -26,18 +26,23 @@ export default function AdminPromptsPage() {
   const loadPrompts = async () => {
     setLoading(true)
     try {
+      // Start with default prompts from config
+      const defaultPrompts = {}
+      QUICK_REELS_NICHES.forEach(niche => {
+        defaultPrompts[niche.slug] = niche.promptTemplate
+      })
+
+      // Try to load custom prompts from database
       const response = await fetch('/api/admin/prompts')
       const data = await response.json()
       
-      if (data.success) {
-        setPrompts(data.prompts)
-        setEditedPrompts(data.prompts)
+      if (data.success && data.prompts) {
+        // Merge custom prompts with defaults (custom overrides default)
+        const mergedPrompts = { ...defaultPrompts, ...data.prompts }
+        setPrompts(mergedPrompts)
+        setEditedPrompts(mergedPrompts)
       } else {
-        // Use default prompts from config
-        const defaultPrompts = {}
-        QUICK_REELS_NICHES.forEach(niche => {
-          defaultPrompts[niche.slug] = niche.promptTemplate
-        })
+        // Use only default prompts
         setPrompts(defaultPrompts)
         setEditedPrompts(defaultPrompts)
       }
