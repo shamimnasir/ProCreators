@@ -569,25 +569,35 @@ export async function POST(request) {
 function generateASSCaptions(script, duration, captionStyle, targetHeight, targetWidth, fontSizeOption = 'medium', positionOption = 'bottom') {
   // Better word splitting for Bengali - split on spaces but preserve Unicode characters
   const words = script.trim().split(/\s+/).filter(w => w.length > 0)
-  const wordsPerSecond = words.length / duration
   
-  // Base font size based on resolution (portrait orientation)
-  const baseFontSize = targetHeight === '2160' ? 52 : targetHeight === '1920' ? 38 : targetHeight === '1440' ? 42 : targetHeight === '1280' ? 28 : 24
+  // Calculate total characters for better sync (Bengali characters take longer to read)
+  const totalChars = script.replace(/\s+/g, '').length
+  const avgCharsPerWord = totalChars / words.length
   
-  // Adjust font size based on user preference
+  // For Bengali, use character-based timing instead of word-based
+  // Average reading speed for Bengali: ~10-12 characters per second for narration
+  const charsPerSecond = totalChars / duration
+  
+  console.log(`[Captions] Total words: ${words.length}, Total chars: ${totalChars}, Duration: ${duration}s, Chars/sec: ${charsPerSecond.toFixed(2)}`)
+  
+  // Base font size - SIGNIFICANTLY INCREASED for portrait videos
+  // Portrait 1080x1920 needs much larger fonts than landscape
+  const baseFontSize = targetHeight === '2160' ? 72 : targetHeight === '1920' ? 64 : targetHeight === '1440' ? 56 : targetHeight === '1280' ? 48 : 40
+  
+  // Adjust font size based on user preference - more aggressive multipliers
   let fontSizeMultiplier = 1
   switch (fontSizeOption) {
     case 'small':
-      fontSizeMultiplier = 0.8
+      fontSizeMultiplier = 0.85
       break
     case 'medium':
-      fontSizeMultiplier = 1.2  // Default is now 20% larger
+      fontSizeMultiplier = 1.0  // Base is already larger
       break
     case 'large':
-      fontSizeMultiplier = 1.5
+      fontSizeMultiplier = 1.3
       break
     case 'extra-large':
-      fontSizeMultiplier = 1.8
+      fontSizeMultiplier = 1.6
       break
   }
   
