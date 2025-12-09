@@ -1601,16 +1601,42 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setCustomMusic(null)}
+                      onClick={() => {
+                        setCustomMusic(null)
+                        setMusicTrack('none')
+                      }}
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="text-center border-2 border-dashed rounded-lg p-6 space-y-2">
-                  <Music className="w-8 h-8 mx-auto text-muted-foreground opacity-50" />
-                  <p className="text-sm text-muted-foreground">No music selected</p>
+                <div className="space-y-3">
+                  {/* Built-in Music Tracks */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-2 block">Built-in Music Tracks</Label>
+                    <Select value={musicTrack} onValueChange={setMusicTrack}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select music track" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Music</SelectItem>
+                        <SelectItem value="upbeat">🎵 Upbeat & Energetic</SelectItem>
+                        <SelectItem value="calm">🎵 Calm & Relaxing</SelectItem>
+                        <SelectItem value="epic">🎵 Epic & Cinematic</SelectItem>
+                        <SelectItem value="emotional">🎵 Emotional & Moving</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* OR Separator */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-border"></div>
+                    <span className="text-xs text-muted-foreground">OR</span>
+                    <div className="flex-1 h-px bg-border"></div>
+                  </div>
+                  
+                  {/* Custom Music from Library */}
                   <Button
                     variant="outline"
                     size="sm"
