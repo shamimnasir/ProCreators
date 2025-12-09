@@ -259,6 +259,10 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
     setScriptLoading(true)
     try {
+      // Use current script content as user's topic/context if they've typed something
+      // This allows users to type a topic/idea and have AI expand it
+      const userTopic = script.trim() || (showCustomTopicInput ? customTopic : undefined)
+      
       const response = await fetch('/api/story-reels/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -266,7 +270,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           duration, 
           language: ttsLanguage,
           niche,
-          customTopic: showCustomTopicInput ? customTopic : undefined
+          customTopic: userTopic
         })
       })
 
