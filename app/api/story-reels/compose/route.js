@@ -55,39 +55,66 @@ export async function POST(request) {
     console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
     console.log(`[${jobId}] Stock videos: ${stockVideos.length}, Custom videos: ${customVideoFiles.length}, Total order: ${videoOrder.length}`)
 
-    // Step 1: Download stock videos using streams to save memory
-    console.log(`[${jobId}] Step 1: Downloading ${stockVideos.length} stock videos...`)
+    // Step 1: Process all video clips (stock videos + custom uploads)
+    console.log(`[${jobId}] Step 1: Processing ${videoOrder.length} video clips...`)
     const videoFiles = []
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     
-    for (let i = 0; i < stockVideos.length; i++) {
-      const video = stockVideos[i]
+    // Determine total clips based on video order or just stock videos (backward compatibility)
+    const totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
+    let stockVideoIdx = 0
+    let customVideoIdx = 0
+    
+    for (let i = 0; i < totalClips; i++) {
       const videoPath = join(tempDir, `clip-${i}.mp4`)
+      const orderInfo = videoOrder[i]
       
-      try {
-        const response = await fetch(video.url)
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
+      // Check if this is a custom video or stock video
+      const isCustom = orderInfo ? orderInfo.isCustom : false
+      
+      if (isCustom && customVideoFiles[customVideoIdx]) {
+        // Handle custom uploaded video
+        try {
+          const customFile = customVideoFiles[customVideoIdx]
+          const buffer = Buffer.from(await customFile.arrayBuffer())
+          await writeFile(videoPath, buffer)
+          videoFiles.push(videoPath)
+          console.log(`[${jobId}] Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
+          customVideoIdx++
+        } catch (error) {
+          console.error(`[${jobId}] Error processing custom clip ${i}:`, error.message)
         }
-        
-        // Convert Web Stream to Node Stream and pipe to file
-        const fileStream = require('fs').createWriteStream(videoPath)
-        await pipeline(
-          Readable.fromWeb(response.body),
-          fileStream
-        )
-        
-        videoFiles.push(videoPath)
-        console.log(`[${jobId}] Downloaded clip ${i + 1}/${stockVideos.length}`)
-      } catch (error) {
-        console.error(`[${jobId}] Error downloading clip ${i}:`, error.message)
+      } else if (stockVideos[stockVideoIdx]) {
+        // Handle stock video URL
+        const video = stockVideos[stockVideoIdx]
+        try {
+          const response = await fetch(video.url)
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`)
+          }
+          
+          // Convert Web Stream to Node Stream and pipe to file
+          const fileStream = require('fs').createWriteStream(videoPath)
+          await pipeline(
+            Readable.fromWeb(response.body),
+            fileStream
+          )
+          
+          videoFiles.push(videoPath)
+          console.log(`[${jobId}] Downloaded stock clip ${i + 1}/${totalClips}`)
+          stockVideoIdx++
+        } catch (error) {
+          console.error(`[${jobId}] Error downloading stock clip ${i}:`, error.message)
+        }
       }
     }
 
     if (videoFiles.length === 0) {
-      throw new Error('Failed to download any stock videos')
+      throw new Error('Failed to process any video clips')
     }
+    
+    console.log(`[${jobId}] Successfully processed ${videoFiles.length} clips`)
 
     // Step 2: Generate or use voice audio
     console.log(`[${jobId}] Step 2: Processing voice audio...`)
