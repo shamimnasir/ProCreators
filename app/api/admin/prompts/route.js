@@ -4,7 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 // GET - Fetch all custom prompts
 export async function GET(request) {
   try {
-    const db = await connectDB()
+    const { db } = await connectToDatabase()
     const promptsCollection = db.collection('custom_prompts')
     
     // Fetch all custom prompts
