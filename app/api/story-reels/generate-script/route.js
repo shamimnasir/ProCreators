@@ -5,6 +5,12 @@ import { getNicheBySlug } from '@/config/quick-reels-niches'
 export async function POST(request) {
   try {
     const { duration, language, niche, customTopic } = await request.json()
+    
+    console.log('=== SCRIPT GENERATION DEBUG ===')
+    console.log('Received niche:', niche)
+    console.log('Received language:', language)
+    console.log('Received duration:', duration)
+    console.log('Received customTopic:', customTopic)
 
     if (!duration || duration < 10 || duration > 60) {
       return NextResponse.json(
