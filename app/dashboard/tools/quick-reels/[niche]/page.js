@@ -53,7 +53,7 @@ export default function NichePage() {
       nicheName={nicheConfig.name}
       nicheIcon={nicheConfig.icon}
       nicheDescription={nicheConfig.description}
-      showCustomTopicInput={nicheConfig.slug === 'generic'}
+      showCustomTopicInput={nicheConfig.slug === 'generic' || nicheConfig.slug === 'business-promo'}
     />
   )
 }
