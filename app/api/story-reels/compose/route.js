@@ -571,8 +571,8 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, fontS
   const words = script.trim().split(/\s+/).filter(w => w.length > 0)
   const wordsPerSecond = words.length / duration
   
-  // Base font size based on resolution
-  const baseFontSize = targetHeight === '2160' ? 52 : targetHeight === '1440' ? 42 : targetHeight === '1080' ? 32 : 24
+  // Base font size based on resolution (portrait orientation)
+  const baseFontSize = targetHeight === '2160' ? 52 : targetHeight === '1920' ? 38 : targetHeight === '1440' ? 42 : targetHeight === '1280' ? 28 : 24
   
   // Adjust font size based on user preference
   let fontSizeMultiplier = 1
