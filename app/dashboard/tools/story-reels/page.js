@@ -522,7 +522,8 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     if (files.length === 0) return
 
     const newVideos = []
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
       if (!file.type.startsWith('video/')) {
         toast({
           title: "Invalid File",
@@ -535,6 +536,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       // Create object URL for preview
       const url = URL.createObjectURL(file)
       newVideos.push({
+        id: `custom-${Date.now()}-${i}`,
         url: url,
         file: file,  // Keep the actual file for upload
         isCustom: true,
@@ -550,6 +552,28 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       })
     }
   }
+
+  // Handle drag end for video reordering
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    
+    if (active.id !== over?.id) {
+      setStockVideos((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id)
+        const newIndex = items.findIndex(item => item.id === over.id)
+        
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+  }
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   // Start recording
   const startRecording = async () => {
