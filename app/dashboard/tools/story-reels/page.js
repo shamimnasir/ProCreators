@@ -833,10 +833,42 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Step 1: Create Your Story Script
+            {(() => {
+              const stepTitles = {
+                'mini-stories': 'Step 1: Create Your Story Script',
+                'motivational': 'Step 1: Create Your Motivation Script',
+                'facts-explainer': 'Step 1: Generate Educational Facts',
+                'comedy': 'Step 1: Create Your Comedy Script',
+                'kids-stories': 'Step 1: Create Your Kids Story',
+                'kids-learning': 'Step 1: Create Learning Content',
+                'business-promo': 'Step 1: Create Your Promo Script',
+                'horror': 'Step 1: Create Your Horror Story',
+                'relationship': 'Step 1: Create Relationship Advice Script',
+                'documentary': 'Step 1: Create Documentary Script',
+                'festival': 'Step 1: Create Festival Content',
+                'generic': 'Step 1: Create Your Video Script'
+              }
+              return stepTitles[niche] || 'Step 1: Create Your Story Script'
+            })()}
           </CardTitle>
           <CardDescription>
-            Generate an AI story or paste your own script (10-60 seconds)
+            {(() => {
+              const descriptions = {
+                'mini-stories': 'Generate an AI story or write your own (moral, emotional, twist endings)',
+                'motivational': 'Generate motivational content (discipline, growth, success)',
+                'facts-explainer': 'Generate educational facts and science explainers (10-60 seconds)',
+                'comedy': 'Generate comedy content or relatable humor (10-60 seconds)',
+                'kids-stories': 'Generate playful stories with moral lessons for children',
+                'kids-learning': 'Generate educational content (ABC, 123, colors, shapes)',
+                'business-promo': 'Generate promotional content for your business or service',
+                'horror': 'Generate atmospheric horror micro-stories (no gore, sensory fear)',
+                'relationship': 'Generate relationship advice and emotional guidance',
+                'documentary': 'Generate historical or factual documentary-style content',
+                'festival': 'Generate festive celebration content',
+                'generic': 'Generate content on any topic you choose (10-60 seconds)'
+              }
+              return descriptions[niche] || 'Generate an AI story or paste your own script (10-60 seconds)'
+            })()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
