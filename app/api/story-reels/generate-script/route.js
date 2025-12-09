@@ -26,9 +26,16 @@ export async function POST(request) {
     let nichePrompt = ''
     if (niche && niche !== 'story-reels') {
       const nicheConfig = getNicheBySlug(niche)
+      console.log('Niche config found:', nicheConfig ? 'YES' : 'NO')
       if (nicheConfig) {
+        console.log('Using prompt template for niche:', nicheConfig.name)
         nichePrompt = nicheConfig.promptTemplate
+        console.log('Prompt template length:', nichePrompt.length)
+      } else {
+        console.log('⚠️ WARNING: No niche config found for slug:', niche)
       }
+    } else {
+      console.log('Using default Story Reels prompt (niche:', niche, ')')
     }
 
     // Default system message for original story-reels (backward compatibility)
