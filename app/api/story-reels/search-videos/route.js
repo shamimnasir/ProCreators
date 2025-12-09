@@ -62,83 +62,96 @@ export async function POST(request) {
     // Search for videos for each keyword
     for (const keyword of keywords) {
       try {
-        // Translate Bengali keywords to English for better Pexels search
+        // Translate Bengali keywords to English for better search
         const searchKeyword = await translateKeywordToEnglish(keyword)
         
-        console.log('[Pexels] Searching keyword:', keyword, '→', searchKeyword)
+        console.log('[Search] Keyword:', keyword, '→', searchKeyword)
         
-        // Try with portrait orientation first using direct API call
-        let url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchKeyword)}&per_page=5&orientation=portrait`
-        let pexelsResponse = await fetch(url, {
-          headers: {
-            'Authorization': apiKey
-          }
-        })
+        let videoFound = false
         
-        let response = await pexelsResponse.json()
-        console.log('[Pexels] Portrait search - Videos found:', response?.videos?.length || 0)
-
-        // If no portrait videos found, try without orientation filter
-        if (!response.videos || response.videos.length === 0) {
-          console.log('[Pexels] No portrait videos, trying all orientations...')
-          url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchKeyword)}&per_page=5`
-          pexelsResponse = await fetch(url, {
-            headers: {
-              'Authorization': apiKey
-            }
-          })
-          response = await pexelsResponse.json()
-          console.log('[Pexels] All orientations - Videos found:', response?.videos?.length || 0)
-        }
-
-        if (response.videos && response.videos.length > 0) {
-          // Get the first video result
-          const video = response.videos[0]
+        // Try Pixabay first if available
+        if (usePixabay) {
+          const pixabayUrl = `https://pixabay.com/api/videos/?key=${pixabayKey}&q=${encodeURIComponent(searchKeyword)}&per_page=3`
+          const pixabayResponse = await fetch(pixabayUrl)
+          const pixabayData = await pixabayResponse.json()
           
-          // Find the best quality video file (prefer HD or medium)
-          const videoFile = video.video_files.find(file => 
-            file.quality === 'hd' && file.width <= 1080
-          ) || video.video_files.find(file =>
-            file.quality === 'sd' && file.width <= 720
-          ) || video.video_files[0]
-
-          videos.push({
-            id: video.id,
-            keyword,
-            url: videoFile.link,
-            thumbnail: video.image,
-            duration: video.duration || 3,
-            width: videoFile.width,
-            height: videoFile.height,
-            quality: videoFile.quality
-          })
-
-          console.log('[Pexels] Found video for', keyword, '-', videoFile.quality, videoFile.width + 'x' + videoFile.height)
-        } else {
-          console.log('[Pexels] No videos found for', keyword, ', using fallback')
+          console.log('[Pixabay] Videos found:', pixabayData?.hits?.length || 0)
           
-          // Fallback: search for generic content with direct API
-          const fallbackUrl = `https://api.pexels.com/videos/search?query=nature&per_page=1`
-          const fallbackFetch = await fetch(fallbackUrl, {
-            headers: { 'Authorization': apiKey }
-          })
-          const fallbackResponse = await fallbackFetch.json()
-
-          if (fallbackResponse.videos && fallbackResponse.videos.length > 0) {
-            const video = fallbackResponse.videos[0]
-            const videoFile = video.video_files[0]
-
+          if (pixabayData.hits && pixabayData.hits.length > 0) {
+            const video = pixabayData.hits[0]
+            const videoFile = video.videos.medium || video.videos.small || video.videos.large
+            
             videos.push({
               id: video.id,
-              keyword: keyword + ' (fallback)',
-              url: videoFile.link,
-              thumbnail: video.image,
+              keyword,
+              url: videoFile.url,
+              thumbnail: video.userImageURL,
               duration: video.duration || 3,
               width: videoFile.width,
               height: videoFile.height,
-              quality: videoFile.quality
+              quality: 'medium'
             })
-            console.log('[Pexels] Fallback video added for:', keyword)
+            
+            videoFound = true
+            console.log('[Pixabay] Added video for:', keyword)
+          }
+        }
+        
+        // Fallback to Pexels PHOTOS (not videos) - will be used as static images with motion
+        if (!videoFound && pexelsKey) {
+          console.log('[Pexels Photos] Searching as fallback...')
+          const photosUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchKeyword)}&per_page=3&orientation=portrait`
+          const photosResponse = await fetch(photosUrl, {
+            headers: { 'Authorization': pexelsKey }
+          })
+          const photosData = await photosResponse.json()
+          
+          console.log('[Pexels Photos] Images found:', photosData?.photos?.length || 0)
+          
+          if (photosData.photos && photosData.photos.length > 0) {
+            const photo = photosData.photos[0]
+            
+            // Use photo as a video clip (frontend will handle motion effects)
+            videos.push({
+              id: photo.id,
+              keyword,
+              url: photo.src.large || photo.src.original,
+              thumbnail: photo.src.medium,
+              duration: 3, // Default 3 seconds per image
+              width: photo.width,
+              height: photo.height,
+              quality: 'photo', // Special flag indicating this is a photo, not video
+              isPhoto: true
+            })
+            
+            videoFound = true
+            console.log('[Pexels Photos] Added photo for:', keyword)
+          }
+        }
+        
+        // Ultimate fallback: generic nature image
+        if (!videoFound && pexelsKey) {
+          console.log('[Fallback] Using generic image...')
+          const fallbackUrl = `https://api.pexels.com/v1/search?query=nature&per_page=1`
+          const fallbackResponse = await fetch(fallbackUrl, {
+            headers: { 'Authorization': pexelsKey }
+          })
+          const fallbackData = await fallbackResponse.json()
+          
+          if (fallbackData.photos && fallbackData.photos.length > 0) {
+            const photo = fallbackData.photos[0]
+            videos.push({
+              id: photo.id,
+              keyword: keyword + ' (generic)',
+              url: photo.src.large,
+              thumbnail: photo.src.medium,
+              duration: 3,
+              width: photo.width,
+              height: photo.height,
+              quality: 'photo',
+              isPhoto: true
+            })
+            console.log('[Fallback] Added generic image')
           }
         }
 
@@ -146,7 +159,7 @@ export async function POST(request) {
         await new Promise(resolve => setTimeout(resolve, 200))
 
       } catch (error) {
-        console.error('[Pexels] Error searching keyword', keyword, ':', error.message)
+        console.error('[Search] Error searching keyword', keyword, ':', error.message)
         // Continue with next keyword
       }
     }
