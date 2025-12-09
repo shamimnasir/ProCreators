@@ -11,14 +11,19 @@ export async function POST(request) {
       )
     }
 
-    const apiKey = process.env.PEXELS_API_KEY
-    if (!apiKey) {
-      throw new Error('PEXELS_API_KEY not configured')
+    // Check for Pixabay API key first (preferred for videos)
+    const pixabayKey = process.env.PIXABAY_API_KEY
+    const pexelsKey = process.env.PEXELS_API_KEY
+    
+    if (!pixabayKey && !pexelsKey) {
+      throw new Error('Neither PIXABAY_API_KEY nor PEXELS_API_KEY configured')
     }
 
     const videos = []
+    const usePixabay = !!pixabayKey
 
-    console.log('[Pexels] Searching for', keywords.length, 'keywords:', keywords)
+    console.log('[Stock Videos] Using provider:', usePixabay ? 'Pixabay' : 'Pexels Photos')
+    console.log('[Stock Videos] Searching for', keywords.length, 'keywords:', keywords)
 
     // Helper function to translate Bengali keywords to English for better search results
     const translateKeywordToEnglish = async (keyword) => {
