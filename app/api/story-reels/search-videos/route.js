@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { createClient } from 'pexels'
 
 export async function POST(request) {
   try {
@@ -17,7 +16,6 @@ export async function POST(request) {
       throw new Error('PEXELS_API_KEY not configured')
     }
 
-    const client = createClient(apiKey)
     const videos = []
 
     console.log('[Pexels] Searching for', keywords.length, 'keywords:', keywords)
