@@ -185,6 +185,15 @@ export default function LibraryPage() {
                         <CardDescription className="line-clamp-2">
                           {item.description}
                         </CardDescription>
+                        {item.niche && (() => {
+                          const nicheInfo = getNicheInfo(item.niche)
+                          return nicheInfo && (
+                            <Badge variant="secondary" className="mt-2 w-fit">
+                              <span className="mr-1">{nicheInfo.icon}</span>
+                              {nicheInfo.name}
+                            </Badge>
+                          )
+                        })()}
                       </CardHeader>
                       <CardContent>
                         {item.category === 'video' && item.videoUrl && (
