@@ -6,15 +6,29 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Settings, Save, RotateCcw } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { Settings, Save, RotateCcw, Video, Type } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 
 export default function SystemPromptsPage() {
+  // State for Viral Tools (text/image)
   const [selectedTool, setSelectedTool] = useState('threads')
   const [tools, setTools] = useState([])
   const [systemPrompt, setSystemPrompt] = useState('')
   const [defaultPrompt, setDefaultPrompt] = useState('')
   const [loading, setLoading] = useState(false)
+  
+  // State for Quick Reels (video)
+  const [quickReelsPrompts, setQuickReelsPrompts] = useState({})
+  const [editedQuickReelsPrompts, setEditedQuickReelsPrompts] = useState({})
+  const [activeNiche, setActiveNiche] = useState('mini-stories')
+  const [savingQuickReels, setSavingQuickReels] = useState(false)
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState('viral-tools')
+  
   const { toast } = useToast()
 
   useEffect(() => {
