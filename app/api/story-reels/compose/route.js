@@ -816,16 +816,14 @@ function formatASSTime(seconds) {
 
 // Helper function to build caption filter for ASS format
 function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
-  // Escape path for ffmpeg - need to escape both colons and backslashes properly
-  // For the subtitles filter, the path needs special escaping
+  // Escape path for ffmpeg - need proper escaping for the filter
   const escapedPath = captionsPath
     .replace(/\\/g, '/')
     .replace(/:/g, '\\:')
-    .replace(/'/g, "'\\''")
   
-  // Use subtitles filter instead of ass for better compatibility
-  // The subtitles filter handles ASS files and has better error recovery
-  return `subtitles='${escapedPath}':fontsdir=/app/fonts:force_style='FontName=SolaimanLipi'`
+  // Use ass filter with fontsdir pointing to our custom fonts
+  // The ass filter properly handles complex scripts like Bengali
+  return `ass='${escapedPath}':fontsdir=/app/fonts`
 }
 
 // Helper function to get music file path based on track selection
