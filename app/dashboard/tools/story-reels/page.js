@@ -912,7 +912,7 @@ export default function StoryReelsPage() {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="tts">
                 <Sparkles className="h-4 w-4 mr-1" />
-                Google Cloud TTS
+                AI Voice Studio
               </TabsTrigger>
               <TabsTrigger value="upload">
                 <Mic className="h-4 w-4 mr-1" />
