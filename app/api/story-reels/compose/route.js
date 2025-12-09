@@ -766,9 +766,9 @@ function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
   // Escape path for ffmpeg
   const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
-  // ASS format with fonts directory specified for Bengali font support
-  // This ensures FFmpeg can find the Noto Sans Bengali UI font
-  return `ass=${escapedPath}:fontsdir=/usr/share/fonts/truetype/noto`
+  // ASS format with multiple fonts directories for robust Bengali font support
+  // Include both system fonts and local fonts directory
+  return `ass=${escapedPath}:fontsdir=/app/fonts\\:/usr/share/fonts/truetype/noto\\:/usr/share/fonts/truetype/lohit-bengali`
 }
 
 // Helper function to get music file path based on track selection
