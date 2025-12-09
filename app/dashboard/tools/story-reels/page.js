@@ -137,12 +137,12 @@ export default function StoryReelsPage() {
   // Get friendly name for language variant
   const getVariantDisplayName = (variant) => {
     const names = {
-      'en-US': '🇺🇸 American English',
-      'en-GB': '🇬🇧 British English',
-      'en-AU': '🇦🇺 Australian English',
-      'en-IN': '🇮🇳 Indian English',
-      'bn-IN': '🇮🇳 Bengali (India)',
-      'bn-BD': '🇧🇩 Bengali (Bangladesh)'
+      'en-US': 'American English',
+      'en-GB': 'British English',
+      'en-AU': 'Australian English',
+      'en-IN': 'English',
+      'bn-IN': 'Bengali',
+      'bn-BD': 'Bengali'
     }
     return names[variant] || variant
   }
