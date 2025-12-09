@@ -390,45 +390,92 @@ export async function POST(request) {
       }
     }
 
-    // Step 7: Add captions and audio to video
-    console.log(`[${jobId}] Step 7: Adding captions and audio to video...`)
-    const finalVideoPath = join(tempDir, 'final.mp4')
-    
-    // Build caption filter based on style
-    const captionFilter = buildCaptionFilter(captionStyle, captionsPath, targetHeight)
-    
-    // Use format filter to ensure consistent pixel format and avoid reinitialization errors
-    const fullVideoFilter = `${captionFilter},format=yuv420p`
+    // Step 7: Normalize video before adding captions (avoid filter reinitialization)
+    console.log(`[${jobId}] Step 7a: Normalizing video for caption overlay...`)
+    const normalizedVideoPath = join(tempDir, 'normalized.mp4')
     
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(concatVideoPath)
-        .input(finalAudioPath)
         .outputOptions([
-          '-vf', fullVideoFilter,
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', '18',
+          '-r', '30',
+          '-vsync', 'cfr',
+          '-pix_fmt', 'yuv420p',
+          '-an'  // Remove audio for now
+        ])
+        .output(normalizedVideoPath)
+        .on('end', () => {
+          console.log(`[${jobId}] Video normalized successfully`)
+          resolve()
+        })
+        .on('error', (err) => {
+          console.error(`[${jobId}] FFmpeg normalize error:`, err.message)
+          reject(err)
+        })
+        .run()
+    })
+    
+    // Step 7b: Add captions to normalized video
+    console.log(`[${jobId}] Step 7b: Adding captions to video...`)
+    const captionedVideoPath = join(tempDir, 'captioned.mp4')
+    
+    // Build caption filter based on style
+    const captionFilter = buildCaptionFilter(captionStyle, captionsPath, targetHeight)
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(normalizedVideoPath)
+        .outputOptions([
+          '-vf', captionFilter,
           '-c:v', 'libx264',
           '-preset', 'fast',
           '-crf', '23',
+          '-pix_fmt', 'yuv420p',
+          '-an'
+        ])
+        .output(captionedVideoPath)
+        .on('end', () => {
+          console.log(`[${jobId}] Captions added successfully`)
+          resolve()
+        })
+        .on('error', (err) => {
+          console.error(`[${jobId}] FFmpeg caption error:`, err.message)
+          reject(err)
+        })
+        .on('progress', (progress) => {
+          console.log(`[${jobId}] Adding captions: ${Math.round(progress.percent || 0)}%`)
+        })
+        .run()
+    })
+    
+    // Step 7c: Merge captioned video with audio
+    console.log(`[${jobId}] Step 7c: Merging video with audio...`)
+    const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(captionedVideoPath)
+        .input(finalAudioPath)
+        .outputOptions([
+          '-c:v', 'copy',  // Copy video stream (already encoded)
           '-c:a', 'aac',
           '-b:a', '128k',
           '-movflags', '+faststart',
           '-map', '0:v:0',
           '-map', '1:a:0',
-          '-shortest',
-          '-vsync', 'cfr',  // Constant frame rate to avoid timing issues
-          '-r', '30'  // Force 30fps output
+          '-shortest'
         ])
         .output(finalVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video composition complete with captions`)
+          console.log(`[${jobId}] Video composition complete`)
           resolve()
         })
         .on('error', (err) => {
-          console.error(`[${jobId}] FFmpeg error:`, err.message)
+          console.error(`[${jobId}] FFmpeg merge error:`, err.message)
           reject(err)
-        })
-        .on('progress', (progress) => {
-          console.log(`[${jobId}] Final processing: ${Math.round(progress.percent || 0)}%`)
         })
         .run()
     })
