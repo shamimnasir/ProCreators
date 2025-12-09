@@ -313,7 +313,7 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mb-4">Integrated AI Models:</p>
                 <div className="flex flex-wrap justify-center gap-3">
                   {tools.map((tool, i) => (
-                    <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-border">
+                    <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border">
                       <tool.icon className="h-4 w-4 text-[#a78bfa]" />
                       <span className="text-sm text-muted-foreground">{tool.name}</span>
                     </div>
