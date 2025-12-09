@@ -132,33 +132,36 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     
     const nicheInstruction = nicheInstructions[niche] || 'a compelling script'
     
+    // Approximate word count based on duration (no mention of seconds in output)
+    const wordCount = Math.floor(duration * 2.5)
+    
     // For generic niche, use custom topic from user
     if (niche === 'generic' && customTopic) {
-      userPrompt = `Create a ${duration}-second video script about: ${customTopic}
+      userPrompt = `Create a short video script about: ${customTopic}
 
 Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
-- Duration: ${duration} seconds
+- Approximately ${wordCount} words
 - Topic: ${customTopic}
-- Engaging hook in first 3 seconds
+- Strong opening hook
 - Clear narrative arc
-- Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
-Generate the complete script now. Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}. DO NOT include any other language.`
+IMPORTANT: Output ONLY the story/narration text. No meta-information, no timing references, no labels.
+Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
     } else {
-      userPrompt = `Create ${nicheInstruction} for a ${duration}-second video.
+      userPrompt = `Create ${nicheInstruction} for a short video.
 
 Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
-- Duration: ${duration} seconds
+- Approximately ${wordCount} words
 - Content Type: ${nicheInstruction}
-- Engaging hook in first 3 seconds
+- Strong opening hook
 - Clear and focused messaging
-- Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
-Generate the complete script now. Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}. DO NOT include any other language. No meta-commentary.`
+IMPORTANT: Output ONLY the story/narration text. No meta-information, no timing references, no labels.
+Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
     }
 
     const result = await generateText(userPrompt, finalSystemMessage)
