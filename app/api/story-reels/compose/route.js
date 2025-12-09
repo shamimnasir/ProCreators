@@ -35,16 +35,25 @@ export async function POST(request) {
     const captionStyle = formData.get('captionStyle')
     const musicTrack = formData.get('musicTrack')
     const resolution = formData.get('resolution')
-    const stockVideos = JSON.parse(formData.get('stockVideos'))
-    const keywords = JSON.parse(formData.get('keywords'))
+    const stockVideos = JSON.parse(formData.get('stockVideos') || '[]')
+    const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
+    const keywords = JSON.parse(formData.get('keywords') || '[]')
     const voiceFile = formData.get('voiceFile')
     const captionFontSize = formData.get('captionFontSize') || 'medium'
     const captionPosition = formData.get('captionPosition') || 'bottom'
     const customMusicPath = formData.get('customMusicPath') || null // For Freesound downloads
     const niche = formData.get('niche') || 'story-reels' // For Quick Reels categorization
+    
+    // Collect custom video files
+    const customVideoFiles = []
+    let customIdx = 0
+    while (formData.has(`customVideo_${customIdx}`)) {
+      customVideoFiles.push(formData.get(`customVideo_${customIdx}`))
+      customIdx++
+    }
 
     console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
-    console.log(`[${jobId}] Stock videos:`, stockVideos.length)
+    console.log(`[${jobId}] Stock videos: ${stockVideos.length}, Custom videos: ${customVideoFiles.length}, Total order: ${videoOrder.length}`)
 
     // Step 1: Download stock videos using streams to save memory
     console.log(`[${jobId}] Step 1: Downloading ${stockVideos.length} stock videos...`)
