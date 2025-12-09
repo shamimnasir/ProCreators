@@ -926,14 +926,23 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
           {showCustomTopicInput && (
             <div className="space-y-2">
-              <Label>Video Topic</Label>
+              <Label>
+                {niche === 'business-promo' ? 'Business/Product/Service Name' : 'Video Topic'}
+              </Label>
               <Input
-                placeholder="e.g., productivity tips, climate change, fitness motivation..."
+                placeholder={
+                  niche === 'business-promo' 
+                    ? "e.g., NShamimPRO, ProCreators Course, Sheba.XYZ..." 
+                    : "e.g., productivity tips, climate change, fitness motivation..."
+                }
                 value={customTopic}
                 onChange={(e) => setCustomTopic(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Enter any topic you want to create a video about
+                {niche === 'business-promo' 
+                  ? 'Enter your exact business/product/service name - it will be used in the script'
+                  : 'Enter any topic you want to create a video about'
+                }
               </p>
             </div>
           )}
