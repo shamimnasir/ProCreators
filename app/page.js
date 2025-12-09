@@ -304,7 +304,7 @@ export default function Home() {
               </div>
 
               {/* Trial notice */}
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 14-day free trial • No credit card required • Cancel anytime
               </p>
 
