@@ -1172,7 +1172,7 @@ export default function StoryReelsPage() {
                     onClick={() => setShowMusicPicker(true)}
                   >
                     <Music className="w-3 h-3 mr-2" />
-                    Browse Freesound Library
+                    Browse Audio Library
                   </Button>
                 </div>
               )}
