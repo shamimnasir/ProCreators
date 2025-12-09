@@ -920,12 +920,12 @@ export default function StoryReelsPage() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Google Cloud TTS Tab */}
+            {/* AI Voice Studio Tab */}
             <TabsContent value="tts" className="space-y-4">
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
-                  Premium Google Cloud TTS - Multiple Accents Available
+                  Premium AI Voice Studio - Multiple Accents Available
                 </h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   {Object.keys(voicesByVariant).length > 0 
