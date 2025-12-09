@@ -1075,7 +1075,7 @@ export default function StoryReelsPage() {
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        💡 Tip: "Neural" and "Chirp HD" voices offer the best quality and naturalness
+                        💡 Tip: "Premium" and "Premium HD" voices offer the best quality and naturalness
                       </p>
                     </div>
                   )}
