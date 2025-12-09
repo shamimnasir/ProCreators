@@ -397,6 +397,64 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     }
   }
 
+  // Video clip management functions
+  const moveVideoUp = (index) => {
+    if (index === 0) return
+    const newVideos = [...stockVideos]
+    ;[newVideos[index - 1], newVideos[index]] = [newVideos[index], newVideos[index - 1]]
+    setStockVideos(newVideos)
+  }
+
+  const moveVideoDown = (index) => {
+    if (index === stockVideos.length - 1) return
+    const newVideos = [...stockVideos]
+    ;[newVideos[index], newVideos[index + 1]] = [newVideos[index + 1], newVideos[index]]
+    setStockVideos(newVideos)
+  }
+
+  const removeVideo = (index) => {
+    const newVideos = stockVideos.filter((_, i) => i !== index)
+    setStockVideos(newVideos)
+    toast({
+      title: "Video Removed",
+      description: `Clip #${index + 1} removed. ${newVideos.length} clips remaining.`
+    })
+  }
+
+  const handleCustomVideoUpload = async (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length === 0) return
+
+    const newVideos = []
+    for (const file of files) {
+      if (!file.type.startsWith('video/')) {
+        toast({
+          title: "Invalid File",
+          description: `${file.name} is not a video file`,
+          variant: "destructive"
+        })
+        continue
+      }
+
+      // Create object URL for preview
+      const url = URL.createObjectURL(file)
+      newVideos.push({
+        url: url,
+        file: file,  // Keep the actual file for upload
+        isCustom: true,
+        name: file.name
+      })
+    }
+
+    if (newVideos.length > 0) {
+      setStockVideos(prev => [...prev, ...newVideos])
+      toast({
+        title: "Videos Added",
+        description: `Added ${newVideos.length} custom video(s)`
+      })
+    }
+  }
+
   // Start recording
   const startRecording = async () => {
     try {
