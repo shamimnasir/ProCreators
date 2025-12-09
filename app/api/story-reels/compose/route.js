@@ -397,12 +397,15 @@ export async function POST(request) {
     // Build caption filter based on style
     const captionFilter = buildCaptionFilter(captionStyle, captionsPath, targetHeight)
     
+    // Use format filter to ensure consistent pixel format and avoid reinitialization errors
+    const fullVideoFilter = `${captionFilter},format=yuv420p`
+    
     await new Promise((resolve, reject) => {
       ffmpeg()
         .input(concatVideoPath)
         .input(finalAudioPath)
         .outputOptions([
-          '-vf', captionFilter,
+          '-vf', fullVideoFilter,
           '-c:v', 'libx264',
           '-preset', 'fast',
           '-crf', '23',
@@ -411,7 +414,9 @@ export async function POST(request) {
           '-movflags', '+faststart',
           '-map', '0:v:0',
           '-map', '1:a:0',
-          '-shortest'
+          '-shortest',
+          '-vsync', 'cfr',  // Constant frame rate to avoid timing issues
+          '-r', '30'  // Force 30fps output
         ])
         .output(finalVideoPath)
         .on('end', () => {
