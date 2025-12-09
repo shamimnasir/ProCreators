@@ -78,10 +78,23 @@ Return ONLY the story script text, nothing else. No titles, no labels, just the 
 The script should be exactly ${duration} seconds when read at normal speaking pace (approximately ${Math.floor(duration * 2.5)} words).`
 
     // Use niche-specific prompt or default
-    const systemMessage = nichePrompt || defaultSystemMessage
+    let finalSystemMessage = nichePrompt || defaultSystemMessage
+    
+    // Replace placeholders in the prompt template
+    finalSystemMessage = finalSystemMessage
+      .replace(/{duration}/g, duration.toString())
+      .replace(/{language}/g, languageName)
+      .replace(/{customTopic}/g, customTopic || '')
+    
+    // Add STRICT language enforcement to the prompt
+    const languageEnforcement = language === 'bn' 
+      ? `\n\n## CRITICAL LANGUAGE REQUIREMENT ##\nYou MUST write the ENTIRE script in Bengali (বাংলা) language ONLY. \nDO NOT use ANY English words, phrases, or sentences.\nDO NOT mix English and Bengali.\nEvery single word must be in Bengali script (বাংলা অক্ষর).\nThis is absolutely mandatory - scripts with English words will be rejected.`
+      : `\n\n## CRITICAL LANGUAGE REQUIREMENT ##\nWrite the entire script in English only.`
+    
+    finalSystemMessage = finalSystemMessage + languageEnforcement
     
     console.log('=== FINAL PROMPT BEING USED ===')
-    console.log('System message (first 200 chars):', systemMessage.substring(0, 200))
+    console.log('System message (first 200 chars):', finalSystemMessage.substring(0, 200))
     console.log('Using niche prompt:', nichePrompt ? 'YES' : 'NO (using default)')
 
     let userPrompt = ''
