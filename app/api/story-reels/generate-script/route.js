@@ -64,6 +64,24 @@ The script should be exactly ${duration} seconds when read at normal speaking pa
 
     let userPrompt = ''
     
+    // Build niche-specific user prompt
+    const nicheInstructions = {
+      'mini-stories': 'a compelling story with moral, emotional twist, or folklore element',
+      'motivational': 'motivational content focused on discipline, growth, success, or resilience',
+      'facts-explainer': 'educational facts or science explainer content',
+      'comedy': 'comedy or relatable humor content',
+      'kids-stories': 'a playful moral story for children',
+      'kids-learning': 'educational learning content (ABC, 123, colors, shapes)',
+      'business-promo': 'a promotional script for a business or service',
+      'horror': 'an atmospheric horror micro-story',
+      'relationship': 'relationship advice or emotional guidance',
+      'documentary': 'a historical or factual documentary-style script',
+      'festival': 'festive celebration content',
+      'generic': customTopic ? `content about: ${customTopic}` : 'a script'
+    }
+    
+    const nicheInstruction = nicheInstructions[niche] || 'a compelling script'
+    
     // For generic niche, use custom topic from user
     if (niche === 'generic' && customTopic) {
       userPrompt = `Create a ${duration}-second video script ${languageText} about: ${customTopic}
@@ -79,17 +97,18 @@ Requirements:
 
 Generate the complete script now.`
     } else {
-      userPrompt = `Create a viral ${duration}-second script ${languageText}.
+      userPrompt = `Create ${nicheInstruction} for a ${duration}-second video ${languageText}.
 
 Requirements:
 - Language: ${languageName}
 - Duration: ${duration} seconds
+- Content Type: ${nicheInstruction}
 - Engaging hook in first 3 seconds
-- Clear narrative arc
+- Clear and focused messaging
 - Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
-Generate the complete script now.`
+Generate the complete script now. Write ONLY the script content, no meta-commentary.`
     }
 
     const result = await generateText(userPrompt, systemMessage)
