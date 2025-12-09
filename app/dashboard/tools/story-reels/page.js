@@ -1309,89 +1309,47 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {stockVideos.map((video, index) => (
-                <div key={index} className="relative group border-2 border-transparent hover:border-primary rounded-lg transition-all">
-                  {/* Video Preview */}
-                  <div className="relative">
-                    <video 
-                      src={video.url} 
-                      className="w-full h-32 object-cover rounded-lg"
-                      muted
-                      onMouseEnter={(e) => e.target.play()}
-                      onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={stockVideos.map(v => v.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {stockVideos.map((video, index) => (
+                    <SortableVideoItem
+                      key={video.id}
+                      video={video}
+                      index={index}
+                      totalCount={stockVideos.length}
+                      onRemove={removeVideo}
                     />
-                    
-                    {/* Clip number badge */}
-                    <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-bold">
-                      #{index + 1}
-                    </div>
-                    
-                    {/* Custom badge */}
-                    {video.isCustom && (
-                      <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
-                        Custom
-                      </div>
-                    )}
-                    
-                    {/* Remove button (always visible on hover) */}
-                    <button
-                      onClick={() => removeVideo(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove this clip"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+                  ))}
                   
-                  {/* Reorder controls */}
-                  <div className="flex justify-center gap-1 mt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => moveVideoUp(index)}
-                      disabled={index === 0}
-                      className="h-7 px-2"
-                      title="Move up"
-                    >
-                      <ArrowUp className="h-3 w-3" />
-                    </Button>
-                    <span className="text-xs text-muted-foreground self-center px-1">
-                      {index + 1}/{stockVideos.length}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => moveVideoDown(index)}
-                      disabled={index === stockVideos.length - 1}
-                      className="h-7 px-2"
-                      title="Move down"
-                    >
-                      <ArrowDown className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  {/* Add more videos card */}
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleCustomVideoUpload}
+                    />
+                    <div className="w-full h-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary rounded-lg flex flex-col items-center justify-center gap-2 transition-colors">
+                      <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Upload Video</span>
+                    </div>
+                  </label>
                 </div>
-              ))}
-              
-              {/* Add more videos card */}
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="video/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleCustomVideoUpload}
-                />
-                <div className="w-full h-32 border-2 border-dashed border-muted-foreground/25 hover:border-primary rounded-lg flex flex-col items-center justify-center gap-2 transition-colors">
-                  <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Upload Video</span>
-                </div>
-              </label>
-            </div>
+              </SortableContext>
+            </DndContext>
             
             {/* Help text */}
             <p className="text-xs text-muted-foreground mt-4 text-center">
-              💡 Tip: Videos will play in order from #1 to #{stockVideos.length}. Use arrows to reorder or upload your own footage.
+              💡 Tip: Drag clips to reorder. Videos will play from #1 to #{stockVideos.length}. Upload your own footage to mix with stock clips.
             </p>
           </CardContent>
         </Card>
