@@ -1462,9 +1462,12 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
       {/* Video Preview */}
       {videoData?.videoUrl && (
-        <Card>
+        <Card ref={videoPreviewRef}>
           <CardHeader>
-            <CardTitle>Your Story Video is Ready!</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5 text-green-500" />
+              Your Story Video is Ready!
+            </CardTitle>
             <CardDescription>Preview and download your video</CardDescription>
           </CardHeader>
           <CardContent>
@@ -1475,8 +1478,10 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                     src={videoData.videoUrl} 
                     controls 
                     playsInline
-                    preload="metadata"
+                    preload="auto"
+                    autoPlay
                     className="w-full h-full object-contain"
+                    onError={(e) => console.error('Video load error:', e.target.error)}
                   />
                 </div>
               </div>
