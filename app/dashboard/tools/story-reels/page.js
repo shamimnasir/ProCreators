@@ -871,6 +871,20 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
             </div>
           </div>
 
+          {showCustomTopicInput && (
+            <div className="space-y-2">
+              <Label>Video Topic</Label>
+              <Input
+                placeholder="e.g., productivity tips, climate change, fitness motivation..."
+                value={customTopic}
+                onChange={(e) => setCustomTopic(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter any topic you want to create a video about
+              </p>
+            </div>
+          )}
+
           <Textarea
             placeholder="Enter your story script here or click 'Generate AI Story' below..."
             value={script}
