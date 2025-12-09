@@ -9,15 +9,71 @@ export async function POST(request) {
   try {
     const { query, duration } = await request.json()
     
-    if (!FREESOUND_API_KEY) {
+    console.log(`[Music Search] Query: "${query}", duration: ${duration}s`)
+    
+    let tracks = []
+    let serviceName = 'Unknown'
+    
+    // Try Freesound first (primary)
+    if (FREESOUND_API_KEY) {
+      try {
+        console.log('[Freesound] Attempting primary music search...')
+        const freesoundTracks = await searchFreesound(query, duration)
+        if (freesoundTracks && freesoundTracks.length > 0) {
+          tracks = freesoundTracks
+          serviceName = 'Freesound'
+          console.log(`[Freesound] Success: ${tracks.length} tracks found`)
+        }
+      } catch (error) {
+        console.log('[Freesound] Failed, trying fallback...', error.message)
+      }
+    }
+    
+    // Fallback to TheAudioDB if Freesound fails
+    if (tracks.length === 0) {
+      try {
+        console.log('[TheAudioDB] Attempting fallback music search...')
+        const audioDbTracks = await searchTheAudioDB(query, duration)
+        if (audioDbTracks && audioDbTracks.length > 0) {
+          tracks = audioDbTracks
+          serviceName = 'TheAudioDB'
+          console.log(`[TheAudioDB] Success: ${tracks.length} tracks found`)
+        }
+      } catch (error) {
+        console.log('[TheAudioDB] Failed:', error.message)
+      }
+    }
+    
+    // If both fail, return informative error
+    if (tracks.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Freesound API key not configured. Please add FREESOUND_API_KEY to your .env file.',
-        needsApiKey: true
-      }, { status: 400 })
+        error: 'Both music services are temporarily unavailable. You can proceed without music.',
+        canProceedWithoutMusic: true,
+        temporaryIssue: true
+      }, { status: 200 })
     }
+    
+    return NextResponse.json({
+      success: true,
+      tracks,
+      count: tracks.length,
+      service: serviceName
+    })
 
-    console.log(`[Freesound] Searching for music: "${query}", duration: ${duration}s`)
+  } catch (error) {
+    console.error('[Music Search] Error:', error)
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to search music',
+      canProceedWithoutMusic: true
+    }, { status: 200 })
+  }
+}
+
+// Freesound search function
+async function searchFreesound(query, duration) {
+  if (!FREESOUND_API_KEY) return null
 
     // Search Freesound for music/background tracks
     // Filter by: music tag, duration (15-120s), high quality
