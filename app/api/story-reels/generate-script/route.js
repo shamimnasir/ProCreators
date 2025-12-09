@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
+import { getNicheBySlug } from '@/config/quick-reels-niches'
 
 export async function POST(request) {
   try {
-    const { duration, language } = await request.json()
+    const { duration, language, niche, customTopic } = await request.json()
 
     if (!duration || duration < 10 || duration > 60) {
       return NextResponse.json(
@@ -15,7 +16,17 @@ export async function POST(request) {
     const languageText = language === 'bn' ? 'in Bengali language' : 'in English language'
     const languageName = language === 'bn' ? 'Bengali' : 'English'
 
-    const systemMessage = `You are a professional viral story writer for TikTok, Instagram Reels, and YouTube Shorts.
+    // Get niche-specific prompt template or use default
+    let nichePrompt = ''
+    if (niche && niche !== 'story-reels') {
+      const nicheConfig = getNicheBySlug(niche)
+      if (nicheConfig) {
+        nichePrompt = nicheConfig.promptTemplate
+      }
+    }
+
+    // Default system message for original story-reels (backward compatibility)
+    const defaultSystemMessage = `You are a professional viral story writer for TikTok, Instagram Reels, and YouTube Shorts.
 
 CRITICAL INSTRUCTIONS:
 1. Write ${languageText}
@@ -31,18 +42,38 @@ Return ONLY the story script text, nothing else. No titles, no labels, just the 
 
 The script should be exactly ${duration} seconds when read at normal speaking pace (approximately ${Math.floor(duration * 2.5)} words).`
 
-    const userPrompt = `Create a viral ${duration}-second story script ${languageText}.
+    // Use niche-specific prompt or default
+    const systemMessage = nichePrompt || defaultSystemMessage
+
+    let userPrompt = ''
+    
+    // For generic niche, use custom topic from user
+    if (niche === 'generic' && customTopic) {
+      userPrompt = `Create a ${duration}-second video script ${languageText} about: ${customTopic}
+
+Requirements:
+- Language: ${languageName}
+- Duration: ${duration} seconds
+- Topic: ${customTopic}
+- Engaging hook in first 3 seconds
+- Clear narrative arc
+- Perfect for vertical video (9:16)
+- Suitable for voiceover narration
+
+Generate the complete script now.`
+    } else {
+      userPrompt = `Create a viral ${duration}-second script ${languageText}.
 
 Requirements:
 - Language: ${languageName}
 - Duration: ${duration} seconds
 - Engaging hook in first 3 seconds
 - Clear narrative arc
-- Emotional or surprising ending
 - Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
 Generate the complete script now.`
+    }
 
     const result = await generateText(userPrompt, systemMessage)
 
@@ -51,7 +82,8 @@ Generate the complete script now.`
         success: true,
         script: result.content,
         language,
-        duration
+        duration,
+        niche: niche || 'story-reels'
       })
     } else {
       throw new Error(result.error || 'Failed to generate script')
