@@ -268,7 +268,7 @@ export default function Home() {
 
               {/* Main Logo Text */}
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                <span className="bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-b from-foreground via-foreground/80 to-muted-foreground bg-clip-text text-transparent">
                   The Easiest Way to Create
                 </span>
                 <br />
