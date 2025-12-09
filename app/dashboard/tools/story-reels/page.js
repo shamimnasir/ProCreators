@@ -19,7 +19,7 @@ import {
 import PreviewModal from './PreviewModal'
 import MusicPicker from './MusicPicker'
 
-export default function StoryReelsPage() {
+export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Story Video Reels', nicheIcon = '🎬', nicheDescription = 'Create engaging story-based video reels', showCustomTopicInput = false }) {
   // Script state
   const [script, setScript] = useState('')
   const [scriptLoading, setScriptLoading] = useState(false)
