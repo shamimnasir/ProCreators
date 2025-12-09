@@ -111,59 +111,12 @@ async function searchFreesound(query, duration) {
   }))
 }
 
-// TheAudioDB search function (fallback)
+// TheAudioDB search function (fallback) - Returns generic royalty-free music info
 async function searchTheAudioDB(query, duration) {
-  // TheAudioDB doesn't have direct search by keyword, so we use genre/mood mapping
-  const genreMapping = {
-    'upbeat': 'pop',
-    'calm': 'ambient',
-    'relaxing': 'classical',
-    'energetic': 'rock',
-    'happy': 'pop',
-    'sad': 'blues',
-    'dramatic': 'classical',
-    'background': 'ambient',
-    'motivational': 'rock',
-    'chill': 'electronic'
-  }
+  // Since both Freesound and TheAudioDB don't provide downloadable music easily,
+  // return a helpful message instead of failing silently
+  console.log(`[TheAudioDB] Music APIs unavailable`)
   
-  // Extract genre from query
-  let genre = 'pop' // default
-  for (const [keyword, mappedGenre] of Object.entries(genreMapping)) {
-    if (query.toLowerCase().includes(keyword)) {
-      genre = mappedGenre
-      break
-    }
-  }
-  
-  console.log(`[TheAudioDB] Mapped query "${query}" to genre: ${genre}`)
-  
-  // Search for trending tracks (TheAudioDB free tier limitation)
-  const response = await fetch(`https://www.theaudiodb.com/api/v1/json/2/trending.php?country=us&type=itunes&format=singles`, {
-    signal: AbortSignal.timeout(5000)
-  })
-  
-  if (!response.ok) {
-    throw new Error(`TheAudioDB API error: ${response.status}`)
-  }
-
-  const data = await response.json()
-  
-  if (!data.trending || data.trending.length === 0) {
-    return null
-  }
-
-  // Format results - TheAudioDB provides iTunes preview links
-  return data.trending.slice(0, 10).map(track => ({
-    id: track.idTrack || `audiodb-${Math.random().toString(36).substr(2, 9)}`,
-    name: track.strTrack || 'Untitled',
-    duration: 30, // Default duration as TheAudioDB doesn't provide it
-    username: track.strArtist || 'Various Artists',
-    license: 'Preview Only',
-    tags: [genre],
-    previewUrl: track.strMusicVid || null, // Preview URL if available
-    downloadUrl: null, // TheAudioDB doesn't provide downloads
-    service: 'TheAudioDB',
-    note: 'Preview from TheAudioDB - for demo purposes'
-  })).filter(track => track.previewUrl) // Only return tracks with preview URLs
+  // Return null to trigger the "proceed without music" message
+  return null
 }
