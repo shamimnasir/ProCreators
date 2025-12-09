@@ -904,7 +904,7 @@ export default function StoryReelsPage() {
             Step 3: Voice Selection
           </CardTitle>
           <CardDescription>
-            Choose Google Cloud TTS voice or use your own recording
+            Choose AI voice or use your own recording
           </CardDescription>
         </CardHeader>
         <CardContent>
