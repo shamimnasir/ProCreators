@@ -116,7 +116,7 @@ const navigation = [
     name: 'Admin',
     icon: Settings,
     children: [
-      { name: 'System Prompts', href: '/dashboard/admin/system-prompts', icon: Settings },
+      { name: 'AI System Prompts', href: '/dashboard/admin/prompts', icon: Settings },
     ]
   },
 ]
