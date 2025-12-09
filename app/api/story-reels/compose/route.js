@@ -764,12 +764,12 @@ function formatASSTime(seconds) {
 
 // Helper function to build caption filter for ASS format
 function buildCaptionFilter(captionStyle, captionsPath, targetHeight) {
-  // Escape path for ffmpeg
+  // Escape path for ffmpeg - escape colons and backslashes
   const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
   
-  // ASS format with multiple fonts directories for robust Bengali font support
-  // Include local fonts, system fonts, and custom Bengali fonts
-  return `ass=${escapedPath}:fontsdir=/app/fonts\\:/usr/share/fonts/truetype/custom-bengali\\:/usr/share/fonts/truetype/noto\\:/usr/share/fonts/truetype/lohit-bengali`
+  // ASS format with single fonts directory (FFmpeg only accepts one)
+  // Using /app/fonts which has all Bengali fonts copied there
+  return `ass=${escapedPath}:fontsdir=/app/fonts`
 }
 
 // Helper function to get music file path based on track selection
