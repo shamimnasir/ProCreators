@@ -733,11 +733,11 @@ export default function StoryReelsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Story Video Reels</h1>
-          <p className="text-muted-foreground">Create engaging story videos with authentic Bengali narration powered by Google Cloud TTS</p>
+          <p className="text-muted-foreground">Create engaging story videos with authentic Bengali narration powered by AI voice synthesis</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           <Sparkles className="h-4 w-4 mr-2" />
-          Google TTS
+          AI Voice Studio
         </Badge>
       </div>
 
