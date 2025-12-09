@@ -404,7 +404,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: (i % 8) * 0.05 }}
                   viewport={{ once: true }}
-                  className="group relative rounded-xl border border-border bg-gradient-to-b from-white/5 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
+                  className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                   onClick={() => router.push('/dashboard')}
                 >
                   <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
@@ -450,7 +450,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="group relative rounded-xl border border-border bg-gradient-to-b from-white/5 to-transparent p-8 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20"
+                  className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-8 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20"
                 >
                   <div className="mb-6">
                     <FeatureIcon icon={feature.icon} />
@@ -525,7 +525,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="rounded-2xl border border-border bg-gradient-to-b from-white/5 to-transparent p-8 backdrop-blur-sm"
+                className="rounded-2xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-8 backdrop-blur-sm"
               >
                 <div className="mb-6">
                   <div className="flex gap-1 mb-4">
@@ -590,7 +590,7 @@ export default function Home() {
                   className={`relative rounded-2xl border p-8 backdrop-blur-sm ${
                     tier.popular 
                       ? 'border-[#7c3aed] bg-gradient-to-b from-[#7c3aed]/20 to-transparent shadow-2xl shadow-[#7c3aed]/30 scale-105' 
-                      : 'border-border bg-gradient-to-b from-white/5 to-transparent'
+                      : 'border-border bg-gradient-to-b from-muted/30 to-transparent'
                   }`}
                 >
                   {tier.popular && (
