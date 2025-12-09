@@ -33,6 +33,7 @@ export default function SystemPromptsPage() {
 
   useEffect(() => {
     fetchTools()
+    loadQuickReelsPrompts()
   }, [])
 
   useEffect(() => {
@@ -40,6 +41,36 @@ export default function SystemPromptsPage() {
       fetchSystemPrompt(selectedTool)
     }
   }, [selectedTool])
+  
+  // Load Quick Reels prompts
+  const loadQuickReelsPrompts = async () => {
+    try {
+      const response = await fetch('/api/admin/prompts')
+      const data = await response.json()
+      
+      if (data.success) {
+        setQuickReelsPrompts(data.prompts)
+        setEditedQuickReelsPrompts(data.prompts)
+      } else {
+        // Use default prompts from config
+        const defaultPrompts = {}
+        QUICK_REELS_NICHES.forEach(niche => {
+          defaultPrompts[niche.slug] = niche.promptTemplate
+        })
+        setQuickReelsPrompts(defaultPrompts)
+        setEditedQuickReelsPrompts(defaultPrompts)
+      }
+    } catch (error) {
+      console.error('Error loading Quick Reels prompts:', error)
+      // Fallback to defaults
+      const defaultPrompts = {}
+      QUICK_REELS_NICHES.forEach(niche => {
+        defaultPrompts[niche.slug] = niche.promptTemplate
+      })
+      setQuickReelsPrompts(defaultPrompts)
+      setEditedQuickReelsPrompts(defaultPrompts)
+    }
+  }
 
   const fetchTools = async () => {
     try {
