@@ -65,17 +65,21 @@ export async function POST(request) {
 
 CRITICAL INSTRUCTIONS:
 1. Write ${languageText}
-2. Create a compelling ${duration}-second story
+2. Create a compelling short story
 3. Story types: moral stories, twist endings, emotional moments, life lessons, folklore
-4. Structure: HOOK (first 3 seconds) → MAIN STORY (${duration - 8} seconds) → TWIST/ENDING (last 5 seconds)
+4. Structure: Strong opening hook → Main story conflict → Satisfying twist/ending
 5. Use simple, conversational language perfect for narration
-6. Include vivid visual descriptions to help with video selection
-7. Make it emotionally engaging and shareable
+6. Make it emotionally engaging and shareable
 
-OUTPUT FORMAT:
-Return ONLY the story script text, nothing else. No titles, no labels, just the narration text.
+OUTPUT RULES (VERY IMPORTANT):
+- Return ONLY the story narration text
+- NO titles, NO labels, NO headers
+- NO timing information (do NOT mention "seconds", "সেকেন্ড", duration, or time)
+- NO meta-commentary about the script
+- NO instructions or notes
+- ONLY pure story text that will be spoken aloud
 
-The script should be exactly ${duration} seconds when read at normal speaking pace (approximately ${Math.floor(duration * 2.5)} words).`
+The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
     // Use niche-specific prompt or default
     let finalSystemMessage = nichePrompt || defaultSystemMessage
