@@ -628,8 +628,9 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   let outline = 4 // Increased default outline
   let shadow = 2 // Increased default shadow
   let bold = -1 // -1 = bold
-  // Use Noto Sans Bengali Bold for better readability - Bold variant handles Bengali conjuncts better
-  let fontName = 'Noto Sans Bengali'
+  // Use SolaimanLipi for best Bengali rendering - a well-supported Bengali font
+  // Fallback fonts available: Siyam Rupali, Bangla, Sorob, Noto Sans Bengali
+  let fontName = 'SolaimanLipi'
   let alignment = 2 // 2 = bottom center, 5 = middle center, 8 = top center
   
   switch (captionStyle) {
