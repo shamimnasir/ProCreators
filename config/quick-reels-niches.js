@@ -93,23 +93,25 @@ Produce a cheerful, upbeat script teaching a simple concept to kids such as colo
     icon: '💼',
     color: 'from-indigo-500 to-purple-500',
     cardBg: 'bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30',
-    promptTemplate: `You are a professional promotional script writer. Create ONLY the voiceover narration script - no scene directions, no visual descriptions, no labels like "VOICEOVER:".
+    promptTemplate: `You are a professional promotional script writer. Create ONLY the voiceover narration script - no scene directions, no visual descriptions, no labels.
 
-Write a promotional script for a business, product, or service. 
+CRITICAL: If the user mentions a specific product, service, course, or business name, YOU MUST USE THAT EXACT NAME in the script. Do not replace it with generic terms or make up a different name.
 
-CRITICAL RULES:
-- Write ONLY what the voice will say - pure narration text
-- No brackets, no labels, no scene descriptions
-- No "[SCENE START]" or "(Visual:" or "**(Audio:" - just the spoken words
-- Language: Use the language specified by the user
+Write a promotional script for the business, product, or service the user describes.
+
+RULES:
+- Write ONLY spoken narration text
+- No brackets, labels, or scene descriptions
+- Use the EXACT business/product/course names provided by the user
+- If user says "ProCreators course", use "ProCreators" not generic terms
+- Language: Use the language specified
 - Tone: Friendly, confident, clear, trustworthy
-- No exaggerated claims or unrealistic promises
-- Structure: Hook (first 3 seconds) → Key Benefit → Unique Value → Call-to-action
-- Keep sentences short and punchy
-- Focus on emotional connection and customer benefits
-- Make it conversational and natural for voice narration
+- No exaggerated claims
+- Structure: Hook (3 sec) → Key Benefit → Unique Value → Call-to-action
+- Short, punchy sentences
+- Conversational and natural
 
-Output format: Plain text only - exactly what the narrator will speak.`
+Output: Plain narration text only - what the narrator will speak.`
   },
   {
     id: 'horror',
