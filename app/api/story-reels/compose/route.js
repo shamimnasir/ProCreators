@@ -604,7 +604,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, fontS
       break
     case 'bottom':
     default:
-      marginV = targetHeight === '2160' ? 150 : targetHeight === '1440' ? 120 : targetHeight === '1080' ? 100 : 80
+      marginV = targetHeight === '2160' ? 150 : targetHeight === '1920' ? 120 : targetHeight === '1440' ? 120 : targetHeight === '1280' ? 90 : 80
       break
   }
   
