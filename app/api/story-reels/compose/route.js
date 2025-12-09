@@ -41,6 +41,7 @@ export async function POST(request) {
     const captionFontSize = formData.get('captionFontSize') || 'medium'
     const captionPosition = formData.get('captionPosition') || 'bottom'
     const customMusicPath = formData.get('customMusicPath') || null // For Freesound downloads
+    const niche = formData.get('niche') || 'story-reels' // For Quick Reels categorization
 
     console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
     console.log(`[${jobId}] Stock videos:`, stockVideos.length)
