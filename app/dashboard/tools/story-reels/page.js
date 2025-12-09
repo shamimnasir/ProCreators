@@ -918,7 +918,23 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           )}
 
           <Textarea
-            placeholder="Enter your story script here or click 'Generate AI Story' below..."
+            placeholder={(() => {
+              const placeholders = {
+                'mini-stories': 'Your story script will appear here... or write your own!',
+                'motivational': 'Your motivational script will appear here... or write your own!',
+                'facts-explainer': 'Educational facts will appear here... or write your own!',
+                'comedy': 'Your comedy script will appear here... or write your own!',
+                'kids-stories': 'Kids story script will appear here... or write your own!',
+                'kids-learning': 'Learning content will appear here... or write your own!',
+                'business-promo': 'Your promo script will appear here... or write your own!',
+                'horror': 'Your horror story will appear here... or write your own!',
+                'relationship': 'Relationship advice script will appear here... or write your own!',
+                'documentary': 'Documentary script will appear here... or write your own!',
+                'festival': 'Festival content will appear here... or write your own!',
+                'generic': 'Your custom video script will appear here... or write your own!'
+              }
+              return placeholders[niche] || 'Enter your story script here or click "Generate AI Content" below...'
+            })()}
             value={script}
             onChange={(e) => {
               const newScript = e.target.value
@@ -947,7 +963,23 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
             >
               {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Sparkles className="mr-2 h-4 w-4" />
-              Generate AI Story
+              {(() => {
+                const buttonTexts = {
+                  'mini-stories': 'Generate AI Story',
+                  'motivational': 'Generate Motivation',
+                  'facts-explainer': 'Generate Facts',
+                  'comedy': 'Generate Comedy',
+                  'kids-stories': 'Generate Kids Story',
+                  'kids-learning': 'Generate Learning Content',
+                  'business-promo': 'Generate Promo Script',
+                  'horror': 'Generate Horror Story',
+                  'relationship': 'Generate Advice',
+                  'documentary': 'Generate Documentary',
+                  'festival': 'Generate Festival Content',
+                  'generic': 'Generate Custom Script'
+                }
+                return buttonTexts[niche] || 'Generate AI Story'
+              })()}
             </Button>
             <Button 
               onClick={handleExtractKeywords} 
