@@ -468,7 +468,13 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
       const data = await response.json()
       if (data.success) {
-        setStockVideos(data.videos)
+        // Add unique IDs to each video for drag-and-drop
+        const videosWithIds = data.videos.map((video, idx) => ({
+          ...video,
+          id: `stock-${Date.now()}-${idx}`,
+          isCustom: false
+        }))
+        setStockVideos(videosWithIds)
         toast({
           title: "Success",
           description: `Found ${data.videos.length} stock videos`
