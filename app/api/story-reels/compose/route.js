@@ -493,6 +493,10 @@ export async function POST(request) {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 30)
 
+      // Get niche display name for better UX
+      const nicheDisplayName = niche === 'story-reels' ? 'Story Reel' : 
+        niche.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+
       const libraryDoc = {
         id: randomUUID(),
         userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
@@ -503,14 +507,17 @@ export async function POST(request) {
         script: script || '',
         type: 'story-reel',
         category: 'video',
-        title: script ? `Story Reel: ${script.substring(0, 50)}...` : 'Story Reel Video',
-        description: script ? script.substring(0, 100) + '...' : 'AI-generated story reel video',
+        niche: niche, // Store the niche slug for filtering
+        title: script ? `${nicheDisplayName}: ${script.substring(0, 50)}...` : `${nicheDisplayName} Video`,
+        description: script ? script.substring(0, 100) + '...' : `AI-generated ${nicheDisplayName.toLowerCase()} video`,
         metadata: {
           duration,
           resolution,
           clipCount: videoFiles.length,
           voiceOption,
           captionStyle,
+          niche,
+          nicheDisplayName,
           jobId
         },
         createdAt: new Date(),
