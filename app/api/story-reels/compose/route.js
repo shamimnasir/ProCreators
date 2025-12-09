@@ -618,11 +618,11 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
       break
   }
   
-  // Style based on caption style
+  // Style based on caption style - ALL STYLES NOW MORE PROMINENT
   let primaryColor = '&H00FFFFFF' // White (default)
   let outlineColor = '&H00000000' // Black
-  let outline = 2
-  let shadow = 1
+  let outline = 4 // Increased default outline
+  let shadow = 2 // Increased default shadow
   let bold = -1 // -1 = bold
   let fontName = 'Noto Sans Bengali UI'
   let alignment = 2 // 2 = bottom center, 5 = middle center, 8 = top center
@@ -631,31 +631,31 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
     case 'karaoke':
       primaryColor = '&H0000FFFF' // Yellow
       outlineColor = '&H00000000' // Black outline
-      outline = 3
-      shadow = 1
+      outline = 5 // Increased
+      shadow = 2
       bold = -1
       alignment = 2 // Bottom
       break
     case 'animated':
       primaryColor = '&H00FFFFFF' // White
       outlineColor = '&H00000000' // Black outline
-      outline = 2
-      shadow = 3
+      outline = 4 // Increased
+      shadow = 4 // Increased
       bold = -1
       alignment = 2 // Bottom
       break
     case 'neon-glow':
       primaryColor = '&H00FFFFFF' // Pure white text (ASS format: &H00BBGGRR)
       outlineColor = '&H00FF00FF' // Bright magenta outline (BGR format)
-      outline = 8 // Extra thick outline for intense glow
-      shadow = 12 // Very large shadow for maximum glow effect
+      outline = 10 // Extra thick outline for intense glow
+      shadow = 15 // Very large shadow for maximum glow effect
       bold = -1
       alignment = 2 // Bottom
       break
     case 'yellow-highlight':
       primaryColor = '&H00000000' // Black text
       outlineColor = '&H0000FFFF' // Yellow outline/background
-      outline = 8 // Thick outline for highlight effect
+      outline = 12 // Very thick outline for highlight effect
       shadow = 0
       bold = -1
       alignment = 2 // Bottom
@@ -663,8 +663,8 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
     case 'zoomed-in':
       primaryColor = '&H00FFFFFF' // White
       outlineColor = '&H00000000' // Black outline
-      outline = 4
-      shadow = 2
+      outline = 6 // Increased
+      shadow = 3
       bold = -1
       fontSize = Math.floor(fontSize * 1.5) // 50% larger
       alignment = 5 // Center of screen
@@ -672,24 +672,24 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
     case 'gradient-pop':
       primaryColor = '&H00FFD700' // Gold
       outlineColor = '&H00FF1493' // Deep pink outline
-      outline = 3
-      shadow = 4
+      outline = 5 // Increased
+      shadow = 5 // Increased
       bold = -1
       alignment = 2 // Bottom
       break
     case 'minimal-clean':
       primaryColor = '&H00FFFFFF' // White
       outlineColor = '&H00000000' // Black outline
-      outline = 1
-      shadow = 0
+      outline = 2 // Slightly increased
+      shadow = 1
       bold = 0 // Not bold
       alignment = 8 // Top
       break
     case 'tiktok-style':
       primaryColor = '&H00FFFFFF' // White
       outlineColor = '&H000000FF' // Red outline (TikTok vibe)
-      outline = 3
-      shadow = 2
+      outline = 5 // Increased
+      shadow = 3
       bold = -1
       alignment = 2 // Bottom
       break
@@ -697,8 +697,8 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
     default:
       primaryColor = '&H00FFFFFF' // White
       outlineColor = '&H00000000' // Black
-      outline = 2
-      shadow = 1
+      outline = 5 // Increased default
+      shadow = 3 // Increased default
       bold = -1
       alignment = 2 // Bottom
   }
