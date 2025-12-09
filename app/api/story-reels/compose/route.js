@@ -721,15 +721,20 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `
 
   // For karaoke: word-by-word, for others: 3-4 words per caption
+  // Use character count to determine timing for better Bengali sync
   const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 3
   let currentTime = 0
   
   for (let i = 0; i < words.length; i += wordsPerCaption) {
     const chunk = words.slice(i, i + wordsPerCaption).join(' ')
-    const wordCount = Math.min(wordsPerCaption, words.length - i)
-    const chunkDuration = wordCount / wordsPerSecond
+    const chunkChars = chunk.replace(/\s+/g, '').length
+    
+    // Calculate duration based on character count (more accurate for Bengali)
+    // Add a small buffer for natural reading pace
+    const chunkDuration = (chunkChars / charsPerSecond) * 1.05 // 5% buffer for natural pace
+    
     const startTime = currentTime
-    const endTime = currentTime + chunkDuration
+    const endTime = Math.min(currentTime + chunkDuration, duration) // Don't exceed total duration
     
     ass += `Dialogue: 0,${formatASSTime(startTime)},${formatASSTime(endTime)},Default,,0,0,0,,${chunk}\n`
     
