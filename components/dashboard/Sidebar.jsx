@@ -165,17 +165,61 @@ export function Sidebar() {
             <div key={item.name}>
               {item.children ? (
                 <div>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start",
-                      collapsed && "justify-center px-2"
-                    )}
-                    onClick={() => toggleSection(item.name)}
-                  >
-                    <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
-                    {!collapsed && <span>{item.name}</span>}
-                  </Button>
+                  {/* Section with children - can also have an href for the section itself */}
+                  {item.href ? (
+                    // Section has both href and children - split functionality
+                    <div className="flex items-center gap-1">
+                      <Link href={item.href} className="flex-1">
+                        <Button
+                          variant={pathname === item.href ? "secondary" : "ghost"}
+                          className={cn(
+                            "w-full justify-start",
+                            collapsed && "justify-center px-2"
+                          )}
+                        >
+                          <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                          {!collapsed && (
+                            <>
+                              <span>{item.name}</span>
+                              {item.badge && (
+                                <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </Button>
+                      </Link>
+                      {!collapsed && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => toggleSection(item.name)}
+                        >
+                          <ChevronRight 
+                            className={cn(
+                              "h-4 w-4 transition-transform",
+                              expandedSections[item.name] && "rotate-90"
+                            )} 
+                          />
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    // Section only has children, no direct link
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start",
+                        collapsed && "justify-center px-2"
+                      )}
+                      onClick={() => toggleSection(item.name)}
+                    >
+                      <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                      {!collapsed && <span>{item.name}</span>}
+                    </Button>
+                  )}
                   {!collapsed && expandedSections[item.name] && (
                     <div className="ml-4 mt-1 space-y-1">
                       {item.children.map((child) => (
