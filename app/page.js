@@ -357,7 +357,7 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 22 Powerful Tools. Endless Possibilities.
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
