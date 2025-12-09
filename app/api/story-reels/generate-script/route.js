@@ -119,10 +119,10 @@ The script should be exactly ${duration} seconds when read at normal speaking pa
     
     // For generic niche, use custom topic from user
     if (niche === 'generic' && customTopic) {
-      userPrompt = `Create a ${duration}-second video script ${languageText} about: ${customTopic}
+      userPrompt = `Create a ${duration}-second video script about: ${customTopic}
 
 Requirements:
-- Language: ${languageName}
+- Language: ${languageName} ONLY (DO NOT mix languages)
 - Duration: ${duration} seconds
 - Topic: ${customTopic}
 - Engaging hook in first 3 seconds
@@ -130,12 +130,12 @@ Requirements:
 - Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
-Generate the complete script now.`
+Generate the complete script now. Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}. DO NOT include any other language.`
     } else {
-      userPrompt = `Create ${nicheInstruction} for a ${duration}-second video ${languageText}.
+      userPrompt = `Create ${nicheInstruction} for a ${duration}-second video.
 
 Requirements:
-- Language: ${languageName}
+- Language: ${languageName} ONLY (DO NOT mix languages)
 - Duration: ${duration} seconds
 - Content Type: ${nicheInstruction}
 - Engaging hook in first 3 seconds
@@ -143,10 +143,10 @@ Requirements:
 - Perfect for vertical video (9:16)
 - Suitable for voiceover narration
 
-Generate the complete script now. Write ONLY the script content, no meta-commentary.`
+Generate the complete script now. Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}. DO NOT include any other language. No meta-commentary.`
     }
 
-    const result = await generateText(userPrompt, systemMessage)
+    const result = await generateText(userPrompt, finalSystemMessage)
 
     if (result.success) {
       return NextResponse.json({
