@@ -263,10 +263,31 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       const data = await response.json()
       if (data.success) {
         setScript(data.script)
-        toast({
-          title: "Success",
-          description: `${nicheName} script generated successfully!`
-        })
+        
+        // Auto-adjust duration based on generated script length
+        const wordCount = data.script.trim().split(/\s+/).length
+        const estimatedSeconds = Math.ceil(wordCount / 2.5)
+        
+        // Update duration if script is longer than current setting
+        if (estimatedSeconds > duration && estimatedSeconds <= 60) {
+          setDuration(estimatedSeconds)
+          toast({
+            title: "Success",
+            description: `${nicheName} script generated! Duration auto-adjusted to ${estimatedSeconds} seconds.`
+          })
+        } else if (estimatedSeconds > 60) {
+          setDuration(60)
+          toast({
+            title: "Success",
+            description: `${nicheName} script generated! Duration set to maximum (60 seconds). Note: Script is longer than 60 seconds.`,
+            variant: "default"
+          })
+        } else {
+          toast({
+            title: "Success",
+            description: `${nicheName} script generated successfully!`
+          })
+        }
       } else {
         throw new Error(data.error)
       }
