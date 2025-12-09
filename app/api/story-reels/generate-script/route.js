@@ -122,12 +122,12 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
       'comedy': 'comedy or relatable humor content',
       'kids-stories': 'a playful moral story for children',
       'kids-learning': 'educational learning content (ABC, 123, colors, shapes)',
-      'business-promo': customTopic ? `a promotional script for the business/product/service named: ${customTopic}. You MUST use this exact name in the script` : 'a promotional script for a business or service',
+      'business-promo': 'a promotional script',
       'horror': 'an atmospheric horror micro-story',
       'relationship': 'relationship advice or emotional guidance',
       'documentary': 'a historical or factual documentary-style script',
       'festival': 'festive celebration content',
-      'generic': customTopic ? `content about: ${customTopic}` : 'a script'
+      'generic': 'a compelling script'
     }
     
     const nicheInstruction = nicheInstructions[niche] || 'a compelling script'
@@ -135,21 +135,31 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     // Approximate word count based on duration (no mention of seconds in output)
     const wordCount = Math.floor(duration * 2.5)
     
-    // For generic niche, use custom topic from user
-    if (niche === 'generic' && customTopic) {
-      userPrompt = `Create a short video script about: ${customTopic}
+    // Check if user provided a topic/context (from script box or custom topic input)
+    const hasUserTopic = customTopic && customTopic.trim().length > 0
+    
+    console.log('Has user topic:', hasUserTopic, '| Topic:', customTopic?.substring(0, 50))
+    
+    if (hasUserTopic) {
+      // User provided a topic - use it as the basis for generation
+      userPrompt = `Create ${nicheInstruction} for a short video based on this topic/idea:
+
+USER'S TOPIC: "${customTopic}"
 
 Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
 - Approximately ${wordCount} words
-- Topic: ${customTopic}
+- MUST be related to the user's topic above
+- Content Type: ${nicheInstruction}
 - Strong opening hook
-- Clear narrative arc
+- Clear and focused messaging
 - Suitable for voiceover narration
 
-IMPORTANT: Output ONLY the story/narration text. No meta-information, no timing references, no labels.
+CRITICAL: Your content MUST be based on the user's topic above. Do not ignore it.
+Output ONLY the narration text. No meta-information, no timing references, no labels.
 Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
     } else {
+      // No user topic - generate freely based on niche
       userPrompt = `Create ${nicheInstruction} for a short video.
 
 Requirements:
@@ -160,7 +170,7 @@ Requirements:
 - Clear and focused messaging
 - Suitable for voiceover narration
 
-IMPORTANT: Output ONLY the story/narration text. No meta-information, no timing references, no labels.
+IMPORTANT: Output ONLY the narration text. No meta-information, no timing references, no labels.
 Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
     }
 
