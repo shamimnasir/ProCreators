@@ -698,7 +698,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, fontS
 Title: Story Reels Captions
 ScriptType: v4.00+
 WrapStyle: 0
-PlayResX: 1080
+PlayResX: ${targetWidth}
 PlayResY: ${targetHeight}
 ScaledBorderAndShadow: yes
 
