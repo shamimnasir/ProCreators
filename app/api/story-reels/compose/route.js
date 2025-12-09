@@ -213,6 +213,21 @@ export async function POST(request) {
       throw new Error('Audio file was not created')
     }
 
+    // Step 2b: Get actual audio duration BEFORE processing video clips
+    console.log(`[${jobId}] Step 2b: Getting actual audio duration...`)
+    const actualAudioDuration = await new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(audioPath, (err, metadata) => {
+        if (err) {
+          console.error(`[${jobId}] Could not get audio duration, using target:`, err.message)
+          resolve(duration) // Fallback to target duration
+        } else {
+          const audioDuration = metadata.format.duration
+          console.log(`[${jobId}] Actual audio duration: ${audioDuration}s (target was ${duration}s)`)
+          resolve(audioDuration)
+        }
+      })
+    })
+
     // Step 3: Normalize each clip individually, then concatenate
     console.log(`[${jobId}] Step 3: Processing and concatenating video clips...`)
     
@@ -223,9 +238,9 @@ export async function POST(request) {
     
     console.log(`[${jobId}] Target resolution: ${targetWidth}x${targetHeight} (9:16 portrait)`)
     
-    // Calculate duration per clip
-    const durationPerClip = duration / videoFiles.length
-    console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds`)
+    // Calculate duration per clip based on ACTUAL AUDIO DURATION (not target duration)
+    const durationPerClip = actualAudioDuration / videoFiles.length
+    console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds (based on ${actualAudioDuration.toFixed(2)}s audio)`)
     
     // Step 3a: Normalize each clip individually
     const normalizedFiles = []
