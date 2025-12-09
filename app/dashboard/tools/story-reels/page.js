@@ -24,6 +24,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [script, setScript] = useState('')
   const [scriptLoading, setScriptLoading] = useState(false)
   const [duration, setDuration] = useState(30)
+  const [customTopic, setCustomTopic] = useState('')
   
   // Keywords & Videos
   const [keywords, setKeywords] = useState([])
