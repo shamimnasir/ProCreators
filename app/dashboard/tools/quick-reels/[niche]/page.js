@@ -5,18 +5,13 @@
  * 
  * This page displays the full Story Reels interface but with niche-specific
  * AI prompts for script generation. Each niche (Horror, Motivational, etc.)
- * uses the same UI but generates contextually appropriate content.
- * 
- * NOTE: This currently uses a simplified ReelGenerator component.
- * For full functionality matching Story Reels, the component needs to be
- * expanded to include all workflow steps (keyword extraction, video search,
- * voice selection, preview, and final composition).
+ * uses the same UI and complete workflow but generates contextually appropriate content.
  */
 
 import React from 'react'
 import { useParams } from 'next/navigation'
 import { getNicheBySlug } from '@/config/quick-reels-niches'
-import ReelGenerator from '@/components/ReelGenerator'
+import StoryReelsPage from '@/app/dashboard/tools/story-reels/page'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
 import Link from 'next/link'
@@ -51,8 +46,9 @@ export default function NichePage() {
     )
   }
   
+  // Use the full Story Reels component with niche-specific props
   return (
-    <ReelGenerator
+    <StoryReelsPage
       niche={nicheConfig.slug}
       nicheName={nicheConfig.name}
       nicheIcon={nicheConfig.icon}
