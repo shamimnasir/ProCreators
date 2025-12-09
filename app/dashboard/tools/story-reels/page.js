@@ -15,9 +15,25 @@ import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Mic, Upload, Download, 
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
-  GripVertical, Trash2, Plus, ArrowUp, ArrowDown, ImagePlus
+  GripVertical, Trash2, Plus, ImagePlus
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 
 export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Story Video Reels', nicheIcon = '🎬', nicheDescription = 'Create engaging story-based video reels', showCustomTopicInput = false }) {
