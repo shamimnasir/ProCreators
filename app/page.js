@@ -435,7 +435,7 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 A Powerful Range of AI Tools
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -468,7 +468,7 @@ export default function Home() {
       <section className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] to-[#1a1147]">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
               Built for Every Creator
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -509,7 +509,7 @@ export default function Home() {
       <section className="py-20 md:py-32">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
               Loved by 10,000+ Creators
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -554,7 +554,7 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 Choose Your Plan
               </h2>
               <p className="mb-8 text-lg text-muted-foreground max-w-2xl mx-auto">
