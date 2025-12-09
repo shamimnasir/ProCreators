@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { connectDB } from '@/lib/db'
-import { ObjectId } from 'mongodb'
+import { connectToDatabase } from '@/lib/mongodb'
 
 // GET - Fetch all custom prompts
 export async function GET(request) {
