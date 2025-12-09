@@ -567,6 +567,10 @@ export async function POST(request) {
 
 // Helper function to generate ASS captions with Bengali support
 function generateASSCaptions(script, duration, captionStyle, targetHeight, targetWidth, fontSizeOption = 'medium', positionOption = 'bottom') {
+  // Ensure height and width are numbers for comparison
+  const height = parseInt(targetHeight) || 1920
+  const width = parseInt(targetWidth) || 1080
+  
   // Better word splitting for Bengali - split on spaces but preserve Unicode characters
   const words = script.trim().split(/\s+/).filter(w => w.length > 0)
   
@@ -582,7 +586,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   
   // Base font size - SIGNIFICANTLY INCREASED for portrait videos
   // Portrait 1080x1920 needs much larger fonts than landscape
-  const baseFontSize = targetHeight === '2160' ? 72 : targetHeight === '1920' ? 64 : targetHeight === '1440' ? 56 : targetHeight === '1280' ? 48 : 40
+  const baseFontSize = height >= 2160 ? 72 : height >= 1920 ? 64 : height >= 1440 ? 56 : height >= 1280 ? 48 : 40
   
   // Adjust font size based on user preference - more aggressive multipliers
   let fontSizeMultiplier = 1
@@ -610,11 +614,11 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
       marginV = 50  // High position
       break
     case 'center':
-      marginV = Math.round(targetHeight / 2)  // Middle of screen
+      marginV = Math.round(height / 2)  // Middle of screen
       break
     case 'bottom':
     default:
-      marginV = targetHeight === '2160' ? 150 : targetHeight === '1920' ? 120 : targetHeight === '1440' ? 120 : targetHeight === '1280' ? 90 : 80
+      marginV = height >= 2160 ? 150 : height >= 1920 ? 120 : height >= 1440 ? 120 : height >= 1280 ? 90 : 80
       break
   }
   
