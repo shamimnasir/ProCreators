@@ -493,27 +493,13 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     }
   }
 
-  // Video clip management functions
-  const moveVideoUp = (index) => {
-    if (index === 0) return
-    const newVideos = [...stockVideos]
-    ;[newVideos[index - 1], newVideos[index]] = [newVideos[index], newVideos[index - 1]]
-    setStockVideos(newVideos)
-  }
-
-  const moveVideoDown = (index) => {
-    if (index === stockVideos.length - 1) return
-    const newVideos = [...stockVideos]
-    ;[newVideos[index], newVideos[index + 1]] = [newVideos[index + 1], newVideos[index]]
-    setStockVideos(newVideos)
-  }
-
+  // Remove video clip
   const removeVideo = (index) => {
     const newVideos = stockVideos.filter((_, i) => i !== index)
     setStockVideos(newVideos)
     toast({
       title: "Video Removed",
-      description: `Clip #${index + 1} removed. ${newVideos.length} clips remaining.`
+      description: `Clip removed. ${newVideos.length} clips remaining.`
     })
   }
 
