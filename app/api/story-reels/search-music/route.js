@@ -29,15 +29,27 @@ export async function POST(request) {
     searchUrl.searchParams.append('page_size', '20') // Get 20 results
     searchUrl.searchParams.append('token', FREESOUND_API_KEY)
 
-    const response = await fetch(searchUrl.toString())
+    const response = await fetch(searchUrl.toString(), {
+      timeout: 10000 // 10 second timeout
+    })
     
     if (!response.ok) {
       const errorText = await response.text()
       console.error('[Freesound] Search error:', response.status, errorText)
+      
+      let userMessage = `Freesound API error: ${response.status}`
+      if (response.status === 503 || response.status === 504) {
+        userMessage = 'Freesound servers are temporarily unavailable. You can proceed without music or try again in a few minutes.'
+      } else if (response.status === 429) {
+        userMessage = 'Rate limit exceeded. Please wait a minute and try again.'
+      }
+      
       return NextResponse.json({
         success: false,
-        error: `Freesound API error: ${response.status}`
-      }, { status: response.status })
+        error: userMessage,
+        canProceedWithoutMusic: true,
+        temporaryIssue: response.status === 503 || response.status === 504
+      }, { status: 200 }) // Return 200 so frontend can handle gracefully
     }
 
     const data = await response.json()
