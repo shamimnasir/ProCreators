@@ -112,12 +112,12 @@ export async function POST(request) {
         } else {
           console.log('[Pexels] No videos found for', keyword, ', using fallback')
           
-          // Fallback: search for generic content
-          const fallbackResponse = await client.videos.search({
-            query: 'abstract background',
-            per_page: 1,
-            orientation: 'portrait'
+          // Fallback: search for generic content with direct API
+          const fallbackUrl = `https://api.pexels.com/videos/search?query=nature&per_page=1`
+          const fallbackFetch = await fetch(fallbackUrl, {
+            headers: { 'Authorization': apiKey }
           })
+          const fallbackResponse = await fallbackFetch.json()
 
           if (fallbackResponse.videos && fallbackResponse.videos.length > 0) {
             const video = fallbackResponse.videos[0]
@@ -133,6 +133,7 @@ export async function POST(request) {
               height: videoFile.height,
               quality: videoFile.quality
             })
+            console.log('[Pexels] Fallback video added for:', keyword)
           }
         }
 
