@@ -18,6 +18,17 @@ export default function LibraryPage() {
     fetchLibrary()
   }, [])
 
+  // Helper to get niche display info
+  const getNicheInfo = (nicheSlug) => {
+    const niche = QUICK_REELS_NICHES.find(n => n.slug === nicheSlug)
+    if (!niche) return null
+    return {
+      icon: niche.icon,
+      name: niche.name,
+      color: niche.color
+    }
+  }
+
   const fetchLibrary = async () => {
     try {
       const response = await fetch('/api/library/list')
