@@ -90,10 +90,21 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
       .replace(/{language}/g, languageName)
       .replace(/{customTopic}/g, customTopic || '')
     
-    // Add STRICT language enforcement to the prompt
+    // Add STRICT language enforcement and output rules to the prompt
     const languageEnforcement = language === 'bn' 
-      ? `\n\n## CRITICAL LANGUAGE REQUIREMENT ##\nYou MUST write the ENTIRE script in Bengali (বাংলা) language ONLY. \nDO NOT use ANY English words, phrases, or sentences.\nDO NOT mix English and Bengali.\nEvery single word must be in Bengali script (বাংলা অক্ষর).\nThis is absolutely mandatory - scripts with English words will be rejected.`
-      : `\n\n## CRITICAL LANGUAGE REQUIREMENT ##\nWrite the entire script in English only.`
+      ? `\n\n## CRITICAL REQUIREMENTS ##
+1. Write the ENTIRE script in Bengali (বাংলা) language ONLY
+2. DO NOT use ANY English words, phrases, or sentences
+3. DO NOT mix English and Bengali
+4. Every single word must be in Bengali script (বাংলা অক্ষর)
+5. DO NOT include any timing references like "সেকেন্ড" (seconds) or duration information
+6. Output ONLY the story narration - no meta-text, no instructions, no labels
+7. The output will be read aloud as-is, so include ONLY speakable story content`
+      : `\n\n## CRITICAL REQUIREMENTS ##
+1. Write the entire script in English only
+2. DO NOT include any timing references like "seconds" or duration information
+3. Output ONLY the story narration - no meta-text, no instructions, no labels
+4. The output will be read aloud as-is, so include ONLY speakable story content`
     
     finalSystemMessage = finalSystemMessage + languageEnforcement
     
