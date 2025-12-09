@@ -95,7 +95,7 @@ export async function DELETE(request) {
       }, { status: 400 })
     }
 
-    const db = await connectDB()
+    const { db } = await connectToDatabase()
     const promptsCollection = db.collection('custom_prompts')
     
     // Delete the custom prompt
