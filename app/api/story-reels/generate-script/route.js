@@ -57,6 +57,10 @@ The script should be exactly ${duration} seconds when read at normal speaking pa
 
     // Use niche-specific prompt or default
     const systemMessage = nichePrompt || defaultSystemMessage
+    
+    console.log('=== FINAL PROMPT BEING USED ===')
+    console.log('System message (first 200 chars):', systemMessage.substring(0, 200))
+    console.log('Using niche prompt:', nichePrompt ? 'YES' : 'NO (using default)')
 
     let userPrompt = ''
     
