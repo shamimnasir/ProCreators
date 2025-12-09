@@ -707,13 +707,15 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
       alignment = 2 // Bottom
   }
   
+  console.log(`[Captions] Font size: ${fontSize}px, Outline: ${outline}, Shadow: ${shadow}, Resolution: ${width}x${height}`)
+  
   // ASS Header with UTF-8 support for Bengali
   let ass = `\ufeff[Script Info]
 Title: Story Reels Captions
 ScriptType: v4.00+
 WrapStyle: 0
-PlayResX: ${targetWidth}
-PlayResY: ${targetHeight}
+PlayResX: ${width}
+PlayResY: ${height}
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
