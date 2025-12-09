@@ -25,14 +25,36 @@ export async function POST(request) {
     // Get niche-specific prompt template or use default
     let nichePrompt = ''
     if (niche && niche !== 'story-reels') {
-      const nicheConfig = getNicheBySlug(niche)
-      console.log('Niche config found:', nicheConfig ? 'YES' : 'NO')
-      if (nicheConfig) {
-        console.log('Using prompt template for niche:', nicheConfig.name)
-        nichePrompt = nicheConfig.promptTemplate
-        console.log('Prompt template length:', nichePrompt.length)
-      } else {
-        console.log('⚠️ WARNING: No niche config found for slug:', niche)
+      // First, check for custom admin-defined prompt
+      try {
+        const { connectDB } = await import('@/lib/db')
+        const db = await connectDB()
+        const promptsCollection = db.collection('custom_prompts')
+        const customPrompt = await promptsCollection.findOne({ nicheSlug: niche })
+        
+        if (customPrompt && customPrompt.prompt) {
+          nichePrompt = customPrompt.prompt
+          console.log('✅ Using CUSTOM admin prompt for niche:', niche)
+          console.log('Prompt template length:', nichePrompt.length)
+        } else {
+          // Fall back to default prompt from config
+          const nicheConfig = getNicheBySlug(niche)
+          console.log('Niche config found:', nicheConfig ? 'YES' : 'NO')
+          if (nicheConfig) {
+            console.log('Using DEFAULT prompt template for niche:', nicheConfig.name)
+            nichePrompt = nicheConfig.promptTemplate
+            console.log('Prompt template length:', nichePrompt.length)
+          } else {
+            console.log('⚠️ WARNING: No niche config found for slug:', niche)
+          }
+        }
+      } catch (dbError) {
+        console.log('Could not check custom prompts, using default:', dbError.message)
+        // Fall back to default prompt from config
+        const nicheConfig = getNicheBySlug(niche)
+        if (nicheConfig) {
+          nichePrompt = nicheConfig.promptTemplate
+        }
       }
     } else {
       console.log('Using default Story Reels prompt (niche:', niche, ')')
