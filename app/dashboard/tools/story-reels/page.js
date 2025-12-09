@@ -36,6 +36,80 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 
+// Sortable Video Item Component
+function SortableVideoItem({ video, index, totalCount, onRemove }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: video.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 100 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative group border-2 rounded-lg transition-all ${isDragging ? 'border-primary shadow-lg' : 'border-transparent hover:border-primary/50'}`}
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-1 left-1 z-10 bg-black/70 text-white p-1 rounded cursor-grab active:cursor-grabbing"
+        title="Drag to reorder"
+      >
+        <GripVertical className="h-4 w-4" />
+      </div>
+
+      {/* Video Preview */}
+      <div className="relative">
+        <video 
+          src={video.url} 
+          className="w-full h-32 object-cover rounded-lg"
+          muted
+          onMouseEnter={(e) => e.target.play()}
+          onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+        />
+        
+        {/* Clip number badge */}
+        <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-bold">
+          #{index + 1}
+        </div>
+        
+        {/* Custom badge */}
+        {video.isCustom && (
+          <div className="absolute top-1 right-8 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
+            Custom
+          </div>
+        )}
+        
+        {/* Remove button */}
+        <button
+          onClick={() => onRemove(index)}
+          className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Remove this clip"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+      
+      {/* Position indicator */}
+      <div className="text-center text-xs text-muted-foreground mt-1">
+        {index + 1} of {totalCount}
+      </div>
+    </div>
+  )
+}
+
 export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Story Video Reels', nicheIcon = '🎬', nicheDescription = 'Create engaging story-based video reels', showCustomTopicInput = false }) {
   // Script state
   const [script, setScript] = useState('')
