@@ -65,8 +65,8 @@ export async function POST(request) {
         console.log('[Pexels] Searching keyword:', keyword, '→', searchKeyword)
         
         const response = await client.videos.search({
-          query: keyword,
-          per_page: 3,
+          query: searchKeyword, // Use translated keyword
+          per_page: 5,
           orientation: 'portrait', // Vertical videos for 9:16
           size: 'medium'
         })
