@@ -237,12 +237,27 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       return
     }
 
+    // For generic niche, require custom topic
+    if (showCustomTopicInput && !customTopic.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a topic for your video",
+        variant: "destructive"
+      })
+      return
+    }
+
     setScriptLoading(true)
     try {
       const response = await fetch('/api/story-reels/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration, language: ttsLanguage })
+        body: JSON.stringify({ 
+          duration, 
+          language: ttsLanguage,
+          niche,
+          customTopic: showCustomTopicInput ? customTopic : undefined
+        })
       })
 
       const data = await response.json()
@@ -250,7 +265,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         setScript(data.script)
         toast({
           title: "Success",
-          description: "Story script generated successfully!"
+          description: `${nicheName} script generated successfully!`
         })
       } else {
         throw new Error(data.error)
