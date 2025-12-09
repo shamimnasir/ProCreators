@@ -766,7 +766,21 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         formData.append('musicTrack', 'none')
       }
       formData.append('resolution', resolution)
-      formData.append('stockVideos', JSON.stringify(stockVideos))
+      
+      // Handle stock videos - separate URLs from custom uploads
+      const urlVideos = stockVideos.filter(v => !v.isCustom)
+      const customVideos = stockVideos.filter(v => v.isCustom)
+      
+      formData.append('stockVideos', JSON.stringify(urlVideos))
+      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
+      
+      // Append custom video files
+      customVideos.forEach((video, idx) => {
+        if (video.file) {
+          formData.append(`customVideo_${idx}`, video.file)
+        }
+      })
+      
       formData.append('keywords', JSON.stringify(keywords))
       formData.append('voiceOption', voiceOption)
       formData.append('ttsLanguage', ttsLanguage)
