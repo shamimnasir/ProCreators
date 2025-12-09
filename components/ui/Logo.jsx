@@ -83,7 +83,7 @@ export function Logo({ className = "h-8 w-8", variant = "default" }) {
         <div className="absolute inset-0 blur-xl bg-[#7c3aed]/30 group-hover:bg-[#7c3aed]/50 transition-all"></div>
       </div>
       {variant === "full" && (
-        <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+        <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
           ProCreators
         </span>
       )}
