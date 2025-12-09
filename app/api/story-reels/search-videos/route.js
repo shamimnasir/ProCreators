@@ -62,28 +62,28 @@ export async function POST(request) {
         
         console.log('[Pexels] Searching keyword:', keyword, '→', searchKeyword)
         
-        // Try with portrait orientation first
-        let response = await client.videos.search({
-          query: searchKeyword, // Use translated keyword
-          per_page: 5,
-          orientation: 'portrait', // Vertical videos for 9:16
-          size: 'medium'
+        // Try with portrait orientation first using direct API call
+        let url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchKeyword)}&per_page=5&orientation=portrait`
+        let pexelsResponse = await fetch(url, {
+          headers: {
+            'Authorization': apiKey
+          }
         })
-
-        console.log('[Pexels] Response type:', typeof response)
-        console.log('[Pexels] Response keys:', Object.keys(response || {}))
-        console.log('[Pexels] Videos count:', response?.videos?.length || 0)
-        console.log('[Pexels] Total results:', response?.total_results || 0)
+        
+        let response = await pexelsResponse.json()
+        console.log('[Pexels] Portrait search - Videos found:', response?.videos?.length || 0)
 
         // If no portrait videos found, try without orientation filter
         if (!response.videos || response.videos.length === 0) {
           console.log('[Pexels] No portrait videos, trying all orientations...')
-          response = await client.videos.search({
-            query: searchKeyword,
-            per_page: 5,
-            size: 'medium'
+          url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchKeyword)}&per_page=5`
+          pexelsResponse = await fetch(url, {
+            headers: {
+              'Authorization': apiKey
+            }
           })
-          console.log('[Pexels] Second attempt - Videos:', response?.videos?.length || 0)
+          response = await pexelsResponse.json()
+          console.log('[Pexels] All orientations - Videos found:', response?.videos?.length || 0)
         }
 
         if (response.videos && response.videos.length > 0) {
