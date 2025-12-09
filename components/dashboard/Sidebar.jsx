@@ -50,10 +50,11 @@ const navigation = [
     ]
   },
   {
-    name: 'Quick Reels Video',
+    name: 'Quick Reels Hub',
+    href: '/dashboard/tools/quick-reels',
     icon: Video,
+    badge: 'New',
     children: [
-      { name: '🎬 Quick Reels Hub', href: '/dashboard/tools/quick-reels', icon: Sparkles, badge: 'New' },
       { name: '📖 Mini Stories', href: '/dashboard/tools/quick-reels/mini-stories', icon: BookOpen },
       { name: '💪 Motivational', href: '/dashboard/tools/quick-reels/motivational', icon: Zap },
       { name: '🧠 Facts & Explainers', href: '/dashboard/tools/quick-reels/facts-explainer', icon: GraduationCap },
