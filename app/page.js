@@ -178,6 +178,17 @@ export default function Home() {
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Set dark mode as default for homepage only (on first visit)
+  React.useEffect(() => {
+    // Check if user has a saved theme preference
+    const savedTheme = localStorage.getItem('theme')
+    
+    // If no saved preference, set dark mode for homepage
+    if (!savedTheme) {
+      setTheme('dark')
+    }
+  }, [setTheme])
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Header */}
