@@ -606,23 +606,7 @@ export default function StoryReelsPage() {
           description: "Your story video is ready!"
         })
         
-        // Auto-save to library
-        await fetch('/api/library/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'story-reel',
-            title: script.substring(0, 50) + '...',
-            content: data.videoUrl,
-            metadata: {
-              duration,
-              resolution,
-              captionStyle,
-              voiceOption,
-              keywords: keywords.slice(0, 5)
-            }
-          })
-        })
+        // Auto-save is now handled by backend in /api/story-reels/compose
       } else {
         throw new Error(data.error)
       }
