@@ -31,7 +31,8 @@ import {
   Library,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Type
 } from 'lucide-react'
 
 const navigation = [
