@@ -1150,7 +1150,7 @@ export default function StoryReelsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{customMusic.name}</p>
-                      <p className="text-xs text-muted-foreground">From Freesound Library</p>
+                      <p className="text-xs text-muted-foreground">From Audio Library</p>
                     </div>
                     <Button
                       size="sm"
