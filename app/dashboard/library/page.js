@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { FileText, Image as ImageIcon, Video, Trash2, Download, Library as LibraryIcon } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 
 export default function LibraryPage() {
   const [items, setItems] = useState([])
