@@ -72,6 +72,11 @@ export async function POST(request) {
           size: 'medium'
         })
 
+        console.log('[Pexels] Response type:', typeof response)
+        console.log('[Pexels] Response keys:', Object.keys(response || {}))
+        console.log('[Pexels] Videos count:', response?.videos?.length || 0)
+        console.log('[Pexels] Total results:', response?.total_results || 0)
+
         // If no portrait videos found, try without orientation filter
         if (!response.videos || response.videos.length === 0) {
           console.log('[Pexels] No portrait videos, trying all orientations...')
@@ -80,6 +85,7 @@ export async function POST(request) {
             per_page: 5,
             size: 'medium'
           })
+          console.log('[Pexels] Second attempt - Videos:', response?.videos?.length || 0)
         }
 
         if (response.videos && response.videos.length > 0) {
