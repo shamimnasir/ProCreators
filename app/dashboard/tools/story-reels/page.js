@@ -149,12 +149,80 @@ export default function StoryReelsPage() {
 
   // Get friendly voice type from name
   const getVoiceType = (voiceName) => {
-    if (voiceName.includes('Neural2')) return 'Neural (Best)'
-    if (voiceName.includes('Wavenet')) return 'Wavenet (High)'
+    if (voiceName.includes('Neural2')) return 'Premium (Best Quality)'
+    if (voiceName.includes('Wavenet')) return 'High Quality'
     if (voiceName.includes('Studio')) return 'Studio (Premium)'
     if (voiceName.includes('Standard')) return 'Standard'
-    if (voiceName.includes('Chirp3-HD')) return 'Chirp HD (Best)'
-    return 'Voice'
+    if (voiceName.includes('Chirp3-HD')) return 'Premium HD (Best)'
+    if (voiceName.includes('Chirp')) return 'Premium'
+    return 'Standard'
+  }
+
+  // Get friendly name for voices based on language and characteristics
+  const getFriendlyVoiceName = (voiceName, gender) => {
+    // Extract voice ID from name (e.g., "bn-IN-Neural2-A" → "A")
+    const voiceId = voiceName.split('-').pop()
+    const isBengali = voiceName.startsWith('bn-')
+    
+    // Bangladeshi names for Bengali voices
+    const bengaliMaleNames = {
+      'A': 'রহিম (Rahim) - Warm',
+      'B': 'করিম (Karim) - Deep',
+      'C': 'সালাম (Salam) - Clear',
+      'D': 'জামাল (Jamal) - Strong',
+      'E': 'আমিন (Amin) - Smooth',
+      'F': 'ফারুক (Faruk) - Rich'
+    }
+    
+    const bengaliFemaleNames = {
+      'A': 'রুমা (Ruma) - Soft',
+      'B': 'সুমা (Suma) - Bright',
+      'C': 'নীলা (Nila) - Gentle',
+      'D': 'মীনা (Mina) - Sweet',
+      'E': 'লীনা (Lina) - Calm',
+      'F': 'রীনা (Rina) - Clear'
+    }
+    
+    // English names with voice characteristics
+    const englishMaleNames = {
+      'A': 'James - Professional',
+      'B': 'David - Authoritative',
+      'C': 'Michael - Friendly',
+      'D': 'Robert - Deep',
+      'E': 'William - Warm',
+      'F': 'Thomas - Clear',
+      'G': 'Christopher - Smooth',
+      'H': 'Daniel - Natural',
+      'I': 'Matthew - Energetic',
+      'J': 'Anthony - Confident'
+    }
+    
+    const englishFemaleNames = {
+      'A': 'Emily - Bright',
+      'B': 'Sarah - Warm',
+      'C': 'Jennifer - Professional',
+      'D': 'Emma - Soft',
+      'E': 'Jessica - Friendly',
+      'F': 'Sophie - Clear',
+      'G': 'Olivia - Natural',
+      'H': 'Charlotte - Gentle',
+      'I': 'Amelia - Sweet',
+      'J': 'Isabella - Elegant'
+    }
+    
+    if (isBengali) {
+      if (gender === 'MALE') {
+        return bengaliMaleNames[voiceId] || `Voice ${voiceId}`
+      } else {
+        return bengaliFemaleNames[voiceId] || `Voice ${voiceId}`
+      }
+    } else {
+      if (gender === 'MALE') {
+        return englishMaleNames[voiceId] || `Voice ${voiceId}`
+      } else {
+        return englishFemaleNames[voiceId] || `Voice ${voiceId}`
+      }
+    }
   }
 
   // Generate AI Script
