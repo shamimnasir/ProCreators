@@ -330,7 +330,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 border-y border-border bg-white/5">
+      <section className="py-12 border-y border-border bg-muted/30">
         <div className="container px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
