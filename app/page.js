@@ -368,10 +368,10 @@ export default function Home() {
             {/* Tool Categories */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
               <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">All Tools (22)</Button>
-              <Button variant="outline" className="border-white/20 text-muted-foreground hover:bg-white/10">Video & Audio (6)</Button>
-              <Button variant="outline" className="border-white/20 text-muted-foreground hover:bg-white/10">Image & Design (6)</Button>
-              <Button variant="outline" className="border-white/20 text-muted-foreground hover:bg-white/10">Text Content (6)</Button>
-              <Button variant="outline" className="border-white/20 text-muted-foreground hover:bg-white/10">Digital Products (2)</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Video & Audio (6)</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Image & Design (6)</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Text Content (6)</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Digital Products (2)</Button>
             </div>
 
             {/* Tools Grid */}
