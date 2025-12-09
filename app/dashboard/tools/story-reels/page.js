@@ -800,8 +800,11 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Story Video Reels</h1>
-          <p className="text-muted-foreground">Create engaging story videos with authentic Bengali narration powered by AI voice synthesis</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <span className="text-4xl">{nicheIcon}</span>
+            {nicheName}
+          </h1>
+          <p className="text-muted-foreground">{nicheDescription}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           <Sparkles className="h-4 w-4 mr-2" />
