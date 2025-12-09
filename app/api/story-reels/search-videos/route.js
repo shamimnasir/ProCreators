@@ -64,12 +64,23 @@ export async function POST(request) {
         
         console.log('[Pexels] Searching keyword:', keyword, '→', searchKeyword)
         
-        const response = await client.videos.search({
+        // Try with portrait orientation first
+        let response = await client.videos.search({
           query: searchKeyword, // Use translated keyword
           per_page: 5,
           orientation: 'portrait', // Vertical videos for 9:16
           size: 'medium'
         })
+
+        // If no portrait videos found, try without orientation filter
+        if (!response.videos || response.videos.length === 0) {
+          console.log('[Pexels] No portrait videos, trying all orientations...')
+          response = await client.videos.search({
+            query: searchKeyword,
+            per_page: 5,
+            size: 'medium'
+          })
+        }
 
         if (response.videos && response.videos.length > 0) {
           // Get the first video result
