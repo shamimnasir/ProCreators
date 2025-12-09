@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
 import { getNicheBySlug } from '@/config/quick-reels-niches'
+import { connectDB } from '@/lib/db'
 
 export async function POST(request) {
   try {
