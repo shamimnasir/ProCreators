@@ -67,6 +67,16 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const audioFileRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
+  const videoPreviewRef = useRef(null)
+
+  // Auto-scroll to video preview when video is ready
+  useEffect(() => {
+    if (videoData?.videoUrl && videoPreviewRef.current) {
+      setTimeout(() => {
+        videoPreviewRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 500)
+    }
+  }, [videoData?.videoUrl])
 
   // Load voices when language changes
   useEffect(() => {
