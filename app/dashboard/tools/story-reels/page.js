@@ -1051,13 +1051,14 @@ export default function StoryReelsPage() {
                         <SelectContent className="max-h-80">
                           {voicesByVariant[languageVariant].map((voice) => {
                             const voiceType = getVoiceType(voice.name)
+                            const friendlyName = getFriendlyVoiceName(voice.name, voice.ssmlGender)
                             return (
                               <SelectItem key={voice.name} value={voice.name} className="py-3">
                                 <div className="flex items-center justify-between gap-4 w-full">
                                   <div className="flex-1">
                                     <div className="font-medium">
                                       {voice.ssmlGender === 'MALE' ? '👨' : voice.ssmlGender === 'FEMALE' ? '👩' : '🗣️'} 
-                                      {' '}{voice.ssmlGender}
+                                      {' '}{friendlyName}
                                     </div>
                                     <div className="text-xs text-muted-foreground">{voiceType}</div>
                                   </div>
