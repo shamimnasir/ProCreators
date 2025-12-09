@@ -28,8 +28,7 @@ export async function POST(request) {
     if (niche && niche !== 'story-reels') {
       // First, check for custom admin-defined prompt
       try {
-        const { connectDB } = await import('@/lib/db')
-        const db = await connectDB()
+        const { db } = await connectToDatabase()
         const promptsCollection = db.collection('custom_prompts')
         const customPrompt = await promptsCollection.findOne({ nicheSlug: niche })
         
