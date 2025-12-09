@@ -216,8 +216,12 @@ export async function POST(request) {
     // Step 3: Normalize each clip individually, then concatenate
     console.log(`[${jobId}] Step 3: Processing and concatenating video clips...`)
     
-    // Determine target height based on resolution
-    const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
+    // Determine target dimensions for 9:16 portrait (vertical) format
+    // For Reels/Shorts, we need portrait orientation
+    const targetWidth = resolution === '4k' ? '1216' : resolution === '2k' ? '810' : resolution === '1080p' ? '1080' : '720'
+    const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
+    
+    console.log(`[${jobId}] Target resolution: ${targetWidth}x${targetHeight} (9:16 portrait)`)
     
     // Calculate duration per clip
     const durationPerClip = duration / videoFiles.length
@@ -231,7 +235,8 @@ export async function POST(request) {
       await new Promise((resolve, reject) => {
         ffmpeg(videoFiles[i])
           .outputOptions([
-            '-vf', `scale=-2:${targetHeight},fps=30`,
+            // Force 9:16 portrait aspect ratio with center crop
+            '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
             '-t', String(durationPerClip),
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
