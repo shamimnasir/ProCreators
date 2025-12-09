@@ -762,6 +762,8 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       if (customMusic) {
         formData.append('musicTrack', 'custom')
         formData.append('customMusicPath', customMusic.path)
+      } else if (musicTrack && musicTrack !== 'none') {
+        formData.append('musicTrack', musicTrack)
       } else {
         formData.append('musicTrack', 'none')
       }
