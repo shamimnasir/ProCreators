@@ -37,7 +37,7 @@ import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 
 // Sortable Video Item Component
-function SortableVideoItem({ video, index, totalCount, onRemove }) {
+function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange }) {
   const {
     attributes,
     listeners,
@@ -53,6 +53,8 @@ function SortableVideoItem({ video, index, totalCount, onRemove }) {
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : 1,
   }
+
+  const [showTextInput, setShowTextInput] = useState(false)
 
   return (
     <div
@@ -95,15 +97,22 @@ function SortableVideoItem({ video, index, totalCount, onRemove }) {
         
         {/* Image/Product badge */}
         {video.type === 'image' && (
-          <div className="absolute top-1 right-8 bg-purple-500 text-white text-xs px-2 py-0.5 rounded">
+          <div className="absolute top-1 right-16 bg-purple-500 text-white text-xs px-2 py-0.5 rounded">
             📷 Image
           </div>
         )}
         
         {/* Custom badge */}
         {video.isCustom && (
-          <div className="absolute top-1 right-8 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
+          <div className="absolute top-1 right-16 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
             Custom
+          </div>
+        )}
+        
+        {/* Text overlay indicator */}
+        {video.textOverlay?.text && (
+          <div className="absolute top-1 right-8 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
+            <Type className="h-3 w-3 inline" />
           </div>
         )}
         
@@ -117,8 +126,42 @@ function SortableVideoItem({ video, index, totalCount, onRemove }) {
         </button>
       </div>
       
+      {/* Text Overlay Controls */}
+      <div className="p-2 space-y-2">
+        <button
+          onClick={() => setShowTextInput(!showTextInput)}
+          className="w-full text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded flex items-center justify-center gap-1"
+        >
+          <Type className="h-3 w-3" />
+          {video.textOverlay?.text ? 'Edit Text' : 'Add Text'}
+        </button>
+        
+        {showTextInput && (
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Text overlay (e.g., Product Name)"
+              value={video.textOverlay?.text || ''}
+              onChange={(e) => onTextChange(index, 'text', e.target.value)}
+              className="w-full text-xs px-2 py-1 border rounded"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <select
+              value={video.textOverlay?.position || 'top'}
+              onChange={(e) => onTextChange(index, 'position', e.target.value)}
+              className="w-full text-xs px-2 py-1 border rounded"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="top">Top</option>
+              <option value="center">Center</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+        )}
+      </div>
+      
       {/* Position indicator */}
-      <div className="text-center text-xs text-muted-foreground mt-1">
+      <div className="text-center text-xs text-muted-foreground pb-1">
         {index + 1} of {totalCount}
       </div>
     </div>
