@@ -1448,38 +1448,39 @@ Product URL: ${scrapeData.product.url}`
                 </Button>
                 
                 {/* Product media button (only for product-review niche) */}
-                {niche === 'product-review' && productData && (
+                {niche === 'product-review' && productData && productMedia.length > 0 && (
                   <Button 
                     onClick={() => {
-                      if (productMedia.length > 0) {
-                        // Add product images to existing stock videos
-                        setStockVideos(prev => [...prev, ...productMedia])
+                      const selectedImages = productMedia.filter(img => img.selected)
+                      if (selectedImages.length > 0) {
+                        // Add only selected product images to existing stock videos
+                        setStockVideos(prev => [...prev, ...selectedImages])
                         toast({
                           title: "Product Images Added!",
-                          description: `${productMedia.length} product images added. Motion effects will be applied automatically.`
+                          description: `${selectedImages.length} product images added. Motion effects will be applied automatically.`
                         })
                       } else {
                         toast({
-                          title: "No Media Found",
-                          description: "No images found in the product URL",
+                          title: "No Images Selected",
+                          description: "Please select at least one product image",
                           variant: "destructive"
                         })
                       }
                     }}
-                    disabled={productMedia.length === 0}
+                    disabled={productMedia.filter(img => img.selected).length === 0}
                     className="flex-1"
                     variant="outline"
                   >
                     <ImagePlus className="mr-2 h-4 w-4" />
-                    Add Product Images ({productMedia.length})
+                    Add Selected ({productMedia.filter(img => img.selected).length})
                   </Button>
                 )}
               </div>
               
               {/* Helper text for product review */}
-              {niche === 'product-review' && productData && (
+              {niche === 'product-review' && productData && productMedia.length > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
-                  💡 Tip: Combine stock videos + product images for best results. Images will have motion effects applied.
+                  💡 Tip: Select product images below, then combine with stock videos for best results
                 </p>
               )}
             </div>
