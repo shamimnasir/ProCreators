@@ -89,27 +89,38 @@ export async function POST(request) {
               filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
             }
             
-            // Add text overlay if present with PROFESSIONAL STYLING
+            // Add text overlay if present - VIRAL COLORED BOX STYLE
             const orderInfo = videoOrder[i]
             const textOverlay = orderInfo?.textOverlay
             if (textOverlay && textOverlay.text) {
               const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
               const position = textOverlay.position || 'top'
-              const fontSize = 72 // Preview resolution
+              const color = textOverlay.color || 'yellow'
+              const fontSize = 68 // Preview resolution (720p)
               
               let yPosition
               if (position === 'top') {
-                yPosition = '180'
+                yPosition = '200'
               } else if (position === 'center') {
                 yPosition = '(h-text_h)/2'
               } else {
-                yPosition = 'h-text_h-180'
+                yPosition = 'h-text_h-200'
               }
               
-              // Professional styling - clean white text with outline
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=3:bordercolor=black`
+              // COLOR CONFIGURATION - matches compose route
+              const colorConfig = {
+                yellow: { boxcolor: 'yellow', fontcolor: 'black' },
+                red: { boxcolor: 'red', fontcolor: 'white' },
+                green: { boxcolor: 'green', fontcolor: 'white' },
+                blue: { boxcolor: 'blue', fontcolor: 'white' }
+              }
               
-              console.log(`[Preview ${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}"`)
+              const config = colorConfig[color] || colorConfig.yellow
+              
+              // VIRAL STYLE: Bold colored box
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
+              
+              console.log(`[Preview ${jobId}] Adding ${color.toUpperCase()} text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
