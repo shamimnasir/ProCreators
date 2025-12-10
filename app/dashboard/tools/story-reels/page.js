@@ -520,50 +520,84 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
     setScrapingProduct(true)
     try {
-      const response = await fetch('/api/story-reels/scrape-product', {
+      // Step 1: Scrape product data
+      const scrapeResponse = await fetch('/api/story-reels/scrape-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: productUrl })
       })
 
-      const data = await response.json()
+      const scrapeData = await scrapeResponse.json()
 
-      if (data.success) {
-        setProductData(data.product)
-        
-        // Auto-fill script with product info
-        const productInfo = `Product: ${data.product.name}
-Brand: ${data.product.brand}
-Price: ${data.product.price}
-Category: ${data.product.category}
+      if (!scrapeData.success) {
+        throw new Error(scrapeData.error)
+      }
 
-Description: ${data.product.description}
+      setProductData(scrapeData.product)
+      
+      // Step 2: Format product info for AI
+      const productContext = `Product Name: ${scrapeData.product.name}
+Brand: ${scrapeData.product.brand}
+Price: ${scrapeData.product.price}
+Category: ${scrapeData.product.category}
+
+Product Description:
+${scrapeData.product.description}
 
 Key Features:
-${data.product.features.map((f, i) => `${i + 1}. ${f}`).join('\n')}
+${scrapeData.product.features.map((f, i) => `${i + 1}. ${f}`).join('\n')}
 
-URL: ${data.product.url}`
-        
-        setScript(productInfo)
-        setCustomTopic(data.product.name)
+Product URL: ${scrapeData.product.url}`
+
+      // Step 3: Generate AI review script using the system prompt
+      toast({
+        title: "Product Loaded!",
+        description: "Generating AI review script...",
+      })
+
+      const scriptResponse = await fetch('/api/story-reels/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          niche: 'product-review',
+          duration,
+          language: ttsLanguage,
+          customTopic: productContext
+        })
+      })
+
+      const scriptData = await scriptResponse.json()
+
+      if (scriptData.success) {
+        setScript(scriptData.script)
+        setCustomTopic(scrapeData.product.name)
         
         // Auto-extract keywords from product
         const productKeywords = [
-          data.product.name.toLowerCase(),
-          data.product.brand.toLowerCase(),
-          data.product.category,
-          ...data.product.features.slice(0, 3).map(f => f.split(' ').slice(0, 2).join(' '))
+          scrapeData.product.name.toLowerCase(),
+          scrapeData.product.brand.toLowerCase(),
+          scrapeData.product.category,
+          ...scrapeData.product.features.slice(0, 3).map(f => f.split(' ').slice(0, 2).join(' '))
         ].filter(k => k && k.length > 2)
         
         setKeywords(productKeywords.slice(0, 8))
         
         toast({
-          title: "Product Scraped!",
-          description: `Loaded ${data.product.name} - Click "Search Stock Videos" to find footage`
+          title: "Review Generated!",
+          description: `AI review script created for ${scrapeData.product.name}`,
         })
       } else {
-        throw new Error(data.error)
+        // Fallback to raw product info if AI generation fails
+        setScript(productContext)
+        setCustomTopic(scrapeData.product.name)
+        
+        toast({
+          title: "Product Loaded",
+          description: "Using raw product info. Click 'Generate AI Story' to create review.",
+          variant: "default"
+        })
       }
+
     } catch (error) {
       toast({
         title: "Scraping Failed",
