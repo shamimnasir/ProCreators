@@ -11,17 +11,15 @@ export async function POST(request) {
       )
     }
 
-    // Check for Pixabay API key first (preferred for videos)
-    const pixabayKey = process.env.PIXABAY_API_KEY
+    // Check for API keys - Pexels is preferred for videos
     const pexelsKey = process.env.PEXELS_API_KEY
+    const pixabayKey = process.env.PIXABAY_API_KEY
     
-    if (!pixabayKey && !pexelsKey) {
-      throw new Error('Neither PIXABAY_API_KEY nor PEXELS_API_KEY configured')
+    if (!pexelsKey && !pixabayKey) {
+      throw new Error('Neither PEXELS_API_KEY nor PIXABAY_API_KEY configured')
     }
 
-    const usePixabay = !!pixabayKey
-
-    console.log('[Stock Videos] Using provider:', usePixabay ? 'Pixabay' : 'Pexels Photos')
+    console.log('[Stock Videos] Priority: Pexels Videos → Pixabay Videos')
     console.log('[Stock Videos] Searching for', keywords.length, 'keywords')
 
     // Simple translation map for common Bengali words (faster than API calls)
