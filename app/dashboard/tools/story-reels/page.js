@@ -551,15 +551,17 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       // Store extracted media (images and videos) - limit to top 10
       if (scrapeData.product.images && scrapeData.product.images.length > 0) {
         const media = scrapeData.product.images.slice(0, 10).map((url, index) => ({
-          id: `product-media-${index}`,
+          id: `product-media-${Date.now()}-${index}`,
           url: url,
           thumbnail: url,
-          title: `${scrapeData.product.name} - Image ${index + 1}`,
+          title: `Product Image ${index + 1}`,
           type: 'image',
-          source: 'product',
-          selected: true // All selected by default
+          source: 'product'
         }))
         setProductMedia(media)
+        
+        // Automatically add product images to stock videos section
+        setStockVideos(prev => [...media, ...prev]) // Add at the beginning
       }
       
       // Step 2: Format product info for AI
