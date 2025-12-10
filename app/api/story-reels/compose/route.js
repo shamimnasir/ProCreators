@@ -54,6 +54,14 @@ export async function POST(request) {
 
     console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
     console.log(`[${jobId}] Stock videos: ${stockVideos.length}, Custom videos: ${customVideoFiles.length}, Total order: ${videoOrder.length}`)
+    
+    // Log detailed info about each clip
+    const imageClips = stockVideos.filter(v => v.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(v.url))
+    const videoClips = stockVideos.filter(v => !imageClips.includes(v))
+    console.log(`[${jobId}] Breakdown: ${imageClips.length} product images, ${videoClips.length} stock videos`)
+    if (imageClips.length > 0) {
+      console.log(`[${jobId}] Product images:`, imageClips.map((img, i) => `${i+1}. ${img.url.substring(0, 80)}...`))
+    }
 
     // Step 1: Process all video clips (stock videos + custom uploads)
     console.log(`[${jobId}] Step 1: Processing ${videoOrder.length} video clips...`)
