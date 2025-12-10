@@ -949,6 +949,13 @@ Product URL: ${scrapeData.product.url}`
       formData.append('selectedVoice', selectedVoice || '')
       formData.append('stockVideos', JSON.stringify(stockVideos))
       
+      // Include video order with text overlays for preview
+      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({
+        index: i,
+        isCustom: !!v.isCustom,
+        textOverlay: v.textOverlay || null
+      }))))
+      
       // Include uploaded/recorded audio for preview
       if (voiceOption === 'upload' && voiceFile) {
         formData.append('voiceFile', voiceFile)
