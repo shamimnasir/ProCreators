@@ -89,26 +89,30 @@ export async function POST(request) {
               filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
             }
             
-            // Add text overlay if present
+            // Add text overlay if present with MODERN PROFESSIONAL STYLING
             const orderInfo = videoOrder[i]
             const textOverlay = orderInfo?.textOverlay
             if (textOverlay && textOverlay.text) {
               const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
               const position = textOverlay.position || 'top'
-              const fontSize = 80 // Preview resolution
+              const fontSize = 72 // Preview resolution
               
               let yPosition
               if (position === 'top') {
-                yPosition = '150'
+                yPosition = '180'
               } else if (position === 'center') {
                 yPosition = '(h-text_h)/2'
               } else {
-                yPosition = 'h-text_h-150'
+                yPosition = 'h-text_h-180'
               }
               
-              // Add viral text styling
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=yellow:x=(w-text_w)/2:y=${yPosition}:borderw=6:bordercolor=black:shadowx=3:shadowy=3:shadowcolor=black`
-              console.log(`[Preview ${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}"`)
+              // Modern professional styling - matches compose route
+              const boxPadding = 20
+              const boxColor = '0x000000@0.7'
+              filterComplex += `,drawbox=x=(w-text_w)/2-${boxPadding}:y=${yPosition}-${boxPadding/2}:w=text_w+${boxPadding*2}:h=text_h+${boxPadding}:color=${boxColor}:t=fill`
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=0x000000@0.5`
+              
+              console.log(`[Preview ${jobId}] Adding professional text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
