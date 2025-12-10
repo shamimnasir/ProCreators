@@ -1401,7 +1401,7 @@ Product URL: ${scrapeData.product.url}`
           </div>
 
           {keywords.length > 0 && (
-            <div className="space-y-2 pt-4 border-t">
+            <div className="space-y-3 pt-4 border-t">
               <Label>Keywords for Video Selection (editable)</Label>
               <div className="flex flex-wrap gap-2">
                 {keywords.map((keyword, index) => (
@@ -1421,15 +1421,66 @@ Product URL: ${scrapeData.product.url}`
                   + Add
                 </Button>
               </div>
-              <Button 
-                onClick={handleSearchVideos} 
-                disabled={loadingVideos}
-                className="w-full"
-              >
-                {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Video className="mr-2 h-4 w-4" />
-                Search Stock Videos
-              </Button>
+              
+              {/* Tabs for media source (only show for product-review niche) */}
+              {niche === 'product-review' && productData && (
+                <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                  <Button
+                    variant={mediaSource === 'stock' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setMediaSource('stock')}
+                  >
+                    <Video className="mr-2 h-4 w-4" />
+                    Stock Videos
+                  </Button>
+                  <Button
+                    variant={mediaSource === 'product' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setMediaSource('product')}
+                  >
+                    <ImagePlus className="mr-2 h-4 w-4" />
+                    Product Media
+                  </Button>
+                </div>
+              )}
+              
+              {/* Conditional button based on media source */}
+              {mediaSource === 'stock' ? (
+                <Button 
+                  onClick={handleSearchVideos} 
+                  disabled={loadingVideos}
+                  className="w-full"
+                >
+                  {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Video className="mr-2 h-4 w-4" />
+                  Search Stock Videos
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => {
+                    if (productMedia.length > 0) {
+                      setStockVideos(productMedia)
+                      toast({
+                        title: "Product Media Loaded!",
+                        description: `${productMedia.length} images from product added`
+                      })
+                    } else {
+                      toast({
+                        title: "No Media Found",
+                        description: "No images or videos found in the product URL",
+                        variant: "destructive"
+                      })
+                    }
+                  }}
+                  disabled={productMedia.length === 0}
+                  className="w-full"
+                >
+                  <ImagePlus className="mr-2 h-4 w-4" />
+                  Use Product Images ({productMedia.length})
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
