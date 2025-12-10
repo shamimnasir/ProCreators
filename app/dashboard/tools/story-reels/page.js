@@ -1004,7 +1004,11 @@ Product URL: ${scrapeData.product.url}`
       console.log('[Compose] stockVideos JSON being sent:', JSON.stringify(urlVideos, null, 2))
       
       formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
-      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
+      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ 
+        index: i, 
+        isCustom: !!v.isCustom,
+        textOverlay: v.textOverlay || null
+      }))))
       
       // Append custom video files
       customVideos.forEach((video, idx) => {
@@ -1123,7 +1127,11 @@ Product URL: ${scrapeData.product.url}`
       console.log('[Compose] stockVideos JSON being sent:', JSON.stringify(urlVideos, null, 2))
       
       formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
-      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
+      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ 
+        index: i, 
+        isCustom: !!v.isCustom,
+        textOverlay: v.textOverlay || null
+      }))))
       
       // Append custom video files
       customVideos.forEach((video, idx) => {
