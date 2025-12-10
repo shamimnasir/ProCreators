@@ -471,18 +471,9 @@ export async function POST(request) {
             }
             
             // MODERN PROFESSIONAL STYLING:
-            // - Clean white text (professional, readable)
-            // - Subtle thin black outline (2px instead of 6px)
-            // - Soft drop shadow for depth
-            // - Semi-transparent black box background for maximum readability
-            
-            // First, add a semi-transparent black background box
-            const boxPadding = 20
-            const boxColor = '0x000000@0.7' // Black with 70% opacity
-            videoFilter += `,drawbox=x=(w-text_w)/2-${boxPadding}:y=${yPosition}-${boxPadding/2}:w=text_w+${boxPadding*2}:h=text_h+${boxPadding}:color=${boxColor}:t=fill`
-            
-            // Then, add the text with clean modern styling
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=0x000000@0.5`
+            // Use box=1 to create background box directly in drawtext
+            // This is simpler and more reliable than drawbox
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black@0.7:boxborderw=20:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=black@0.5`
             
             console.log(`[${jobId}] Adding PROFESSIONAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
