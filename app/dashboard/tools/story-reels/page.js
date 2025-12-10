@@ -102,6 +102,13 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
           </div>
         )}
         
+        {/* UGC Video badge */}
+        {video.type === 'ugc-video' && (
+          <div className="absolute top-1 right-16 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">
+            👤 UGC
+          </div>
+        )}
+        
         {/* Custom badge */}
         {video.isCustom && (
           <div className="absolute top-1 right-16 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
