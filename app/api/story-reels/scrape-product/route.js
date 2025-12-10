@@ -41,6 +41,9 @@ export async function POST(request) {
 
     const html = await response.text()
     
+    // Extract images and videos from HTML first
+    const mediaUrls = extractMediaFromHtml(html, url)
+    
     // Convert HTML to plain text for easier parsing
     const content = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove scripts
@@ -49,8 +52,12 @@ export async function POST(request) {
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim()
     
-    // Extract product information using simple parsing
+    // Parse the markdown content to extract structured data
     const productInfo = parseProductInfo(content, url)
+    
+    // Add extracted media URLs
+    productInfo.images = [...new Set([...mediaUrls.images, ...productInfo.images])] // Remove duplicates
+    productInfo.videos = mediaUrls.videos
     
     console.log(`[Product Scraper] Successfully scraped product:`, productInfo.name || 'Unknown')
 
