@@ -35,8 +35,8 @@ export async function POST(request) {
 
     console.log(`[Preview ${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice })
 
-    // Step 1: Download stock videos (using streams)
-    console.log(`[Preview ${jobId}] Downloading ${stockVideos.length} videos...`)
+    // Step 1: Download stock videos and process images (using streams)
+    console.log(`[Preview ${jobId}] Processing ${stockVideos.length} clips (videos + images)...`)
     const videoFiles = []
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
@@ -44,18 +44,83 @@ export async function POST(request) {
     for (let i = 0; i < stockVideos.length; i++) {
       const video = stockVideos[i]
       const videoPath = join(tempDir, `clip-${i}.mp4`)
+      const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
       
       try {
-        const response = await fetch(video.url)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        
-        const fileStream = require('fs').createWriteStream(videoPath)
-        await pipeline(Readable.fromWeb(response.body), fileStream)
-        
-        videoFiles.push(videoPath)
-        console.log(`[Preview ${jobId}] Downloaded clip ${i + 1}/${stockVideos.length}`)
+        if (isImage) {
+          // Handle product image - convert to video with motion effects
+          const imagePath = join(tempDir, `image-${i}.jpg`)
+          
+          // Handle local cached images vs external URLs
+          let imageBuffer
+          if (video.url.startsWith('/')) {
+            // Local cached image - read from file system
+            const localPath = join(process.cwd(), 'public', video.url)
+            console.log(`[Preview ${jobId}] Reading local image from: ${localPath}`)
+            const fs = require('fs')
+            if (!fs.existsSync(localPath)) {
+              throw new Error(`Local image not found: ${localPath}`)
+            }
+            imageBuffer = fs.readFileSync(localPath)
+          } else {
+            // External URL - fetch it
+            const response = await fetch(video.url)
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+            imageBuffer = Buffer.from(await response.arrayBuffer())
+          }
+          
+          // Save image to temp directory
+          await writeFile(imagePath, imageBuffer)
+          
+          // Convert image to video with Ken Burns effect (same as compose)
+          await new Promise((resolve, reject) => {
+            const randomEffect = Math.floor(Math.random() * 3)
+            let filterComplex = ''
+            
+            if (randomEffect === 0) {
+              filterComplex = 'scale=8000:-1,zoompan=z=\'min(zoom+0.0015,1.5)\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
+            } else if (randomEffect === 1) {
+              filterComplex = 'scale=8000:-1,zoompan=z=\'if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
+            } else {
+              filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
+            }
+            
+            ffmpeg(imagePath)
+              .inputOptions(['-loop 1'])
+              .outputOptions([
+                '-vf', filterComplex,
+                '-t', '5', // 5 seconds per image
+                '-pix_fmt', 'yuv420p',
+                '-c:v', 'libx264',
+                '-r', '30'
+              ])
+              .output(videoPath)
+              .on('end', () => {
+                videoFiles.push(videoPath)
+                console.log(`[Preview ${jobId}] ✅ Converted image ${i + 1}/${stockVideos.length} to video`)
+                resolve()
+              })
+              .on('error', (err) => {
+                console.error(`[Preview ${jobId}] ❌ Image conversion error:`, err.message)
+                reject(err)
+              })
+              .run()
+          })
+        } else {
+          // Handle regular video URL
+          const response = await fetch(video.url)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          
+          const fileStream = require('fs').createWriteStream(videoPath)
+          await pipeline(Readable.fromWeb(response.body), fileStream)
+          
+          videoFiles.push(videoPath)
+          console.log(`[Preview ${jobId}] ✅ Downloaded video ${i + 1}/${stockVideos.length}`)
+        }
       } catch (error) {
-        console.error(`[Preview ${jobId}] Error downloading clip ${i}:`, error.message)
+        console.error(`[Preview ${jobId}] ❌ Error processing clip ${i}:`, error.message)
       }
     }
 
