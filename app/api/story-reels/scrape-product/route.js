@@ -92,28 +92,32 @@ function extractMediaFromHtml(html, baseUrl) {
   
   try {
     // First, try to extract from Amazon's image gallery/carousel (priority)
-    // Look for imageGallery data or altImages data structure
-    const galleryMatch = html.match(/imageGalleryData["\s:]+(\[.*?\])/s) || 
-                        html.match(/altImages["\s:]+(\[.*?\])/s) ||
-                        html.match(/"hiRes":\s*"([^"]+)"/g)
-    
-    if (galleryMatch) {
-      console.log('[Media Extract] Found Amazon image gallery data')
-      const hiResMatches = html.match(/"hiRes":\s*"([^"]+)"/g) || []
-      for (const match of hiResMatches) {
-        const urlMatch = match.match(/"hiRes":\s*"([^"]+)"/)
-        if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
-          images.push(urlMatch[1])
-        }
+    // Look for any Amazon media URLs in the HTML (including in scripts)
+    const amazonImageMatches = html.match(/https?:\/\/[^"'\s]*media-amazon\.com[^"'\s]*\/images\/I\/[^"'\s]+\.jpg/g) || []
+    for (const url of amazonImageMatches) {
+      const cleanUrl = url.replace(/\\"/g, '')
+      if (!cleanUrl.includes('icon') && !cleanUrl.includes('logo')) {
+        images.push(cleanUrl)
       }
-      
-      // Also try large images
-      const largeMatches = html.match(/"large":\s*"([^"]+)"/g) || []
-      for (const match of largeMatches) {
-        const urlMatch = match.match(/"large":\s*"([^"]+)"/)
-        if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
-          images.push(urlMatch[1])
-        }
+    }
+    
+    console.log(`[Media Extract] Found ${images.length} Amazon media URLs`)
+    
+    // Also look for hiRes and large images in JSON structures
+    const hiResMatches = html.match(/"hiRes":\s*"([^"]+)"/g) || []
+    for (const match of hiResMatches) {
+      const urlMatch = match.match(/"hiRes":\s*"([^"]+)"/)
+      if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
+        images.push(urlMatch[1])
+      }
+    }
+    
+    // Also try large images
+    const largeMatches = html.match(/"large":\s*"([^"]+)"/g) || []
+    for (const match of largeMatches) {
+      const urlMatch = match.match(/"large":\s*"([^"]+)"/)
+      if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
+        images.push(urlMatch[1])
       }
     }
     
