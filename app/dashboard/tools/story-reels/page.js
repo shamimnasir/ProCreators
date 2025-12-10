@@ -130,7 +130,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [loadingVideos, setLoadingVideos] = useState(false)
   
   // Voice state - simplified with Google Cloud TTS
-  const [ttsLanguage, setTtsLanguage] = useState('bn')
+  const [ttsLanguage, setTtsLanguage] = useState(niche === 'product-review' ? 'en' : 'bn')
   const [voiceOption, setVoiceOption] = useState('tts') // 'tts' or 'upload'
   const [languageVariant, setLanguageVariant] = useState('') // en-US, en-GB, bn-IN, etc.
   const [availableVoices, setAvailableVoices] = useState([])
