@@ -494,10 +494,11 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           id: `stock-${Date.now()}-${idx}`,
           isCustom: false
         }))
-        setStockVideos(videosWithIds)
+        // APPEND to existing clips (including product images) instead of replacing
+        setStockVideos(prev => [...prev, ...videosWithIds])
         toast({
           title: "Success",
-          description: `Found ${data.videos.length} stock videos`
+          description: `Added ${data.videos.length} stock videos. Total clips: ${stockVideos.length + data.videos.length}`
         })
       } else {
         throw new Error(data.error)
