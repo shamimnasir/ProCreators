@@ -537,6 +537,19 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
       setProductData(scrapeData.product)
       
+      // Store extracted media (images and videos)
+      if (scrapeData.product.images && scrapeData.product.images.length > 0) {
+        const media = scrapeData.product.images.map((url, index) => ({
+          id: `product-media-${index}`,
+          url: url,
+          thumbnail: url,
+          title: `${scrapeData.product.name} - Image ${index + 1}`,
+          type: 'image',
+          source: 'product'
+        }))
+        setProductMedia(media)
+      }
+      
       // Step 2: Format product info for AI
       const productContext = `Product Name: ${scrapeData.product.name}
 Brand: ${scrapeData.product.brand}
