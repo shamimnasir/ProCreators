@@ -477,6 +477,8 @@ export async function POST(request) {
             console.log(`[${jobId}] Adding PROFESSIONAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
+          console.log(`[${jobId}] Video filter for clip ${i + 1}:`, videoFilter.substring(0, 200) + '...')
+          
           cmd.outputOptions([
               '-vf', videoFilter,
               '-t', String(durationPerClip),
