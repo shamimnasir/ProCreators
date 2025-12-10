@@ -183,20 +183,34 @@ export async function POST(request) {
                   .run()
               })
             } else {
-              // Handle regular video URL
-              const response = await fetch(video.url)
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`)
+              // Handle regular video URL or UGC video
+              if (video.url.startsWith('/')) {
+                // Local cached video (UGC) - copy from filesystem
+                const localPath = join(process.cwd(), 'public', video.url)
+                console.log(`[${jobId}] Reading local UGC video from: ${localPath}`)
+                const fs = require('fs')
+                if (!fs.existsSync(localPath)) {
+                  throw new Error(`Local UGC video not found: ${localPath}`)
+                }
+                const videoBuffer = fs.readFileSync(localPath)
+                await writeFile(videoPath, videoBuffer)
+                console.log(`[${jobId}] ✅ Copied UGC video ${i + 1}/${totalClips}`)
+              } else {
+                // External stock video - download it
+                const response = await fetch(video.url)
+                if (!response.ok) {
+                  throw new Error(`HTTP ${response.status}`)
+                }
+                
+                // Convert Web Stream to Node Stream and pipe to file
+                const fileStream = require('fs').createWriteStream(videoPath)
+                await pipeline(
+                  Readable.fromWeb(response.body),
+                  fileStream
+                )
+                
+                console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
               }
-              
-              // Convert Web Stream to Node Stream and pipe to file
-              const fileStream = require('fs').createWriteStream(videoPath)
-              await pipeline(
-                Readable.fromWeb(response.body),
-                fileStream
-              )
-              
-              console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
             }
             
             return { index: i, path: videoPath, success: true }
