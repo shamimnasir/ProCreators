@@ -91,9 +91,44 @@ function extractMediaFromHtml(html, baseUrl) {
   const videos = []
   
   try {
-    // Extract image URLs from img tags and data attributes
+    // First, try to extract from Amazon's image gallery/carousel (priority)
+    // Look for imageGallery data or altImages data structure
+    const galleryMatch = html.match(/imageGalleryData["\s:]+(\[.*?\])/s) || 
+                        html.match(/altImages["\s:]+(\[.*?\])/s) ||
+                        html.match(/"hiRes":\s*"([^"]+)"/g)
+    
+    if (galleryMatch) {
+      console.log('[Media Extract] Found Amazon image gallery data')
+      const hiResMatches = html.match(/"hiRes":\s*"([^"]+)"/g) || []
+      for (const match of hiResMatches) {
+        const urlMatch = match.match(/"hiRes":\s*"([^"]+)"/)
+        if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
+          images.push(urlMatch[1])
+        }
+      }
+      
+      // Also try large images
+      const largeMatches = html.match(/"large":\s*"([^"]+)"/g) || []
+      for (const match of largeMatches) {
+        const urlMatch = match.match(/"large":\s*"([^"]+)"/)
+        if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
+          images.push(urlMatch[1])
+        }
+      }
+    }
+    
+    // Extract from img tags as fallback
     const imgMatches = html.match(/<img[^>]+>/gi) || []
     for (const match of imgMatches) {
+      // Skip if this image is clearly promotional
+      if (match.toLowerCase().includes('fresh') || 
+          match.toLowerCase().includes('prime') ||
+          match.toLowerCase().includes('video') ||
+          match.toLowerCase().includes('grocery') ||
+          match.toLowerCase().includes('banner')) {
+        continue
+      }
+      
       // Try multiple attributes where images might be stored
       const srcMatch = match.match(/src=["']([^"']+)["']/) || 
                        match.match(/data-src=["']([^"']+)["']/) ||
@@ -103,13 +138,18 @@ function extractMediaFromHtml(html, baseUrl) {
       if (srcMatch) {
         let imageUrl = srcMatch[1]
         
-        // For Amazon dynamic images, extract the first URL from the JSON
+        // For Amazon dynamic images, extract all URLs from the JSON
         if (imageUrl.startsWith('{')) {
           try {
-            const jsonMatch = imageUrl.match(/["'](https?:\/\/[^"']+)["']/)
-            if (jsonMatch) {
-              imageUrl = jsonMatch[1]
+            // Extract all URLs from the JSON object
+            const urlMatches = imageUrl.match(/"(https?:\/\/[^"]+)"/g) || []
+            for (const url of urlMatches) {
+              const cleanUrl = url.replace(/"/g, '')
+              if (cleanUrl.includes('_AC_') || cleanUrl.includes('_SL') || cleanUrl.includes('_SX')) {
+                images.push(cleanUrl)
+              }
             }
+            continue
           } catch (e) {
             continue
           }
@@ -133,7 +173,7 @@ function extractMediaFromHtml(html, baseUrl) {
         // Skip data URIs and tiny images
         if (imageUrl.startsWith('data:')) continue
         
-        // Filter out small icons, logos, and common non-product images
+        // Filter out promotional and UI images
         if (imageUrl.includes('icon') || 
             imageUrl.includes('logo') || 
             imageUrl.includes('favicon') ||
@@ -142,15 +182,19 @@ function extractMediaFromHtml(html, baseUrl) {
             imageUrl.includes('pixel') ||
             imageUrl.includes('/nav/') ||
             imageUrl.includes('/chrome/') ||
+            imageUrl.includes('fresh') ||
+            imageUrl.includes('prime') ||
+            imageUrl.includes('banner') ||
             imageUrl.includes('.gif')) {
           continue
         }
         
-        // Only include images that look like product images (Amazon specific patterns)
-        if (imageUrl.includes('media-amazon.com') || 
-            imageUrl.includes('ssl-images-amazon.com') ||
-            imageUrl.includes('images-na.ssl-images-amazon.com') ||
-            imageUrl.match(/\.(jpg|jpeg|png|webp)($|\?)/i)) {
+        // Only include images that look like product images
+        // Amazon product images typically have _AC_, _SL, or _SX in the URL
+        if ((imageUrl.includes('media-amazon.com') || 
+             imageUrl.includes('ssl-images-amazon.com') ||
+             imageUrl.includes('images-na.ssl-images-amazon.com')) &&
+            (imageUrl.includes('_AC_') || imageUrl.includes('_SL') || imageUrl.includes('_SX') || imageUrl.includes('/I/'))) {
           images.push(imageUrl)
         }
       }
