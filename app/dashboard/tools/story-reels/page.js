@@ -924,12 +924,22 @@ Product URL: ${scrapeData.product.url}`
       const urlVideos = stockVideos.filter(v => !v.isCustom) // Includes stock videos AND product images
       const customVideos = stockVideos.filter(v => v.isCustom)
       
+      const imageClips = urlVideos.filter(v => v.type === 'image')
       console.log('[Compose] Sending:', { 
         totalClips: stockVideos.length, 
         urlVideos: urlVideos.length, 
         customVideos: customVideos.length,
-        productImages: urlVideos.filter(v => v.type === 'image').length
+        productImages: imageClips.length
       })
+      
+      // Log product images being sent
+      if (imageClips.length > 0) {
+        console.log('[Compose] Product images:', imageClips.map((img, i) => ({
+          index: i,
+          type: img.type,
+          url: img.url?.substring(0, 80) + '...'
+        })))
+      }
       
       formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
       formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
@@ -1030,12 +1040,22 @@ Product URL: ${scrapeData.product.url}`
       const urlVideos = stockVideos.filter(v => !v.isCustom) // Includes stock videos AND product images
       const customVideos = stockVideos.filter(v => v.isCustom)
       
+      const imageClips = urlVideos.filter(v => v.type === 'image')
       console.log('[Compose] Sending:', { 
         totalClips: stockVideos.length, 
         urlVideos: urlVideos.length, 
         customVideos: customVideos.length,
-        productImages: urlVideos.filter(v => v.type === 'image').length
+        productImages: imageClips.length
       })
+      
+      // Log product images being sent
+      if (imageClips.length > 0) {
+        console.log('[Compose] Product images:', imageClips.map((img, i) => ({
+          index: i,
+          type: img.type,
+          url: img.url?.substring(0, 80) + '...'
+        })))
+      }
       
       formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
       formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
