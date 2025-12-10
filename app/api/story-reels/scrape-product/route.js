@@ -276,6 +276,52 @@ function extractMediaFromHtml(html, baseUrl) {
       videos.push(`https://www.youtube.com/watch?v=${videoId}`)
     }
     
+    // Extract User-Generated Content (UGC) videos from Amazon
+    // Amazon stores customer videos in their video player data structures
+    console.log('[UGC Extract] Looking for customer review videos...')
+    
+    // Method 1: Look for video URLs in data-video-url attributes
+    const dataVideoMatches = html.match(/data-video-url=["']([^"']+)["']/gi) || []
+    for (const match of dataVideoMatches) {
+      const urlMatch = match.match(/data-video-url=["']([^"']+)["']/)
+      if (urlMatch && urlMatch[1]) {
+        let videoUrl = urlMatch[1]
+        if (videoUrl.startsWith('//')) {
+          videoUrl = 'https:' + videoUrl
+        }
+        videos.push(videoUrl)
+      }
+    }
+    
+    // Method 2: Look for Amazon video player URLs (m.media-amazon.com/video)
+    const amazonVideoMatches = html.match(/https?:\/\/[^"'\s]*(?:m\.media-amazon\.com|images-amazon\.com)[^"'\s]*\/videos?\/[^"'\s]+\.(?:mp4|webm)/gi) || []
+    for (const url of amazonVideoMatches) {
+      const cleanUrl = url.replace(/\\"/g, '').replace(/\\'/g, '')
+      videos.push(cleanUrl)
+    }
+    
+    // Method 3: Extract from video source URLs in the HTML
+    const videoSrcMatches = html.match(/<source[^>]+src=["']([^"']+\.mp4[^"']*)["']/gi) || []
+    for (const match of videoSrcMatches) {
+      const urlMatch = match.match(/src=["']([^"']+)["']/)
+      if (urlMatch && urlMatch[1]) {
+        let videoUrl = urlMatch[1]
+        if (videoUrl.startsWith('//')) {
+          videoUrl = 'https:' + videoUrl
+        }
+        videos.push(videoUrl)
+      }
+    }
+    
+    // Method 4: Look for Amazon Live video URLs
+    const liveVideoMatches = html.match(/https?:\/\/[^"'\s]*amazon\.com\/live\/video\/[a-zA-Z0-9]+/gi) || []
+    for (const url of liveVideoMatches) {
+      // These are Amazon Live URLs, we'll note them but may need special handling
+      console.log('[UGC Extract] Found Amazon Live URL:', url)
+    }
+    
+    console.log(`[UGC Extract] Found ${videos.length} total video URLs`)
+    
   } catch (error) {
     console.error('[Media Extraction] Error:', error)
   }
