@@ -1614,7 +1614,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                   <div>
                     <p className="text-sm font-medium">No Music Selected</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Search from Freesound & TheAudioDB library
+                      Add background music to your video
                     </p>
                   </div>
                   <Button
