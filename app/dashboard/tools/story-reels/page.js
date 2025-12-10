@@ -1434,145 +1434,25 @@ Product URL: ${scrapeData.product.url}`
                 </Button>
               </div>
               
-              {/* Multiple buttons for product review - can add both stock and product media */}
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleSearchVideos} 
-                  disabled={loadingVideos}
-                  className="flex-1"
-                  variant="default"
-                >
-                  {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  <Video className="mr-2 h-4 w-4" />
-                  Add Stock Videos
-                </Button>
-                
-                {/* Product media button (only for product-review niche) */}
-                {niche === 'product-review' && productData && productMedia.length > 0 && (
-                  <Button 
-                    onClick={() => {
-                      const selectedImages = productMedia.filter(img => img.selected)
-                      if (selectedImages.length > 0) {
-                        // Add only selected product images to existing stock videos
-                        setStockVideos(prev => [...prev, ...selectedImages])
-                        toast({
-                          title: "Product Images Added!",
-                          description: `${selectedImages.length} product images added. Motion effects will be applied automatically.`
-                        })
-                      } else {
-                        toast({
-                          title: "No Images Selected",
-                          description: "Please select at least one product image",
-                          variant: "destructive"
-                        })
-                      }
-                    }}
-                    disabled={productMedia.filter(img => img.selected).length === 0}
-                    className="flex-1"
-                    variant="outline"
-                  >
-                    <ImagePlus className="mr-2 h-4 w-4" />
-                    Add Selected ({productMedia.filter(img => img.selected).length})
-                  </Button>
-                )}
-              </div>
+              {/* Single unified button for adding media */}
+              <Button 
+                onClick={handleSearchVideos} 
+                disabled={loadingVideos}
+                className="w-full"
+                variant="default"
+              >
+                {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Video className="mr-2 h-4 w-4" />
+                Search Stock Videos
+              </Button>
               
-              {/* Helper text for product review */}
+              {/* Auto-add product images info for product-review */}
               {niche === 'product-review' && productData && productMedia.length > 0 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  💡 Tip: Select product images below, then combine with stock videos for best results
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Product Images Preview (only for product-review niche) */}
-          {niche === 'product-review' && productData && (
-            <div className="space-y-3 pt-4 border-t">
-              {productMedia.length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/30">
-                  <ImagePlus className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                  <p className="text-sm font-medium text-muted-foreground">No Product Images Found</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Images may not be available for this URL or failed to download
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    You can still use stock videos instead
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Product Images (Select to use)</Label>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => selectAllProductImages(true)}
-                  >
-                    Select All
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => selectAllProductImages(false)}
-                  >
-                    Deselect All
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {productMedia.map((image, index) => (
-                  <div 
-                    key={image.id}
-                    className={`relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${
-                      image.selected 
-                        ? 'border-primary ring-2 ring-primary/20' 
-                        : 'border-muted hover:border-primary/50'
-                    }`}
-                    onClick={() => toggleProductImageSelection(image.id)}
-                  >
-                    <div className="aspect-square relative">
-                      <img 
-                        src={image.url} 
-                        alt={`Product ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none'
-                          e.target.nextSibling.style.display = 'flex'
-                        }}
-                      />
-                      <div 
-                        className="w-full h-full hidden items-center justify-center bg-muted text-muted-foreground text-xs"
-                        style={{display: 'none'}}
-                      >
-                        Failed to load
-                      </div>
-                    </div>
-                    
-                    {/* Checkbox overlay */}
-                    <div className="absolute top-2 right-2">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        image.selected 
-                          ? 'bg-primary border-primary' 
-                          : 'bg-white/90 border-gray-300'
-                      }`}>
-                        {image.selected && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                    </div>
-                    
-                    {/* Image number */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 px-2 text-center">
-                      Image {index + 1}
-                    </div>
+                <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+                    <Check className="h-4 w-4" />
+                    <span>{productMedia.length} product images ready below • Drag to reorder with stock videos</span>
                   </div>
-                ))}
-              </div>
-              
-              <p className="text-xs text-muted-foreground">
-                {productMedia.filter(img => img.selected).length} of {productMedia.length} images selected • Motion effects will be applied to all selected images
-              </p>
                 </div>
               )}
             </div>
