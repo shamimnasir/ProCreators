@@ -137,12 +137,29 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
       <div className="p-2 space-y-2">
         {/* Show current text if exists */}
         {video.textOverlay?.text && !showTextInput && (
-          <div className="text-xs bg-yellow-100 border border-yellow-300 px-2 py-1 rounded">
-            <div className="font-semibold text-yellow-800 truncate">
-              📝 {video.textOverlay.text}
+          <div className={`text-xs px-2 py-1 rounded border ${
+            video.textOverlay.color === 'red' ? 'bg-red-100 border-red-300' :
+            video.textOverlay.color === 'green' ? 'bg-green-100 border-green-300' :
+            video.textOverlay.color === 'blue' ? 'bg-blue-100 border-blue-300' :
+            'bg-yellow-100 border-yellow-300'
+          }`}>
+            <div className={`font-semibold truncate ${
+              video.textOverlay.color === 'red' ? 'text-red-800' :
+              video.textOverlay.color === 'green' ? 'text-green-800' :
+              video.textOverlay.color === 'blue' ? 'text-blue-800' :
+              'text-yellow-800'
+            }`}>
+              {video.textOverlay.color === 'red' ? '🔴' :
+               video.textOverlay.color === 'green' ? '🟢' :
+               video.textOverlay.color === 'blue' ? '🔵' : '🟡'} {video.textOverlay.text}
             </div>
-            <div className="text-yellow-600 text-[10px]">
-              Position: {video.textOverlay.position || 'top'}
+            <div className={`text-[10px] ${
+              video.textOverlay.color === 'red' ? 'text-red-600' :
+              video.textOverlay.color === 'green' ? 'text-green-600' :
+              video.textOverlay.color === 'blue' ? 'text-blue-600' :
+              'text-yellow-600'
+            }`}>
+              {video.textOverlay.position || 'top'} • {video.textOverlay.color || 'yellow'}
             </div>
           </div>
         )}
