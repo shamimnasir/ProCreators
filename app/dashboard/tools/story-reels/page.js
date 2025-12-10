@@ -536,15 +536,16 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
       setProductData(scrapeData.product)
       
-      // Store extracted media (images and videos)
+      // Store extracted media (images and videos) - limit to top 10
       if (scrapeData.product.images && scrapeData.product.images.length > 0) {
-        const media = scrapeData.product.images.map((url, index) => ({
+        const media = scrapeData.product.images.slice(0, 10).map((url, index) => ({
           id: `product-media-${index}`,
           url: url,
           thumbnail: url,
           title: `${scrapeData.product.name} - Image ${index + 1}`,
           type: 'image',
-          source: 'product'
+          source: 'product',
+          selected: true // All selected by default
         }))
         setProductMedia(media)
       }
