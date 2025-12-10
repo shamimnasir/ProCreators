@@ -408,6 +408,8 @@ export async function POST(request) {
       return limit(async () => {
         const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
         const clipType = clipTypes[i]
+        const orderInfo = videoOrder[i]
+        const textOverlay = orderInfo?.textOverlay
         
         return new Promise((resolve, reject) => {
           const cmd = ffmpeg(videoFile)
@@ -420,9 +422,32 @@ export async function POST(request) {
             console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
           }
           
+          // Build video filter with optional text overlay
+          let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
+          
+          // Add text overlay if present
+          if (textOverlay && textOverlay.text) {
+            const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
+            const position = textOverlay.position || 'top'
+            const fontSize = parseInt(targetHeight) >= 1920 ? 72 : 56
+            
+            // Position mapping
+            let yPosition
+            if (position === 'top') {
+              yPosition = '100'
+            } else if (position === 'center') {
+              yPosition = '(h-text_h)/2'
+            } else { // bottom
+              yPosition = 'h-text_h-100'
+            }
+            
+            // Add drawtext filter
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=4:bordercolor=black`
+            console.log(`[${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+          }
+          
           cmd.outputOptions([
-              // Force 9:16 portrait aspect ratio with center crop
-              '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
+              '-vf', videoFilter,
               '-t', String(durationPerClip),
               '-c:v', 'libx264',
               '-preset', 'veryfast', // Changed from ultrafast
