@@ -89,7 +89,7 @@ export async function POST(request) {
               filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
             }
             
-            // Add text overlay if present with MODERN PROFESSIONAL STYLING
+            // Add text overlay if present with PROFESSIONAL STYLING
             const orderInfo = videoOrder[i]
             const textOverlay = orderInfo?.textOverlay
             if (textOverlay && textOverlay.text) {
@@ -106,10 +106,10 @@ export async function POST(request) {
                 yPosition = 'h-text_h-180'
               }
               
-              // Modern professional styling - simple and reliable
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black:boxborderw=20:borderw=2:bordercolor=black`
+              // Professional styling - clean white text with outline
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=3:bordercolor=black`
               
-              console.log(`[Preview ${jobId}] Adding professional text overlay to clip ${i + 1}: "${textOverlay.text}"`)
+              console.log(`[Preview ${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
