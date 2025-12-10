@@ -82,8 +82,12 @@ export async function POST(request) {
     const cachedImages = await downloadAndCacheImages(productInfo.images.slice(0, 10))
     productInfo.images = cachedImages
     
+    // Download and cache UGC videos (max 3 for shorts/reels)
+    const cachedVideos = await downloadAndCacheVideos(productInfo.videos.slice(0, 3))
+    productInfo.videos = cachedVideos
+    
     console.log(`[Product Scraper] Successfully scraped product:`, productInfo.name || 'Unknown')
-    console.log(`[Product Scraper] Cached ${cachedImages.length} images locally`)
+    console.log(`[Product Scraper] Cached ${cachedImages.length} images and ${cachedVideos.length} UGC videos locally`)
 
     return NextResponse.json({
       success: true,
