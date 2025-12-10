@@ -91,12 +91,30 @@ function extractMediaFromHtml(html, baseUrl) {
   const videos = []
   
   try {
-    // Extract image URLs from img tags
-    const imgMatches = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi) || []
+    // Extract image URLs from img tags and data attributes
+    const imgMatches = html.match(/<img[^>]+>/gi) || []
     for (const match of imgMatches) {
-      const srcMatch = match.match(/src=["']([^"']+)["']/)
+      // Try multiple attributes where images might be stored
+      const srcMatch = match.match(/src=["']([^"']+)["']/) || 
+                       match.match(/data-src=["']([^"']+)["']/) ||
+                       match.match(/data-old-hires=["']([^"']+)["']/) ||
+                       match.match(/data-a-dynamic-image=["']([^"']+)["']/)
+      
       if (srcMatch) {
         let imageUrl = srcMatch[1]
+        
+        // For Amazon dynamic images, extract the first URL from the JSON
+        if (imageUrl.startsWith('{')) {
+          try {
+            const jsonMatch = imageUrl.match(/["'](https?:\/\/[^"']+)["']/)
+            if (jsonMatch) {
+              imageUrl = jsonMatch[1]
+            }
+          } catch (e) {
+            continue
+          }
+        }
+        
         // Convert relative URLs to absolute
         if (imageUrl.startsWith('//')) {
           imageUrl = 'https:' + imageUrl
@@ -104,17 +122,35 @@ function extractMediaFromHtml(html, baseUrl) {
           const baseUrlObj = new URL(baseUrl)
           imageUrl = baseUrlObj.origin + imageUrl
         } else if (!imageUrl.startsWith('http')) {
-          const baseUrlObj = new URL(baseUrl)
-          imageUrl = new URL(imageUrl, baseUrlObj.href).href
+          try {
+            const baseUrlObj = new URL(baseUrl)
+            imageUrl = new URL(imageUrl, baseUrlObj.href).href
+          } catch (e) {
+            continue
+          }
         }
         
-        // Filter out small icons and common non-product images
-        if (!imageUrl.includes('icon') && 
-            !imageUrl.includes('logo') && 
-            !imageUrl.includes('favicon') &&
-            !imageUrl.includes('sprite') &&
-            !imageUrl.match(/\d+x\d+/) || 
-            imageUrl.match(/(\d+)x(\d+)/) && (parseInt(RegExp.$1) > 200 || parseInt(RegExp.$2) > 200)) {
+        // Skip data URIs and tiny images
+        if (imageUrl.startsWith('data:')) continue
+        
+        // Filter out small icons, logos, and common non-product images
+        if (imageUrl.includes('icon') || 
+            imageUrl.includes('logo') || 
+            imageUrl.includes('favicon') ||
+            imageUrl.includes('sprite') ||
+            imageUrl.includes('1x1') ||
+            imageUrl.includes('pixel') ||
+            imageUrl.includes('/nav/') ||
+            imageUrl.includes('/chrome/') ||
+            imageUrl.includes('.gif')) {
+          continue
+        }
+        
+        // Only include images that look like product images (Amazon specific patterns)
+        if (imageUrl.includes('media-amazon.com') || 
+            imageUrl.includes('ssl-images-amazon.com') ||
+            imageUrl.includes('images-na.ssl-images-amazon.com') ||
+            imageUrl.match(/\.(jpg|jpeg|png|webp)($|\?)/i)) {
           images.push(imageUrl)
         }
       }
