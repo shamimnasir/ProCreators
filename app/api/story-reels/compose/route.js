@@ -81,6 +81,16 @@ export async function POST(request) {
       // Check if this is a custom video or stock video
       const isCustom = orderInfo ? orderInfo.isCustom : false
       
+      console.log(`[${jobId}] Processing clip ${i + 1}/${totalClips}:`, {
+        isCustom,
+        stockVideoIdx,
+        hasStockVideo: !!stockVideos[stockVideoIdx],
+        stockVideoData: stockVideos[stockVideoIdx] ? {
+          url: stockVideos[stockVideoIdx].url?.substring(0, 60),
+          type: stockVideos[stockVideoIdx].type
+        } : null
+      })
+      
       if (isCustom && customVideoFiles[customVideoIdx]) {
         // Handle custom uploaded video
         try {
