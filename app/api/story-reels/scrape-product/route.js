@@ -509,3 +509,83 @@ async function downloadAndCacheImages(imageUrls) {
   console.log(`[Image Cache] Successfully cached ${cachedImages.length} images`)
   return cachedImages
 }
+
+// Download and cache UGC videos locally
+async function downloadAndCacheVideos(videoUrls) {
+  const cachedVideos = []
+  const cacheDir = join(process.cwd(), 'public', 'product-videos-cache')
+  
+  // Create cache directory if it doesn't exist
+  if (!existsSync(cacheDir)) {
+    await mkdir(cacheDir, { recursive: true })
+  }
+  
+  // Filter out invalid URLs
+  const validUrls = videoUrls
+    .filter(url => {
+      try {
+        const urlObj = new URL(url)
+        return (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') && 
+               (url.includes('.mp4') || url.includes('.webm') || url.includes('video'))
+      } catch {
+        return false
+      }
+    })
+  
+  // Remove duplicates
+  const uniqueUrls = [...new Set(validUrls)]
+  
+  console.log(`[Video Cache] Found ${uniqueUrls.length} valid video URLs, will download up to 3`)
+  
+  for (let i = 0; i < Math.min(uniqueUrls.length, 3); i++) {
+    try {
+      const videoUrl = uniqueUrls[i]
+      const videoId = randomBytes(8).toString('hex')
+      const ext = videoUrl.match(/\.(mp4|webm|mov)$/i)?.[1] || 'mp4'
+      const filename = `${videoId}.${ext}`
+      const filepath = join(cacheDir, filename)
+      
+      console.log(`[Video Cache] Downloading video ${i + 1}/3: ${videoUrl.substring(0, 100)}...`)
+      
+      const response = await fetch(videoUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'video/mp4,video/webm,video/*,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': videoUrl.split('/').slice(0, 3).join('/') + '/'
+        },
+        signal: AbortSignal.timeout(30000) // 30 second timeout per video
+      })
+      
+      if (!response.ok) {
+        console.log(`[Video Cache] Failed to fetch video ${i + 1}: ${response.status}`)
+        continue
+      }
+      
+      const arrayBuffer = await response.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      
+      // Validate video size (should be at least 10KB)
+      if (buffer.length < 10240) {
+        console.log(`[Video Cache] Video ${i + 1} too small (${buffer.length} bytes), skipping`)
+        continue
+      }
+      
+      await writeFile(filepath, buffer)
+      
+      // Return the local URL path with type indicator
+      cachedVideos.push({
+        url: `/product-videos-cache/${filename}`,
+        type: 'ugc-video'
+      })
+      console.log(`[Video Cache] ✓ Cached video ${i + 1}/3 (${Math.round(buffer.length / 1024)}KB)`)
+      
+    } catch (error) {
+      console.error(`[Video Cache] Error downloading video ${i + 1}:`, error.message)
+      // Continue with next video
+    }
+  }
+  
+  console.log(`[Video Cache] Successfully cached ${cachedVideos.length} UGC videos`)
+  return cachedVideos
+}
