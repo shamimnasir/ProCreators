@@ -434,25 +434,28 @@ export async function POST(request) {
           // Build video filter with optional text overlay
           let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
           
-          // Add text overlay if present
+          // Add text overlay if present with VIRAL STYLING
           if (textOverlay && textOverlay.text) {
             const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
             const position = textOverlay.position || 'top'
-            const fontSize = parseInt(targetHeight) >= 1920 ? 72 : 56
             
-            // Position mapping
+            // LARGER font sizes for viral impact
+            const fontSize = parseInt(targetHeight) >= 1920 ? 96 : 80
+            
+            // Better positioning with safe margins (text won't be cut off)
             let yPosition
             if (position === 'top') {
-              yPosition = '100'
+              yPosition = '150' // Moved down from 100 for safe area
             } else if (position === 'center') {
               yPosition = '(h-text_h)/2'
             } else { // bottom
-              yPosition = 'h-text_h-100'
+              yPosition = 'h-text_h-150' // Moved up from 100 for safe area
             }
             
-            // Add drawtext filter
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=4:bordercolor=black`
-            console.log(`[${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+            // VIRAL STYLING: Bold text with thick shadow and outline
+            // Uses yellow text (viral/eye-catching) with black outline and shadow for maximum contrast
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=yellow:x=(w-text_w)/2:y=${yPosition}:borderw=6:bordercolor=black:shadowx=3:shadowy=3:shadowcolor=black`
+            console.log(`[${jobId}] Adding VIRAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
           cmd.outputOptions([
