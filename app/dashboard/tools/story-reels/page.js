@@ -1450,21 +1450,26 @@ Product URL: ${scrapeData.product.url}`
               
               {/* Two separate buttons for product images and stock videos */}
               <div className="flex gap-2">
-                {/* Product images button (only for product-review niche with images) */}
-                {niche === 'product-review' && productData && productMedia.length > 0 && (
+                {/* Product images button (always show for product-review after scraping) */}
+                {niche === 'product-review' && productData && (
                   <Button 
                     onClick={() => {
-                      setStockVideos(prev => [...productMedia, ...prev])
-                      toast({
-                        title: "Product Images Added!",
-                        description: `${productMedia.length} product images added to Step 2. Drag to reorder.`
-                      })
+                      if (productMedia.length > 0) {
+                        setStockVideos(prev => [...productMedia, ...prev])
+                        toast({
+                          title: "Product Images Added!",
+                          description: `${productMedia.length} product images added to Step 2. Drag to reorder.`
+                        })
+                      }
                     }}
+                    disabled={productMedia.length === 0}
                     className="flex-1"
                     variant="default"
                   >
                     <ImagePlus className="mr-2 h-4 w-4" />
-                    Add Product Images ({productMedia.length})
+                    {productMedia.length > 0 
+                      ? `Add Product Images (${productMedia.length})` 
+                      : 'No Product Images Found'}
                   </Button>
                 )}
                 
@@ -1473,7 +1478,7 @@ Product URL: ${scrapeData.product.url}`
                   onClick={handleSearchVideos} 
                   disabled={loadingVideos}
                   className="flex-1"
-                  variant={niche === 'product-review' && productMedia.length > 0 ? "outline" : "default"}
+                  variant={niche === 'product-review' && productData ? "outline" : "default"}
                 >
                   {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Video className="mr-2 h-4 w-4" />
@@ -1482,9 +1487,11 @@ Product URL: ${scrapeData.product.url}`
               </div>
               
               {/* Helper text */}
-              {niche === 'product-review' && productData && productMedia.length > 0 && (
+              {niche === 'product-review' && productData && (
                 <p className="text-xs text-muted-foreground text-center">
-                  💡 Tip: Add product images first, then stock videos. Drag & drop to reorder in Step 2.
+                  {productMedia.length > 0 
+                    ? '💡 Tip: Add product images first, then stock videos. Drag & drop to reorder in Step 2.'
+                    : '⚠️ No product images found. You can still use stock videos for your review.'}
                 </p>
               )}
             </div>
