@@ -1295,7 +1295,7 @@ Product URL: ${scrapeData.product.url}`
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Paste any product URL and we'll automatically extract product info, images, and features
+                Paste any product URL - we'll scrape the product info and generate an AI review script using our system prompt
               </p>
               {productData && (
                 <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
