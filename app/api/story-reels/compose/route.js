@@ -452,28 +452,39 @@ export async function POST(request) {
           // Build video filter with optional text overlay
           let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
           
-          // Add text overlay if present with MODERN PROFESSIONAL STYLING
+          // Add text overlay if present - VIRAL COLORED BOX STYLE
           if (textOverlay && textOverlay.text) {
             const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
             const position = textOverlay.position || 'top'
+            const color = textOverlay.color || 'yellow'
             
-            // Modern font sizes - slightly smaller for elegance
-            const fontSize = parseInt(targetHeight) >= 1920 ? 88 : 72
+            // Viral font size - bold and impossible to miss
+            const fontSize = parseInt(targetHeight) >= 1920 ? 80 : 68
             
-            // Professional positioning with generous safe areas
+            // Safe positioning for 9:16 format - stays within frame
             let yPosition
             if (position === 'top') {
-              yPosition = '180' // Extra margin from top
+              yPosition = '200' // Safe from top edge
             } else if (position === 'center') {
               yPosition = '(h-text_h)/2'
             } else { // bottom
-              yPosition = 'h-text_h-180' // Extra margin from bottom
+              yPosition = 'h-text_h-200' // Safe from bottom edge
             }
             
-            // PROFESSIONAL STYLING - Clean white text with outline
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=3:bordercolor=black`
+            // COLOR CONFIGURATION - Viral TikTok/Reels style
+            const colorConfig = {
+              yellow: { boxcolor: 'yellow', fontcolor: 'black' },
+              red: { boxcolor: 'red', fontcolor: 'white' },
+              green: { boxcolor: 'green', fontcolor: 'white' },
+              blue: { boxcolor: 'blue', fontcolor: 'white' }
+            }
             
-            console.log(`[${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+            const config = colorConfig[color] || colorConfig.yellow
+            
+            // VIRAL STYLE: Bold colored box with high-contrast text
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
+            
+            console.log(`[${jobId}] Adding ${color.toUpperCase()} text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
           cmd.outputOptions([
