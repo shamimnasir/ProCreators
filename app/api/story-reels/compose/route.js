@@ -63,154 +63,160 @@ export async function POST(request) {
       console.log(`[${jobId}] Product images:`, imageClips.map((img, i) => `${i+1}. ${img.url.substring(0, 80)}...`))
     }
 
-    // Step 1: Process all video clips (stock videos + custom uploads)
-    console.log(`[${jobId}] Step 1: Processing ${videoOrder.length} video clips...`)
-    const videoFiles = []
+    // Step 1: Process all video clips (stock videos + custom uploads) - PARALLELIZED
+    console.log(`[${jobId}] Step 1: Processing ${videoOrder.length} video clips in parallel...`)
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
+    const pLimit = (await import('p-limit')).default
+    
+    // Limit concurrent operations to avoid overwhelming the system
+    const limit = pLimit(5) // Process max 5 clips at once
     
     // Determine total clips based on video order or just stock videos (backward compatibility)
     const totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
+    
+    // Build processing tasks
+    const processingTasks = []
     let stockVideoIdx = 0
     let customVideoIdx = 0
     
     for (let i = 0; i < totalClips; i++) {
       const videoPath = join(tempDir, `clip-${i}.mp4`)
       const orderInfo = videoOrder[i]
-      
-      // Check if this is a custom video or stock video
       const isCustom = orderInfo ? orderInfo.isCustom : false
       
-      console.log(`[${jobId}] Processing clip ${i + 1}/${totalClips}:`, {
-        isCustom,
-        stockVideoIdx,
-        hasStockVideo: !!stockVideos[stockVideoIdx],
-        stockVideoData: stockVideos[stockVideoIdx] ? {
-          url: stockVideos[stockVideoIdx].url?.substring(0, 60),
-          type: stockVideos[stockVideoIdx].type
-        } : null
-      })
-      
-      if (isCustom && customVideoFiles[customVideoIdx]) {
-        // Handle custom uploaded video
+      const task = limit(async () => {
         try {
-          const customFile = customVideoFiles[customVideoIdx]
-          const buffer = Buffer.from(await customFile.arrayBuffer())
-          await writeFile(videoPath, buffer)
-          videoFiles.push(videoPath)
-          console.log(`[${jobId}] Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
-          customVideoIdx++
-        } catch (error) {
-          console.error(`[${jobId}] Error processing custom clip ${i}:`, error.message)
-        }
-      } else if (stockVideos[stockVideoIdx]) {
-        // Handle stock video URL or product image
-        const video = stockVideos[stockVideoIdx]
-        const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
-        
-        console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : '🎥 VIDEO'}`, {
-          type: video.type,
-          url: video.url?.substring(0, 80)
-        })
-        
-        try {
-          if (isImage) {
-            // Download image and convert to video with motion effects
-            const imagePath = join(tempDir, `image-${i}.jpg`)
+          if (isCustom && customVideoFiles[customVideoIdx]) {
+            // Handle custom uploaded video
+            const customFile = customVideoFiles[customVideoIdx]
+            const buffer = Buffer.from(await customFile.arrayBuffer())
+            await writeFile(videoPath, buffer)
+            console.log(`[${jobId}] ✅ Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
+            return { index: i, path: videoPath, success: true }
+          } else if (stockVideos[stockVideoIdx]) {
+            // Handle stock video URL or product image
+            const video = stockVideos[stockVideoIdx]
+            const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
             
-            // Handle local cached images vs external URLs
-            let imageBuffer
-            if (video.url.startsWith('/')) {
-              // Local cached image - read from file system
-              const localPath = join(process.cwd(), 'public', video.url)
-              console.log(`[${jobId}] Reading local image from: ${localPath}`)
-              const fs = require('fs')
-              if (!fs.existsSync(localPath)) {
-                throw new Error(`Local image not found: ${localPath}`)
+            console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : '🎥 VIDEO'}`)
+            
+            if (isImage) {
+              // Download image and convert to video with motion effects
+              const imagePath = join(tempDir, `image-${i}.jpg`)
+              
+              // Handle local cached images vs external URLs
+              let imageBuffer
+              if (video.url.startsWith('/')) {
+                // Local cached image - read from file system
+                const localPath = join(process.cwd(), 'public', video.url)
+                const fs = require('fs')
+                if (!fs.existsSync(localPath)) {
+                  throw new Error(`Local image not found: ${localPath}`)
+                }
+                imageBuffer = fs.readFileSync(localPath)
+              } else {
+                // External URL - fetch it
+                const response = await fetch(video.url)
+                if (!response.ok) {
+                  throw new Error(`HTTP ${response.status}`)
+                }
+                imageBuffer = Buffer.from(await response.arrayBuffer())
               }
-              imageBuffer = fs.readFileSync(localPath)
+              
+              // Save image to temp directory
+              await writeFile(imagePath, imageBuffer)
+              
+              // Convert image to video with Ken Burns effect - OPTIMIZED
+              await new Promise((resolve, reject) => {
+                const randomEffect = Math.floor(Math.random() * 3) // 0: zoom in, 1: zoom out, 2: pan
+                let filterComplex = ''
+                
+                if (randomEffect === 0) {
+                  // Ken Burns: Zoom In effect - OPTIMIZED: scale reduced from 8000 to 2160
+                  filterComplex = 'scale=2160:-1,zoompan=z=\'min(zoom+0.0015,1.5)\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+                } else if (randomEffect === 1) {
+                  // Ken Burns: Zoom Out effect - OPTIMIZED
+                  filterComplex = 'scale=2160:-1,zoompan=z=\'if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+                } else {
+                  // Ken Burns: Pan effect - OPTIMIZED
+                  filterComplex = 'scale=2160:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+                }
+                
+                ffmpeg(imagePath)
+                  .inputOptions(['-loop 1'])
+                  .outputOptions([
+                    '-vf', filterComplex,
+                    '-t', '5', // 5 seconds per image
+                    '-pix_fmt', 'yuv420p',
+                    '-c:v', 'libx264',
+                    '-preset', 'veryfast', // Changed from ultrafast for better quality/speed balance
+                    '-crf', '23', // Better quality than 28
+                    '-r', '30'
+                  ])
+                  .output(videoPath)
+                  .on('end', () => {
+                    console.log(`[${jobId}] ✅ Converted image ${i + 1}/${totalClips} to video with motion`)
+                    resolve()
+                  })
+                  .on('error', (err) => {
+                    console.error(`[${jobId}] ❌ Image to video conversion error:`, err.message)
+                    reject(err)
+                  })
+                  .run()
+              })
             } else {
-              // External URL - fetch it
+              // Handle regular video URL
               const response = await fetch(video.url)
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`)
               }
-              imageBuffer = Buffer.from(await response.arrayBuffer())
+              
+              // Convert Web Stream to Node Stream and pipe to file
+              const fileStream = require('fs').createWriteStream(videoPath)
+              await pipeline(
+                Readable.fromWeb(response.body),
+                fileStream
+              )
+              
+              console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
             }
             
-            // Save image to temp directory
-            await writeFile(imagePath, imageBuffer)
-            console.log(`[${jobId}] Image saved to temp: ${imagePath}`)
-            
-            // Convert image to video with Ken Burns effect (zoom + pan)
-            await new Promise((resolve, reject) => {
-              const randomEffect = Math.floor(Math.random() * 3) // 0: zoom in, 1: zoom out, 2: pan
-              let filterComplex = ''
-              
-              if (randomEffect === 0) {
-                // Ken Burns: Zoom In effect
-                filterComplex = 'scale=8000:-1,zoompan=z=\'min(zoom+0.0015,1.5)\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
-              } else if (randomEffect === 1) {
-                // Ken Burns: Zoom Out effect  
-                filterComplex = 'scale=8000:-1,zoompan=z=\'if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
-              } else {
-                // Ken Burns: Pan effect
-                filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
-              }
-              
-              ffmpeg(imagePath)
-                .inputOptions(['-loop 1'])
-                .outputOptions([
-                  '-vf', filterComplex,
-                  '-t', '5', // 5 seconds per image
-                  '-pix_fmt', 'yuv420p',
-                  '-c:v', 'libx264',
-                  '-r', '30'
-                ])
-                .output(videoPath)
-                .on('end', () => {
-                  videoFiles.push(videoPath)
-                  console.log(`[${jobId}] ✅ Converted image ${i + 1}/${totalClips} to video with motion`)
-                  resolve()
-                })
-                .on('error', (err) => {
-                  console.error(`[${jobId}] ❌ Image to video conversion error:`, err.message)
-                  reject(err)
-                })
-                .run()
-            })
-          } else {
-            // Handle regular video URL
-            const response = await fetch(video.url)
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`)
-            }
-            
-            // Convert Web Stream to Node Stream and pipe to file
-            const fileStream = require('fs').createWriteStream(videoPath)
-            await pipeline(
-              Readable.fromWeb(response.body),
-              fileStream
-            )
-            
-            videoFiles.push(videoPath)
-            console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
+            return { index: i, path: videoPath, success: true }
           }
+          
+          return { index: i, path: null, success: false }
         } catch (error) {
           console.error(`[${jobId}] ❌ Error processing clip ${i}:`, error.message)
+          return { index: i, path: null, success: false }
         }
-        
-        // CRITICAL: Always increment stockVideoIdx, even if processing failed
-        // This prevents getting stuck in an infinite loop on the same clip
+      })
+      
+      processingTasks.push(task)
+      
+      // Increment indices for tracking (before parallelization)
+      if (isCustom) {
+        customVideoIdx++
+      } else {
         stockVideoIdx++
       }
     }
+    
+    // Execute all tasks in parallel (with concurrency limit)
+    console.log(`[${jobId}] Starting parallel processing of ${processingTasks.length} clips...`)
+    const results = await Promise.all(processingTasks)
+    
+    // Collect successful video files in correct order
+    const videoFiles = results
+      .filter(r => r.success && r.path)
+      .sort((a, b) => a.index - b.index)
+      .map(r => r.path)
 
     if (videoFiles.length === 0) {
       throw new Error('Failed to process any video clips')
     }
     
-    console.log(`[${jobId}] Successfully processed ${videoFiles.length} clips`)
+    console.log(`[${jobId}] Successfully processed ${videoFiles.length} clips in parallel`)
 
     // Step 2: Generate or use voice audio
     console.log(`[${jobId}] Step 2: Processing voice audio...`)
