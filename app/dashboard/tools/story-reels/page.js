@@ -1595,7 +1595,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                         <p className="text-sm font-medium truncate">{customMusic.name}</p>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        From Freesound • Will auto-cut to {duration}s
+                        Will auto-cut to {duration}s
                       </p>
                     </div>
                     <Button
