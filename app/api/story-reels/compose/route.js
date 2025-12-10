@@ -339,9 +339,20 @@ export async function POST(request) {
     for (let i = 0; i < videoFiles.length; i++) {
       const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
       
+      // Check if this is a stock video or custom video (not a product image)
+      // Product images will have been converted to video earlier and won't need trimming
+      const isStockVideo = stockVideos[i] && stockVideos[i].type !== 'image' && !stockVideos[i].isCustom
+      
       await new Promise((resolve, reject) => {
-        ffmpeg(videoFiles[i])
-          .outputOptions([
+        const cmd = ffmpeg(videoFiles[i])
+        
+        // Trim first 3 seconds for stock videos (skip intros/logos)
+        if (isStockVideo) {
+          cmd.inputOptions(['-ss', '3'])
+          console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
+        }
+        
+        cmd.outputOptions([
             // Force 9:16 portrait aspect ratio with center crop
             '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
             '-t', String(durationPerClip),
