@@ -559,9 +559,6 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           source: 'product'
         }))
         setProductMedia(media)
-        
-        // Automatically add product images to stock videos section
-        setStockVideos(prev => [...media, ...prev]) // Add at the beginning
       }
       
       // Step 2: Format product info for AI
