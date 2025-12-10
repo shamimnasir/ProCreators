@@ -1487,8 +1487,21 @@ Product URL: ${scrapeData.product.url}`
           )}
 
           {/* Product Images Preview (only for product-review niche) */}
-          {niche === 'product-review' && productMedia.length > 0 && (
+          {niche === 'product-review' && productData && (
             <div className="space-y-3 pt-4 border-t">
+              {productMedia.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/30">
+                  <ImagePlus className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-sm font-medium text-muted-foreground">No Product Images Found</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Images may not be available for this URL or failed to download
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    You can still use stock videos instead
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Product Images (Select to use)</Label>
                 <div className="flex gap-2">
