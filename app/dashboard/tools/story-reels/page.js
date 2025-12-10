@@ -507,6 +507,74 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     })
   }
 
+  // Scrape product from URL (for product review niche)
+  const handleScrapeProduct = async () => {
+    if (!productUrl.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a product URL",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setScrapingProduct(true)
+    try {
+      const response = await fetch('/api/story-reels/scrape-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: productUrl })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setProductData(data.product)
+        
+        // Auto-fill script with product info
+        const productInfo = `Product: ${data.product.name}
+Brand: ${data.product.brand}
+Price: ${data.product.price}
+Category: ${data.product.category}
+
+Description: ${data.product.description}
+
+Key Features:
+${data.product.features.map((f, i) => `${i + 1}. ${f}`).join('\n')}
+
+URL: ${data.product.url}`
+        
+        setScript(productInfo)
+        setCustomTopic(data.product.name)
+        
+        // Auto-extract keywords from product
+        const productKeywords = [
+          data.product.name.toLowerCase(),
+          data.product.brand.toLowerCase(),
+          data.product.category,
+          ...data.product.features.slice(0, 3).map(f => f.split(' ').slice(0, 2).join(' '))
+        ].filter(k => k && k.length > 2)
+        
+        setKeywords(productKeywords.slice(0, 8))
+        
+        toast({
+          title: "Product Scraped!",
+          description: `Loaded ${data.product.name} - Click "Search Stock Videos" to find footage`
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Scraping Failed",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setScrapingProduct(false)
+    }
+  }
+
   const handleCustomVideoUpload = async (e) => {
     const files = Array.from(e.target.files)
     if (files.length === 0) return
