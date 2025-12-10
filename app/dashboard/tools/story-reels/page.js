@@ -1644,6 +1644,7 @@ Product URL: ${scrapeData.product.url}`
                       index={index}
                       totalCount={stockVideos.length}
                       onRemove={removeVideo}
+                      onTextChange={handleTextOverlayChange}
                     />
                   ))}
                   
