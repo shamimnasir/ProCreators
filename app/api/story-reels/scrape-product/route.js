@@ -253,21 +253,36 @@ async function downloadAndCacheImages(imageUrls) {
     await mkdir(cacheDir, { recursive: true })
   }
   
-  for (let i = 0; i < Math.min(imageUrls.length, 10); i++) {
+  // Filter out invalid URLs
+  const validUrls = imageUrls.filter(url => {
     try {
-      const imageUrl = imageUrls[i]
+      const urlObj = new URL(url)
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+    } catch {
+      return false
+    }
+  })
+  
+  console.log(`[Image Cache] Found ${validUrls.length} valid image URLs, will download up to 10`)
+  
+  for (let i = 0; i < Math.min(validUrls.length, 10); i++) {
+    try {
+      const imageUrl = validUrls[i]
       const imageId = randomBytes(8).toString('hex')
       const ext = imageUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i)?.[1] || 'jpg'
       const filename = `${imageId}.${ext}`
       const filepath = join(cacheDir, filename)
       
-      console.log(`[Image Cache] Downloading image ${i + 1}/10...`)
+      console.log(`[Image Cache] Downloading image ${i + 1}/10: ${imageUrl.substring(0, 100)}...`)
       
       const response = await fetch(imageUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': imageUrl.split('/').slice(0, 3).join('/') + '/'
         },
-        signal: AbortSignal.timeout(10000) // 10 second timeout per image
+        signal: AbortSignal.timeout(15000) // 15 second timeout per image
       })
       
       if (!response.ok) {
@@ -276,11 +291,19 @@ async function downloadAndCacheImages(imageUrls) {
       }
       
       const arrayBuffer = await response.arrayBuffer()
-      await writeFile(filepath, Buffer.from(arrayBuffer))
+      const buffer = Buffer.from(arrayBuffer)
+      
+      // Validate image size (should be at least 1KB)
+      if (buffer.length < 1024) {
+        console.log(`[Image Cache] Image ${i + 1} too small (${buffer.length} bytes), skipping`)
+        continue
+      }
+      
+      await writeFile(filepath, buffer)
       
       // Return the local URL path
       cachedImages.push(`/product-images-cache/${filename}`)
-      console.log(`[Image Cache] Cached image ${i + 1}/10`)
+      console.log(`[Image Cache] ✓ Cached image ${i + 1}/10 (${Math.round(buffer.length / 1024)}KB)`)
       
     } catch (error) {
       console.error(`[Image Cache] Error downloading image ${i + 1}:`, error.message)
@@ -288,5 +311,6 @@ async function downloadAndCacheImages(imageUrls) {
     }
   }
   
+  console.log(`[Image Cache] Successfully cached ${cachedImages.length} images`)
   return cachedImages
 }
