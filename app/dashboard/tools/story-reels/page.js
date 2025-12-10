@@ -1060,6 +1060,9 @@ Product URL: ${scrapeData.product.url}`
         })))
       }
       
+      // CRITICAL: Log the actual data being sent to backend
+      console.log('[Compose] stockVideos JSON being sent:', JSON.stringify(urlVideos, null, 2))
+      
       formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
       formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
       
