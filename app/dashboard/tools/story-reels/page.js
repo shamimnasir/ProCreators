@@ -919,11 +919,18 @@ Product URL: ${scrapeData.product.url}`
       }
       formData.append('resolution', resolution)
       
-      // Handle stock videos - separate URLs from custom uploads
-      const urlVideos = stockVideos.filter(v => !v.isCustom)
+      // Handle stock videos - separate custom uploads from URLs/images
+      const urlVideos = stockVideos.filter(v => !v.isCustom) // Includes stock videos AND product images
       const customVideos = stockVideos.filter(v => v.isCustom)
       
-      formData.append('stockVideos', JSON.stringify(urlVideos))
+      console.log('[Compose] Sending:', { 
+        totalClips: stockVideos.length, 
+        urlVideos: urlVideos.length, 
+        customVideos: customVideos.length,
+        productImages: urlVideos.filter(v => v.type === 'image').length
+      })
+      
+      formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
       formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
       
       // Append custom video files
@@ -1018,11 +1025,18 @@ Product URL: ${scrapeData.product.url}`
       }
       formData.append('resolution', resolution)
       
-      // Handle stock videos - separate URLs from custom uploads
-      const urlVideos = stockVideos.filter(v => !v.isCustom)
+      // Handle stock videos - separate custom uploads from URLs/images
+      const urlVideos = stockVideos.filter(v => !v.isCustom) // Includes stock videos AND product images
       const customVideos = stockVideos.filter(v => v.isCustom)
       
-      formData.append('stockVideos', JSON.stringify(urlVideos))
+      console.log('[Compose] Sending:', { 
+        totalClips: stockVideos.length, 
+        urlVideos: urlVideos.length, 
+        customVideos: customVideos.length,
+        productImages: urlVideos.filter(v => v.type === 'image').length
+      })
+      
+      formData.append('stockVideos', JSON.stringify(urlVideos)) // Send ALL non-custom (stock + images)
       formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({ index: i, isCustom: !!v.isCustom }))))
       
       // Append custom video files
