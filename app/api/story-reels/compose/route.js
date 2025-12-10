@@ -111,11 +111,12 @@ export async function POST(request) {
             console.log(`[${jobId}] ✅ Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
             return { index: i, path: videoPath, success: true }
           } else if (stockVideos[clipInfo.stockIdx]) {
-            // Handle stock video URL or product image
+            // Handle stock video URL, UGC video, or product image
             const video = stockVideos[clipInfo.stockIdx]
             const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
+            const isUGCVideo = video.type === 'ugc-video'
             
-            console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : '🎥 VIDEO'}`)
+            console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : isUGCVideo ? '👤 UGC VIDEO' : '🎥 VIDEO'}`)
             
             if (isImage) {
               // Download image and convert to video with motion effects
