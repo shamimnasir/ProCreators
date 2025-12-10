@@ -1620,9 +1620,13 @@ Product URL: ${scrapeData.product.url}`
                     onClick={() => {
                       if (productMedia.length > 0) {
                         setStockVideos(prev => [...productMedia, ...prev])
+                        
+                        const imageCount = productMedia.filter(m => m.type === 'image').length
+                        const videoCount = productMedia.filter(m => m.type === 'ugc-video').length
+                        
                         toast({
-                          title: "Product Images Added!",
-                          description: `${productMedia.length} product images added to Step 2. Drag to reorder.`
+                          title: "Product Media Added!",
+                          description: `Added ${imageCount} images and ${videoCount} UGC videos to Step 2. Drag to reorder.`
                         })
                       }
                     }}
@@ -1632,8 +1636,8 @@ Product URL: ${scrapeData.product.url}`
                   >
                     <ImagePlus className="mr-2 h-4 w-4" />
                     {productMedia.length > 0 
-                      ? `Add Product Images (${productMedia.length})` 
-                      : 'No Product Images Found'}
+                      ? `Add Product Images & UGC (${productMedia.length})` 
+                      : 'No Product Media Found'}
                   </Button>
                 )}
                 
