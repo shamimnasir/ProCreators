@@ -1422,64 +1422,53 @@ Product URL: ${scrapeData.product.url}`
                 </Button>
               </div>
               
-              {/* Tabs for media source (only show for product-review niche) */}
-              {niche === 'product-review' && productData && (
-                <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                  <Button
-                    variant={mediaSource === 'stock' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => setMediaSource('stock')}
-                  >
-                    <Video className="mr-2 h-4 w-4" />
-                    Stock Videos
-                  </Button>
-                  <Button
-                    variant={mediaSource === 'product' ? 'default' : 'ghost'}
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => setMediaSource('product')}
-                  >
-                    <ImagePlus className="mr-2 h-4 w-4" />
-                    Product Media
-                  </Button>
-                </div>
-              )}
-              
-              {/* Conditional button based on media source */}
-              {mediaSource === 'stock' ? (
+              {/* Multiple buttons for product review - can add both stock and product media */}
+              <div className="flex gap-2">
                 <Button 
                   onClick={handleSearchVideos} 
                   disabled={loadingVideos}
-                  className="w-full"
+                  className="flex-1"
+                  variant="default"
                 >
                   {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   <Video className="mr-2 h-4 w-4" />
-                  Search Stock Videos
+                  Add Stock Videos
                 </Button>
-              ) : (
-                <Button 
-                  onClick={() => {
-                    if (productMedia.length > 0) {
-                      setStockVideos(productMedia)
-                      toast({
-                        title: "Product Media Loaded!",
-                        description: `${productMedia.length} images from product added`
-                      })
-                    } else {
-                      toast({
-                        title: "No Media Found",
-                        description: "No images or videos found in the product URL",
-                        variant: "destructive"
-                      })
-                    }
-                  }}
-                  disabled={productMedia.length === 0}
-                  className="w-full"
-                >
-                  <ImagePlus className="mr-2 h-4 w-4" />
-                  Use Product Images ({productMedia.length})
-                </Button>
+                
+                {/* Product media button (only for product-review niche) */}
+                {niche === 'product-review' && productData && (
+                  <Button 
+                    onClick={() => {
+                      if (productMedia.length > 0) {
+                        // Add product images to existing stock videos
+                        setStockVideos(prev => [...prev, ...productMedia])
+                        toast({
+                          title: "Product Images Added!",
+                          description: `${productMedia.length} product images added. Motion effects will be applied automatically.`
+                        })
+                      } else {
+                        toast({
+                          title: "No Media Found",
+                          description: "No images found in the product URL",
+                          variant: "destructive"
+                        })
+                      }
+                    }}
+                    disabled={productMedia.length === 0}
+                    className="flex-1"
+                    variant="outline"
+                  >
+                    <ImagePlus className="mr-2 h-4 w-4" />
+                    Add Product Images ({productMedia.length})
+                  </Button>
+                )}
+              </div>
+              
+              {/* Helper text for product review */}
+              {niche === 'product-review' && productData && (
+                <p className="text-xs text-muted-foreground text-center">
+                  💡 Tip: Combine stock videos + product images for best results. Images will have motion effects applied.
+                </p>
               )}
             </div>
           )}
