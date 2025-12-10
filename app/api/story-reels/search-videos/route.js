@@ -126,10 +126,45 @@ export async function POST(request) {
       const searchTerm = quickTranslate(keyword)
       console.log(`[Search] ${keyword} → ${searchTerm}`)
       
-      // Try Pixabay first if available
-      if (usePixabay) {
+      // Priority 1: Try Pexels Videos first (best quality and relevance)
+      if (pexelsKey) {
         try {
-          const pixabayUrl = `https://pixabay.com/api/videos/?key=${pixabayKey}&q=${encodeURIComponent(searchTerm)}&per_page=3`
+          const pexelsVideosUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchTerm)}&per_page=3&orientation=portrait`
+          const pexelsResponse = await fetch(pexelsVideosUrl, {
+            headers: { 'Authorization': pexelsKey },
+            signal: AbortSignal.timeout(5000) // 5 second timeout
+          })
+          const pexelsData = await pexelsResponse.json()
+          
+          if (pexelsData.videos && pexelsData.videos.length > 0) {
+            const video = pexelsData.videos[0]
+            // Get the best quality video file (HD or SD)
+            const videoFile = video.video_files.find(f => f.quality === 'hd') || video.video_files[0]
+            
+            console.log(`[Pexels] ✅ Found video for "${keyword}"`)
+            return {
+              id: video.id,
+              keyword,
+              url: videoFile.link,
+              thumbnail: video.image,
+              duration: video.duration || 5,
+              width: videoFile.width,
+              height: videoFile.height,
+              quality: videoFile.quality || 'hd',
+              source: 'pexels'
+            }
+          } else {
+            console.log(`[Pexels] No videos found for "${keyword}", trying Pixabay...`)
+          }
+        } catch (error) {
+          console.error(`[Pexels] Error for ${keyword}:`, error.message)
+        }
+      }
+      
+      // Priority 2: Fallback to Pixabay Videos
+      if (pixabayKey) {
+        try {
+          const pixabayUrl = `https://pixabay.com/api/videos/?key=${pixabayKey}&q=${encodeURIComponent(searchTerm)}&per_page=3&orientation=vertical`
           const pixabayResponse = await fetch(pixabayUrl, { 
             signal: AbortSignal.timeout(5000) // 5 second timeout
           })
@@ -139,52 +174,27 @@ export async function POST(request) {
             const video = pixabayData.hits[0]
             const videoFile = video.videos.medium || video.videos.small || video.videos.large
             
+            console.log(`[Pixabay] ✅ Found video for "${keyword}"`)
             return {
               id: video.id,
               keyword,
               url: videoFile.url,
               thumbnail: video.userImageURL,
-              duration: video.duration || 3,
+              duration: video.duration || 5,
               width: videoFile.width,
               height: videoFile.height,
-              quality: 'medium'
+              quality: 'medium',
+              source: 'pixabay'
             }
+          } else {
+            console.log(`[Pixabay] No videos found for "${keyword}"`)
           }
         } catch (error) {
           console.error(`[Pixabay] Error for ${keyword}:`, error.message)
         }
       }
       
-      // Fallback to Pexels Photos
-      if (pexelsKey) {
-        try {
-          const photosUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchTerm)}&per_page=1&orientation=portrait`
-          const photosResponse = await fetch(photosUrl, {
-            headers: { 'Authorization': pexelsKey },
-            signal: AbortSignal.timeout(5000) // 5 second timeout
-          })
-          const photosData = await photosResponse.json()
-          
-          if (photosData.photos && photosData.photos.length > 0) {
-            const photo = photosData.photos[0]
-            
-            return {
-              id: photo.id,
-              keyword,
-              url: photo.src.large || photo.src.original,
-              thumbnail: photo.src.medium,
-              duration: 3,
-              width: photo.width,
-              height: photo.height,
-              quality: 'photo',
-              isPhoto: true
-            }
-          }
-        } catch (error) {
-          console.error(`[Pexels] Error for ${keyword}:`, error.message)
-        }
-      }
-      
+      console.log(`[Search] ❌ No videos found for "${keyword}" from any source`)
       return null // No video found for this keyword
     }
 
