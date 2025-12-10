@@ -567,6 +567,22 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     })
   }
 
+  // Handle text overlay changes
+  const handleTextOverlayChange = (index, field, value) => {
+    setStockVideos(prev => prev.map((video, i) => {
+      if (i === index) {
+        return {
+          ...video,
+          textOverlay: {
+            ...video.textOverlay,
+            [field]: value
+          }
+        }
+      }
+      return video
+    }))
+  }
+
   // Toggle product image selection
   const toggleProductImageSelection = (imageId) => {
     setProductMedia(prev => prev.map(img => 
