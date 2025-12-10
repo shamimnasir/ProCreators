@@ -1433,26 +1433,44 @@ Product URL: ${scrapeData.product.url}`
                 </Button>
               </div>
               
-              {/* Single unified button for adding media */}
-              <Button 
-                onClick={handleSearchVideos} 
-                disabled={loadingVideos}
-                className="w-full"
-                variant="default"
-              >
-                {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Video className="mr-2 h-4 w-4" />
-                Search Stock Videos
-              </Button>
+              {/* Two separate buttons for product images and stock videos */}
+              <div className="flex gap-2">
+                {/* Product images button (only for product-review niche with images) */}
+                {niche === 'product-review' && productData && productMedia.length > 0 && (
+                  <Button 
+                    onClick={() => {
+                      setStockVideos(prev => [...productMedia, ...prev])
+                      toast({
+                        title: "Product Images Added!",
+                        description: `${productMedia.length} product images added to Step 2. Drag to reorder.`
+                      })
+                    }}
+                    className="flex-1"
+                    variant="default"
+                  >
+                    <ImagePlus className="mr-2 h-4 w-4" />
+                    Add Product Images ({productMedia.length})
+                  </Button>
+                )}
+                
+                {/* Stock videos button */}
+                <Button 
+                  onClick={handleSearchVideos} 
+                  disabled={loadingVideos}
+                  className="flex-1"
+                  variant={niche === 'product-review' && productMedia.length > 0 ? "outline" : "default"}
+                >
+                  {loadingVideos && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Video className="mr-2 h-4 w-4" />
+                  Search Stock Videos
+                </Button>
+              </div>
               
-              {/* Auto-add product images info for product-review */}
+              {/* Helper text */}
               {niche === 'product-review' && productData && productMedia.length > 0 && (
-                <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
-                    <Check className="h-4 w-4" />
-                    <span>{productMedia.length} product images ready below • Drag to reorder with stock videos</span>
-                  </div>
-                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  💡 Tip: Add product images first, then stock videos. Drag & drop to reorder in Step 2.
+                </p>
               )}
             </div>
           )}
