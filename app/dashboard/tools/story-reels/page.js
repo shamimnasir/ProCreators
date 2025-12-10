@@ -1762,7 +1762,6 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         voicesByVariant={voicesByVariant}
         languageVariant={languageVariant}
         customMusic={customMusic}
-        initialMusicTrack={musicTrack}
       />
 
       {/* Music Picker Modal */}
