@@ -1592,11 +1592,16 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
             <div className="space-y-2">
               <Label>Background Music</Label>
               {customMusic ? (
-                <div className="border rounded-lg p-3 space-y-2">
+                <div className="border rounded-lg p-3 bg-muted/50">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{customMusic.name}</p>
-                      <p className="text-xs text-muted-foreground">From Audio Library</p>
+                      <div className="flex items-center gap-2">
+                        <Music className="w-4 h-4 text-primary" />
+                        <p className="text-sm font-medium truncate">{customMusic.name}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        From Freesound • Will auto-cut to {duration}s
+                      </p>
                     </div>
                     <Button
                       size="sm"
@@ -1605,46 +1610,29 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                         setCustomMusic(null)
                         setMusicTrack('none')
                       }}
+                      title="Remove music"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {/* Built-in Music Tracks */}
+                <div className="border-2 border-dashed rounded-lg p-6 text-center space-y-3">
+                  <Music className="w-10 h-10 mx-auto text-muted-foreground/50" />
                   <div>
-                    <Label className="text-xs text-muted-foreground mb-2 block">Built-in Music Tracks</Label>
-                    <Select value={musicTrack} onValueChange={setMusicTrack}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select music track" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Music</SelectItem>
-                        <SelectItem value="upbeat">🎵 Upbeat & Energetic</SelectItem>
-                        <SelectItem value="calm">🎵 Calm & Relaxing</SelectItem>
-                        <SelectItem value="epic">🎵 Epic & Cinematic</SelectItem>
-                        <SelectItem value="emotional">🎵 Emotional & Moving</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <p className="text-sm font-medium">No Music Selected</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Search from Freesound & TheAudioDB library
+                    </p>
                   </div>
-                  
-                  {/* OR Separator */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-px bg-border"></div>
-                    <span className="text-xs text-muted-foreground">OR</span>
-                    <div className="flex-1 h-px bg-border"></div>
-                  </div>
-                  
-                  {/* Custom Music from Library */}
                   <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     className="w-full"
                     onClick={() => setShowMusicPicker(true)}
                   >
-                    <Music className="w-3 h-3 mr-2" />
-                    Browse Audio Library
+                    <Search className="w-4 h-4 mr-2" />
+                    Search Music Library
                   </Button>
                 </div>
               )}
