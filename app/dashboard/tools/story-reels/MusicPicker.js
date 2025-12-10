@@ -180,7 +180,7 @@ export default function MusicPicker({ open, onClose, onSelectMusic, videoDuratio
             Choose Background Music
           </DialogTitle>
           <DialogDescription>
-            Search Freesound's library of free music. Tracks will auto-cut to match your video duration ({Math.floor(videoDuration)}s)
+            Search our music library for the perfect background track. Music will auto-cut to match your video duration ({Math.floor(videoDuration)}s)
           </DialogDescription>
         </DialogHeader>
 
