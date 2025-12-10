@@ -336,20 +336,40 @@ export async function POST(request) {
     
     // Step 3a: Normalize each clip individually
     const normalizedFiles = []
+    
+    // Track which clips are images, stock videos, or custom uploads
+    const clipTypes = []
+    let stockIdx = 0
+    let customIdx2 = 0
+    
+    for (let i = 0; i < totalClips; i++) {
+      const orderInfo = videoOrder[i]
+      const isCustom = orderInfo ? orderInfo.isCustom : false
+      
+      if (isCustom) {
+        clipTypes.push({ type: 'custom' })
+        customIdx2++
+      } else {
+        const stockVideo = stockVideos[stockIdx]
+        const isImage = stockVideo && (stockVideo.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(stockVideo.url))
+        clipTypes.push({ type: isImage ? 'image' : 'stock', data: stockVideo })
+        stockIdx++
+      }
+    }
+    
     for (let i = 0; i < videoFiles.length; i++) {
       const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
-      
-      // Check if this is a stock video or custom video (not a product image)
-      // Product images will have been converted to video earlier and won't need trimming
-      const isStockVideo = stockVideos[i] && stockVideos[i].type !== 'image' && !stockVideos[i].isCustom
+      const clipType = clipTypes[i]
       
       await new Promise((resolve, reject) => {
         const cmd = ffmpeg(videoFiles[i])
         
-        // Trim first 3 seconds for stock videos (skip intros/logos)
-        if (isStockVideo) {
+        // Trim first 3 seconds ONLY for stock videos (not images or custom)
+        if (clipType && clipType.type === 'stock') {
           cmd.inputOptions(['-ss', '3'])
           console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
+        } else if (clipType && clipType.type === 'image') {
+          console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
         }
         
         cmd.outputOptions([
