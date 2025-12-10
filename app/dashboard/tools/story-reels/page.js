@@ -1769,10 +1769,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       <MusicPicker
         open={showMusicPicker}
         onClose={() => setShowMusicPicker(false)}
-        onSelectMusic={(music) => {
-          setCustomMusic(music)
-          setMusicTrack('none') // Clear built-in track when custom music is selected
-        }}
+        onSelectMusic={(music) => setCustomMusic(music)}
         videoDuration={duration}
       />
     </div>
