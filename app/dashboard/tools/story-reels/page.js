@@ -117,6 +117,11 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [duration, setDuration] = useState(30)
   const [customTopic, setCustomTopic] = useState('')
   
+  // Product review specific state
+  const [productUrl, setProductUrl] = useState('')
+  const [scrapingProduct, setScrapingProduct] = useState(false)
+  const [productData, setProductData] = useState(null)
+  
   // Keywords & Videos
   const [keywords, setKeywords] = useState([])
   const [extracting, setExtracting] = useState(false)
