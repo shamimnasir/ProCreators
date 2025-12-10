@@ -75,19 +75,35 @@ export async function POST(request) {
     // Determine total clips based on video order or just stock videos (backward compatibility)
     const totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
     
-    // Build processing tasks
-    const processingTasks = []
+    // Pre-calculate indices for each clip BEFORE parallel execution
+    const clipIndices = []
     let stockVideoIdx = 0
     let customVideoIdx = 0
     
     for (let i = 0; i < totalClips; i++) {
-      const videoPath = join(tempDir, `clip-${i}.mp4`)
       const orderInfo = videoOrder[i]
       const isCustom = orderInfo ? orderInfo.isCustom : false
       
+      if (isCustom) {
+        clipIndices.push({ isCustom: true, customIdx: customVideoIdx, stockIdx: null })
+        customVideoIdx++
+      } else {
+        clipIndices.push({ isCustom: false, customIdx: null, stockIdx: stockVideoIdx })
+        stockVideoIdx++
+      }
+    }
+    
+    // Build processing tasks
+    const processingTasks = []
+    
+    for (let i = 0; i < totalClips; i++) {
+      const videoPath = join(tempDir, `clip-${i}.mp4`)
+      const clipInfo = clipIndices[i]
+      const orderInfo = videoOrder[i]
+      
       const task = limit(async () => {
         try {
-          if (isCustom && customVideoFiles[customVideoIdx]) {
+          if (clipInfo.isCustom && customVideoFiles[clipInfo.customIdx]) {
             // Handle custom uploaded video
             const customFile = customVideoFiles[customVideoIdx]
             const buffer = Buffer.from(await customFile.arrayBuffer())
