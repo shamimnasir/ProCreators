@@ -128,6 +128,18 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
       
       {/* Text Overlay Controls */}
       <div className="p-2 space-y-2">
+        {/* Show current text if exists */}
+        {video.textOverlay?.text && !showTextInput && (
+          <div className="text-xs bg-yellow-100 border border-yellow-300 px-2 py-1 rounded">
+            <div className="font-semibold text-yellow-800 truncate">
+              📝 {video.textOverlay.text}
+            </div>
+            <div className="text-yellow-600 text-[10px]">
+              Position: {video.textOverlay.position || 'top'}
+            </div>
+          </div>
+        )}
+        
         <button
           onClick={() => setShowTextInput(!showTextInput)}
           className="w-full text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded flex items-center justify-center gap-1"
@@ -156,6 +168,18 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
               <option value="center">Center</option>
               <option value="bottom">Bottom</option>
             </select>
+            {video.textOverlay?.text && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onTextChange(index, 'text', '')
+                  setShowTextInput(false)
+                }}
+                className="w-full text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded"
+              >
+                Remove Text
+              </button>
+            )}
           </div>
         )}
       </div>
