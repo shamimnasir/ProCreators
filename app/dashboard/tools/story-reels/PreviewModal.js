@@ -22,7 +22,8 @@ export default function PreviewModal({
   availableVoices,
   voicesByVariant,
   languageVariant,
-  customMusic
+  customMusic,
+  initialMusicTrack = 'none'
 }) {
   const { toast } = useToast()
   const videoRef = useRef(null)
@@ -44,7 +45,7 @@ export default function PreviewModal({
   const [captionFontSize, setCaptionFontSize] = useState('medium')
   const [captionPosition, setCaptionPosition] = useState('bottom')
   const [selectedVoice, setSelectedVoice] = useState('')
-  const [selectedMusic, setSelectedMusic] = useState('upbeat')
+  const [selectedMusic, setSelectedMusic] = useState(initialMusicTrack)
   const [isRegeneratingVoice, setIsRegeneratingVoice] = useState(false)
   const [isGeneratingFinal, setIsGeneratingFinal] = useState(false)
 
