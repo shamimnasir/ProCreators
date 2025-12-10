@@ -159,7 +159,7 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
           <div className="space-y-2">
             <input
               type="text"
-              placeholder="Text overlay (e.g., Product Name)"
+              placeholder="Text overlay (e.g., BUY NOW 50% OFF)"
               value={video.textOverlay?.text || ''}
               onChange={(e) => onTextChange(index, 'text', e.target.value)}
               className="w-full text-xs px-2 py-1 border rounded"
@@ -174,6 +174,17 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
               <option value="top">Top</option>
               <option value="center">Center</option>
               <option value="bottom">Bottom</option>
+            </select>
+            <select
+              value={video.textOverlay?.color || 'yellow'}
+              onChange={(e) => onTextChange(index, 'color', e.target.value)}
+              className="w-full text-xs px-2 py-1 border rounded"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="yellow">🟡 Yellow - Deals/Attention</option>
+              <option value="red">🔴 Red - Urgent/Limited</option>
+              <option value="green">🟢 Green - Success/Go</option>
+              <option value="blue">🔵 Blue - Info/Trust</option>
             </select>
             {video.textOverlay?.text && (
               <button
