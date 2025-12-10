@@ -139,8 +139,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [captionFontSize, setCaptionFontSize] = useState('medium')
   const [captionPosition, setCaptionPosition] = useState('bottom')
-  const [musicTrack, setMusicTrack] = useState('none')
-  const [customMusic, setCustomMusic] = useState(null) // For Freesound downloads
+  const [customMusic, setCustomMusic] = useState(null) // For Freesound/AudioDB downloads
   const [showMusicPicker, setShowMusicPicker] = useState(false)
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
