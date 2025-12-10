@@ -605,7 +605,7 @@ export async function POST(request) {
     })
     
     // Step 7b: Merge captioned video with audio
-    console.log(`[${jobId}] Step 7c: Merging video with audio...`)
+    console.log(`[${jobId}] Step 7b: Merging video with audio...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     await new Promise((resolve, reject) => {
