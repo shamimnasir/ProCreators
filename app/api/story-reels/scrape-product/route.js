@@ -333,17 +333,30 @@ async function downloadAndCacheImages(imageUrls) {
     await mkdir(cacheDir, { recursive: true })
   }
   
-  // Filter out invalid URLs
-  const validUrls = imageUrls.filter(url => {
-    try {
-      const urlObj = new URL(url)
-      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
-    } catch {
-      return false
-    }
-  })
+  // Filter out invalid URLs and convert thumbnails to full size
+  const validUrls = imageUrls
+    .filter(url => {
+      try {
+        const urlObj = new URL(url)
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+      } catch {
+        return false
+      }
+    })
+    .map(url => {
+      // Convert Amazon thumbnail URLs to full-size versions
+      // Replace _AC_US40_ (40px) or similar with _AC_SL1500_ (1500px)
+      return url
+        .replace(/_AC_US\d+_/, '_AC_SL1500_')
+        .replace(/_AC_UL\d+_/, '_AC_SL1500_')
+        .replace(/_AC_SR\d+,\d+_/, '_AC_SL1500_')
+        .replace(/\.SS\d+_/, '_AC_SL1500_.')
+    })
   
-  console.log(`[Image Cache] Found ${validUrls.length} valid image URLs, will download up to 10`)
+  // Remove duplicates
+  const uniqueUrls = [...new Set(validUrls)]
+  
+  console.log(`[Image Cache] Found ${uniqueUrls.length} valid image URLs, will download up to 10`)
   
   for (let i = 0; i < Math.min(validUrls.length, 10); i++) {
     try {
