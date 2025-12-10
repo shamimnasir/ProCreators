@@ -117,14 +117,30 @@ export async function POST(request) {
           if (isImage) {
             // Download image and convert to video with motion effects
             const imagePath = join(tempDir, `image-${i}.jpg`)
-            const response = await fetch(video.url)
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`)
+            
+            // Handle local cached images vs external URLs
+            let imageBuffer
+            if (video.url.startsWith('/')) {
+              // Local cached image - read from file system
+              const localPath = join(process.cwd(), 'public', video.url)
+              console.log(`[${jobId}] Reading local image from: ${localPath}`)
+              const fs = require('fs')
+              if (!fs.existsSync(localPath)) {
+                throw new Error(`Local image not found: ${localPath}`)
+              }
+              imageBuffer = fs.readFileSync(localPath)
+            } else {
+              // External URL - fetch it
+              const response = await fetch(video.url)
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`)
+              }
+              imageBuffer = Buffer.from(await response.arrayBuffer())
             }
             
-            // Save image
-            const imageBuffer = await response.arrayBuffer()
-            await writeFile(imagePath, Buffer.from(imageBuffer))
+            // Save image to temp directory
+            await writeFile(imagePath, imageBuffer)
+            console.log(`[${jobId}] Image saved to temp: ${imagePath}`)
             
             // Convert image to video with Ken Burns effect (zoom + pan)
             await new Promise((resolve, reject) => {
@@ -154,17 +170,15 @@ export async function POST(request) {
                 .output(videoPath)
                 .on('end', () => {
                   videoFiles.push(videoPath)
-                  console.log(`[${jobId}] Converted image ${i + 1}/${totalClips} to video with motion`)
+                  console.log(`[${jobId}] ✅ Converted image ${i + 1}/${totalClips} to video with motion`)
                   resolve()
                 })
                 .on('error', (err) => {
-                  console.error(`[${jobId}] Image to video conversion error:`, err.message)
+                  console.error(`[${jobId}] ❌ Image to video conversion error:`, err.message)
                   reject(err)
                 })
                 .run()
             })
-            
-            stockVideoIdx++
           } else {
             // Handle regular video URL
             const response = await fetch(video.url)
@@ -180,12 +194,15 @@ export async function POST(request) {
             )
             
             videoFiles.push(videoPath)
-            console.log(`[${jobId}] Downloaded stock clip ${i + 1}/${totalClips}`)
-            stockVideoIdx++
+            console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
           }
         } catch (error) {
-          console.error(`[${jobId}] Error processing clip ${i}:`, error.message)
+          console.error(`[${jobId}] ❌ Error processing clip ${i}:`, error.message)
         }
+        
+        // CRITICAL: Always increment stockVideoIdx, even if processing failed
+        // This prevents getting stuck in an infinite loop on the same clip
+        stockVideoIdx++
       }
     }
 
