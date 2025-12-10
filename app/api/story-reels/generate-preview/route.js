@@ -133,15 +133,30 @@ export async function POST(request) {
               .run()
           })
         } else {
-          // Handle regular video URL
-          const response = await fetch(video.url)
-          if (!response.ok) throw new Error(`HTTP ${response.status}`)
-          
-          const fileStream = require('fs').createWriteStream(videoPath)
-          await pipeline(Readable.fromWeb(response.body), fileStream)
-          
-          videoFiles.push(videoPath)
-          console.log(`[Preview ${jobId}] ✅ Downloaded video ${i + 1}/${stockVideos.length}`)
+          // Handle regular video URL or local UGC video
+          if (video.url.startsWith('/')) {
+            // Local cached video (UGC) - copy from filesystem
+            const localPath = join(process.cwd(), 'public', video.url)
+            console.log(`[Preview ${jobId}] Reading local UGC video from: ${localPath}`)
+            const fs = require('fs')
+            if (!fs.existsSync(localPath)) {
+              throw new Error(`Local UGC video not found: ${localPath}`)
+            }
+            const videoBuffer = fs.readFileSync(localPath)
+            await writeFile(videoPath, videoBuffer)
+            videoFiles.push(videoPath)
+            console.log(`[Preview ${jobId}] ✅ Copied UGC video ${i + 1}/${stockVideos.length}`)
+          } else {
+            // External stock video - download it
+            const response = await fetch(video.url)
+            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+            
+            const fileStream = require('fs').createWriteStream(videoPath)
+            await pipeline(Readable.fromWeb(response.body), fileStream)
+            
+            videoFiles.push(videoPath)
+            console.log(`[Preview ${jobId}] ✅ Downloaded video ${i + 1}/${stockVideos.length}`)
+          }
         }
       } catch (error) {
         console.error(`[Preview ${jobId}] ❌ Error processing clip ${i}:`, error.message)
