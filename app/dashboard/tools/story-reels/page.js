@@ -1573,6 +1573,8 @@ Product URL: ${scrapeData.product.url}`
               <p className="text-xs text-muted-foreground">
                 {productMedia.filter(img => img.selected).length} of {productMedia.length} images selected • Motion effects will be applied to all selected images
               </p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
