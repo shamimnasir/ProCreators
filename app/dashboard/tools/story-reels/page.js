@@ -70,20 +70,35 @@ function SortableVideoItem({ video, index, totalCount, onRemove }) {
         <GripVertical className="h-4 w-4" />
       </div>
 
-      {/* Video Preview */}
+      {/* Video/Image Preview */}
       <div className="relative">
-        <video 
-          src={video.url} 
-          className="w-full h-32 object-cover rounded-lg"
-          muted
-          onMouseEnter={(e) => e.target.play()}
-          onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
-        />
+        {video.type === 'image' ? (
+          <img 
+            src={video.url} 
+            alt={video.title || `Image ${index + 1}`}
+            className="w-full h-32 object-cover rounded-lg"
+          />
+        ) : (
+          <video 
+            src={video.url} 
+            className="w-full h-32 object-cover rounded-lg"
+            muted
+            onMouseEnter={(e) => e.target.play()}
+            onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+          />
+        )}
         
         {/* Clip number badge */}
         <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-bold">
           #{index + 1}
         </div>
+        
+        {/* Image/Product badge */}
+        {video.type === 'image' && (
+          <div className="absolute top-1 right-8 bg-purple-500 text-white text-xs px-2 py-0.5 rounded">
+            📷 Image
+          </div>
+        )}
         
         {/* Custom badge */}
         {video.isCustom && (
