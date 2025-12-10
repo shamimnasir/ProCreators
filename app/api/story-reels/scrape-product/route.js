@@ -76,6 +76,74 @@ export async function POST(request) {
   }
 }
 
+function extractMediaFromHtml(html, baseUrl) {
+  const images = []
+  const videos = []
+  
+  try {
+    // Extract image URLs from img tags
+    const imgMatches = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi) || []
+    for (const match of imgMatches) {
+      const srcMatch = match.match(/src=["']([^"']+)["']/)
+      if (srcMatch) {
+        let imageUrl = srcMatch[1]
+        // Convert relative URLs to absolute
+        if (imageUrl.startsWith('//')) {
+          imageUrl = 'https:' + imageUrl
+        } else if (imageUrl.startsWith('/')) {
+          const baseUrlObj = new URL(baseUrl)
+          imageUrl = baseUrlObj.origin + imageUrl
+        } else if (!imageUrl.startsWith('http')) {
+          const baseUrlObj = new URL(baseUrl)
+          imageUrl = new URL(imageUrl, baseUrlObj.href).href
+        }
+        
+        // Filter out small icons and common non-product images
+        if (!imageUrl.includes('icon') && 
+            !imageUrl.includes('logo') && 
+            !imageUrl.includes('favicon') &&
+            !imageUrl.includes('sprite') &&
+            !imageUrl.match(/\d+x\d+/) || 
+            imageUrl.match(/(\d+)x(\d+)/) && (parseInt(RegExp.$1) > 200 || parseInt(RegExp.$2) > 200)) {
+          images.push(imageUrl)
+        }
+      }
+    }
+    
+    // Extract video URLs from video tags and common video sources
+    const videoMatches = html.match(/<video[^>]+src=["']([^"']+)["'][^>]*>/gi) || []
+    for (const match of videoMatches) {
+      const srcMatch = match.match(/src=["']([^"']+)["']/)
+      if (srcMatch) {
+        let videoUrl = srcMatch[1]
+        // Convert relative URLs to absolute
+        if (videoUrl.startsWith('//')) {
+          videoUrl = 'https:' + videoUrl
+        } else if (videoUrl.startsWith('/')) {
+          const baseUrlObj = new URL(baseUrl)
+          videoUrl = baseUrlObj.origin + videoUrl
+        }
+        videos.push(videoUrl)
+      }
+    }
+    
+    // Extract YouTube embeds
+    const youtubeMatches = html.match(/(?:youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]+)/g) || []
+    for (const match of youtubeMatches) {
+      const videoId = match.split('/').pop()
+      videos.push(`https://www.youtube.com/watch?v=${videoId}`)
+    }
+    
+  } catch (error) {
+    console.error('[Media Extraction] Error:', error)
+  }
+  
+  return {
+    images: [...new Set(images)], // Remove duplicates
+    videos: [...new Set(videos)]  // Remove duplicates
+  }
+}
+
 function parseProductInfo(content, url) {
   // Extract domain for brand inference
   const domain = new URL(url).hostname.replace('www.', '').split('.')[0]
