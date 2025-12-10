@@ -380,8 +380,8 @@ export async function POST(request) {
     const durationPerClip = actualAudioDuration / videoFiles.length
     console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds (based on ${actualAudioDuration.toFixed(2)}s audio)`)
     
-    // Step 3a: Normalize each clip individually
-    const normalizedFiles = []
+    // Step 3a: Normalize each clip individually - PARALLELIZED
+    console.log(`[${jobId}] Starting parallel normalization of ${videoFiles.length} clips...`)
     
     // Track which clips are images, stock videos, or custom uploads
     const clipTypes = []
@@ -403,44 +403,56 @@ export async function POST(request) {
       }
     }
     
-    for (let i = 0; i < videoFiles.length; i++) {
-      const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
-      const clipType = clipTypes[i]
-      
-      await new Promise((resolve, reject) => {
-        const cmd = ffmpeg(videoFiles[i])
+    // Create all normalization tasks
+    const normalizationTasks = videoFiles.map((videoFile, i) => {
+      return limit(async () => {
+        const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
+        const clipType = clipTypes[i]
         
-        // Trim first 3 seconds ONLY for stock videos (not images or custom)
-        if (clipType && clipType.type === 'stock') {
-          cmd.inputOptions(['-ss', '3'])
-          console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
-        } else if (clipType && clipType.type === 'image') {
-          console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
-        }
-        
-        cmd.outputOptions([
-            // Force 9:16 portrait aspect ratio with center crop
-            '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
-            '-t', String(durationPerClip),
-            '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-crf', '28',
-            '-pix_fmt', 'yuv420p',
-            '-an' // Remove audio from individual clips
-          ])
-          .output(normalizedPath)
-          .on('end', () => {
-            normalizedFiles.push(normalizedPath)
-            console.log(`[${jobId}] Normalized clip ${i + 1}/${videoFiles.length}`)
-            resolve()
-          })
-          .on('error', (err) => {
-            console.error(`[${jobId}] Error normalizing clip ${i}:`, err.message)
-            reject(err)
-          })
-          .run()
+        return new Promise((resolve, reject) => {
+          const cmd = ffmpeg(videoFile)
+          
+          // Trim first 3 seconds ONLY for stock videos (not images or custom)
+          if (clipType && clipType.type === 'stock') {
+            cmd.inputOptions(['-ss', '3'])
+            console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
+          } else if (clipType && clipType.type === 'image') {
+            console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
+          }
+          
+          cmd.outputOptions([
+              // Force 9:16 portrait aspect ratio with center crop
+              '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
+              '-t', String(durationPerClip),
+              '-c:v', 'libx264',
+              '-preset', 'veryfast', // Changed from ultrafast
+              '-crf', '23', // Better quality
+              '-pix_fmt', 'yuv420p',
+              '-an' // Remove audio from individual clips
+            ])
+            .output(normalizedPath)
+            .on('end', () => {
+              console.log(`[${jobId}] ✅ Normalized clip ${i + 1}/${videoFiles.length}`)
+              resolve({ index: i, path: normalizedPath })
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] ❌ Error normalizing clip ${i}:`, err.message)
+              reject(err)
+            })
+            .run()
+        })
       })
-    }
+    })
+    
+    // Execute all normalization tasks in parallel
+    const normalizationResults = await Promise.all(normalizationTasks)
+    
+    // Sort by index to maintain order
+    const normalizedFiles = normalizationResults
+      .sort((a, b) => a.index - b.index)
+      .map(r => r.path)
+    
+    console.log(`[${jobId}] All ${normalizedFiles.length} clips normalized in parallel`)
     
     // Step 3b: Concatenate normalized clips
     console.log(`[${jobId}] Concatenating ${normalizedFiles.length} normalized clips...`)
