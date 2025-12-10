@@ -76,7 +76,7 @@ export async function POST(request) {
           // Save image to temp directory
           await writeFile(imagePath, imageBuffer)
           
-          // Convert image to video with Ken Burns effect (same as compose)
+          // Convert image to video with Ken Burns effect + text overlay
           await new Promise((resolve, reject) => {
             const randomEffect = Math.floor(Math.random() * 3)
             let filterComplex = ''
@@ -87,6 +87,28 @@ export async function POST(request) {
               filterComplex = 'scale=8000:-1,zoompan=z=\'if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
             } else {
               filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=720x1280'
+            }
+            
+            // Add text overlay if present
+            const orderInfo = videoOrder[i]
+            const textOverlay = orderInfo?.textOverlay
+            if (textOverlay && textOverlay.text) {
+              const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
+              const position = textOverlay.position || 'top'
+              const fontSize = 80 // Preview resolution
+              
+              let yPosition
+              if (position === 'top') {
+                yPosition = '150'
+              } else if (position === 'center') {
+                yPosition = '(h-text_h)/2'
+              } else {
+                yPosition = 'h-text_h-150'
+              }
+              
+              // Add viral text styling
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=yellow:x=(w-text_w)/2:y=${yPosition}:borderw=6:bordercolor=black:shadowx=3:shadowy=3:shadowcolor=black`
+              console.log(`[Preview ${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
