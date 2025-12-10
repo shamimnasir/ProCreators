@@ -1485,6 +1485,89 @@ Product URL: ${scrapeData.product.url}`
               )}
             </div>
           )}
+
+          {/* Product Images Preview (only for product-review niche) */}
+          {niche === 'product-review' && productMedia.length > 0 && (
+            <div className="space-y-3 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <Label>Product Images (Select to use)</Label>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => selectAllProductImages(true)}
+                  >
+                    Select All
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => selectAllProductImages(false)}
+                  >
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {productMedia.map((image, index) => (
+                  <div 
+                    key={image.id}
+                    className={`relative border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${
+                      image.selected 
+                        ? 'border-primary ring-2 ring-primary/20' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => toggleProductImageSelection(image.id)}
+                  >
+                    <div className="aspect-square relative">
+                      <img 
+                        src={image.url} 
+                        alt={`Product ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'flex'
+                        }}
+                      />
+                      <div 
+                        className="w-full h-full hidden items-center justify-center bg-muted text-muted-foreground text-xs"
+                        style={{display: 'none'}}
+                      >
+                        Failed to load
+                      </div>
+                    </div>
+                    
+                    {/* Checkbox overlay */}
+                    <div className="absolute top-2 right-2">
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        image.selected 
+                          ? 'bg-primary border-primary' 
+                          : 'bg-white/90 border-gray-300'
+                      }`}>
+                        {image.selected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                    </div>
+                    
+                    {/* Image number */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 px-2 text-center">
+                      Image {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                {productMedia.filter(img => img.selected).length} of {productMedia.length} images selected • Motion effects will be applied to all selected images
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Step 2: Stock Videos Preview */}
+      {stockVideos.length > 0 && (
+        <Card>
         </CardContent>
       </Card>
 
