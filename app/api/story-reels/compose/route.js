@@ -86,26 +86,82 @@ export async function POST(request) {
           console.error(`[${jobId}] Error processing custom clip ${i}:`, error.message)
         }
       } else if (stockVideos[stockVideoIdx]) {
-        // Handle stock video URL
+        // Handle stock video URL or product image
         const video = stockVideos[stockVideoIdx]
+        const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
+        
         try {
-          const response = await fetch(video.url)
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`)
+          if (isImage) {
+            // Download image and convert to video with motion effects
+            const imagePath = join(tempDir, `image-${i}.jpg`)
+            const response = await fetch(video.url)
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+            
+            // Save image
+            const imageBuffer = await response.arrayBuffer()
+            await writeFile(imagePath, Buffer.from(imageBuffer))
+            
+            // Convert image to video with Ken Burns effect (zoom + pan)
+            await new Promise((resolve, reject) => {
+              const randomEffect = Math.floor(Math.random() * 3) // 0: zoom in, 1: zoom out, 2: pan
+              let filterComplex = ''
+              
+              if (randomEffect === 0) {
+                // Ken Burns: Zoom In effect
+                filterComplex = 'scale=8000:-1,zoompan=z=\'min(zoom+0.0015,1.5)\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+              } else if (randomEffect === 1) {
+                // Ken Burns: Zoom Out effect  
+                filterComplex = 'scale=8000:-1,zoompan=z=\'if(lte(zoom,1.0),1.5,max(1.001,zoom-0.0015))\':d=125:x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+              } else {
+                // Ken Burns: Pan effect
+                filterComplex = 'scale=8000:-1,zoompan=z=1.2:d=125:x=\'if(gte(on,1),x+2,0)\':y=\'ih/2-(ih/zoom/2)\':s=1080x1920'
+              }
+              
+              ffmpeg(imagePath)
+                .inputOptions(['-loop 1'])
+                .outputOptions([
+                  '-vf', filterComplex,
+                  '-t', '5', // 5 seconds per image
+                  '-pix_fmt', 'yuv420p',
+                  '-c:v', 'libx264',
+                  '-r', '30'
+                ])
+                .output(videoPath)
+                .on('end', () => {
+                  videoFiles.push(videoPath)
+                  console.log(`[${jobId}] Converted image ${i + 1}/${totalClips} to video with motion`)
+                  resolve()
+                })
+                .on('error', (err) => {
+                  console.error(`[${jobId}] Image to video conversion error:`, err.message)
+                  reject(err)
+                })
+                .run()
+            })
+            
+            stockVideoIdx++
+          } else {
+            // Handle regular video URL
+            const response = await fetch(video.url)
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+            
+            // Convert Web Stream to Node Stream and pipe to file
+            const fileStream = require('fs').createWriteStream(videoPath)
+            await pipeline(
+              Readable.fromWeb(response.body),
+              fileStream
+            )
+            
+            videoFiles.push(videoPath)
+            console.log(`[${jobId}] Downloaded stock clip ${i + 1}/${totalClips}`)
+            stockVideoIdx++
           }
-          
-          // Convert Web Stream to Node Stream and pipe to file
-          const fileStream = require('fs').createWriteStream(videoPath)
-          await pipeline(
-            Readable.fromWeb(response.body),
-            fileStream
-          )
-          
-          videoFiles.push(videoPath)
-          console.log(`[${jobId}] Downloaded stock clip ${i + 1}/${totalClips}`)
-          stockVideoIdx++
         } catch (error) {
-          console.error(`[${jobId}] Error downloading stock clip ${i}:`, error.message)
+          console.error(`[${jobId}] Error processing clip ${i}:`, error.message)
         }
       }
     }
