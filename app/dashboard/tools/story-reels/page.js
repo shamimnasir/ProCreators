@@ -1601,10 +1601,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => {
-                        setCustomMusic(null)
-                        setMusicTrack('none')
-                      }}
+                      onClick={() => setCustomMusic(null)}
                       title="Remove music"
                     >
                       <X className="w-4 h-4" />
