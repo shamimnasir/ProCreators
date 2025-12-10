@@ -106,11 +106,8 @@ export async function POST(request) {
                 yPosition = 'h-text_h-180'
               }
               
-              // Modern professional styling - matches compose route
-              const boxPadding = 20
-              const boxColor = '0x000000@0.7'
-              filterComplex += `,drawbox=x=(w-text_w)/2-${boxPadding}:y=${yPosition}-${boxPadding/2}:w=text_w+${boxPadding*2}:h=text_h+${boxPadding}:color=${boxColor}:t=fill`
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=0x000000@0.5`
+              // Modern professional styling - use box parameter in drawtext
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black@0.7:boxborderw=20:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=black@0.5`
               
               console.log(`[Preview ${jobId}] Adding professional text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
