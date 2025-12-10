@@ -1287,6 +1287,7 @@ URL: ${data.product.url}`
                 'relationship': 'Relationship advice script will appear here... or write your own!',
                 'documentary': 'Documentary script will appear here... or write your own!',
                 'festival': 'Festival content will appear here... or write your own!',
+                'product-review': 'Product info will appear here after scraping... or write your own review!',
                 'generic': 'Your custom video script will appear here... or write your own!'
               }
               return placeholders[niche] || 'Enter your story script here or click "Generate AI Content" below...'
