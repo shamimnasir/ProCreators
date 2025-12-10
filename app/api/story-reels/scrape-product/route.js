@@ -27,41 +27,27 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
-    // Use the crawl API to fetch and extract product information
-    const crawlResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/crawl`, {
-      method: 'POST',
+    // Fetch the webpage content using simple fetch
+    const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       },
-      body: JSON.stringify({
-        url: url,
-        formats: 'markdown',
-        question: `Extract product information including:
-- Product name and brand
-- Product description
-- Key features and specifications
-- Price (if available)
-- Product category
-- Any pros/cons mentioned
-- Images URLs
-- Any ratings or reviews mentioned
-
-Return this as structured information.`
-      })
+      signal: AbortSignal.timeout(15000) // 15 second timeout
     })
 
-    if (!crawlResponse.ok) {
-      throw new Error(`Crawl API failed: ${crawlResponse.status}`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch URL: ${response.status}`)
     }
 
-    const crawlData = await crawlResponse.json()
+    const html = await response.text()
     
-    if (!crawlData.success) {
-      throw new Error(crawlData.error || 'Failed to scrape product data')
-    }
-
-    // Parse the markdown content to extract structured data
-    const content = crawlData.data || crawlData.content || ''
+    // Convert HTML to plain text for easier parsing
+    const content = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove scripts
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Remove styles
+      .replace(/<[^>]+>/g, ' ') // Remove HTML tags
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim()
     
     // Extract product information using simple parsing
     const productInfo = parseProductInfo(content, url)
