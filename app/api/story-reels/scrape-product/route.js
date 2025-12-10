@@ -130,6 +130,21 @@ function extractMediaFromHtml(html, baseUrl) {
     
     console.log(`[Media Extract] Found ${images.length} Amazon media URLs`)
     
+    // Method 5: If still no images, try to find ANY amazon image URLs in the HTML
+    if (images.length === 0) {
+      console.log('[Media Extract] No images found with specific methods, trying broad search...')
+      const broadMatches = html.match(/https?:\/\/[^"'\s<>]+amazon[^"'\s<>]+\.(?:jpg|jpeg|png|webp)/gi) || []
+      for (const url of broadMatches) {
+        const cleanUrl = url.replace(/\\"/g, '').replace(/&quot;/g, '').replace(/&amp;/g, '&')
+        // Filter out obvious non-product images
+        if (!cleanUrl.match(/nav|sprite|icon|logo|button|badge|arrow|star|checkmark|pixel|1x1|blank/i) &&
+            cleanUrl.includes('/I/')) {
+          images.push(cleanUrl)
+        }
+      }
+      console.log(`[Media Extract] Broad search found ${images.length} additional URLs`)
+    }
+    
     // Method 3: Look for hiRes and large images in JSON structures
     const hiResMatches = html.match(/"(?:hiRes|large)":\s*"([^"]+)"/g) || []
     for (const match of hiResMatches) {
