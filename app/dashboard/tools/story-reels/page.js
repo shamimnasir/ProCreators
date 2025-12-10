@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Mic, Upload, Download, 
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
-  GripVertical, Trash2, Plus, ImagePlus
+  GripVertical, Trash2, Plus, ImagePlus, Search
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import {
