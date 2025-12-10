@@ -209,13 +209,6 @@ export async function POST(request) {
       })
       
       processingTasks.push(task)
-      
-      // Increment indices for tracking (before parallelization)
-      if (isCustom) {
-        customVideoIdx++
-      } else {
-        stockVideoIdx++
-      }
     }
     
     // Execute all tasks in parallel (with concurrency limit)
