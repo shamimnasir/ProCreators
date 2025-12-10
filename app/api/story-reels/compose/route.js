@@ -469,8 +469,8 @@ export async function POST(request) {
         .inputOptions(['-f', 'concat', '-safe', '0'])
         .outputOptions([
           '-c:v', 'libx264',
-          '-preset', 'ultrafast',
-          '-crf', '28',
+          '-preset', 'veryfast', // Better balance than ultrafast
+          '-crf', '23', // Better quality than 28
           '-pix_fmt', 'yuv420p'
         ])
         .output(concatVideoPath)
