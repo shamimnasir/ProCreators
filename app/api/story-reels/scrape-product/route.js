@@ -243,3 +243,50 @@ function inferCategory(text, domain) {
   
   return 'general'
 }
+
+async function downloadAndCacheImages(imageUrls) {
+  const cachedImages = []
+  const cacheDir = join(process.cwd(), 'public', 'product-images-cache')
+  
+  // Create cache directory if it doesn't exist
+  if (!existsSync(cacheDir)) {
+    await mkdir(cacheDir, { recursive: true })
+  }
+  
+  for (let i = 0; i < Math.min(imageUrls.length, 10); i++) {
+    try {
+      const imageUrl = imageUrls[i]
+      const imageId = randomBytes(8).toString('hex')
+      const ext = imageUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i)?.[1] || 'jpg'
+      const filename = `${imageId}.${ext}`
+      const filepath = join(cacheDir, filename)
+      
+      console.log(`[Image Cache] Downloading image ${i + 1}/10...`)
+      
+      const response = await fetch(imageUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout per image
+      })
+      
+      if (!response.ok) {
+        console.log(`[Image Cache] Failed to fetch image ${i + 1}: ${response.status}`)
+        continue
+      }
+      
+      const arrayBuffer = await response.arrayBuffer()
+      await writeFile(filepath, Buffer.from(arrayBuffer))
+      
+      // Return the local URL path
+      cachedImages.push(`/product-images-cache/${filename}`)
+      console.log(`[Image Cache] Cached image ${i + 1}/10`)
+      
+    } catch (error) {
+      console.error(`[Image Cache] Error downloading image ${i + 1}:`, error.message)
+      // Continue with next image
+    }
+  }
+  
+  return cachedImages
+}
