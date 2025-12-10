@@ -105,14 +105,14 @@ export async function POST(request) {
         try {
           if (clipInfo.isCustom && customVideoFiles[clipInfo.customIdx]) {
             // Handle custom uploaded video
-            const customFile = customVideoFiles[customVideoIdx]
+            const customFile = customVideoFiles[clipInfo.customIdx]
             const buffer = Buffer.from(await customFile.arrayBuffer())
             await writeFile(videoPath, buffer)
             console.log(`[${jobId}] ✅ Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
             return { index: i, path: videoPath, success: true }
-          } else if (stockVideos[stockVideoIdx]) {
+          } else if (stockVideos[clipInfo.stockIdx]) {
             // Handle stock video URL or product image
-            const video = stockVideos[stockVideoIdx]
+            const video = stockVideos[clipInfo.stockIdx]
             const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
             
             console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : '🎥 VIDEO'}`)
