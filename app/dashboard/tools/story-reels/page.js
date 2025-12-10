@@ -1279,16 +1279,17 @@ Product URL: ${scrapeData.product.url}`
                   onClick={handleScrapeProduct}
                   disabled={scrapingProduct || !productUrl.trim()}
                   variant="default"
+                  className="min-w-[180px]"
                 >
                   {scrapingProduct ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Scraping...
+                      Generating Review...
                     </>
                   ) : (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Scrape Product
+                      Scrape & Generate
                     </>
                   )}
                 </Button>
