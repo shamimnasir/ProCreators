@@ -1164,6 +1164,7 @@ URL: ${data.product.url}`
                 'relationship': 'Generate relationship advice and emotional guidance',
                 'documentary': 'Generate historical or factual documentary-style content',
                 'festival': 'Generate festive celebration content',
+                'product-review': 'Paste product URL (Amazon, eBay, etc.) or write your own review',
                 'generic': 'Generate content on any topic you choose (10-60 seconds)'
               }
               return descriptions[niche] || 'Generate an AI story or paste your own script (10-60 seconds)'
