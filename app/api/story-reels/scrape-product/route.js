@@ -360,7 +360,7 @@ async function downloadAndCacheImages(imageUrls) {
   
   for (let i = 0; i < Math.min(uniqueUrls.length, 10); i++) {
     try {
-      const imageUrl = validUrls[i]
+      const imageUrl = uniqueUrls[i]
       const imageId = randomBytes(8).toString('hex')
       const ext = imageUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i)?.[1] || 'jpg'
       const filename = `${imageId}.${ext}`
