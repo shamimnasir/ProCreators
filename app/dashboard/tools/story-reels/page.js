@@ -862,12 +862,10 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
       formData.append('captionStyle', captionStyle)
       formData.append('captionFontSize', captionFontSize)
       formData.append('captionPosition', captionPosition)
-      // Send proper music track value
+      // Send music from Freesound/AudioDB selection
       if (customMusic) {
         formData.append('musicTrack', 'custom')
         formData.append('customMusicPath', customMusic.path)
-      } else if (musicTrack && musicTrack !== 'none') {
-        formData.append('musicTrack', musicTrack)
       } else {
         formData.append('musicTrack', 'none')
       }
