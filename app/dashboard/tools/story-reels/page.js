@@ -1144,6 +1144,7 @@ URL: ${data.product.url}`
                 'relationship': 'Step 1: Create Relationship Advice Script',
                 'documentary': 'Step 1: Create Documentary Script',
                 'festival': 'Step 1: Create Festival Content',
+                'product-review': 'Step 1: Add Product URL or Write Review',
                 'generic': 'Step 1: Create Your Video Script'
               }
               return stepTitles[niche] || 'Step 1: Create Your Story Script'
