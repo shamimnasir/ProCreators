@@ -91,33 +91,52 @@ function extractMediaFromHtml(html, baseUrl) {
   const videos = []
   
   try {
-    // First, try to extract from Amazon's image gallery/carousel (priority)
-    // Look for any Amazon media URLs in the HTML (including in scripts)
-    const amazonImageMatches = html.match(/https?:\/\/[^"'\s]*media-amazon\.com[^"'\s]*\/images\/I\/[^"'\s]+\.jpg/g) || []
+    // Method 1: Extract from Amazon's inline JSON data (colorImages, altImages)
+    const colorImagesMatch = html.match(/'colorImages':\s*\{[^}]*'initial':\s*(\[[^\]]+\])/s)
+    if (colorImagesMatch) {
+      console.log('[Media Extract] Found colorImages data structure')
+      const jsonStr = colorImagesMatch[1]
+      const urlMatches = jsonStr.match(/https?:\/\/[^"'\s,]+\/images\/I\/[A-Za-z0-9+_-]+\.jpg/g) || []
+      urlMatches.forEach(url => {
+        const cleanUrl = url.replace(/\\"/g, '').replace(/\\'/g, '')
+        if (!cleanUrl.includes('icon') && !cleanUrl.includes('logo')) {
+          images.push(cleanUrl)
+        }
+      })
+    }
+    
+    // Method 2: Extract all Amazon media URLs from entire HTML
+    const amazonImageMatches = html.match(/https?:\/\/[^"'\s]*(?:media-amazon\.com|ssl-images-amazon\.com|images-(?:na|eu|fe)\.ssl-images-amazon\.com)[^"'\s]*\/images\/I\/[A-Za-z0-9+_-]+\.(?:jpg|png|webp)/gi) || []
     for (const url of amazonImageMatches) {
-      const cleanUrl = url.replace(/\\"/g, '')
-      if (!cleanUrl.includes('icon') && !cleanUrl.includes('logo')) {
+      const cleanUrl = url.replace(/\\"/g, '').replace(/\\'/g, '').replace(/&quot;/g, '')
+      if (!cleanUrl.includes('icon') && !cleanUrl.includes('logo') && !cleanUrl.includes('sprite')) {
         images.push(cleanUrl)
       }
     }
     
     console.log(`[Media Extract] Found ${images.length} Amazon media URLs`)
     
-    // Also look for hiRes and large images in JSON structures
-    const hiResMatches = html.match(/"hiRes":\s*"([^"]+)"/g) || []
+    // Method 3: Look for hiRes and large images in JSON structures
+    const hiResMatches = html.match(/"(?:hiRes|large)":\s*"([^"]+)"/g) || []
     for (const match of hiResMatches) {
-      const urlMatch = match.match(/"hiRes":\s*"([^"]+)"/)
-      if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
+      const urlMatch = match.match(/"(?:hiRes|large)":\s*"([^"]+)"/)
+      if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null' && urlMatch[1].includes('images-amazon')) {
         images.push(urlMatch[1])
       }
     }
     
-    // Also try large images
-    const largeMatches = html.match(/"large":\s*"([^"]+)"/g) || []
-    for (const match of largeMatches) {
-      const urlMatch = match.match(/"large":\s*"([^"]+)"/)
-      if (urlMatch && urlMatch[1] && urlMatch[1] !== 'null') {
-        images.push(urlMatch[1])
+    // Method 4: Extract from data-a-dynamic-image attribute
+    const dynamicImageMatches = html.match(/data-a-dynamic-image=["']([^"']+)["']/gi) || []
+    for (const match of dynamicImageMatches) {
+      const jsonMatch = match.match(/data-a-dynamic-image=["']([^"']+)["']/i)
+      if (jsonMatch) {
+        try {
+          const decoded = jsonMatch[1].replace(/&quot;/g, '"')
+          const urlMatches = decoded.match(/https?:\/\/[^"]+\/images\/I\/[A-Za-z0-9+_-]+\.jpg/g) || []
+          urlMatches.forEach(url => images.push(url))
+        } catch (e) {
+          // Skip invalid JSON
+        }
       }
     }
     
