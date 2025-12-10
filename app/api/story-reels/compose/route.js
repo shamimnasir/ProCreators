@@ -108,6 +108,11 @@ export async function POST(request) {
         const video = stockVideos[stockVideoIdx]
         const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
         
+        console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : '🎥 VIDEO'}`, {
+          type: video.type,
+          url: video.url?.substring(0, 80)
+        })
+        
         try {
           if (isImage) {
             // Download image and convert to video with motion effects
