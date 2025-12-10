@@ -508,6 +508,18 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     })
   }
 
+  // Toggle product image selection
+  const toggleProductImageSelection = (imageId) => {
+    setProductMedia(prev => prev.map(img => 
+      img.id === imageId ? { ...img, selected: !img.selected } : img
+    ))
+  }
+
+  // Select all product images
+  const selectAllProductImages = (selected) => {
+    setProductMedia(prev => prev.map(img => ({ ...img, selected })))
+  }
+
   // Scrape product from URL (for product review niche)
   const handleScrapeProduct = async () => {
     if (!productUrl.trim()) {
