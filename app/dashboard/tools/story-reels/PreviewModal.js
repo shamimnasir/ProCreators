@@ -471,21 +471,25 @@ export default function PreviewModal({
                 </Select>
               </div>
 
-              {/* Background Music */}
+              {/* Background Music Info */}
               <div className="space-y-2">
                 <Label>Background Music</Label>
-                <Select value={selectedMusic} onValueChange={setSelectedMusic}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Music</SelectItem>
-                    <SelectItem value="upbeat">Upbeat & Energetic</SelectItem>
-                    <SelectItem value="calm">Calm & Peaceful</SelectItem>
-                    <SelectItem value="epic">Epic & Dramatic</SelectItem>
-                    <SelectItem value="emotional">Emotional</SelectItem>
-                  </SelectContent>
-                </Select>
+                {customMusic ? (
+                  <div className="border rounded-lg p-3 bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        ✓ Selected
+                      </Badge>
+                      <p className="text-sm truncate">{customMusic.name}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-3 bg-muted/30">
+                    <p className="text-xs text-muted-foreground text-center">
+                      No music selected • Will be added in final video
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t space-y-2">
