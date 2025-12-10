@@ -122,7 +122,6 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [scrapingProduct, setScrapingProduct] = useState(false)
   const [productData, setProductData] = useState(null)
   const [productMedia, setProductMedia] = useState([]) // Images/videos from product URL
-  const [mediaSource, setMediaSource] = useState('stock') // 'stock' or 'product'
   
   // Keywords & Videos
   const [keywords, setKeywords] = useState([])
