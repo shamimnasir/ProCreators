@@ -106,8 +106,8 @@ export async function POST(request) {
                 yPosition = 'h-text_h-180'
               }
               
-              // Modern professional styling - use box parameter in drawtext
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black@0.7:boxborderw=20:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=black@0.5`
+              // Modern professional styling - simple and reliable
+              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black:boxborderw=20:borderw=2:bordercolor=black`
               
               console.log(`[Preview ${jobId}] Adding professional text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
