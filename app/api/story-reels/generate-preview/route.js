@@ -32,8 +32,10 @@ export async function POST(request) {
     const selectedVoice = formData.get('selectedVoice')
     const voiceFile = formData.get('voiceFile')
     const stockVideos = JSON.parse(formData.get('stockVideos'))
+    const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
 
     console.log(`[Preview ${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice })
+    console.log(`[Preview ${jobId}] Video order received with ${videoOrder.length} clips`)
 
     // Step 1: Download stock videos and process images (using streams)
     console.log(`[Preview ${jobId}] Processing ${stockVideos.length} clips (videos + images)...`)
