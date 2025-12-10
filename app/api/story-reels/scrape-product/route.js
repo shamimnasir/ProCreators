@@ -59,7 +59,12 @@ export async function POST(request) {
     productInfo.images = [...new Set([...mediaUrls.images, ...productInfo.images])] // Remove duplicates
     productInfo.videos = mediaUrls.videos
     
+    // Download and cache images locally to avoid CORS issues
+    const cachedImages = await downloadAndCacheImages(productInfo.images.slice(0, 10))
+    productInfo.images = cachedImages
+    
     console.log(`[Product Scraper] Successfully scraped product:`, productInfo.name || 'Unknown')
+    console.log(`[Product Scraper] Cached ${cachedImages.length} images locally`)
 
     return NextResponse.json({
       success: true,
