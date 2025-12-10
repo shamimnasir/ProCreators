@@ -452,28 +452,39 @@ export async function POST(request) {
           // Build video filter with optional text overlay
           let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
           
-          // Add text overlay if present with VIRAL STYLING
+          // Add text overlay if present with MODERN PROFESSIONAL STYLING
           if (textOverlay && textOverlay.text) {
             const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
             const position = textOverlay.position || 'top'
             
-            // LARGER font sizes for viral impact
-            const fontSize = parseInt(targetHeight) >= 1920 ? 96 : 80
+            // Modern font sizes - slightly smaller for elegance
+            const fontSize = parseInt(targetHeight) >= 1920 ? 88 : 72
             
-            // Better positioning with safe margins (text won't be cut off)
+            // Professional positioning with generous safe areas
             let yPosition
             if (position === 'top') {
-              yPosition = '150' // Moved down from 100 for safe area
+              yPosition = '180' // Extra margin from top
             } else if (position === 'center') {
               yPosition = '(h-text_h)/2'
             } else { // bottom
-              yPosition = 'h-text_h-150' // Moved up from 100 for safe area
+              yPosition = 'h-text_h-180' // Extra margin from bottom
             }
             
-            // VIRAL STYLING: Bold text with thick shadow and outline
-            // Uses yellow text (viral/eye-catching) with black outline and shadow for maximum contrast
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=yellow:x=(w-text_w)/2:y=${yPosition}:borderw=6:bordercolor=black:shadowx=3:shadowy=3:shadowcolor=black`
-            console.log(`[${jobId}] Adding VIRAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+            // MODERN PROFESSIONAL STYLING:
+            // - Clean white text (professional, readable)
+            // - Subtle thin black outline (2px instead of 6px)
+            // - Soft drop shadow for depth
+            // - Semi-transparent black box background for maximum readability
+            
+            // First, add a semi-transparent black background box
+            const boxPadding = 20
+            const boxColor = '0x000000@0.7' // Black with 70% opacity
+            videoFilter += `,drawbox=x=(w-text_w)/2-${boxPadding}:y=${yPosition}-${boxPadding/2}:w=text_w+${boxPadding*2}:h=text_h+${boxPadding}:color=${boxColor}:t=fill`
+            
+            // Then, add the text with clean modern styling
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:borderw=2:bordercolor=black:shadowx=2:shadowy=2:shadowcolor=0x000000@0.5`
+            
+            console.log(`[${jobId}] Adding PROFESSIONAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
           cmd.outputOptions([
