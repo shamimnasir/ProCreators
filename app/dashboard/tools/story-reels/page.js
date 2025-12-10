@@ -1568,12 +1568,6 @@ Product URL: ${scrapeData.product.url}`
       {/* Step 2: Stock Videos Preview */}
       {stockVideos.length > 0 && (
         <Card>
-        </CardContent>
-      </Card>
-
-      {/* Step 2: Stock Videos Preview */}
-      {stockVideos.length > 0 && (
-        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Film className="h-5 w-5" />
