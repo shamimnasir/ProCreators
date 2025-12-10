@@ -358,7 +358,7 @@ async function downloadAndCacheImages(imageUrls) {
   
   console.log(`[Image Cache] Found ${uniqueUrls.length} valid image URLs, will download up to 10`)
   
-  for (let i = 0; i < Math.min(validUrls.length, 10); i++) {
+  for (let i = 0; i < Math.min(uniqueUrls.length, 10); i++) {
     try {
       const imageUrl = validUrls[i]
       const imageId = randomBytes(8).toString('hex')
