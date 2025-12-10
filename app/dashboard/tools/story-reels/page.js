@@ -647,17 +647,42 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
       setProductData(scrapeData.product)
       
-      // Store extracted media (images and videos) - limit to top 10
+      // Store extracted media (images + UGC videos) - mix them together
+      const allMedia = []
+      
+      // Add product images
       if (scrapeData.product.images && scrapeData.product.images.length > 0) {
-        const media = scrapeData.product.images.slice(0, 10).map((url, index) => ({
-          id: `product-media-${Date.now()}-${index}`,
+        const imageMedia = scrapeData.product.images.slice(0, 10).map((url, index) => ({
+          id: `product-image-${Date.now()}-${index}`,
           url: url,
           thumbnail: url,
           title: `Product Image ${index + 1}`,
           type: 'image',
           source: 'product'
         }))
-        setProductMedia(media)
+        allMedia.push(...imageMedia)
+      }
+      
+      // Add UGC videos (max 3)
+      if (scrapeData.product.videos && scrapeData.product.videos.length > 0) {
+        const videoMedia = scrapeData.product.videos.map((videoData, index) => ({
+          id: `ugc-video-${Date.now()}-${index}`,
+          url: videoData.url,
+          thumbnail: videoData.url, // Will show video preview
+          title: `User Review Video ${index + 1}`,
+          type: 'ugc-video',
+          source: 'ugc'
+        }))
+        allMedia.push(...videoMedia)
+      }
+      
+      setProductMedia(allMedia)
+      
+      if (allMedia.length > 0) {
+        toast({
+          title: "Media Extracted!",
+          description: `Found ${scrapeData.product.images?.length || 0} images and ${scrapeData.product.videos?.length || 0} user videos`,
+        })
       }
       
       // Step 2: Format product info for AI
