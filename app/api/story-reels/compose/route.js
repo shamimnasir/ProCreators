@@ -422,7 +422,8 @@ export async function POST(request) {
       } else {
         const stockVideo = stockVideos[stockIdx]
         const isImage = stockVideo && (stockVideo.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(stockVideo.url))
-        clipTypes.push({ type: isImage ? 'image' : 'stock', data: stockVideo })
+        const isUGC = stockVideo && stockVideo.type === 'ugc-video'
+        clipTypes.push({ type: isImage ? 'image' : isUGC ? 'ugc' : 'stock', data: stockVideo })
         stockIdx++
       }
     }
