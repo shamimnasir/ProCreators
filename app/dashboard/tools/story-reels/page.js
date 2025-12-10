@@ -1226,6 +1226,53 @@ URL: ${data.product.url}`
             </div>
           )}
 
+          {/* Product URL Input (only for product-review niche) */}
+          {niche === 'product-review' && (
+            <div className="space-y-3 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <span className="text-2xl">🔗</span>
+                <span>Product URL (Amazon, eBay, Apple, etc.)</span>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://www.amazon.com/product-name/dp/..."
+                  value={productUrl}
+                  onChange={(e) => setProductUrl(e.target.value)}
+                  className="flex-1"
+                  disabled={scrapingProduct}
+                />
+                <Button
+                  onClick={handleScrapeProduct}
+                  disabled={scrapingProduct || !productUrl.trim()}
+                  variant="default"
+                >
+                  {scrapingProduct ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Scraping...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Scrape Product
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Paste any product URL and we'll automatically extract product info, images, and features
+              </p>
+              {productData && (
+                <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+                    <Check className="h-4 w-4" />
+                    <span className="font-medium">Product loaded: {productData.name}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <Textarea
             placeholder={(() => {
               const placeholders = {
