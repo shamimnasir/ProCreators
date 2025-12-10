@@ -439,12 +439,14 @@ export async function POST(request) {
         return new Promise((resolve, reject) => {
           const cmd = ffmpeg(videoFile)
           
-          // Trim first 3 seconds ONLY for stock videos (not images or custom)
+          // Trim first 3 seconds ONLY for stock videos (not images, UGC, or custom)
           if (clipType && clipType.type === 'stock') {
             cmd.inputOptions(['-ss', '3'])
             console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
           } else if (clipType && clipType.type === 'image') {
             console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
+          } else if (clipType && clipType.type === 'ugc') {
+            console.log(`[${jobId}] Processing UGC video ${i + 1} (no trim, user review content)`)
           }
           
           // Build video filter with optional text overlay
