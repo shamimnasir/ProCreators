@@ -470,14 +470,14 @@ export async function POST(request) {
               yPosition = 'h-text_h-180' // Extra margin from bottom
             }
             
-            // MODERN PROFESSIONAL STYLING - Simple and reliable
-            // White text with black background box and subtle shadow
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black:boxborderw=20:borderw=2:bordercolor=black`
+            // SIMPLE PROFESSIONAL STYLING  
+            // White text with black box background for readability
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=black:boxborderw=15`
             
-            console.log(`[${jobId}] Adding PROFESSIONAL text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+            console.log(`[${jobId}] Adding text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
-          console.log(`[${jobId}] Video filter for clip ${i + 1}:`, videoFilter.substring(0, 200) + '...')
+          console.log(`[${jobId}] Video filter for clip ${i + 1}:`, videoFilter.substring(0, 150))
           
           cmd.outputOptions([
               '-vf', videoFilter,
