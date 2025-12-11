@@ -1260,27 +1260,54 @@ export async function POST(request) {
         }
       }
     } else if (videoSource === 'hybrid') {
-      // Mix AI and stock videos
+      // Mix AI and stock videos with smart keyword search
       console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
       
+      // Extract keywords from script for stock video search
+      const keywords = extractKeywordsFromScript(prompt, 5)
+      console.log(`[${jobId}] Extracted keywords: ${keywords.join(', ')}`)
+      
+      // Try to generate 1-2 AI videos for key scenes
       try {
         const aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
         if (aiVideos.length > 0) {
-          videos.push(...aiVideos)
+          videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
+          console.log(`[${jobId}] ✅ Got ${aiVideos.length} AI clips`)
         }
       } catch (e) {
-        console.log(`[${jobId}] AI generation failed for hybrid, using stock only`)
+        console.log(`[${jobId}] AI generation skipped: ${e.message}`)
       }
       
-      // Add stock videos
-      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-      const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
-      videos.push(...stockVideos)
+      // Search and add stock videos based on keywords (with 3-second trim later)
+      const numStockClips = Math.max(2, Math.ceil(duration / 5) - videos.length)
+      const stockVideos = await searchStockVideosByKeywords(keywords, numStockClips)
+      videos.push(...stockVideos.map(v => ({ ...v, type: 'stock' })))
+      console.log(`[${jobId}] ✅ Got ${stockVideos.length} stock clips (will be 3s trimmed)`)
+      
     } else {
-      // Stock videos only
-      console.log(`[${jobId}] 📹 Fetching stock videos...`)
-      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-      videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+      // AI only mode (stock-only is now removed)
+      console.log(`[${jobId}] 🎨 AI-only mode, generating with Fal.ai...`)
+      
+      try {
+        videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+        
+        if (videos.length === 0) {
+          throw new Error('No AI videos generated')
+        }
+        console.log(`[${jobId}] ✅ Generated ${videos.length} AI clips`)
+      } catch (falError) {
+        console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
+        
+        // Try Replicate as fallback
+        try {
+          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        } catch (replicateError) {
+          // Final fallback: use hybrid mode
+          console.log(`[${jobId}] All AI failed, falling back to stock videos`)
+          const keywords = extractKeywordsFromScript(prompt, 5)
+          videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
+        }
+      }
     }
     
     if (videos.length === 0) {
