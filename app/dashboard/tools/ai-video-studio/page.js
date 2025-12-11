@@ -693,11 +693,14 @@ export default function AIVideoStudioPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🎨</span>
-                        <Label htmlFor="ai" className="font-semibold cursor-pointer">AI-Generated Scenes</Label>
-                        <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">AI Powered</Badge>
+                        <Label htmlFor="ai" className="font-semibold cursor-pointer">AI-Generated Video</Label>
+                        <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">Fal.ai</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        FLUX model generates unique scenes from your prompt • ~2-3min render
+                        Powered by <strong>Minimax Hailuo</strong> or <strong>Kling</strong> • ~2-3min render
+                      </p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                        Real AI-generated video scenes with motion
                       </p>
                     </div>
                   </div>
@@ -713,10 +716,10 @@ export default function AIVideoStudioPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-lg">✨</span>
                         <Label htmlFor="hybrid" className="font-semibold cursor-pointer">Hybrid Mix</Label>
-                        <Badge className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500">Best Quality</Badge>
+                        <Badge className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500">Best Value</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        AI scenes for key moments + stock B-roll • ~1-2min render
+                        AI video for key moments + HD stock B-roll • ~1-2min render
                       </p>
                     </div>
                   </div>
