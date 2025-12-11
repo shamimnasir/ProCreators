@@ -85,17 +85,16 @@ async function fetchStockVideos(keywords, count = 3) {
   return videos.slice(0, count)
 }
 
-// Fallback stock videos (free Pexels videos with direct links)
+// Fallback stock videos (using Shotstack's free assets - guaranteed working)
 function getFallbackVideos(count) {
   const fallbackUrls = [
-    'https://static.pexels.com/lib/videos/free-videos.mp4',
-    'https://player.vimeo.com/external/370467553.hd.mp4?s=ce49c8c6d8e28a89298ffb4c53a2e842bdb11546&profile_id=174&oauth2_token_id=57447761',
-    // Use Shotstack's free assets
     'https://shotstack-assets.s3.amazonaws.com/footage/beach-overhead.mp4',
     'https://shotstack-assets.s3.amazonaws.com/footage/earth.mp4',
     'https://shotstack-assets.s3.amazonaws.com/footage/night-sky.mp4',
-    'https://shotstack-assets.s3.amazonaws.com/footage/sunset-beach.mp4',
-    'https://shotstack-assets.s3.amazonaws.com/footage/city-night.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/city-timelapse.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/rain-on-window.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/slow-motion-coffee.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/abstract-blue.mp4',
   ]
   
   return fallbackUrls.slice(0, count).map((url, i) => ({
