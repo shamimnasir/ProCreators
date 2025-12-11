@@ -296,7 +296,9 @@ function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
 }
 
 // Build edit JSON for image-based video with Ken Burns effect
-function buildImageVideoEdit(imageUrl, prompt, duration, dimensions) {
+function buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId) {
+  const config = getTemplateVisualConfig(templateId)
+  
   const clips = [
     {
       asset: {
@@ -314,13 +316,16 @@ function buildImageVideoEdit(imageUrl, prompt, duration, dimensions) {
     }
   ]
   
-  // Add text overlay if prompt is provided
+  // Add branded text overlay if prompt is provided
   if (prompt && prompt.trim()) {
     clips.push({
       asset: {
         type: 'html',
-        html: `<div style="display:flex;align-items:flex-end;justify-content:center;height:100%;padding:60px;background:linear-gradient(transparent 60%, rgba(0,0,0,0.7) 100%);">
-          <p style="font-family:'Montserrat',sans-serif;font-size:48px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 10px rgba(0,0,0,0.8);">${prompt.substring(0, 100)}</p>
+        html: `<div style="display:flex;align-items:flex-end;justify-content:center;height:100%;padding:60px;background:linear-gradient(transparent 50%, ${config.colorScheme.secondary}ee 100%);">
+          <div style="text-align:center;">
+            <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};text-align:center;font-weight:${config.typography.fontWeight};text-shadow:0 4px 20px rgba(0,0,0,0.8);line-height:1.2;">${prompt.substring(0, 100)}</p>
+            <div style="margin-top:20px;width:60px;height:4px;background:${config.colorScheme.primary};margin:20px auto 0;"></div>
+          </div>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
@@ -332,11 +337,9 @@ function buildImageVideoEdit(imageUrl, prompt, duration, dimensions) {
   
   return {
     timeline: {
-      background: '#000000',
+      background: config.colorScheme.secondary,
       fonts: [
-        {
-          src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'
-        }
+        { src: `https://fonts.googleapis.com/css2?family=${config.typography.fontFamily.replace(' ', '+')}:wght@400;700&display=swap` }
       ],
       tracks: [{ clips }]
     },
