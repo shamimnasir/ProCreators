@@ -827,18 +827,7 @@ export default function AIVideoStudioPage() {
                     }`}
                     onClick={() => setVideoSource('stock')}
                   >
-                    <RadioGroupItem value="stock" id="stock" className="mt-1" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">📹</span>
-                        <Label htmlFor="stock" className="font-semibold cursor-pointer">Stock Videos</Label>
-                        <Badge variant="secondary" className="text-xs">Fast</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        High-quality HD footage from Pexels • ~30s render
-                      </p>
-                    </div>
-                  </div>
+                    <RadioGroupItem value="stock" id="stock" className="mt-1 hidden" />
                   
                   <div 
                     className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
@@ -854,14 +843,13 @@ export default function AIVideoStudioPage() {
                         <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">Fal.ai</Badge>
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Ovi $0.04/s</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Pixverse $0.04/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Pixverse $0.04</Badge>
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Wan $0.05/s</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Minimax $0.05/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Hunyuan $0.05/s</Badge>
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">🏆 Kling $0.07/s</Badge>
                       </div>
                       <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
-                        Auto-selects cheapest working model • Real AI video with motion
+                        100% AI-generated video • Auto-selects cheapest working model
                       </p>
                     </div>
                   </div>
@@ -876,11 +864,14 @@ export default function AIVideoStudioPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">✨</span>
-                        <Label htmlFor="hybrid" className="font-semibold cursor-pointer">Hybrid Mix</Label>
+                        <Label htmlFor="hybrid" className="font-semibold cursor-pointer">AI + Stock Hybrid</Label>
                         <Badge className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500">Best Value</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        AI video for key moments + HD stock B-roll • ~1-2min render
+                        AI video for key scenes + HD stock B-roll (auto-searched by keywords)
+                      </p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        📹 3-second auto-trim • 🔍 Keyword search • 📝 Text overlay
                       </p>
                     </div>
                   </div>
@@ -891,12 +882,11 @@ export default function AIVideoStudioPage() {
               <div className="space-y-3 pt-4 border-t">
                 <div className={`p-4 rounded-lg border ${
                   videoSource === 'ai' ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200 dark:border-purple-800' :
-                  videoSource === 'hybrid' ? 'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200 dark:border-blue-800' :
-                  'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800'
+                  'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200 dark:border-blue-800'
                 }`}>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">
-                      {videoSource === 'ai' ? '🎨' : videoSource === 'hybrid' ? '✨' : '📹'}
+                      {videoSource === 'ai' ? '🎨' : '✨'}
                     </span>
                     <div>
                       <p className={`font-semibold ${
