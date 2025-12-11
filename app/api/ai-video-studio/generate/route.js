@@ -270,8 +270,6 @@ function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
     },
     output: {
       format: 'mp4',
-      resolution: 'hd',
-      aspectRatio: dimensions.width > dimensions.height ? '16:9' : '9:16',
       size: {
         width: dimensions.width,
         height: dimensions.height
