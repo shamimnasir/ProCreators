@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir, unlink } from 'fs/promises'
+import { writeFile, mkdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
@@ -32,13 +32,13 @@ export async function POST(request) {
     const formData = await request.formData()
     const provider = formData.get('provider') || 'shotstack' // Default to Shotstack
     const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
-    const prompt = formData.get('prompt')
+    const prompt = formData.get('prompt') || ''
     const duration = parseInt(formData.get('duration') || '5')
     const format = formData.get('format') || 'portrait'
     const templateId = formData.get('templateId') || 'custom'
     const imageFile = formData.get('image')
     
-    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s`)
+    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s, HasImage: ${!!imageFile}`)
     
     let result
     
@@ -100,13 +100,15 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   // Build the edit JSON based on mode
   let editJson
   
-  if (mode === 'text-to-video' || mode === 'slideshow') {
+  if (mode === 'image-to-video' && imageFile) {
+    // For image-to-video, first upload the image to Shotstack Serve API
+    console.log(`[${jobId}] Uploading image to Shotstack Serve...`)
+    const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
+    console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
+    editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions)
+  } else if (mode === 'text-to-video' || mode === 'slideshow' || !imageFile) {
     // Create a text animation video with background and text overlays
     editJson = buildTextVideoEdit(prompt, duration, dimensions, templateId)
-  } else if (mode === 'image-to-video' && imageFile) {
-    // For image-to-video, we'll create a Ken Burns effect video
-    // First, upload the image to get a URL (or use a placeholder for now)
-    editJson = buildImageVideoEdit(prompt, duration, dimensions)
   } else {
     // Default: create a simple animated video
     editJson = buildDefaultVideoEdit(prompt, duration, dimensions)
@@ -127,7 +129,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   if (!renderResponse.ok) {
     const errorText = await renderResponse.text()
     console.error(`[${jobId}] Shotstack render error:`, errorText)
-    throw new Error(`Shotstack render failed: ${renderResponse.status}`)
+    throw new Error(`Shotstack render failed: ${renderResponse.status} - ${errorText}`)
   }
   
   const renderData = await renderResponse.json()
@@ -183,10 +185,42 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   }
 }
 
+// Upload image to Shotstack Serve API
+async function uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId) {
+  try {
+    // Read the image as buffer
+    const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
+    const mimeType = imageFile.type || 'image/jpeg'
+    const extension = mimeType.split('/')[1] || 'jpg'
+    
+    // For Shotstack, we need to use a publicly accessible URL
+    // Option 1: Upload to Shotstack's serve endpoint
+    // Option 2: Save locally and serve via public folder
+    
+    // Using Option 2: Save to public folder and return URL
+    const publicDir = join(process.cwd(), 'public', 'ai-video-uploads')
+    await mkdir(publicDir, { recursive: true })
+    
+    const fileName = `${jobId}.${extension}`
+    const filePath = join(publicDir, fileName)
+    await writeFile(filePath, imageBuffer)
+    
+    // Return the public URL
+    const publicUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/ai-video-uploads/${fileName}`
+    console.log(`[${jobId}] Image saved to: ${publicUrl}`)
+    
+    return publicUrl
+  } catch (error) {
+    console.error(`[${jobId}] Image upload error:`, error)
+    // Return a sample image as fallback
+    return 'https://shotstack-assets.s3.amazonaws.com/images/earth.jpg'
+  }
+}
+
 // Build edit JSON for text/prompt-based video
 function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
   // Create text slides from the prompt
-  const lines = prompt.split('\n').filter(l => l.trim()).slice(0, 5)
+  const lines = prompt ? prompt.split('\n').filter(l => l.trim()).slice(0, 5) : ['Your Video']
   const slideDuration = Math.max(2, Math.floor(duration / Math.max(1, lines.length)))
   
   // Color schemes based on template
@@ -238,26 +272,6 @@ function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
     })
   })
   
-  // If no lines, add the full prompt as one slide
-  if (lines.length === 0) {
-    clips.push({
-      asset: {
-        type: 'html',
-        html: `<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
-          <p style="font-family:'Montserrat',sans-serif;font-size:60px;color:${colors.text};font-weight:bold;">${prompt.substring(0, 200)}</p>
-        </div>`,
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      start: 0,
-      length: duration,
-      transition: {
-        in: 'fade',
-        out: 'fade'
-      }
-    })
-  }
-  
   return {
     timeline: {
       background: colors.bg,
@@ -280,33 +294,49 @@ function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
 }
 
 // Build edit JSON for image-based video with Ken Burns effect
-function buildImageVideoEdit(imageUrl, duration, dimensions) {
-  // Use a sample image for testing if no URL provided
-  const sampleImage = imageUrl || 'https://shotstack-assets.s3.amazonaws.com/images/earth.jpg'
+function buildImageVideoEdit(imageUrl, prompt, duration, dimensions) {
+  const clips = [
+    {
+      asset: {
+        type: 'image',
+        src: imageUrl
+      },
+      start: 0,
+      length: duration,
+      fit: 'cover',
+      effect: 'zoomIn',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  ]
+  
+  // Add text overlay if prompt is provided
+  if (prompt && prompt.trim()) {
+    clips.push({
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;align-items:flex-end;justify-content:center;height:100%;padding:60px;background:linear-gradient(transparent 60%, rgba(0,0,0,0.7) 100%);">
+          <p style="font-family:'Montserrat',sans-serif;font-size:48px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 10px rgba(0,0,0,0.8);">${prompt.substring(0, 100)}</p>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    })
+  }
   
   return {
     timeline: {
       background: '#000000',
-      tracks: [
+      fonts: [
         {
-          clips: [
-            {
-              asset: {
-                type: 'image',
-                src: sampleImage
-              },
-              start: 0,
-              length: duration,
-              fit: 'cover',
-              effect: 'zoomIn', // Ken Burns zoom effect
-              transition: {
-                in: 'fade',
-                out: 'fade'
-              }
-            }
-          ]
+          src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'
         }
-      ]
+      ],
+      tracks: [{ clips }]
     },
     output: {
       format: 'mp4',
@@ -336,7 +366,7 @@ function buildDefaultVideoEdit(prompt, duration, dimensions) {
               asset: {
                 type: 'html',
                 html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:60px;">
-                  <p style="font-family:'Montserrat',sans-serif;font-size:72px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 20px rgba(0,0,0,0.5);">${prompt.substring(0, 150)}</p>
+                  <p style="font-family:'Montserrat',sans-serif;font-size:72px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 20px rgba(0,0,0,0.5);">${(prompt || 'Your Video').substring(0, 150)}</p>
                 </div>`,
                 width: dimensions.width,
                 height: dimensions.height
@@ -368,14 +398,11 @@ function buildDefaultVideoEdit(prompt, duration, dimensions) {
 async function generateWithReplicate({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
   console.log(`[${jobId}] Using Replicate for AI video generation...`)
   
-  const Replicate = require('replicate').default
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
   if (!replicateKey) {
     throw new Error('Replicate API key not configured. Please add REPLICATE_API_TOKEN to environment variables.')
   }
-  
-  const replicate = new Replicate({ auth: replicateKey })
   
   // Get format dimensions
   const dimensions = format === 'portrait' 
@@ -393,28 +420,47 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     
     console.log(`[${jobId}] Running SVD image-to-video...`)
     
-    // Use Stable Video Diffusion
-    let prediction = await replicate.predictions.create({
-      version: '3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
-      input: {
-        input_image: imageDataUrl,
-        video_length: '25_frames_with_svd_xt',
-        sizing_strategy: 'maintain_aspect_ratio',
-        frames_per_second: 6,
-        motion_bucket_id: 127,
-        cond_aug: 0.02
-      }
+    // Use Stable Video Diffusion via Replicate API directly
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${replicateKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        version: '3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
+        input: {
+          input_image: imageDataUrl,
+          video_length: '25_frames_with_svd_xt',
+          sizing_strategy: 'maintain_aspect_ratio',
+          frames_per_second: 6,
+          motion_bucket_id: 127,
+          cond_aug: 0.02
+        }
+      })
     })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Replicate API error: ${response.status} - ${errorText}`)
+    }
+    
+    let prediction = await response.json()
+    console.log(`[${jobId}] Prediction started: ${prediction.id}`)
     
     // Poll until complete
     while (!['succeeded', 'failed', 'canceled'].includes(prediction.status)) {
       await new Promise(r => setTimeout(r, 2000))
-      prediction = await replicate.predictions.get(prediction.id)
+      
+      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { 'Authorization': `Bearer ${replicateKey}` }
+      })
+      prediction = await statusResponse.json()
       console.log(`[${jobId}] SVD status: ${prediction.status}`)
     }
     
     if (prediction.status !== 'succeeded') {
-      throw new Error(`SVD generation failed: ${prediction.status}`)
+      throw new Error(`SVD generation failed: ${prediction.error || prediction.status}`)
     }
     
     videoUrl = extractVideoUrl(prediction.output)
@@ -424,29 +470,48 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     console.log(`[${jobId}] Running ZeroScope text-to-video...`)
     
     const formattedPrompt = format === 'portrait'
-      ? `${prompt}, vertical video, 9:16 aspect ratio, high quality`
-      : `${prompt}, horizontal video, 16:9 aspect ratio, cinematic, high quality`
+      ? `${prompt || 'beautiful scenery'}, vertical video, 9:16 aspect ratio, high quality`
+      : `${prompt || 'beautiful scenery'}, horizontal video, 16:9 aspect ratio, cinematic, high quality`
     
-    let prediction = await replicate.predictions.create({
-      version: '9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
-      input: {
-        prompt: formattedPrompt,
-        num_frames: 36,
-        fps: 8,
-        width: dimensions.width,
-        height: dimensions.height
-      }
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${replicateKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        version: '9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
+        input: {
+          prompt: formattedPrompt,
+          num_frames: 36,
+          fps: 8,
+          width: dimensions.width,
+          height: dimensions.height
+        }
+      })
     })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Replicate API error: ${response.status} - ${errorText}`)
+    }
+    
+    let prediction = await response.json()
+    console.log(`[${jobId}] Prediction started: ${prediction.id}`)
     
     // Poll until complete
     while (!['succeeded', 'failed', 'canceled'].includes(prediction.status)) {
       await new Promise(r => setTimeout(r, 2000))
-      prediction = await replicate.predictions.get(prediction.id)
+      
+      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { 'Authorization': `Bearer ${replicateKey}` }
+      })
+      prediction = await statusResponse.json()
       console.log(`[${jobId}] ZeroScope status: ${prediction.status}`)
     }
     
     if (prediction.status !== 'succeeded') {
-      throw new Error(`ZeroScope generation failed: ${prediction.status}`)
+      throw new Error(`ZeroScope generation failed: ${prediction.error || prediction.status}`)
     }
     
     videoUrl = extractVideoUrl(prediction.output)
