@@ -769,24 +769,158 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
 }
 
 // Parse prompt into individual scene descriptions
+// ==================== SMART SCENE PARSER ====================
+// Extracts scene context from scripts for better AI video generation
+// Handles: Time of day, mood, location, weather, actions
+
+function extractSceneContext(text) {
+  const context = {
+    timeOfDay: null,
+    mood: null,
+    location: null,
+    weather: null,
+    lighting: null
+  }
+  
+  const lowerText = text.toLowerCase()
+  
+  // Time of day detection (English + Bengali + Hindi)
+  const timePatterns = {
+    night: /night|midnight|3\s*am|2\s*am|1\s*am|4\s*am|রাত|মধ্যরাত|রাত্রি|रात|आधी रात/i,
+    evening: /evening|dusk|sunset|twilight|সন্ধ্যা|গোধূলি|शाम|सूर्यास्त/i,
+    morning: /morning|dawn|sunrise|সকাল|ভোর|সূর্যোদয়|सुबह|भोर/i,
+    afternoon: /afternoon|noon|midday|দুপুর|বিকেল|दोपहर/i,
+    day: /day|daytime|bright|দিন|दिन/i
+  }
+  
+  for (const [time, pattern] of Object.entries(timePatterns)) {
+    if (pattern.test(lowerText)) {
+      context.timeOfDay = time
+      break
+    }
+  }
+  
+  // Mood detection
+  const moodPatterns = {
+    dark: /dark|scary|horror|fear|ভয়|অন্ধকার|डरावना|अंधेरा/i,
+    romantic: /love|romantic|heart|ভালোবাসা|রোমান্টিক|प्यार|रोमांटिक/i,
+    sad: /sad|cry|tear|কান্না|দুঃখ|रोना|दुखी/i,
+    happy: /happy|joy|smile|laugh|হাসি|আনন्দ|खुश|हंसी/i,
+    tense: /tension|suspense|nervous|উত্তেজনা|সন্দেহ|तनाव|रहस्य/i,
+    peaceful: /calm|peace|serene|quiet|শান্ত|শান্তি|शांत|शांति/i
+  }
+  
+  for (const [mood, pattern] of Object.entries(moodPatterns)) {
+    if (pattern.test(lowerText)) {
+      context.mood = mood
+      break
+    }
+  }
+  
+  // Location detection
+  const locationPatterns = {
+    indoor: /room|house|home|bedroom|kitchen|office|ঘর|বাড়ি|অফিস|घर|कमरा|ऑफिस/i,
+    outdoor: /outside|street|road|garden|park|forest|বাইরে|রাস্তা|বাগান|बाहर|सड़क|पार्क/i,
+    urban: /city|building|urban|শহর|বিল्ডিং|शहर|इमारत/i,
+    nature: /nature|mountain|river|sea|ocean|প্রকৃতি|পাহাড়|নদী|समुद्र|पहाड़|नदी/i
+  }
+  
+  for (const [loc, pattern] of Object.entries(locationPatterns)) {
+    if (pattern.test(lowerText)) {
+      context.location = loc
+      break
+    }
+  }
+  
+  // Weather detection
+  const weatherPatterns = {
+    rain: /rain|storm|thunder|বৃষ্টি|ঝড়|बारिश|तूफान/i,
+    snow: /snow|winter|cold|তুষার|শীত|बर्फ|सर्दी/i,
+    sunny: /sun|sunny|bright|রোদ|সূর্য|धूप|सूरज/i,
+    cloudy: /cloud|overcast|মেঘ|মেঘলা|बादल/i
+  }
+  
+  for (const [weather, pattern] of Object.entries(weatherPatterns)) {
+    if (pattern.test(lowerText)) {
+      context.weather = weather
+      break
+    }
+  }
+  
+  // Build lighting instruction based on context
+  if (context.timeOfDay === 'night') {
+    context.lighting = 'dark nighttime scene, moonlight, shadows, low-key lighting, night atmosphere'
+  } else if (context.timeOfDay === 'evening') {
+    context.lighting = 'golden hour, warm sunset lighting, dusk atmosphere'
+  } else if (context.timeOfDay === 'morning') {
+    context.lighting = 'soft morning light, sunrise, gentle rays, dawn atmosphere'
+  } else if (context.mood === 'dark') {
+    context.lighting = 'dark moody lighting, dramatic shadows, low-key'
+  }
+  
+  return context
+}
+
 function parsePromptToScenes(prompt, numScenes) {
   // Split by newlines or sentences
   let parts = prompt.split(/\n+/).filter(l => l.trim())
   
   if (parts.length < numScenes) {
-    // Split by sentences
-    parts = prompt.split(/[.!?]+/).filter(l => l.trim()).map(l => l.trim())
+    // Split by sentences (handles English, Bengali, Hindi)
+    parts = prompt.split(/[.!?।]+/).filter(l => l.trim()).map(l => l.trim())
   }
   
+  // Extract overall scene context from the full prompt
+  const globalContext = extractSceneContext(prompt)
+  
+  // Enhance each scene with context
+  const enhancedParts = parts.map((part, index) => {
+    const sceneContext = extractSceneContext(part)
+    
+    // Merge local context with global context (local takes priority)
+    const finalContext = {
+      timeOfDay: sceneContext.timeOfDay || globalContext.timeOfDay,
+      mood: sceneContext.mood || globalContext.mood,
+      location: sceneContext.location || globalContext.location,
+      weather: sceneContext.weather || globalContext.weather,
+      lighting: sceneContext.lighting || globalContext.lighting
+    }
+    
+    // Build enhanced prompt
+    let enhanced = part
+    
+    // Add lighting/time instructions
+    if (finalContext.lighting) {
+      enhanced += `, ${finalContext.lighting}`
+    } else if (finalContext.timeOfDay) {
+      enhanced += `, ${finalContext.timeOfDay} scene`
+    }
+    
+    // Add mood
+    if (finalContext.mood) {
+      enhanced += `, ${finalContext.mood} atmosphere`
+    }
+    
+    // Add weather
+    if (finalContext.weather) {
+      enhanced += `, ${finalContext.weather} weather`
+    }
+    
+    return enhanced
+  })
+  
   // Ensure we have enough scenes
-  while (parts.length < numScenes) {
-    // Duplicate the last part with variations
-    const lastPart = parts[parts.length - 1] || prompt
-    parts.push(lastPart + ', different angle')
+  while (enhancedParts.length < numScenes) {
+    const lastPart = enhancedParts[enhancedParts.length - 1] || prompt
+    enhancedParts.push(lastPart + ', different angle, continuous scene')
   }
   
   // Take only what we need
-  return parts.slice(0, numScenes)
+  const scenes = enhancedParts.slice(0, numScenes)
+  
+  console.log(`[Scene Parser] Extracted ${scenes.length} scenes with context:`, globalContext)
+  
+  return scenes
 }
 
 export async function POST(request) {
