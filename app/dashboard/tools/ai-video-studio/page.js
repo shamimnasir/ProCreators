@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,33 +14,41 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
-  Play, Wand2, Monitor, Smartphone, Clock, Zap, Film,
-  Type, Music, Mic, ChevronRight, Info
+  Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
+  Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X
 } from 'lucide-react'
 
 // Import configurations
-import { AI_VIDEO_USECASES, DURATION_OPTIONS, FORMAT_OPTIONS, getUseCaseById } from '@/config/ai-video-usecases'
+import { DURATION_OPTIONS, FORMAT_OPTIONS } from '@/config/ai-video-usecases'
+import { 
+  AI_VIDEO_TEMPLATES, 
+  TEMPLATE_CATEGORIES, 
+  getTemplateById, 
+  getTemplatesByCategory,
+  getPopularTemplates,
+  searchTemplates 
+} from '@/config/ai-video-templates'
 
 export default function AIVideoStudioPage() {
-  // Mode: image-to-video or text-to-video
-  const [mode, setMode] = useState('image-to-video')
+  // View state: 'gallery' or 'create'
+  const [view, setView] = useState('gallery')
   
-  // Use case selection
-  const [selectedUseCase, setSelectedUseCase] = useState('make-anything')
+  // Template selection
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [activeCategory, setActiveCategory] = useState('popular')
+  const [searchQuery, setSearchQuery] = useState('')
   
   // Input state
   const [prompt, setPrompt] = useState('')
   const [enhancedPrompt, setEnhancedPrompt] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  const [photos, setPhotos] = useState([])
   
-  // Output settings
-  const [duration, setDuration] = useState(5)
+  // Output settings (from template defaults)
+  const [duration, setDuration] = useState(30)
   const [format, setFormat] = useState('portrait')
-  
-  // Voice & Audio (for future integration)
-  const [voiceOption, setVoiceOption] = useState('none')
-  const [textOverlay, setTextOverlay] = useState({ text: '', position: 'bottom', color: 'yellow' })
+  const [language, setLanguage] = useState('en')
   
   // Generation state
   const [generating, setGenerating] = useState(false)
@@ -53,53 +60,74 @@ export default function AIVideoStudioPage() {
   
   const { toast } = useToast()
   const fileInputRef = useRef(null)
-  const videoRef = useRef(null)
+  const multiFileInputRef = useRef(null)
 
-  // Get current use case config
-  const currentUseCase = getUseCaseById(selectedUseCase)
-  const currentDuration = DURATION_OPTIONS.find(d => d.value === duration)
-  const currentFormat = FORMAT_OPTIONS.find(f => f.value === format)
+  // Get templates to display
+  const displayTemplates = searchQuery 
+    ? searchTemplates(searchQuery)
+    : getTemplatesByCategory(activeCategory)
 
-  // Handle image upload
+  // Select a template and go to create view
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(template)
+    setDuration(template.defaultSettings.duration)
+    setFormat(template.defaultSettings.format)
+    if (template.defaultSettings.language) {
+      setLanguage(template.defaultSettings.language)
+    }
+    setPrompt('')
+    setEnhancedPrompt('')
+    setImageFile(null)
+    setImagePreview(null)
+    setPhotos([])
+    setVideoResult(null)
+    setView('create')
+  }
+
+  // Go back to gallery
+  const handleBackToGallery = () => {
+    setView('gallery')
+    setSelectedTemplate(null)
+  }
+
+  // Handle single image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: 'Invalid File',
-          description: 'Please upload an image file (JPG, PNG, WebP)',
-          variant: 'destructive'
-        })
+        toast({ title: 'Invalid File', description: 'Please upload an image file', variant: 'destructive' })
         return
       }
-      
       if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: 'File Too Large',
-          description: 'Image must be less than 10MB',
-          variant: 'destructive'
-        })
+        toast({ title: 'File Too Large', description: 'Image must be less than 10MB', variant: 'destructive' })
         return
       }
-      
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
-      
-      toast({
-        title: 'Image Uploaded',
-        description: 'Ready for video generation'
-      })
     }
+  }
+
+  // Handle multiple photos upload
+  const handlePhotosUpload = (e) => {
+    const files = Array.from(e.target.files)
+    const validFiles = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024).slice(0, 10)
+    const newPhotos = validFiles.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }))
+    setPhotos(prev => [...prev, ...newPhotos].slice(0, 10))
+    toast({ title: 'Photos Added', description: `${newPhotos.length} photos uploaded` })
+  }
+
+  // Remove a photo
+  const removePhoto = (index) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
   }
 
   // Enhance prompt with AI
   const handleEnhancePrompt = async () => {
     if (!prompt.trim()) {
-      toast({
-        title: 'Prompt Required',
-        description: 'Enter a description to enhance',
-        variant: 'destructive'
-      })
+      toast({ title: 'Input Required', description: 'Enter something to enhance', variant: 'destructive' })
       return
     }
     
@@ -109,51 +137,37 @@ export default function AIVideoStudioPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
-          useCaseId: selectedUseCase,
-          platform: format === 'portrait' ? 'instagram' : 'youtube',
+          useCaseId: selectedTemplate?.id || 'make-anything',
           duration,
-          format
+          format,
+          language
         })
       })
       
       const data = await response.json()
-      
       if (data.success) {
         setEnhancedPrompt(data.enhancedPrompt)
-        toast({
-          title: 'Prompt Enhanced!',
-          description: `Optimized for ${currentUseCase.name}`
-        })
+        toast({ title: 'Prompt Enhanced!', description: 'Optimized for better results' })
       } else {
         throw new Error(data.error)
       }
     } catch (error) {
-      toast({
-        title: 'Enhancement Failed',
-        description: error.message,
-        variant: 'destructive'
-      })
+      toast({ title: 'Enhancement Failed', description: error.message, variant: 'destructive' })
     }
   }
 
   // Generate video
   const handleGenerate = async () => {
-    // Validation
-    if (mode === 'image-to-video' && !imageFile) {
-      toast({
-        title: 'Image Required',
-        description: 'Please upload an image to animate',
-        variant: 'destructive'
-      })
+    // Validation based on input type
+    const inputType = selectedTemplate?.inputType || 'prompt'
+    
+    if (['image', 'photos'].includes(inputType) && !imageFile && photos.length === 0) {
+      toast({ title: 'Image Required', description: 'Please upload an image', variant: 'destructive' })
       return
     }
     
-    if (mode === 'text-to-video' && !prompt.trim()) {
-      toast({
-        title: 'Prompt Required',
-        description: 'Please enter a description for your video',
-        variant: 'destructive'
-      })
+    if (['prompt', 'script', 'story-script', 'quote', 'topic', 'facts', 'chat'].includes(inputType) && !prompt.trim()) {
+      toast({ title: 'Input Required', description: 'Please enter your content', variant: 'destructive' })
       return
     }
     
@@ -163,27 +177,30 @@ export default function AIVideoStudioPage() {
     setVideoResult(null)
     
     try {
-      // Prepare form data
       const formData = new FormData()
-      formData.append('mode', mode)
+      formData.append('mode', selectedTemplate?.defaultSettings.mode || 'text-to-video')
       formData.append('prompt', enhancedPrompt || prompt)
       formData.append('duration', duration)
       formData.append('format', format)
-      formData.append('useCaseId', selectedUseCase)
+      formData.append('templateId', selectedTemplate?.id || 'make-anything')
+      formData.append('language', language)
       
       if (imageFile) {
         formData.append('image', imageFile)
       }
       
-      if (textOverlay.text) {
-        formData.append('textOverlay', JSON.stringify(textOverlay))
+      if (photos.length > 0) {
+        photos.forEach((photo, idx) => {
+          formData.append(`photo_${idx}`, photo.file)
+        })
+        formData.append('photoCount', photos.length)
       }
       
-      // Simulate progress for UX
-      const segments = currentDuration.segments
+      // Progress simulation
+      const segments = Math.ceil(duration / 5)
       let currentProgress = 0
       const progressInterval = setInterval(() => {
-        currentProgress += 100 / (segments * 30) // ~30 updates per segment
+        currentProgress += 100 / (segments * 25)
         if (currentProgress < 90) {
           setProgress(currentProgress)
           const currentSegment = Math.floor((currentProgress / 100) * segments) + 1
@@ -191,35 +208,24 @@ export default function AIVideoStudioPage() {
         }
       }, 1000)
       
-      // Make API call
       const response = await fetch('/api/ai-video-studio/generate', {
         method: 'POST',
         body: formData
       })
       
       clearInterval(progressInterval)
-      
       const data = await response.json()
       
       if (data.success) {
         setProgress(100)
         setProgressMessage('Complete!')
         setVideoResult(data)
-        
-        toast({
-          title: '🎬 Video Generated!',
-          description: `${duration}s ${format === 'portrait' ? '9:16' : '16:9'} video ready`
-        })
+        toast({ title: '🎬 Video Generated!', description: `${duration}s video ready` })
       } else {
         throw new Error(data.error)
       }
-      
     } catch (error) {
-      toast({
-        title: 'Generation Failed',
-        description: error.message,
-        variant: 'destructive'
-      })
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
     } finally {
       setGenerating(false)
     }
@@ -228,206 +234,327 @@ export default function AIVideoStudioPage() {
   // Download video
   const handleDownload = async () => {
     if (!videoResult?.videoUrl) return
-    
     try {
       const response = await fetch(videoResult.videoUrl)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
-      
       const link = document.createElement('a')
       link.href = url
-      link.download = `ai-video-${Date.now()}.mp4`
+      link.download = `${selectedTemplate?.shortName || 'ai-video'}-${Date.now()}.mp4`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-      
-      toast({
-        title: 'Download Started',
-        description: 'Your video is downloading...'
-      })
+      toast({ title: 'Download Started' })
     } catch (error) {
-      toast({
-        title: 'Download Failed',
-        description: error.message,
-        variant: 'destructive'
-      })
+      toast({ title: 'Download Failed', description: error.message, variant: 'destructive' })
     }
   }
 
-  return (
-    <div className="container mx-auto py-6 space-y-6 max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <span className="text-4xl">🎬</span>
-            AI Video Studio
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Generate stunning AI videos from images or text prompts
-          </p>
-        </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          <Sparkles className="h-4 w-4 mr-2" />
-          Powered by AI
-        </Badge>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Panel - Input */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Mode Selection */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Video className="h-5 w-5" />
-                Generation Mode
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={mode} onValueChange={setMode} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="image-to-video" className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    Image to Video
-                  </TabsTrigger>
-                  <TabsTrigger value="text-to-video" className="flex items-center gap-2">
-                    <Type className="h-4 w-4" />
-                    Text to Video
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Image to Video */}
-                <TabsContent value="image-to-video" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label>Upload Image to Animate</Label>
-                    <div 
-                      className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                        imagePreview 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-muted-foreground/25 hover:border-primary/50'
-                      }`}
-                      onClick={() => fileInputRef.current?.click()}
+  // Render input based on template type
+  const renderInput = () => {
+    const inputType = selectedTemplate?.inputType || 'prompt'
+    
+    switch (inputType) {
+      case 'image':
+        return (
+          <div className="space-y-4">
+            <Label>Upload Image</Label>
+            <div 
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                imagePreview ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              {imagePreview ? (
+                <div className="space-y-3">
+                  <img src={imagePreview} alt="Preview" className="max-h-48 mx-auto rounded-lg shadow-lg" />
+                  <p className="text-sm text-muted-foreground">Click to change</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
+                  <p className="font-medium">Drop an image or click to upload</p>
+                  <p className="text-sm text-muted-foreground">JPG, PNG, WebP up to 10MB</p>
+                </div>
+              )}
+            </div>
+            <Textarea
+              placeholder={selectedTemplate?.inputPlaceholder || 'Describe what you want...'}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={3}
+            />
+          </div>
+        )
+      
+      case 'photos':
+        return (
+          <div className="space-y-4">
+            <Label>Upload Photos (up to 10)</Label>
+            <div 
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50"
+              onClick={() => multiFileInputRef.current?.click()}
+            >
+              <input
+                ref={multiFileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePhotosUpload}
+              />
+              <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+              <p className="font-medium">Add Photos</p>
+            </div>
+            {photos.length > 0 && (
+              <div className="grid grid-cols-5 gap-2">
+                {photos.map((photo, idx) => (
+                  <div key={idx} className="relative group">
+                    <img src={photo.preview} alt={`Photo ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                    <button
+                      onClick={() => removePhoto(idx)}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-0.5 rounded opacity-0 group-hover:opacity-100"
                     >
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
-                      
-                      {imagePreview ? (
-                        <div className="space-y-3">
-                          <img 
-                            src={imagePreview} 
-                            alt="Preview" 
-                            className="max-h-48 mx-auto rounded-lg shadow-lg"
-                          />
-                          <p className="text-sm text-muted-foreground">
-                            Click to change image
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">Drop an image or click to upload</p>
-                            <p className="text-sm text-muted-foreground">
-                              JPG, PNG, WebP up to 10MB
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Motion Description (Optional)</Label>
-                    <Textarea
-                      placeholder="Describe how you want the image to animate... (e.g., 'gentle zoom with floating particles', 'dramatic camera rotation')"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </TabsContent>
-
-                {/* Text to Video */}
-                <TabsContent value="text-to-video" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label>Video Description</Label>
-                    <Textarea
-                      placeholder="Describe your video in detail... (e.g., 'A majestic eagle soaring through golden clouds at sunset, cinematic slow motion')"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      rows={4}
-                    />
-                    <div className="flex justify-end">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleEnhancePrompt}
-                        disabled={!prompt.trim()}
-                      >
-                        <Wand2 className="h-4 w-4 mr-1" />
-                        Enhance with AI
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {enhancedPrompt && (
-                    <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                      <Label className="text-green-700 dark:text-green-300">Enhanced Prompt:</Label>
-                      <p className="text-sm mt-1">{enhancedPrompt}</p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-
-          {/* Use Case Selection */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                Use Case
-              </CardTitle>
-              <CardDescription>
-                Select a preset optimized for your content type
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {AI_VIDEO_USECASES.filter(uc => ['make-anything', 'social-media-ads'].includes(uc.id)).map((useCase) => (
-                  <div
-                    key={useCase.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedUseCase === useCase.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-transparent bg-muted/50 hover:border-primary/30'
-                    }`}
-                    onClick={() => setSelectedUseCase(useCase.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{useCase.icon}</span>
-                      <div>
-                        <p className="font-medium">{useCase.name}</p>
-                        <p className="text-xs text-muted-foreground">{useCase.description}</p>
-                      </div>
-                    </div>
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
                 ))}
               </div>
+            )}
+            <Textarea
+              placeholder={selectedTemplate?.inputPlaceholder || 'Describe the vibe...'}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={2}
+            />
+          </div>
+        )
+      
+      case 'url':
+        return (
+          <div className="space-y-4">
+            <Label>Product URL</Label>
+            <Input
+              placeholder="Paste Amazon, eBay, or product URL..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+          </div>
+        )
+      
+      default:
+        return (
+          <div className="space-y-4">
+            <Label>{inputType === 'chat' ? 'Chat Conversation' : inputType === 'facts' ? 'Enter Facts' : 'Your Content'}</Label>
+            <Textarea
+              placeholder={selectedTemplate?.inputPlaceholder || 'Enter your content...'}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={inputType === 'chat' || inputType === 'facts' ? 8 : 5}
+              className="font-mono text-sm"
+            />
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={handleEnhancePrompt} disabled={!prompt.trim()}>
+                <Wand2 className="h-4 w-4 mr-1" />
+                Enhance with AI
+              </Button>
+            </div>
+            {enhancedPrompt && (
+              <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <Label className="text-green-700 dark:text-green-300 text-xs">Enhanced:</Label>
+                <p className="text-sm mt-1">{enhancedPrompt}</p>
+              </div>
+            )}
+          </div>
+        )
+    }
+  }
+
+  // ==================== GALLERY VIEW ====================
+  if (view === 'gallery') {
+    return (
+      <div className="container mx-auto py-6 space-y-6 max-w-7xl">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <span className="text-4xl">🎬</span>
+              AI Video Studio
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Choose a template to create stunning AI videos in minutes
+            </p>
+          </div>
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            <Sparkles className="h-4 w-4 mr-2" />
+            {AI_VIDEO_TEMPLATES.length} Templates
+          </Badge>
+        </div>
+
+        {/* Search */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search templates... (e.g., 'story', 'business', 'meme')"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Category Tabs */}
+        {!searchQuery && (
+          <div className="flex gap-2 flex-wrap">
+            {TEMPLATE_CATEGORIES.map((cat) => (
+              <Button
+                key={cat.id}
+                variant={activeCategory === cat.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveCategory(cat.id)}
+                className="gap-2"
+              >
+                <span>{cat.icon}</span>
+                {cat.name}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* Template Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {displayTemplates.map((template) => (
+            <Card 
+              key={template.id}
+              className={`cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] bg-gradient-to-br ${template.color} text-white overflow-hidden`}
+              onClick={() => handleSelectTemplate(template)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <span className="text-3xl">{template.icon}</span>
+                  <div className="flex gap-1">
+                    {template.isPopular && (
+                      <Badge className="bg-white/20 text-white text-xs">🔥 Popular</Badge>
+                    )}
+                    {template.isNew && (
+                      <Badge className="bg-white/20 text-white text-xs">✨ New</Badge>
+                    )}
+                  </div>
+                </div>
+                <CardTitle className="text-lg">{template.name}</CardTitle>
+                <CardDescription className="text-white/80 text-sm">
+                  {template.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {template.perfectFor.slice(0, 2).map((tag, idx) => (
+                    <span key={idx} className="text-xs bg-white/20 px-2 py-0.5 rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3 mt-3 text-xs text-white/70">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {template.defaultSettings.duration}s
+                  </span>
+                  <span className="flex items-center gap-1">
+                    {template.defaultSettings.format === 'portrait' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                    {template.defaultSettings.format === 'portrait' ? '9:16' : '16:9'}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {displayTemplates.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No templates found for "{searchQuery}"</p>
+            <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
+          </div>
+        )}
+
+        {/* Custom Creation Card */}
+        <Card className="border-dashed border-2 hover:border-primary/50 cursor-pointer transition-all"
+          onClick={() => handleSelectTemplate({
+            id: 'custom',
+            name: 'Custom Creation',
+            shortName: 'Custom',
+            description: 'Start from scratch with full control',
+            icon: '✨',
+            category: 'custom',
+            color: 'from-gray-500 to-gray-600',
+            perfectFor: ['Advanced users', 'Custom projects'],
+            defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
+            inputType: 'prompt',
+            inputPlaceholder: 'Describe your video in detail...'
+          })}
+        >
+          <CardContent className="flex items-center justify-center py-8 gap-4">
+            <Sparkles className="h-8 w-8 text-muted-foreground" />
+            <div>
+              <p className="font-semibold">Can't find what you need?</p>
+              <p className="text-sm text-muted-foreground">Create a custom video from scratch</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // ==================== CREATE VIEW ====================
+  return (
+    <div className="container mx-auto py-6 space-y-6 max-w-6xl">
+      {/* Header with Back Button */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={handleBackToGallery}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{selectedTemplate?.icon}</span>
+            <div>
+              <h1 className="text-2xl font-bold">{selectedTemplate?.name}</h1>
+              <p className="text-muted-foreground text-sm">{selectedTemplate?.description}</p>
+            </div>
+          </div>
+        </div>
+        <Badge variant="outline" className="gap-1">
+          <Clock className="h-3 w-3" />
+          {duration}s
+        </Badge>
+        <Badge variant="outline" className="gap-1">
+          {format === 'portrait' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+          {format === 'portrait' ? '9:16' : '16:9'}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Input */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Your Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderInput()}
             </CardContent>
           </Card>
 
-          {/* Output Settings */}
+          {/* Settings */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Film className="h-5 w-5" />
                 Output Settings
@@ -436,146 +563,78 @@ export default function AIVideoStudioPage() {
             <CardContent className="space-y-6">
               {/* Duration */}
               <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Duration
-                </Label>
-                <RadioGroup 
-                  value={duration.toString()} 
-                  onValueChange={(v) => setDuration(parseInt(v))}
-                  className="grid grid-cols-3 gap-3"
-                >
+                <Label>Duration</Label>
+                <div className="grid grid-cols-3 gap-3">
                   {DURATION_OPTIONS.map((opt) => (
-                    <div key={opt.value} className="relative">
-                      <RadioGroupItem
-                        value={opt.value.toString()}
-                        id={`duration-${opt.value}`}
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor={`duration-${opt.value}`}
-                        className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all
-                          peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5
-                          hover:border-primary/50
-                          ${opt.isPremium ? 'border-amber-300' : 'border-muted'}
-                        `}
-                      >
-                        <span className="font-bold text-lg">{opt.label}</span>
-                        <span className="text-xs text-muted-foreground text-center mt-1">
-                          {opt.description}
-                        </span>
-                        {opt.isPremium && (
-                          <Badge variant="secondary" className="mt-2 text-xs">
-                            <Zap className="h-3 w-3 mr-1" />
-                            Long Form
-                          </Badge>
-                        )}
-                      </Label>
+                    <div
+                      key={opt.value}
+                      className={`p-3 border-2 rounded-lg cursor-pointer text-center transition-all ${
+                        duration === opt.value ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                      }`}
+                      onClick={() => setDuration(opt.value)}
+                    >
+                      <p className="font-bold">{opt.label}</p>
+                      <p className="text-xs text-muted-foreground">{opt.segments} segment{opt.segments > 1 ? 's' : ''}</p>
                     </div>
                   ))}
-                </RadioGroup>
+                </div>
               </div>
 
               {/* Format */}
               <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Monitor className="h-4 w-4" />
-                  Format
-                </Label>
-                <RadioGroup 
-                  value={format} 
-                  onValueChange={setFormat}
-                  className="grid grid-cols-2 gap-3"
-                >
+                <Label>Format</Label>
+                <div className="grid grid-cols-2 gap-3">
                   {FORMAT_OPTIONS.map((opt) => (
-                    <div key={opt.value}>
-                      <RadioGroupItem
-                        value={opt.value}
-                        id={`format-${opt.value}`}
-                        className="peer sr-only"
-                      />
-                      <Label
-                        htmlFor={`format-${opt.value}`}
-                        className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all
-                          peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5
-                          border-muted hover:border-primary/50
-                        "
-                      >
-                        <span className="text-2xl">{opt.icon}</span>
-                        <div>
-                          <p className="font-medium">{opt.label}</p>
-                          <p className="text-xs text-muted-foreground">{opt.description}</p>
-                        </div>
-                      </Label>
+                    <div
+                      key={opt.value}
+                      className={`p-3 border-2 rounded-lg cursor-pointer transition-all flex items-center gap-3 ${
+                        format === opt.value ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                      }`}
+                      onClick={() => setFormat(opt.value)}
+                    >
+                      <span className="text-xl">{opt.icon}</span>
+                      <div>
+                        <p className="font-medium">{opt.label}</p>
+                        <p className="text-xs text-muted-foreground">{opt.description}</p>
+                      </div>
                     </div>
                   ))}
-                </RadioGroup>
+                </div>
               </div>
 
-              {/* Text Overlay (Optional) */}
-              <div className="space-y-3 pt-4 border-t">
-                <Label className="flex items-center gap-2">
-                  <Type className="h-4 w-4" />
-                  Text Overlay (Optional)
-                </Label>
-                <Input
-                  placeholder="Add text to your video (e.g., 'SALE 50% OFF')"
-                  value={textOverlay.text}
-                  onChange={(e) => setTextOverlay({ ...textOverlay, text: e.target.value })}
-                />
-                {textOverlay.text && (
-                  <div className="flex gap-2">
-                    <Select 
-                      value={textOverlay.position} 
-                      onValueChange={(v) => setTextOverlay({ ...textOverlay, position: v })}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="top">Top</SelectItem>
-                        <SelectItem value="center">Center</SelectItem>
-                        <SelectItem value="bottom">Bottom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select 
-                      value={textOverlay.color} 
-                      onValueChange={(v) => setTextOverlay({ ...textOverlay, color: v })}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="yellow">🟡 Yellow</SelectItem>
-                        <SelectItem value="red">🔴 Red</SelectItem>
-                        <SelectItem value="green">🟢 Green</SelectItem>
-                        <SelectItem value="blue">🔵 Blue</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
+              {/* Language (for explainers) */}
+              {selectedTemplate?.defaultSettings?.language && (
+                <div className="space-y-3">
+                  <Label>Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="bn">বাংলা (Bengali)</SelectItem>
+                      <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
+                      <SelectItem value="es">Español (Spanish)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Panel - Preview & Generate */}
+        {/* Right: Generate & Preview */}
         <div className="space-y-6">
-          {/* Generate Button */}
-          <Card className={`${currentUseCase.cardBg}`}>
+          <Card className={`bg-gradient-to-br ${selectedTemplate?.color || 'from-violet-500 to-purple-500'} text-white`}>
             <CardContent className="p-6 space-y-4">
-              <div className="text-center space-y-2">
-                <span className="text-4xl">{currentUseCase.icon}</span>
-                <h3 className="font-bold text-lg">{currentUseCase.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {currentDuration?.label} • {currentFormat?.label}
-                </p>
+              <div className="text-center">
+                <span className="text-4xl">{selectedTemplate?.icon}</span>
+                <h3 className="font-bold mt-2">{selectedTemplate?.shortName || selectedTemplate?.name}</h3>
               </div>
               
               <Button
-                className="w-full h-14 text-lg"
-                size="lg"
-                disabled={generating || (mode === 'image-to-video' && !imageFile) || (mode === 'text-to-video' && !prompt.trim())}
+                className="w-full h-12 text-lg bg-white text-black hover:bg-white/90"
+                disabled={generating}
                 onClick={handleGenerate}
               >
                 {generating ? (
@@ -593,35 +652,20 @@ export default function AIVideoStudioPage() {
               
               {generating && (
                 <div className="space-y-2">
-                  <Progress value={progress} className="h-2" />
-                  <p className="text-xs text-center text-muted-foreground">
-                    {progressMessage}
-                  </p>
+                  <Progress value={progress} className="h-2 bg-white/20" />
+                  <p className="text-xs text-center text-white/80">{progressMessage}</p>
                 </div>
               )}
-              
-              {/* Info */}
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div className="flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  <span>Estimated time: {currentDuration?.segments * 30}s - {currentDuration?.segments * 60}s</span>
-                </div>
-                {duration === 60 && (
-                  <p className="text-amber-600 dark:text-amber-400">
-                    ⚡ Long-form videos use advanced chaining technology
-                  </p>
-                )}
-              </div>
             </CardContent>
           </Card>
 
           {/* Video Result */}
           {videoResult && (
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Play className="h-5 w-5" />
-                  Generated Video
+                  Your Video
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -629,52 +673,41 @@ export default function AIVideoStudioPage() {
                   format === 'portrait' ? 'aspect-[9/16]' : 'aspect-video'
                 }`}>
                   <video
-                    ref={videoRef}
                     src={videoResult.videoUrl}
                     controls
-                    className="w-full h-full object-contain"
                     autoPlay
                     loop
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                
                 <div className="flex gap-2">
                   <Button className="flex-1" onClick={handleDownload}>
                     <Download className="h-4 w-4 mr-2" />
                     Download
                   </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setVideoResult(null)
-                      setProgress(0)
-                    }}
-                  >
-                    New Video
+                  <Button variant="outline" onClick={() => setVideoResult(null)}>
+                    New
                   </Button>
-                </div>
-                
-                <div className="text-xs text-muted-foreground">
-                  <p>Duration: {videoResult.duration}s</p>
-                  <p>Format: {videoResult.format === 'portrait' ? '9:16 Portrait' : '16:9 Landscape'}</p>
-                  <p>Segments: {videoResult.segments}</p>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Quick Tips */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">💡 Pro Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground space-y-2">
-              <p>• <strong>Image-to-Video:</strong> Works best with clear, high-quality images</p>
-              <p>• <strong>Text-to-Video:</strong> Be specific about motion, lighting, and style</p>
-              <p>• <strong>Social Ads:</strong> Keep text short and impactful</p>
-              <p>• <strong>Long Form:</strong> Uses AI chaining for seamless transitions</p>
-            </CardContent>
-          </Card>
+          {/* Perfect For */}
+          {selectedTemplate?.perfectFor && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">✨ Perfect For</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.perfectFor.map((tag, idx) => (
+                    <Badge key={idx} variant="secondary">{tag}</Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
