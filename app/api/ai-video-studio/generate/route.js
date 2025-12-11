@@ -106,6 +106,124 @@ function getFallbackVideos(count) {
   }))
 }
 
+// Generate AI video scenes using Replicate
+async function generateAIVideoScenes(prompt, duration, format, jobId) {
+  const replicateKey = process.env.REPLICATE_API_TOKEN
+  
+  if (!replicateKey) {
+    console.log(`[${jobId}] No Replicate key, falling back to stock videos`)
+    return getFallbackVideos(Math.ceil(duration / 5))
+  }
+  
+  const numScenes = Math.ceil(duration / 5) // Each scene is ~5 seconds
+  const aiVideos = []
+  
+  // Parse prompt into scene descriptions
+  const scenes = parsePromptToScenes(prompt, numScenes)
+  
+  console.log(`[${jobId}] Generating ${scenes.length} AI scenes...`)
+  
+  // Get format dimensions for AI generation
+  const dimensions = format === 'portrait' 
+    ? { width: 576, height: 1024 }
+    : { width: 1024, height: 576 }
+  
+  // Generate scenes in parallel (up to 2 at a time to avoid rate limits)
+  for (let i = 0; i < scenes.length; i++) {
+    const scene = scenes[i]
+    console.log(`[${jobId}] Generating scene ${i + 1}/${scenes.length}: "${scene.substring(0, 50)}..."`)
+    
+    try {
+      // Use ZeroScope for text-to-video
+      const response = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${replicateKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          version: '9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
+          input: {
+            prompt: `${scene}, cinematic lighting, high quality, smooth motion, ${format === 'portrait' ? 'vertical video 9:16' : 'horizontal video 16:9'}`,
+            num_frames: 36,
+            fps: 8,
+            width: dimensions.width,
+            height: dimensions.height
+          }
+        })
+      })
+      
+      if (!response.ok) {
+        console.error(`[${jobId}] Scene ${i + 1} failed to start:`, response.status)
+        continue
+      }
+      
+      let prediction = await response.json()
+      console.log(`[${jobId}] Scene ${i + 1} prediction ID: ${prediction.id}`)
+      
+      // Poll until complete
+      let attempts = 0
+      while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 120) {
+        await new Promise(r => setTimeout(r, 2000))
+        attempts++
+        
+        const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+          headers: { 'Authorization': `Bearer ${replicateKey}` }
+        })
+        prediction = await statusResponse.json()
+        
+        if (attempts % 10 === 0) {
+          console.log(`[${jobId}] Scene ${i + 1} status: ${prediction.status} (${attempts * 2}s)`)
+        }
+      }
+      
+      if (prediction.status === 'succeeded' && prediction.output) {
+        const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
+        console.log(`[${jobId}] ✅ Scene ${i + 1} complete: ${videoUrl}`)
+        aiVideos.push({
+          url: videoUrl,
+          keyword: scene,
+          width: dimensions.width,
+          height: dimensions.height
+        })
+      } else {
+        console.error(`[${jobId}] Scene ${i + 1} failed: ${prediction.status}`)
+      }
+    } catch (error) {
+      console.error(`[${jobId}] Scene ${i + 1} error:`, error.message)
+    }
+  }
+  
+  // If we didn't get any AI videos, fall back to stock
+  if (aiVideos.length === 0) {
+    console.log(`[${jobId}] No AI videos generated, falling back to stock videos`)
+    return getFallbackVideos(numScenes)
+  }
+  
+  return aiVideos
+}
+
+// Parse prompt into individual scene descriptions
+function parsePromptToScenes(prompt, numScenes) {
+  // Split by newlines or sentences
+  let parts = prompt.split(/\n+/).filter(l => l.trim())
+  
+  if (parts.length < numScenes) {
+    // Split by sentences
+    parts = prompt.split(/[.!?]+/).filter(l => l.trim()).map(l => l.trim())
+  }
+  
+  // Ensure we have enough scenes
+  while (parts.length < numScenes) {
+    // Duplicate the last part with variations
+    const lastPart = parts[parts.length - 1] || prompt
+    parts.push(lastPart + ', different angle')
+  }
+  
+  // Take only what we need
+  return parts.slice(0, numScenes)
+}
+
 export async function POST(request) {
   const jobId = randomUUID()
   
