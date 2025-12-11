@@ -453,70 +453,89 @@ const TEMPLATE_VIDEO_KEYWORDS = {
   'default': ['abstract background', 'nature aerial', 'city skyline', 'modern architecture', 'sky clouds']
 }
 
-// AI Video Generation Models - Ordered by cost (cheapest first)
-// Pricing as of 2025 from fal.ai/pricing
+// AI Video Generation Models - Updated June 2025
+// Pricing from fal.ai/pricing - Ordered by cost (cheapest first)
 const AI_VIDEO_MODELS = {
-  // TIER 1: Budget-Friendly (~$0.04/s)
-  'ovi': {
-    name: 'Ovi',
-    endpoint: 'fal-ai/ovi/text-to-video',
-    costPerVideo: 0.20, // $0.20 per 5s video = ~$0.04/s
-    costPerSecond: 0.04,
-    description: 'Ultra budget-friendly AI video',
+  // TIER 1: Budget-Friendly (~$0.04/video)
+  'pixverse': {
+    name: 'Pixverse v5.5',
+    endpoint: 'fal-ai/pixverse/v5.5/text-to-video',
+    costPerVideo: 0.04,
+    costPerSecond: 0.008,
+    description: 'Budget-friendly creative videos',
     maxDuration: 5,
     tier: 'budget'
   },
-  'pixverse': {
-    name: 'Pixverse v5',
-    endpoint: 'fal-ai/pixverse/v5/text-to-video',
-    costPerVideo: 0.20, // $0.20 per 5s video at 720p
-    costPerSecond: 0.04,
-    description: 'Creative effects & stylized videos',
-    maxDuration: 5,
+  'longcat': {
+    name: 'LongCat Distilled',
+    endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p',
+    costPerVideo: 0.05,
+    costPerSecond: 0.01,
+    description: 'Fast long-form video generation',
+    maxDuration: 10,
     tier: 'budget'
   },
   
   // TIER 2: Value (~$0.05/s)
   'wan': {
     name: 'Wan 2.5',
-    endpoint: 'fal-ai/wan-t2v',
+    endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video',
     costPerSecond: 0.05,
-    description: 'Fast & reliable video generation',
+    description: 'Reliable high-quality video',
     maxDuration: 5,
     tier: 'value'
   },
-  'minimax-hailuo': {
-    name: 'Minimax Hailuo',
-    endpoint: 'fal-ai/minimax-video/video-01-live',
+  'hunyuan': {
+    name: 'Hunyuan 1.5',
+    endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video',
     costPerSecond: 0.05,
-    description: 'High-quality cinematic AI video',
-    maxDuration: 6,
+    description: 'Tencent\'s best video model',
+    maxDuration: 5,
+    tier: 'value'
+  },
+  'sana': {
+    name: 'Sana Video',
+    endpoint: 'fal-ai/sana-video',
+    costPerSecond: 0.05,
+    description: 'Ultra-fast video generation',
+    maxDuration: 5,
     tier: 'value'
   },
   
-  // TIER 3: Premium (~$0.07/s)
+  // TIER 3: Premium (~$0.07-0.08/s)
   'kling-turbo': {
     name: 'Kling 2.5 Turbo Pro',
     endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
     costPerSecond: 0.07,
-    description: 'Top-tier cinematic quality',
+    description: 'Cinematic quality, fluid motion',
     maxDuration: 10,
     tier: 'premium'
+  },
+  'kling-26': {
+    name: 'Kling 2.6 Pro',
+    endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video',
+    costPerSecond: 0.08,
+    description: 'Latest Kling with audio generation',
+    maxDuration: 10,
+    tier: 'premium'
+  },
+  
+  // TIER 4: Ultra (~$0.20+/s - highest quality)
+  'veo': {
+    name: 'Veo 3.1 Fast',
+    endpoint: 'fal-ai/veo3.1/fast',
+    costPerSecond: 0.20,
+    description: 'Google DeepMind\'s best video AI',
+    maxDuration: 8,
+    tier: 'ultra'
   }
 }
 
 // Provider configurations
 const PROVIDERS = {
-  shotstack: {
-    name: 'Shotstack',
-    description: 'Professional video editing API - best for slideshows, text animations, and composed videos',
-    baseUrl: process.env.SHOTSTACK_ENV === 'production' 
-      ? 'https://api.shotstack.io/v1'
-      : 'https://api.shotstack.io/stage'
-  },
   fal: {
     name: 'Fal.ai',
-    description: 'AI video generation with Ovi, Pixverse, Wan, Minimax, Kling models'
+    description: 'AI video generation with Pixverse, Wan, Hunyuan, Kling, Veo models'
   },
   replicate: {
     name: 'Replicate',
