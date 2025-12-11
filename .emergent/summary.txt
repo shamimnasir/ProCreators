@@ -1,198 +1,179 @@
 <analysis>
 
-**original_problem_statement**: **PRODUCT REQUIREMENTS (from previous session):**
-1.  **Hub Page:** A central page () for all niches.
-2.  **Niche Tools:** Every niche tool must have the exact same functionality as the existing Story Video Reels tool.
-3.  **Custom AI Prompts:** Each niche must have a unique system prompt for its AI.
-4.  **Niche-Specific UI Text:** UI text should adapt to the niche.
-5.  **Admin Panel for Prompts:** An admin page to manage system prompts.
-6.  **Sidebar Navigation:** Easy access to the hub and tools.
-7.  **Video Format:** All videos must be 9:16.
-8.  **Video Clip Customization:** Allow reordering, removing, and uploading clips.
-9.  **Fix Bengali Captions/Fonts:** Fix broken Bengali font rendering.
-10. **Overhaul Music System:** Replace the built-in music system with a search-based one.
-11. **Create Product Review Tool:** A new tool to scrape a product URL, generate a review script, and create a video using scraped media and stock footage.
-12. **Apply Motion Effects:** Apply Ken Burns/panning/zooming effects to static product images.
+**original_problem_statement**: The user wants to build a new feature, AI Video Studio, to generate cinematic, template-driven videos. The initial plan to use Shotstack.io for AI video generation was abandoned after it was discovered Shotstack is a composition tool, not a generator. The user then directed the agent to integrate Fal.ai for true text-to-video generation, using a cost-effective cascade of models (Ovi, Pixverse, Wan, Kling), with Replicate as a fallback. The final composed video should be saved to the user's media library. The user has now requested to replace the failing Shotstack composition step with a custom FFmpeg pipeline to compile clips and integrate existing features like Text Overlay, TTS, and Custom Audio.
 
-**USER REQUESTS IN THIS SESSION:**
-1.  **Fix Slow Performance:** Video generation for 20 clips was taking over 3 minutes.
-2.  **Change Stock Video Source Priority:** Prioritize Pexels for video searches, with Pixabay as a fallback.
-3.  **Implement Text Overlays:** Add functionality to place text on individual video clips. This involved multiple iterations:
-    *   Initial implementation.
-    *   Fixing a parallel processing bug.
-    *   Fixing styling and positioning.
-    *   Fixing the preview to show overlays.
-    *   Refining the style to be more viral and professional after several user feedback loops and FFmpeg errors.
-4.  **Scrape User-Generated Content (UGC):** Scrape user-submitted review videos from Amazon product pages and include them in the media selection.
-5.  **Fix UGC Preview:** UGC videos were not appearing in the preview or final video.
-6.  **Fix Text Overlay Preview:** Text overlays are not showing up in the preview modal, even though the text is entered in the UI.
+**PRODUCT REQUIREMENTS:**
+1.  **AI Video Generation**: Use Fal.ai as the primary engine to generate video scenes from text prompts.
+2.  **Model Cascade**: Automatically attempt generation with the cheapest Fal.ai models first (Ovi, Pixverse) and fall back to more expensive ones (Wan, Kling) on failure. Use Replicate as a final fallback.
+3.  **Video Source Options**: The UI must allow users to choose between Stock Videos, AI-Generated Video, and a Hybrid Mix.
+4.  **Video Compilation**: Compile the generated AI clips and/or stock footage into a single video file. The current Shotstack implementation for this is failing due to credit issues.
+5.  **Feature Integration**: The final video compilation must incorporate existing platform features like Text Overlays, Google TTS, and custom audio uploads/recordings.
+6.  **Auto-Save to Library**: All successfully generated videos must be automatically saved to the user's media library.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The agent has implemented several major features and optimizations in this session:
-1.  **Performance Optimization:** The video composition logic in  was significantly refactored. It now uses  and  to process video clips (downloads, conversions) in parallel, drastically reducing generation time.
-2.  **Stock Video Source Update:** The  API was modified to prioritize Pexels for stock video searches and use Pixabay as a fallback, per the user's request.
-3.  **Text Overlay Feature:** A complex text overlay feature was implemented.
-    *   **Frontend:**  was updated to include input fields for text, position, and color on each clip card. The UI also shows a preview of the entered text.
-    *   **Backend:**  and  were updated with a robust FFmpeg filter chain (++) to render text on a colored background box, designed to be viral and fit within a 9:16 frame. This was the result of multiple iterations to fix styling and critical FFmpeg errors.
-4.  **UGC Video Scraping:** The  API can now find, download, and cache up to 3 user-generated review videos from Amazon product pages. The frontend and backend have been updated to handle and display these  clips.
+- A frontend UI at  with a template gallery and a video source selector that correctly displays the new Fal.ai model options.
+- Backend logic in  that successfully integrates Fal.ai for AI video generation.
+- A model cascade is implemented, attempting to use cheaper models like Ovi and Pixverse before falling back to others, with Replicate as a final option.
+- The user-provided Fal.ai API key is configured in the environment.
+- The Shotstack integration for video *composition* still exists but is consistently failing due to a lack of credits on the sandbox account.
+- A temporary workaround is in place: if the Shotstack composition fails, the system saves the first raw AI-generated video clip to the library to prevent data loss.
 
 **Last working item**:
-    - Last item agent was working: The user reported that while text overlays can be added in the UI, they are not appearing in the video preview modal. The agent analyzed the user's screenshot, confirmed the issue, and was investigating why the preview generation was not correctly rendering the text overlays. Logs did not show recent preview generation attempts, suggesting the process might not be triggering correctly or is using cached data.
-    - Status: IN PROGRESS
+    - Last item agent was working: The user approved a plan to replace the failing Shotstack composition step with a custom FFmpeg-based pipeline. This new pipeline will be responsible for compiling AI-generated clips (from Fal.ai) and stock videos, and is intended to integrate existing features like text overlays, TTS, and custom audio. The agent's last action was to get user approval for this plan.
+    - Status: NOT STARTED
     - Agent Testing Done: N
     - Which testing method agent to use? backend testing agent
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1:  Text overlay does not appear in the video preview modal (P0, Highest Priority)
-  - Issue 2:  Bengali font is severely broken in generated videos (P0, Recurring, High Priority)
-  - Issue 3:  Custom uploaded video clips are ignored in the final video (P1)
-  - Issue 4:  Music is not audible in the video preview modal (P2)
+  - Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline (P0, Highest Priority)
+  - Issue 2: Integrate Existing Features into the New FFmpeg Pipeline (P1)
+  - Issue 3: Video generation fails to save to the library (P1)
   
   Issues Detail:
   - Issue 1: 
-     - **Description**: After adding text to a clip via the UI, opening the preview modal shows the video clip without the text overlay. The regular captions might be visible, but the specific text overlay is missing.
-     - **Attempted fixes**: The agent previously fixed the preview route to handle text overlays, but a new issue has emerged. The agent was checking logs but found no recent preview generation activity, suspecting a caching issue or a problem in the frontend logic that triggers the preview generation.
+     - **Description**: The final step of video creation, composing scenes together, is failing because the Shotstack sandbox account has run out of credits. This prevents videos from being properly compiled and saved. The user has approved replacing Shotstack with a local FFmpeg solution.
+     - **Attempted fixes**: A temporary fix was implemented to save the first raw AI video clip if Shotstack fails. This is not a long-term solution.
      - **Next debug checklist**:
-        1. In , check the  function. Add  statements to verify that it is being called when the preview button is clicked and that it is sending the most up-to-date  array (with  data) to the backend.
-        2. Check the browser's network tab to see if the  request is being made and what its payload contains.
-        3. Add detailed logging at the very beginning of  to log the entire incoming request body, confirming if the text overlay data is arriving.
-     - **Why fix this issue and what will be achieved with the fix?**: The preview is a critical feature for users to see their changes before committing to a long video generation process. Without it, the text overlay feature is unusable.
-     - **Status**:  IN PROGRESS
-     - **Is recurring issue?**: Y (This is a new bug on a previously fixed feature).
-     - **Should Test frontend/backend/both after fix?**: both
+        1. In , create a new function .
+        2. This function should take an array of video file paths (from Fal.ai and/or Pexels) as input.
+        3. Use  or shell commands to concatenate the video clips into a single output file.
+        4. Modify the main  handler to call  instead of making API calls to Shotstack for the final render.
+        5. Ensure the final compiled video URL is returned in the API response and saved to the library.
+     - **Why fix this issue and what will be achieved with the fix?**: This will remove the dependency on the credit-limited Shotstack service, creating a robust, self-hosted video composition pipeline. It is the critical unblocker for all other features.
+     - **Status**:  NOT STARTED
+     - **Is recurring issue?**: Y (The composition step is a hard failure point).
+     - **Should Test frontend/backend/both after fix?**: backend
      - **Blocked on other issue**: None
 
   - Issue 2: 
-     - **Description**: (From previous session) A high-priority bug where Bengali font rendering is severely broken in generated videos remains unfixed.
-     - **Attempted fixes**: In a previous session, multiple fonts were installed, and FFmpeg's  filter was configured with a . This did not solve the problem.
-     - **Next debug checklist**: Re-investigate FFmpeg's  filter with a hardcoded font path to a known-good Bengali font file and explicit encoding settings () to isolate the issue. Verify the subtitle file is correctly encoded.
-     - **Why fix this issue and what will be achieved with the fix?**: Makes the tool usable for its Bengali-speaking audience, a core requirement.
+     - **Description**: The user has repeatedly noted that existing features like TTS, custom audio recording/upload, and advanced text overlays are not present in the AI Video Studio.
+     - **Attempted fixes**: None. This was planned for a later stage.
+     - **Next debug checklist**:
+        1. Once the FFmpeg pipeline (Issue 1) is functional for basic video concatenation, extend it.
+        2. Add logic to overlay text from the user's script onto the video using FFmpeg's  filter.
+        3. Add logic to accept a TTS audio file or custom audio file URL and merge it as the audio track for the final video using FFmpeg.
+     - **Why fix this issue and what will be achieved with the fix?**: This will bring the AI Video Studio to feature parity with other tools on the platform and fulfill a core user requirement.
      - **Status**:  NOT STARTED
+     - **Is recurring issue?**: N
+     - **Should Test frontend/backend/both after fix?**: both
+     - **Blocked on other issue**: Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline
+
+  - Issue 3:
+     - **Description**: The primary reason videos are not saving to the library is the Shotstack composition failure. The current workaround only saves the *first* generated clip, not the final composed video.
+     - **Attempted fixes**: Implemented a temporary fallback to save the first raw AI clip.
+     - **Next debug checklist**: This issue will be resolved by fixing Issue 1. The FFmpeg pipeline must output a final video URL, which should then be passed to the existing  function.
+     - **Why fix this issue and what will be achieved with the fix?**: The core functionality of generating and saving a complete video will be restored.
+     - **Status**: IN PROGRESS
      - **Is recurring issue?**: Y
      - **Should Test frontend/backend/both after fix?**: backend
-     - **Blocked on other issue**: None
-
-  - Issue 3: 
-     - **Description**: (From previous session) Custom user-uploaded video clips are ignored in the final render. This has not been addressed.
-     - **Attempted fixes**: None in this session.
-     - **Next debug checklist**: Log the  creation in  in  to ensure files are appended correctly. In , log the parsed  to see if the files are being received by the backend.
-     - **Why fix this issue and what will be achieved with the fix?**: Enables a core feature of the video editor, allowing users to use their own media.
-     - **Status**:  NOT STARTED
-     - **Is recurring issue?**: N
-     - **Should Test frontend/backend/both after fix?**: both
-     - **Blocked on other issue**: None
-
-  - Issue 4: 
-     - **Description**: (From previous session) Music does not play in the video *preview* modal.
-     - **Attempted fixes**: None. The  API was not updated to handle the new music system.
-     - **Next debug checklist**: Update the  API to download the selected music track and mix it into the preview clip using FFmpeg.
-     - **Why fix this issue and what will be achieved with the fix?**: Improves the user experience, allowing a full audio-visual preview.
-     - **Status**:  NOT STARTED
-     - **Is recurring issue?**: N
-     - **Should Test frontend/backend/both after fix?**: backend
-     - **Blocked on other issue**: None
+     - **Blocked on other issue**: Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline
 
 **In progress Task List**:
-  - Task 1:  Finalize Text Overlay Feature (P0)
-     - **Where to resume**: Debugging why the text overlay is not appearing in the preview modal. See Issue 1 in the list above for the debug checklist.
-     - **What will be achieved with this?**: A fully functional and user-verifiable text overlay feature, a key user request from this session.
-     - **Status**:  IN PROGRESS
-     - **Should Test frontend/backend/both after fix?**: both
-     - **Blocked on something**: Blocked on fixing the preview bug.
+  - Task 1:  Implement FFmpeg-based Video Compilation (P0)
+     - **Where to resume**: Start by writing the FFmpeg logic inside .
+     - **What will be achieved with this?**: A self-reliant video compilation engine that is not dependent on third-party credits.
+     - **Status**:  NOT STARTED
+     - **Should Test frontend/backend/both after fix?**: backend
+     - **Blocked on something**: None. The user has approved this plan.
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **Task 1: Integrate Library Auto-Save into All Tools (P1)**
-        - This planned task from the previous session has not been started.
-        - **File to use**: 
+    - **Task 1: Implement Remaining Templates (P1):** Complex templates like Auto Reaction Video Generator and Podcast Clip Auto-Generator are still pending.
     Future Tasks:
-    - **Task 2: Create Quick Longform Video Section (P2)**
-        - A future requirement mentioned by the user.
+    - **Task 2: Build Credits/Warning UI (P2):** A UI to warn about API costs or track generation credits.
+    - **Task 3: Long-Form Video Generation (P2):** Feature to generate longer videos by chaining shorter clips.
+    - **Task 4: Switch to Production Keys (P2):** The application will eventually need production Shotstack/Fal.ai keys.
 
 **Completed work in this session**
-- **Performance Optimization**: Successfully parallelized video processing in  to significantly speed up video generation.
-- **Stock Video Source Prioritization**: Changed the video search logic in  to use Pexels first.
-- **UGC Video Scraping**: Implemented functionality in  to find and download user-generated videos from Amazon pages. Fixed a subsequent bug in the preview route to handle these local video files.
-- **Text Overlay Implementation (Partial)**: Implemented the core UI and backend logic for text overlays. Fixed multiple critical bugs related to parallel processing, styling, and FFmpeg errors.
+- **AI Engine Pivot**: Replaced the entire AI generation backend, moving from a flawed Shotstack  approach to a true  implementation using **Fal.ai**.
+- **Fal.ai Integration**: Successfully integrated the  npm package and the user-provided API key.
+- **Cost-Optimized Model Cascade**: Implemented a backend function that intelligently tries multiple Fal.ai models in order of cost (Ovi, Pixverse, Wan, Minimax, Kling) to ensure generation is both successful and cost-effective.
+- **Replicate Fallback**: Configured the system to use Replicate as a last-resort AI video generation engine if all Fal.ai models fail.
+- **Frontend UI Update**: Updated the AI Video Studio frontend to accurately reflect the new Fal.ai models and their pricing, providing transparency to the user.
+- **Fixed Progress Messages**: Corrected the  notifications on the frontend to show accurate progress for Fal.ai generation, removing confusing FLUX model messages.
+- **Fixed Text Positioning**: Standardized text overlay positioning to the bottom of the screen for better readability across all video types.
+- **Implemented Generation Fallback**: Created a temporary but critical fix to save the first raw AI-generated video when the Shotstack composition step fails, preventing the loss of generated assets.
+
+**Earlier issues found/mentioned but not fixed**
+   - Issue 1: Integration of existing features (TTS, Custom Audio, Captions). This was raised by the user and is now the main goal of the approved FFmpeg plan.
+
+**Known issue recurrence from previous fork**
+  - **AI Scene Generation**: The core task of generating AI video scenes has been a recurring problem. The implementation has evolved through multiple failed stages:
+    1.  Replicate (poor quality).
+    2.  Feature removal (agent mistake).
+    3.  Shotstack  (static images, not real video).
+    4.  Fal.ai (currently working, but compilation is broken).
+    This history highlights the importance of getting the new FFmpeg compilation right.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Framework:** Next.js (React)
-- **Video/Audio Processing (FFmpeg):**
-  - **Parallel Processing:** Using  and  to run multiple FFmpeg commands concurrently.
-  - **Advanced Filter Chains:** Using a sequence of , , and  filters to create complex text overlays with colored backgrounds. This replaced a simpler, bug-prone approach using the  parameter.
-  - **Filter Expressions:** Debugged issues with FFmpeg filter syntax, especially regarding variable evaluation () and color alpha channels.
-- **Web Scraping:**  was used to parse HTML and extract video URLs from embedded JSON data on Amazon product pages.
-- **File Handling:** Logic for handling local file paths () vs. remote URLs was implemented and debugged in both the  and  routes.
+- **AI Video Generation**: Fal.ai (primary, with model cascade), Replicate (fallback)
+- **Video Composition**: Shotstack.io (currently failing, to be replaced by FFmpeg)
+- **Stock Media**: Pexels API
+- **Framework**: Next.js (React)
+- **Database**: MongoDB
+- **Local Tooling**: FFmpeg (installed, to be implemented)
+
+**key DB schema**
+  - **systemPrompts**: 
+
+**changes in tech stack**
+  - **Generation Engine**: Shifted from Shotstack's pseudo-AI () to a true AI text-to-video service, **Fal.ai**.
+  - **Composition Engine**: Approved plan to migrate from cloud-based **Shotstack API** to a local **FFmpeg** process for compiling video clips.
 
 **All files of reference**
-- : The main frontend component. Heavily modified to add UI and state management for text overlays and to handle scraped UGC videos.
-- : The core video generation API. Refactored for performance, and updated to handle text overlays and UGC videos.
-- : The preview generation API. Modified to mirror the compose route's new features, but currently has a bug with text overlays.
-- : The product scraping API. Extended to scrape, download, and cache UGC videos.
-- : The stock video search API. Logic was changed to alter provider priority.
-
-**Areas that need refactoring**:
-- The FFmpeg filter strings for text overlays in  and  are complex and duplicated. They could be extracted into a shared helper function to ensure consistency and simplify maintenance.
--  is extremely large and complex. It should be broken down into smaller components (e.g., , , ).
-
-**key api endpoints**
-- : Now returns scraped images and cached UGC video paths.
-- : Now accepts  data and  types in the .
-- : Intended to support text overlays and UGC videos, but has a bug with text overlays not appearing.
+- : The central backend file. It contains the logic for Fal.ai, Replicate, and the failing Shotstack calls. This is where the FFmpeg compilation logic must be implemented.
+- : The main frontend component, which has been updated to reflect the Fal.ai integration.
 
 **Critical Info for New Agent**
-- **FOCUS ON THE PREVIEW BUG:** The most immediate task is to fix the text overlay preview. The user cannot effectively use the new feature until they can see what they are creating. Follow the debug checklist for Issue 1.
-- **VERIFY UGC FEATURE:** Once the preview is fixed, ask the user to perform a full test of the UGC video scraping feature to confirm it works as expected from end-to-end.
-- **TEXT OVERLAY IS FRAGILE:** The text overlay feature has been through many bug fixes. The current FFmpeg filter chain is powerful but complex. Be cautious when making changes to it and test thoroughly in both the main  and  routes.
-- **OLDER HIGH-PRIORITY BUGS PENDING:** Do not forget the long-standing Bengali font issue. It is a core requirement and should be tackled after the current set of features is stable and verified by the user.
+- **Your IMMEDIATE and HIGHEST priority is to implement the FFmpeg compilation pipeline.** The user has explicitly approved this plan. This will replace the failing Shotstack composition step.
+- The goal of the FFmpeg pipeline is twofold: 1) Compile video clips from Fal.ai/Pexels. 2) Integrate existing features like Text Overlays, TTS, and Custom Audio.
+- The Fal.ai integration for *generating* clips is working correctly. Do not change the  function. Your task is to work on what happens *after* the clips are generated.
+- The Shotstack sandbox account is out of credits. This is why you are building the FFmpeg solution. Do not waste time trying to debug Shotstack.
+- The user is aware of the step-by-step process and is technically savvy. Focus on executing the approved plan.
 
 **documents created in this job**
-  - 
-  - 
-  - 
-  - 
+  - None.
 
 **Last 10 User Messages and any pending user messages**
-- **User:** Reported FFmpeg error with professional text style. (FIXED by simplifying the style)
-- **User:** Asked for a better viral style again, suggesting a colored box. (IMPLEMENTED)
-- **Agent:** Researched viral styles and proposed a plan for a colored box background. (PLANNING)
-- **User:** Approved the plan for the colored box. (CONFIRMED)
-- **Agent:** Implemented the new colored box text overlay style. (COMPLETED)
-- **Agent:** Summarized the new viral text overlay feature. (SUMMARY)
-- **User:** Reported that the text overlay does not show up in the preview. (NEW BUG REPORTED)
-- **Agent:** Analyzed the screenshot and confirmed the preview is not showing the overlay. (INVESTIGATING)
-- **Agent:** Checked backend logs but found no recent preview generation logs. (INVESTIGATING)
-- **Agent:** Suspects a frontend or caching issue is preventing the preview from being re-generated with new text data. (LAST STATE)
+ - **User:** Reported that generated videos were static images, text was random, and key features (TTS, etc.) were missing. (PARTIALLY ADDRESSED)
+ - **User:** Prioritized fixing the AI video motion first. (ADDRESSED by moving to Fal.ai)
+ - **User:** Clarified that Shotstack is not a generation model and instructed to use **Fal.ai** instead, providing an API key. (ADDRESSED)
+ - **User:** Requested to use the most cost-effective Fal.ai models first. (ADDRESSED)
+ - **User:** Asked to add even cheaper Fal.ai models like Ovi and Pixverse. (ADDRESSED)
+ - **User:** Pointed out that the UI progress messages were still showing FLUX model from the old implementation. (ADDRESSED)
+ - **User:** Reported that newly generated videos were not saving to the Media Library. (PARTIALLY ADDRESSED with a workaround, root cause identified)
+ - **User:** Proposed using FFmpeg to compile clips and integrate features, instead of coding a solution from scratch. (AWAITING AGENT PLAN)
+ - **Agent:** Provided a detailed plan to use FFmpeg. (PLAN SENT)
+ - **User:** Approved the FFmpeg plan and asked for a session summary before forking. (PENDING - This summary fulfills the request).
 
 **Project Health Check:**
-- **Broken**:
-  - Text overlay rendering in the video preview modal.
+- **Broken**: The primary video composition pipeline (Shotstack) is non-functional due to exhausted credits. The auto-save feature is only partially working as a result.
 - **Mocked**: None.
 
 **3rd Party Integrations**
-- Google Cloud Text-to-Speech
-- Pexels (now primary video source)
-- Pixabay (now secondary video source)
-- Freesound
-- TheAudioDB
-- @dnd-kit/core, @dnd-kit/sortable
+- **Fal.ai**: Primary AI text-to-video generation service. Requires the User API Key provided in the chat history ().
+- **Replicate**: Fallback AI video generation service. Requires a User API Key from .
+- **Shotstack.io**: Used for video composition but is currently non-functional due to credit limits. To be replaced by FFmpeg. Requires a User API Key from .
+- **Pexels**: Used to fetch stock video footage. Requires a User API Key from .
 
 **Testing status**
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: None
-  - Known regressions: A new regression was introduced where text overlays do not appear in the preview modal.
+  - Test files created: None.
+  - Known regressions: The final video composition and saving functionality is broken.
 
 **Credentials to test flow:**
-- API keys are in .
+- **Fal.ai API Key**: 
+- **Shotstack API Key**: Located in , but the associated account is out of credits.
+- **Replicate API Token**: Located in .
 
 **What agent forgot to execute**
-- The agent correctly prioritized the user's active feature requests and bug reports. It did not forget tasks but rather deferred older, pending issues (Bengali font, custom uploads, preview music) to focus on the immediate work, which is the correct strategy.
+- The integration of core features like TTS, custom audio, and advanced text overlays has not been implemented yet. The user mentioned this, and it is now the explicit goal of the newly approved FFmpeg task. It was not forgotten but rather deferred, and is now the highest priority after basic compilation.
 
 </analysis>
