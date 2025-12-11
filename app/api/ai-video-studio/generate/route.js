@@ -1712,6 +1712,134 @@ function getKeywordsFromPromptAndTemplate(prompt, templateId) {
 
 // ==================== FAL.AI VIDEO GENERATION ====================
 // Generate AI video clips using Fal.ai - tries models from cheapest to more expensive
+// ==================== FAL.AI IMAGE-TO-VIDEO ====================
+// Generates video from uploaded image with ad-style motion and effects
+// Perfect for Small Business Promo Ads template
+
+async function generateImageToVideoWithFal(imageDataUrl, prompt, duration, dimensions, jobId, templateId) {
+  const videos = []
+  const numClips = Math.max(1, Math.ceil(duration / 5))
+  
+  // Image-to-video models ordered by cost (cheapest first)
+  const imageToVideoModels = [
+    {
+      name: 'Pixverse v4 I2V',
+      endpoint: 'fal-ai/pixverse/v4/image-to-video',
+      costPerVideo: 0.05,
+      tier: '💰 Budget',
+      inputFormat: 'image_url'
+    },
+    {
+      name: 'Stable Video',
+      endpoint: 'fal-ai/stable-video',
+      costPerVideo: 0.05,
+      tier: '💰 Budget',
+      inputFormat: 'image_url'
+    },
+    {
+      name: 'Kling 1.5 I2V',
+      endpoint: 'fal-ai/kling-video/v1.5/pro/image-to-video',
+      costPerSecond: 0.065,
+      tier: '⭐ Value',
+      inputFormat: 'image_url'
+    },
+    {
+      name: 'Veo 3 I2V',
+      endpoint: 'fal-ai/veo3/image-to-video',
+      costPerSecond: 0.20,
+      tier: '🏆 Premium',
+      inputFormat: 'image_url'
+    }
+  ]
+  
+  // Build ad-style motion prompt based on template
+  let motionPrompt = prompt
+  if (templateId === 'small-business-promo' || templateId?.includes('promo') || templateId?.includes('ads')) {
+    motionPrompt = `PROFESSIONAL ADVERTISEMENT VIDEO: ${prompt}. 
+Style: Scroll-stopping commercial with dynamic motion. 
+Motion: Smooth zoom in, subtle rotation, professional product showcase. 
+Effects: High contrast, vibrant colors, clean transitions.
+Mood: Energetic, professional, attention-grabbing.`
+    console.log(`[${jobId}] 🎬 Using AD-STYLE motion prompt for promo template`)
+  } else {
+    motionPrompt = `Animate this image with cinematic motion: ${prompt}. 
+Add subtle camera movement, depth, and professional lighting effects.`
+  }
+  
+  let selectedModel = imageToVideoModels[0]
+  let modelIndex = 0
+  
+  // Try to generate video from image
+  for (let i = 0; i < numClips; i++) {
+    let success = false
+    let attempts = 0
+    
+    while (!success && modelIndex < imageToVideoModels.length) {
+      const model = imageToVideoModels[modelIndex]
+      console.log(`[${jobId}] 🖼️ Generating image-to-video clip ${i + 1}/${numClips} with ${model.name}...`)
+      
+      try {
+        const input = {
+          prompt: motionPrompt,
+          image_url: imageDataUrl
+        }
+        
+        // Add aspect ratio for portrait/landscape
+        if (dimensions.height > dimensions.width) {
+          input.aspect_ratio = '9:16'
+        } else {
+          input.aspect_ratio = '16:9'
+        }
+        
+        const result = await fal.subscribe(model.endpoint, {
+          input,
+          pollInterval: 2000,
+          timeout: 180000, // 3 min timeout
+          onQueueUpdate: (update) => {
+            if (update.status === 'IN_PROGRESS') {
+              console.log(`[${jobId}] 🎬 ${model.name} processing...`)
+            }
+          }
+        })
+        
+        const videoUrl = extractVideoUrl(result.data)
+        
+        if (videoUrl) {
+          videos.push({
+            url: videoUrl,
+            prompt: motionPrompt,
+            model: model.name,
+            type: 'ai-image-to-video',
+            index: i
+          })
+          console.log(`[${jobId}] ✅ Image-to-video clip ${i + 1} complete with ${model.name}`)
+          success = true
+        } else {
+          throw new Error('No video URL in response')
+        }
+      } catch (error) {
+        console.error(`[${jobId}] ❌ ${model.name} failed:`, error.message)
+        attempts++
+        
+        // Try next model after 2 failures
+        if (attempts >= 2) {
+          modelIndex++
+          attempts = 0
+          if (modelIndex < imageToVideoModels.length) {
+            console.log(`[${jobId}] 🔄 Switching to ${imageToVideoModels[modelIndex].name}`)
+          }
+        }
+      }
+    }
+    
+    if (!success) {
+      console.log(`[${jobId}] ⚠️ All image-to-video models failed for clip ${i + 1}`)
+    }
+  }
+  
+  return videos
+}
+
 // Updated Fal.ai Video Models - June 2025
 // Order by cost: Cheapest first → Most expensive last
 // Reference: https://fal.ai/pricing
