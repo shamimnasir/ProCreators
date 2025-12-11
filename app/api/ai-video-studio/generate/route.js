@@ -1146,13 +1146,14 @@ function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVid
     }]
   })
   
-  // Track 3: Hybrid indicator badge
+  // Track 3: Hybrid indicator badge with model info
+  const aiModelName = aiVideos.length > 0 ? aiVideos[0].model || 'AI' : 'AI'
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
         html: `<div style="position:absolute;top:30px;right:30px;background:linear-gradient(135deg, #3b82f6, #06b6d4);padding:10px 20px;border-radius:25px;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-          <span style="font-family:'Montserrat',sans-serif;font-size:14px;color:white;font-weight:700;letter-spacing:1px;">✨ AI + STOCK</span>
+          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:700;letter-spacing:1px;">✨ ${aiModelName} + STOCK</span>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
