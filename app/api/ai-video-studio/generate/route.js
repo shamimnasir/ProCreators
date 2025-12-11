@@ -3,6 +3,7 @@ import { writeFile, mkdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
+import { buildCinematicVideoEdit, getTemplateVisualConfig } from '@/lib/cinematic-video-builder'
 
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
