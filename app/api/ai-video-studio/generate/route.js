@@ -331,32 +331,52 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else if (videoSource === 'ai') {
-    // AI-Generated Scenes: Two-step process
-    // Step 1: Generate images using Shotstack Create API (FLUX model)
-    // Step 2: Use image-to-video to animate those images with real motion
-    console.log(`[${jobId}] 🎨 Starting AI video generation with FLUX model...`)
+    // AI-Generated Video Scenes using Fal.ai
+    // Primary: Minimax Hailuo (cheapest), Fallback: Kling, then Replicate
+    console.log(`[${jobId}] 🎨 Starting AI video generation with Fal.ai...`)
     
-    const numScenes = Math.ceil(duration / 6) // Each scene is ~6 seconds
-    console.log(`[${jobId}] Generating ${numScenes} AI scenes...`)
-    
-    const generatedImages = await generateAIImages(prompt, numScenes, dimensions, apiKey, jobId)
-    
-    if (generatedImages.length === 0) {
-      console.log(`[${jobId}] ⚠️ No AI images generated, falling back to stock videos`)
-      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-      const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
-      editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
-    } else {
-      console.log(`[${jobId}] ✅ Generated ${generatedImages.length} AI images, building video with motion...`)
-      editJson = buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, generatedImages, jobId)
+    try {
+      // Generate AI video clips using Fal.ai
+      const aiVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+      
+      if (aiVideos.length > 0) {
+        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} AI video clips with Fal.ai`)
+        // Compose the AI videos with text overlays using Shotstack
+        editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, aiVideos, jobId)
+      } else {
+        throw new Error('No AI videos generated')
+      }
+    } catch (falError) {
+      console.error(`[${jobId}] ⚠️ Fal.ai failed, trying Replicate fallback:`, falError.message)
+      
+      try {
+        // Fallback to Replicate
+        const replicateVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        
+        if (replicateVideos.length > 0) {
+          console.log(`[${jobId}] ✅ Generated ${replicateVideos.length} AI video clips with Replicate (fallback)`)
+          editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, replicateVideos, jobId)
+        } else {
+          throw new Error('Replicate also failed')
+        }
+      } catch (replicateError) {
+        console.error(`[${jobId}] ⚠️ Replicate fallback also failed, using stock videos:`, replicateError.message)
+        const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+        const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+        editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
+      }
     }
   } else if (videoSource === 'hybrid') {
-    // Hybrid: Mix AI-generated scenes with stock footage
+    // Hybrid: Mix AI-generated video with stock footage
     console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
     
-    // Generate 2-3 AI images for key moments (hook, climax, resolution)
-    const numAIScenes = Math.min(3, Math.ceil(duration / 10))
-    const generatedImages = await generateAIImages(prompt, numAIScenes, dimensions, apiKey, jobId)
+    let aiVideos = []
+    try {
+      // Generate 1-2 AI video clips for key moments
+      aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
+    } catch (error) {
+      console.log(`[${jobId}] ⚠️ AI generation failed for hybrid, using more stock footage`)
+    }
     
     // Fetch stock videos for B-roll
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
