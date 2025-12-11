@@ -210,13 +210,21 @@ async function compileVideoWithFFmpeg({
       await new Promise((resolve, reject) => {
         const cmd = ffmpeg(videoFile)
         
-        // Build video filters array
-        const filters = []
-        
-        // Basic scaling and cropping
-        filters.push(`scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase`)
-        filters.push(`crop=${targetWidth}:${targetHeight}`)
-        filters.push(`fps=30`)
+        // Build video filters array using object syntax
+        const filters = [
+          {
+            filter: 'scale',
+            options: `${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase`
+          },
+          {
+            filter: 'crop',
+            options: `${targetWidth}:${targetHeight}`
+          },
+          {
+            filter: 'fps',
+            options: '30'
+          }
+        ]
         
         // Add text overlay from prompt (positioned at bottom)
         if (prompt && prompt.trim() && captionStyle && captionStyle !== 'none') {
@@ -228,14 +236,20 @@ async function compileVideoWithFFmpeg({
             if (rawText.trim()) {
               const fontSize = targetHeight >= 1920 ? 56 : 42
               
-              // For fluent-ffmpeg, we use the drawtext filter as a separate filter
-              // Escape text for FFmpeg drawtext filter
-              const escapedText = rawText
-                .replace(/'/g, "'\\''")   // Escape single quotes for shell
-                .replace(/:/g, '\\:')     // Escape colons for FFmpeg filter
-                .replace(/\\/g, '\\\\')   // Escape backslashes
-              
-              filters.push(`drawtext=text='${escapedText}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=h-text_h-100:shadowcolor=black:shadowx=2:shadowy=2`)
+              // Use object syntax for drawtext - fluent-ffmpeg handles escaping
+              filters.push({
+                filter: 'drawtext',
+                options: {
+                  text: rawText,
+                  fontsize: fontSize,
+                  fontcolor: 'white',
+                  x: '(w-text_w)/2',
+                  y: 'h-text_h-100',
+                  shadowcolor: 'black',
+                  shadowx: 2,
+                  shadowy: 2
+                }
+              })
               console.log(`[${jobId}] Adding text overlay: "${rawText.substring(0, 30)}..."`)
             }
           } catch (textError) {
@@ -243,8 +257,8 @@ async function compileVideoWithFFmpeg({
           }
         }
         
-        // Use videoFilters method instead of -vf option string
-        cmd.videoFilters(filters)
+        // Use complexFilter for proper escaping
+        cmd.complexFilter(filters)
         
         cmd.outputOptions([
             '-t', String(durationPerClip),
