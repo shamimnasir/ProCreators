@@ -111,6 +111,124 @@ function extractDialogueFromScript(script, language = 'en') {
     method: dialogues.length > 0 ? 'quotes' : uniqueDialogues.length > 0 ? 'emotional' : 'none'
   }
 }
+
+// ==================== ASS CAPTION GENERATION ====================
+// Generates ASS subtitle files for video captions (reused from Quick Reels Hub)
+
+function generateASSCaptions(script, duration, captionStyle, targetHeight, targetWidth) {
+  const height = parseInt(targetHeight) || 1920
+  const width = parseInt(targetWidth) || 1080
+  
+  // Split on spaces - handles both English and Bengali
+  const words = script.trim().split(/\s+/).filter(w => w.length > 0)
+  const totalChars = script.replace(/\s+/g, '').length
+  const charsPerSecond = totalChars / duration
+  
+  console.log(`[Captions] Words: ${words.length}, Chars: ${totalChars}, Duration: ${duration}s`)
+  
+  // Base font size for portrait videos
+  const baseFontSize = height >= 2160 ? 72 : height >= 1920 ? 64 : height >= 1440 ? 56 : 48
+  let fontSize = baseFontSize
+  
+  // Margin (vertical position)
+  let marginV = height >= 2160 ? 150 : height >= 1920 ? 120 : 90
+  
+  // Style settings based on caption style
+  let primaryColor = '&H00FFFFFF' // White
+  let outlineColor = '&H00000000' // Black
+  let outline = 4
+  let shadow = 2
+  let bold = -1
+  let fontName = 'Siyam Rupali' // Good for Bengali
+  let alignment = 2 // Bottom center
+  
+  switch (captionStyle) {
+    case 'karaoke':
+      primaryColor = '&H0000FFFF' // Yellow
+      outline = 5
+      break
+    case 'neon-glow':
+      primaryColor = '&H00FFFFFF'
+      outlineColor = '&H00FF00FF' // Magenta
+      outline = 10
+      shadow = 15
+      break
+    case 'yellow-highlight':
+      primaryColor = '&H00000000' // Black text
+      outlineColor = '&H0000FFFF' // Yellow background
+      outline = 12
+      shadow = 0
+      break
+    case 'tiktok-style':
+      primaryColor = '&H00FFFFFF'
+      outlineColor = '&H000000FF' // Red
+      outline = 5
+      shadow = 3
+      break
+    case 'minimal-clean':
+      primaryColor = '&H00FFFFFF'
+      outline = 2
+      shadow = 1
+      bold = 0
+      alignment = 8 // Top
+      break
+    case 'zoomed-in':
+      fontSize = Math.floor(fontSize * 1.5)
+      outline = 6
+      shadow = 3
+      alignment = 5 // Center
+      break
+    case 'bold-outline':
+    default:
+      outline = 5
+      shadow = 3
+  }
+  
+  // ASS Header with UTF-8 BOM
+  let ass = `\ufeff[Script Info]
+Title: AI Video Studio Captions
+ScriptType: v4.00+
+WrapStyle: 0
+PlayResX: ${width}
+PlayResY: ${height}
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,${fontName},${fontSize},${primaryColor},&H000000FF,${outlineColor},&H00000000,${bold},0,0,0,100,100,0,0,1,${outline},${shadow},${alignment},10,10,${marginV},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`
+
+  // Generate dialogue lines (3 words per caption, or 1 for karaoke)
+  const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 3
+  let currentTime = 0
+  
+  for (let i = 0; i < words.length; i += wordsPerCaption) {
+    const chunk = words.slice(i, i + wordsPerCaption).join(' ')
+    const chunkChars = chunk.replace(/\s+/g, '').length
+    const chunkDuration = (chunkChars / charsPerSecond) * 1.05
+    
+    const startTime = currentTime
+    const endTime = Math.min(currentTime + chunkDuration, duration)
+    
+    ass += `Dialogue: 0,${formatASSTime(startTime)},${formatASSTime(endTime)},Default,,0,0,0,,${chunk}\n`
+    
+    currentTime = endTime
+  }
+  
+  return ass
+}
+
+// Format time for ASS subtitles
+function formatASSTime(seconds) {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  const centisecs = Math.floor((seconds % 1) * 100)
+  return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centisecs).padStart(2, '0')}`
+}
   
   return {
     dialogueOnly,
