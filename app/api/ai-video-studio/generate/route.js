@@ -382,7 +382,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
     const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 8))
     
-    editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, generatedImages, jobId)
+    editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, aiVideos, jobId)
   } else {
     // Stock Videos: Original implementation
     console.log(`[${jobId}] 📹 Fetching cinematic stock videos for template: ${templateId}`)
