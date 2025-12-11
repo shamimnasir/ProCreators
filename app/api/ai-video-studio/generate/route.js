@@ -821,13 +821,15 @@ export async function POST(request) {
       selectedVoice,
       voiceFile,
       captionStyle,
-      musicTrack
+      musicTrack,
+      narrationMode
     })
     
     return NextResponse.json({
       success: true,
       ...result,
       provider: 'ffmpeg',
+      narrationMode,
       models: videos.map(v => v.model).filter(Boolean)
     })
     
