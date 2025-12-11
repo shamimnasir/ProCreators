@@ -126,6 +126,7 @@ const navigation = [
     children: [
       { name: 'System Prompts (Viral Tools)', href: '/dashboard/admin/system-prompts', icon: Type },
       { name: 'System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
+      { name: 'System Prompts (AI Video Studio)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
     ]
   },
 ]
