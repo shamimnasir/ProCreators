@@ -176,19 +176,17 @@ export default function AIVideoStudioPage() {
     
     setGenerating(true)
     setProgress(0)
-    setProgressMessage(videoSource === 'ai-generated' ? 'Initializing AI video generation...' : 'Finding best stock videos...')
+    setProgressMessage('Finding best stock videos...')
     setVideoResult(null)
     
     try {
       const formData = new FormData()
-      formData.append('provider', provider) // Add provider selection
       formData.append('mode', selectedTemplate?.defaultSettings.mode || 'text-to-video')
       formData.append('prompt', enhancedPrompt || prompt)
       formData.append('duration', duration)
       formData.append('format', format)
       formData.append('templateId', selectedTemplate?.id || 'make-anything')
       formData.append('language', language)
-      formData.append('videoSource', videoSource) // 'stock' or 'ai-generated'
       
       if (imageFile) {
         formData.append('image', imageFile)
@@ -201,20 +199,14 @@ export default function AIVideoStudioPage() {
         formData.append('photoCount', photos.length)
       }
       
-      // Progress simulation - AI generation takes longer
+      // Progress simulation
       const segments = Math.ceil(duration / 5)
-      const progressMultiplier = videoSource === 'ai-generated' ? 60 : 25 // AI takes longer
       let currentProgress = 0
       const progressInterval = setInterval(() => {
-        currentProgress += 100 / (segments * progressMultiplier)
+        currentProgress += 100 / (segments * 25)
         if (currentProgress < 90) {
           setProgress(currentProgress)
-          if (videoSource === 'ai-generated') {
-            const currentSegment = Math.floor((currentProgress / 100) * segments) + 1
-            setProgressMessage(`🤖 AI generating scene ${currentSegment}/${segments}...`)
-          } else {
-            setProgressMessage(`📹 Composing video with stock footage...`)
-          }
+          setProgressMessage(`📹 Composing video with stock footage...`)
         }
       }, 1000)
       
@@ -228,9 +220,33 @@ export default function AIVideoStudioPage() {
       
       if (data.success) {
         setProgress(100)
-        setProgressMessage('Complete!')
+        setProgressMessage('Saving to library...')
         setVideoResult(data)
-        toast({ title: '🎬 Video Generated!', description: `${duration}s video ready` })
+        
+        // Auto-save to user library
+        const libraryResult = await saveToLibrary({
+          type: 'ai-video-studio',
+          category: 'video',
+          title: `${selectedTemplate?.name || 'AI Video'} - ${new Date().toLocaleDateString()}`,
+          description: (enhancedPrompt || prompt).substring(0, 200),
+          videoUrl: data.videoUrl,
+          filePath: data.videoUrl,
+          metadata: {
+            duration,
+            format,
+            templateId: selectedTemplate?.id,
+            templateName: selectedTemplate?.name
+          }
+        })
+        
+        if (libraryResult.success) {
+          toast({ 
+            title: '🎬 Video Generated & Saved!', 
+            description: `${duration}s video saved to your library`
+          })
+        } else {
+          toast({ title: '🎬 Video Generated!', description: `${duration}s video ready` })
+        }
       } else {
         throw new Error(data.error)
       }
