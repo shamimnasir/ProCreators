@@ -150,6 +150,20 @@ async function compileVideoWithFFmpeg({
       // Generate TTS with Google Cloud
       console.log(`[${jobId}] Generating TTS with Google Cloud...`)
       
+      // Extract dialogue if narration mode is 'dialogue-only' (default)
+      let ttsText = prompt
+      if (narrationMode !== 'full') {
+        const extracted = extractDialogueFromScript(prompt)
+        if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
+          ttsText = extracted.dialogueOnly
+          console.log(`[${jobId}] 🎭 Dialogue-only mode: ${extracted.dialogueCount} dialogues, ~${extracted.costSavings}% cost savings`)
+        } else {
+          console.log(`[${jobId}] ⚠️ No dialogue found in script, using full text`)
+        }
+      } else {
+        console.log(`[${jobId}] 📜 Full narration mode: using entire script`)
+      }
+      
       try {
         const client = new textToSpeech.TextToSpeechClient({
           keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -173,7 +187,7 @@ async function compileVideoWithFFmpeg({
         }
         
         const ttsRequest = {
-          input: { text: prompt },
+          input: { text: ttsText },  // Use extracted dialogue or full text
           voice: voiceConfig,
           audioConfig: {
             audioEncoding: 'MP3',
