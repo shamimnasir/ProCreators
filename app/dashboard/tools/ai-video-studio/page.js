@@ -175,7 +175,7 @@ export default function AIVideoStudioPage() {
     
     setGenerating(true)
     setProgress(0)
-    setProgressMessage('Initializing AI models...')
+    setProgressMessage(videoSource === 'ai-generated' ? 'Initializing AI video generation...' : 'Finding best stock videos...')
     setVideoResult(null)
     
     try {
@@ -187,6 +187,7 @@ export default function AIVideoStudioPage() {
       formData.append('format', format)
       formData.append('templateId', selectedTemplate?.id || 'make-anything')
       formData.append('language', language)
+      formData.append('videoSource', videoSource) // 'stock' or 'ai-generated'
       
       if (imageFile) {
         formData.append('image', imageFile)
@@ -199,15 +200,20 @@ export default function AIVideoStudioPage() {
         formData.append('photoCount', photos.length)
       }
       
-      // Progress simulation
+      // Progress simulation - AI generation takes longer
       const segments = Math.ceil(duration / 5)
+      const progressMultiplier = videoSource === 'ai-generated' ? 60 : 25 // AI takes longer
       let currentProgress = 0
       const progressInterval = setInterval(() => {
-        currentProgress += 100 / (segments * 25)
+        currentProgress += 100 / (segments * progressMultiplier)
         if (currentProgress < 90) {
           setProgress(currentProgress)
-          const currentSegment = Math.floor((currentProgress / 100) * segments) + 1
-          setProgressMessage(`Generating segment ${currentSegment}/${segments}...`)
+          if (videoSource === 'ai-generated') {
+            const currentSegment = Math.floor((currentProgress / 100) * segments) + 1
+            setProgressMessage(`🤖 AI generating scene ${currentSegment}/${segments}...`)
+          } else {
+            setProgressMessage(`📹 Composing video with stock footage...`)
+          }
         }
       }, 1000)
       
