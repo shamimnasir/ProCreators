@@ -237,13 +237,14 @@ export async function POST(request) {
     const format = formData.get('format') || 'portrait'
     const templateId = formData.get('templateId') || 'custom'
     const imageFile = formData.get('image')
+    const videoSource = formData.get('videoSource') || 'stock' // 'stock', 'ai', 'hybrid'
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
     console.log(`[${jobId}] Mode: ${mode}, Duration: ${duration}s, Format: ${format}`)
-    console.log(`[${jobId}] Template: ${templateId}, HasValidImage: ${hasValidImage}`)
+    console.log(`[${jobId}] Template: ${templateId}, VideoSource: ${videoSource}, HasValidImage: ${hasValidImage}`)
     
-    // Use Shotstack for all video generation with stock footage
+    // Use Shotstack for all video generation
     const result = await generateWithShotstack({
       jobId,
       mode,
@@ -251,7 +252,8 @@ export async function POST(request) {
       duration,
       format,
       templateId,
-      imageFile
+      imageFile,
+      videoSource // Pass the video source selection
     })
     
     return NextResponse.json({
@@ -269,8 +271,8 @@ export async function POST(request) {
 }
 
 // ==================== SHOTSTACK GENERATION ====================
-async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
-  console.log(`[${jobId}] Using Shotstack for video generation...`)
+async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile, videoSource }) {
+  console.log(`[${jobId}] Using Shotstack for video generation (source: ${videoSource})...`)
   
   const apiKey = process.env.SHOTSTACK_API_KEY
   if (!apiKey) {
