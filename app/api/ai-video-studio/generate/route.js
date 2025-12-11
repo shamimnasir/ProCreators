@@ -731,12 +731,13 @@ export async function POST(request) {
     const voiceFile = formData.get('voiceFile')
     const captionStyle = formData.get('captionStyle') || 'bold-outline'
     const musicTrack = formData.get('musicTrack') || 'none'
+    const narrationMode = formData.get('narrationMode') || 'dialogue-only' // 'full' or 'dialogue-only'
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
     console.log(`[${jobId}] Mode: ${mode}, Duration: ${duration}s, Format: ${format}`)
     console.log(`[${jobId}] Template: ${templateId}, VideoSource: ${videoSource}, HasValidImage: ${hasValidImage}`)
-    console.log(`[${jobId}] Voice: ${voiceOption}, TTS Language: ${ttsLanguage}`)
+    console.log(`[${jobId}] Voice: ${voiceOption}, TTS Language: ${ttsLanguage}, Narration: ${narrationMode}`)
     
     // Get format dimensions
     const dimensions = format === 'portrait' 
