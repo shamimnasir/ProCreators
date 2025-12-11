@@ -882,7 +882,7 @@ export default function AIVideoStudioPage() {
                         videoSource === 'hybrid' ? 'text-cyan-700 dark:text-cyan-300' :
                         'text-blue-700 dark:text-blue-300'
                       }`}>
-                        {videoSource === 'ai' ? 'Ovi → Pixverse → Wan → Minimax → Kling → Replicate' : 
+                        {videoSource === 'ai' ? 'Pixverse → LongCat → Wan → Hunyuan → Kling → Veo' : 
                          videoSource === 'hybrid' ? 'AI video clips + HD stock B-roll footage' : 
                          'Real HD footage from Pexels • Renders in ~30s'}
                       </p>
@@ -893,6 +893,154 @@ export default function AIVideoStudioPage() {
                     <p className="text-xs text-green-700 dark:text-green-300">Auto-saves to your library</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Voice/TTS Settings */}
+              <div className="space-y-4 pt-4 border-t">
+                <Label className="flex items-center gap-2">
+                  <Mic className="h-4 w-4" />
+                  Voice & Narration
+                </Label>
+                
+                {/* Voice Option Toggle */}
+                <RadioGroup value={voiceOption} onValueChange={setVoiceOption} className="grid grid-cols-3 gap-2">
+                  <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                    voiceOption === 'tts' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                  }`} onClick={() => setVoiceOption('tts')}>
+                    <RadioGroupItem value="tts" id="tts" />
+                    <Label htmlFor="tts" className="cursor-pointer text-sm">🎙️ AI Voice (TTS)</Label>
+                  </div>
+                  <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                    voiceOption === 'upload' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                  }`} onClick={() => setVoiceOption('upload')}>
+                    <RadioGroupItem value="upload" id="upload" />
+                    <Label htmlFor="upload" className="cursor-pointer text-sm">🎤 Record/Upload</Label>
+                  </div>
+                  <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                    voiceOption === 'none' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                  }`} onClick={() => setVoiceOption('none')}>
+                    <RadioGroupItem value="none" id="none" />
+                    <Label htmlFor="none" className="cursor-pointer text-sm">🔇 No Voice</Label>
+                  </div>
+                </RadioGroup>
+
+                {/* TTS Settings */}
+                {voiceOption === 'tts' && (
+                  <div className="space-y-4 p-4 rounded-lg bg-muted/50">
+                    {/* Narration Mode */}
+                    <div className="space-y-2">
+                      <Label className="text-sm">Narration Mode</Label>
+                      <Select value={narrationMode} onValueChange={setNarrationMode}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dialogue-only">
+                            <div className="flex items-center gap-2">
+                              <span>💬</span>
+                              <div>
+                                <p>Dialogue Only</p>
+                                <p className="text-xs text-muted-foreground">Speaks only quoted text (~70% cost savings)</p>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="full">
+                            <div className="flex items-center gap-2">
+                              <span>📜</span>
+                              <div>
+                                <p>Full Script</p>
+                                <p className="text-xs text-muted-foreground">Narrates entire script</p>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Language Selection */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-sm">TTS Language</Label>
+                        <Select value={ttsLanguage} onValueChange={setTtsLanguage}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="en">🇺🇸 English</SelectItem>
+                            <SelectItem value="bn">🇧🇩 Bengali</SelectItem>
+                            <SelectItem value="hi">🇮🇳 Hindi</SelectItem>
+                            <SelectItem value="es">🇪🇸 Spanish</SelectItem>
+                            <SelectItem value="fr">🇫🇷 French</SelectItem>
+                            <SelectItem value="de">🇩🇪 German</SelectItem>
+                            <SelectItem value="ja">🇯🇵 Japanese</SelectItem>
+                            <SelectItem value="ko">🇰🇷 Korean</SelectItem>
+                            <SelectItem value="zh">🇨🇳 Chinese</SelectItem>
+                            <SelectItem value="ar">🇸🇦 Arabic</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Voice {loadingVoices && <Loader2 className="inline h-3 w-3 animate-spin ml-1" />}</Label>
+                        <Select value={selectedVoice} onValueChange={setSelectedVoice} disabled={loadingVoices || availableVoices.length === 0}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select voice" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(voicesByVariant).map(([variant, voices]) => (
+                              <div key={variant}>
+                                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted">{variant}</div>
+                                {voices.map(voice => (
+                                  <SelectItem key={voice.name} value={voice.name}>
+                                    {voice.ssmlGender === 'MALE' ? '👨' : '👩'} {voice.name.split('-').slice(-1)[0]}
+                                  </SelectItem>
+                                ))}
+                              </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload/Record Voice */}
+                {voiceOption === 'upload' && (
+                  <div className="space-y-3 p-4 rounded-lg bg-muted/50">
+                    <div className="flex gap-2">
+                      <Button
+                        variant={isRecording ? 'destructive' : 'outline'}
+                        onClick={isRecording ? stopRecording : startRecording}
+                        className="flex-1"
+                      >
+                        {isRecording ? (
+                          <>🔴 Stop ({recordingTime}s)</>
+                        ) : (
+                          <>🎤 Record Voice</>
+                        )}
+                      </Button>
+                      <Button variant="outline" onClick={() => voiceFileInputRef.current?.click()} className="flex-1">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Audio
+                      </Button>
+                      <input
+                        type="file"
+                        ref={voiceFileInputRef}
+                        className="hidden"
+                        accept="audio/*"
+                        onChange={handleVoiceFileUpload}
+                      />
+                    </div>
+                    {voiceFile && (
+                      <div className="flex items-center gap-2 p-2 rounded bg-green-100 dark:bg-green-900/30 text-sm">
+                        <span>✅</span>
+                        <span>{voiceFile.name || 'Recording ready'}</span>
+                        <Button variant="ghost" size="sm" className="ml-auto h-6" onClick={() => setVoiceFile(null)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
