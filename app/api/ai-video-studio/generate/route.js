@@ -210,57 +210,15 @@ async function compileVideoWithFFmpeg({
       await new Promise((resolve, reject) => {
         const cmd = ffmpeg(videoFile)
         
-        // Build video filters array using object syntax
-        const filters = [
-          {
-            filter: 'scale',
-            options: `${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase`
-          },
-          {
-            filter: 'crop',
-            options: `${targetWidth}:${targetHeight}`
-          },
-          {
-            filter: 'fps',
-            options: '30'
-          }
-        ]
+        // Build basic video filter string
+        let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
         
         // Add text overlay from prompt (positioned at bottom)
-        if (prompt && prompt.trim() && captionStyle && captionStyle !== 'none') {
-          try {
-            const lines = parsePromptToLines(prompt, 4)
-            const lineIndex = i % lines.length
-            const rawText = lines[lineIndex] || ''
-            
-            if (rawText.trim()) {
-              const fontSize = targetHeight >= 1920 ? 56 : 42
-              
-              // Use object syntax for drawtext - fluent-ffmpeg handles escaping
-              filters.push({
-                filter: 'drawtext',
-                options: {
-                  text: rawText,
-                  fontsize: fontSize,
-                  fontcolor: 'white',
-                  x: '(w-text_w)/2',
-                  y: 'h-text_h-100',
-                  shadowcolor: 'black',
-                  shadowx: 2,
-                  shadowy: 2
-                }
-              })
-              console.log(`[${jobId}] Adding text overlay: "${rawText.substring(0, 30)}..."`)
-            }
-          } catch (textError) {
-            console.log(`[${jobId}] Skipping text overlay due to error:`, textError.message)
-          }
-        }
-        
-        // Use complexFilter for proper escaping
-        cmd.complexFilter(filters)
+        // For now, skip text overlay to get basic compilation working
+        // Text overlays will be handled in a later step using ASS subtitles (like story-reels)
         
         cmd.outputOptions([
+            '-vf', videoFilter,
             '-t', String(durationPerClip),
             '-c:v', 'libx264',
             '-preset', 'fast',
