@@ -154,19 +154,6 @@ function extractDialogueFromScript(script, language = 'en') {
     costSavings,
     method: dialogues.length > 0 ? 'quotes' : uniqueDialogues.length > 0 ? 'script-based' : 'none'
   }
-} 
-    ? Math.round((1 - dialogueOnly.length / script.length) * 100) 
-    : 0
-  
-  console.log(`[Smart Dialogue Extraction] Full: ${script.length} chars → Dialogue: ${dialogueOnly.length} chars (${costSavings}% savings, ${uniqueDialogues.length} dialogues found)`)
-  
-  return {
-    dialogueOnly,
-    fullScript: script,
-    dialogueCount: uniqueDialogues.length,
-    costSavings,
-    method: dialogues.length > 0 ? 'quotes' : uniqueDialogues.length > 0 ? 'emotional' : 'none'
-  }
 }
 
 // ==================== ASS CAPTION GENERATION ====================
