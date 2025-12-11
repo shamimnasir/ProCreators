@@ -383,7 +383,7 @@ async function compileVideoWithFFmpeg({
     
     // Step 5: Merge video with audio (if audio exists)
     console.log(`[${jobId}] Step 5: Merging video with audio...`)
-    const finalVideoPath = join(tempDir, 'final.mp4')
+    const videoWithAudioPath = join(tempDir, 'with-audio.mp4')
     
     if (hasAudio && existsSync(audioPath)) {
       await new Promise((resolve, reject) => {
@@ -399,7 +399,7 @@ async function compileVideoWithFFmpeg({
             '-map', '1:a:0',
             '-shortest'
           ])
-          .output(finalVideoPath)
+          .output(videoWithAudioPath)
           .on('end', () => {
             console.log(`[${jobId}] ✅ Audio merged`)
             resolve()
@@ -410,12 +410,68 @@ async function compileVideoWithFFmpeg({
     } else {
       // No audio - just copy the concatenated video
       const fs = require('fs')
-      fs.copyFileSync(concatVideoPath, finalVideoPath)
+      fs.copyFileSync(concatVideoPath, videoWithAudioPath)
       console.log(`[${jobId}] Video saved without audio`)
     }
     
-    // Step 6: Save to public folder
-    console.log(`[${jobId}] Step 6: Saving video...`)
+    // Step 6: Add captions if caption style is not 'none'
+    console.log(`[${jobId}] Step 6: Processing captions...`)
+    const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    if (captionStyle && captionStyle !== 'none' && prompt && prompt.trim()) {
+      try {
+        // Generate ASS captions
+        const captionContent = generateASSCaptions(
+          prompt, 
+          actualDuration, 
+          captionStyle, 
+          dimensions.height, 
+          dimensions.width
+        )
+        
+        const captionsPath = join(tempDir, 'captions.ass')
+        await writeFile(captionsPath, captionContent)
+        console.log(`[${jobId}] ✅ ASS captions generated`)
+        
+        // Burn captions into video
+        const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
+        
+        await new Promise((resolve, reject) => {
+          ffmpeg(videoWithAudioPath)
+            .outputOptions([
+              '-vf', `ass='${escapedPath}':fontsdir=/app/fonts`,
+              '-c:v', 'libx264',
+              '-preset', 'fast',
+              '-crf', '23',
+              '-c:a', 'copy',
+              '-movflags', '+faststart'
+            ])
+            .output(finalVideoPath)
+            .on('end', () => {
+              console.log(`[${jobId}] ✅ Captions burned into video`)
+              resolve()
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] ⚠️ Caption burn failed:`, err.message)
+              // Fallback: just copy the video without captions
+              require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
+              resolve()
+            })
+            .run()
+        })
+      } catch (captionError) {
+        console.error(`[${jobId}] ⚠️ Caption generation failed:`, captionError.message)
+        // Fallback: just copy the video without captions
+        require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
+      }
+    } else {
+      // No captions - just copy the video
+      require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
+      console.log(`[${jobId}] Skipping captions (style: ${captionStyle})`)
+    }
+    
+    // Step 7: Save to public folder
+    console.log(`[${jobId}] Step 7: Saving video...`)
     const videoBuffer = await readFile(finalVideoPath)
     
     const publicDir = '/app/public/ai-video-studio'
