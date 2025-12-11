@@ -576,7 +576,278 @@ function getKeywordsFromPromptAndTemplate(prompt, templateId) {
   return [...new Set(allKeywords)].slice(0, 5)
 }
 
-// ==================== AI-GENERATED VIDEO EDIT ====================
+// ==================== FAL.AI VIDEO GENERATION ====================
+// Generate AI video clips using Fal.ai (Minimax Hailuo - cheapest, then Kling)
+async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
+  const videos = []
+  const numClips = Math.ceil(duration / 5) // Each clip is ~5 seconds
+  const scenes = parsePromptToScenes(prompt, numClips)
+  
+  // Try Minimax Hailuo first (cheapest at $0.05/s)
+  const models = [
+    { 
+      name: 'Minimax Hailuo', 
+      endpoint: 'fal-ai/minimax-video/video-01-live',
+      costPerSecond: 0.05
+    },
+    { 
+      name: 'Kling 1.6 Standard', 
+      endpoint: 'fal-ai/kling-video/v1.6/standard/text-to-video',
+      costPerSecond: 0.07
+    }
+  ]
+  
+  let selectedModel = models[0]
+  let modelIndex = 0
+  
+  for (let i = 0; i < numClips; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
+      dimensions.height > dimensions.width ? 'vertical portrait video' : 'horizontal landscape video'
+    }`
+    
+    console.log(`[${jobId}] 🎬 Generating AI clip ${i + 1}/${numClips} with ${selectedModel.name}...`)
+    console.log(`[${jobId}] Prompt: "${cinematicPrompt.substring(0, 80)}..."`)
+    
+    try {
+      const result = await fal.subscribe(selectedModel.endpoint, {
+        input: {
+          prompt: cinematicPrompt,
+          aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
+          duration: '5'
+        },
+        logs: true,
+        onQueueUpdate: (update) => {
+          if (update.status === 'IN_PROGRESS') {
+            console.log(`[${jobId}] Clip ${i + 1} progress: ${update.logs?.length || 0} logs`)
+          }
+        }
+      })
+      
+      // Extract video URL from result
+      const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url
+      
+      if (videoUrl) {
+        console.log(`[${jobId}] ✅ Clip ${i + 1} generated: ${videoUrl.substring(0, 60)}...`)
+        videos.push({
+          url: videoUrl,
+          prompt: scenePrompt,
+          model: selectedModel.name,
+          cost: selectedModel.costPerSecond * 5,
+          index: i
+        })
+      } else {
+        console.log(`[${jobId}] ⚠️ Clip ${i + 1} - no video URL in response`)
+        // Try next model
+        if (modelIndex < models.length - 1) {
+          modelIndex++
+          selectedModel = models[modelIndex]
+          console.log(`[${jobId}] Switching to ${selectedModel.name}`)
+          i-- // Retry this clip
+        }
+      }
+    } catch (error) {
+      console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
+      
+      // Try next model if available
+      if (modelIndex < models.length - 1) {
+        modelIndex++
+        selectedModel = models[modelIndex]
+        console.log(`[${jobId}] Switching to ${selectedModel.name} due to error`)
+        i-- // Retry this clip
+      }
+    }
+  }
+  
+  return videos
+}
+
+// ==================== REPLICATE FALLBACK ====================
+async function generateAIVideosWithReplicate(prompt, duration, dimensions, jobId) {
+  const videos = []
+  const numClips = Math.ceil(duration / 5)
+  const scenes = parsePromptToScenes(prompt, numClips)
+  
+  const replicateApiKey = process.env.REPLICATE_API_TOKEN
+  if (!replicateApiKey) {
+    throw new Error('Replicate API key not configured')
+  }
+  
+  for (let i = 0; i < numClips; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
+    
+    console.log(`[${jobId}] 🎬 Generating clip ${i + 1}/${numClips} with Replicate (fallback)...`)
+    
+    try {
+      // Use MiniMax video model on Replicate
+      const response = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${replicateApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          version: "minimax/video-01",
+          input: {
+            prompt: cinematicPrompt,
+            prompt_optimizer: true
+          }
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Replicate API error: ${response.status}`)
+      }
+      
+      const prediction = await response.json()
+      
+      // Poll for completion
+      let result = prediction
+      let attempts = 0
+      const maxAttempts = 120 // 4 minutes max
+      
+      while (result.status !== 'succeeded' && result.status !== 'failed' && attempts < maxAttempts) {
+        await new Promise(r => setTimeout(r, 2000))
+        attempts++
+        
+        const statusResponse = await fetch(result.urls.get, {
+          headers: { 'Authorization': `Bearer ${replicateApiKey}` }
+        })
+        result = await statusResponse.json()
+        
+        if (attempts % 10 === 0) {
+          console.log(`[${jobId}] Replicate clip ${i + 1} status: ${result.status} (${attempts * 2}s)`)
+        }
+      }
+      
+      if (result.status === 'succeeded' && result.output) {
+        const videoUrl = Array.isArray(result.output) ? result.output[0] : result.output
+        console.log(`[${jobId}] ✅ Replicate clip ${i + 1} generated`)
+        videos.push({
+          url: videoUrl,
+          prompt: scenePrompt,
+          model: 'Replicate MiniMax',
+          cost: 0.10,
+          index: i
+        })
+      }
+    } catch (error) {
+      console.error(`[${jobId}] ❌ Replicate clip ${i + 1} failed:`, error.message)
+    }
+  }
+  
+  return videos
+}
+
+// ==================== AI VIDEO COMPOSITION ====================
+// Compose AI-generated video clips with text overlays using Shotstack
+function buildAIVideoComposition(templateId, prompt, duration, dimensions, aiVideos, jobId) {
+  const config = getTemplateVisualConfig(templateId)
+  const lines = parsePromptToLines(prompt, Math.min(4, aiVideos.length || 2))
+  
+  const tracks = []
+  
+  // Track 1: AI-generated video clips
+  const videoClips = aiVideos.map((video, index) => {
+    const clipDuration = duration / aiVideos.length
+    return {
+      asset: {
+        type: 'video',
+        src: video.url,
+        volume: 0.3 // Keep some ambient audio from AI video
+      },
+      start: index * clipDuration,
+      length: clipDuration + 0.5, // Slight overlap for smooth transitions
+      fit: 'cover',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  })
+  
+  tracks.push({ clips: videoClips })
+  
+  // Track 2: Gradient overlay for text readability (bottom only)
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, transparent 0%, transparent 50%, ${config.colorScheme.secondary}88 75%, ${config.colorScheme.secondary}dd 100%);"></div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 3: AI badge showing model used
+  const modelNames = [...new Set(aiVideos.map(v => v.model))].join(' + ')
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:absolute;top:30px;right:30px;background:linear-gradient(135deg, #8b5cf6, #ec4899);padding:10px 20px;border-radius:25px;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:700;letter-spacing:1px;">✨ AI: ${modelNames}</span>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 4: Text content (positioned at bottom)
+  const textClips = lines.map((line, index) => {
+    const startTime = index * (duration / lines.length)
+    const clipDuration = duration / lines.length + 0.5
+    
+    return {
+      asset: {
+        type: 'html',
+        html: `<div style="position:absolute;bottom:8%;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:0 40px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${Math.round(config.typography.titleSize * 0.85)}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 2px 10px rgba(0,0,0,0.9),0 4px 30px rgba(0,0,0,0.7);line-height:1.3;max-width:95%;">
+            ${line}
+          </p>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: startTime,
+      length: clipDuration,
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  })
+  
+  tracks.push({ clips: textClips })
+  
+  return {
+    timeline: {
+      background: config.colorScheme.secondary,
+      fonts: [
+        { src: `https://fonts.googleapis.com/css2?family=${config.typography.fontFamily.replace(' ', '+')}:wght@400;700;800&display=swap` },
+        { src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap' }
+      ],
+      tracks
+    },
+    output: {
+      format: 'mp4',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// ==================== OLD AI-GENERATED VIDEO EDIT (KEPT FOR REFERENCE) ====================
 // Step 1: Generate images using Create API (text-to-image with FLUX model)
 // Step 2: Use image-to-video asset type to animate those images with real motion
 async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
