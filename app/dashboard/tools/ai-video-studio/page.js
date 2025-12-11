@@ -756,7 +756,7 @@ export default function AIVideoStudioPage() {
                         videoSource === 'hybrid' ? 'text-cyan-700 dark:text-cyan-300' :
                         'text-blue-700 dark:text-blue-300'
                       }`}>
-                        {videoSource === 'ai' ? 'Minimax Hailuo → Kling → Replicate (fallback)' : 
+                        {videoSource === 'ai' ? 'Ovi → Pixverse → Wan → Minimax → Kling → Replicate' : 
                          videoSource === 'hybrid' ? 'AI video clips + HD stock B-roll footage' : 
                          'Real HD footage from Pexels • Renders in ~30s'}
                       </p>
