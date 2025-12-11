@@ -891,21 +891,17 @@ export default function AIVideoStudioPage() {
                     <div>
                       <p className={`font-semibold ${
                         videoSource === 'ai' ? 'text-purple-900 dark:text-purple-100' :
-                        videoSource === 'hybrid' ? 'text-cyan-900 dark:text-cyan-100' :
-                        'text-blue-900 dark:text-blue-100'
+                        'text-cyan-900 dark:text-cyan-100'
                       }`}>
                         {videoSource === 'ai' ? 'AI Video Generation (Fal.ai)' : 
-                         videoSource === 'hybrid' ? 'Hybrid: AI Video + Stock' : 
-                         'Cinematic Stock Videos'}
+                         'AI + Stock Hybrid (Best Value)'}
                       </p>
                       <p className={`text-xs ${
                         videoSource === 'ai' ? 'text-purple-700 dark:text-purple-300' :
-                        videoSource === 'hybrid' ? 'text-cyan-700 dark:text-cyan-300' :
-                        'text-blue-700 dark:text-blue-300'
+                        'text-cyan-700 dark:text-cyan-300'
                       }`}>
                         {videoSource === 'ai' ? 'Pixverse → LongCat → Wan → Hunyuan → Kling → Veo' : 
-                         videoSource === 'hybrid' ? 'AI video clips + HD stock B-roll footage' : 
-                         'Real HD footage from Pexels • Renders in ~30s'}
+                         'AI scenes + 3s auto-trim stock clips (keyword-searched)'}
                       </p>
                     </div>
                   </div>
