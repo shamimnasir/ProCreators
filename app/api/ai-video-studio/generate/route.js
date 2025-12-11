@@ -229,14 +229,6 @@ function formatASSTime(seconds) {
   const centisecs = Math.floor((seconds % 1) * 100)
   return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centisecs).padStart(2, '0')}`
 }
-  
-  return {
-    dialogueOnly,
-    fullScript: script,
-    dialogueCount: dialogues.length,
-    costSavings
-  }
-}
 
 // ==================== FFMPEG VIDEO COMPILATION ====================
 // This replaces Shotstack for video composition - handles AI clips, stock videos,
