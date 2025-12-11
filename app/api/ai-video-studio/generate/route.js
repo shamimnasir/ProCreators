@@ -21,6 +21,376 @@ fal.config({
   credentials: process.env.FAL_KEY
 })
 
+// ==================== FFMPEG VIDEO COMPILATION ====================
+// This replaces Shotstack for video composition - handles AI clips, stock videos,
+// text overlays, TTS, and custom audio
+
+async function compileVideoWithFFmpeg({
+  jobId,
+  videos,        // Array of video objects with {url, prompt, model} from AI or stock
+  prompt,        // User's prompt/script text
+  duration,      // Target duration
+  dimensions,    // {width, height}
+  templateId,    // For styling config
+  voiceOption,   // 'tts', 'upload', or 'none'
+  ttsLanguage,   // 'en' or other language code
+  selectedVoice, // Google TTS voice name
+  voiceFile,     // Uploaded audio file (if any)
+  captionStyle,  // Caption styling option
+  musicTrack,    // Background music option
+}) {
+  const tempDir = `/tmp/ai-video-studio-${jobId}`
+  
+  try {
+    console.log(`[${jobId}] 🎬 Starting FFmpeg compilation...`)
+    
+    // Create temp directory
+    await mkdir(tempDir, { recursive: true })
+    
+    const { Readable } = require('stream')
+    const { pipeline } = require('stream/promises')
+    
+    // Step 1: Download all video clips in parallel
+    console.log(`[${jobId}] Step 1: Downloading ${videos.length} video clips...`)
+    const videoFiles = []
+    
+    const downloadPromises = videos.map(async (video, index) => {
+      const videoPath = join(tempDir, `clip-${index}.mp4`)
+      
+      try {
+        if (video.url.startsWith('/')) {
+          // Local file - copy it
+          const localPath = join(process.cwd(), 'public', video.url)
+          const fs = require('fs')
+          if (fs.existsSync(localPath)) {
+            const buffer = fs.readFileSync(localPath)
+            await writeFile(videoPath, buffer)
+            console.log(`[${jobId}] ✅ Copied local clip ${index + 1}/${videos.length}`)
+            return { index, path: videoPath, success: true }
+          }
+        } else {
+          // Download from URL
+          const response = await fetch(video.url)
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`)
+          }
+          
+          const fileStream = createWriteStream(videoPath)
+          await pipeline(Readable.fromWeb(response.body), fileStream)
+          console.log(`[${jobId}] ✅ Downloaded clip ${index + 1}/${videos.length}`)
+          return { index, path: videoPath, success: true }
+        }
+      } catch (error) {
+        console.error(`[${jobId}] ❌ Error downloading clip ${index}:`, error.message)
+        return { index, path: null, success: false }
+      }
+      
+      return { index, path: null, success: false }
+    })
+    
+    const downloadResults = await Promise.all(downloadPromises)
+    const successfulDownloads = downloadResults
+      .filter(r => r.success && r.path)
+      .sort((a, b) => a.index - b.index)
+    
+    if (successfulDownloads.length === 0) {
+      throw new Error('Failed to download any video clips')
+    }
+    
+    for (const result of successfulDownloads) {
+      videoFiles.push(result.path)
+    }
+    
+    console.log(`[${jobId}] Downloaded ${videoFiles.length} clips successfully`)
+    
+    // Step 2: Generate or process voice audio
+    console.log(`[${jobId}] Step 2: Processing audio...`)
+    let audioPath = join(tempDir, 'voice.mp3')
+    let hasAudio = false
+    
+    if (voiceOption === 'tts' && prompt && prompt.trim()) {
+      // Generate TTS with Google Cloud
+      console.log(`[${jobId}] Generating TTS with Google Cloud...`)
+      
+      try {
+        const client = new textToSpeech.TextToSpeechClient({
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        })
+        
+        let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
+        
+        if (selectedVoice && selectedVoice.includes('-')) {
+          const parts = selectedVoice.split('-')
+          if (parts.length >= 2) {
+            languageCode = `${parts[0]}-${parts[1]}`
+          }
+        }
+        
+        const voiceConfig = { languageCode }
+        if (selectedVoice) {
+          voiceConfig.name = selectedVoice
+          if (selectedVoice.includes('Studio') || selectedVoice.includes('Chirp')) {
+            voiceConfig.model = selectedVoice
+          }
+        }
+        
+        const ttsRequest = {
+          input: { text: prompt },
+          voice: voiceConfig,
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: 1.0,
+            pitch: 0.0
+          }
+        }
+        
+        const [response] = await client.synthesizeSpeech(ttsRequest)
+        await writeFile(audioPath, response.audioContent, 'binary')
+        hasAudio = true
+        console.log(`[${jobId}] ✅ TTS generated successfully`)
+      } catch (ttsError) {
+        console.error(`[${jobId}] ⚠️ TTS failed:`, ttsError.message)
+        // Continue without audio
+      }
+    } else if (voiceOption === 'upload' && voiceFile) {
+      // Use uploaded audio
+      const buffer = Buffer.from(await voiceFile.arrayBuffer())
+      const rawPath = join(tempDir, 'uploaded-raw.mp3')
+      await writeFile(rawPath, buffer)
+      
+      // Normalize the audio
+      await new Promise((resolve, reject) => {
+        ffmpeg(rawPath)
+          .audioFilters(['loudnorm=I=-16:TP=-1.5:LRA=11', 'volume=2.0'])
+          .audioCodec('libmp3lame')
+          .audioBitrate('128k')
+          .output(audioPath)
+          .on('end', () => {
+            hasAudio = true
+            console.log(`[${jobId}] ✅ Uploaded audio normalized`)
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[${jobId}] Audio normalization error:`, err.message)
+            require('fs').copyFileSync(rawPath, audioPath)
+            hasAudio = true
+            resolve()
+          })
+          .run()
+      })
+    }
+    
+    // Get actual audio duration if we have audio
+    let actualDuration = duration
+    if (hasAudio && existsSync(audioPath)) {
+      actualDuration = await new Promise((resolve) => {
+        ffmpeg.ffprobe(audioPath, (err, metadata) => {
+          if (err) {
+            resolve(duration)
+          } else {
+            resolve(metadata.format.duration || duration)
+          }
+        })
+      })
+      console.log(`[${jobId}] Audio duration: ${actualDuration}s`)
+    }
+    
+    // Step 3: Normalize and trim each clip
+    console.log(`[${jobId}] Step 3: Normalizing ${videoFiles.length} clips...`)
+    const targetWidth = dimensions.width
+    const targetHeight = dimensions.height
+    const durationPerClip = actualDuration / videoFiles.length
+    
+    const normalizedFiles = []
+    
+    for (let i = 0; i < videoFiles.length; i++) {
+      const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
+      const videoFile = videoFiles[i]
+      
+      await new Promise((resolve, reject) => {
+        // Build video filter with text overlay support
+        let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
+        
+        // Add text overlay from prompt (positioned at bottom)
+        if (prompt && captionStyle !== 'none') {
+          const lines = parsePromptToLines(prompt, 4)
+          const lineIndex = i % lines.length
+          const text = lines[lineIndex].replace(/'/g, "\\'").replace(/:/g, "\\:")
+          const fontSize = targetHeight >= 1920 ? 56 : 42
+          
+          // Simple bottom-positioned text with shadow
+          videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=h-text_h-100:shadowcolor=black:shadowx=2:shadowy=2`
+        }
+        
+        ffmpeg(videoFile)
+          .outputOptions([
+            '-vf', videoFilter,
+            '-t', String(durationPerClip),
+            '-c:v', 'libx264',
+            '-preset', 'fast',
+            '-crf', '23',
+            '-pix_fmt', 'yuv420p',
+            '-an'
+          ])
+          .output(normalizedPath)
+          .on('end', () => {
+            normalizedFiles.push(normalizedPath)
+            console.log(`[${jobId}] ✅ Normalized clip ${i + 1}/${videoFiles.length}`)
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[${jobId}] ❌ Normalization error for clip ${i}:`, err.message)
+            reject(err)
+          })
+          .run()
+      })
+    }
+    
+    // Step 4: Concatenate all normalized clips
+    console.log(`[${jobId}] Step 4: Concatenating ${normalizedFiles.length} clips...`)
+    const clipListPath = join(tempDir, 'clips.txt')
+    const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
+    await writeFile(clipListPath, clipListContent)
+    
+    const concatVideoPath = join(tempDir, 'concat.mp4')
+    
+    await new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(clipListPath)
+        .inputOptions(['-f', 'concat', '-safe', '0'])
+        .outputOptions([
+          '-c:v', 'libx264',
+          '-preset', 'fast',
+          '-crf', '23',
+          '-pix_fmt', 'yuv420p'
+        ])
+        .output(concatVideoPath)
+        .on('end', () => {
+          console.log(`[${jobId}] ✅ Clips concatenated`)
+          resolve()
+        })
+        .on('error', reject)
+        .run()
+    })
+    
+    // Step 5: Merge video with audio (if audio exists)
+    console.log(`[${jobId}] Step 5: Merging video with audio...`)
+    const finalVideoPath = join(tempDir, 'final.mp4')
+    
+    if (hasAudio && existsSync(audioPath)) {
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(concatVideoPath)
+          .input(audioPath)
+          .outputOptions([
+            '-c:v', 'copy',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-movflags', '+faststart',
+            '-map', '0:v:0',
+            '-map', '1:a:0',
+            '-shortest'
+          ])
+          .output(finalVideoPath)
+          .on('end', () => {
+            console.log(`[${jobId}] ✅ Audio merged`)
+            resolve()
+          })
+          .on('error', reject)
+          .run()
+      })
+    } else {
+      // No audio - just copy the concatenated video
+      const fs = require('fs')
+      fs.copyFileSync(concatVideoPath, finalVideoPath)
+      console.log(`[${jobId}] Video saved without audio`)
+    }
+    
+    // Step 6: Save to public folder
+    console.log(`[${jobId}] Step 6: Saving video...`)
+    const videoBuffer = await readFile(finalVideoPath)
+    
+    const publicDir = '/app/public/ai-video-studio'
+    if (!existsSync(publicDir)) {
+      await mkdir(publicDir, { recursive: true })
+    }
+    
+    const publicVideoPath = join(publicDir, `${jobId}.mp4`)
+    await writeFile(publicVideoPath, videoBuffer)
+    
+    const videoUrl = `/ai-video-studio/${jobId}.mp4`
+    console.log(`[${jobId}] ✅ Video saved to: ${videoUrl}`)
+    
+    // Step 7: Auto-save to library
+    console.log(`[${jobId}] Step 7: Saving to library...`)
+    try {
+      const libraryCollection = await getCollection('library')
+      
+      // Create TTL index if needed
+      try {
+        await libraryCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+      } catch (e) { /* Index may already exist */ }
+      
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 30)
+      
+      const libraryDoc = {
+        id: randomUUID(),
+        userId: 'default-user',
+        content: prompt || '',
+        videoUrl,
+        filePath: videoUrl,
+        fileSize: videoBuffer.length,
+        script: prompt || '',
+        type: 'ai-video-studio',
+        category: 'video',
+        title: prompt ? `AI Video: ${prompt.substring(0, 50)}...` : 'AI Generated Video',
+        description: prompt ? prompt.substring(0, 200) : 'AI-generated cinematic video',
+        metadata: {
+          duration: actualDuration,
+          dimensions,
+          clipCount: videos.length,
+          templateId,
+          voiceOption,
+          models: videos.map(v => v.model).filter(Boolean),
+          jobId
+        },
+        createdAt: new Date(),
+        expiresAt
+      }
+      
+      await libraryCollection.insertOne(libraryDoc)
+      console.log(`[${jobId}] ✅ Video auto-saved to library`)
+    } catch (saveError) {
+      console.error(`[${jobId}] ⚠️ Library save failed:`, saveError.message)
+    }
+    
+    // Cleanup temp files
+    console.log(`[${jobId}] Cleaning up...`)
+    try {
+      await require('fs/promises').rm(tempDir, { recursive: true, force: true })
+    } catch (e) { /* Ignore cleanup errors */ }
+    
+    console.log(`[${jobId}] 🎉 FFmpeg compilation complete!`)
+    
+    return {
+      videoUrl,
+      duration: actualDuration,
+      format: dimensions,
+      clipCount: videos.length,
+      fileSize: videoBuffer.length
+    }
+    
+  } catch (error) {
+    // Cleanup on error
+    try {
+      await require('fs/promises').rm(tempDir, { recursive: true, force: true })
+    } catch (e) { /* Ignore */ }
+    
+    throw error
+  }
+}
+
 // Stock video keywords for different templates
 const TEMPLATE_VIDEO_KEYWORDS = {
   'auto-story-reels': ['dramatic', 'cinematic', 'emotional', 'city night', 'people silhouette'],
