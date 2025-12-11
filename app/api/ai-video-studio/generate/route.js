@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir, readFile } from 'fs/promises'
-import { existsSync } from 'fs'
+import { writeFile, mkdir, readFile, unlink } from 'fs/promises'
+import { existsSync, createWriteStream } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 import { buildCinematicVideoEdit, getTemplateVisualConfig } from '@/lib/cinematic-video-builder'
 import { fal } from '@fal-ai/client'
+import ffmpeg from 'fluent-ffmpeg'
+import textToSpeech from '@google-cloud/text-to-speech'
+import { getCollection } from '@/lib/mongodb'
+
+// Set ffmpeg path
+ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
+ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
