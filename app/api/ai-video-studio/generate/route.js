@@ -296,18 +296,41 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else if (videoSource === 'ai') {
-    // AI-Generated Scenes: Use Shotstack's text-to-image and image-to-video assets
-    console.log(`[${jobId}] Building AI-generated video using FLUX model...`)
-    editJson = buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, jobId)
+    // AI-Generated Scenes: Two-step process
+    // Step 1: Generate images using Shotstack Create API (FLUX model)
+    // Step 2: Use image-to-video to animate those images with real motion
+    console.log(`[${jobId}] 🎨 Starting AI video generation with FLUX model...`)
+    
+    const numScenes = Math.ceil(duration / 6) // Each scene is ~6 seconds
+    console.log(`[${jobId}] Generating ${numScenes} AI scenes...`)
+    
+    const generatedImages = await generateAIImages(prompt, numScenes, dimensions, apiKey, jobId)
+    
+    if (generatedImages.length === 0) {
+      console.log(`[${jobId}] ⚠️ No AI images generated, falling back to stock videos`)
+      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+      const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+      editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
+    } else {
+      console.log(`[${jobId}] ✅ Generated ${generatedImages.length} AI images, building video with motion...`)
+      editJson = buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, generatedImages, jobId)
+    }
   } else if (videoSource === 'hybrid') {
     // Hybrid: Mix AI-generated scenes with stock footage
-    console.log(`[${jobId}] Building hybrid video (AI + Stock)...`)
+    console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
+    
+    // Generate 2-3 AI images for key moments (hook, climax, resolution)
+    const numAIScenes = Math.min(3, Math.ceil(duration / 10))
+    const generatedImages = await generateAIImages(prompt, numAIScenes, dimensions, apiKey, jobId)
+    
+    // Fetch stock videos for B-roll
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-    const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 10)) // Half as many stock videos
-    editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, jobId)
+    const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 8))
+    
+    editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, generatedImages, jobId)
   } else {
     // Stock Videos: Original implementation
-    console.log(`[${jobId}] Fetching cinematic stock videos for template: ${templateId}`)
+    console.log(`[${jobId}] 📹 Fetching cinematic stock videos for template: ${templateId}`)
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
     console.log(`[${jobId}] Keywords: ${keywords.join(', ')}`)
     
