@@ -215,7 +215,15 @@ async function compileVideoWithFFmpeg({
         if (prompt && captionStyle !== 'none') {
           const lines = parsePromptToLines(prompt, 4)
           const lineIndex = i % lines.length
-          const text = lines[lineIndex].replace(/'/g, "\\'").replace(/:/g, "\\:")
+          // Proper FFmpeg text escaping: escape single quotes, colons, and backslashes
+          const text = lines[lineIndex]
+            .replace(/\\/g, '\\\\')     // Escape backslashes first
+            .replace(/'/g, "'\\''")      // Escape single quotes
+            .replace(/:/g, '\\:')        // Escape colons
+            .replace(/\[/g, '\\[')       // Escape brackets
+            .replace(/\]/g, '\\]')
+            .replace(/,/g, '\\,')        // Escape commas
+            .replace(/;/g, '\\;')        // Escape semicolons
           const fontSize = targetHeight >= 1920 ? 56 : 42
           
           // Simple bottom-positioned text with shadow
