@@ -743,8 +743,8 @@ export default function AIVideoStudioPage() {
                         videoSource === 'hybrid' ? 'text-cyan-900 dark:text-cyan-100' :
                         'text-blue-900 dark:text-blue-100'
                       }`}>
-                        {videoSource === 'ai' ? 'AI Scene Generation' : 
-                         videoSource === 'hybrid' ? 'Hybrid AI + Stock' : 
+                        {videoSource === 'ai' ? 'AI Video Generation (Fal.ai)' : 
+                         videoSource === 'hybrid' ? 'Hybrid: AI Video + Stock' : 
                          'Cinematic Stock Videos'}
                       </p>
                       <p className={`text-xs ${
@@ -752,8 +752,8 @@ export default function AIVideoStudioPage() {
                         videoSource === 'hybrid' ? 'text-cyan-700 dark:text-cyan-300' :
                         'text-blue-700 dark:text-blue-300'
                       }`}>
-                        {videoSource === 'ai' ? 'Unique AI-generated visuals via FLUX model' : 
-                         videoSource === 'hybrid' ? 'AI for key scenes + HD stock for B-roll' : 
+                        {videoSource === 'ai' ? 'Minimax Hailuo → Kling → Replicate (fallback)' : 
+                         videoSource === 'hybrid' ? 'AI video clips + HD stock B-roll footage' : 
                          'Real HD footage from Pexels • Renders in ~30s'}
                       </p>
                     </div>
