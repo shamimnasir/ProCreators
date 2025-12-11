@@ -26,28 +26,55 @@ const TEMPLATE_VIDEO_KEYWORDS = {
   'default': ['abstract background', 'nature aerial', 'city skyline', 'modern architecture', 'sky clouds']
 }
 
-// AI Video Generation Models (ordered by cost - cheapest first)
+// AI Video Generation Models - Ordered by cost (cheapest first)
+// Pricing as of 2025 from fal.ai/pricing
 const AI_VIDEO_MODELS = {
+  // TIER 1: Budget-Friendly (~$0.04/s)
+  'ovi': {
+    name: 'Ovi',
+    endpoint: 'fal-ai/ovi/text-to-video',
+    costPerVideo: 0.20, // $0.20 per 5s video = ~$0.04/s
+    costPerSecond: 0.04,
+    description: 'Ultra budget-friendly AI video',
+    maxDuration: 5,
+    tier: 'budget'
+  },
+  'pixverse': {
+    name: 'Pixverse v5',
+    endpoint: 'fal-ai/pixverse/v5/text-to-video',
+    costPerVideo: 0.20, // $0.20 per 5s video at 720p
+    costPerSecond: 0.04,
+    description: 'Creative effects & stylized videos',
+    maxDuration: 5,
+    tier: 'budget'
+  },
+  
+  // TIER 2: Value (~$0.05/s)
+  'wan': {
+    name: 'Wan 2.5',
+    endpoint: 'fal-ai/wan-t2v',
+    costPerSecond: 0.05,
+    description: 'Fast & reliable video generation',
+    maxDuration: 5,
+    tier: 'value'
+  },
   'minimax-hailuo': {
-    name: 'Minimax Hailuo AI',
+    name: 'Minimax Hailuo',
     endpoint: 'fal-ai/minimax-video/video-01-live',
     costPerSecond: 0.05,
-    description: 'Fast & affordable video generation',
-    maxDuration: 6
+    description: 'High-quality cinematic AI video',
+    maxDuration: 6,
+    tier: 'value'
   },
+  
+  // TIER 3: Premium (~$0.07/s)
   'kling-turbo': {
-    name: 'Kling 2.5 Turbo',
-    endpoint: 'fal-ai/kling-video/v1.6/standard/text-to-video',
+    name: 'Kling 2.5 Turbo Pro',
+    endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
     costPerSecond: 0.07,
-    description: 'High-quality cinematic video',
-    maxDuration: 10
-  },
-  'runway-gen3': {
-    name: 'Runway Gen-3 Alpha',
-    endpoint: 'fal-ai/runway-gen3/turbo/image-to-video',
-    costPerSecond: 0.10,
-    description: 'Professional-grade video generation',
-    maxDuration: 10
+    description: 'Top-tier cinematic quality',
+    maxDuration: 10,
+    tier: 'premium'
   }
 }
 
@@ -62,7 +89,7 @@ const PROVIDERS = {
   },
   fal: {
     name: 'Fal.ai',
-    description: 'AI video generation with Minimax, Kling, and other models'
+    description: 'AI video generation with Ovi, Pixverse, Wan, Minimax, Kling models'
   },
   replicate: {
     name: 'Replicate',
