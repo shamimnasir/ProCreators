@@ -359,16 +359,17 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else if (videoSource === 'ai') {
     // AI-Generated Video Scenes using Fal.ai
-    // Primary: Minimax Hailuo (cheapest), Fallback: Kling, then Replicate
+    // Primary: Ovi/Pixverse (cheapest), then Wan/Minimax, then Kling, then Replicate
     console.log(`[${jobId}] 🎨 Starting AI video generation with Fal.ai...`)
     
+    let aiVideos = []
     try {
       // Generate AI video clips using Fal.ai
-      const aiVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+      aiVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
       
       if (aiVideos.length > 0) {
         console.log(`[${jobId}] ✅ Generated ${aiVideos.length} AI video clips with Fal.ai`)
-        // Compose the AI videos with text overlays using Shotstack
+        // Try to compose the AI videos with text overlays using Shotstack
         editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, aiVideos, jobId)
       } else {
         throw new Error('No AI videos generated')
@@ -382,6 +383,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
         
         if (replicateVideos.length > 0) {
           console.log(`[${jobId}] ✅ Generated ${replicateVideos.length} AI video clips with Replicate (fallback)`)
+          aiVideos = replicateVideos
           editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, replicateVideos, jobId)
         } else {
           throw new Error('Replicate also failed')
@@ -392,6 +394,12 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
         const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
       }
+    }
+    
+    // Store AI videos in case Shotstack fails later
+    if (aiVideos.length > 0) {
+      // We'll use this if Shotstack composition fails
+      generatedAIVideos = aiVideos
     }
   } else if (videoSource === 'hybrid') {
     // Hybrid: Mix AI-generated video with stock footage
