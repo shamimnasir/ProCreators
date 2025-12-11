@@ -179,7 +179,7 @@ export default function AIVideoStudioPage() {
     setGenerating(true)
     setProgress(0)
     setProgressMessage(
-      videoSource === 'ai' ? '🎨 Generating AI scenes...' :
+      videoSource === 'ai' ? '🎨 Starting AI video generation with Fal.ai...' :
       videoSource === 'hybrid' ? '🎬 Creating AI + Stock hybrid...' :
       'Finding best stock videos...'
     )
@@ -206,18 +206,26 @@ export default function AIVideoStudioPage() {
         formData.append('photoCount', photos.length)
       }
       
-      // Progress simulation
+      // Progress simulation with Fal.ai model names
       const segments = Math.ceil(duration / 5)
       let currentProgress = 0
+      const aiModels = ['Ovi', 'Pixverse', 'Wan', 'Minimax', 'Kling']
+      let modelIndex = 0
       const progressInterval = setInterval(() => {
         currentProgress += 100 / (segments * (videoSource === 'ai' ? 50 : videoSource === 'hybrid' ? 40 : 25))
         if (currentProgress < 90) {
           setProgress(currentProgress)
-          setProgressMessage(
-            videoSource === 'ai' ? '🎨 Generating AI scenes with FLUX model...' :
-            videoSource === 'hybrid' ? '🎬 Mixing AI scenes with stock footage...' :
-            '📹 Composing video with stock footage...'
-          )
+          // Rotate through model names in progress message
+          if (videoSource === 'ai') {
+            const currentModel = aiModels[modelIndex % aiModels.length]
+            setProgressMessage(`🎨 Generating with ${currentModel} (Fal.ai)...`)
+            if (currentProgress > 20 * (modelIndex + 1)) modelIndex++
+          } else if (videoSource === 'hybrid') {
+            setProgressMessage('🎬 Mixing AI video + stock footage...')
+          } else {
+            setProgressMessage('📹 Composing video with stock footage...')
+          }
+        }
         }
       }, 1000)
       
