@@ -355,11 +355,12 @@ async function compileVideoWithFFmpeg({
       // Extract dialogue if narration mode is 'dialogue-only' (default)
       let ttsText = prompt
       if (narrationMode !== 'full') {
-        const extracted = extractDialogueFromScript(prompt)
+        const extracted = extractDialogueFromScript(prompt, ttsLanguage)
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
           spokenText = extracted.dialogueOnly // Captions should match spoken text
           console.log(`[${jobId}] 🎭 Dialogue-only mode: ${extracted.dialogueCount} dialogues, ~${extracted.costSavings}% cost savings`)
+          console.log(`[${jobId}] 🗣️ Will speak: "${ttsText.substring(0, 100)}..."`)
         } else {
           console.log(`[${jobId}] ⚠️ No dialogue found in script, using full text`)
         }
@@ -372,21 +373,31 @@ async function compileVideoWithFFmpeg({
           keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
         })
         
-        let languageCode = ttsLanguage === 'bn' ? 'bn-IN' : 'en-US'
-        
-        if (selectedVoice && selectedVoice.includes('-')) {
-          const parts = selectedVoice.split('-')
-          if (parts.length >= 2) {
-            languageCode = `${parts[0]}-${parts[1]}`
-          }
+        // Set language code based on ttsLanguage selection - DON'T override with selectedVoice
+        let languageCode = 'en-US'
+        switch (ttsLanguage) {
+          case 'bn': languageCode = 'bn-IN'; break
+          case 'hi': languageCode = 'hi-IN'; break
+          case 'es': languageCode = 'es-ES'; break
+          case 'fr': languageCode = 'fr-FR'; break
+          case 'de': languageCode = 'de-DE'; break
+          case 'ja': languageCode = 'ja-JP'; break
+          case 'ko': languageCode = 'ko-KR'; break
+          case 'zh': languageCode = 'cmn-CN'; break
+          case 'ar': languageCode = 'ar-XA'; break
+          default: languageCode = 'en-US'
         }
         
+        console.log(`[${jobId}] 🌐 TTS Language: ${ttsLanguage} → ${languageCode}`)
+        
+        // Build voice config - use selectedVoice only if it matches the language
         const voiceConfig = { languageCode }
-        if (selectedVoice) {
+        if (selectedVoice && selectedVoice.startsWith(languageCode.split('-')[0])) {
           voiceConfig.name = selectedVoice
-          if (selectedVoice.includes('Studio') || selectedVoice.includes('Chirp')) {
-            voiceConfig.model = selectedVoice
-          }
+          console.log(`[${jobId}] 🎤 Using selected voice: ${selectedVoice}`)
+        } else {
+          // Don't specify voice name - let Google pick the best voice for the language
+          console.log(`[${jobId}] 🎤 Using default ${languageCode} voice (selected voice ${selectedVoice} doesn't match language)`)
         }
         
         const ttsRequest = {
