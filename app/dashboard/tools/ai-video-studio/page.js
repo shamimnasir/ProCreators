@@ -821,13 +821,8 @@ export default function AIVideoStudioPage() {
                   Video Scene Source
                 </Label>
                 <RadioGroup value={videoSource} onValueChange={setVideoSource} className="space-y-3">
-                  <div 
-                    className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      videoSource === 'stock' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
-                    }`}
-                    onClick={() => setVideoSource('stock')}
-                  >
-                    <RadioGroupItem value="stock" id="stock" className="mt-1 hidden" />
+                  {/* Hidden stock option - removed from UI but kept for compatibility */}
+                  <RadioGroupItem value="stock" id="stock" className="hidden" />
                   
                   <div 
                     className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
