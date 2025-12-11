@@ -21,6 +21,43 @@ fal.config({
   credentials: process.env.FAL_KEY
 })
 
+// ==================== DIALOGUE EXTRACTION ====================
+// Extracts only dialogue (quoted text) from a script for TTS
+// This reduces TTS cost by ~70% and creates more natural narration
+
+function extractDialogueFromScript(script) {
+  if (!script || typeof script !== 'string') {
+    return { dialogueOnly: '', fullScript: script || '' }
+  }
+  
+  // Match text inside quotes (both " and ")
+  // Handles: "Hello", "Hello", 'Hello'
+  const dialoguePattern = /["\"](.*?)["\"]|[''](.*?)['']|"(.*?)"/g
+  
+  const dialogues = []
+  let match
+  
+  while ((match = dialoguePattern.exec(script)) !== null) {
+    // Get the captured group (whichever matched)
+    const dialogue = match[1] || match[2] || match[3]
+    if (dialogue && dialogue.trim()) {
+      dialogues.push(dialogue.trim())
+    }
+  }
+  
+  // Join dialogues with pauses (periods create natural TTS pauses)
+  const dialogueOnly = dialogues.join('. ')
+  
+  console.log(`[Dialogue Extraction] Full script: ${script.length} chars → Dialogue only: ${dialogueOnly.length} chars (${Math.round((1 - dialogueOnly.length/script.length) * 100)}% reduction)`)
+  
+  return {
+    dialogueOnly,
+    fullScript: script,
+    dialogueCount: dialogues.length,
+    costSavings: Math.round((1 - dialogueOnly.length / script.length) * 100)
+  }
+}
+
 // ==================== FFMPEG VIDEO COMPILATION ====================
 // This replaces Shotstack for video composition - handles AI clips, stock videos,
 // text overlays, TTS, and custom audio
@@ -38,6 +75,7 @@ async function compileVideoWithFFmpeg({
   voiceFile,     // Uploaded audio file (if any)
   captionStyle,  // Caption styling option
   musicTrack,    // Background music option
+  narrationMode, // 'full' or 'dialogue-only' (default: dialogue-only)
 }) {
   const tempDir = `/tmp/ai-video-studio-${jobId}`
   
