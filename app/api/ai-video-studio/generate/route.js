@@ -604,36 +604,61 @@ function getKeywordsFromPromptAndTemplate(prompt, templateId) {
 }
 
 // ==================== FAL.AI VIDEO GENERATION ====================
-// Generate AI video clips using Fal.ai (Minimax Hailuo - cheapest, then Kling)
+// Generate AI video clips using Fal.ai - tries models from cheapest to more expensive
+// Order: Ovi ($0.04/s) → Pixverse ($0.04/s) → Wan ($0.05/s) → Minimax ($0.05/s) → Kling ($0.07/s)
 async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   const videos = []
   const numClips = Math.ceil(duration / 5) // Each clip is ~5 seconds
   const scenes = parsePromptToScenes(prompt, numClips)
   
-  // Try Minimax Hailuo first (cheapest at $0.05/s)
+  // Models ordered by cost (cheapest first)
   const models = [
+    { 
+      name: 'Ovi', 
+      endpoint: 'fal-ai/ovi/text-to-video',
+      costPerSecond: 0.04,
+      tier: '💰 Budget'
+    },
+    { 
+      name: 'Pixverse v5', 
+      endpoint: 'fal-ai/pixverse/v5/text-to-video',
+      costPerSecond: 0.04,
+      tier: '💰 Budget'
+    },
+    { 
+      name: 'Wan 2.5', 
+      endpoint: 'fal-ai/wan-t2v',
+      costPerSecond: 0.05,
+      tier: '⭐ Value'
+    },
     { 
       name: 'Minimax Hailuo', 
       endpoint: 'fal-ai/minimax-video/video-01-live',
-      costPerSecond: 0.05
+      costPerSecond: 0.05,
+      tier: '⭐ Value'
     },
     { 
-      name: 'Kling 1.6 Standard', 
-      endpoint: 'fal-ai/kling-video/v1.6/standard/text-to-video',
-      costPerSecond: 0.07
+      name: 'Kling 2.5 Turbo', 
+      endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
+      costPerSecond: 0.07,
+      tier: '🏆 Premium'
     }
   ]
   
   let selectedModel = models[0]
   let modelIndex = 0
+  let consecutiveFailures = 0
+  
+  console.log(`[${jobId}] 🎬 Starting AI video generation with ${models.length} available models`)
+  console.log(`[${jobId}] Model priority: ${models.map(m => `${m.name} ($${m.costPerSecond}/s)`).join(' → ')}`)
   
   for (let i = 0; i < numClips; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
-      dimensions.height > dimensions.width ? 'vertical portrait video' : 'horizontal landscape video'
+      dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
     }`
     
-    console.log(`[${jobId}] 🎬 Generating AI clip ${i + 1}/${numClips} with ${selectedModel.name}...`)
+    console.log(`[${jobId}] 🎬 Clip ${i + 1}/${numClips} using ${selectedModel.tier} ${selectedModel.name}...`)
     console.log(`[${jobId}] Prompt: "${cinematicPrompt.substring(0, 80)}..."`)
     
     try {
@@ -651,13 +676,20 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         }
       })
       
-      // Extract video URL from result
-      const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url
+      // Extract video URL from result (different models return in different formats)
+      const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
       
       if (videoUrl) {
-        console.log(`[${jobId}] ✅ Clip ${i + 1} generated: ${videoUrl.substring(0, 60)}...`)
+        console.log(`[${jobId}] ✅ Clip ${i + 1} generated with ${selectedModel.name}: ${videoUrl.substring(0, 60)}...`)
         videos.push({
           url: videoUrl,
+          prompt: scenePrompt,
+          model: selectedModel.name,
+          tier: selectedModel.tier,
+          cost: selectedModel.costPerSecond * 5,
+          index: i
+        })
+        consecutiveFailures = 0 // Reset on success
           prompt: scenePrompt,
           model: selectedModel.name,
           cost: selectedModel.costPerSecond * 5,
