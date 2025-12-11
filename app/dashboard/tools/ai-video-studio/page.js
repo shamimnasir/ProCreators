@@ -210,10 +210,14 @@ export default function AIVideoStudioPage() {
       const segments = Math.ceil(duration / 5)
       let currentProgress = 0
       const progressInterval = setInterval(() => {
-        currentProgress += 100 / (segments * 25)
+        currentProgress += 100 / (segments * (videoSource === 'ai' ? 50 : videoSource === 'hybrid' ? 40 : 25))
         if (currentProgress < 90) {
           setProgress(currentProgress)
-          setProgressMessage(`📹 Composing video with stock footage...`)
+          setProgressMessage(
+            videoSource === 'ai' ? '🎨 Generating AI scenes with FLUX model...' :
+            videoSource === 'hybrid' ? '🎬 Mixing AI scenes with stock footage...' :
+            '📹 Composing video with stock footage...'
+          )
         }
       }, 1000)
       
