@@ -54,6 +54,22 @@ export default function AIVideoStudioPage() {
   const [language, setLanguage] = useState('en')
   const [videoSource, setVideoSource] = useState('stock') // 'stock', 'ai', 'hybrid'
   
+  // Voice/TTS state (reused from Quick Reels Hub)
+  const [ttsLanguage, setTtsLanguage] = useState('en')
+  const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'none'
+  const [availableVoices, setAvailableVoices] = useState([])
+  const [voicesByVariant, setVoicesByVariant] = useState({})
+  const [selectedVoice, setSelectedVoice] = useState('')
+  const [loadingVoices, setLoadingVoices] = useState(false)
+  const [voiceFile, setVoiceFile] = useState(null)
+  const [narrationMode, setNarrationMode] = useState('dialogue-only') // 'dialogue-only', 'full'
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const recordingIntervalRef = useRef(null)
+  const voiceFileInputRef = useRef(null)
+  
   // Generation state
   const [generating, setGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -65,6 +81,98 @@ export default function AIVideoStudioPage() {
   const { toast } = useToast()
   const fileInputRef = useRef(null)
   const multiFileInputRef = useRef(null)
+
+  // Load voices when TTS language changes
+  useEffect(() => {
+    if (voiceOption === 'tts') {
+      loadVoices()
+    }
+  }, [ttsLanguage, voiceOption])
+
+  const loadVoices = async () => {
+    setLoadingVoices(true)
+    try {
+      const response = await fetch(`/api/story-reels/list-voices?language=${ttsLanguage}`)
+      const data = await response.json()
+      if (data.success && data.voices) {
+        setAvailableVoices(data.voices)
+        
+        // Group voices by variant
+        const grouped = {}
+        data.voices.forEach(voice => {
+          const variant = voice.name.split('-').slice(2, 3).join('-') || 'Standard'
+          if (!grouped[variant]) grouped[variant] = []
+          grouped[variant].push(voice)
+        })
+        setVoicesByVariant(grouped)
+        
+        // Select first voice if none selected
+        const variants = Object.keys(grouped)
+        if (variants.length > 0 && !selectedVoice) {
+          const firstVariant = variants[0]
+          if (grouped[firstVariant]?.length > 0) {
+            setSelectedVoice(grouped[firstVariant][0].name)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load voices:', error)
+    } finally {
+      setLoadingVoices(false)
+    }
+  }
+
+  // Voice recording handlers
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' })
+        setVoiceFile(audioBlob)
+        stream.getTracks().forEach(track => track.stop())
+      }
+      
+      mediaRecorder.start()
+      setIsRecording(true)
+      setRecordingTime(0)
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+      
+      toast({ title: 'Recording Started', description: 'Speak your narration' })
+    } catch (error) {
+      toast({ title: 'Recording Failed', description: error.message, variant: 'destructive' })
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      clearInterval(recordingIntervalRef.current)
+      toast({ title: 'Recording Saved', description: `${recordingTime}s of audio recorded` })
+    }
+  }
+
+  const handleVoiceFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (!file.type.startsWith('audio/')) {
+        toast({ title: 'Invalid File', description: 'Please upload an audio file', variant: 'destructive' })
+        return
+      }
+      setVoiceFile(file)
+      toast({ title: 'Audio Uploaded', description: file.name })
+    }
+  }
 
   // Get templates to display
   const displayTemplates = searchQuery 
