@@ -37,19 +37,23 @@ function extractDialogueFromScript(script, language = 'en') {
   const dialogues = []
   
   // Method 1: Match text inside various quote types
-  // Supports: "text", "text", 'text', 'text', «text», „text", 「text」
+  // Supports multiple quote styles used across languages
   const quotePatterns = [
-    /"([^"]+)"/g,           // Straight double quotes
-    /"([^"]+)"/g,           // Curly double quotes
-    /'([^']+)'/g,           // Curly single quotes
+    /"([^"]+)"/g,           // Straight double quotes "text"
+    /"([^"]+)"/g,           // Curly double quotes "text"
+    /'([^']+)'/g,           // Curly single quotes 'text'
+    /'([^']+)'/g,           // Straight single quotes 'text'
     /「([^」]+)」/g,         // Japanese/Chinese quotes
     /«([^»]+)»/g,           // French/Russian quotes
     /„([^"]+)"/g,           // German quotes
     /『([^』]+)』/g,         // Japanese double quotes
+    /\u201C([^\u201D]+)\u201D/g,  // Unicode left/right double quotes
   ]
   
   for (const pattern of quotePatterns) {
     let match
+    // Reset regex lastIndex for each pattern
+    pattern.lastIndex = 0
     while ((match = pattern.exec(script)) !== null) {
       const dialogue = match[1]
       if (dialogue && dialogue.trim() && dialogue.trim().length > 2) {
@@ -60,17 +64,21 @@ function extractDialogueFromScript(script, language = 'en') {
   
   // Method 2: If no quotes found, try dialogue indicators (for scripts without proper quotes)
   if (dialogues.length === 0) {
-    // English dialogue indicators
-    const englishIndicators = /(?:said|says|shouted|whispered|asked|replied|exclaimed|muttered|yelled|screamed|spoke|cried|answered)[,:]?\s*[""']?([^.!?]+[.!?])/gi
-    // Bengali dialogue indicators
-    const bengaliIndicators = /(?:বললো|বলল|বলে|বললেন|চিৎকার করে|জিজ্ঞেস করলো|উত্তর দিলো)[,:]?\s*[""']?([^।!?]+[।!?])/gi
+    // English dialogue indicators - captures text AFTER the indicator
+    const englishIndicators = /(?:said|says|shouted|whispered|asked|replied|exclaimed|muttered|yelled|screamed|spoke|cried|answered|told)[,:\s]+["'"']?([^.!?"']+[.!?]?)/gi
+    
+    // Bengali dialogue indicators - common verbs meaning "said/told/shouted"
+    // বললো, বলল, বলে, বললেন, চিৎকার করল, জিজ্ঞেস করল
+    const bengaliIndicators = /(?:বললো|বলল|বলে|বললেন|বলেছিল|বলেছে|চিৎকার করল|চিৎকার করে|জিজ্ঞেস করল|জিজ্ঞেস করে|উত্তর দিল|উত্তর দিয়ে|ডাকল|ডেকে)[,:\s—–-]+["'"']?([^।.!?]+[।.!?]?)/gi
+    
     // Hindi dialogue indicators
-    const hindiIndicators = /(?:बोला|बोली|कहा|कही|चिल्लाया|पूछा|जवाब दिया)[,:]?\s*[""']?([^।!?]+[।!?])/gi
+    const hindiIndicators = /(?:बोला|बोली|कहा|कही|चिल्लाया|पूछा|जवाब दिया|बताया)[,:\s]+["'"']?([^।.!?]+[।.!?]?)/gi
     
     const indicatorPatterns = [englishIndicators, bengaliIndicators, hindiIndicators]
     
     for (const pattern of indicatorPatterns) {
       let match
+      pattern.lastIndex = 0
       while ((match = pattern.exec(script)) !== null) {
         const dialogue = match[1]
         if (dialogue && dialogue.trim() && dialogue.trim().length > 3) {
