@@ -8,6 +8,18 @@ import { buildCinematicVideoEdit, getTemplateVisualConfig } from '@/lib/cinemati
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 
+// Stock video keywords for different templates
+const TEMPLATE_VIDEO_KEYWORDS = {
+  'auto-story-reels': ['dramatic', 'cinematic', 'emotional', 'city night', 'people silhouette'],
+  'small-business-promo': ['business office', 'professional', 'success', 'modern building', 'teamwork'],
+  'motivation-broll': ['fitness gym', 'mountain summit', 'sunrise motivation', 'running athlete', 'achievement'],
+  'cinematic-script': ['cinematic rain', 'film noir', 'dramatic clouds', 'atmosphere fog', 'dark city'],
+  'local-language-explainer': ['technology abstract', 'education', 'world globe', 'science', 'digital'],
+  'music-facts': ['abstract particles', 'neon lights', 'energy waves', 'colorful abstract', 'dynamic motion'],
+  'tribute-video': ['love couple', 'family happy', 'memories photo', 'celebration', 'romantic sunset'],
+  'default': ['abstract background', 'nature aerial', 'city skyline', 'modern architecture', 'sky clouds']
+}
+
 // Provider configurations
 const PROVIDERS = {
   shotstack: {
@@ -21,6 +33,77 @@ const PROVIDERS = {
     name: 'Replicate',
     description: 'AI video generation - best for image-to-video and text-to-video AI generation'
   }
+}
+
+// Fetch stock videos from Pexels
+async function fetchStockVideos(keywords, count = 3) {
+  const pexelsKey = process.env.PEXELS_API_KEY
+  
+  if (!pexelsKey) {
+    console.log('[Stock Videos] No PEXELS_API_KEY, using fallback videos')
+    return getFallbackVideos(count)
+  }
+  
+  const videos = []
+  
+  for (const keyword of keywords.slice(0, count)) {
+    try {
+      const response = await fetch(
+        `https://api.pexels.com/videos/search?query=${encodeURIComponent(keyword)}&per_page=3&orientation=portrait`,
+        {
+          headers: { 'Authorization': pexelsKey }
+        }
+      )
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.videos && data.videos.length > 0) {
+          // Get the first video with a suitable file
+          const video = data.videos[0]
+          const videoFile = video.video_files.find(f => f.quality === 'hd' || f.quality === 'sd') || video.video_files[0]
+          if (videoFile) {
+            videos.push({
+              url: videoFile.link,
+              keyword,
+              width: videoFile.width,
+              height: videoFile.height
+            })
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`[Stock Videos] Error fetching for "${keyword}":`, error.message)
+    }
+  }
+  
+  // Fill with fallbacks if needed
+  while (videos.length < count) {
+    const fallbacks = getFallbackVideos(count - videos.length)
+    videos.push(...fallbacks)
+  }
+  
+  return videos.slice(0, count)
+}
+
+// Fallback stock videos (free Pexels videos with direct links)
+function getFallbackVideos(count) {
+  const fallbackUrls = [
+    'https://static.pexels.com/lib/videos/free-videos.mp4',
+    'https://player.vimeo.com/external/370467553.hd.mp4?s=ce49c8c6d8e28a89298ffb4c53a2e842bdb11546&profile_id=174&oauth2_token_id=57447761',
+    // Use Shotstack's free assets
+    'https://shotstack-assets.s3.amazonaws.com/footage/beach-overhead.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/earth.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/night-sky.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/sunset-beach.mp4',
+    'https://shotstack-assets.s3.amazonaws.com/footage/city-night.mp4',
+  ]
+  
+  return fallbackUrls.slice(0, count).map((url, i) => ({
+    url,
+    keyword: 'background',
+    width: 1920,
+    height: 1080
+  }))
 }
 
 export async function POST(request) {
