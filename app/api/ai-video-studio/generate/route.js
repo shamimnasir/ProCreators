@@ -743,48 +743,54 @@ function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, gen
 
 // ==================== HYBRID VIDEO EDIT (AI + STOCK) ====================
 // Mixes AI-generated scenes for key moments with stock footage for B-roll
-function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, jobId) {
+function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, generatedImages, jobId) {
   const config = getTemplateVisualConfig(templateId)
-  const scenes = parsePromptToScenes(prompt, 6)
   const lines = parsePromptToLines(prompt, 4)
   
   const tracks = []
   const totalSegments = Math.max(4, Math.ceil(duration / 5))
   const segmentDuration = duration / totalSegments
   
+  // Motion prompts for AI-generated clips
+  const motionPrompts = [
+    'Slowly zoom out while orbiting left',
+    'Gentle push in with subtle movement',
+    'Slow pan right across the scene'
+  ]
+  
   // Create alternating AI and Stock clips for hybrid effect
   const backgroundClips = []
+  let aiImageIndex = 0
+  let stockIndex = 0
   
   for (let i = 0; i < totalSegments; i++) {
     const startTime = i * segmentDuration
-    const isAIScene = i === 0 || i === Math.floor(totalSegments / 2) || i === totalSegments - 1 // Hook, climax, resolution
+    // Use AI for first, middle, and last segments (hook, climax, resolution)
+    const isAIScene = (i === 0 || i === Math.floor(totalSegments / 2) || i === totalSegments - 1) && aiImageIndex < generatedImages.length
     
-    if (isAIScene) {
-      // AI-generated scene for important moments
-      const scenePrompt = scenes[i % scenes.length] || prompt
-      const cinematicPrompt = `${scenePrompt}, cinematic, dramatic lighting, high quality, ${
-        dimensions.height > dimensions.width ? 'vertical' : 'landscape'
-      }, professional`
+    if (isAIScene && generatedImages.length > 0) {
+      // Use pre-generated AI image with image-to-video for real motion
+      const aiImage = generatedImages[aiImageIndex % generatedImages.length]
+      const motionPrompt = motionPrompts[aiImageIndex % motionPrompts.length]
       
       backgroundClips.push({
         asset: {
-          type: 'text-to-image',
-          prompt: cinematicPrompt,
-          width: Math.min(1280, dimensions.width),
-          height: Math.min(1280, dimensions.height)
+          type: 'image-to-video',
+          src: aiImage.url,
+          prompt: motionPrompt
         },
         start: startTime,
-        length: segmentDuration + 0.3,
+        length: 'auto', // Let Shotstack determine optimal length (~6s)
         fit: 'cover',
-        effect: 'zoomIn',
         transition: {
           in: 'fade',
           out: 'fade'
         }
       })
+      aiImageIndex++
     } else {
       // Stock video for B-roll
-      const stockVideo = stockVideos[i % stockVideos.length] || stockVideos[0]
+      const stockVideo = stockVideos[stockIndex % stockVideos.length] || stockVideos[0]
       if (stockVideo) {
         backgroundClips.push({
           asset: {
@@ -795,24 +801,25 @@ function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVid
           start: startTime,
           length: segmentDuration + 0.3,
           fit: 'cover',
-          effect: i % 2 === 0 ? 'zoomOut' : 'slideRight',
+          effect: stockIndex % 2 === 0 ? 'zoomOut' : 'slideRight',
           transition: {
             in: 'fade',
             out: 'fade'
           }
         })
+        stockIndex++
       }
     }
   }
   
   tracks.push({ clips: backgroundClips })
   
-  // Track 2: Cinematic overlay
+  // Track 2: Cinematic overlay (positioned at bottom for text readability)
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}55 0%, ${config.colorScheme.secondary}bb 100%);"></div>`,
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, transparent 0%, transparent 40%, ${config.colorScheme.secondary}88 70%, ${config.colorScheme.secondary}dd 100%);"></div>`,
         width: dimensions.width,
         height: dimensions.height
       },
@@ -826,9 +833,8 @@ function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVid
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="position:absolute;top:20px;right:20px;background:linear-gradient(135deg, #3b82f6, #06b6d4);padding:8px 16px;border-radius:20px;display:flex;align-items:center;gap:8px;">
-          <span style="font-size:14px;">✨</span>
-          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:600;">AI + STOCK</span>
+        html: `<div style="position:absolute;top:30px;right:30px;background:linear-gradient(135deg, #3b82f6, #06b6d4);padding:10px 20px;border-radius:25px;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+          <span style="font-family:'Montserrat',sans-serif;font-size:14px;color:white;font-weight:700;letter-spacing:1px;">✨ AI + STOCK</span>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
