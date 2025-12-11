@@ -622,39 +622,62 @@ export default function AIVideoStudioPage() {
                     <SelectContent>
                       <SelectItem value="en">English</SelectItem>
                       <SelectItem value="bn">বাংলা (Bengali)</SelectItem>
-                      <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
+                      <SelectItem value="hi">হिंদी (Hindi)</SelectItem>
                       <SelectItem value="es">Español (Spanish)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               )}
 
-              {/* Video Engine (Provider) */}
+              {/* Video Source Selection */}
               <div className="space-y-3 pt-4 border-t">
                 <Label className="flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  Video Engine
+                  <Video className="h-4 w-4" />
+                  Video Background Source
                 </Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   <div
-                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      provider === 'shotstack' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      videoSource === 'stock' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
                     }`}
-                    onClick={() => setProvider('shotstack')}
+                    onClick={() => setVideoSource('stock')}
                   >
-                    <p className="font-medium">⚡ Shotstack</p>
-                    <p className="text-xs text-muted-foreground">Fast • Text & Slideshows</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📹</span>
+                        <div>
+                          <p className="font-semibold">Stock Videos</p>
+                          <p className="text-xs text-muted-foreground">Real footage from Pexels • Fast (~30s)</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">Recommended</Badge>
+                    </div>
                   </div>
                   <div
-                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                      provider === 'replicate' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      videoSource === 'ai-generated' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
                     }`}
-                    onClick={() => setProvider('replicate')}
+                    onClick={() => setVideoSource('ai-generated')}
                   >
-                    <p className="font-medium">🤖 Replicate AI</p>
-                    <p className="text-xs text-muted-foreground">AI Gen • Image Animation</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">🤖</span>
+                        <div>
+                          <p className="font-semibold">AI Generated</p>
+                          <p className="text-xs text-muted-foreground">Unique AI scenes from your prompt • Slower (~2-4 min)</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">Premium</Badge>
+                    </div>
                   </div>
                 </div>
+                {videoSource === 'ai-generated' && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm">
+                    <p className="text-amber-800 dark:text-amber-200">
+                      ⚡ <strong>AI Generation</strong> creates unique video scenes based on your text. Takes 2-4 minutes per scene.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
