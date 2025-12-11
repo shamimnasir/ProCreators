@@ -3,222 +3,77 @@ import { writeFile, mkdir, unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
-import Replicate from 'replicate'
-import ffmpeg from 'fluent-ffmpeg'
-import { getUseCaseById, FORMAT_OPTIONS } from '@/config/ai-video-usecases'
-
-// Set ffmpeg paths
-ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
-ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 
-// Video generation models
-const VIDEO_MODELS = {
-  imageToVideo: {
-    id: 'stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
-    name: 'Stable Video Diffusion',
-    type: 'image',
-    framesPerSecond: 6,
-    outputFrames: 25
+// Provider configurations
+const PROVIDERS = {
+  shotstack: {
+    name: 'Shotstack',
+    description: 'Professional video editing API - best for slideshows, text animations, and composed videos',
+    baseUrl: process.env.SHOTSTACK_ENV === 'production' 
+      ? 'https://api.shotstack.io/v1'
+      : 'https://api.shotstack.io/stage'
   },
-  textToVideo: {
-    id: 'anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
-    name: 'ZeroScope V2 XL',
-    type: 'text',
-    framesPerSecond: 8
+  replicate: {
+    name: 'Replicate',
+    description: 'AI video generation - best for image-to-video and text-to-video AI generation'
   }
 }
 
 export async function POST(request) {
   const jobId = randomUUID()
-  const tempDir = `/tmp/ai-video-studio-${jobId}`
   
   try {
-    console.log(`[${jobId}] Starting AI Video Studio generation...`)
+    console.log(`[${jobId}] Starting video generation...`)
     
     // Parse request
     const formData = await request.formData()
-    const mode = formData.get('mode') // 'image-to-video' or 'text-to-video'
+    const provider = formData.get('provider') || 'shotstack' // Default to Shotstack
+    const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
     const prompt = formData.get('prompt')
     const duration = parseInt(formData.get('duration') || '5')
     const format = formData.get('format') || 'portrait'
-    const useCaseId = formData.get('useCaseId') || 'make-anything'
-    const imageFile = formData.get('image') // For image-to-video
+    const templateId = formData.get('templateId') || 'custom'
+    const imageFile = formData.get('image')
     
-    // Optional: Voice, Music, Text overlay (for future integration)
-    const voiceOption = formData.get('voiceOption') // 'none', 'tts', 'upload'
-    const ttsLanguage = formData.get('ttsLanguage')
-    const selectedVoice = formData.get('selectedVoice')
-    const voiceScript = formData.get('voiceScript')
-    const voiceFile = formData.get('voiceFile')
-    const musicPath = formData.get('musicPath')
-    const textOverlay = formData.get('textOverlay') ? JSON.parse(formData.get('textOverlay')) : null
+    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s`)
     
-    console.log(`[${jobId}] Config:`, { mode, duration, format, useCaseId, hasImage: !!imageFile })
+    let result
     
-    // Validate inputs
-    if (mode === 'image-to-video' && !imageFile) {
-      return NextResponse.json(
-        { success: false, error: 'Image is required for image-to-video mode' },
-        { status: 400 }
-      )
+    if (provider === 'shotstack') {
+      result = await generateWithShotstack({
+        jobId,
+        mode,
+        prompt,
+        duration,
+        format,
+        templateId,
+        imageFile
+      })
+    } else if (provider === 'replicate') {
+      result = await generateWithReplicate({
+        jobId,
+        mode,
+        prompt,
+        duration,
+        format,
+        templateId,
+        imageFile
+      })
+    } else {
+      throw new Error(`Unknown provider: ${provider}`)
     }
-    
-    if (mode === 'text-to-video' && !prompt) {
-      return NextResponse.json(
-        { success: false, error: 'Prompt is required for text-to-video mode' },
-        { status: 400 }
-      )
-    }
-    
-    // Check Replicate API key
-    const replicateKey = process.env.REPLICATE_API_TOKEN
-    if (!replicateKey) {
-      return NextResponse.json(
-        { success: false, error: 'Replicate API key not configured. Please add REPLICATE_API_TOKEN to environment variables.' },
-        { status: 500 }
-      )
-    }
-    
-    // Create temp directory
-    await mkdir(tempDir, { recursive: true })
-    
-    // Initialize Replicate
-    const replicate = new Replicate({ auth: replicateKey })
-    
-    // Get format configuration
-    const formatConfig = FORMAT_OPTIONS.find(f => f.value === format) || FORMAT_OPTIONS[0]
-    
-    // Calculate segments needed for duration
-    const segmentDuration = 5 // Each AI generation produces ~5 seconds
-    const segmentsNeeded = Math.ceil(duration / segmentDuration)
-    
-    console.log(`[${jobId}] Generating ${segmentsNeeded} segment(s) for ${duration}s video`)
-    
-    // Generate video segments
-    const videoSegments = []
-    let currentImage = null
-    
-    // If image-to-video, save the uploaded image
-    if (mode === 'image-to-video' && imageFile) {
-      const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
-      const imagePath = join(tempDir, 'input-image.jpg')
-      await writeFile(imagePath, imageBuffer)
-      
-      // Convert to base64 data URL for Replicate
-      const base64Image = imageBuffer.toString('base64')
-      const mimeType = imageFile.type || 'image/jpeg'
-      currentImage = `data:${mimeType};base64,${base64Image}`
-      
-      console.log(`[${jobId}] Saved input image: ${imagePath}`)
-    }
-    
-    // Generate each segment
-    for (let segment = 0; segment < segmentsNeeded; segment++) {
-      console.log(`[${jobId}] Generating segment ${segment + 1}/${segmentsNeeded}...`)
-      
-      let videoUrl
-      
-      if (mode === 'image-to-video' || (segment > 0 && currentImage)) {
-        // Image-to-Video generation (SVD)
-        videoUrl = await generateImageToVideo(replicate, currentImage, prompt, formatConfig, jobId)
-      } else {
-        // Text-to-Video generation (ZeroScope)
-        videoUrl = await generateTextToVideo(replicate, prompt, formatConfig, jobId)
-      }
-      
-      if (!videoUrl) {
-        throw new Error(`Failed to generate segment ${segment + 1}`)
-      }
-      
-      // Download the generated video
-      const segmentPath = join(tempDir, `segment-${segment}.mp4`)
-      const response = await fetch(videoUrl)
-      const videoBuffer = Buffer.from(await response.arrayBuffer())
-      await writeFile(segmentPath, videoBuffer)
-      
-      videoSegments.push(segmentPath)
-      console.log(`[${jobId}] ✅ Segment ${segment + 1} saved: ${segmentPath}`)
-      
-      // Extract last frame for chaining (if more segments needed)
-      if (segment < segmentsNeeded - 1) {
-        const lastFramePath = join(tempDir, `lastframe-${segment}.jpg`)
-        await extractLastFrame(segmentPath, lastFramePath)
-        
-        // Convert to base64 for next generation
-        const fs = require('fs')
-        const frameBuffer = fs.readFileSync(lastFramePath)
-        currentImage = `data:image/jpeg;base64,${frameBuffer.toString('base64')}`
-        
-        console.log(`[${jobId}] Extracted last frame for chaining`)
-      }
-    }
-    
-    // Concatenate all segments into final video
-    console.log(`[${jobId}] Concatenating ${videoSegments.length} segments...`)
-    const rawVideoPath = join(tempDir, 'raw-output.mp4')
-    await concatenateVideos(videoSegments, rawVideoPath, jobId)
-    
-    // Apply post-processing (format, voice, music, text overlay)
-    console.log(`[${jobId}] Applying post-processing...`)
-    const finalVideoPath = join(tempDir, 'final-output.mp4')
-    
-    await postProcessVideo({
-      inputPath: rawVideoPath,
-      outputPath: finalVideoPath,
-      format: formatConfig,
-      voiceOption,
-      ttsLanguage,
-      selectedVoice,
-      voiceScript,
-      voiceFile,
-      musicPath,
-      textOverlay,
-      tempDir,
-      jobId
-    })
-    
-    // Move to public folder
-    const publicDir = join(process.cwd(), 'public', 'ai-video-studio')
-    await mkdir(publicDir, { recursive: true })
-    
-    const outputFileName = `video-${jobId}.mp4`
-    const publicPath = join(publicDir, outputFileName)
-    
-    const fs = require('fs')
-    fs.copyFileSync(finalVideoPath, publicPath)
-    
-    // Clean up temp directory
-    try {
-      fs.rmSync(tempDir, { recursive: true, force: true })
-    } catch (e) {
-      console.log(`[${jobId}] Cleanup warning:`, e.message)
-    }
-    
-    console.log(`[${jobId}] ✅ Video generation complete!`)
     
     return NextResponse.json({
       success: true,
-      videoUrl: `/ai-video-studio/${outputFileName}`,
-      duration,
-      format: formatConfig.value,
-      segments: segmentsNeeded,
-      jobId
+      provider,
+      ...result
     })
     
   } catch (error) {
     console.error(`[${jobId}] Video generation error:`, error)
-    
-    // Clean up on error
-    try {
-      const fs = require('fs')
-      if (existsSync(tempDir)) {
-        fs.rmSync(tempDir, { recursive: true, force: true })
-      }
-    } catch (e) {}
-    
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate video' },
       { status: 500 }
@@ -226,20 +81,330 @@ export async function POST(request) {
   }
 }
 
-// Generate video from image using Stable Video Diffusion
-async function generateImageToVideo(replicate, imageData, prompt, formatConfig, jobId) {
-  console.log(`[${jobId}] Running SVD image-to-video...`)
+// ==================== SHOTSTACK GENERATION ====================
+async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
+  console.log(`[${jobId}] Using Shotstack for video generation...`)
   
-  const model = VIDEO_MODELS.imageToVideo
+  const apiKey = process.env.SHOTSTACK_API_KEY
+  if (!apiKey) {
+    throw new Error('Shotstack API key not configured')
+  }
   
-  try {
+  const baseUrl = PROVIDERS.shotstack.baseUrl
+  
+  // Get format dimensions
+  const dimensions = format === 'portrait' 
+    ? { width: 1080, height: 1920 }
+    : { width: 1920, height: 1080 }
+  
+  // Build the edit JSON based on mode
+  let editJson
+  
+  if (mode === 'text-to-video' || mode === 'slideshow') {
+    // Create a text animation video with background and text overlays
+    editJson = buildTextVideoEdit(prompt, duration, dimensions, templateId)
+  } else if (mode === 'image-to-video' && imageFile) {
+    // For image-to-video, we'll create a Ken Burns effect video
+    // First, upload the image to get a URL (or use a placeholder for now)
+    editJson = buildImageVideoEdit(prompt, duration, dimensions)
+  } else {
+    // Default: create a simple animated video
+    editJson = buildDefaultVideoEdit(prompt, duration, dimensions)
+  }
+  
+  console.log(`[${jobId}] Submitting to Shotstack:`, JSON.stringify(editJson).substring(0, 500))
+  
+  // Submit render request
+  const renderResponse = await fetch(`${baseUrl}/render`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey
+    },
+    body: JSON.stringify(editJson)
+  })
+  
+  if (!renderResponse.ok) {
+    const errorText = await renderResponse.text()
+    console.error(`[${jobId}] Shotstack render error:`, errorText)
+    throw new Error(`Shotstack render failed: ${renderResponse.status}`)
+  }
+  
+  const renderData = await renderResponse.json()
+  const renderId = renderData.response?.id
+  
+  if (!renderId) {
+    throw new Error('No render ID returned from Shotstack')
+  }
+  
+  console.log(`[${jobId}] Render submitted. ID: ${renderId}`)
+  
+  // Poll for completion
+  let videoUrl = null
+  let attempts = 0
+  const maxAttempts = 60 // 2 minutes max
+  
+  while (!videoUrl && attempts < maxAttempts) {
+    await new Promise(r => setTimeout(r, 2000))
+    attempts++
+    
+    const statusResponse = await fetch(`${baseUrl}/render/${renderId}`, {
+      headers: { 'x-api-key': apiKey }
+    })
+    
+    if (!statusResponse.ok) {
+      console.error(`[${jobId}] Status check failed:`, statusResponse.status)
+      continue
+    }
+    
+    const statusData = await statusResponse.json()
+    const status = statusData.response?.status
+    
+    console.log(`[${jobId}] Render status: ${status} (attempt ${attempts})`)
+    
+    if (status === 'done') {
+      videoUrl = statusData.response?.url
+      console.log(`[${jobId}] ✅ Render complete! URL: ${videoUrl}`)
+    } else if (status === 'failed') {
+      throw new Error(`Shotstack render failed: ${statusData.response?.error || 'Unknown error'}`)
+    }
+  }
+  
+  if (!videoUrl) {
+    throw new Error('Render timed out')
+  }
+  
+  return {
+    videoUrl,
+    renderId,
+    duration,
+    format,
+    provider: 'shotstack'
+  }
+}
+
+// Build edit JSON for text/prompt-based video
+function buildTextVideoEdit(prompt, duration, dimensions, templateId) {
+  // Create text slides from the prompt
+  const lines = prompt.split('\n').filter(l => l.trim()).slice(0, 5)
+  const slideDuration = Math.max(2, Math.floor(duration / Math.max(1, lines.length)))
+  
+  // Color schemes based on template
+  const colorSchemes = {
+    'auto-story-reels': { bg: '#1a1a2e', text: '#eaeaea', accent: '#e94560' },
+    'motivation-broll': { bg: '#0f0f0f', text: '#ffffff', accent: '#ffd700' },
+    'cinematic-script': { bg: '#000000', text: '#ffffff', accent: '#4a90d9' },
+    'small-business-promo': { bg: '#1e3a5f', text: '#ffffff', accent: '#ff6b35' },
+    'default': { bg: '#0a0a0a', text: '#ffffff', accent: '#00d4ff' }
+  }
+  
+  const colors = colorSchemes[templateId] || colorSchemes.default
+  
+  const clips = []
+  
+  // Add background
+  clips.push({
+    asset: {
+      type: 'html',
+      html: `<div style="width:100%;height:100%;background:linear-gradient(135deg, ${colors.bg} 0%, ${colors.accent}22 100%);"></div>`,
+      width: dimensions.width,
+      height: dimensions.height
+    },
+    start: 0,
+    length: duration
+  })
+  
+  // Add text for each line with animation
+  lines.forEach((line, index) => {
+    const startTime = index * slideDuration
+    const fontSize = dimensions.width < 1200 ? 60 : 80
+    
+    clips.push({
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
+          <p style="font-family:'Montserrat',sans-serif;font-size:${fontSize}px;color:${colors.text};font-weight:bold;line-height:1.3;text-shadow:2px 2px 10px rgba(0,0,0,0.8);">${line.trim()}</p>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: startTime,
+      length: slideDuration,
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      },
+      effect: 'zoomIn'
+    })
+  })
+  
+  // If no lines, add the full prompt as one slide
+  if (lines.length === 0) {
+    clips.push({
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
+          <p style="font-family:'Montserrat',sans-serif;font-size:60px;color:${colors.text};font-weight:bold;">${prompt.substring(0, 200)}</p>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration,
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    })
+  }
+  
+  return {
+    timeline: {
+      background: colors.bg,
+      fonts: [
+        {
+          src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'
+        }
+      ],
+      tracks: [{ clips }]
+    },
+    output: {
+      format: 'mp4',
+      resolution: 'hd',
+      aspectRatio: dimensions.width > dimensions.height ? '16:9' : '9:16',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// Build edit JSON for image-based video with Ken Burns effect
+function buildImageVideoEdit(imageUrl, duration, dimensions) {
+  // Use a sample image for testing if no URL provided
+  const sampleImage = imageUrl || 'https://shotstack-assets.s3.amazonaws.com/images/earth.jpg'
+  
+  return {
+    timeline: {
+      background: '#000000',
+      tracks: [
+        {
+          clips: [
+            {
+              asset: {
+                type: 'image',
+                src: sampleImage
+              },
+              start: 0,
+              length: duration,
+              fit: 'cover',
+              effect: 'zoomIn', // Ken Burns zoom effect
+              transition: {
+                in: 'fade',
+                out: 'fade'
+              }
+            }
+          ]
+        }
+      ]
+    },
+    output: {
+      format: 'mp4',
+      resolution: 'hd',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// Build default video edit
+function buildDefaultVideoEdit(prompt, duration, dimensions) {
+  return {
+    timeline: {
+      background: '#000000',
+      fonts: [
+        {
+          src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'
+        }
+      ],
+      tracks: [
+        {
+          clips: [
+            {
+              asset: {
+                type: 'html',
+                html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:60px;">
+                  <p style="font-family:'Montserrat',sans-serif;font-size:72px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 20px rgba(0,0,0,0.5);">${prompt.substring(0, 150)}</p>
+                </div>`,
+                width: dimensions.width,
+                height: dimensions.height
+              },
+              start: 0,
+              length: duration,
+              effect: 'zoomIn',
+              transition: {
+                in: 'fade',
+                out: 'fade'
+              }
+            }
+          ]
+        }
+      ]
+    },
+    output: {
+      format: 'mp4',
+      resolution: 'hd',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// ==================== REPLICATE GENERATION ====================
+async function generateWithReplicate({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
+  console.log(`[${jobId}] Using Replicate for AI video generation...`)
+  
+  const Replicate = require('replicate').default
+  const replicateKey = process.env.REPLICATE_API_TOKEN
+  
+  if (!replicateKey) {
+    throw new Error('Replicate API key not configured. Please add REPLICATE_API_TOKEN to environment variables.')
+  }
+  
+  const replicate = new Replicate({ auth: replicateKey })
+  
+  // Get format dimensions
+  const dimensions = format === 'portrait' 
+    ? { width: 576, height: 1024 }
+    : { width: 1024, height: 576 }
+  
+  let videoUrl
+  
+  if (mode === 'image-to-video' && imageFile) {
+    // Convert uploaded image to base64
+    const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
+    const base64Image = imageBuffer.toString('base64')
+    const mimeType = imageFile.type || 'image/jpeg'
+    const imageDataUrl = `data:${mimeType};base64,${base64Image}`
+    
+    console.log(`[${jobId}] Running SVD image-to-video...`)
+    
+    // Use Stable Video Diffusion
     let prediction = await replicate.predictions.create({
-      version: model.id.split(':')[1],
+      version: '3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
       input: {
-        input_image: imageData,
+        input_image: imageDataUrl,
         video_length: '25_frames_with_svd_xt',
         sizing_strategy: 'maintain_aspect_ratio',
-        frames_per_second: model.framesPerSecond,
+        frames_per_second: 6,
         motion_bucket_id: 127,
         cond_aug: 0.02
       }
@@ -256,34 +421,24 @@ async function generateImageToVideo(replicate, imageData, prompt, formatConfig, 
       throw new Error(`SVD generation failed: ${prediction.status}`)
     }
     
-    return extractVideoUrl(prediction.output)
+    videoUrl = extractVideoUrl(prediction.output)
     
-  } catch (error) {
-    console.error(`[${jobId}] SVD error:`, error.message)
-    throw error
-  }
-}
-
-// Generate video from text using ZeroScope
-async function generateTextToVideo(replicate, prompt, formatConfig, jobId) {
-  console.log(`[${jobId}] Running ZeroScope text-to-video...`)
-  
-  const model = VIDEO_MODELS.textToVideo
-  
-  // Adjust prompt for format
-  const formattedPrompt = formatConfig.value === 'portrait'
-    ? `${prompt}, vertical video, 9:16 aspect ratio`
-    : `${prompt}, horizontal video, 16:9 aspect ratio, cinematic`
-  
-  try {
+  } else {
+    // Text-to-video using ZeroScope
+    console.log(`[${jobId}] Running ZeroScope text-to-video...`)
+    
+    const formattedPrompt = format === 'portrait'
+      ? `${prompt}, vertical video, 9:16 aspect ratio, high quality`
+      : `${prompt}, horizontal video, 16:9 aspect ratio, cinematic, high quality`
+    
     let prediction = await replicate.predictions.create({
-      version: model.id.split(':')[1],
+      version: '9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
       input: {
         prompt: formattedPrompt,
         num_frames: 36,
-        fps: model.framesPerSecond,
-        width: formatConfig.value === 'portrait' ? 576 : 1024,
-        height: formatConfig.value === 'portrait' ? 1024 : 576
+        fps: 8,
+        width: dimensions.width,
+        height: dimensions.height
       }
     })
     
@@ -298,15 +453,24 @@ async function generateTextToVideo(replicate, prompt, formatConfig, jobId) {
       throw new Error(`ZeroScope generation failed: ${prediction.status}`)
     }
     
-    return extractVideoUrl(prediction.output)
-    
-  } catch (error) {
-    console.error(`[${jobId}] ZeroScope error:`, error.message)
-    throw error
+    videoUrl = extractVideoUrl(prediction.output)
+  }
+  
+  if (!videoUrl) {
+    throw new Error('No video URL returned from Replicate')
+  }
+  
+  console.log(`[${jobId}] ✅ Replicate generation complete! URL: ${videoUrl}`)
+  
+  return {
+    videoUrl,
+    duration,
+    format,
+    provider: 'replicate'
   }
 }
 
-// Extract video URL from various output formats
+// Helper to extract video URL from various output formats
 function extractVideoUrl(output) {
   if (!output) return null
   if (typeof output === 'string') return output
@@ -314,132 +478,8 @@ function extractVideoUrl(output) {
     const first = output[0]
     if (typeof first === 'string') return first
     if (first?.url) return typeof first.url === 'function' ? first.url() : first.url
-    if (first?.toString) return first.toString()
   }
   if (output.url) return typeof output.url === 'function' ? output.url() : output.url
   if (output.video) return output.video
   return null
-}
-
-// Extract last frame from video for chaining
-async function extractLastFrame(videoPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    ffmpeg(videoPath)
-      .outputOptions([
-        '-sseof', '-0.1', // Seek to 0.1s before end
-        '-vframes', '1',
-        '-q:v', '2'
-      ])
-      .output(outputPath)
-      .on('end', resolve)
-      .on('error', reject)
-      .run()
-  })
-}
-
-// Concatenate multiple video segments
-async function concatenateVideos(segments, outputPath, jobId) {
-  if (segments.length === 1) {
-    // Just copy if single segment
-    const fs = require('fs')
-    fs.copyFileSync(segments[0], outputPath)
-    return
-  }
-  
-  // Create concat file
-  const concatFilePath = outputPath.replace('.mp4', '-concat.txt')
-  const concatContent = segments.map(s => `file '${s}'`).join('\n')
-  await writeFile(concatFilePath, concatContent)
-  
-  return new Promise((resolve, reject) => {
-    ffmpeg()
-      .input(concatFilePath)
-      .inputOptions(['-f', 'concat', '-safe', '0'])
-      .outputOptions(['-c', 'copy'])
-      .output(outputPath)
-      .on('end', () => {
-        console.log(`[${jobId}] Concatenation complete`)
-        resolve()
-      })
-      .on('error', (err) => {
-        console.error(`[${jobId}] Concat error:`, err.message)
-        reject(err)
-      })
-      .run()
-  })
-}
-
-// Post-process video (format, voice, music, text overlay)
-async function postProcessVideo(options) {
-  const {
-    inputPath,
-    outputPath,
-    format,
-    voiceOption,
-    ttsLanguage,
-    selectedVoice,
-    voiceScript,
-    voiceFile,
-    musicPath,
-    textOverlay,
-    tempDir,
-    jobId
-  } = options
-  
-  // Build FFmpeg filter chain
-  const filters = []
-  let audioInputs = []
-  
-  // Scale to correct format
-  filters.push(`scale=${format.width}:${format.height}:force_original_aspect_ratio=decrease`)
-  filters.push(`pad=${format.width}:${format.height}:(ow-iw)/2:(oh-ih)/2`)
-  filters.push('setsar=1')
-  
-  // Text overlay (if provided)
-  if (textOverlay && textOverlay.text) {
-    const position = textOverlay.position || 'bottom'
-    const color = textOverlay.color || 'yellow'
-    
-    const colorMap = {
-      yellow: { bg: '0xFFD700', text: '0x000000' },
-      red: { bg: '0xFF0000', text: '0xFFFFFF' },
-      green: { bg: '0x00FF00', text: '0x000000' },
-      blue: { bg: '0x0000FF', text: '0xFFFFFF' }
-    }
-    
-    const colors = colorMap[color] || colorMap.yellow
-    
-    const yPos = position === 'top' ? 'h*0.1' : position === 'center' ? '(h-text_h)/2' : 'h*0.85'
-    
-    filters.push(`drawtext=text='${textOverlay.text.replace(/'/g, "'\\''")}':fontsize=48:fontcolor=${colors.text}:borderw=3:bordercolor=black:x=(w-text_w)/2:y=${yPos}`)
-  }
-  
-  return new Promise((resolve, reject) => {
-    let command = ffmpeg(inputPath)
-    
-    // Apply video filters
-    if (filters.length > 0) {
-      command = command.videoFilters(filters)
-    }
-    
-    command
-      .outputOptions([
-        '-c:v', 'libx264',
-        '-preset', 'fast',
-        '-crf', '23',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-movflags', '+faststart'
-      ])
-      .output(outputPath)
-      .on('end', () => {
-        console.log(`[${jobId}] Post-processing complete`)
-        resolve()
-      })
-      .on('error', (err) => {
-        console.error(`[${jobId}] Post-process error:`, err.message)
-        reject(err)
-      })
-      .run()
-  })
 }
