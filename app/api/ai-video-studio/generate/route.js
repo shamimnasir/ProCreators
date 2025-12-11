@@ -103,12 +103,16 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   // Build the edit JSON based on mode
   let editJson
   
-  if (mode === 'image-to-video' && imageFile) {
+  if (mode === 'image-to-video' && imageFile && typeof imageFile !== 'string' && imageFile.size > 0) {
     // For image-to-video, first upload the image to Shotstack Serve API
     console.log(`[${jobId}] Uploading image to Shotstack Serve...`)
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions)
+  } else if (mode === 'image-to-video' && (!imageFile || imageFile.size === 0)) {
+    // Image mode but no image - fall back to text with a message
+    console.log(`[${jobId}] No image provided for image-to-video, using text mode`)
+    editJson = buildTextVideoEdit(prompt || 'Upload an image to animate', duration, dimensions, templateId)
   } else if (mode === 'text-to-video' || mode === 'slideshow' || !imageFile) {
     // Create a text animation video with background and text overlays
     editJson = buildTextVideoEdit(prompt, duration, dimensions, templateId)
