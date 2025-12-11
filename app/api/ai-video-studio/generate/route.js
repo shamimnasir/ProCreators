@@ -317,6 +317,7 @@ async function compileVideoWithFFmpeg({
     console.log(`[${jobId}] Step 2: Processing audio...`)
     let audioPath = join(tempDir, 'voice.mp3')
     let hasAudio = false
+    let spokenText = prompt // Track what text is actually spoken for caption sync
     
     if (voiceOption === 'tts' && prompt && prompt.trim()) {
       // Generate TTS with Google Cloud
@@ -328,6 +329,7 @@ async function compileVideoWithFFmpeg({
         const extracted = extractDialogueFromScript(prompt)
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
+          spokenText = extracted.dialogueOnly // Captions should match spoken text
           console.log(`[${jobId}] 🎭 Dialogue-only mode: ${extracted.dialogueCount} dialogues, ~${extracted.costSavings}% cost savings`)
         } else {
           console.log(`[${jobId}] ⚠️ No dialogue found in script, using full text`)
