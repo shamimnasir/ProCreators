@@ -540,7 +540,7 @@ export default function AIVideoStudioPage() {
           <CardContent className="flex items-center justify-center py-8 gap-4">
             <Sparkles className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="font-semibold">Can't find what you need?</p>
+              <p className="font-semibold">Can&apos;t find what you need?</p>
               <p className="text-sm text-muted-foreground">Create a custom video from scratch</p>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
