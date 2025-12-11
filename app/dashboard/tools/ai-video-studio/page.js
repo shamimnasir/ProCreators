@@ -516,7 +516,7 @@ export default function AIVideoStudioPage() {
         {displayTemplates.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No templates found for "{searchQuery}"</p>
+            <p>No templates found for &quot;{searchQuery}&quot;</p>
             <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
           </div>
         )}
