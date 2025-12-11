@@ -678,26 +678,110 @@ export async function POST(request) {
     const imageFile = formData.get('image')
     const videoSource = formData.get('videoSource') || 'stock' // 'stock', 'ai', 'hybrid'
     
+    // New parameters for TTS and audio
+    const voiceOption = formData.get('voiceOption') || 'tts' // 'tts', 'upload', 'none'
+    const ttsLanguage = formData.get('ttsLanguage') || 'en'
+    const selectedVoice = formData.get('selectedVoice') || 'en-US-Neural2-D'
+    const voiceFile = formData.get('voiceFile')
+    const captionStyle = formData.get('captionStyle') || 'bold-outline'
+    const musicTrack = formData.get('musicTrack') || 'none'
+    
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
     console.log(`[${jobId}] Mode: ${mode}, Duration: ${duration}s, Format: ${format}`)
     console.log(`[${jobId}] Template: ${templateId}, VideoSource: ${videoSource}, HasValidImage: ${hasValidImage}`)
+    console.log(`[${jobId}] Voice: ${voiceOption}, TTS Language: ${ttsLanguage}`)
     
-    // Use Shotstack for all video generation
-    const result = await generateWithShotstack({
+    // Get format dimensions
+    const dimensions = format === 'portrait' 
+      ? { width: 1080, height: 1920 }
+      : { width: 1920, height: 1080 }
+    
+    // Step 1: Generate or fetch video clips
+    let videos = []
+    
+    if (videoSource === 'ai') {
+      // Generate AI video clips using Fal.ai
+      console.log(`[${jobId}] 🎨 Generating AI video clips with Fal.ai...`)
+      
+      try {
+        videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+        
+        if (videos.length === 0) {
+          throw new Error('No AI videos generated from Fal.ai')
+        }
+        console.log(`[${jobId}] ✅ Generated ${videos.length} AI clips`)
+      } catch (falError) {
+        console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
+        
+        // Try Replicate as fallback
+        try {
+          console.log(`[${jobId}] 🔄 Trying Replicate fallback...`)
+          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+          
+          if (videos.length === 0) {
+            throw new Error('Replicate also failed')
+          }
+          console.log(`[${jobId}] ✅ Generated ${videos.length} clips with Replicate`)
+        } catch (replicateError) {
+          console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
+          console.log(`[${jobId}] 📹 Falling back to stock videos`)
+          
+          const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+          videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+        }
+      }
+    } else if (videoSource === 'hybrid') {
+      // Mix AI and stock videos
+      console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
+      
+      try {
+        const aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
+        if (aiVideos.length > 0) {
+          videos.push(...aiVideos)
+        }
+      } catch (e) {
+        console.log(`[${jobId}] AI generation failed for hybrid, using stock only`)
+      }
+      
+      // Add stock videos
+      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+      const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+      videos.push(...stockVideos)
+    } else {
+      // Stock videos only
+      console.log(`[${jobId}] 📹 Fetching stock videos...`)
+      const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+      videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+    }
+    
+    if (videos.length === 0) {
+      throw new Error('No video clips available for compilation')
+    }
+    
+    console.log(`[${jobId}] 🎬 Compiling ${videos.length} clips with FFmpeg...`)
+    
+    // Step 2: Compile video using FFmpeg (replaces Shotstack)
+    const result = await compileVideoWithFFmpeg({
       jobId,
-      mode,
+      videos,
       prompt,
       duration,
-      format,
+      dimensions,
       templateId,
-      imageFile,
-      videoSource // Pass the video source selection
+      voiceOption,
+      ttsLanguage,
+      selectedVoice,
+      voiceFile,
+      captionStyle,
+      musicTrack
     })
     
     return NextResponse.json({
       success: true,
-      ...result
+      ...result,
+      provider: 'ffmpeg',
+      models: videos.map(v => v.model).filter(Boolean)
     })
     
   } catch (error) {
