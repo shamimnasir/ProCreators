@@ -49,8 +49,6 @@ export default function AIVideoStudioPage() {
   const [duration, setDuration] = useState(30)
   const [format, setFormat] = useState('portrait')
   const [language, setLanguage] = useState('en')
-  const [provider, setProvider] = useState('shotstack') // 'shotstack' or 'replicate'
-  const [videoSource, setVideoSource] = useState('stock') // 'stock' or 'ai-generated'
   
   // Generation state
   const [generating, setGenerating] = useState(false)
