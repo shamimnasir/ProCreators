@@ -1045,6 +1045,61 @@ export default function AIVideoStudioPage() {
                     )}
                   </div>
                 )}
+
+                {/* Caption Style Selector */}
+                <div className="space-y-3 pt-4 border-t">
+                  <Label className="flex items-center gap-2">
+                    <Type className="h-4 w-4" />
+                    Caption Style
+                  </Label>
+                  <Select value={captionStyle} onValueChange={setCaptionStyle}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">
+                        <div className="flex items-center gap-2">
+                          <span>🚫</span> No Captions
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="bold-outline">
+                        <div className="flex items-center gap-2">
+                          <span>✨</span> Bold Outline (Default)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="karaoke">
+                        <div className="flex items-center gap-2">
+                          <span>🎤</span> Karaoke (Word by Word)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="neon-glow">
+                        <div className="flex items-center gap-2">
+                          <span>💜</span> Neon Glow
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="yellow-highlight">
+                        <div className="flex items-center gap-2">
+                          <span>💛</span> Yellow Highlight
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="tiktok-style">
+                        <div className="flex items-center gap-2">
+                          <span>📱</span> TikTok Style
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="minimal-clean">
+                        <div className="flex items-center gap-2">
+                          <span>🤍</span> Minimal Clean
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="zoomed-in">
+                        <div className="flex items-center gap-2">
+                          <span>🔍</span> Zoomed In (Center)
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
