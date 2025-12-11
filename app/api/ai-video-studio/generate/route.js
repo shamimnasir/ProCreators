@@ -922,12 +922,12 @@ function buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVide
   
   tracks.push({ clips: videoClips })
   
-  // Track 2: Dark overlay for text readability
+  // Track 2: Dark overlay for text readability (gradient at bottom only)
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}99 0%, ${config.colorScheme.secondary}dd 100%);"></div>`,
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, transparent 0%, transparent 40%, ${config.colorScheme.secondary}88 70%, ${config.colorScheme.secondary}dd 100%);"></div>`,
         width: dimensions.width,
         height: dimensions.height
       },
@@ -936,14 +936,13 @@ function buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVide
     }]
   })
   
-  // Track 3: Animated accent elements
+  // Track 3: Stock badge indicator
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="position:relative;width:100%;height:100%;">
-          <div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);width:80%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
-          <div style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:60%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
+        html: `<div style="position:absolute;top:30px;right:30px;background:rgba(0,0,0,0.6);padding:10px 20px;border-radius:25px;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+          <span style="font-family:'Montserrat',sans-serif;font-size:14px;color:white;font-weight:700;letter-spacing:1px;">📹 HD VIDEO</span>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
@@ -953,26 +952,25 @@ function buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVide
     }]
   })
   
-  // Track 4: Main text content
+  // Track 4: Main text content (positioned at bottom)
   const textClips = lines.map((line, index) => {
     const startTime = index * (duration / lines.length)
-    const clipDuration = duration / lines.length + 0.3
+    const clipDuration = duration / lines.length + 0.5
     
     return {
       asset: {
         type: 'html',
-        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
-          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+        html: `<div style="position:absolute;bottom:8%;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:0 40px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${Math.round(config.typography.titleSize * 0.85)}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 2px 10px rgba(0,0,0,0.9),0 4px 30px rgba(0,0,0,0.7);line-height:1.3;max-width:95%;">
             ${line}
           </p>
-          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+          <div style="margin-top:15px;width:60px;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
       },
       start: startTime,
       length: clipDuration,
-      effect: 'slideUp',
       transition: {
         in: 'fade',
         out: 'fade'
