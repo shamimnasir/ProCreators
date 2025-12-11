@@ -4,9 +4,15 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 import { buildCinematicVideoEdit, getTemplateVisualConfig } from '@/lib/cinematic-video-builder'
+import { fal } from '@fal-ai/client'
 
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
+
+// Configure Fal.ai client
+fal.config({
+  credentials: process.env.FAL_KEY
+})
 
 // Stock video keywords for different templates
 const TEMPLATE_VIDEO_KEYWORDS = {
@@ -20,6 +26,31 @@ const TEMPLATE_VIDEO_KEYWORDS = {
   'default': ['abstract background', 'nature aerial', 'city skyline', 'modern architecture', 'sky clouds']
 }
 
+// AI Video Generation Models (ordered by cost - cheapest first)
+const AI_VIDEO_MODELS = {
+  'minimax-hailuo': {
+    name: 'Minimax Hailuo AI',
+    endpoint: 'fal-ai/minimax-video/video-01-live',
+    costPerSecond: 0.05,
+    description: 'Fast & affordable video generation',
+    maxDuration: 6
+  },
+  'kling-turbo': {
+    name: 'Kling 2.5 Turbo',
+    endpoint: 'fal-ai/kling-video/v1.6/standard/text-to-video',
+    costPerSecond: 0.07,
+    description: 'High-quality cinematic video',
+    maxDuration: 10
+  },
+  'runway-gen3': {
+    name: 'Runway Gen-3 Alpha',
+    endpoint: 'fal-ai/runway-gen3/turbo/image-to-video',
+    costPerSecond: 0.10,
+    description: 'Professional-grade video generation',
+    maxDuration: 10
+  }
+}
+
 // Provider configurations
 const PROVIDERS = {
   shotstack: {
@@ -29,9 +60,13 @@ const PROVIDERS = {
       ? 'https://api.shotstack.io/v1'
       : 'https://api.shotstack.io/stage'
   },
+  fal: {
+    name: 'Fal.ai',
+    description: 'AI video generation with Minimax, Kling, and other models'
+  },
   replicate: {
     name: 'Replicate',
-    description: 'AI video generation - best for image-to-video and text-to-video AI generation'
+    description: 'Fallback AI video generation'
   }
 }
 
