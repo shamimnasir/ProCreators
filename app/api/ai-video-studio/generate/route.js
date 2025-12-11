@@ -498,6 +498,314 @@ function getKeywordsFromPromptAndTemplate(prompt, templateId) {
   return [...new Set(allKeywords)].slice(0, 5)
 }
 
+// ==================== AI-GENERATED VIDEO EDIT ====================
+// Uses Shotstack's text-to-image (FLUX model) and image-to-video assets
+function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, jobId) {
+  const config = getTemplateVisualConfig(templateId)
+  const scenes = parsePromptToScenes(prompt, Math.ceil(duration / 5))
+  
+  // Each AI scene will be ~5-6 seconds (Shotstack image-to-video generates 6s clips)
+  const sceneLength = 6
+  const numScenes = Math.ceil(duration / sceneLength)
+  
+  const tracks = []
+  
+  // Track 1: AI-generated scenes using text-to-image + image-to-video pipeline
+  // Shotstack supports these asset types directly in the Edit timeline
+  const aiSceneClips = []
+  
+  for (let i = 0; i < numScenes; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const startTime = i * sceneLength
+    
+    // Create a cinematic prompt for the AI to generate
+    const cinematicPrompt = `${scenePrompt}, cinematic lighting, dramatic atmosphere, high quality, professional photography, ${
+      dimensions.height > dimensions.width ? 'vertical composition, portrait orientation' : 'wide cinematic shot, landscape orientation'
+    }, 8K resolution, film grain`
+    
+    // Use text-to-image asset to generate the scene
+    // Then the rendering pipeline will convert it to video with motion
+    aiSceneClips.push({
+      asset: {
+        type: 'text-to-image',
+        prompt: cinematicPrompt,
+        width: Math.min(1280, dimensions.width),
+        height: Math.min(1280, dimensions.height)
+      },
+      start: startTime,
+      length: sceneLength,
+      fit: 'cover',
+      effect: i % 3 === 0 ? 'zoomIn' : i % 3 === 1 ? 'zoomOut' : 'slideLeft',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    })
+  }
+  
+  tracks.push({ clips: aiSceneClips })
+  
+  // Track 2: Dark overlay for text readability
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}66 0%, ${config.colorScheme.secondary}cc 100%);"></div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 3: Accent decorations
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:relative;width:100%;height:100%;">
+          <div style="position:absolute;top:8%;left:50%;transform:translateX(-50%);width:70%;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
+          <div style="position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:50%;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 4: AI badge indicator
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:absolute;top:20px;right:20px;background:linear-gradient(135deg, ${config.colorScheme.primary}, #9333ea);padding:8px 16px;border-radius:20px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:14px;">✨</span>
+          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:600;">AI GENERATED</span>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 5: Main text content
+  const lines = parsePromptToLines(prompt, 4)
+  const textClips = lines.map((line, index) => {
+    const startTime = index * (duration / lines.length)
+    const clipDuration = duration / lines.length + 0.3
+    
+    return {
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+            ${line}
+          </p>
+          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: startTime,
+      length: clipDuration,
+      effect: 'slideUp',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  })
+  
+  tracks.push({ clips: textClips })
+  
+  return {
+    timeline: {
+      background: config.colorScheme.secondary,
+      fonts: [
+        { src: `https://fonts.googleapis.com/css2?family=${config.typography.fontFamily.replace(' ', '+')}:wght@400;700;800&display=swap` },
+        { src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap' }
+      ],
+      tracks
+    },
+    output: {
+      format: 'mp4',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// ==================== HYBRID VIDEO EDIT (AI + STOCK) ====================
+// Mixes AI-generated scenes for key moments with stock footage for B-roll
+function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, jobId) {
+  const config = getTemplateVisualConfig(templateId)
+  const scenes = parsePromptToScenes(prompt, 6)
+  const lines = parsePromptToLines(prompt, 4)
+  
+  const tracks = []
+  const totalSegments = Math.max(4, Math.ceil(duration / 5))
+  const segmentDuration = duration / totalSegments
+  
+  // Create alternating AI and Stock clips for hybrid effect
+  const backgroundClips = []
+  
+  for (let i = 0; i < totalSegments; i++) {
+    const startTime = i * segmentDuration
+    const isAIScene = i === 0 || i === Math.floor(totalSegments / 2) || i === totalSegments - 1 // Hook, climax, resolution
+    
+    if (isAIScene) {
+      // AI-generated scene for important moments
+      const scenePrompt = scenes[i % scenes.length] || prompt
+      const cinematicPrompt = `${scenePrompt}, cinematic, dramatic lighting, high quality, ${
+        dimensions.height > dimensions.width ? 'vertical' : 'landscape'
+      }, professional`
+      
+      backgroundClips.push({
+        asset: {
+          type: 'text-to-image',
+          prompt: cinematicPrompt,
+          width: Math.min(1280, dimensions.width),
+          height: Math.min(1280, dimensions.height)
+        },
+        start: startTime,
+        length: segmentDuration + 0.3,
+        fit: 'cover',
+        effect: 'zoomIn',
+        transition: {
+          in: 'fade',
+          out: 'fade'
+        }
+      })
+    } else {
+      // Stock video for B-roll
+      const stockVideo = stockVideos[i % stockVideos.length] || stockVideos[0]
+      if (stockVideo) {
+        backgroundClips.push({
+          asset: {
+            type: 'video',
+            src: stockVideo.url,
+            volume: 0
+          },
+          start: startTime,
+          length: segmentDuration + 0.3,
+          fit: 'cover',
+          effect: i % 2 === 0 ? 'zoomOut' : 'slideRight',
+          transition: {
+            in: 'fade',
+            out: 'fade'
+          }
+        })
+      }
+    }
+  }
+  
+  tracks.push({ clips: backgroundClips })
+  
+  // Track 2: Cinematic overlay
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}55 0%, ${config.colorScheme.secondary}bb 100%);"></div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 3: Hybrid indicator badge
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:absolute;top:20px;right:20px;background:linear-gradient(135deg, #3b82f6, #06b6d4);padding:8px 16px;border-radius:20px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:14px;">✨</span>
+          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:600;">AI + STOCK</span>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 4: Decorative elements
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:relative;width:100%;height:100%;">
+          <div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);width:80%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
+          <div style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:60%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 5: Main text content
+  const textClips = lines.map((line, index) => {
+    const startTime = index * (duration / lines.length)
+    const clipDuration = duration / lines.length + 0.3
+    
+    return {
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+            ${line}
+          </p>
+          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: startTime,
+      length: clipDuration,
+      effect: 'slideUp',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  })
+  
+  tracks.push({ clips: textClips })
+  
+  return {
+    timeline: {
+      background: config.colorScheme.secondary,
+      fonts: [
+        { src: `https://fonts.googleapis.com/css2?family=${config.typography.fontFamily.replace(' ', '+')}:wght@400;700;800&display=swap` },
+        { src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap' }
+      ],
+      tracks
+    },
+    output: {
+      format: 'mp4',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
 // Build video edit with stock footage backgrounds
 function buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos) {
   const config = getTemplateVisualConfig(templateId)
