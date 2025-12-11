@@ -38,7 +38,10 @@ export async function POST(request) {
     const templateId = formData.get('templateId') || 'custom'
     const imageFile = formData.get('image')
     
-    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s, HasImage: ${!!imageFile}`)
+    // Check if imageFile is actually a file or just a string
+    const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
+    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s`)
+    console.log(`[${jobId}] ImageFile type: ${typeof imageFile}, HasValidImage: ${hasValidImage}, Size: ${imageFile?.size || 0}`)
     
     let result
     
