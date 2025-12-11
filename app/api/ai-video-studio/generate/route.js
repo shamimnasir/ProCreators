@@ -159,7 +159,7 @@ export async function POST(request) {
 }
 
 // ==================== SHOTSTACK GENERATION ====================
-async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
+async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile, videoSource = 'stock' }) {
   console.log(`[${jobId}] Using Shotstack for video generation...`)
   
   const apiKey = process.env.SHOTSTACK_API_KEY
@@ -183,6 +183,14 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
+  } else if (videoSource === 'ai-generated') {
+    // Generate AI video clips using Replicate
+    console.log(`[${jobId}] Generating AI video scenes...`)
+    const aiVideos = await generateAIVideoScenes(prompt, duration, format, jobId)
+    console.log(`[${jobId}] Generated ${aiVideos.length} AI video scenes`)
+    
+    // Build video with AI-generated backgrounds
+    editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, aiVideos)
   } else {
     // Fetch stock videos for background
     console.log(`[${jobId}] Fetching stock videos for template: ${templateId}`)
