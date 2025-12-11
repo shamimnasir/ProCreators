@@ -231,32 +231,27 @@ export async function POST(request) {
     
     // Parse request
     const formData = await request.formData()
-    const provider = formData.get('provider') || 'shotstack' // Default to Shotstack
     const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
     const prompt = formData.get('prompt') || ''
     const duration = parseInt(formData.get('duration') || '5')
     const format = formData.get('format') || 'portrait'
     const templateId = formData.get('templateId') || 'custom'
     const imageFile = formData.get('image')
-    const videoSource = formData.get('videoSource') || 'stock' // 'stock' or 'ai-generated'
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
-    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s, VideoSource: ${videoSource}`)
-    console.log(`[${jobId}] ImageFile type: ${typeof imageFile}, HasValidImage: ${hasValidImage}, Size: ${imageFile?.size || 0}`)
+    console.log(`[${jobId}] Mode: ${mode}, Duration: ${duration}s, Format: ${format}`)
+    console.log(`[${jobId}] Template: ${templateId}, HasValidImage: ${hasValidImage}`)
     
-    let result
-    
-    // Use Shotstack for composition with either stock or AI-generated backgrounds
-    result = await generateWithShotstack({
+    // Use Shotstack for all video generation with stock footage
+    const result = await generateWithShotstack({
       jobId,
       mode,
       prompt,
       duration,
       format,
       templateId,
-      imageFile,
-      videoSource // Pass video source to determine background type
+      imageFile
     })
     
     return NextResponse.json({
