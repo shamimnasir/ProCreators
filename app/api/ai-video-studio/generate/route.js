@@ -2838,13 +2838,36 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
 // Helper to extract video URL from various output formats
 function extractVideoUrl(output) {
   if (!output) return null
+  
+  // If it's already a string URL, return it
   if (typeof output === 'string') return output
+  
+  // Handle array output
   if (Array.isArray(output)) {
     const first = output[0]
     if (typeof first === 'string') return first
-    if (first?.url) return typeof first.url === 'function' ? first.url() : first.url
+    if (first?.url) {
+      const url = typeof first.url === 'function' ? first.url() : first.url
+      return typeof url === 'string' ? url : (url?.url || null)
+    }
+    if (first?.video?.url) return first.video.url
   }
-  if (output.url) return typeof output.url === 'function' ? output.url() : output.url
-  if (output.video) return output.video
+  
+  // Handle object with url property
+  if (output.url) {
+    const url = typeof output.url === 'function' ? output.url() : output.url
+    return typeof url === 'string' ? url : (url?.url || null)
+  }
+  
+  // Handle Fal.ai format: { video: { url: '...' } }
+  if (output.video) {
+    if (typeof output.video === 'string') return output.video
+    if (output.video.url) return output.video.url
+  }
+  
+  // Handle nested video object
+  if (output.data?.video?.url) return output.data.video.url
+  
+  console.log('[extractVideoUrl] Unknown format:', JSON.stringify(output).substring(0, 200))
   return null
 }
