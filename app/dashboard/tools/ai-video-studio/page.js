@@ -85,6 +85,7 @@ export default function AIVideoStudioPage() {
     setImagePreview(null)
     setPhotos([])
     setVideoResult(null)
+    setVideoSource('stock') // Reset to stock
     setView('create')
   }
 
