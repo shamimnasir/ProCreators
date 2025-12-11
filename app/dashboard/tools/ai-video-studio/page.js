@@ -691,16 +691,20 @@ export default function AIVideoStudioPage() {
                   >
                     <RadioGroupItem value="ai" id="ai" className="mt-1" />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-lg">🎨</span>
                         <Label htmlFor="ai" className="font-semibold cursor-pointer">AI-Generated Video</Label>
                         <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">Fal.ai</Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Powered by <strong>Minimax Hailuo</strong> or <strong>Kling</strong> • ~2-3min render
-                      </p>
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                        Real AI-generated video scenes with motion
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Ovi $0.04/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Pixverse $0.04/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Wan $0.05/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Minimax $0.05/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">🏆 Kling $0.07/s</Badge>
+                      </div>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
+                        Auto-selects cheapest working model • Real AI video with motion
                       </p>
                     </div>
                   </div>
