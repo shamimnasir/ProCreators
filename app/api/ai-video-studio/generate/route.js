@@ -782,7 +782,91 @@ const PROVIDERS = {
   }
 }
 
-// Fetch stock videos from Pexels
+// Extract keywords from script for stock video search
+function extractKeywordsFromScript(script, count = 5) {
+  if (!script) return ['nature', 'people', 'lifestyle']
+  
+  // Common stop words to ignore
+  const stopWords = new Set([
+    'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+    'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+    'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare',
+    'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by',
+    'from', 'up', 'about', 'into', 'over', 'after', 'beneath', 'under',
+    'above', 'and', 'but', 'or', 'nor', 'so', 'yet', 'both', 'either',
+    'neither', 'not', 'only', 'own', 'same', 'than', 'too', 'very',
+    'just', 'also', 'now', 'here', 'there', 'when', 'where', 'why', 'how',
+    'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some',
+    'such', 'no', 'any', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours',
+    'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers',
+    'it', 'its', 'they', 'them', 'their', 'this', 'that', 'these', 'those',
+    // Bengali stop words
+    'এবং', 'কিন্তু', 'যে', 'এই', 'সেই', 'তার', 'আমি', 'তুমি', 'সে', 'আমরা',
+    'তোমরা', 'তারা', 'কি', 'কে', 'কোথায়', 'কখন', 'কেন', 'কিভাবে'
+  ])
+  
+  // Extract meaningful words
+  const words = script
+    .toLowerCase()
+    .replace(/["""''।,!?.:;()\[\]{}]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 3 && !stopWords.has(word))
+  
+  // Count word frequency
+  const wordCount = {}
+  words.forEach(word => {
+    wordCount[word] = (wordCount[word] || 0) + 1
+  })
+  
+  // Sort by frequency and get top keywords
+  const sortedWords = Object.entries(wordCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, count * 2)
+    .map(([word]) => word)
+  
+  // Return unique keywords
+  return sortedWords.length > 0 ? sortedWords.slice(0, count) : ['nature', 'people', 'lifestyle']
+}
+
+// Search stock videos by keywords using the Quick Reels Hub API
+async function searchStockVideosByKeywords(keywords, count = 3) {
+  try {
+    console.log(`[Hybrid] Searching stock videos for keywords: ${keywords.join(', ')}`)
+    
+    // Use the existing search-videos API from Quick Reels Hub
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/story-reels/search-videos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keywords: keywords.slice(0, count) })
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Search API returned ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    if (data.success && data.videos && data.videos.length > 0) {
+      console.log(`[Hybrid] ✅ Found ${data.videos.length} stock videos`)
+      return data.videos.map(v => ({
+        url: v.url,
+        keyword: v.keyword,
+        type: 'stock',
+        duration: v.duration || 5,
+        source: v.source || 'pexels'
+      }))
+    }
+    
+    throw new Error('No videos found')
+  } catch (error) {
+    console.error(`[Hybrid] Stock search failed:`, error.message)
+    // Fallback to direct Pexels fetch
+    return fetchStockVideos(keywords, count)
+  }
+}
+
+// Fetch stock videos from Pexels (fallback)
 async function fetchStockVideos(keywords, count = 3) {
   const pexelsKey = process.env.PEXELS_API_KEY
   
@@ -812,6 +896,7 @@ async function fetchStockVideos(keywords, count = 3) {
             videos.push({
               url: videoFile.link,
               keyword,
+              type: 'stock',
               width: videoFile.width,
               height: videoFile.height
             })
