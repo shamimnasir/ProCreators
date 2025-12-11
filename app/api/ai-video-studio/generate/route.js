@@ -1823,9 +1823,11 @@ Add subtle camera movement, depth, and professional lighting effects.`
           }
         })
         
+        console.log(`[${jobId}] Raw Fal.ai response:`, JSON.stringify(result.data).substring(0, 300))
         const videoUrl = extractVideoUrl(result.data)
+        console.log(`[${jobId}] Extracted URL type: ${typeof videoUrl}, value: ${String(videoUrl).substring(0, 100)}`)
         
-        if (videoUrl) {
+        if (videoUrl && typeof videoUrl === 'string') {
           videos.push({
             url: videoUrl,
             prompt: motionPrompt,
@@ -1836,7 +1838,7 @@ Add subtle camera movement, depth, and professional lighting effects.`
           console.log(`[${jobId}] ✅ Image-to-video clip ${i + 1} complete with ${model.name}`)
           success = true
         } else {
-          throw new Error('No video URL in response')
+          throw new Error(`No valid video URL in response (got ${typeof videoUrl})`)
         }
       } catch (error) {
         console.error(`[${jobId}] ❌ ${model.name} failed:`, error.message)
