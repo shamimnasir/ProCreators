@@ -646,55 +646,21 @@ export default function AIVideoStudioPage() {
                 </div>
               )}
 
-              {/* Video Source Selection */}
+              {/* Video Info */}
               <div className="space-y-3 pt-4 border-t">
-                <Label className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Video Background Source
-                </Label>
-                <div className="grid grid-cols-1 gap-3">
-                  <div
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      videoSource === 'stock' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
-                    }`}
-                    onClick={() => setVideoSource('stock')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">📹</span>
-                        <div>
-                          <p className="font-semibold">Stock Videos</p>
-                          <p className="text-xs text-muted-foreground">Real footage from Pexels • Fast (~30s)</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">Recommended</Badge>
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">📹</span>
+                    <div>
+                      <p className="font-semibold text-blue-900 dark:text-blue-100">Cinematic Stock Videos</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">Real HD footage from Pexels • Renders in ~30s</p>
                     </div>
                   </div>
-                  <div
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      videoSource === 'ai-generated' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
-                    }`}
-                    onClick={() => setVideoSource('ai-generated')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">🤖</span>
-                        <div>
-                          <p className="font-semibold">AI Generated</p>
-                          <p className="text-xs text-muted-foreground">Unique AI scenes from your prompt • Slower (~2-4 min)</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">Premium</Badge>
-                    </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Library className="h-4 w-4 text-green-600" />
+                    <p className="text-xs text-green-700 dark:text-green-300">Auto-saves to your library</p>
                   </div>
                 </div>
-                {videoSource === 'ai-generated' && (
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm">
-                    <p className="text-amber-800 dark:text-amber-200">
-                      ⚡ <strong>AI Generation</strong> creates unique video scenes based on your text. Takes 2-4 minutes per scene.
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
