@@ -25,34 +25,92 @@ fal.config({
 // Extracts only dialogue (quoted text) from a script for TTS
 // This reduces TTS cost by ~70% and creates more natural narration
 
-function extractDialogueFromScript(script) {
+// ==================== SMART DIALOGUE EXTRACTION ====================
+// Extracts dialogue from scripts using multiple detection methods
+// Supports: English, Bengali, Hindi quotes and dialogue indicators
+
+function extractDialogueFromScript(script, language = 'en') {
   if (!script || typeof script !== 'string') {
-    return { dialogueOnly: '', fullScript: script || '' }
+    return { dialogueOnly: '', fullScript: script || '', dialogueCount: 0, costSavings: 0 }
   }
   
-  // Match text inside double quotes (handles both straight " and curly "" quotes)
-  // Supports: "Hello", "Hello", etc.
-  const dialoguePattern = /"([^"]+)"|"([^"]+)"/g
-  
   const dialogues = []
-  let match
   
-  while ((match = dialoguePattern.exec(script)) !== null) {
-    // Get whichever group matched
-    const dialogue = match[1] || match[2]
-    if (dialogue && dialogue.trim()) {
-      dialogues.push(dialogue.trim())
+  // Method 1: Match text inside various quote types
+  // Supports: "text", "text", 'text', 'text', «text», „text", 「text」
+  const quotePatterns = [
+    /"([^"]+)"/g,           // Straight double quotes
+    /"([^"]+)"/g,           // Curly double quotes
+    /'([^']+)'/g,           // Curly single quotes
+    /「([^」]+)」/g,         // Japanese/Chinese quotes
+    /«([^»]+)»/g,           // French/Russian quotes
+    /„([^"]+)"/g,           // German quotes
+    /『([^』]+)』/g,         // Japanese double quotes
+  ]
+  
+  for (const pattern of quotePatterns) {
+    let match
+    while ((match = pattern.exec(script)) !== null) {
+      const dialogue = match[1]
+      if (dialogue && dialogue.trim() && dialogue.trim().length > 2) {
+        dialogues.push(dialogue.trim())
+      }
     }
   }
   
-  // Join dialogues with natural pauses (periods create TTS pauses)
-  const dialogueOnly = dialogues.join('. ')
+  // Method 2: If no quotes found, try dialogue indicators (for scripts without proper quotes)
+  if (dialogues.length === 0) {
+    // English dialogue indicators
+    const englishIndicators = /(?:said|says|shouted|whispered|asked|replied|exclaimed|muttered|yelled|screamed|spoke|cried|answered)[,:]?\s*[""']?([^.!?]+[.!?])/gi
+    // Bengali dialogue indicators
+    const bengaliIndicators = /(?:বললো|বলল|বলে|বললেন|চিৎকার করে|জিজ্ঞেস করলো|উত্তর দিলো)[,:]?\s*[""']?([^।!?]+[।!?])/gi
+    // Hindi dialogue indicators
+    const hindiIndicators = /(?:बोला|बोली|कहा|कही|चिल्लाया|पूछा|जवाब दिया)[,:]?\s*[""']?([^।!?]+[।!?])/gi
+    
+    const indicatorPatterns = [englishIndicators, bengaliIndicators, hindiIndicators]
+    
+    for (const pattern of indicatorPatterns) {
+      let match
+      while ((match = pattern.exec(script)) !== null) {
+        const dialogue = match[1]
+        if (dialogue && dialogue.trim() && dialogue.trim().length > 3) {
+          dialogues.push(dialogue.trim())
+        }
+      }
+    }
+  }
+  
+  // Method 3: Smart sentence extraction - if still no dialogues, extract key emotional sentences
+  if (dialogues.length === 0) {
+    // Look for sentences with emotional punctuation or short impactful phrases
+    const emotionalPattern = /([^.!?।]+[!?])/g
+    let match
+    while ((match = emotionalPattern.exec(script)) !== null) {
+      const sentence = match[1].trim()
+      if (sentence.length > 5 && sentence.length < 100) {
+        dialogues.push(sentence)
+      }
+    }
+  }
+  
+  // Remove duplicates and join with natural pauses
+  const uniqueDialogues = [...new Set(dialogues)]
+  const dialogueOnly = uniqueDialogues.join('. ')
   
   const costSavings = dialogueOnly.length > 0 
     ? Math.round((1 - dialogueOnly.length / script.length) * 100) 
     : 0
   
-  console.log(`[Dialogue Extraction] Full script: ${script.length} chars → Dialogue only: ${dialogueOnly.length} chars (${costSavings}% reduction)`)
+  console.log(`[Smart Dialogue Extraction] Full: ${script.length} chars → Dialogue: ${dialogueOnly.length} chars (${costSavings}% savings, ${uniqueDialogues.length} dialogues found)`)
+  
+  return {
+    dialogueOnly,
+    fullScript: script,
+    dialogueCount: uniqueDialogues.length,
+    costSavings,
+    method: dialogues.length > 0 ? 'quotes' : uniqueDialogues.length > 0 ? 'emotional' : 'none'
+  }
+}
   
   return {
     dialogueOnly,
