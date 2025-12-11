@@ -109,17 +109,11 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     console.log(`[${jobId}] Uploading image to Shotstack Serve...`)
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
-    editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions)
-  } else if (mode === 'image-to-video' && (!imageFile || imageFile.size === 0)) {
-    // Image mode but no image - fall back to text with a message
-    console.log(`[${jobId}] No image provided for image-to-video, using text mode`)
-    editJson = buildTextVideoEdit(prompt || 'Upload an image to animate', duration, dimensions, templateId)
-  } else if (mode === 'text-to-video' || mode === 'slideshow' || !imageFile) {
-    // Create a text animation video with background and text overlays
-    editJson = buildTextVideoEdit(prompt, duration, dimensions, templateId)
+    editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else {
-    // Default: create a simple animated video
-    editJson = buildDefaultVideoEdit(prompt, duration, dimensions)
+    // Use the cinematic video builder for text-based videos
+    console.log(`[${jobId}] Building cinematic video for template: ${templateId}`)
+    editJson = buildCinematicVideoEdit(templateId, prompt, duration, dimensions)
   }
   
   console.log(`[${jobId}] Submitting to Shotstack:`, JSON.stringify(editJson).substring(0, 500))
