@@ -208,27 +208,38 @@ async function compileVideoWithFFmpeg({
       const videoFile = videoFiles[i]
       
       await new Promise((resolve, reject) => {
-        // Build video filter with text overlay support
+        // Build video filter - start with basic scaling
         let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
         
         // Add text overlay from prompt (positioned at bottom)
-        if (prompt && captionStyle !== 'none') {
-          const lines = parsePromptToLines(prompt, 4)
-          const lineIndex = i % lines.length
-          // Proper FFmpeg text escaping: escape single quotes, colons, and backslashes
-          const text = lines[lineIndex]
-            .replace(/\\/g, '\\\\')     // Escape backslashes first
-            .replace(/'/g, "'\\''")      // Escape single quotes
-            .replace(/:/g, '\\:')        // Escape colons
-            .replace(/\[/g, '\\[')       // Escape brackets
-            .replace(/\]/g, '\\]')
-            .replace(/,/g, '\\,')        // Escape commas
-            .replace(/;/g, '\\;')        // Escape semicolons
-          const fontSize = targetHeight >= 1920 ? 56 : 42
-          
-          // Simple bottom-positioned text with shadow
-          videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=h-text_h-100:shadowcolor=black:shadowx=2:shadowy=2`
+        // Note: We skip text overlay if captionStyle is 'none' or if prompt is empty
+        if (prompt && prompt.trim() && captionStyle && captionStyle !== 'none') {
+          try {
+            const lines = parsePromptToLines(prompt, 4)
+            const lineIndex = i % lines.length
+            const rawText = lines[lineIndex] || ''
+            
+            if (rawText.trim()) {
+              // Proper FFmpeg drawtext escaping - use double escaping
+              const text = rawText
+                .replace(/\\/g, '\\\\\\\\')  // Backslash: \ → \\\\
+                .replace(/'/g, "'\\\\''")     // Single quote: ' → '\''
+                .replace(/:/g, '\\\\:')       // Colon: : → \:
+                .replace(/\[/g, '\\\\[')      // Square brackets
+                .replace(/\]/g, '\\\\]')
+              
+              const fontSize = targetHeight >= 1920 ? 56 : 42
+              
+              // Add drawtext filter
+              videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=white:x=(w-text_w)/2:y=h-text_h-100:shadowcolor=black:shadowx=2:shadowy=2`
+              console.log(`[${jobId}] Adding text overlay: "${rawText.substring(0, 30)}..."`)
+            }
+          } catch (textError) {
+            console.log(`[${jobId}] Skipping text overlay due to error:`, textError.message)
+          }
         }
+        
+        console.log(`[${jobId}] Video filter: ${videoFilter.substring(0, 100)}...`)
         
         ffmpeg(videoFile)
           .outputOptions([
