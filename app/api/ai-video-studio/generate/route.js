@@ -368,6 +368,160 @@ function buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   }
 }
 
+// Extract keywords from prompt and template for stock video search
+function getKeywordsFromPromptAndTemplate(prompt, templateId) {
+  // Get template-specific keywords
+  const templateKeywords = TEMPLATE_VIDEO_KEYWORDS[templateId] || TEMPLATE_VIDEO_KEYWORDS['default']
+  
+  // Extract important words from prompt
+  const promptWords = prompt
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 3)
+    .slice(0, 3)
+  
+  // Combine and deduplicate
+  const allKeywords = [...promptWords, ...templateKeywords]
+  return [...new Set(allKeywords)].slice(0, 5)
+}
+
+// Build video edit with stock footage backgrounds
+function buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos) {
+  const config = getTemplateVisualConfig(templateId)
+  const lines = parsePromptToLines(prompt, 4)
+  
+  // Calculate segment durations
+  const numSegments = Math.max(1, stockVideos.length)
+  const segmentDuration = Math.max(3, duration / numSegments)
+  
+  const tracks = []
+  
+  // Track 1: Stock video backgrounds
+  const videoClips = stockVideos.map((video, index) => ({
+    asset: {
+      type: 'video',
+      src: video.url,
+      volume: 0 // Mute the video
+    },
+    start: index * segmentDuration,
+    length: segmentDuration + 0.5, // Small overlap for smooth transition
+    fit: 'cover',
+    effect: index % 2 === 0 ? 'zoomIn' : 'zoomOut',
+    transition: {
+      in: 'fade',
+      out: 'fade'
+    }
+  }))
+  
+  tracks.push({ clips: videoClips })
+  
+  // Track 2: Dark overlay for text readability
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}99 0%, ${config.colorScheme.secondary}dd 100%);"></div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 3: Animated accent elements
+  tracks.push({
+    clips: [{
+      asset: {
+        type: 'html',
+        html: `<div style="position:relative;width:100%;height:100%;">
+          <div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);width:80%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
+          <div style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:60%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: 0,
+      length: duration
+    }]
+  })
+  
+  // Track 4: Main text content
+  const textClips = lines.map((line, index) => {
+    const startTime = index * (duration / lines.length)
+    const clipDuration = duration / lines.length + 0.3
+    
+    return {
+      asset: {
+        type: 'html',
+        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+            ${line}
+          </p>
+          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+        </div>`,
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      start: startTime,
+      length: clipDuration,
+      effect: 'slideUp',
+      transition: {
+        in: 'fade',
+        out: 'fade'
+      }
+    }
+  })
+  
+  tracks.push({ clips: textClips })
+  
+  return {
+    timeline: {
+      background: config.colorScheme.secondary,
+      fonts: [
+        { src: `https://fonts.googleapis.com/css2?family=${config.typography.fontFamily.replace(' ', '+')}:wght@400;700;800&display=swap` }
+      ],
+      tracks
+    },
+    output: {
+      format: 'mp4',
+      size: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      fps: 30
+    }
+  }
+}
+
+// Parse prompt into lines
+function parsePromptToLines(prompt, maxLines = 4) {
+  if (!prompt || typeof prompt !== 'string') {
+    return ['Your Video Here']
+  }
+  
+  // Split by newlines first
+  let lines = prompt.split(/\n+/).filter(l => l.trim())
+  
+  // If only one line, try to split by sentences
+  if (lines.length === 1) {
+    lines = prompt.split(/[.!?]+/).filter(l => l.trim()).map(l => l.trim())
+  }
+  
+  // If still one line, split by length
+  if (lines.length === 1 && prompt.length > 60) {
+    const words = prompt.split(' ')
+    const chunkSize = Math.ceil(words.length / maxLines)
+    lines = []
+    for (let i = 0; i < words.length; i += chunkSize) {
+      lines.push(words.slice(i, i + chunkSize).join(' '))
+    }
+  }
+  
+  return lines.slice(0, maxLines).map(l => l.trim())
+}
+
 // ==================== REPLICATE GENERATION ====================
 async function generateWithReplicate({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
   console.log(`[${jobId}] Using Replicate for AI video generation...`)
