@@ -65,6 +65,7 @@ export default function AIVideoStudioPage() {
   const [narrationMode, setNarrationMode] = useState('dialogue-only') // 'dialogue-only', 'full'
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
+  const [captionStyle, setCaptionStyle] = useState('bold-outline') // Caption style
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
   const recordingIntervalRef = useRef(null)
