@@ -30,31 +30,35 @@ function extractDialogueFromScript(script) {
     return { dialogueOnly: '', fullScript: script || '' }
   }
   
-  // Match text inside quotes (both " and ")
-  // Handles: "Hello", "Hello", 'Hello'
-  const dialoguePattern = /["\"](.*?)["\"]|[''](.*?)['']|"(.*?)"/g
+  // Match text inside double quotes (handles both straight " and curly "" quotes)
+  // Supports: "Hello", "Hello", etc.
+  const dialoguePattern = /"([^"]+)"|"([^"]+)"/g
   
   const dialogues = []
   let match
   
   while ((match = dialoguePattern.exec(script)) !== null) {
-    // Get the captured group (whichever matched)
-    const dialogue = match[1] || match[2] || match[3]
+    // Get whichever group matched
+    const dialogue = match[1] || match[2]
     if (dialogue && dialogue.trim()) {
       dialogues.push(dialogue.trim())
     }
   }
   
-  // Join dialogues with pauses (periods create natural TTS pauses)
+  // Join dialogues with natural pauses (periods create TTS pauses)
   const dialogueOnly = dialogues.join('. ')
   
-  console.log(`[Dialogue Extraction] Full script: ${script.length} chars → Dialogue only: ${dialogueOnly.length} chars (${Math.round((1 - dialogueOnly.length/script.length) * 100)}% reduction)`)
+  const costSavings = dialogueOnly.length > 0 
+    ? Math.round((1 - dialogueOnly.length / script.length) * 100) 
+    : 0
+  
+  console.log(`[Dialogue Extraction] Full script: ${script.length} chars → Dialogue only: ${dialogueOnly.length} chars (${costSavings}% reduction)`)
   
   return {
     dialogueOnly,
     fullScript: script,
     dialogueCount: dialogues.length,
-    costSavings: Math.round((1 - dialogueOnly.length / script.length) * 100)
+    costSavings
   }
 }
 
