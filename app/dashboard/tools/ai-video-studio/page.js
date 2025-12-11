@@ -326,6 +326,9 @@ export default function AIVideoStudioPage() {
         formData.append('photoCount', photos.length)
       }
       
+      // Caption style
+      formData.append('captionStyle', captionStyle)
+      
       // Progress simulation with Fal.ai model names
       const segments = Math.ceil(duration / 5)
       let currentProgress = 0
