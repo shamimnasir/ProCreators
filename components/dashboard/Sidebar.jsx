@@ -38,6 +38,13 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
+    name: 'AI Video Studio',
+    href: '/dashboard/tools/ai-video-studio',
+    icon: Film,
+    badge: 'New',
+    children: []
+  },
+  {
     name: 'Viral Tools',
     icon: Sparkles,
     children: [
@@ -54,7 +61,7 @@ const navigation = [
     name: 'Quick Reels Hub',
     href: '/dashboard/tools/quick-reels',
     icon: Video,
-    badge: 'New',
+    badge: '',
     children: [
       { name: '📖 Mini Stories', href: '/dashboard/tools/quick-reels/mini-stories', icon: BookOpen },
       { name: '💪 Motivational', href: '/dashboard/tools/quick-reels/motivational', icon: Zap },
