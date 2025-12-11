@@ -440,9 +440,18 @@ async function compileVideoWithFFmpeg({
     for (let i = 0; i < videoFiles.length; i++) {
       const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
       const videoFile = videoFiles[i]
+      const videoMeta = videos[i] || {} // Get video metadata (type, keyword, etc.)
       
       await new Promise((resolve, reject) => {
         const cmd = ffmpeg(videoFile)
+        
+        // Apply 3-second trim ONLY for stock videos (skip watermarks/intros)
+        if (videoMeta.type === 'stock') {
+          cmd.inputOptions(['-ss', '3']) // Skip first 3 seconds
+          console.log(`[${jobId}] 📹 Trimming first 3s from stock clip ${i + 1} (keyword: ${videoMeta.keyword || 'unknown'})`)
+        } else {
+          console.log(`[${jobId}] 🎨 Processing AI clip ${i + 1} (no trim)`)
+        }
         
         // Build basic video filter string
         let videoFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`
