@@ -52,7 +52,7 @@ export default function AIVideoStudioPage() {
   const [duration, setDuration] = useState(30)
   const [format, setFormat] = useState('portrait')
   const [language, setLanguage] = useState('en')
-  const [videoSource, setVideoSource] = useState('stock') // 'stock', 'ai', 'hybrid'
+  const [videoSource, setVideoSource] = useState('ai') // 'ai' or 'hybrid' (removed 'stock')
   
   // Voice/TTS state (reused from Quick Reels Hub)
   const [ttsLanguage, setTtsLanguage] = useState('en')
