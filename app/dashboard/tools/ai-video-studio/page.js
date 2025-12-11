@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast'
 import { 
   Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
-  Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X
+  Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library
 } from 'lucide-react'
 
 // Import configurations
@@ -28,6 +28,9 @@ import {
   getPopularTemplates,
   searchTemplates 
 } from '@/config/ai-video-templates'
+
+// Import library utility
+import { saveToLibrary } from '@/lib/library-utils'
 
 export default function AIVideoStudioPage() {
   // View state: 'gallery' or 'create'
