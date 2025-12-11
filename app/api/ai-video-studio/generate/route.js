@@ -1237,7 +1237,31 @@ export async function POST(request) {
     // Step 1: Generate or fetch video clips
     let videos = []
     
-    if (videoSource === 'ai') {
+    // Check for image-to-video mode with uploaded image
+    if (mode === 'image-to-video' && hasValidImage) {
+      console.log(`[${jobId}] 📸 IMAGE-TO-VIDEO mode with uploaded image`)
+      
+      // Upload image and convert to video using Fal.ai image-to-video
+      try {
+        const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
+        const base64Image = imageBuffer.toString('base64')
+        const mimeType = imageFile.type || 'image/jpeg'
+        const dataUrl = `data:${mimeType};base64,${base64Image}`
+        
+        // Use Fal.ai image-to-video models
+        videos = await generateImageToVideoWithFal(dataUrl, prompt, duration, dimensions, jobId, templateId)
+        
+        if (videos.length === 0) {
+          throw new Error('Image-to-video generation failed')
+        }
+        console.log(`[${jobId}] ✅ Generated ${videos.length} videos from image`)
+      } catch (imgError) {
+        console.error(`[${jobId}] ⚠️ Image-to-video failed:`, imgError.message)
+        // Fallback to stock videos based on prompt keywords
+        const keywords = extractKeywordsFromScript(prompt, 5)
+        videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
+      }
+    } else if (videoSource === 'ai') {
       // Generate AI video clips using Fal.ai
       console.log(`[${jobId}] 🎨 Generating AI video clips with Fal.ai...`)
       
