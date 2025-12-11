@@ -447,6 +447,23 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   if (!renderResponse.ok) {
     const errorText = await renderResponse.text()
     console.error(`[${jobId}] Shotstack render error:`, errorText)
+    
+    // If we have AI videos, return the first one directly instead of failing
+    if (generatedAIVideos.length > 0) {
+      console.log(`[${jobId}] ⚠️ Shotstack failed, returning raw AI video instead`)
+      const firstAIVideo = generatedAIVideos[0]
+      return {
+        videoUrl: firstAIVideo.url,
+        renderId: `ai-direct-${jobId}`,
+        duration,
+        format: dimensions,
+        provider: 'fal-ai-direct',
+        model: firstAIVideo.model,
+        aiVideos: generatedAIVideos,
+        note: 'Returned raw AI video (Shotstack composition unavailable)'
+      }
+    }
+    
     throw new Error(`Shotstack render failed: ${renderResponse.status} - ${errorText}`)
   }
   
@@ -486,11 +503,41 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
       videoUrl = statusData.response?.url
       console.log(`[${jobId}] ✅ Render complete! URL: ${videoUrl}`)
     } else if (status === 'failed') {
+      // If Shotstack composition fails but we have AI videos, return them
+      if (generatedAIVideos.length > 0) {
+        console.log(`[${jobId}] ⚠️ Shotstack composition failed, returning raw AI video`)
+        const firstAIVideo = generatedAIVideos[0]
+        return {
+          videoUrl: firstAIVideo.url,
+          renderId: `ai-direct-${jobId}`,
+          duration,
+          format: dimensions,
+          provider: 'fal-ai-direct',
+          model: firstAIVideo.model,
+          aiVideos: generatedAIVideos,
+          note: 'Returned raw AI video (Shotstack composition failed)'
+        }
+      }
       throw new Error(`Shotstack render failed: ${statusData.response?.error || 'Unknown error'}`)
     }
   }
   
   if (!videoUrl) {
+    // If we have AI videos and timed out, return them
+    if (generatedAIVideos.length > 0) {
+      console.log(`[${jobId}] ⚠️ Shotstack timed out, returning raw AI video`)
+      const firstAIVideo = generatedAIVideos[0]
+      return {
+        videoUrl: firstAIVideo.url,
+        renderId: `ai-direct-${jobId}`,
+        duration,
+        format: dimensions,
+        provider: 'fal-ai-direct',
+        model: firstAIVideo.model,
+        aiVideos: generatedAIVideos,
+        note: 'Returned raw AI video (Shotstack timed out)'
+      }
+    }
     throw new Error('Render timed out')
   }
   
