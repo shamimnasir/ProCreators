@@ -276,9 +276,30 @@ async function compileVideoWithFFmpeg({
       const videoPath = join(tempDir, `clip-${index}.mp4`)
       
       try {
-        if (video.url.startsWith('/')) {
+        // Extract URL from video object - handle different formats
+        let videoUrl = null
+        if (typeof video === 'string') {
+          videoUrl = video
+        } else if (video && typeof video.url === 'string') {
+          videoUrl = video.url
+        } else if (video && video.url && typeof video.url.url === 'string') {
+          // Nested URL object
+          videoUrl = video.url.url
+        } else if (video && video.video && typeof video.video.url === 'string') {
+          // Fal.ai format: { video: { url: '...' } }
+          videoUrl = video.video.url
+        }
+        
+        if (!videoUrl) {
+          console.error(`[${jobId}] ❌ No valid URL found for clip ${index}:`, JSON.stringify(video).substring(0, 200))
+          return { index, path: null, success: false }
+        }
+        
+        console.log(`[${jobId}] Downloading clip ${index + 1}: ${videoUrl.substring(0, 60)}...`)
+        
+        if (videoUrl.startsWith('/')) {
           // Local file - copy it
-          const localPath = join(process.cwd(), 'public', video.url)
+          const localPath = join(process.cwd(), 'public', videoUrl)
           const fs = require('fs')
           if (fs.existsSync(localPath)) {
             const buffer = fs.readFileSync(localPath)
@@ -288,7 +309,7 @@ async function compileVideoWithFFmpeg({
           }
         } else {
           // Download from URL
-          const response = await fetch(video.url)
+          const response = await fetch(videoUrl)
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`)
           }
