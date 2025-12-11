@@ -350,6 +350,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   
   // Build the edit JSON based on mode and video source
   let editJson
+  let generatedAIVideos = [] // Store AI videos in case Shotstack fails
   
   if (mode === 'image-to-video' && imageFile && typeof imageFile !== 'string' && imageFile.size > 0) {
     // For image-to-video, first upload the image to Shotstack Serve API
