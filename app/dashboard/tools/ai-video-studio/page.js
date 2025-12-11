@@ -179,6 +179,7 @@ export default function AIVideoStudioPage() {
     
     try {
       const formData = new FormData()
+      formData.append('provider', provider) // Add provider selection
       formData.append('mode', selectedTemplate?.defaultSettings.mode || 'text-to-video')
       formData.append('prompt', enhancedPrompt || prompt)
       formData.append('duration', duration)
