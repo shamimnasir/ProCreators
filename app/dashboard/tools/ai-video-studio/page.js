@@ -329,24 +329,50 @@ export default function AIVideoStudioPage() {
       // Caption style
       formData.append('captionStyle', captionStyle)
       
-      // Progress simulation with Fal.ai model names
+      // Calculate estimated processing time based on script length and video options
+      const scriptLength = (enhancedPrompt || prompt).length
+      const estimatedTTSDuration = Math.ceil(scriptLength / 12) // ~12 chars per second for TTS
+      const hasTTS = voiceOption === 'tts'
+      const hasCaptions = captionStyle !== 'none'
+      
+      // Warn if script is very long
+      if (hasTTS && estimatedTTSDuration > duration * 2) {
+        console.log(`Warning: Script (${scriptLength} chars) may produce ~${estimatedTTSDuration}s of audio for ${duration}s video`)
+      }
+      
+      // Progress simulation with better time estimates
       const segments = Math.ceil(duration / 5)
       let currentProgress = 0
+      let elapsedTime = 0
       const aiModels = ['Pixverse v5.5', 'LongCat', 'Wan 2.5', 'Hunyuan', 'Kling']
       let modelIndex = 0
+      
+      // Processing steps for progress messages
+      const processingSteps = [
+        { at: 5, msg: hasTTS ? '🎙️ Generating TTS audio...' : '📹 Fetching video clips...' },
+        { at: 20, msg: '📥 Downloading video clips...' },
+        { at: 35, msg: '🔧 Normalizing video clips...' },
+        { at: 50, msg: '🎬 Concatenating clips...' },
+        { at: 65, msg: hasTTS ? '🔊 Merging audio with video...' : '⚡ Processing video...' },
+        { at: 80, msg: hasCaptions ? '📝 Burning captions into video...' : '💾 Finalizing video...' },
+        { at: 90, msg: '💾 Saving to library...' }
+      ]
+      
       const progressInterval = setInterval(() => {
-        currentProgress += 100 / (segments * (videoSource === 'ai' ? 50 : videoSource === 'hybrid' ? 40 : 25))
-        if (currentProgress < 90) {
-          setProgress(currentProgress)
-          // Rotate through model names in progress message
-          if (videoSource === 'ai') {
-            const currentModel = aiModels[modelIndex % aiModels.length]
-            setProgressMessage(`🎨 Generating with ${currentModel} (Fal.ai)...`)
-            if (currentProgress > 20 * (modelIndex + 1)) modelIndex++
-          } else if (videoSource === 'hybrid') {
-            setProgressMessage('🎬 Mixing AI video + stock footage...')
-          } else {
-            setProgressMessage('📹 Composing video with stock footage...')
+        elapsedTime += 1
+        // Slower progress for longer operations
+        const baseSpeed = videoSource === 'ai' ? 50 : videoSource === 'hybrid' ? 40 : 25
+        const adjustedSpeed = hasTTS ? baseSpeed * 1.5 : baseSpeed // TTS takes longer
+        currentProgress += 100 / (segments * adjustedSpeed)
+        
+        if (currentProgress < 95) {
+          setProgress(Math.min(currentProgress, 95))
+          
+          // Find current step message
+          const currentStep = processingSteps.filter(s => currentProgress >= s.at).pop()
+          if (currentStep) {
+            const timeStr = elapsedTime > 60 ? `${Math.floor(elapsedTime/60)}m ${elapsedTime%60}s` : `${elapsedTime}s`
+            setProgressMessage(`${currentStep.msg} (${timeStr})`)
           }
         }
       }, 1000)
@@ -361,7 +387,7 @@ export default function AIVideoStudioPage() {
       
       if (data.success) {
         setProgress(100)
-        setProgressMessage('Saving to library...')
+        setProgressMessage('✅ Complete!')
         setVideoResult(data)
         
         // Auto-save to user library
@@ -373,20 +399,21 @@ export default function AIVideoStudioPage() {
           videoUrl: data.videoUrl,
           filePath: data.videoUrl,
           metadata: {
-            duration,
+            duration: data.duration || duration,
             format,
             templateId: selectedTemplate?.id,
             templateName: selectedTemplate?.name
           }
         })
         
+        const actualDuration = data.duration ? Math.round(data.duration) : duration
         if (libraryResult.success) {
           toast({ 
             title: '🎬 Video Generated & Saved!', 
-            description: `${duration}s video saved to your library`
+            description: `${actualDuration}s video saved to your library`
           })
         } else {
-          toast({ title: '🎬 Video Generated!', description: `${duration}s video ready` })
+          toast({ title: '🎬 Video Generated!', description: `${actualDuration}s video ready` })
         }
       } else {
         throw new Error(data.error)
