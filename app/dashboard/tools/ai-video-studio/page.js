@@ -226,7 +226,6 @@ export default function AIVideoStudioPage() {
             setProgressMessage('📹 Composing video with stock footage...')
           }
         }
-        }
       }, 1000)
       
       const response = await fetch('/api/ai-video-studio/generate', {
