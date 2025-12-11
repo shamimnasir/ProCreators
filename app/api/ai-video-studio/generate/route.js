@@ -121,41 +121,31 @@ export async function POST(request) {
     const format = formData.get('format') || 'portrait'
     const templateId = formData.get('templateId') || 'custom'
     const imageFile = formData.get('image')
+    const videoSource = formData.get('videoSource') || 'stock' // 'stock' or 'ai-generated'
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
-    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s`)
+    console.log(`[${jobId}] Provider: ${provider}, Mode: ${mode}, Duration: ${duration}s, VideoSource: ${videoSource}`)
     console.log(`[${jobId}] ImageFile type: ${typeof imageFile}, HasValidImage: ${hasValidImage}, Size: ${imageFile?.size || 0}`)
     
     let result
     
-    if (provider === 'shotstack') {
-      result = await generateWithShotstack({
-        jobId,
-        mode,
-        prompt,
-        duration,
-        format,
-        templateId,
-        imageFile
-      })
-    } else if (provider === 'replicate') {
-      result = await generateWithReplicate({
-        jobId,
-        mode,
-        prompt,
-        duration,
-        format,
-        templateId,
-        imageFile
-      })
-    } else {
-      throw new Error(`Unknown provider: ${provider}`)
-    }
+    // Use Shotstack for composition with either stock or AI-generated backgrounds
+    result = await generateWithShotstack({
+      jobId,
+      mode,
+      prompt,
+      duration,
+      format,
+      templateId,
+      imageFile,
+      videoSource // Pass video source to determine background type
+    })
     
     return NextResponse.json({
       success: true,
-      provider,
+      provider: 'shotstack',
+      videoSource,
       ...result
     })
     
