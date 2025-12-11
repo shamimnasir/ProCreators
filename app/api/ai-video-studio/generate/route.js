@@ -844,43 +844,25 @@ function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVid
     }]
   })
   
-  // Track 4: Decorative elements
-  tracks.push({
-    clips: [{
-      asset: {
-        type: 'html',
-        html: `<div style="position:relative;width:100%;height:100%;">
-          <div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);width:80%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
-          <div style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:60%;height:4px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
-        </div>`,
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      start: 0,
-      length: duration
-    }]
-  })
-  
-  // Track 5: Main text content
+  // Track 4: Main text content (positioned at bottom)
   const textClips = lines.map((line, index) => {
     const startTime = index * (duration / lines.length)
-    const clipDuration = duration / lines.length + 0.3
+    const clipDuration = duration / lines.length + 0.5
     
     return {
       asset: {
         type: 'html',
-        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
-          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+        html: `<div style="position:absolute;bottom:8%;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:0 40px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${Math.round(config.typography.titleSize * 0.85)}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 2px 10px rgba(0,0,0,0.9),0 4px 30px rgba(0,0,0,0.7);line-height:1.3;max-width:95%;">
             ${line}
           </p>
-          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+          <div style="margin-top:15px;width:60px;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
       },
       start: startTime,
       length: clipDuration,
-      effect: 'slideUp',
       transition: {
         in: 'fade',
         out: 'fade'
