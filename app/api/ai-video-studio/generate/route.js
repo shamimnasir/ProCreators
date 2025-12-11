@@ -354,51 +354,6 @@ function buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   }
 }
 
-// Build default video edit
-function buildDefaultVideoEdit(prompt, duration, dimensions) {
-  return {
-    timeline: {
-      background: '#000000',
-      fonts: [
-        {
-          src: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'
-        }
-      ],
-      tracks: [
-        {
-          clips: [
-            {
-              asset: {
-                type: 'html',
-                html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:60px;">
-                  <p style="font-family:'Montserrat',sans-serif;font-size:72px;color:white;text-align:center;font-weight:bold;text-shadow:2px 2px 20px rgba(0,0,0,0.5);">${(prompt || 'Your Video').substring(0, 150)}</p>
-                </div>`,
-                width: dimensions.width,
-                height: dimensions.height
-              },
-              start: 0,
-              length: duration,
-              effect: 'zoomIn',
-              transition: {
-                in: 'fade',
-                out: 'fade'
-              }
-            }
-          ]
-        }
-      ]
-    },
-    output: {
-      format: 'mp4',
-      size: {
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      fps: 30
-    }
-  }
-}
-
 // ==================== REPLICATE GENERATION ====================
 async function generateWithReplicate({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
   console.log(`[${jobId}] Using Replicate for AI video generation...`)
