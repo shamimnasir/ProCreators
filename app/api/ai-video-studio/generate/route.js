@@ -690,32 +690,38 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
           index: i
         })
         consecutiveFailures = 0 // Reset on success
-          prompt: scenePrompt,
-          model: selectedModel.name,
-          cost: selectedModel.costPerSecond * 5,
-          index: i
-        })
       } else {
-        console.log(`[${jobId}] ⚠️ Clip ${i + 1} - no video URL in response`)
-        // Try next model
-        if (modelIndex < models.length - 1) {
+        console.log(`[${jobId}] ⚠️ Clip ${i + 1} - no video URL in response from ${selectedModel.name}`)
+        consecutiveFailures++
+        // Try next model after 2 consecutive failures
+        if (consecutiveFailures >= 2 && modelIndex < models.length - 1) {
           modelIndex++
           selectedModel = models[modelIndex]
-          console.log(`[${jobId}] Switching to ${selectedModel.name}`)
-          i-- // Retry this clip
+          console.log(`[${jobId}] 🔄 Switching to ${selectedModel.tier} ${selectedModel.name} after failures`)
+          consecutiveFailures = 0
         }
+        i-- // Retry this clip
       }
     } catch (error) {
-      console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
+      console.error(`[${jobId}] ❌ Clip ${i + 1} failed with ${selectedModel.name}:`, error.message)
+      consecutiveFailures++
       
-      // Try next model if available
+      // Try next model after failure
       if (modelIndex < models.length - 1) {
         modelIndex++
         selectedModel = models[modelIndex]
-        console.log(`[${jobId}] Switching to ${selectedModel.name} due to error`)
+        console.log(`[${jobId}] 🔄 Switching to ${selectedModel.tier} ${selectedModel.name} due to error`)
+        consecutiveFailures = 0
         i-- // Retry this clip
       }
     }
+  }
+  
+  // Log summary
+  if (videos.length > 0) {
+    const modelUsed = [...new Set(videos.map(v => v.model))].join(', ')
+    const totalCost = videos.reduce((sum, v) => sum + v.cost, 0)
+    console.log(`[${jobId}] 📊 Generated ${videos.length} clips using: ${modelUsed} | Est. cost: $${totalCost.toFixed(2)}`)
   }
   
   return videos
