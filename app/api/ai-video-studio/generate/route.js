@@ -527,14 +527,19 @@ async function compileVideoWithFFmpeg({
     }
     
     // Step 6: Add captions if caption style is not 'none'
+    // IMPORTANT: Captions should match what's actually being spoken (spokenText)
     console.log(`[${jobId}] Step 6: Processing captions...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
-    if (captionStyle && captionStyle !== 'none' && prompt && prompt.trim()) {
+    // Only add captions if we have audio (captions should sync with spoken audio)
+    const shouldAddCaptions = captionStyle && captionStyle !== 'none' && hasAudio && spokenText && spokenText.trim()
+    
+    if (shouldAddCaptions) {
       try {
-        // Generate ASS captions
+        // Generate ASS captions from the SPOKEN text (not full script)
+        // This ensures captions are synced with what's actually being said
         const captionContent = generateASSCaptions(
-          prompt, 
+          spokenText,  // Use spoken text, not full prompt
           actualDuration, 
           captionStyle, 
           dimensions.height, 
@@ -543,7 +548,7 @@ async function compileVideoWithFFmpeg({
         
         const captionsPath = join(tempDir, 'captions.ass')
         await writeFile(captionsPath, captionContent)
-        console.log(`[${jobId}] ✅ ASS captions generated`)
+        console.log(`[${jobId}] ✅ ASS captions generated (synced with ${spokenText.length} chars of spoken text)`)
         
         // Burn captions into video
         const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
@@ -579,7 +584,7 @@ async function compileVideoWithFFmpeg({
     } else {
       // No captions - just copy the video
       require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
-      console.log(`[${jobId}] Skipping captions (style: ${captionStyle})`)
+      console.log(`[${jobId}] Skipping captions (style: ${captionStyle}, hasAudio: ${hasAudio})`)
     }
     
     // Step 7: Save to public folder
