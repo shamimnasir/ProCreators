@@ -178,7 +178,11 @@ export default function AIVideoStudioPage() {
     
     setGenerating(true)
     setProgress(0)
-    setProgressMessage('Finding best stock videos...')
+    setProgressMessage(
+      videoSource === 'ai' ? '🎨 Generating AI scenes...' :
+      videoSource === 'hybrid' ? '🎬 Creating AI + Stock hybrid...' :
+      'Finding best stock videos...'
+    )
     setVideoResult(null)
     
     try {
@@ -189,6 +193,7 @@ export default function AIVideoStudioPage() {
       formData.append('format', format)
       formData.append('templateId', selectedTemplate?.id || 'make-anything')
       formData.append('language', language)
+      formData.append('videoSource', videoSource) // NEW: Add video source selection
       
       if (imageFile) {
         formData.append('image', imageFile)
