@@ -499,58 +499,151 @@ function getKeywordsFromPromptAndTemplate(prompt, templateId) {
 }
 
 // ==================== AI-GENERATED VIDEO EDIT ====================
-// Uses Shotstack's text-to-image (FLUX model) and image-to-video assets
-function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, jobId) {
-  const config = getTemplateVisualConfig(templateId)
-  const scenes = parsePromptToScenes(prompt, Math.ceil(duration / 5))
+// Step 1: Generate images using Create API (text-to-image with FLUX model)
+// Step 2: Use image-to-video asset type to animate those images with real motion
+async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
+  const createBaseUrl = process.env.SHOTSTACK_ENV === 'production'
+    ? 'https://api.shotstack.io/create/v1'
+    : 'https://api.shotstack.io/create/stage'
   
-  // Each AI scene will be ~5-6 seconds (Shotstack image-to-video generates 6s clips)
+  const scenes = parsePromptToScenes(prompt, numScenes)
+  const generatedImages = []
+  
+  console.log(`[${jobId}] Generating ${numScenes} AI images using FLUX model...`)
+  
+  // Generate images in parallel (up to 3 at a time)
+  const imagePromises = scenes.slice(0, numScenes).map(async (scenePrompt, index) => {
+    const cinematicPrompt = `${scenePrompt}, cinematic lighting, dramatic atmosphere, high quality, professional photography, ${
+      dimensions.height > dimensions.width ? 'vertical composition, portrait orientation' : 'wide cinematic shot, landscape orientation'
+    }, 8K resolution, photorealistic`
+    
+    console.log(`[${jobId}] Scene ${index + 1}: "${cinematicPrompt.substring(0, 60)}..."`)
+    
+    try {
+      // Create image using Shotstack Create API
+      const createResponse = await fetch(`${createBaseUrl}/assets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey
+        },
+        body: JSON.stringify({
+          provider: 'shotstack',
+          options: {
+            type: 'text-to-image',
+            prompt: cinematicPrompt,
+            width: Math.min(1280, Math.round(dimensions.width / 256) * 256), // Must be multiple of 256
+            height: Math.min(1280, Math.round(dimensions.height / 256) * 256)
+          }
+        })
+      })
+      
+      if (!createResponse.ok) {
+        const errorText = await createResponse.text()
+        console.error(`[${jobId}] Image ${index + 1} creation failed:`, errorText)
+        return null
+      }
+      
+      const createData = await createResponse.json()
+      const assetId = createData.data?.id
+      
+      if (!assetId) {
+        console.error(`[${jobId}] No asset ID returned for image ${index + 1}`)
+        return null
+      }
+      
+      console.log(`[${jobId}] Image ${index + 1} queued: ${assetId}`)
+      
+      // Poll for completion
+      let imageUrl = null
+      let attempts = 0
+      const maxAttempts = 60 // 2 minutes max per image
+      
+      while (!imageUrl && attempts < maxAttempts) {
+        await new Promise(r => setTimeout(r, 2000))
+        attempts++
+        
+        const statusResponse = await fetch(`${createBaseUrl}/assets/${assetId}`, {
+          headers: { 'x-api-key': apiKey }
+        })
+        
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json()
+          const status = statusData.data?.attributes?.status
+          
+          if (status === 'done') {
+            imageUrl = statusData.data?.attributes?.url
+            console.log(`[${jobId}] ✅ Image ${index + 1} ready: ${imageUrl}`)
+          } else if (status === 'failed') {
+            console.error(`[${jobId}] ❌ Image ${index + 1} failed`)
+            break
+          } else if (attempts % 5 === 0) {
+            console.log(`[${jobId}] Image ${index + 1} status: ${status} (${attempts * 2}s)`)
+          }
+        }
+      }
+      
+      return imageUrl ? { url: imageUrl, prompt: scenePrompt, index } : null
+    } catch (error) {
+      console.error(`[${jobId}] Image ${index + 1} error:`, error.message)
+      return null
+    }
+  })
+  
+  // Wait for all images
+  const results = await Promise.all(imagePromises)
+  return results.filter(r => r !== null).sort((a, b) => a.index - b.index)
+}
+
+// Build AI video using image-to-video asset type (creates actual motion from images)
+function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, generatedImages, jobId) {
+  const config = getTemplateVisualConfig(templateId)
+  
+  // Each image-to-video clip is ~5-6 seconds with real motion
   const sceneLength = 6
-  const numScenes = Math.ceil(duration / sceneLength)
+  const numScenes = generatedImages.length
   
   const tracks = []
   
-  // Track 1: AI-generated scenes using text-to-image + image-to-video pipeline
-  // Shotstack supports these asset types directly in the Edit timeline
-  const aiSceneClips = []
+  // Motion prompts for different effects
+  const motionPrompts = [
+    'Slowly zoom out while orbiting left around the scene',
+    'Gentle push in with subtle camera shake',
+    'Slow pan right across the scene',
+    'Dolly zoom effect, slowly pulling back',
+    'Smooth crane shot moving upward',
+    'Slow motion zoom in on the center'
+  ]
   
-  for (let i = 0; i < numScenes; i++) {
-    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
-    const startTime = i * sceneLength
+  // Track 1: AI-generated video scenes using image-to-video (REAL MOTION)
+  const videoClips = generatedImages.map((img, index) => {
+    const startTime = index * sceneLength
+    const motionPrompt = motionPrompts[index % motionPrompts.length]
     
-    // Create a cinematic prompt for the AI to generate
-    const cinematicPrompt = `${scenePrompt}, cinematic lighting, dramatic atmosphere, high quality, professional photography, ${
-      dimensions.height > dimensions.width ? 'vertical composition, portrait orientation' : 'wide cinematic shot, landscape orientation'
-    }, 8K resolution, film grain`
-    
-    // Use text-to-image asset to generate the scene
-    // Then the rendering pipeline will convert it to video with motion
-    aiSceneClips.push({
+    return {
       asset: {
-        type: 'text-to-image',
-        prompt: cinematicPrompt,
-        width: Math.min(1280, dimensions.width),
-        height: Math.min(1280, dimensions.height)
+        type: 'image-to-video',
+        src: img.url,
+        prompt: motionPrompt // This tells Shotstack how to animate the image
       },
       start: startTime,
-      length: sceneLength,
+      length: 'auto', // Let Shotstack determine optimal length (usually 5-6s)
       fit: 'cover',
-      effect: i % 3 === 0 ? 'zoomIn' : i % 3 === 1 ? 'zoomOut' : 'slideLeft',
       transition: {
         in: 'fade',
         out: 'fade'
       }
-    })
-  }
+    }
+  })
   
-  tracks.push({ clips: aiSceneClips })
+  tracks.push({ clips: videoClips })
   
-  // Track 2: Dark overlay for text readability
+  // Track 2: Cinematic gradient overlay (positioned at bottom for text readability)
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, ${config.colorScheme.secondary}66 0%, ${config.colorScheme.secondary}cc 100%);"></div>`,
+        html: `<div style="width:100%;height:100%;background:linear-gradient(180deg, transparent 0%, transparent 40%, ${config.colorScheme.secondary}99 70%, ${config.colorScheme.secondary}ee 100%);"></div>`,
         width: dimensions.width,
         height: dimensions.height
       },
@@ -559,14 +652,13 @@ function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, job
     }]
   })
   
-  // Track 3: Accent decorations
+  // Track 3: AI badge indicator (top right)
   tracks.push({
     clips: [{
       asset: {
         type: 'html',
-        html: `<div style="position:relative;width:100%;height:100%;">
-          <div style="position:absolute;top:8%;left:50%;transform:translateX(-50%);width:70%;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
-          <div style="position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:50%;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.accent || config.colorScheme.primary}, transparent);"></div>
+        html: `<div style="position:absolute;top:30px;right:30px;background:linear-gradient(135deg, #8b5cf6, #ec4899);padding:10px 20px;border-radius:25px;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+          <span style="font-family:'Montserrat',sans-serif;font-size:14px;color:white;font-weight:700;letter-spacing:1px;">✨ AI GENERATED</span>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
@@ -576,44 +668,27 @@ function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, job
     }]
   })
   
-  // Track 4: AI badge indicator
-  tracks.push({
-    clips: [{
-      asset: {
-        type: 'html',
-        html: `<div style="position:absolute;top:20px;right:20px;background:linear-gradient(135deg, ${config.colorScheme.primary}, #9333ea);padding:8px 16px;border-radius:20px;display:flex;align-items:center;gap:8px;">
-          <span style="font-size:14px;">✨</span>
-          <span style="font-family:'Montserrat',sans-serif;font-size:12px;color:white;font-weight:600;">AI GENERATED</span>
-        </div>`,
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      start: 0,
-      length: duration
-    }]
-  })
-  
-  // Track 5: Main text content
-  const lines = parsePromptToLines(prompt, 4)
+  // Track 4: Main text content (positioned at bottom with proper styling)
+  const lines = parsePromptToLines(prompt, Math.min(4, numScenes))
   const textClips = lines.map((line, index) => {
     const startTime = index * (duration / lines.length)
-    const clipDuration = duration / lines.length + 0.3
+    const clipDuration = duration / lines.length + 0.5
     
+    // Position text at bottom 30% of screen
     return {
       asset: {
         type: 'html',
-        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:60px;">
-          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${config.typography.titleSize}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 4px 30px rgba(0,0,0,0.9),0 0 60px ${config.colorScheme.primary}44;line-height:1.2;max-width:90%;">
+        html: `<div style="position:absolute;bottom:8%;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:0 40px;">
+          <p style="font-family:'${config.typography.fontFamily}',sans-serif;font-size:${Math.round(config.typography.titleSize * 0.85)}px;color:${config.colorScheme.text};font-weight:${config.typography.fontWeight};text-align:center;text-shadow:0 2px 10px rgba(0,0,0,0.9),0 4px 30px rgba(0,0,0,0.7);line-height:1.3;max-width:95%;">
             ${line}
           </p>
-          <div style="margin-top:30px;width:80px;height:4px;background:${config.colorScheme.primary};"></div>
+          <div style="margin-top:15px;width:60px;height:3px;background:linear-gradient(90deg, transparent, ${config.colorScheme.primary}, transparent);"></div>
         </div>`,
         width: dimensions.width,
         height: dimensions.height
       },
       start: startTime,
       length: clipDuration,
-      effect: 'slideUp',
       transition: {
         in: 'fade',
         out: 'fade'
