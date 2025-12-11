@@ -310,7 +310,6 @@ function buildImageVideoEdit(imageUrl, duration, dimensions) {
     },
     output: {
       format: 'mp4',
-      resolution: 'hd',
       size: {
         width: dimensions.width,
         height: dimensions.height
