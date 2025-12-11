@@ -1068,8 +1068,8 @@ function buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, gen
 }
 
 // ==================== HYBRID VIDEO EDIT (AI + STOCK) ====================
-// Mixes AI-generated scenes for key moments with stock footage for B-roll
-function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, generatedImages, jobId) {
+// Mixes AI-generated video clips for key moments with stock footage for B-roll
+function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, aiVideos, jobId) {
   const config = getTemplateVisualConfig(templateId)
   const lines = parsePromptToLines(prompt, 4)
   
@@ -1077,43 +1077,35 @@ function buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVid
   const totalSegments = Math.max(4, Math.ceil(duration / 5))
   const segmentDuration = duration / totalSegments
   
-  // Motion prompts for AI-generated clips
-  const motionPrompts = [
-    'Slowly zoom out while orbiting left',
-    'Gentle push in with subtle movement',
-    'Slow pan right across the scene'
-  ]
-  
-  // Create alternating AI and Stock clips for hybrid effect
+  // Create alternating AI video and Stock clips for hybrid effect
   const backgroundClips = []
-  let aiImageIndex = 0
+  let aiVideoIndex = 0
   let stockIndex = 0
   
   for (let i = 0; i < totalSegments; i++) {
     const startTime = i * segmentDuration
-    // Use AI for first, middle, and last segments (hook, climax, resolution)
-    const isAIScene = (i === 0 || i === Math.floor(totalSegments / 2) || i === totalSegments - 1) && aiImageIndex < generatedImages.length
+    // Use AI video for first, middle, and last segments (hook, climax, resolution)
+    const useAI = (i === 0 || i === Math.floor(totalSegments / 2) || i === totalSegments - 1) && aiVideoIndex < aiVideos.length
     
-    if (isAIScene && generatedImages.length > 0) {
-      // Use pre-generated AI image with image-to-video for real motion
-      const aiImage = generatedImages[aiImageIndex % generatedImages.length]
-      const motionPrompt = motionPrompts[aiImageIndex % motionPrompts.length]
+    if (useAI && aiVideos.length > 0) {
+      // Use AI-generated video clip
+      const aiVideo = aiVideos[aiVideoIndex]
       
       backgroundClips.push({
         asset: {
-          type: 'image-to-video',
-          src: aiImage.url,
-          prompt: motionPrompt
+          type: 'video',
+          src: aiVideo.url,
+          volume: 0.2 // Low volume for ambient AI video audio
         },
         start: startTime,
-        length: 'auto', // Let Shotstack determine optimal length (~6s)
+        length: segmentDuration + 0.5,
         fit: 'cover',
         transition: {
           in: 'fade',
           out: 'fade'
         }
       })
-      aiImageIndex++
+      aiVideoIndex++
     } else {
       // Stock video for B-roll
       const stockVideo = stockVideos[stockIndex % stockVideos.length] || stockVideos[0]
