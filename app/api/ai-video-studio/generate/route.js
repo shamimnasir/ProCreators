@@ -194,9 +194,16 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else {
-    // Use the cinematic video builder for text-based videos
-    console.log(`[${jobId}] Building cinematic video for template: ${templateId}`)
-    editJson = buildCinematicVideoEdit(templateId, prompt, duration, dimensions)
+    // Fetch stock videos for background
+    console.log(`[${jobId}] Fetching stock videos for template: ${templateId}`)
+    const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+    console.log(`[${jobId}] Keywords: ${keywords.join(', ')}`)
+    
+    const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+    console.log(`[${jobId}] Fetched ${stockVideos.length} stock videos`)
+    
+    // Build video with stock footage backgrounds
+    editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
   }
   
   console.log(`[${jobId}] Submitting to Shotstack:`, JSON.stringify(editJson).substring(0, 500))
