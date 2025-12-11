@@ -621,6 +621,34 @@ export default function AIVideoStudioPage() {
                   </Select>
                 </div>
               )}
+
+              {/* Video Engine (Provider) */}
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Video Engine
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      provider === 'shotstack' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setProvider('shotstack')}
+                  >
+                    <p className="font-medium">⚡ Shotstack</p>
+                    <p className="text-xs text-muted-foreground">Fast • Text & Slideshows</p>
+                  </div>
+                  <div
+                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      provider === 'replicate' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setProvider('replicate')}
+                  >
+                    <p className="font-medium">🤖 Replicate AI</p>
+                    <p className="text-xs text-muted-foreground">AI Gen • Image Animation</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
