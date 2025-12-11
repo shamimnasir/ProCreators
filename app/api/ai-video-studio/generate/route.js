@@ -286,7 +286,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     ? { width: 1080, height: 1920 }
     : { width: 1920, height: 1080 }
   
-  // Build the edit JSON based on mode
+  // Build the edit JSON based on mode and video source
   let editJson
   
   if (mode === 'image-to-video' && imageFile && typeof imageFile !== 'string' && imageFile.size > 0) {
@@ -295,8 +295,18 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
     console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
+  } else if (videoSource === 'ai') {
+    // AI-Generated Scenes: Use Shotstack's text-to-image and image-to-video assets
+    console.log(`[${jobId}] Building AI-generated video using FLUX model...`)
+    editJson = buildAIGeneratedVideoEdit(templateId, prompt, duration, dimensions, jobId)
+  } else if (videoSource === 'hybrid') {
+    // Hybrid: Mix AI-generated scenes with stock footage
+    console.log(`[${jobId}] Building hybrid video (AI + Stock)...`)
+    const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+    const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 10)) // Half as many stock videos
+    editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, jobId)
   } else {
-    // Fetch stock videos for background - always use high-quality stock footage
+    // Stock Videos: Original implementation
     console.log(`[${jobId}] Fetching cinematic stock videos for template: ${templateId}`)
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
     console.log(`[${jobId}] Keywords: ${keywords.join(', ')}`)
