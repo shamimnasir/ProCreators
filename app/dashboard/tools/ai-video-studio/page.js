@@ -657,14 +657,102 @@ export default function AIVideoStudioPage() {
                 </div>
               )}
 
+              {/* Video Source Selection */}
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Video Scene Source
+                </Label>
+                <RadioGroup value={videoSource} onValueChange={setVideoSource} className="space-y-3">
+                  <div 
+                    className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      videoSource === 'stock' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setVideoSource('stock')}
+                  >
+                    <RadioGroupItem value="stock" id="stock" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📹</span>
+                        <Label htmlFor="stock" className="font-semibold cursor-pointer">Stock Videos</Label>
+                        <Badge variant="secondary" className="text-xs">Fast</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        High-quality HD footage from Pexels • ~30s render
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      videoSource === 'ai' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setVideoSource('ai')}
+                  >
+                    <RadioGroupItem value="ai" id="ai" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎨</span>
+                        <Label htmlFor="ai" className="font-semibold cursor-pointer">AI-Generated Scenes</Label>
+                        <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">AI Powered</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        FLUX model generates unique scenes from your prompt • ~2-3min render
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      videoSource === 'hybrid' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setVideoSource('hybrid')}
+                  >
+                    <RadioGroupItem value="hybrid" id="hybrid" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">✨</span>
+                        <Label htmlFor="hybrid" className="font-semibold cursor-pointer">Hybrid Mix</Label>
+                        <Badge className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500">Best Quality</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        AI scenes for key moments + stock B-roll • ~1-2min render
+                      </p>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {/* Video Info */}
               <div className="space-y-3 pt-4 border-t">
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className={`p-4 rounded-lg border ${
+                  videoSource === 'ai' ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200 dark:border-purple-800' :
+                  videoSource === 'hybrid' ? 'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200 dark:border-blue-800' :
+                  'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-800'
+                }`}>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">📹</span>
+                    <span className="text-2xl">
+                      {videoSource === 'ai' ? '🎨' : videoSource === 'hybrid' ? '✨' : '📹'}
+                    </span>
                     <div>
-                      <p className="font-semibold text-blue-900 dark:text-blue-100">Cinematic Stock Videos</p>
-                      <p className="text-xs text-blue-700 dark:text-blue-300">Real HD footage from Pexels • Renders in ~30s</p>
+                      <p className={`font-semibold ${
+                        videoSource === 'ai' ? 'text-purple-900 dark:text-purple-100' :
+                        videoSource === 'hybrid' ? 'text-cyan-900 dark:text-cyan-100' :
+                        'text-blue-900 dark:text-blue-100'
+                      }`}>
+                        {videoSource === 'ai' ? 'AI Scene Generation' : 
+                         videoSource === 'hybrid' ? 'Hybrid AI + Stock' : 
+                         'Cinematic Stock Videos'}
+                      </p>
+                      <p className={`text-xs ${
+                        videoSource === 'ai' ? 'text-purple-700 dark:text-purple-300' :
+                        videoSource === 'hybrid' ? 'text-cyan-700 dark:text-cyan-300' :
+                        'text-blue-700 dark:text-blue-300'
+                      }`}>
+                        {videoSource === 'ai' ? 'Unique AI-generated visuals via FLUX model' : 
+                         videoSource === 'hybrid' ? 'AI for key scenes + HD stock for B-roll' : 
+                         'Real HD footage from Pexels • Renders in ~30s'}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-3">
