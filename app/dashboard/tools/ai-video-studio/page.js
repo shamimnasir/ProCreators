@@ -301,7 +301,18 @@ export default function AIVideoStudioPage() {
       formData.append('format', format)
       formData.append('templateId', selectedTemplate?.id || 'make-anything')
       formData.append('language', language)
-      formData.append('videoSource', videoSource) // NEW: Add video source selection
+      formData.append('videoSource', videoSource)
+      
+      // Voice/TTS parameters
+      formData.append('voiceOption', voiceOption)
+      formData.append('ttsLanguage', ttsLanguage)
+      formData.append('selectedVoice', selectedVoice || '')
+      formData.append('narrationMode', narrationMode)
+      
+      // Upload voice file if available
+      if (voiceOption === 'upload' && voiceFile) {
+        formData.append('voiceFile', voiceFile)
+      }
       
       if (imageFile) {
         formData.append('image', imageFile)
@@ -317,7 +328,7 @@ export default function AIVideoStudioPage() {
       // Progress simulation with Fal.ai model names
       const segments = Math.ceil(duration / 5)
       let currentProgress = 0
-      const aiModels = ['Ovi', 'Pixverse', 'Wan', 'Minimax', 'Kling']
+      const aiModels = ['Pixverse v5.5', 'LongCat', 'Wan 2.5', 'Hunyuan', 'Kling']
       let modelIndex = 0
       const progressInterval = setInterval(() => {
         currentProgress += 100 / (segments * (videoSource === 'ai' ? 50 : videoSource === 'hybrid' ? 40 : 25))
