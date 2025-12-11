@@ -256,8 +256,6 @@ export async function POST(request) {
     
     return NextResponse.json({
       success: true,
-      provider: 'shotstack',
-      videoSource,
       ...result
     })
     
