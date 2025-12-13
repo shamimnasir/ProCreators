@@ -110,21 +110,16 @@ export default function AIVideoStudioPage() {
       if (data.success && data.voices) {
         setAvailableVoices(data.voices)
         
-        // Group voices by variant
-        const grouped = {}
-        data.voices.forEach(voice => {
-          const variant = voice.name.split('-').slice(2, 3).join('-') || 'Standard'
-          if (!grouped[variant]) grouped[variant] = []
-          grouped[variant].push(voice)
-        })
+        // Group voices using the new voice config utility
+        const grouped = groupVoicesForUI(data.voices)
         setVoicesByVariant(grouped)
         
-        // Select first voice if none selected
-        const variants = Object.keys(grouped)
-        if (variants.length > 0 && !selectedVoice) {
-          const firstVariant = variants[0]
-          if (grouped[firstVariant]?.length > 0) {
-            setSelectedVoice(grouped[firstVariant][0].name)
+        // Select first voice if none selected - prefer Premium HD
+        const categories = Object.keys(grouped)
+        if (categories.length > 0 && !selectedVoice) {
+          const preferredCategory = categories.find(c => c === 'Premium HD') || categories[0]
+          if (grouped[preferredCategory]?.length > 0) {
+            setSelectedVoice(grouped[preferredCategory][0].name)
           }
         }
       }
