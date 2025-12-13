@@ -502,11 +502,11 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
             title: "Success",
             description: `${nicheName} script generated! Duration auto-adjusted to ${estimatedSeconds} seconds.`
           })
-        } else if (estimatedSeconds > 60) {
-          setDuration(60)
+        } else if (estimatedSeconds > 600) {
+          setDuration(600)
           toast({
             title: "Success",
-            description: `${nicheName} script generated! Duration set to maximum (60 seconds). Note: Script is longer than 60 seconds.`,
+            description: `${nicheName} script generated! Duration set to maximum (10 minutes). Note: Script is longer.`,
             variant: "default"
           })
         } else {
