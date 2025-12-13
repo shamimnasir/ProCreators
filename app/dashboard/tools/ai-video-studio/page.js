@@ -32,6 +32,18 @@ import {
 // Import library utility
 import { saveToLibrary } from '@/lib/library-utils'
 
+// Import friendly names and voice config
+import { VIDEO_SOURCE_NAMES, PROCESSING_STEP_NAMES, getProgressMessage } from '@/config/friendly-names'
+import { 
+  formatVoiceForDisplay, 
+  getVoiceGender, 
+  getVoiceType, 
+  getFriendlyVoiceName,
+  getGenderIcon,
+  groupVoicesForUI,
+  SUPPORTED_TTS_LANGUAGES 
+} from '@/config/voice-config'
+
 export default function AIVideoStudioPage() {
   // View state: 'gallery' or 'create'
   const [view, setView] = useState('gallery')
