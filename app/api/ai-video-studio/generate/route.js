@@ -424,16 +424,26 @@ async function compileVideoWithFFmpeg({
           default: languageCode = 'en-US'
         }
         
-        console.log(`[${jobId}] 🌐 TTS Language: ${ttsLanguage} → ${languageCode}`)
+        console.log(`[${jobId}] 🌐 TTS Language selection: ${ttsLanguage}`)
         
-        // Build voice config - use selectedVoice only if it matches the language
+        // Build voice config - CRITICAL: Extract language code FROM the voice name
+        // Google TTS requires the languageCode to MATCH the voice's language
+        // Voice format is: {lang}-{region}-{modelName}, e.g., "en-AU-Chirp3-HD-Achernar"
         const voiceConfig = { languageCode }
-        if (selectedVoice && selectedVoice.startsWith(languageCode.split('-')[0])) {
-          voiceConfig.name = selectedVoice
-          console.log(`[${jobId}] 🎤 Using selected voice: ${selectedVoice}`)
+        
+        if (selectedVoice && selectedVoice.includes('-')) {
+          // Extract language code from voice name (first 2 parts: en-AU, en-US, bn-IN, etc.)
+          const voiceParts = selectedVoice.split('-')
+          if (voiceParts.length >= 2) {
+            const voiceLanguageCode = `${voiceParts[0]}-${voiceParts[1]}`.toLowerCase()
+            // Use the voice's actual language code to avoid mismatch errors
+            voiceConfig.languageCode = voiceLanguageCode
+            voiceConfig.name = selectedVoice
+            console.log(`[${jobId}] 🎤 Using voice: ${selectedVoice} (language: ${voiceLanguageCode})`)
+          }
         } else {
-          // Don't specify voice name - let Google pick the best voice for the language
-          console.log(`[${jobId}] 🎤 Using default ${languageCode} voice (selected voice ${selectedVoice} doesn't match language)`)
+          // No specific voice selected - use default for the language
+          console.log(`[${jobId}] 🎤 Using default ${languageCode} voice`)
         }
         
         const ttsRequest = {
