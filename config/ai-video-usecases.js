@@ -133,21 +133,48 @@ export const DURATION_OPTIONS = [
     label: '5 seconds', 
     description: 'Quick clip - single generation',
     segments: 1,
-    isDefault: true
+    isDefault: true,
+    tier: 'free'
   },
   { 
     value: 10, 
     label: '10 seconds', 
-    description: 'Extended clip - 2 chained generations',
+    description: 'Extended clip - 2 generations',
     segments: 2,
-    isDefault: false
+    isDefault: false,
+    tier: 'free'
+  },
+  { 
+    value: 30, 
+    label: '30 seconds', 
+    description: 'Short video - 6 generations',
+    segments: 6,
+    isDefault: false,
+    tier: 'standard'
+  },
+  { 
+    value: 45, 
+    label: '45 seconds', 
+    description: 'Medium video - 9 generations',
+    segments: 9,
+    isDefault: false,
+    tier: 'standard'
   },
   { 
     value: 60, 
-    label: '1 minute (Long Form)', 
-    description: 'Full video - 12 chained generations',
+    label: '1 minute', 
+    description: 'Full video - 12 generations',
     segments: 12,
     isDefault: false,
+    tier: 'premium'
+  },
+  { 
+    value: 120, 
+    label: '2 minutes', 
+    description: 'Long video - 24 generations',
+    segments: 24,
+    isDefault: false,
+    tier: 'premium',
     isPremium: true
   }
 ]
