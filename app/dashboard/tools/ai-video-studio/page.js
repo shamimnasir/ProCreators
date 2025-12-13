@@ -354,14 +354,14 @@ export default function AIVideoStudioPage() {
       const aiModels = ['Pixverse v5.5', 'LongCat', 'Wan 2.5', 'Hunyuan', 'Kling']
       let modelIndex = 0
       
-      // Processing steps for progress messages
+      // Processing steps for progress messages - user-friendly
       const processingSteps = [
-        { at: 5, msg: hasTTS ? '🎙️ Generating TTS audio...' : '📹 Fetching video clips...' },
-        { at: 20, msg: '📥 Downloading video clips...' },
-        { at: 35, msg: '🔧 Normalizing video clips...' },
-        { at: 50, msg: '🎬 Concatenating clips...' },
-        { at: 65, msg: hasTTS ? '🔊 Merging audio with video...' : '⚡ Processing video...' },
-        { at: 80, msg: hasCaptions ? '📝 Burning captions into video...' : '💾 Finalizing video...' },
+        { at: 5, msg: hasTTS ? '🎙️ Creating voiceover...' : '📹 Preparing video clips...' },
+        { at: 20, msg: '📥 Loading video content...' },
+        { at: 35, msg: '🔧 Optimizing quality...' },
+        { at: 50, msg: '🎬 Assembling video...' },
+        { at: 65, msg: hasTTS ? '🔊 Adding voiceover...' : '⚡ Processing...' },
+        { at: 80, msg: hasCaptions ? '📝 Adding captions...' : '💾 Finalizing...' },
         { at: 90, msg: '💾 Saving to library...' }
       ]
       
