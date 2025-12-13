@@ -1209,6 +1209,119 @@ export default function AIVideoStudioPage() {
           )}
         </div>
       </div>
+      
+      {/* My Recent AI Video Creations - Instagram-style Feed */}
+      <RecentCreationsFeed toolType="ai-video-studio" />
     </div>
+  )
+}
+
+// Recent Creations Feed Component
+function RecentCreationsFeed({ toolType }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [playingVideo, setPlayingVideo] = useState(null)
+  const { toast } = useToast()
+
+  useEffect(() => {
+    fetchRecentItems()
+  }, [toolType])
+
+  const fetchRecentItems = async () => {
+    try {
+      const response = await fetch(`/api/library/list?tool=${toolType}&limit=6`)
+      const data = await response.json()
+      if (data.success) {
+        setItems(data.items || [])
+      }
+    } catch (error) {
+      console.error('Failed to load recent items:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDownload = async (item) => {
+    if (item.videoUrl) {
+      const a = document.createElement('a')
+      a.href = item.videoUrl
+      a.download = `ai-video-${Date.now()}.mp4`
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      toast({ title: 'Download Started' })
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="mt-8">
+        <CardContent className="py-8 text-center">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (items.length === 0) {
+    return null // Don't show section if no items
+  }
+
+  return (
+    <Card className="mt-8">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Library className="h-5 w-5" />
+            My Recent Creations
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/library?tool=ai-video-studio'}>
+            View All
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        <CardDescription>Your recent AI Video Studio creations</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {items.map((item) => (
+            <div 
+              key={item.id} 
+              className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden cursor-pointer group"
+              onClick={() => setPlayingVideo(playingVideo === item.id ? null : item.id)}
+            >
+              <video 
+                src={item.videoUrl} 
+                className="w-full h-full object-cover"
+                controls={playingVideo === item.id}
+                muted={playingVideo !== item.id}
+                autoPlay={playingVideo === item.id}
+                loop
+                preload="metadata"
+              />
+              {playingVideo !== item.id && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
+                  <Play className="h-8 w-8 text-white" fill="currentColor" />
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                <p className="text-white text-xs line-clamp-1">{item.title}</p>
+                <p className="text-white/60 text-[10px]">
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              {/* Download button on hover */}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDownload(item); }}
+                className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+              >
+                <Download className="h-3 w-3 text-white" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
