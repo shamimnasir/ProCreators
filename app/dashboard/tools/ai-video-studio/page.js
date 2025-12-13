@@ -979,22 +979,17 @@ export default function AIVideoStudioPage() {
                     {/* Language Selection */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label className="text-sm">TTS Language</Label>
+                        <Label className="text-sm">Language</Label>
                         <Select value={ttsLanguage} onValueChange={setTtsLanguage}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="en">🇺🇸 English</SelectItem>
-                            <SelectItem value="bn">🇧🇩 Bengali</SelectItem>
-                            <SelectItem value="hi">🇮🇳 Hindi</SelectItem>
-                            <SelectItem value="es">🇪🇸 Spanish</SelectItem>
-                            <SelectItem value="fr">🇫🇷 French</SelectItem>
-                            <SelectItem value="de">🇩🇪 German</SelectItem>
-                            <SelectItem value="ja">🇯🇵 Japanese</SelectItem>
-                            <SelectItem value="ko">🇰🇷 Korean</SelectItem>
-                            <SelectItem value="zh">🇨🇳 Chinese</SelectItem>
-                            <SelectItem value="ar">🇸🇦 Arabic</SelectItem>
+                            {SUPPORTED_TTS_LANGUAGES.map(lang => (
+                              <SelectItem key={lang.code} value={lang.code}>
+                                {lang.flag} {lang.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1004,13 +999,22 @@ export default function AIVideoStudioPage() {
                           <SelectTrigger>
                             <SelectValue placeholder="Select voice" />
                           </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(voicesByVariant).map(([variant, voices]) => (
-                              <div key={variant}>
-                                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted">{variant}</div>
+                          <SelectContent className="max-h-[300px]">
+                            {Object.entries(voicesByVariant).map(([category, voices]) => (
+                              <div key={category}>
+                                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted sticky top-0">
+                                  {category === 'Premium HD' ? '💎 ' : category === 'Premium' ? '⭐ ' : category === 'Natural' ? '🎙️ ' : '📢 '}
+                                  {category}
+                                </div>
                                 {voices.map(voice => (
                                   <SelectItem key={voice.name} value={voice.name}>
-                                    {voice.ssmlGender === 'MALE' ? '👨' : '👩'} {voice.name.split('-').slice(-1)[0]}
+                                    <div className="flex items-center gap-2">
+                                      <span>{voice.genderIcon}</span>
+                                      <span>{voice.friendlyName}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        ({voice.gender}{voice.accent ? `, ${voice.accent}` : ''})
+                                      </span>
+                                    </div>
                                   </SelectItem>
                                 ))}
                               </div>
