@@ -496,7 +496,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         const estimatedSeconds = Math.ceil(wordCount / 2.5)
         
         // Update duration if script is longer than current setting
-        if (estimatedSeconds > duration && estimatedSeconds <= 60) {
+        if (estimatedSeconds > duration && estimatedSeconds <= 600) {
           setDuration(estimatedSeconds)
           toast({
             title: "Success",
@@ -1626,7 +1626,7 @@ Product URL: ${scrapeData.product.url}`
                 const estimatedSeconds = Math.ceil(wordCount / 2.5)
                 
                 // Only auto-adjust if estimated time is longer than current duration
-                if (estimatedSeconds > duration && estimatedSeconds <= 60) {
+                if (estimatedSeconds > duration && estimatedSeconds <= 600) {
                   setDuration(estimatedSeconds)
                 }
               }
