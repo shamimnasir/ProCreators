@@ -840,18 +840,16 @@ export default function AIVideoStudioPage() {
                     <RadioGroupItem value="ai" id="ai" className="mt-1" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-lg">🎨</span>
+                        <span className="text-lg">🤖</span>
                         <Label htmlFor="ai" className="font-semibold cursor-pointer">AI-Generated Video</Label>
-                        <Badge className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">Fal.ai</Badge>
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💰 Pixverse $0.04</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Wan $0.05/s</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⭐ Hunyuan $0.05/s</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">🏆 Kling $0.07/s</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">⚡ Quick</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">🎬 Cinema</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">💎 Ultra</Badge>
                       </div>
                       <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
-                        100% AI-generated video • Auto-selects cheapest working model
+                        100% AI-generated video • Auto-selects best available quality
                       </p>
                     </div>
                   </div>
@@ -866,14 +864,14 @@ export default function AIVideoStudioPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">✨</span>
-                        <Label htmlFor="hybrid" className="font-semibold cursor-pointer">AI + Stock Hybrid</Label>
+                        <Label htmlFor="hybrid" className="font-semibold cursor-pointer">AI + Stock Mix</Label>
                         <Badge className="text-xs bg-gradient-to-r from-blue-500 to-cyan-500">Best Value</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        AI video for key scenes + HD stock B-roll (auto-searched by keywords)
+                        AI video for key scenes + HD stock footage (auto-searched by keywords)
                       </p>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                        📹 3-second auto-trim • 🔍 Keyword search • 📝 Text overlay
+                        📹 3-second auto-trim • 🔍 Smart keyword search • 📝 Text overlay
                       </p>
                     </div>
                   </div>
@@ -888,21 +886,21 @@ export default function AIVideoStudioPage() {
                 }`}>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">
-                      {videoSource === 'ai' ? '🎨' : '✨'}
+                      {videoSource === 'ai' ? '🤖' : '✨'}
                     </span>
                     <div>
                       <p className={`font-semibold ${
                         videoSource === 'ai' ? 'text-purple-900 dark:text-purple-100' :
                         'text-cyan-900 dark:text-cyan-100'
                       }`}>
-                        {videoSource === 'ai' ? 'AI Video Generation (Fal.ai)' : 
-                         'AI + Stock Hybrid (Best Value)'}
+                        {videoSource === 'ai' ? 'AI Video Generation' : 
+                         'AI + Stock Mix (Best Value)'}
                       </p>
                       <p className={`text-xs ${
                         videoSource === 'ai' ? 'text-purple-700 dark:text-purple-300' :
                         'text-cyan-700 dark:text-cyan-300'
                       }`}>
-                        {videoSource === 'ai' ? 'Pixverse → LongCat → Wan → Hunyuan → Kling → Veo' : 
+                        {videoSource === 'ai' ? 'Quick → Standard → Cinema → Ultra quality cascade' : 
                          'AI scenes + 3s auto-trim stock clips (keyword-searched)'}
                       </p>
                     </div>
