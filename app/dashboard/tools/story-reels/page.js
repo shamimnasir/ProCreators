@@ -886,10 +886,10 @@ Product URL: ${scrapeData.product.url}`
           audio.addEventListener('loadedmetadata', () => {
             const audioDuration = Math.ceil(audio.duration)
             if (audioDuration > duration) {
-              setDuration(Math.min(audioDuration, 60)) // Cap at 60 seconds max
+              setDuration(Math.min(audioDuration, 600)) // Cap at 60 seconds max
               toast({
                 title: "Recording Complete",
-                description: `Video duration auto-adjusted to ${Math.min(audioDuration, 60)} seconds to match your recording`,
+                description: `Video duration auto-adjusted to ${Math.min(audioDuration, 600)} seconds to match your recording`,
                 duration: 4000
               })
             }
@@ -958,10 +958,10 @@ Product URL: ${scrapeData.product.url}`
         audio.addEventListener('loadedmetadata', () => {
           const audioDuration = Math.ceil(audio.duration)
           if (audioDuration > duration) {
-            setDuration(Math.min(audioDuration, 60)) // Cap at 60 seconds max
+            setDuration(Math.min(audioDuration, 600)) // Cap at 60 seconds max
             toast({
               title: "Audio Uploaded",
-              description: `Video duration auto-adjusted to ${Math.min(audioDuration, 60)} seconds to match your audio`,
+              description: `Video duration auto-adjusted to ${Math.min(audioDuration, 600)} seconds to match your audio`,
               duration: 4000
             })
           } else {
