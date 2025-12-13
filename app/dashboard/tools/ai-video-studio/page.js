@@ -295,9 +295,9 @@ export default function AIVideoStudioPage() {
     setGenerating(true)
     setProgress(0)
     setProgressMessage(
-      videoSource === 'ai' ? '🎨 Starting AI video generation with Fal.ai...' :
-      videoSource === 'hybrid' ? '🎬 Creating AI + Stock hybrid...' :
-      'Finding best stock videos...'
+      videoSource === 'ai' ? '🎨 Starting AI video creation...' :
+      videoSource === 'hybrid' ? '🎬 Creating AI + Stock mix...' :
+      '🔍 Finding best footage...'
     )
     setVideoResult(null)
     
