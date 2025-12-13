@@ -1,179 +1,261 @@
 <analysis>
 
-**original_problem_statement**: The user wants to build a new feature, AI Video Studio, to generate cinematic, template-driven videos. The initial plan to use Shotstack.io for AI video generation was abandoned after it was discovered Shotstack is a composition tool, not a generator. The user then directed the agent to integrate Fal.ai for true text-to-video generation, using a cost-effective cascade of models (Ovi, Pixverse, Wan, Kling), with Replicate as a fallback. The final composed video should be saved to the user's media library. The user has now requested to replace the failing Shotstack composition step with a custom FFmpeg pipeline to compile clips and integrate existing features like Text Overlay, TTS, and Custom Audio.
+**original_problem_statement**: The user wants to build an AI Video Studio to generate cinematic videos. The initial goal was to replace a failing Shotstack composition service with a custom FFmpeg pipeline. Throughout the process, the user has requested numerous enhancements, including: integrating Fal.ai for text-to-video and image-to-video generation, implementing a dialogue-only TTS mode to reduce costs, reusing UI components and logic (like captioning and stock video handling) from an existing Quick Reels Hub feature, and improving the AI's contextual understanding of scripts.
 
 **PRODUCT REQUIREMENTS:**
-1.  **AI Video Generation**: Use Fal.ai as the primary engine to generate video scenes from text prompts.
-2.  **Model Cascade**: Automatically attempt generation with the cheapest Fal.ai models first (Ovi, Pixverse) and fall back to more expensive ones (Wan, Kling) on failure. Use Replicate as a final fallback.
-3.  **Video Source Options**: The UI must allow users to choose between Stock Videos, AI-Generated Video, and a Hybrid Mix.
-4.  **Video Compilation**: Compile the generated AI clips and/or stock footage into a single video file. The current Shotstack implementation for this is failing due to credit issues.
-5.  **Feature Integration**: The final video compilation must incorporate existing platform features like Text Overlays, Google TTS, and custom audio uploads/recordings.
-6.  **Auto-Save to Library**: All successfully generated videos must be automatically saved to the user's media library.
+1.  **AI Video Generation**: Use Fal.ai for both text-to-video and image-to-video generation.
+2.  **Model Cascade**: Prioritize cheaper, working Fal.ai models (like Pixverse v5.5) before falling back to others.
+3.  **Video Source Options**: The UI must support AI-Generated Video and a Hybrid Mix (AI + Stock). The Stock Video only option was removed per the user's request.
+4.  **Hybrid Mode**: When using the Hybrid option, automatically search for stock videos based on keywords from the script and trim each stock clip to 3 seconds.
+5.  **FFmpeg Compilation**: Use a local FFmpeg pipeline to compile all video clips (AI-generated and stock).
+6.  **Dialogue-Only TTS**: Implement a Smart Dialogue Mode that extracts only dialogue (quoted text, including Bengali quotes) from a script and sends only that text to the Google TTS engine to save costs.
+7.  **Caption Sync**: Generate ASS-style captions that are perfectly synchronized with the audio being spoken (i.e., if only dialogue is spoken, only dialogue is captioned).
+8.  **Contextual AI Prompts**: The system should parse scripts to extract contextual information (e.g., night scene, dark) and add it to the AI generation prompts to produce more relevant videos.
+9.  **Feature Reuse**: The UI and backend should reuse components from the Quick Reels Hub, including voice selectors, language pickers, and the captioning system.
+10. **Image-to-Video**: Templates designated as  (like Small Business Promo Ads) should use Fal.ai's image animation APIs to generate a video from a user-uploaded image.
 
-**User's preferred language**: English
+**User's preferred language**: English, but the application must support features for other languages, specifically Bengali (Bangla) for scripts and TTS.
 
 **what currently exists?**
-- A frontend UI at  with a template gallery and a video source selector that correctly displays the new Fal.ai model options.
-- Backend logic in  that successfully integrates Fal.ai for AI video generation.
-- A model cascade is implemented, attempting to use cheaper models like Ovi and Pixverse before falling back to others, with Replicate as a final option.
-- The user-provided Fal.ai API key is configured in the environment.
-- The Shotstack integration for video *composition* still exists but is consistently failing due to a lack of credits on the sandbox account.
-- A temporary workaround is in place: if the Shotstack composition fails, the system saves the first raw AI-generated video clip to the library to prevent data loss.
+- A heavily modified backend route at  that orchestrates the entire video generation process.
+- An FFmpeg-based compilation pipeline using  that replaces the old Shotstack integration.
+- Integration with Fal.ai for both text-to-video and image-to-video generation, with an updated list of working 2025 models.
+- A Smart Dialogue Mode that uses regex to extract dialogue (including Bengali quotes) from scripts for TTS processing.
+- A Smart Scene Parser that enhances AI prompts with contextual keywords from the script.
+- A captioning system, ported from the story-reels feature, that generates and burns ASS subtitles into the final video, synchronized with the spoken audio.
+- A Hybrid Mode that searches for stock videos using script keywords and trims them to 3 seconds.
+- A frontend UI at  that incorporates voice selectors, language pickers, narration mode toggles, and caption style choices, also ported from story-reels.
+- The UI has been updated to remove the Stock Video only option, defaulting to AI Generation.
 
 **Last working item**:
-    - Last item agent was working: The user approved a plan to replace the failing Shotstack composition step with a custom FFmpeg-based pipeline. This new pipeline will be responsible for compiling AI-generated clips (from Fal.ai) and stock videos, and is intended to integrate existing features like text overlays, TTS, and custom audio. The agent's last action was to get user approval for this plan.
-    - Status: NOT STARTED
-    - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent
+    - Last item agent was working: The user reported a syntax error when trying to generate a video. The agent identified and fixed leftover/duplicate code within the  function in . After removing the bad code, clearing the cache, and restarting the server, the agent confirmed the API was working via a test call.
+    - Status: USER VERIFICATION PENDING
+    - Agent Testing Done: Y (A simple API test was successful after the fix).
+    - Which testing method agent to use? The user should be asked to try generating the video again, as the issue was a server-side syntax error that is now resolved. If it still fails, use the backend testing agent.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline (P0, Highest Priority)
-  - Issue 2: Integrate Existing Features into the New FFmpeg Pipeline (P1)
-  - Issue 3: Video generation fails to save to the library (P1)
+  - Issue 1: Final user verification of the latest bug fix (P0, Highest Priority)
   
   Issues Detail:
   - Issue 1: 
-     - **Description**: The final step of video creation, composing scenes together, is failing because the Shotstack sandbox account has run out of credits. This prevents videos from being properly compiled and saved. The user has approved replacing Shotstack with a local FFmpeg solution.
-     - **Attempted fixes**: A temporary fix was implemented to save the first raw AI video clip if Shotstack fails. This is not a long-term solution.
-     - **Next debug checklist**:
-        1. In , create a new function .
-        2. This function should take an array of video file paths (from Fal.ai and/or Pexels) as input.
-        3. Use  or shell commands to concatenate the video clips into a single output file.
-        4. Modify the main  handler to call  instead of making API calls to Shotstack for the final render.
-        5. Ensure the final compiled video URL is returned in the API response and saved to the library.
-     - **Why fix this issue and what will be achieved with the fix?**: This will remove the dependency on the credit-limited Shotstack service, creating a robust, self-hosted video composition pipeline. It is the critical unblocker for all other features.
-     - **Status**:  NOT STARTED
-     - **Is recurring issue?**: Y (The composition step is a hard failure point).
+     - **Description**: The agent fixed a server-side syntax error in  that was preventing video generation. The agent has confirmed the fix with a direct API test, but the user has not yet confirmed that the Generate video button works for them.
+     - **Attempted fixes**: The agent removed orphaned code, cleared the Next.js cache, and restarted the server.
+     - **Next debug checklist**: 
+        1. Ask the user to try generating the video again.
+        2. If it fails, check the backend logs ([ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Clip 1 progress: 0 logs
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Clip 1 generated with Pixverse v5.5: https://v3b.fal.media/files/b/0a85eefe/7B2IZfe9a2sHwzsIUgeIO...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] 📊 Generated 1 clips using: Pixverse v5.5 | Est. cost: $NaN
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Generated 1 AI clips
+[ab58053a-34d0-49e9-a55b-a4348b40efac] 🎬 Compiling 1 clips with FFmpeg...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] 🎬 Starting FFmpeg compilation...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 1: Downloading 1 video clips...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Downloading clip 1: https://v3b.fal.media/files/b/0a85eefe/7B2IZfe9a2sHwzsIUgeIO...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Downloaded clip 1/1
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Downloaded 1 clips successfully
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 2: Processing audio...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 3: Normalizing 1 clips...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] 🎨 Processing AI clip 1 (no trim)
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Normalized clip 1/1
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 4: Concatenating 1 clips...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Clips concatenated
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 5: Merging video with audio...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Video saved without audio
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 6: Processing captions...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Skipping captions (style: bold-outline, hasAudio: false)
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 7: Saving video...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Video saved to: /ai-video-studio/ab58053a-34d0-49e9-a55b-a4348b40efac.mp4
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Step 7: Saving to library...
+Connected to MongoDB
+[ab58053a-34d0-49e9-a55b-a4348b40efac] ✅ Video auto-saved to library
+[ab58053a-34d0-49e9-a55b-a4348b40efac] Cleaning up...
+[ab58053a-34d0-49e9-a55b-a4348b40efac] 🎉 FFmpeg compilation complete!
+ POST /api/ai-video-studio/generate 200 in 51s (compile: 559ms, render: 50s)
+yarn run v1.22.22
+$ bash setup-dependencies.sh
+🔧 Checking system dependencies...
+📦 ffmpeg not found. Installing...) for new errors.
+        3. If no obvious errors, use the backend testing agent to run a full generation flow and analyze the results.
+     - **Why fix this issue and what will be achieved with the fix?**: This resolves the immediate blocker preventing the user from using the tool.
+     - **Status**:  USER VERIFICATION PENDING
+     - **Is recurring issue?**: Y (Syntax errors from complex edits have occurred before).
      - **Should Test frontend/backend/both after fix?**: backend
      - **Blocked on other issue**: None
 
-  - Issue 2: 
-     - **Description**: The user has repeatedly noted that existing features like TTS, custom audio recording/upload, and advanced text overlays are not present in the AI Video Studio.
-     - **Attempted fixes**: None. This was planned for a later stage.
-     - **Next debug checklist**:
-        1. Once the FFmpeg pipeline (Issue 1) is functional for basic video concatenation, extend it.
-        2. Add logic to overlay text from the user's script onto the video using FFmpeg's  filter.
-        3. Add logic to accept a TTS audio file or custom audio file URL and merge it as the audio track for the final video using FFmpeg.
-     - **Why fix this issue and what will be achieved with the fix?**: This will bring the AI Video Studio to feature parity with other tools on the platform and fulfill a core user requirement.
-     - **Status**:  NOT STARTED
-     - **Is recurring issue?**: N
-     - **Should Test frontend/backend/both after fix?**: both
-     - **Blocked on other issue**: Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline
-
-  - Issue 3:
-     - **Description**: The primary reason videos are not saving to the library is the Shotstack composition failure. The current workaround only saves the *first* generated clip, not the final composed video.
-     - **Attempted fixes**: Implemented a temporary fallback to save the first raw AI clip.
-     - **Next debug checklist**: This issue will be resolved by fixing Issue 1. The FFmpeg pipeline must output a final video URL, which should then be passed to the existing  function.
-     - **Why fix this issue and what will be achieved with the fix?**: The core functionality of generating and saving a complete video will be restored.
-     - **Status**: IN PROGRESS
-     - **Is recurring issue?**: Y
-     - **Should Test frontend/backend/both after fix?**: backend
-     - **Blocked on other issue**: Issue 1: Replace Shotstack Composition with an FFmpeg Pipeline
-
 **In progress Task List**:
-  - Task 1:  Implement FFmpeg-based Video Compilation (P0)
-     - **Where to resume**: Start by writing the FFmpeg logic inside .
-     - **What will be achieved with this?**: A self-reliant video compilation engine that is not dependent on third-party credits.
-     - **Status**:  NOT STARTED
-     - **Should Test frontend/backend/both after fix?**: backend
-     - **Blocked on something**: None. The user has approved this plan.
+  - None.
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **Task 1: Implement Remaining Templates (P1):** Complex templates like Auto Reaction Video Generator and Podcast Clip Auto-Generator are still pending.
-    Future Tasks:
-    - **Task 2: Build Credits/Warning UI (P2):** A UI to warn about API costs or track generation credits.
-    - **Task 3: Long-Form Video Generation (P2):** Feature to generate longer videos by chaining shorter clips.
-    - **Task 4: Switch to Production Keys (P2):** The application will eventually need production Shotstack/Fal.ai keys.
+    - **Task 1: Implement AI Video Preview (P1):** The user requested a feature to render a preview of the AI-generated video *before* the final, full-quality generation and compilation. This has not been started. (File:  for UI,  for a potential new preview endpoint).
 
 **Completed work in this session**
-- **AI Engine Pivot**: Replaced the entire AI generation backend, moving from a flawed Shotstack  approach to a true  implementation using **Fal.ai**.
-- **Fal.ai Integration**: Successfully integrated the  npm package and the user-provided API key.
-- **Cost-Optimized Model Cascade**: Implemented a backend function that intelligently tries multiple Fal.ai models in order of cost (Ovi, Pixverse, Wan, Minimax, Kling) to ensure generation is both successful and cost-effective.
-- **Replicate Fallback**: Configured the system to use Replicate as a last-resort AI video generation engine if all Fal.ai models fail.
-- **Frontend UI Update**: Updated the AI Video Studio frontend to accurately reflect the new Fal.ai models and their pricing, providing transparency to the user.
-- **Fixed Progress Messages**: Corrected the  notifications on the frontend to show accurate progress for Fal.ai generation, removing confusing FLUX model messages.
-- **Fixed Text Positioning**: Standardized text overlay positioning to the bottom of the screen for better readability across all video types.
-- **Implemented Generation Fallback**: Created a temporary but critical fix to save the first raw AI-generated video when the Shotstack composition step fails, preventing the loss of generated assets.
+- **FFmpeg Pipeline Implementation**: Replaced the failing third-party Shotstack service with a robust, local FFmpeg pipeline for video compilation.
+- **Advanced Feature Integration**: Ported and integrated several key features from the Quick Reels Hub:
+  - Google Cloud TTS with voice and language selection.
+  - ASS-style caption generation and burning.
+  - Keyword-based stock video search.
+- **Smart Dialogue & Narration**: Created a Dialogue-Only TTS mode that extracts quoted dialogue (including Bengali) to significantly reduce TTS API costs and syncs captions to the spoken audio.
+- **Fal.ai Integration (T2V & I2V)**:
+  - Integrated Fal.ai for both text-to-video and image-to-video generation.
+  - Researched and updated the model list with current, working, and cost-effective Fal.ai models for 2025.
+  - Fixed API key and response parsing issues.
+- **Hybrid Generation Mode**: Implemented a Hybrid mode that combines AI-generated clips with 3-second, keyword-searched stock video clips.
+- **Context-Aware AI**: Implemented a Smart Scene Parser to extract contextual keywords (like night, dark) from the script to improve the relevance of AI-generated videos.
+- **UI Overhaul**:
+  - Removed the Stock Video Only option as requested.
+  - Added UI controls for narration mode, language, voice, and caption style.
+  - Improved progress indicators during video generation to provide better user feedback on long-running jobs.
+- **Numerous Bug Fixes**: Resolved a wide range of issues including FFmpeg filter errors, JSX syntax errors, API response handling, incorrect TTS language selection, and Next.js caching problems.
 
 **Earlier issues found/mentioned but not fixed**
-   - Issue 1: Integration of existing features (TTS, Custom Audio, Captions). This was raised by the user and is now the main goal of the approved FFmpeg plan.
+   - **Issue 1: AI Video Preview**: The user requested a feature to preview the generated video before committing to a full render. This task was acknowledged but not implemented.
 
 **Known issue recurrence from previous fork**
-  - **AI Scene Generation**: The core task of generating AI video scenes has been a recurring problem. The implementation has evolved through multiple failed stages:
-    1.  Replicate (poor quality).
-    2.  Feature removal (agent mistake).
-    3.  Shotstack  (static images, not real video).
-    4.  Fal.ai (currently working, but compilation is broken).
-    This history highlights the importance of getting the new FFmpeg compilation right.
+  - Not applicable.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **AI Video Generation**: Fal.ai (primary, with model cascade), Replicate (fallback)
-- **Video Composition**: Shotstack.io (currently failing, to be replaced by FFmpeg)
+- **Video Processing**: FFmpeg, fluent-ffmpeg
+- **AI Generation**: Fal.ai (Text-to-Video, Image-to-Video), Replicate (as a fallback)
+- **Audio**: Google Cloud Text-to-Speech API
 - **Stock Media**: Pexels API
 - **Framework**: Next.js (React)
-- **Database**: MongoDB
-- **Local Tooling**: FFmpeg (installed, to be implemented)
+- **Backend Logic**: Node.js streams, asynchronous processing with Promises.
 
 **key DB schema**
-  - **systemPrompts**: 
+  - **systemPrompts**: Not directly modified, but templates from  act as a similar configuration source.
+  - **library**:  - Where final videos are saved.
 
 **changes in tech stack**
-  - **Generation Engine**: Shifted from Shotstack's pseudo-AI () to a true AI text-to-video service, **Fal.ai**.
-  - **Composition Engine**: Approved plan to migrate from cloud-based **Shotstack API** to a local **FFmpeg** process for compiling video clips.
+  - **Video Composition**: Migrated from cloud-based **Shotstack API** to a local **FFmpeg** process.
 
 **All files of reference**
-- : The central backend file. It contains the logic for Fal.ai, Replicate, and the failing Shotstack calls. This is where the FFmpeg compilation logic must be implemented.
-- : The main frontend component, which has been updated to reflect the Fal.ai integration.
+- : This is the most critical file. It has grown significantly and now contains almost all backend logic for the AI Video Studio.
+- : The primary frontend file, heavily modified to include new state management and UI components for the advanced features.
+- : This file defines the behavior of different video templates (e.g.,  mode).
+
+**Areas that need refactoring**:
+- The  file has become a mega-route handling many different responsibilities (T2V, I2V, TTS, FFmpeg, captions). It could be broken down into smaller, more manageable helper modules/services for better maintainability.
+
+**key api endpoints**
+- : The main endpoint for creating videos.
+- : Used to pre-process user prompts.
+- : Reused for finding stock footage in Hybrid mode.
 
 **Critical Info for New Agent**
-- **Your IMMEDIATE and HIGHEST priority is to implement the FFmpeg compilation pipeline.** The user has explicitly approved this plan. This will replace the failing Shotstack composition step.
-- The goal of the FFmpeg pipeline is twofold: 1) Compile video clips from Fal.ai/Pexels. 2) Integrate existing features like Text Overlays, TTS, and Custom Audio.
-- The Fal.ai integration for *generating* clips is working correctly. Do not change the  function. Your task is to work on what happens *after* the clips are generated.
-- The Shotstack sandbox account is out of credits. This is why you are building the FFmpeg solution. Do not waste time trying to debug Shotstack.
-- The user is aware of the step-by-step process and is technically savvy. Focus on executing the approved plan.
+- **Wait for User Verification:** Your first action should be to ask the user to test the video generation again. The last-known bug was a server-side syntax error that the previous agent fixed and verified with an API test.
+- **Complex Main Route:** Be aware that  is very large and complex. Changes there are high-risk. Read the surrounding code carefully before editing.
+- **Next Feature is Preview:** The user's most recent unimplemented feature request is for a video preview before the final render. This should be your next major task after the current state is confirmed stable.
+- **Dialogue/Caption Logic:** The logic for dialogue extraction and caption syncing is intricate. When debugging TTS or caption issues, check the  function and ensure the  variable is being correctly passed to the  function.
 
 **documents created in this job**
   - None.
 
 **Last 10 User Messages and any pending user messages**
- - **User:** Reported that generated videos were static images, text was random, and key features (TTS, etc.) were missing. (PARTIALLY ADDRESSED)
- - **User:** Prioritized fixing the AI video motion first. (ADDRESSED by moving to Fal.ai)
- - **User:** Clarified that Shotstack is not a generation model and instructed to use **Fal.ai** instead, providing an API key. (ADDRESSED)
- - **User:** Requested to use the most cost-effective Fal.ai models first. (ADDRESSED)
- - **User:** Asked to add even cheaper Fal.ai models like Ovi and Pixverse. (ADDRESSED)
- - **User:** Pointed out that the UI progress messages were still showing FLUX model from the old implementation. (ADDRESSED)
- - **User:** Reported that newly generated videos were not saving to the Media Library. (PARTIALLY ADDRESSED with a workaround, root cause identified)
- - **User:** Proposed using FFmpeg to compile clips and integrate features, instead of coding a solution from scratch. (AWAITING AGENT PLAN)
- - **Agent:** Provided a detailed plan to use FFmpeg. (PLAN SENT)
- - **User:** Approved the FFmpeg plan and asked for a session summary before forking. (PENDING - This summary fulfills the request).
+- **User:** Reported a stuck generation. (ADDRESSED - It was a long processing time; UI progress indicators were improved).
+- **User:** Requested to remove the Stock Only option, enhance Hybrid mode with 3-second trimming/keyword search, and add a video preview. (PARTIALLY ADDRESSED - Hybrid mode was implemented, Stock Only was removed, preview is pending).
+- **User:** Reported a JSX syntax error on the dashboard. (ADDRESSED - Agent fixed the UI code and cleared cache).
+- **User:** Reported that the Small Business Promo template (image-based) was not using the uploaded image for AI generation. (ADDRESSED - Agent implemented image-to-video with Fal.ai).
+- **User:** Reported an error during image-to-video generation. (ADDRESSED - Agent fixed API response parsing for Fal.ai image-to-video).
+- **User:** Reported that Bengali TTS was speaking in English and reading the whole script, not just dialogue. (ADDRESSED - Agent fixed the TTS language override logic and improved the dialogue extraction regex for Bengali).
+- **User:** Reported another syntax error after the last fix. (ADDRESSED - Agent found and removed more orphaned code in ).
+- **User:** Asked for the captions to be synced with the spoken audio (dialogue-only). (ADDRESSED - Captions are now generated from the same text sent to TTS).
+- **User:** Reported the Bengali dialogue detection wasn't working, causing very long video generation times. (ADDRESSED - Regex was improved, and UI progress was made more explicit).
+- **User:** Reported a final syntax error after the Bengali dialogue fix. (ADDRESSED - The last agent action was to fix this. It is now pending user verification).
 
 **Project Health Check:**
-- **Broken**: The primary video composition pipeline (Shotstack) is non-functional due to exhausted credits. The auto-save feature is only partially working as a result.
+- **Broken**: No core features are confirmed broken, but the last fix is awaiting user validation. The system is complex and has been patched multiple times, so it may be fragile.
 - **Mocked**: None.
 
 **3rd Party Integrations**
-- **Fal.ai**: Primary AI text-to-video generation service. Requires the User API Key provided in the chat history ().
+- **Fal.ai**: Primary service for AI text-to-video and image-to-video. Requires a User API Key from .
 - **Replicate**: Fallback AI video generation service. Requires a User API Key from .
-- **Shotstack.io**: Used for video composition but is currently non-functional due to credit limits. To be replaced by FFmpeg. Requires a User API Key from .
-- **Pexels**: Used to fetch stock video footage. Requires a User API Key from .
+- **Google Cloud TTS**: Used for text-to-speech. Credentials seem to be configured in the environment.
+- **Pexels**: Used to fetch stock video footage for Hybrid mode. Requires a User API Key from .
 
 **Testing status**
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: None.
-  - Known regressions: The final video composition and saving functionality is broken.
+  - Test files created: A temporary test script was created to validate the Fal.ai API key access.
+  - Known regressions: None currently known, but the system's complexity has led to several regressions that were subsequently fixed during the session.
 
 **Credentials to test flow:**
-- **Fal.ai API Key**: 
-- **Shotstack API Key**: Located in , but the associated account is out of credits.
+- **Fal.ai API Key**: Located in  ().
+- **Pexels API Key**: Located in  ().
 - **Replicate API Token**: Located in .
 
 **What agent forgot to execute**
-- The integration of core features like TTS, custom audio, and advanced text overlays has not been implemented yet. The user mentioned this, and it is now the explicit goal of the newly approved FFmpeg task. It was not forgotten but rather deferred, and is now the highest priority after basic compilation.
+- **Video Preview Feature**: The user requested a feature to preview the AI-generated video before the final render. This was acknowledged but has not been implemented and is the most significant pending task.
 
 </analysis>
