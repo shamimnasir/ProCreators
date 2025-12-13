@@ -1446,21 +1446,69 @@ Product URL: ${scrapeData.product.url}`
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Target Duration: {duration} seconds</Label>
-            <Slider
-              value={[duration]}
-              onValueChange={(value) => setDuration(value[0])}
-              min={10}
-              max={60}
-              step={5}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>10s</span>
-              <span>60s</span>
+          {/* Duration Mode Toggle */}
+          <div className="space-y-3">
+            <Label>Video Length</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={duration <= 60 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setDuration(30)}
+                className="justify-start"
+              >
+                📱 Short Form (10s-60s)
+              </Button>
+              <Button
+                variant={duration > 60 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setDuration(120)}
+                className="justify-start"
+              >
+                🎬 Long Form (2m-10m)
+              </Button>
             </div>
           </div>
+          
+          {/* Duration Slider - Short Form */}
+          {duration <= 60 && (
+            <div className="space-y-2">
+              <Label>Duration: {duration} seconds</Label>
+              <Slider
+                value={[duration]}
+                onValueChange={(value) => setDuration(value[0])}
+                min={10}
+                max={60}
+                step={5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>10s</span>
+                <span>60s</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Duration Selector - Long Form */}
+          {duration > 60 && (
+            <div className="space-y-2">
+              <Label>Duration: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')} minutes</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {[120, 180, 240, 360, 600].map((d) => (
+                  <Button
+                    key={d}
+                    variant={duration === d ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setDuration(d)}
+                  >
+                    {Math.floor(d / 60)}:{String(d % 60).padStart(2, '0')}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Long-form videos use multiple stock clips stitched together
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
