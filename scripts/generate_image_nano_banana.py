@@ -77,7 +77,7 @@ if __name__ == "__main__":
         
         input_data = json.loads(sys.argv[1])
         prompt = input_data.get('prompt')
-        model = input_data.get('model', 'gemini-3-pro-image-preview')
+        model = input_data.get('model', 'models/nano-banana-pro-preview')
         
         if not prompt:
             print(json.dumps({
