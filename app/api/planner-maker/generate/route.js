@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
@@ -14,7 +14,11 @@ import {
   getCurrentYear
 } from '@/lib/pdf-design'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+// Use OpenAI SDK with Emergent's OpenAI-compatible endpoint
+const openai = new OpenAI({
+  apiKey: process.env.EMERGENT_LLM_KEY,
+  baseURL: 'https://api.emergentai.io/v1',
+})
 
 // Planner types with specific configurations
 const PLANNER_CONFIGS = {
