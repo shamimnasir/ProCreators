@@ -86,16 +86,18 @@ const navigation = [
     ]
   },
   {
-    name: 'Viral Tools',
+    name: '🚀 Viral Post Creation',
+    href: '/dashboard/viral-posts',
     icon: Sparkles,
+    badge: '',
     children: [
-      { name: 'Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
-      { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
-      { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
-      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
-      { name: 'Tutorials', href: '/dashboard/tools/tutorials', icon: GraduationCap },
-      { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
-      { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
+      { name: '🧵 Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
+      { name: '💬 Quotes', href: '/dashboard/tools/quotes', icon: Quote },
+      { name: '🎠 Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
+      { name: '📰 News Generator', href: '/dashboard/tools/news', icon: Newspaper },
+      { name: '📚 Tutorials', href: '/dashboard/tools/tutorials', icon: GraduationCap },
+      { name: '📋 Lists', href: '/dashboard/tools/lists', icon: List },
+      { name: '🖼️ Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
     ]
   },
   {
