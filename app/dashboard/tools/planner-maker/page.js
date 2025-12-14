@@ -54,20 +54,39 @@ export default function PlannerMakerPage() {
 
   const handleGenerate = async () => {
     setGenerating(true)
+    setGeneratedPDF(null)
     try {
-      // Simulate generation - in real implementation, call API
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      toast({
-        title: 'Planner Generated!',
-        description: `Your ${PLANNER_TYPES.find(p => p.id === plannerType)?.name} is ready to download.`
+      const response = await fetch('/api/planner-maker/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plannerType,
+          designStyle,
+          paperSize,
+          pageCount,
+          customTitle: customTitle || undefined,
+        }),
       })
       
-      setGeneratedPDF('/sample-planner.pdf')
+      const data = await response.json()
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to generate planner')
+      }
+      
+      toast({
+        title: '🎉 Planner Generated!',
+        description: `"${data.title}" with ${data.pageCount} pages is ready to download.`
+      })
+      
+      setGeneratedPDF(data.downloadUrl)
     } catch (error) {
+      console.error('Generation error:', error)
       toast({
         title: 'Generation Failed',
-        description: error.message,
+        description: error.message || 'Something went wrong',
         variant: 'destructive'
       })
     } finally {
