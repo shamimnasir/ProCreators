@@ -31,9 +31,10 @@ const PLANNER_CONFIGS = {
   gratitude: { name: 'Gratitude Planner', sections: ['Daily Gratitude', 'Reflections', 'Affirmations'] },
 }
 
-// Generate planner content with AI using OpenAI-compatible endpoint via Emergent
+// Generate planner content with AI using Google Gemini
 async function generatePlannerContent(plannerType, customTitle, pageCount, customInstructions) {
   try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const config = PLANNER_CONFIGS[plannerType] || PLANNER_CONFIGS.weekly
     
     const prompt = `Create content for a ${config.name} with ${pageCount} pages.
@@ -58,22 +59,12 @@ Format as JSON:
 
 IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are a creative assistant that generates planner content. Always respond with valid JSON only, no markdown formatting.' 
-        },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.7,
-    })
-    
-    let text = completion.choices[0].message.content.trim()
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    let text = response.text().trim()
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     
-    console.log('AI generated content successfully')
+    console.log('AI generated content successfully via Gemini')
     return JSON.parse(text)
   } catch (error) {
     console.error('AI content generation error:', error.message || error)
