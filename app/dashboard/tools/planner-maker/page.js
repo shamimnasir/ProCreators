@@ -245,14 +245,31 @@ export default function PlannerMakerPage() {
                     </p>
                   </div>
                 </div>
-                <Button size="lg" onClick={handleGenerate} disabled={generating}>
-                  {generating ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Planner</>
+                <div className="flex gap-2">
+                  {generatedPDF && (
+                    <a href={generatedPDF} download target="_blank" rel="noopener noreferrer">
+                      <Button size="lg" variant="outline" className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100">
+                        <Download className="mr-2 h-4 w-4" /> Download PDF
+                      </Button>
+                    </a>
                   )}
-                </Button>
+                  <Button size="lg" onClick={handleGenerate} disabled={generating}>
+                    {generating ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Planner</>
+                    )}
+                  </Button>
+                </div>
               </div>
+              {generating && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating your planner with AI... This may take 15-30 seconds.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
