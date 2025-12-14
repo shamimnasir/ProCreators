@@ -582,23 +582,111 @@ export default function AIVideoStudioPage() {
   // ==================== GALLERY VIEW ====================
   if (view === 'gallery') {
     return (
-      <div className="container mx-auto py-6 space-y-6 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <span className="text-4xl">🎬</span>
-              AI Video Studio
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Choose a template to create stunning AI videos in minutes
-            </p>
+      <div className="space-y-6">
+        {/* Hero Header */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-8 text-white">
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
+                <Film className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">AI Video Studio</h1>
+                <p className="text-white/80">Professional AI-Powered Video Creation</p>
+              </div>
+              <Badge className="ml-auto bg-white/20 text-white border-0">Pro</Badge>
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                <Wand2 className="h-5 w-5 mb-2" />
+                <p className="text-2xl font-bold">AI Engine</p>
+                <p className="text-xs text-white/70">Cinema Quality</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                <Clock className="h-5 w-5 mb-2" />
+                <p className="text-2xl font-bold">5s - 2m</p>
+                <p className="text-xs text-white/70">Video Duration</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                <Grid className="h-5 w-5 mb-2" />
+                <p className="text-2xl font-bold">{AI_VIDEO_TEMPLATES.length}+</p>
+                <p className="text-xs text-white/70">Templates</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                <Zap className="h-5 w-5 mb-2" />
+                <p className="text-2xl font-bold">4K</p>
+                <p className="text-xs text-white/70">Max Resolution</p>
+              </div>
+            </div>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-2">
-            <Sparkles className="h-4 w-4 mr-2" />
-            {AI_VIDEO_TEMPLATES.length} Templates
-          </Badge>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
         </div>
+
+        {/* Custom Creation CTA - Highlighted at top */}
+        <Card 
+          className="border-2 border-primary/50 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
+          onClick={() => handleSelectTemplate({
+            id: 'custom',
+            name: 'Custom Creation',
+            shortName: 'Custom',
+            description: 'Start from scratch with full control',
+            icon: '✨',
+            category: 'custom',
+            color: 'from-gray-500 to-gray-600',
+            perfectFor: ['Advanced users', 'Custom projects'],
+            defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
+            inputType: 'prompt',
+            inputPlaceholder: 'Describe your video in detail...'
+          })}
+        >
+          <CardContent className="py-5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl text-white">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-violet-900 dark:text-violet-100">
+                    Create Custom Video from Scratch
+                  </h3>
+                  <p className="text-sm text-violet-700 dark:text-violet-300">
+                    Full control • Any style • Your imagination
+                  </p>
+                </div>
+              </div>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700">
+                <Play className="h-4 w-4 mr-2" />
+                Start Creating
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Platform Badges */}
+        <Card className="border-dashed bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-indigo-800 dark:text-indigo-200">
+                  Perfect for:
+                </span>
+                <div className="flex gap-2 flex-wrap">
+                  {['TikTok', 'Instagram', 'YouTube', 'Ads', 'E-commerce'].map((platform) => (
+                    <Badge key={platform} variant="secondary" className="bg-white dark:bg-indigo-900">
+                      {platform}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Search */}
         <div className="relative max-w-md">
@@ -613,20 +701,19 @@ export default function AIVideoStudioPage() {
 
         {/* Category Tabs */}
         {!searchQuery && (
-          <div className="flex gap-2 flex-wrap">
-            {TEMPLATE_CATEGORIES.map((cat) => (
-              <Button
-                key={cat.id}
-                variant={activeCategory === cat.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setActiveCategory(cat.id)}
-                className="gap-2"
-              >
-                <span>{cat.icon}</span>
-                {cat.name}
-              </Button>
-            ))}
-          </div>
+          <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+            <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <TabsTrigger 
+                  key={cat.id}
+                  value={cat.id}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  {cat.icon} {cat.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         )}
 
         {/* Template Grid */}
@@ -634,7 +721,7 @@ export default function AIVideoStudioPage() {
           {displayTemplates.map((template) => (
             <Card 
               key={template.id}
-              className={`cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] bg-gradient-to-br ${template.color} text-white overflow-hidden`}
+              className={`cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 bg-gradient-to-br ${template.color} text-white overflow-hidden border-0`}
               onClick={() => handleSelectTemplate(template)}
             >
               <CardHeader className="pb-2">
@@ -642,10 +729,10 @@ export default function AIVideoStudioPage() {
                   <span className="text-3xl">{template.icon}</span>
                   <div className="flex gap-1">
                     {template.isPopular && (
-                      <Badge className="bg-white/20 text-white text-xs">🔥 Popular</Badge>
+                      <Badge className="bg-white/20 text-white text-xs border-0">🔥 Popular</Badge>
                     )}
                     {template.isNew && (
-                      <Badge className="bg-white/20 text-white text-xs">✨ New</Badge>
+                      <Badge className="bg-white/20 text-white text-xs border-0">✨ New</Badge>
                     )}
                   </div>
                 </div>
@@ -685,29 +772,44 @@ export default function AIVideoStudioPage() {
           </div>
         )}
 
-        {/* Custom Creation Card */}
-        <Card className="border-dashed border-2 hover:border-primary/50 cursor-pointer transition-all"
-          onClick={() => handleSelectTemplate({
-            id: 'custom',
-            name: 'Custom Creation',
-            shortName: 'Custom',
-            description: 'Start from scratch with full control',
-            icon: '✨',
-            category: 'custom',
-            color: 'from-gray-500 to-gray-600',
-            perfectFor: ['Advanced users', 'Custom projects'],
-            defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
-            inputType: 'prompt',
-            inputPlaceholder: 'Describe your video in detail...'
-          })}
-        >
-          <CardContent className="flex items-center justify-center py-8 gap-4">
-            <Sparkles className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="font-semibold">Can&apos;t find what you need?</p>
-              <p className="text-sm text-muted-foreground">Create a custom video from scratch</p>
+        {/* Pro Tips Section */}
+        <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <Star className="h-5 w-5" />
+              Pro Tips for AI Video Creation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                  <span className="text-lg">1️⃣</span>
+                </div>
+                <div>
+                  <p className="font-medium text-amber-900 dark:text-amber-100">Detailed Prompts</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">Describe camera angles, lighting, mood, and style</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                  <span className="text-lg">2️⃣</span>
+                </div>
+                <div>
+                  <p className="font-medium text-amber-900 dark:text-amber-100">Use Templates</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">Start with templates for faster, optimized results</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                  <span className="text-lg">3️⃣</span>
+                </div>
+                <div>
+                  <p className="font-medium text-amber-900 dark:text-amber-100">Iterate & Refine</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">Generate variations and pick the best one</p>
+                </div>
+              </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </CardContent>
         </Card>
       </div>
