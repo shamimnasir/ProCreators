@@ -322,12 +322,25 @@ export default function PlannerMakerPage() {
                 <Textarea 
                   placeholder="Describe any specific customizations you want... (e.g., add inspirational quotes, include meal prep section, etc.)"
                   className="min-h-[100px]"
+                  value={customInstructions}
+                  onChange={(e) => setCustomInstructions(e.target.value)}
                 />
               </div>
 
+              {generatedPDF && (
+                <div className="p-4 bg-green-50 rounded-lg flex items-center justify-between">
+                  <p className="text-green-700">Your planner is ready!</p>
+                  <a href={generatedPDF} download target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="bg-green-100 border-green-300 text-green-700">
+                      <Download className="mr-2 h-4 w-4" /> Download PDF
+                    </Button>
+                  </a>
+                </div>
+              )}
+
               <Button size="lg" className="w-full" onClick={handleGenerate} disabled={generating}>
                 {generating ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating (15-30 sec)...</>
                 ) : (
                   <><Sparkles className="mr-2 h-4 w-4" /> Generate Custom Planner</>
                 )}
