@@ -9,10 +9,13 @@ export default function DashboardLayout({ children }) {
   
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
+      {/* Sidebar - hidden on mobile, shown on md+ */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
+        <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6">
           {children}
         </main>
       </div>
