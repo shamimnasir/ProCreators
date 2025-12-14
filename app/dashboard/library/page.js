@@ -197,6 +197,7 @@ export default function LibraryPage() {
   // Render item card based on view mode
   const renderItem = (item, isGridView = true) => {
     const isFeed = !isGridView
+    const isPDF = item.filePath && item.filePath.endsWith('.pdf')
     
     return (
       <Card key={item.id} className={isFeed ? 'max-w-lg mx-auto' : ''}>
@@ -230,6 +231,16 @@ export default function LibraryPage() {
               alt={item.title}
               className="w-full h-full object-cover rounded-t-lg"
             />
+          </div>
+        )}
+        
+        {/* Document/PDF Preview */}
+        {isPDF && (
+          <div className={`relative ${isFeed ? 'aspect-square' : 'aspect-video'} bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 rounded-t-lg flex items-center justify-center`}>
+            <div className="text-center">
+              <div className="text-6xl mb-2">📄</div>
+              <span className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/50 px-2 py-1 rounded">PDF</span>
+            </div>
           </div>
         )}
         
