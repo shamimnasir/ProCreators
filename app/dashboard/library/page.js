@@ -368,6 +368,9 @@ export default function LibraryPage() {
           <TabsTrigger value="videos">
             Videos ({items.filter(i => i.category === 'video').length})
           </TabsTrigger>
+          <TabsTrigger value="documents">
+            Documents ({items.filter(i => i.category === 'document' || (i.filePath && i.filePath.endsWith('.pdf'))).length})
+          </TabsTrigger>
           <TabsTrigger value="images">
             Images ({items.filter(i => i.category === 'image').length})
           </TabsTrigger>
@@ -376,7 +379,7 @@ export default function LibraryPage() {
           </TabsTrigger>
         </TabsList>
         
-        {['all', 'videos', 'images', 'text'].map(tab => (
+        {['all', 'videos', 'documents', 'images', 'text'].map(tab => (
           <TabsContent key={tab} value={tab} className="mt-6">
             {loading ? (
               <div className="flex items-center justify-center py-16">
