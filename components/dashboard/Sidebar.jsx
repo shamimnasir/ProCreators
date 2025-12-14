@@ -32,7 +32,23 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Type
+  Type,
+  FileText,
+  Palette,
+  Briefcase,
+  GamepadIcon,
+  Camera,
+  PenTool,
+  Target,
+  Users,
+  TrendingUp,
+  Lightbulb,
+  Calendar,
+  ShoppingBag,
+  Smile,
+  Heart,
+  Star,
+  Award
 } from 'lucide-react'
 
 const navigation = [
@@ -41,21 +57,8 @@ const navigation = [
     name: 'AI Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
-    badge: 'New',
+    badge: 'Pro',
     children: []
-  },
-  {
-    name: 'Viral Tools',
-    icon: Sparkles,
-    children: [
-      { name: 'Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
-      { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
-      { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
-      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
-      { name: 'Tutorials', href: '/dashboard/tools/tutorials', icon: GraduationCap },
-      { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
-      { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
-    ]
   },
   {
     name: 'Quick Reels Hub',
@@ -83,13 +86,99 @@ const navigation = [
     ]
   },
   {
-    name: 'Digital Products',
-    icon: BookOpen,
+    name: 'Viral Tools',
+    icon: Sparkles,
     children: [
-      { name: 'Ebook Maker', href: '/dashboard/tools/ebook-maker', icon: BookText },
-      { name: 'Storybook Maker', href: '/dashboard/tools/storybook-maker', icon: BookOpen },
-      { name: 'Slides Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
-      { name: 'Learning Cards', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
+      { name: 'Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
+      { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
+      { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
+      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
+      { name: 'Tutorials', href: '/dashboard/tools/tutorials', icon: GraduationCap },
+      { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
+      { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
+    ]
+  },
+  {
+    name: '💰 Digital Products',
+    href: '/dashboard/digital-products',
+    icon: ShoppingBag,
+    badge: 'New',
+    children: [
+      { name: '📅 Planner Maker', href: '/dashboard/tools/planner-maker', icon: Calendar },
+      { name: '📝 Worksheet Generator', href: '/dashboard/tools/worksheet-maker', icon: FileText },
+      { name: '🎨 Coloring Book Creator', href: '/dashboard/tools/coloring-book', icon: Palette },
+      { name: '📓 Journal Maker', href: '/dashboard/tools/journal-maker', icon: BookText },
+      { name: '✅ Checklist Maker', href: '/dashboard/tools/checklist-maker', icon: List },
+      { name: '📚 Ebook Creator', href: '/dashboard/tools/ebook-maker', icon: BookOpen },
+      { name: '📊 Notion Templates', href: '/dashboard/tools/notion-templates', icon: Presentation },
+      { name: '📱 Social Templates', href: '/dashboard/tools/social-templates', icon: ImageIcon },
+      { name: '📕 Storybook Maker', href: '/dashboard/tools/storybook-maker', icon: BookOpen },
+      { name: '🎓 Learning Cards', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
+      { name: '📊 Slides Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
+    ]
+  },
+  {
+    name: '🖼️ Image Generation',
+    icon: Camera,
+    badge: 'New',
+    children: [
+      { name: '📸 AI Product Photos', href: '/dashboard/tools/ai-product-photos', icon: Camera },
+      { name: '👤 AI Headshot Generator', href: '/dashboard/tools/ai-headshots', icon: User },
+      { name: '🎨 Logo Generator', href: '/dashboard/tools/logo-generator', icon: PenTool },
+      { name: '🖼️ Background Remover', href: '/dashboard/tools/bg-remover', icon: ImageIcon },
+      { name: '🎭 AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: Smile },
+      { name: '📐 Image Editor', href: '/dashboard/tools/image-editor', icon: Edit3 },
+    ]
+  },
+  {
+    name: '👨‍🎓 Students & Teachers',
+    icon: GraduationCap,
+    badge: 'New',
+    children: [
+      { name: '📊 Presentation Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
+      { name: '❓ Quiz Generator', href: '/dashboard/tools/quiz-maker', icon: Lightbulb },
+      { name: '🎴 Flashcard Creator', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
+      { name: '📝 Study Notes Generator', href: '/dashboard/tools/study-notes', icon: FileText },
+      { name: '📖 Research Summarizer', href: '/dashboard/tools/research-summarizer', icon: BookOpen },
+      { name: '✍️ Essay Helper', href: '/dashboard/tools/essay-helper', icon: Edit3 },
+    ]
+  },
+  {
+    name: '💼 Jobs & Career',
+    icon: Briefcase,
+    badge: 'New',
+    children: [
+      { name: '📄 Resume Builder', href: '/dashboard/tools/resume-builder', icon: FileText },
+      { name: '✉️ Cover Letter Generator', href: '/dashboard/tools/cover-letter', icon: MessageSquare },
+      { name: '💼 LinkedIn Post Writer', href: '/dashboard/tools/linkedin-posts', icon: Users },
+      { name: '🎤 Interview Prep Coach', href: '/dashboard/tools/interview-prep', icon: Mic },
+      { name: '📧 Professional Email Writer', href: '/dashboard/tools/email-writer', icon: MessageSquare },
+    ]
+  },
+  {
+    name: '🏢 Business with AI',
+    icon: TrendingUp,
+    badge: 'New',
+    children: [
+      { name: '📢 Ad Copy Generator', href: '/dashboard/tools/ad-copy', icon: Target },
+      { name: '📅 Social Media Calendar', href: '/dashboard/tools/social-calendar', icon: Calendar },
+      { name: '📧 Email Campaign Writer', href: '/dashboard/tools/email-campaigns', icon: MessageSquare },
+      { name: '⭐ Review Responder', href: '/dashboard/tools/review-responder', icon: Star },
+      { name: '📋 Business Plan Generator', href: '/dashboard/tools/business-plan', icon: FileText },
+      { name: '🎯 Marketing Strategy', href: '/dashboard/tools/marketing-strategy', icon: Target },
+    ]
+  },
+  {
+    name: '🎮 Fun & Recreation',
+    icon: GamepadIcon,
+    badge: 'New',
+    children: [
+      { name: '😂 Meme Generator', href: '/dashboard/tools/meme-generator', icon: Smile },
+      { name: '🎭 AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: User },
+      { name: '📖 Story Writer', href: '/dashboard/tools/story-writer', icon: BookOpen },
+      { name: '😄 Joke Generator', href: '/dashboard/tools/joke-generator', icon: Smile },
+      { name: '🔮 Fortune Teller', href: '/dashboard/tools/fortune-teller', icon: Sparkles },
+      { name: '💕 Love Letter Generator', href: '/dashboard/tools/love-letter', icon: Heart },
     ]
   },
   {
@@ -190,9 +279,9 @@ export function Sidebar() {
                           <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
                           {!collapsed && (
                             <>
-                              <span>{item.name}</span>
+                              <span className="truncate">{item.name}</span>
                               {item.badge && (
-                                <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                                <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">
                                   {item.badge}
                                 </span>
                               )}
@@ -227,7 +316,22 @@ export function Sidebar() {
                       onClick={() => toggleSection(item.name)}
                     >
                       <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
-                      {!collapsed && <span>{item.name}</span>}
+                      {!collapsed && (
+                        <>
+                          <span className="truncate">{item.name}</span>
+                          {item.badge && (
+                            <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">
+                              {item.badge}
+                            </span>
+                          )}
+                          <ChevronRight 
+                            className={cn(
+                              "ml-auto h-4 w-4 transition-transform",
+                              expandedSections[item.name] && "rotate-90"
+                            )} 
+                          />
+                        </>
+                      )}
                     </Button>
                   )}
                   {!collapsed && expandedSections[item.name] && (
@@ -239,7 +343,7 @@ export function Sidebar() {
                             className="w-full justify-start text-sm"
                           >
                             <child.icon className="mr-2 h-3 w-3" />
-                            <span>{child.name}</span>
+                            <span className="truncate">{child.name}</span>
                           </Button>
                         </Link>
                       ))}
