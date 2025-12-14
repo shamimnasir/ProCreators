@@ -225,7 +225,7 @@ export async function POST(request) {
         y = height - margin
       }
       
-      page.drawText('★ BONUS:', { x: margin, y, size: 12, font: boldFont, color: rgb(0.6, 0.4, 0) })
+      page.drawText('* BONUS:', { x: margin, y, size: 12, font: boldFont, color: rgb(0.6, 0.4, 0) })
       y -= 18
       page.drawText(content.bonusQuestion.question, { x: margin + 20, y, size: 11, font: regularFont })
       y -= 25
