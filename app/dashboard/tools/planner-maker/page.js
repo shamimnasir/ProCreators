@@ -263,7 +263,7 @@ export default function PlannerMakerPage() {
                         value={[pageCount]}
                         onValueChange={([v]) => setPageCount(v)}
                         min={4}
-                        max={52}
+                        max={200}
                         step={4}
                       />
                     </div>
