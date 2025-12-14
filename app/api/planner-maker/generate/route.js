@@ -79,16 +79,9 @@ async function generatePlannerContent(plannerType, customTitle, pageCount) {
   }
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional planner designer. Generate structured, practical content for digital planners that people can print and use. Provide content in a clear, organized format.'
-        },
-        {
-          role: 'user',
-          content: `Create content for a ${pageCount}-page ${plannerType} planner${customTitle ? ` titled "${customTitle}"` : ''}.
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    
+    const prompt = `Create content for a ${pageCount}-page ${plannerType} planner${customTitle ? ` titled "${customTitle}"` : ''}.
 
 ${contentPrompts[plannerType] || contentPrompts.weekly}
 
@@ -98,15 +91,17 @@ Provide:
 3. 3 inspirational quotes themed to this planner type
 4. 5 tips for using this type of planner effectively
 
-Format your response as JSON with keys: title, sections (array), quotes (array of 3), tips (array of 5)`
-        }
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 1000,
-      temperature: 0.7
-    })
+Format your response as JSON with keys: title, sections (array), quotes (array of 3), tips (array of 5)
+IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
 
-    const content = JSON.parse(response.choices[0].message.content)
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    let text = response.text().trim()
+    
+    // Clean up response if it contains markdown code blocks
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    
+    const content = JSON.parse(text)
     return content
   } catch (error) {
     console.error('AI content generation error:', error)
