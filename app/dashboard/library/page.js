@@ -22,7 +22,11 @@ const TOOL_TYPES = [
   { value: 'quote-maker', label: 'Quote Maker', icon: '💬' },
   { value: 'thread-generator', label: 'Thread Generator', icon: '🧵' },
   { value: 'image-generator', label: 'Image Generator', icon: '🖼️' },
-  { value: 'ebook-generator', label: 'Ebook Generator', icon: '📚' },
+  { value: 'planner', label: 'Planner Maker', icon: '📅' },
+  { value: 'ebook', label: 'Ebook Maker', icon: '📖' },
+  { value: 'journal', label: 'Journal Maker', icon: '📓' },
+  { value: 'worksheet', label: 'Worksheet Generator', icon: '📝' },
+  { value: 'checklist', label: 'Checklist Maker', icon: '✅' },
 ]
 
 export default function LibraryPage() {
