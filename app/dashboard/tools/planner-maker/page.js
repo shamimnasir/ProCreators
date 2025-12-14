@@ -48,6 +48,7 @@ export default function PlannerMakerPage() {
   const [paperSize, setPaperSize] = useState('letter')
   const [pageCount, setPageCount] = useState(12)
   const [customTitle, setCustomTitle] = useState('')
+  const [customInstructions, setCustomInstructions] = useState('')
   const [generating, setGenerating] = useState(false)
   const [generatedPDF, setGeneratedPDF] = useState(null)
   const { toast } = useToast()
