@@ -68,6 +68,7 @@ export default function PlannerMakerPage() {
           paperSize,
           pageCount,
           customTitle: customTitle || undefined,
+          customInstructions: customInstructions || undefined,
         }),
       })
       
