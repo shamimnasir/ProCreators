@@ -190,6 +190,7 @@ export default function LibraryPage() {
     if (category === 'text') return items.filter(item => item.category === 'text')
     if (category === 'images') return items.filter(item => item.category === 'image')
     if (category === 'videos') return items.filter(item => item.category === 'video')
+    if (category === 'documents') return items.filter(item => item.category === 'document' || (item.filePath && item.filePath.endsWith('.pdf')))
     return items
   }
 
