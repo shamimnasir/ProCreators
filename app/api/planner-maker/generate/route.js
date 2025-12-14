@@ -46,16 +46,16 @@ ${customInstructions ? `Special instructions: ${customInstructions}` : ''}
 Generate:
 1. A catchy title (or use provided title)
 2. A subtitle describing the planner's purpose
-3. 5 motivational quotes related to ${plannerType} planning
-4. 3 tips for using this planner effectively
+3. 10 motivational quotes related to ${plannerType} planning${customInstructions ? ` and incorporating themes from: ${customInstructions}` : ''}
+4. 5 tips for using this planner effectively${customInstructions ? ` (include tips related to: ${customInstructions})` : ''}
 5. Section descriptions for: ${config.sections.join(', ')}
 
 Format as JSON:
 {
   "title": "...",
   "subtitle": "...",
-  "quotes": ["...", "...", "...", "...", "..."],
-  "tips": ["...", "...", "..."],
+  "quotes": ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."],
+  "tips": ["...", "...", "...", "...", "..."],
   "sections": [{ "name": "...", "description": "..." }]
 }
 
@@ -81,22 +81,97 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
   } catch (error) {
     console.error('AI content generation error:', error.message || error)
     const config = PLANNER_CONFIGS[plannerType] || PLANNER_CONFIGS.weekly
+    
+    // Generate fallback content that incorporates custom instructions
+    const baseQuotes = [
+      'A goal without a plan is just a wish.',
+      'The secret of getting ahead is getting started.',
+      'Plan your work and work your plan.',
+      'Every accomplishment starts with the decision to try.',
+      'Small steps every day lead to big results.',
+      'Progress, not perfection.',
+      'Your future is created by what you do today.',
+      'Dream big, start small, act now.',
+      'Consistency is the key to success.',
+      'Make each day your masterpiece.'
+    ]
+    
+    // Add instruction-specific quotes if provided
+    let quotes = [...baseQuotes]
+    if (customInstructions) {
+      const lowerInstructions = customInstructions.toLowerCase()
+      if (lowerInstructions.includes('meal') || lowerInstructions.includes('food') || lowerInstructions.includes('diet')) {
+        quotes = [
+          'Let food be thy medicine.',
+          'A balanced diet is a cookie in each hand.',
+          'Eat well, live well, be well.',
+          'Good food is the foundation of genuine happiness.',
+          'Plan your meals, plan your success.',
+          ...baseQuotes.slice(0, 5)
+        ]
+      }
+      if (lowerInstructions.includes('fitness') || lowerInstructions.includes('exercise') || lowerInstructions.includes('workout')) {
+        quotes = [
+          'The only bad workout is the one that didn\'t happen.',
+          'Sweat is just fat crying.',
+          'Your body can do anything, it\'s your mind you need to convince.',
+          'Fitness is not about being better than someone else.',
+          'Strong is the new beautiful.',
+          ...baseQuotes.slice(0, 5)
+        ]
+      }
+      if (lowerInstructions.includes('motivation') || lowerInstructions.includes('inspire')) {
+        quotes = [
+          'Believe you can and you\'re halfway there.',
+          'The only limit is the one you set yourself.',
+          'Success is not final, failure is not fatal.',
+          'Be the change you wish to see.',
+          'Today is a new opportunity to be better.',
+          ...baseQuotes.slice(0, 5)
+        ]
+      }
+    }
+    
+    // Generate tips based on instructions
+    let tips = [
+      'Review your planner every morning',
+      'Set realistic and achievable goals',
+      'Celebrate your progress regularly',
+      'Use color coding for different priorities',
+      'Schedule breaks and self-care time'
+    ]
+    
+    if (customInstructions) {
+      const lowerInstructions = customInstructions.toLowerCase()
+      if (lowerInstructions.includes('meal')) {
+        tips = [
+          'Plan your meals for the week ahead',
+          'Prep ingredients on weekends',
+          'Keep healthy snacks ready',
+          'Track your water intake daily',
+          'Try one new recipe each week'
+        ]
+      }
+      if (lowerInstructions.includes('fitness')) {
+        tips = [
+          'Schedule workouts like appointments',
+          'Track your progress with measurements',
+          'Start with small achievable goals',
+          'Rest days are just as important',
+          'Celebrate non-scale victories'
+        ]
+      }
+    }
+    
     return {
       title: customTitle || `My ${config.name}`,
-      subtitle: `Your personal ${plannerType} planning companion`,
-      quotes: [
-        'A goal without a plan is just a wish.',
-        'The secret of getting ahead is getting started.',
-        'Plan your work and work your plan.',
-        'Every accomplishment starts with the decision to try.',
-        'Small steps every day lead to big results.'
-      ],
-      tips: [
-        'Review your planner every morning',
-        'Set realistic and achievable goals',
-        'Celebrate your progress regularly'
-      ],
+      subtitle: customInstructions 
+        ? `Your personal ${plannerType} planning companion - ${customInstructions.substring(0, 50)}${customInstructions.length > 50 ? '...' : ''}`
+        : `Your personal ${plannerType} planning companion`,
+      quotes,
+      tips,
       sections: config.sections.map(s => ({ name: s, description: `Your ${s.toLowerCase()} section` }))
+    }
     }
   }
 }
