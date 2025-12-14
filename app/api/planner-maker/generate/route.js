@@ -172,7 +172,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
       tips,
       sections: config.sections.map(s => ({ name: s, description: `Your ${s.toLowerCase()} section` }))
     }
-    }
   }
 }
 
