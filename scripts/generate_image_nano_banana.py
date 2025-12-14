@@ -5,10 +5,10 @@ import os
 import base64
 import google.generativeai as genai
 
-def generate_image_nano_banana(prompt, model="gemini-3-pro-image-preview"):
+def generate_image_nano_banana(prompt, model="models/nano-banana-pro-preview"):
     """
-    Generate image using Google Gemini 3 Pro Image Preview with perfect Bengali text support
-    This model is specifically optimized for text rendering in images
+    Generate image using Google Gemini Nano Banana model
+    This model is specifically optimized for image generation
     """
     try:
         # Use Google API key
@@ -24,11 +24,11 @@ def generate_image_nano_banana(prompt, model="gemini-3-pro-image-preview"):
         # Configure Google Generative AI
         genai.configure(api_key=api_key)
         
-        # Use Gemini 3 Pro Image Preview - best for text rendering
+        # Use Nano Banana Pro Preview - best for image generation
         model_instance = genai.GenerativeModel(model)
         
-        # Generate image with explicit instruction for clear text rendering
-        enhanced_prompt = f"Create a high-quality image. IMPORTANT: Render all text EXACTLY as written, character by character, without any changes or interpretation. {prompt}"
+        # Generate image with explicit instruction for high quality
+        enhanced_prompt = f"Create a beautiful, high-quality artistic image: {prompt}"
         
         response = model_instance.generate_content(enhanced_prompt)
         
@@ -44,7 +44,8 @@ def generate_image_nano_banana(prompt, model="gemini-3-pro-image-preview"):
                                     # Found image data
                                     image_bytes = part.inline_data.data
                                     base64_image = base64.b64encode(image_bytes).decode('utf-8')
-                                    image_url = f"data:image/png;base64,{base64_image}"
+                                    mime_type = part.inline_data.mime_type
+                                    image_url = f"data:{mime_type};base64,{base64_image}"
                                     
                                     return {
                                         "success": True,
