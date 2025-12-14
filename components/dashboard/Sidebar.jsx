@@ -54,14 +54,14 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
-    name: 'AI Video Studio',
+    name: '🎬 AI Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
     badge: 'Pro',
     children: []
   },
   {
-    name: 'Quick Reels Hub',
+    name: '🎥 Quick Video Studio',
     href: '/dashboard/tools/quick-reels',
     icon: Video,
     badge: '',
