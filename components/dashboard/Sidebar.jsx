@@ -119,6 +119,7 @@ const navigation = [
   },
   {
     name: '🖼️ Image Generation',
+    href: '/dashboard/image-generation',
     icon: Camera,
     badge: 'New',
     children: [
@@ -132,6 +133,7 @@ const navigation = [
   },
   {
     name: '👨‍🎓 Students & Teachers',
+    href: '/dashboard/students-teachers',
     icon: GraduationCap,
     badge: 'New',
     children: [
@@ -145,6 +147,7 @@ const navigation = [
   },
   {
     name: '💼 Jobs & Career',
+    href: '/dashboard/jobs-career',
     icon: Briefcase,
     badge: 'New',
     children: [
@@ -157,6 +160,7 @@ const navigation = [
   },
   {
     name: '🏢 Business with AI',
+    href: '/dashboard/business-ai',
     icon: TrendingUp,
     badge: 'New',
     children: [
@@ -170,6 +174,7 @@ const navigation = [
   },
   {
     name: '🎮 Fun & Recreation',
+    href: '/dashboard/fun-recreation',
     icon: GamepadIcon,
     badge: 'New',
     children: [
