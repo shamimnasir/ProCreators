@@ -36,15 +36,16 @@ const EBOOK_GENRES = {
 function sanitizeText(text) {
   if (!text) return ''
   // Replace problematic characters with safe alternatives
-  return text
-    .replace(/[\u2018\u2019]/g, "'")  // Smart single quotes
-    .replace(/[\u201C\u201D]/g, '"')  // Smart double quotes
-    .replace(/\u2026/g, '...')         // Ellipsis
-    .replace(/\u2013/g, '-')           // En dash
-    .replace(/\u2014/g, '--')          // Em dash
-    .replace(/\u00A0/g, ' ')           // Non-breaking space
-    .replace(/[\u000A\u000D]/g, ' ')   // Newlines to spaces
-    .replace(/[^\x00-\x7F]/g, '')      // Remove any remaining non-ASCII
+  return String(text)
+    .replace(/[\r\n\t]/g, ' ')         // Replace newlines and tabs with space
+    .replace(/[\u2018\u2019]/g, "'")   // Smart single quotes
+    .replace(/[\u201C\u201D]/g, '"')   // Smart double quotes
+    .replace(/\u2026/g, '...')          // Ellipsis
+    .replace(/\u2013/g, '-')            // En dash
+    .replace(/\u2014/g, '--')           // Em dash
+    .replace(/\u00A0/g, ' ')            // Non-breaking space
+    .replace(/[^\x20-\x7E]/g, '')       // Remove any non-printable ASCII
+    .replace(/\s+/g, ' ')               // Collapse multiple spaces
     .trim()
 }
 
