@@ -517,7 +517,7 @@ export async function POST(request) {
     // Generate content pages based on planner type
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 
                     'July', 'August', 'September', 'October', 'November', 'December']
-    const pagesToGenerate = Math.min(pageCount, 52)
+    const pagesToGenerate = Math.min(pageCount, 200)
 
     for (let i = 0; i < pagesToGenerate; i++) {
       const page = pdfDoc.addPage([size.width, size.height])
