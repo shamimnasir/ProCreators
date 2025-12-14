@@ -179,7 +179,7 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines
 }
 
-// Create PDF from ebook content
+// Create PDF from ebook content with professional formatting
 async function createEbookPDF(content, designStyle, colorScheme, coverStyle, authorName, coverImageUrl) {
   const pdfDoc = await PDFDocument.create()
   const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
@@ -188,12 +188,53 @@ async function createEbookPDF(content, designStyle, colorScheme, coverStyle, aut
   
   const pageWidth = 612
   const pageHeight = 792
-  const margin = 72 // 1 inch
+  const margin = 65
   const contentWidth = pageWidth - (margin * 2)
+  const lineHeight = 20  // Increased line spacing
+  const paragraphSpacing = 28  // Space between paragraphs
   
   // Get colors from scheme
   const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['ocean-blue']
   const cover = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
+  
+  // Helper function to draw a colored note box
+  const drawNoteBox = (page, x, y, width, height, text, font, fontSize) => {
+    // Light accent background
+    page.drawRectangle({
+      x: x,
+      y: y - height + 10,
+      width: width,
+      height: height,
+      color: colors.accent,
+      borderColor: colors.secondary,
+      borderWidth: 1,
+    })
+    
+    // Left accent bar
+    page.drawRectangle({
+      x: x,
+      y: y - height + 10,
+      width: 4,
+      height: height,
+      color: colors.primary,
+    })
+    
+    // Text inside box
+    const lines = wrapText(text, font, fontSize, width - 30)
+    let textY = y - 8
+    lines.forEach(line => {
+      page.drawText(line, {
+        x: x + 15,
+        y: textY,
+        size: fontSize,
+        font: font,
+        color: colors.text,
+      })
+      textY -= fontSize + 4
+    })
+    
+    return height + 15
+  }
   
   // Title Page with AI-generated cover image
   let page = pdfDoc.addPage([pageWidth, pageHeight])
@@ -231,23 +272,297 @@ async function createEbookPDF(content, designStyle, colorScheme, coverStyle, aut
   page = pdfDoc.addPage([pageWidth, pageHeight])
   page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
   
+  // TOC Header
   page.drawText('Table of Contents', {
     x: margin,
     y: pageHeight - margin - 30,
-    size: 24,
+    size: 26,
     font: boldFont,
     color: colors.primary
   })
   
-  let y = pageHeight - margin - 80
-  page.drawText('Introduction', { x: margin + 20, y, size: 14, font: regularFont, color: colors.text })
-  y -= 30
+  // Decorative line under TOC header
+  page.drawLine({
+    start: { x: margin, y: pageHeight - margin - 45 },
+    end: { x: pageWidth - margin, y: pageHeight - margin - 45 },
+    thickness: 2,
+    color: colors.secondary,
+  })
   
+  let y = pageHeight - margin - 80
+  
+  // Introduction entry
+  page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
+  page.drawText('Introduction', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
+  y -= 35
+  
+  // Chapter entries
   content.chapters.forEach((chapter) => {
     const chapterText = sanitizeText(`Chapter ${chapter.number}: ${chapter.title}`)
+    page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
     page.drawText(chapterText, {
-      x: margin + 20,
+      x: margin + 25,
       y: y,
+      size: 13,
+      font: regularFont,
+      color: colors.text
+    })
+    y -= 35
+    if (y < margin + 50) {
+      page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+      y = pageHeight - margin - 50
+    }
+  })
+  
+  // Conclusion entry
+  page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
+  page.drawText('Conclusion', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
+  
+  // Introduction Page
+  page = pdfDoc.addPage([pageWidth, pageHeight])
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+  
+  // Section header with accent bar
+  page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
+  page.drawText('Introduction', {
+    x: margin,
+    y: pageHeight - margin - 30,
+    size: 26,
+    font: boldFont,
+    color: colors.primary
+  })
+  
+  // Decorative line
+  page.drawLine({
+    start: { x: margin, y: pageHeight - margin - 48 },
+    end: { x: margin + 150, y: pageHeight - margin - 48 },
+    thickness: 2,
+    color: colors.secondary,
+  })
+  
+  y = pageHeight - margin - 85
+  const introLines = wrapText(content.introduction, regularFont, 11, contentWidth)
+  for (const line of introLines) {
+    if (y < margin + 60) {
+      page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+      y = pageHeight - margin - 50
+    }
+    page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+    y -= lineHeight
+  }
+  
+  // Chapters
+  for (const chapter of content.chapters) {
+    // New page for each chapter
+    page = pdfDoc.addPage([pageWidth, pageHeight])
+    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+    
+    // Chapter number badge
+    page.drawRectangle({
+      x: margin - 10,
+      y: pageHeight - margin - 20,
+      width: 80,
+      height: 25,
+      color: colors.primary,
+    })
+    page.drawText(`Chapter ${chapter.number}`, {
+      x: margin - 5,
+      y: pageHeight - margin - 14,
+      size: 11,
+      font: boldFont,
+      color: colors.background,
+    })
+    
+    // Chapter title
+    const chapterTitleLines = wrapText(chapter.title, boldFont, 22, contentWidth)
+    y = pageHeight - margin - 55
+    chapterTitleLines.forEach(line => {
+      page.drawText(line, { x: margin, y, size: 22, font: boldFont, color: colors.primary })
+      y -= 28
+    })
+    
+    // Decorative line under title
+    page.drawLine({
+      start: { x: margin, y: y + 8 },
+      end: { x: margin + 180, y: y + 8 },
+      thickness: 2,
+      color: colors.secondary,
+    })
+    
+    y -= 30  // Extra space after title
+    
+    // Chapter content - split into paragraphs with better spacing
+    const paragraphs = chapter.content.split(/\n\n|(?<=\. )(?=[A-Z])/).filter(p => p.trim())
+    
+    for (let pIdx = 0; pIdx < paragraphs.length; pIdx++) {
+      const paragraph = paragraphs[pIdx].trim()
+      if (!paragraph) continue
+      
+      const lines = wrapText(paragraph, regularFont, 11, contentWidth)
+      
+      for (let i = 0; i < lines.length; i++) {
+        if (y < margin + 100) {
+          page = pdfDoc.addPage([pageWidth, pageHeight])
+          page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+          y = pageHeight - margin - 50
+        }
+        
+        // First line of paragraph gets indent
+        const indent = (i === 0 && pIdx > 0) ? 20 : 0
+        page.drawText(lines[i], { 
+          x: margin + indent, 
+          y, 
+          size: 11, 
+          font: regularFont, 
+          color: colors.text 
+        })
+        y -= lineHeight
+      }
+      y -= 12  // Paragraph spacing
+    }
+    
+    // Key Takeaways Box
+    if (chapter.keyTakeaways && chapter.keyTakeaways.length > 0) {
+      // Ensure space for takeaways box
+      const boxHeight = 30 + (chapter.keyTakeaways.length * 28)
+      if (y < margin + boxHeight + 50) {
+        page = pdfDoc.addPage([pageWidth, pageHeight])
+        page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+        y = pageHeight - margin - 50
+      }
+      
+      y -= 25  // Space before box
+      
+      // Takeaway box background
+      page.drawRectangle({
+        x: margin,
+        y: y - boxHeight + 25,
+        width: contentWidth,
+        height: boxHeight,
+        color: colors.accent,
+        borderColor: colors.secondary,
+        borderWidth: 1,
+      })
+      
+      // Left accent bar
+      page.drawRectangle({
+        x: margin,
+        y: y - boxHeight + 25,
+        width: 5,
+        height: boxHeight,
+        color: colors.primary,
+      })
+      
+      // Header inside box
+      page.drawText('Key Takeaways', { 
+        x: margin + 18, 
+        y: y, 
+        size: 13, 
+        font: boldFont, 
+        color: colors.primary 
+      })
+      
+      y -= 28
+      
+      // Takeaway items with bullet points
+      chapter.keyTakeaways.forEach((takeaway, idx) => {
+        const cleanTakeaway = sanitizeText(takeaway)
+        
+        // Bullet point
+        page.drawCircle({ 
+          x: margin + 20, 
+          y: y + 4, 
+          size: 3, 
+          color: colors.primary 
+        })
+        
+        // Takeaway text
+        const takeawayLines = wrapText(cleanTakeaway, italicFont, 10, contentWidth - 50)
+        takeawayLines.forEach((line, lineIdx) => {
+          page.drawText(line, { 
+            x: margin + 30, 
+            y: y - (lineIdx * 14), 
+            size: 10, 
+            font: italicFont, 
+            color: colors.text 
+          })
+        })
+        y -= 24
+      })
+      
+      y -= 20  // Space after box
+    }
+  }
+  
+  // Conclusion Page
+  page = pdfDoc.addPage([pageWidth, pageHeight])
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+  
+  // Section header with accent bar
+  page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
+  page.drawText('Conclusion', {
+    x: margin,
+    y: pageHeight - margin - 30,
+    size: 26,
+    font: boldFont,
+    color: colors.primary
+  })
+  
+  // Decorative line
+  page.drawLine({
+    start: { x: margin, y: pageHeight - margin - 48 },
+    end: { x: margin + 130, y: pageHeight - margin - 48 },
+    thickness: 2,
+    color: colors.secondary,
+  })
+  
+  y = pageHeight - margin - 85
+  const conclusionLines = wrapText(content.conclusion, regularFont, 11, contentWidth)
+  for (const line of conclusionLines) {
+    if (y < margin + 60) {
+      page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+      y = pageHeight - margin - 50
+    }
+    page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+    y -= lineHeight
+  }
+  
+  // About Author page
+  if (authorName) {
+    page = pdfDoc.addPage([pageWidth, pageHeight])
+    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+    
+    // Section header with accent bar
+    page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
+    page.drawText('About the Author', {
+      x: margin,
+      y: pageHeight - margin - 30,
+      size: 26,
+      font: boldFont,
+      color: colors.primary
+    })
+    
+    // Decorative line
+    page.drawLine({
+      start: { x: margin, y: pageHeight - margin - 48 },
+      end: { x: margin + 180, y: pageHeight - margin - 48 },
+      thickness: 2,
+      color: colors.secondary,
+    })
+    
+    y = pageHeight - margin - 85
+    const aboutLines = wrapText(content.aboutAuthor || `${authorName} is the author of this ebook.`, regularFont, 11, contentWidth)
+    for (const line of aboutLines) {
+      page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+      y -= lineHeight
+    }
+  }
+  
+  return pdfDoc
+}
       size: 14,
       font: regularFont,
       color: colors.text
