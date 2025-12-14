@@ -192,7 +192,7 @@ export async function POST(request) {
       page.drawText('Tips:', { x: margin, y, size: 10, font: boldFont, color: scheme.primary })
       y -= 18
       content.tips.forEach(tip => {
-        page.drawText(`• ${tip}`, { x: margin + 10, y, size: 9, font: regularFont })
+        page.drawText(`- ${tip}`, { x: margin + 10, y, size: 9, font: regularFont })
         y -= 14
       })
       
