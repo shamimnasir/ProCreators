@@ -1,17 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useTheme } from 'next-themes'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { TopBar } from '@/components/dashboard/TopBar'
 
 export default function DashboardLayout({ children }) {
-  const { setTheme } = useTheme()
-  
-  // Force light mode on dashboard
-  useEffect(() => {
-    setTheme('light')
-  }, [setTheme])
+  // Dashboard uses the default theme from ThemeProvider (light)
+  // Users can toggle dark mode using the TopBar button
   
   return (
     <div className="flex h-screen overflow-hidden bg-background">
