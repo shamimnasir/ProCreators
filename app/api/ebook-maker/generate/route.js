@@ -5,9 +5,18 @@ import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
+import { 
+  PDF_COLOR_SCHEMES, 
+  COVER_STYLES, 
+  PAPER_SIZES,
+  drawCoverPageWithImage,
+  drawCoverPage,
+  getCurrentYear
+} from '@/lib/pdf-design'
+import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
 
-// Initialize Google Generative AI with Emergent LLM key
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+// Use Google Generative AI with the proper Google API key
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
 // Ebook genres with prompts
 const EBOOK_GENRES = {
@@ -23,13 +32,29 @@ const EBOOK_GENRES = {
   'children': 'age-appropriate content for young readers'
 }
 
+// Helper function to sanitize text for PDF (remove problematic characters)
+function sanitizeText(text) {
+  if (!text) return ''
+  // Replace problematic characters with safe alternatives
+  return text
+    .replace(/[\u2018\u2019]/g, "'")  // Smart single quotes
+    .replace(/[\u201C\u201D]/g, '"')  // Smart double quotes
+    .replace(/\u2026/g, '...')         // Ellipsis
+    .replace(/\u2013/g, '-')           // En dash
+    .replace(/\u2014/g, '--')          // Em dash
+    .replace(/\u00A0/g, ' ')           // Non-breaking space
+    .replace(/[\u000A\u000D]/g, ' ')   // Newlines to spaces
+    .replace(/[^\x00-\x7F]/g, '')      // Remove any remaining non-ASCII
+    .trim()
+}
+
 // Generate ebook content with AI
-async function generateEbookContent(title, outline, genre, chapterCount, language) {
+async function generateEbookContent(title, outline, genre, chapterCount, language, authorName) {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     const genreContext = EBOOK_GENRES[genre] || EBOOK_GENRES['non-fiction']
-    const languageInstruction = language === 'bengali' ? 'Write the entire content in Bengali (বাংলা) language.' : 'Write in English.'
+    const languageInstruction = language === 'bengali' ? 'Write the entire content in Bengali language.' : 'Write in English.'
     
     const prompt = `You are an expert ebook author. Create a comprehensive ebook with the following details:
 
@@ -37,14 +62,21 @@ Title: "${title}"
 Genre: ${genre} - ${genreContext}
 Number of Chapters: ${chapterCount}
 Outline/Topics to cover: ${outline}
+Author: ${authorName || 'Anonymous'}
 
 ${languageInstruction}
 
 Generate a complete ebook with:
-1. An engaging introduction (300-400 words)
-2. ${chapterCount} detailed chapters (500-800 words each)
-3. Key takeaways at the end of each chapter
+1. An engaging introduction (200-300 words)
+2. ${chapterCount} detailed chapters (300-500 words each)
+3. Key takeaways at the end of each chapter (3 bullet points)
 4. A conclusion summarizing the main points
+
+IMPORTANT RULES:
+- Use only plain ASCII characters
+- No special quotes or symbols
+- No emojis
+- Keep text simple and clean
 
 Format your response as JSON with this structure:
 {
@@ -60,7 +92,7 @@ Format your response as JSON with this structure:
     }
   ],
   "conclusion": "...",
-  "aboutAuthor": "A brief author bio placeholder"
+  "aboutAuthor": "..."
 }
 
 IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
@@ -73,41 +105,64 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     
     const content = JSON.parse(text)
+    
+    // Sanitize all text fields
+    content.title = sanitizeText(content.title) || title
+    content.subtitle = sanitizeText(content.subtitle)
+    content.introduction = sanitizeText(content.introduction)
+    content.conclusion = sanitizeText(content.conclusion)
+    content.aboutAuthor = sanitizeText(content.aboutAuthor)
+    
+    if (content.chapters) {
+      content.chapters = content.chapters.map(ch => ({
+        ...ch,
+        title: sanitizeText(ch.title),
+        content: sanitizeText(ch.content),
+        keyTakeaways: (ch.keyTakeaways || []).map(t => sanitizeText(t))
+      }))
+    }
+    
+    console.log('AI generated ebook content successfully via Gemini')
     return content
   } catch (error) {
-    console.error('AI content generation error:', error)
+    console.error('AI content generation error:', error.message || error)
     // Return default structure
     return {
-      title: title,
+      title: sanitizeText(title),
       subtitle: `A ${genre} guide`,
       introduction: 'This ebook provides valuable insights and practical knowledge on the topics covered. Each chapter is designed to help you understand and apply the concepts effectively.',
       chapters: Array.from({ length: chapterCount }, (_, i) => ({
         number: i + 1,
         title: `Chapter ${i + 1}`,
-        content: `This chapter covers important aspects of ${outline}. The content provides actionable insights and practical guidance.`,
+        content: `This chapter covers important aspects of ${sanitizeText(outline)}. The content provides actionable insights and practical guidance.`,
         keyTakeaways: ['Key insight from this chapter', 'Practical application', 'Remember this point']
       })),
       conclusion: 'Thank you for reading this ebook. Apply these insights to achieve your goals.',
-      aboutAuthor: 'Created with AI assistance.'
+      aboutAuthor: authorName ? `Written by ${sanitizeText(authorName)}.` : 'Created with AI assistance.'
     }
   }
 }
 
 // Helper to wrap text for PDF
 function wrapText(text, font, fontSize, maxWidth) {
-  const words = text.split(' ')
+  const words = sanitizeText(text).split(' ')
   const lines = []
   let currentLine = ''
   
   for (const word of words) {
     const testLine = currentLine ? `${currentLine} ${word}` : word
-    const width = font.widthOfTextAtSize(testLine, fontSize)
-    
-    if (width <= maxWidth) {
-      currentLine = testLine
-    } else {
-      if (currentLine) lines.push(currentLine)
-      currentLine = word
+    try {
+      const width = font.widthOfTextAtSize(testLine, fontSize)
+      
+      if (width <= maxWidth) {
+        currentLine = testLine
+      } else {
+        if (currentLine) lines.push(currentLine)
+        currentLine = word
+      }
+    } catch (e) {
+      // Skip problematic words
+      continue
     }
   }
   if (currentLine) lines.push(currentLine)
@@ -116,7 +171,7 @@ function wrapText(text, font, fontSize, maxWidth) {
 }
 
 // Create PDF from ebook content
-async function createEbookPDF(content, designStyle) {
+async function createEbookPDF(content, designStyle, colorScheme, coverStyle, authorName, coverImageUrl) {
   const pdfDoc = await PDFDocument.create()
   const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
   const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
@@ -127,101 +182,87 @@ async function createEbookPDF(content, designStyle) {
   const margin = 72 // 1 inch
   const contentWidth = pageWidth - (margin * 2)
   
-  // Colors based on design style
-  const colors = {
-    modern: { primary: rgb(0.1, 0.1, 0.3), accent: rgb(0.3, 0.5, 0.7) },
-    classic: { primary: rgb(0.2, 0.15, 0.1), accent: rgb(0.5, 0.4, 0.3) },
-    minimal: { primary: rgb(0, 0, 0), accent: rgb(0.5, 0.5, 0.5) },
-    vibrant: { primary: rgb(0.2, 0.2, 0.5), accent: rgb(0.8, 0.3, 0.4) }
-  }
-  const { primary, accent } = colors[designStyle] || colors.modern
+  // Get colors from scheme
+  const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['ocean-blue']
+  const cover = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
   
-  // Title Page
+  // Title Page with AI-generated cover image
   let page = pdfDoc.addPage([pageWidth, pageHeight])
   
-  // Title
-  const titleLines = wrapText(content.title, boldFont, 32, contentWidth)
-  let y = pageHeight - 250
-  titleLines.forEach(line => {
-    const titleWidth = boldFont.widthOfTextAtSize(line, 32)
-    page.drawText(line, {
-      x: (pageWidth - titleWidth) / 2,
-      y: y,
-      size: 32,
-      font: boldFont,
-      color: primary
+  if (coverImageUrl) {
+    await drawCoverPageWithImage(page, pdfDoc, {
+      width: pageWidth,
+      height: pageHeight,
+      title: content.title,
+      subtitle: content.subtitle,
+      authorName: authorName,
+      year: getCurrentYear(),
+      colors,
+      coverStyle: cover,
+      boldFont,
+      regularFont,
+      coverImageUrl
     })
-    y -= 45
-  })
-  
-  // Subtitle
-  if (content.subtitle) {
-    const subtitleWidth = italicFont.widthOfTextAtSize(content.subtitle, 16)
-    page.drawText(content.subtitle, {
-      x: (pageWidth - subtitleWidth) / 2,
-      y: y - 30,
-      size: 16,
-      font: italicFont,
-      color: accent
+  } else {
+    drawCoverPage(page, {
+      width: pageWidth,
+      height: pageHeight,
+      title: content.title,
+      subtitle: content.subtitle,
+      authorName: authorName,
+      year: getCurrentYear(),
+      colors,
+      coverStyle: cover,
+      boldFont,
+      regularFont
     })
   }
-  
-  // Decorative line
-  page.drawLine({
-    start: { x: pageWidth / 2 - 100, y: y - 70 },
-    end: { x: pageWidth / 2 + 100, y: y - 70 },
-    thickness: 2,
-    color: accent
-  })
-  
-  // Created with text
-  page.drawText('Created with ProCreators AI', {
-    x: (pageWidth - regularFont.widthOfTextAtSize('Created with ProCreators AI', 12)) / 2,
-    y: 100,
-    size: 12,
-    font: regularFont,
-    color: accent
-  })
   
   // Table of Contents
   page = pdfDoc.addPage([pageWidth, pageHeight])
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+  
   page.drawText('Table of Contents', {
     x: margin,
     y: pageHeight - margin - 30,
     size: 24,
     font: boldFont,
-    color: primary
+    color: colors.primary
   })
   
-  y = pageHeight - margin - 80
-  page.drawText('Introduction', { x: margin + 20, y, size: 14, font: regularFont, color: primary })
+  let y = pageHeight - margin - 80
+  page.drawText('Introduction', { x: margin + 20, y, size: 14, font: regularFont, color: colors.text })
   y -= 30
   
-  content.chapters.forEach((chapter, idx) => {
-    page.drawText(`Chapter ${chapter.number}: ${chapter.title}`, {
+  content.chapters.forEach((chapter) => {
+    const chapterText = sanitizeText(`Chapter ${chapter.number}: ${chapter.title}`)
+    page.drawText(chapterText, {
       x: margin + 20,
       y: y,
       size: 14,
       font: regularFont,
-      color: primary
+      color: colors.text
     })
     y -= 30
     if (y < margin + 50) {
       page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       y = pageHeight - margin - 50
     }
   })
   
-  page.drawText('Conclusion', { x: margin + 20, y: y, size: 14, font: regularFont, color: primary })
+  page.drawText('Conclusion', { x: margin + 20, y: y, size: 14, font: regularFont, color: colors.text })
   
   // Introduction
   page = pdfDoc.addPage([pageWidth, pageHeight])
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+  
   page.drawText('Introduction', {
     x: margin,
     y: pageHeight - margin - 30,
     size: 24,
     font: boldFont,
-    color: primary
+    color: colors.primary
   })
   
   y = pageHeight - margin - 80
@@ -229,69 +270,71 @@ async function createEbookPDF(content, designStyle) {
   for (const line of introLines) {
     if (y < margin + 50) {
       page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       y = pageHeight - margin - 50
     }
-    page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: primary })
+    page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: colors.text })
     y -= 18
   }
   
   // Chapters
   for (const chapter of content.chapters) {
     page = pdfDoc.addPage([pageWidth, pageHeight])
+    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
     
-    // Chapter title
+    // Chapter number
     page.drawText(`Chapter ${chapter.number}`, {
       x: margin,
       y: pageHeight - margin - 20,
       size: 14,
       font: regularFont,
-      color: accent
+      color: colors.secondary
     })
     
+    // Chapter title
     const chapterTitleLines = wrapText(chapter.title, boldFont, 22, contentWidth)
     y = pageHeight - margin - 50
     chapterTitleLines.forEach(line => {
-      page.drawText(line, { x: margin, y, size: 22, font: boldFont, color: primary })
+      page.drawText(line, { x: margin, y, size: 22, font: boldFont, color: colors.primary })
       y -= 30
     })
     
     y -= 20
     
     // Chapter content
-    const paragraphs = chapter.content.split('\n\n')
-    for (const paragraph of paragraphs) {
-      const lines = wrapText(paragraph, regularFont, 12, contentWidth)
-      for (const line of lines) {
-        if (y < margin + 80) {
-          page = pdfDoc.addPage([pageWidth, pageHeight])
-          y = pageHeight - margin - 50
-        }
-        page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: primary })
-        y -= 18
+    const contentLines = wrapText(chapter.content, regularFont, 12, contentWidth)
+    for (const line of contentLines) {
+      if (y < margin + 80) {
+        page = pdfDoc.addPage([pageWidth, pageHeight])
+        page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+        y = pageHeight - margin - 50
       }
-      y -= 10 // Paragraph spacing
+      page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: colors.text })
+      y -= 18
     }
     
     // Key Takeaways
     if (chapter.keyTakeaways && chapter.keyTakeaways.length > 0) {
       if (y < margin + 150) {
         page = pdfDoc.addPage([pageWidth, pageHeight])
+        page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
         y = pageHeight - margin - 50
       }
       
       y -= 30
-      page.drawText('Key Takeaways:', { x: margin, y, size: 14, font: boldFont, color: accent })
+      page.drawText('Key Takeaways:', { x: margin, y, size: 14, font: boldFont, color: colors.secondary })
       y -= 25
       
-      chapter.keyTakeaways.forEach((takeaway, idx) => {
+      chapter.keyTakeaways.forEach((takeaway) => {
         if (y < margin + 50) {
           page = pdfDoc.addPage([pageWidth, pageHeight])
+          page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
           y = pageHeight - margin - 50
         }
-        const bullet = `• ${takeaway}`
+        const bullet = `- ${sanitizeText(takeaway)}`
         const takeawayLines = wrapText(bullet, italicFont, 11, contentWidth - 20)
         takeawayLines.forEach(line => {
-          page.drawText(line, { x: margin + 20, y, size: 11, font: italicFont, color: primary })
+          page.drawText(line, { x: margin + 20, y, size: 11, font: italicFont, color: colors.text })
           y -= 16
         })
       })
@@ -300,12 +343,14 @@ async function createEbookPDF(content, designStyle) {
   
   // Conclusion
   page = pdfDoc.addPage([pageWidth, pageHeight])
+  page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+  
   page.drawText('Conclusion', {
     x: margin,
     y: pageHeight - margin - 30,
     size: 24,
     font: boldFont,
-    color: primary
+    color: colors.primary
   })
   
   y = pageHeight - margin - 80
@@ -313,10 +358,32 @@ async function createEbookPDF(content, designStyle) {
   for (const line of conclusionLines) {
     if (y < margin + 50) {
       page = pdfDoc.addPage([pageWidth, pageHeight])
+      page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       y = pageHeight - margin - 50
     }
-    page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: primary })
+    page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: colors.text })
     y -= 18
+  }
+  
+  // About Author page
+  if (authorName) {
+    page = pdfDoc.addPage([pageWidth, pageHeight])
+    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+    
+    page.drawText('About the Author', {
+      x: margin,
+      y: pageHeight - margin - 30,
+      size: 24,
+      font: boldFont,
+      color: colors.primary
+    })
+    
+    y = pageHeight - margin - 80
+    const aboutLines = wrapText(content.aboutAuthor || `${authorName} is the author of this ebook.`, regularFont, 12, contentWidth)
+    for (const line of aboutLines) {
+      page.drawText(line, { x: margin, y, size: 12, font: regularFont, color: colors.text })
+      y -= 18
+    }
   }
   
   return pdfDoc
@@ -324,7 +391,17 @@ async function createEbookPDF(content, designStyle) {
 
 export async function POST(request) {
   try {
-    const { title, outline, genre, chapterCount, language, designStyle } = await request.json()
+    const { 
+      title, 
+      outline, 
+      genre, 
+      chapterCount, 
+      language, 
+      designStyle,
+      colorScheme,
+      coverStyle,
+      authorName 
+    } = await request.json()
     
     if (!title || !outline) {
       return NextResponse.json(
@@ -341,13 +418,39 @@ export async function POST(request) {
       outline,
       genre || 'non-fiction',
       chapterCount || 5,
-      language || 'english'
+      language || 'english',
+      authorName
     )
     
-    console.log('Ebook content generated, creating PDF...')
+    console.log('Ebook content generated, creating cover image...')
+    
+    // Generate cover image
+    let coverImageUrl = null
+    try {
+      const themeKey = getEbookTheme(genre || 'non-fiction')
+      console.log(`Generating cover image for theme: ${themeKey}`)
+      const imageResult = await generateCoverImage(themeKey)
+      if (imageResult.success && imageResult.imageUrl) {
+        coverImageUrl = imageResult.imageUrl
+        console.log('Cover image generated successfully')
+      } else {
+        console.log('Cover image generation failed, using fallback design:', imageResult.error)
+      }
+    } catch (imgError) {
+      console.log('Error generating cover image:', imgError.message)
+    }
+    
+    console.log('Creating PDF...')
     
     // Create PDF
-    const pdfDoc = await createEbookPDF(ebookContent, designStyle || 'modern')
+    const pdfDoc = await createEbookPDF(
+      ebookContent, 
+      designStyle || 'modern',
+      colorScheme || 'ocean-blue',
+      coverStyle || 'elegant',
+      authorName,
+      coverImageUrl
+    )
     const pdfBytes = await pdfDoc.save()
     
     // Save file
@@ -365,17 +468,21 @@ export async function POST(request) {
     await libraryCollection.insertOne({
       id: documentId,
       userId: 'default-user',
-      type: 'ebook',
+      type: 'document',
       category: 'document',
       title: ebookContent.title,
       description: `${genre} ebook with ${chapterCount} chapters`,
       filePath: `/ebooks/${fileName}`,
       fileSize: pdfBytes.length,
+      tool: 'ebook-maker',
       metadata: {
         genre,
         chapterCount,
         language,
         designStyle,
+        colorScheme,
+        coverStyle,
+        authorName,
         chapters: ebookContent.chapters.map(c => c.title)
       },
       createdAt: new Date(),
