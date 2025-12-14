@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 
-// Initialize OpenAI with Emergent LLM key
-const openai = new OpenAI({
-  apiKey: process.env.EMERGENT_LLM_KEY,
-  baseURL: 'https://api.emergentmethods.ai/v1'
-})
+// Initialize Google Generative AI with Emergent LLM key
+const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
 
 // Paper size dimensions in points (72 points = 1 inch)
 const PAPER_SIZES = {
