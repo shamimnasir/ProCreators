@@ -145,11 +145,18 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
 
 // Helper to wrap text for PDF
 function wrapText(text, font, fontSize, maxWidth) {
-  const words = sanitizeText(text).split(' ')
+  // First sanitize the text
+  const cleanText = sanitizeText(text || '')
+  if (!cleanText) return []
+  
+  const words = cleanText.split(/\s+/).filter(w => w.length > 0)
   const lines = []
   let currentLine = ''
   
   for (const word of words) {
+    // Skip empty words
+    if (!word) continue
+    
     const testLine = currentLine ? `${currentLine} ${word}` : word
     try {
       const width = font.widthOfTextAtSize(testLine, fontSize)
@@ -161,7 +168,8 @@ function wrapText(text, font, fontSize, maxWidth) {
         currentLine = word
       }
     } catch (e) {
-      // Skip problematic words
+      // If word causes encoding error, skip it
+      console.log('Skipping problematic word:', word)
       continue
     }
   }
