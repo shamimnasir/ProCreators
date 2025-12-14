@@ -481,6 +481,22 @@ export async function POST(request) {
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions)
     console.log('Content generated:', content.title)
 
+    // Generate cover image (AI-powered)
+    let coverImageUrl = null
+    try {
+      const themeKey = getPlannerTheme(plannerType)
+      console.log(`Generating cover image for theme: ${themeKey}`)
+      const imageResult = await generateCoverImage(themeKey)
+      if (imageResult.success && imageResult.imageUrl) {
+        coverImageUrl = imageResult.imageUrl
+        console.log('Cover image generated successfully')
+      } else {
+        console.log('Cover image generation failed, using fallback design:', imageResult.error)
+      }
+    } catch (imgError) {
+      console.log('Error generating cover image:', imgError.message)
+    }
+
     // Create PDF
     const pdfDoc = await PDFDocument.create()
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -488,20 +504,36 @@ export async function POST(request) {
     const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
     const fonts = { regular: regularFont, bold: boldFont, italic: italicFont }
 
-    // Cover page
+    // Cover page - use image version if available
     const coverPage = pdfDoc.addPage([size.width, size.height])
-    drawCoverPage(coverPage, {
-      width: size.width,
-      height: size.height,
-      title: content.title,
-      subtitle: content.subtitle,
-      authorName: authorName || undefined,
-      year: year || getCurrentYear(),
-      colors,
-      coverStyle: cover,
-      boldFont,
-      regularFont,
-    })
+    if (coverImageUrl) {
+      await drawCoverPageWithImage(coverPage, pdfDoc, {
+        width: size.width,
+        height: size.height,
+        title: content.title,
+        subtitle: content.subtitle,
+        authorName: authorName || undefined,
+        year: year || getCurrentYear(),
+        colors,
+        coverStyle: cover,
+        boldFont,
+        regularFont,
+        coverImageUrl,
+      })
+    } else {
+      drawCoverPage(coverPage, {
+        width: size.width,
+        height: size.height,
+        title: content.title,
+        subtitle: content.subtitle,
+        authorName: authorName || undefined,
+        year: year || getCurrentYear(),
+        colors,
+        coverStyle: cover,
+        boldFont,
+        regularFont,
+      })
+    }
 
     // Generate content pages based on planner type
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 
