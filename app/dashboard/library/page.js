@@ -105,6 +105,7 @@ export default function LibraryPage() {
   }
 
   const handleDownload = (item) => {
+    // For videos
     if (item.category === 'video' && item.videoUrl) {
       const a = document.createElement('a')
       a.href = item.videoUrl
@@ -114,7 +115,24 @@ export default function LibraryPage() {
       a.click()
       document.body.removeChild(a)
       toast({ title: "Downloading", description: "Video download started" })
-    } else if (item.category === 'image' && item.filePath) {
+      return
+    }
+    
+    // For documents (PDFs - ebooks, journals, planners, worksheets, checklists)
+    if (item.filePath && item.filePath.endsWith('.pdf')) {
+      const a = document.createElement('a')
+      a.href = item.filePath
+      a.download = `${item.title || item.type}-${Date.now()}.pdf`
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      toast({ title: "Downloading", description: "PDF download started" })
+      return
+    }
+    
+    // For images
+    if (item.category === 'image' && item.filePath) {
       const a = document.createElement('a')
       a.href = item.filePath
       a.download = `${item.type}-${Date.now()}.jpg`
@@ -123,7 +141,24 @@ export default function LibraryPage() {
       a.click()
       document.body.removeChild(a)
       toast({ title: "Downloaded", description: "Image downloaded successfully" })
-    } else if (item.content) {
+      return
+    }
+    
+    // For any other file with filePath
+    if (item.filePath) {
+      const a = document.createElement('a')
+      a.href = item.filePath
+      a.download = `${item.title || item.type}-${Date.now()}`
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      toast({ title: "Downloading", description: "Download started" })
+      return
+    }
+    
+    // For text content
+    if (item.content) {
       const blob = new Blob([item.content], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -134,7 +169,15 @@ export default function LibraryPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast({ title: "Downloaded", description: "Content downloaded successfully" })
+      return
     }
+    
+    // Fallback - no downloadable content
+    toast({ 
+      title: "Download unavailable", 
+      description: "This item doesn't have downloadable content",
+      variant: "destructive" 
+    })
   }
 
   // Filter items by category tab
