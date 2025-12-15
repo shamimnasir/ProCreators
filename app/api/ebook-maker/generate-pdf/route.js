@@ -14,7 +14,7 @@ import {
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
 
-// Helper to sanitize text (preserves newlines for paragraph breaks)
+// Helper to sanitize text - PRESERVES Unicode characters (Bengali, Hindi, Chinese, etc.)
 function sanitizeText(text, preserveNewlines = false) {
   if (!text) return ''
   let result = String(text)
@@ -24,10 +24,10 @@ function sanitizeText(text, preserveNewlines = false) {
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E\n\r]/g, '')
+    // Only remove control characters, NOT Unicode letters
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
   
   if (preserveNewlines) {
-    // Normalize multiple newlines to double newline (paragraph break)
     result = result.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ')
   } else {
     result = result.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ')
@@ -44,6 +44,29 @@ function sanitizeForLine(text) {
 // Helper to sanitize content (preserves paragraph structure)
 function sanitizeContent(text) {
   return sanitizeText(text, true)
+}
+
+// Detect if text contains non-Latin characters
+function hasNonLatinChars(text) {
+  if (!text) return false
+  // Bengali, Hindi, Chinese, Arabic, Japanese, Korean, etc.
+  return /[\u0900-\u097F\u0980-\u09FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0B80-\u0BFF\u0C00-\u0C7F]/.test(text)
+}
+
+// Transliterate text for PDF if needed (fallback for fonts that don't support Unicode)
+function getDisplayText(text, font, fontSize) {
+  if (!text) return ''
+  
+  // Check if font can render the text
+  try {
+    // Try to get width - if it fails, the font doesn't support the characters
+    font.widthOfTextAtSize(text, fontSize)
+    return text
+  } catch (e) {
+    // Font doesn't support these characters - we'll need to skip or use fallback
+    // For now, return the text as-is (PDF will show boxes for unsupported chars)
+    return text
+  }
 }
 
 // Helper to wrap text (for single line/paragraph - strips newlines)
