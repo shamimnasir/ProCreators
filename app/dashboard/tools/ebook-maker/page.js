@@ -28,12 +28,13 @@ const GENRES = [
 ]
 
 const COLOR_SCHEMES = [
-  { id: 'ocean-blue', name: 'Ocean Blue', color: 'bg-blue-500' },
-  { id: 'rose-gold', name: 'Rose Gold', color: 'bg-pink-400' },
-  { id: 'forest-green', name: 'Forest Green', color: 'bg-green-600' },
-  { id: 'lavender', name: 'Lavender', color: 'bg-purple-400' },
-  { id: 'sunset', name: 'Sunset', color: 'bg-orange-500' },
-  { id: 'midnight', name: 'Midnight', color: 'bg-indigo-900' },
+  { id: 'ocean-blue', name: 'Ocean Blue', color: 'bg-blue-500', hex: '#3b82f6' },
+  { id: 'rose-gold', name: 'Rose Gold', color: 'bg-pink-400', hex: '#f472b6' },
+  { id: 'forest-green', name: 'Forest Green', color: 'bg-green-600', hex: '#16a34a' },
+  { id: 'lavender', name: 'Lavender', color: 'bg-purple-400', hex: '#c084fc' },
+  { id: 'sunset', name: 'Sunset', color: 'bg-orange-500', hex: '#f97316' },
+  { id: 'midnight', name: 'Midnight', color: 'bg-indigo-900', hex: '#312e81' },
+  { id: 'custom', name: 'Custom', color: 'bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500', hex: null },
 ]
 
 const COVER_STYLES = [
