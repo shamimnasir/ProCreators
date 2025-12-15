@@ -57,6 +57,12 @@ export async function POST(request) {
       )
     }
     
+    // Detect language from chapter title or book title
+    const detectedLang = detectLanguage(chapterTitle) || detectLanguage(bookTitle)
+    const languageInstruction = detectedLang !== 'en' 
+      ? `CRITICAL: The content is in a non-English language. Write ALL content in the SAME language as the chapter title. Do NOT translate to English.`
+      : ''
+    
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     const prompt = `You are a bestselling author writing an engaging chapter for a popular non-fiction ebook.
@@ -65,6 +71,8 @@ BOOK: "${bookTitle || 'Untitled'}"
 AUDIENCE: ${targetAudience || 'general readers looking for practical advice'}
 CHAPTER: "${chapterTitle}"
 ABOUT: ${chapterSummary || 'Cover the main topic in an engaging way'}
+
+${languageInstruction}
 
 CRITICAL WRITING STYLE RULES:
 1. Write like a FRIEND giving advice, NOT like a textbook or research paper
