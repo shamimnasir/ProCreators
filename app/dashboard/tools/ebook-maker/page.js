@@ -754,106 +754,330 @@ export default function EbookMakerPage() {
               <Palette className="h-5 w-5 text-purple-500" />
               Step 4: Design Your Ebook
             </CardTitle>
-            <CardDescription>Choose colors and style for your ebook</CardDescription>
+            <CardDescription>Customize colors, fonts, cover image, and internal page styling</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <Label>Color Scheme</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {COLOR_SCHEMES.map((color) => (
-                      <button
-                        key={color.id}
-                        onClick={() => setColorScheme(color.id)}
-                        className={`p-3 rounded-lg ${color.color} text-white text-sm font-medium transition-all ${
-                          colorScheme === color.id ? 'ring-2 ring-offset-2 ring-primary scale-105' : 'hover:scale-102'
-                        }`}
-                      >
-                        {color.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <Tabs defaultValue="cover" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="cover" className="flex items-center gap-2">
+                  <Image className="h-4 w-4" /> Cover Design
+                </TabsTrigger>
+                <TabsTrigger value="internal" className="flex items-center gap-2">
+                  <Layout className="h-4 w-4" /> Internal Pages
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" /> Preview
+                </TabsTrigger>
+              </TabsList>
 
-                {/* Custom Color Picker - Shows when "Custom" is selected */}
-                {colorScheme === 'custom' && (
-                  <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
-                    <Label className="flex items-center gap-2">
-                      <Palette className="h-4 w-4" />
-                      Pick Your Custom Color
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="color"
-                        value={customColor}
-                        onChange={(e) => setCustomColor(e.target.value)}
-                        className="w-16 h-12 rounded-lg cursor-pointer border-2 border-border"
-                      />
-                      <div className="flex-1">
-                        <Input
-                          value={customColor}
-                          onChange={(e) => setCustomColor(e.target.value)}
-                          placeholder="#6366f1"
-                          className="font-mono uppercase"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'].map((hex) => (
+              {/* Cover Design Tab */}
+              <TabsContent value="cover" className="space-y-6 mt-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Color Scheme */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Color Scheme</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {COLOR_SCHEMES.map((color) => (
                         <button
-                          key={hex}
-                          onClick={() => setCustomColor(hex)}
-                          className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
-                          style={{ backgroundColor: hex }}
-                          title={hex}
-                        />
+                          key={color.id}
+                          onClick={() => setColorScheme(color.id)}
+                          className={`p-3 rounded-lg ${color.color} text-white text-sm font-medium transition-all ${
+                            colorScheme === color.id ? 'ring-2 ring-offset-2 ring-primary scale-105' : 'hover:scale-102'
+                          }`}
+                        >
+                          {color.name}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom Color Picker */}
+                    {colorScheme === 'custom' && (
+                      <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                        <Label className="flex items-center gap-2">
+                          <Palette className="h-4 w-4" />
+                          Pick Your Custom Color
+                        </Label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="color"
+                            value={customColor}
+                            onChange={(e) => setCustomColor(e.target.value)}
+                            className="w-16 h-12 rounded-lg cursor-pointer border-2 border-border"
+                          />
+                          <div className="flex-1">
+                            <Input
+                              value={customColor}
+                              onChange={(e) => setCustomColor(e.target.value)}
+                              placeholder="#6366f1"
+                              className="font-mono uppercase"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'].map((hex) => (
+                            <button
+                              key={hex}
+                              onClick={() => setCustomColor(hex)}
+                              className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                              style={{ backgroundColor: hex }}
+                              title={hex}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cover Style */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Cover Layout Style</Label>
+                    <div className="space-y-2">
+                      {COVER_STYLES.map((style) => (
+                        <button
+                          key={style.id}
+                          onClick={() => setCoverStyle(style.id)}
+                          className={`w-full p-3 rounded-lg border text-left transition-all ${
+                            coverStyle === style.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="font-medium">{style.name}</div>
+                          <div className="text-xs text-muted-foreground">{style.description}</div>
+                        </button>
                       ))}
                     </div>
                   </div>
-                )}
+                </div>
 
+                {/* Cover Image Style */}
                 <div className="space-y-3">
-                  <Label>Cover Style</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {COVER_STYLES.map((style) => (
+                  <Label className="text-base font-semibold">Cover Image Style</Label>
+                  <p className="text-sm text-muted-foreground">Choose what type of AI-generated image appears on your cover</p>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    {COVER_IMAGE_STYLES.map((style) => (
                       <button
                         key={style.id}
-                        onClick={() => setCoverStyle(style.id)}
+                        onClick={() => setCoverImageStyle(style.id)}
                         className={`p-3 rounded-lg border text-center transition-all ${
-                          coverStyle === style.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                          coverImageStyle === style.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                         }`}
                       >
-                        {style.name}
+                        <div className="font-medium text-sm">{style.name}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{style.description}</div>
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
 
-              <div className="space-y-4">
-                <Label>Preview</Label>
-                <div 
-                  className="aspect-[3/4] rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
-                  style={{ 
-                    backgroundColor: colorScheme === 'custom' 
-                      ? customColor 
-                      : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6'
-                  }}
-                >
-                  <div className="text-center pt-8">
-                    <h3 className="text-lg font-bold">{cover.title || 'Your Ebook Title'}</h3>
-                    <p className="text-sm opacity-80 mt-2">{cover.subtitle}</p>
+                  {/* Custom Image Prompt */}
+                  {coverImageStyle === 'custom' && (
+                    <div className="p-4 border rounded-lg bg-muted/50 space-y-2">
+                      <Label>Describe Your Cover Image</Label>
+                      <Textarea
+                        value={customImagePrompt}
+                        onChange={(e) => setCustomImagePrompt(e.target.value)}
+                        placeholder="e.g., A serene mountain landscape at sunset with warm golden hues..."
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground">Be specific about colors, mood, and style you want</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Internal Pages Tab */}
+              <TabsContent value="internal" className="space-y-6 mt-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Font Style */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      <Type className="h-4 w-4" /> Font Style
+                    </Label>
+                    <div className="space-y-2">
+                      {FONT_STYLES.map((font) => (
+                        <button
+                          key={font.id}
+                          onClick={() => setFontStyle(font.id)}
+                          className={`w-full p-3 rounded-lg border text-left transition-all ${
+                            fontStyle === font.id ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="font-medium" style={{ fontFamily: font.font }}>{font.name}</div>
+                          <div className="text-xs text-muted-foreground">{font.description}</div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-center space-y-1">
-                    {cover.authorName && <p className="text-sm">by {cover.authorName}</p>}
-                    <p className="text-xs opacity-60">{chapters.length} Chapters</p>
+
+                  {/* Internal Page Colors */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      <Palette className="h-4 w-4" /> Internal Page Color
+                    </Label>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setInternalPageColor('same')}
+                        className={`w-full p-3 rounded-lg border text-left transition-all ${
+                          internalPageColor === 'same' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="font-medium">Match Cover Theme</div>
+                        <div className="text-xs text-muted-foreground">Use same color palette as cover</div>
+                      </button>
+                      <button
+                        onClick={() => setInternalPageColor('clean')}
+                        className={`w-full p-3 rounded-lg border text-left transition-all ${
+                          internalPageColor === 'clean' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="font-medium">Clean White</div>
+                        <div className="text-xs text-muted-foreground">White background with black text</div>
+                      </button>
+                      <button
+                        onClick={() => setInternalPageColor('custom')}
+                        className={`w-full p-3 rounded-lg border text-left transition-all ${
+                          internalPageColor === 'custom' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="font-medium">Custom Background</div>
+                        <div className="text-xs text-muted-foreground">Choose your own page color</div>
+                      </button>
+                    </div>
+
+                    {/* Custom Internal Color Picker */}
+                    {internalPageColor === 'custom' && (
+                      <div className="p-4 border rounded-lg bg-muted/50 space-y-2">
+                        <Label>Page Background Color</Label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="color"
+                            value={internalCustomColor}
+                            onChange={(e) => setInternalCustomColor(e.target.value)}
+                            className="w-12 h-10 rounded-lg cursor-pointer border-2 border-border"
+                          />
+                          <Input
+                            value={internalCustomColor}
+                            onChange={(e) => setInternalCustomColor(e.target.value)}
+                            placeholder="#ffffff"
+                            className="font-mono uppercase flex-1"
+                          />
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {['#ffffff', '#fef9e7', '#f5f5dc', '#f0f8ff', '#faf0e6', '#fffacd'].map((hex) => (
+                            <button
+                              key={hex}
+                              onClick={() => setInternalCustomColor(hex)}
+                              className="w-8 h-8 rounded border-2 border-gray-300 shadow-sm hover:scale-110 transition-transform"
+                              style={{ backgroundColor: hex }}
+                              title={hex}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Light colors work best for readability</p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="flex gap-2">
+                {/* Page Elements */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">Page Elements</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <input type="checkbox" defaultChecked id="showPageNumbers" className="h-4 w-4" />
+                      <label htmlFor="showPageNumbers" className="text-sm">Show Page Numbers</label>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <input type="checkbox" defaultChecked id="showChapterHeaders" className="h-4 w-4" />
+                      <label htmlFor="showChapterHeaders" className="text-sm">Chapter Header Decorations</label>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <input type="checkbox" defaultChecked id="showKeyTakeaways" className="h-4 w-4" />
+                      <label htmlFor="showKeyTakeaways" className="text-sm">Key Takeaway Boxes</label>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <input type="checkbox" defaultChecked id="showDividers" className="h-4 w-4" />
+                      <label htmlFor="showDividers" className="text-sm">Section Dividers</label>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Preview Tab */}
+              <TabsContent value="preview" className="mt-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Cover Preview */}
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Cover Preview</Label>
+                    <div 
+                      className="aspect-[3/4] rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
+                      style={{ 
+                        backgroundColor: colorScheme === 'custom' 
+                          ? customColor 
+                          : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6'
+                      }}
+                    >
+                      <div className="h-1/2 bg-black/10 rounded-lg flex items-center justify-center text-xs opacity-50">
+                        {coverImageStyle === 'gradient' ? 'Gradient Only' : `AI ${coverImageStyle} Image`}
+                      </div>
+                      <div className="text-center space-y-2">
+                        <h3 className="text-lg font-bold leading-tight">{cover.title || 'Your Ebook Title'}</h3>
+                        <p className="text-sm opacity-80">{cover.subtitle}</p>
+                        {cover.authorName && <p className="text-xs opacity-60">by {cover.authorName}</p>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Internal Page Preview */}
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Internal Page Preview</Label>
+                    <div 
+                      className="aspect-[3/4] rounded-lg p-4 shadow-xl border flex flex-col"
+                      style={{ 
+                        backgroundColor: internalPageColor === 'clean' ? '#ffffff' 
+                          : internalPageColor === 'custom' ? internalCustomColor 
+                          : '#fafafa',
+                        fontFamily: FONT_STYLES.find(f => f.id === fontStyle)?.font || 'Times New Roman'
+                      }}
+                    >
+                      <div 
+                        className="text-xs font-bold mb-2 px-2 py-1 rounded"
+                        style={{ 
+                          backgroundColor: colorScheme === 'custom' ? customColor : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6',
+                          color: 'white'
+                        }}
+                      >
+                        Chapter 1
+                      </div>
+                      <h3 
+                        className="text-sm font-bold mb-2"
+                        style={{ 
+                          color: colorScheme === 'custom' ? customColor : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6'
+                        }}
+                      >
+                        Sample Chapter Title
+                      </h3>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-2 bg-gray-300 rounded w-full"></div>
+                        <div className="h-2 bg-gray-300 rounded w-5/6"></div>
+                        <div className="h-2 bg-gray-300 rounded w-4/5"></div>
+                        <div className="h-2 bg-gray-300 rounded w-full"></div>
+                        <div className="h-2 bg-gray-300 rounded w-3/4"></div>
+                      </div>
+                      <div 
+                        className="mt-2 p-2 rounded text-xs"
+                        style={{ 
+                          backgroundColor: (colorScheme === 'custom' ? customColor : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6') + '20',
+                          borderLeft: `3px solid ${colorScheme === 'custom' ? customColor : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6'}`
+                        }}
+                      >
+                        Key Takeaway Box
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setStep(3)}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Content
               </Button>
