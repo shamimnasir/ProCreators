@@ -262,7 +262,13 @@ export default function EbookMakerPage() {
           introduction,
           chapters,
           conclusion,
-          settings: { colorScheme, coverStyle, genre, generateCoverImage: true }
+          settings: { 
+            colorScheme, 
+            customColor: colorScheme === 'custom' ? customColor : null,
+            coverStyle, 
+            genre, 
+            generateCoverImage: true 
+          }
         })
       })
 
