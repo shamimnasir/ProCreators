@@ -3,19 +3,17 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
-// Helper to sanitize text
+// Helper to sanitize text while preserving structure markers
 function sanitizeText(text) {
   if (!text) return ''
   return String(text)
-    .replace(/[\r\n\t]/g, ' ')
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\u2026/g, '...')
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E]/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/[^\x20-\x7E\n\r\t•\-\*]/g, '')
     .trim()
 }
 
@@ -41,43 +39,62 @@ export async function POST(request) {
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
-    const prompt = `You are an expert author writing a chapter for an ebook.
+    const prompt = `You are a bestselling author writing an engaging chapter for a popular non-fiction ebook.
 
-Book Title: "${bookTitle || 'Untitled'}"
-Book Context: ${bookContext || 'Educational/informative book'}
-Target Audience: ${targetAudience || 'general readers'}
-Tone: ${tone || 'professional and engaging'}
+BOOK: "${bookTitle || 'Untitled'}"
+AUDIENCE: ${targetAudience || 'general readers looking for practical advice'}
+CHAPTER: "${chapterTitle}"
+ABOUT: ${chapterSummary || 'Cover the main topic in an engaging way'}
 
-Write Chapter: "${chapterTitle}"
-Chapter Summary: ${chapterSummary || 'Cover the main topic'}
-Key Points to Cover:
-${(keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n')}
+CRITICAL WRITING STYLE RULES:
+1. Write like a FRIEND giving advice, NOT like a textbook or research paper
+2. Use SHORT paragraphs (2-4 sentences MAX per paragraph)
+3. Break up content with clear SUBHEADINGS every 150-200 words
+4. Include BULLET POINTS and numbered lists frequently
+5. Add "Pro Tip:" or "Quick Tip:" callouts for practical advice
+6. Use conversational language ("you'll find", "here's the thing", "let's be honest")
+7. Include brief EXAMPLES or mini-stories to illustrate points
+8. Vary sentence length - mix short punchy sentences with longer ones
+9. End sections with a clear transition or question
 
-Target Word Count: ${wordCount || 1500} words
+DO NOT:
+- Write long academic paragraphs
+- Use formal/stiff language
+- Create walls of text without breaks
+- Be preachy or lecture-y
 
-Write comprehensive, well-structured chapter content that:
-1. Opens with an engaging introduction paragraph
-2. Covers each key point in depth with examples and practical advice
-3. Uses clear subheadings for each major section
-4. Includes actionable tips and real-world applications
-5. Ends with a summary and transition to the next topic
+Key Points to weave in naturally:
+${(keyPoints || ['Main concepts', 'Practical applications']).map((p, i) => `• ${p}`).join('\n')}
 
-Format your response as JSON:
+Target length: ${wordCount || 1200} words (quality over quantity)
+
+FORMAT YOUR RESPONSE AS JSON:
 {
-  "title": "...",
-  "content": "Full chapter content with multiple paragraphs. Use clear paragraph breaks. Include practical examples and actionable advice.",
+  "title": "${chapterTitle}",
   "sections": [
     {
-      "heading": "Section heading",
-      "content": "Section content..."
+      "heading": "Opening Hook",
+      "content": "2-3 short paragraphs that grab attention. Start with a relatable scenario or question.",
+      "tips": ["Optional tip or callout"],
+      "bullets": ["Optional bullet points"]
+    },
+    {
+      "heading": "Section Subheading",
+      "content": "Content broken into short paragraphs...",
+      "tips": ["Pro Tip: practical advice here"],
+      "bullets": ["Key point 1", "Key point 2"]
     }
   ],
-  "keyTakeaways": ["...", "...", "..."],
-  "callToAction": "What the reader should do next..."
+  "keyTakeaways": [
+    "One clear actionable takeaway",
+    "Another practical insight",
+    "Something they can do TODAY"
+  ],
+  "closingThought": "An inspiring or thought-provoking final sentence"
 }
 
-Write substantive, valuable content that provides real insights. Avoid fluff.
-IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII characters only.`
+Create 4-6 sections. Each section should have a clear heading, short paragraphs in content, and optionally tips or bullets.
+IMPORTANT: Return ONLY valid JSON, no markdown. Use plain ASCII.`
 
     const result = await model.generateContent(prompt)
     const response = await result.response
@@ -90,13 +107,14 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII char
     
     // Sanitize all fields
     chapter.title = sanitizeText(chapter.title)
-    chapter.content = sanitizeText(chapter.content)
-    chapter.callToAction = sanitizeText(chapter.callToAction)
+    chapter.closingThought = sanitizeText(chapter.closingThought)
     
     if (chapter.sections) {
       chapter.sections = chapter.sections.map(s => ({
         heading: sanitizeText(s.heading),
-        content: sanitizeText(s.content)
+        content: sanitizeText(s.content),
+        tips: (s.tips || []).map(t => sanitizeText(t)),
+        bullets: (s.bullets || []).map(b => sanitizeText(b))
       }))
     }
     
@@ -104,7 +122,18 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII char
       chapter.keyTakeaways = chapter.keyTakeaways.map(t => sanitizeText(t))
     }
     
-    console.log(`AI generated chapter content: ${chapter.title}`)
+    // Build combined content for simple display
+    let combinedContent = ''
+    if (chapter.sections) {
+      chapter.sections.forEach(section => {
+        if (section.content) {
+          combinedContent += section.content + '\n\n'
+        }
+      })
+    }
+    chapter.content = combinedContent.trim()
+    
+    console.log(`AI generated chapter content: ${chapter.title} (${chapter.sections?.length || 0} sections)`)
     
     return NextResponse.json({
       success: true,
