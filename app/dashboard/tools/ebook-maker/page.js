@@ -91,6 +91,11 @@ export default function EbookMakerPage() {
   const [colorScheme, setColorScheme] = useState('ocean-blue')
   const [customColor, setCustomColor] = useState('#6366f1')
   const [coverStyle, setCoverStyle] = useState('elegant')
+  const [fontStyle, setFontStyle] = useState('serif')
+  const [coverImageStyle, setCoverImageStyle] = useState('abstract')
+  const [customImagePrompt, setCustomImagePrompt] = useState('')
+  const [internalPageColor, setInternalPageColor] = useState('same') // 'same' or 'custom'
+  const [internalCustomColor, setInternalCustomColor] = useState('#ffffff')
 
   // Generated result
   const [result, setResult] = useState(null)
