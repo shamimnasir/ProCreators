@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
-  RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp
+  RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp,
+  Type, Image, Layout
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
