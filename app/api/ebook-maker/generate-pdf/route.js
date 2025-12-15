@@ -9,7 +9,8 @@ import {
   COVER_STYLES, 
   drawCoverPageWithImage,
   drawCoverPage,
-  getCurrentYear
+  getCurrentYear,
+  generateCustomColors
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
 
