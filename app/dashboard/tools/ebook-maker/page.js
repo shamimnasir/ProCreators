@@ -314,9 +314,14 @@ export default function EbookMakerPage() {
           settings: { 
             colorScheme, 
             customColor: colorScheme === 'custom' ? customColor : null,
-            coverStyle, 
+            coverStyle,
+            fontStyle,
+            coverImageStyle,
+            customImagePrompt: coverImageStyle === 'custom' ? customImagePrompt : null,
+            internalPageColor,
+            internalCustomColor: internalPageColor === 'custom' ? internalCustomColor : null,
             genre, 
-            generateCoverImage: true 
+            generateCoverImage: coverImageStyle !== 'gradient'
           }
         })
       })
