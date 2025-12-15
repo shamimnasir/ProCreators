@@ -77,6 +77,7 @@ export async function POST(request) {
     console.log(`Generating ebook PDF: "${cover.title}" with ${chapters.length} chapters...`)
     
     const colorScheme = settings?.colorScheme || 'ocean-blue'
+    const customColor = settings?.customColor || null
     const coverStyle = settings?.coverStyle || 'elegant'
     const genre = settings?.genre || 'non-fiction'
     
@@ -108,7 +109,13 @@ export async function POST(request) {
     const contentWidth = pageWidth - (margin * 2)
     const lineHeight = 20
     
-    const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['ocean-blue']
+    // Get colors - either from preset or generate custom
+    let colors
+    if (colorScheme === 'custom' && customColor) {
+      colors = generateCustomColors(customColor)
+    } else {
+      colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['ocean-blue']
+    }
     const coverStyleObj = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
     
     // ===== COVER PAGE =====
