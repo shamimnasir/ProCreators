@@ -38,9 +38,25 @@ const COLOR_SCHEMES = [
 ]
 
 const COVER_STYLES = [
-  { id: 'elegant', name: 'Elegant' },
-  { id: 'modern', name: 'Modern' },
-  { id: 'minimalist', name: 'Minimalist' },
+  { id: 'elegant', name: 'Elegant', description: 'Classic with decorative elements' },
+  { id: 'modern', name: 'Modern', description: 'Clean geometric design' },
+  { id: 'minimalist', name: 'Minimalist', description: 'Simple and clean' },
+  { id: 'bold', name: 'Bold', description: 'High contrast dramatic' },
+  { id: 'artistic', name: 'Artistic', description: 'Creative with textures' },
+]
+
+const FONT_STYLES = [
+  { id: 'serif', name: 'Classic Serif', font: 'Times New Roman', description: 'Traditional book style' },
+  { id: 'sans', name: 'Modern Sans', font: 'Helvetica', description: 'Clean and modern' },
+  { id: 'elegant', name: 'Elegant', font: 'Georgia', description: 'Sophisticated look' },
+]
+
+const COVER_IMAGE_STYLES = [
+  { id: 'abstract', name: 'Abstract Art', description: 'Geometric shapes and colors' },
+  { id: 'nature', name: 'Nature Scene', description: 'Landscapes and natural elements' },
+  { id: 'minimal', name: 'Minimal Pattern', description: 'Simple subtle pattern' },
+  { id: 'gradient', name: 'Gradient Only', description: 'No image, just color gradient' },
+  { id: 'custom', name: 'Custom Prompt', description: 'Describe your own image' },
 ]
 
 export default function EbookMakerPage() {
