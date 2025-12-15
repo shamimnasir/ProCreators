@@ -14,20 +14,36 @@ import {
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
 
-// Helper to sanitize text
-function sanitizeText(text) {
+// Helper to sanitize text (preserves newlines for paragraph breaks)
+function sanitizeText(text, preserveNewlines = false) {
   if (!text) return ''
-  return String(text)
-    .replace(/[\r\n\t]/g, ' ')
+  let result = String(text)
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\u2026/g, '...')
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .replace(/[^\x20-\x7E\n\r]/g, '')
+  
+  if (preserveNewlines) {
+    // Normalize multiple newlines to double newline (paragraph break)
+    result = result.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ')
+  } else {
+    result = result.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ')
+  }
+  
+  return result.trim()
+}
+
+// Helper to sanitize text for single lines (removes newlines)
+function sanitizeForLine(text) {
+  return sanitizeText(text, false)
+}
+
+// Helper to sanitize content (preserves paragraph structure)
+function sanitizeContent(text) {
+  return sanitizeText(text, true)
 }
 
 // Helper to wrap text
