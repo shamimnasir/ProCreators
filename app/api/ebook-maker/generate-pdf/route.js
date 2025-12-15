@@ -121,6 +121,14 @@ export async function POST(request) {
     const coverStyle = settings?.coverStyle || 'elegant'
     const genre = settings?.genre || 'non-fiction'
     
+    // Detect if content contains non-Latin characters (Bengali, Hindi, etc.)
+    const contentSample = `${cover.title} ${cover.subtitle || ''} ${chapters.map(c => c.title).join(' ')}`
+    const needsUnicodeFont = hasNonLatinChars(contentSample)
+    
+    if (needsUnicodeFont) {
+      console.log('Detected non-Latin characters, using Unicode font...')
+    }
+    
     // Generate cover image if requested
     let coverImageUrl = null
     if (settings?.generateCoverImage !== false) {
@@ -139,9 +147,55 @@ export async function POST(request) {
     
     // Create PDF
     const pdfDoc = await PDFDocument.create()
-    const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-    const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
-    const italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
+    
+    // Embed fonts - use Unicode fonts if needed
+    let regularFont, boldFont, italicFont
+    
+    if (needsUnicodeFont) {
+      // Load custom Unicode fonts for non-Latin scripts
+      try {
+        // Check if Bengali (most common Unicode request based on user's case)
+        const hasBengali = /[\u0980-\u09FF]/.test(contentSample)
+        
+        if (hasBengali) {
+          // Load Bengali font
+          const bengaliRegularPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Regular.ttf')
+          const bengaliBoldPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Bold.ttf')
+          
+          const regularFontBytes = await fs.readFile(bengaliRegularPath)
+          const boldFontBytes = await fs.readFile(bengaliBoldPath)
+          
+          regularFont = await pdfDoc.embedFont(regularFontBytes)
+          boldFont = await pdfDoc.embedFont(boldFontBytes)
+          italicFont = regularFont // Bengali fonts typically don't have italic variant
+          
+          console.log('Bengali fonts embedded successfully')
+        } else {
+          // Fallback to standard Noto Sans for other scripts
+          const notoRegularPath = path.join(process.cwd(), 'public/fonts/NotoSans-Regular.ttf')
+          const notoBoldPath = path.join(process.cwd(), 'public/fonts/NotoSans-Bold.ttf')
+          
+          const regularFontBytes = await fs.readFile(notoRegularPath)
+          const boldFontBytes = await fs.readFile(notoBoldPath)
+          
+          regularFont = await pdfDoc.embedFont(regularFontBytes)
+          boldFont = await pdfDoc.embedFont(boldFontBytes)
+          italicFont = regularFont
+          
+          console.log('Noto Sans fonts embedded successfully')
+        }
+      } catch (fontError) {
+        console.log('Custom font loading failed, falling back to standard fonts:', fontError.message)
+        regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+        boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+        italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
+      }
+    } else {
+      // Use standard PDF fonts for Latin text
+      regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+      boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+      italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
+    }
     
     const pageWidth = 612
     const pageHeight = 792
