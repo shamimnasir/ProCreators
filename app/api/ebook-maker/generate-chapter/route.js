@@ -3,18 +3,38 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
-// Helper to sanitize text while preserving structure markers
-function sanitizeText(text) {
+// Helper to sanitize text - PRESERVES Unicode characters (Bengali, Hindi, Chinese, etc.)
+function sanitizeText(text, preserveNewlines = false) {
   if (!text) return ''
-  return String(text)
+  let result = String(text)
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\u2026/g, '...')
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E\n\r\t•\-\*]/g, '')
-    .trim()
+    // Only remove control characters, NOT Unicode letters
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+  
+  if (preserveNewlines) {
+    result = result.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+/g, ' ')
+  } else {
+    result = result.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ')
+  }
+  
+  return result.trim()
+}
+
+// Detect language from text
+function detectLanguage(text) {
+  if (!text) return 'en'
+  if (/[\u0980-\u09FF]/.test(text)) return 'bn' // Bengali
+  if (/[\u0900-\u097F]/.test(text)) return 'hi' // Hindi
+  if (/[\u4E00-\u9FFF]/.test(text)) return 'zh' // Chinese
+  if (/[\u0600-\u06FF]/.test(text)) return 'ar' // Arabic
+  if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'ja' // Japanese
+  if (/[\uAC00-\uD7AF]/.test(text)) return 'ko' // Korean
+  return 'en'
 }
 
 export async function POST(request) {
