@@ -46,9 +46,9 @@ function sanitizeContent(text) {
   return sanitizeText(text, true)
 }
 
-// Helper to wrap text
+// Helper to wrap text (for single line/paragraph - strips newlines)
 function wrapText(text, font, fontSize, maxWidth) {
-  const cleanText = sanitizeText(text || '')
+  const cleanText = sanitizeForLine(text || '')
   if (!cleanText) return []
   
   const words = cleanText.split(/\s+/).filter(w => w.length > 0)
