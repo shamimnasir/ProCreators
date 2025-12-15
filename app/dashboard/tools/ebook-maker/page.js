@@ -100,6 +100,33 @@ export default function EbookMakerPage() {
   // Generated result
   const [result, setResult] = useState(null)
 
+  // Helper to check if content is complete
+  const getContentStatus = () => {
+    const chaptersWithContent = chapters.filter(ch => ch.content && ch.content.trim().length > 50)
+    return {
+      hasIntro: introduction.content && introduction.content.trim().length > 50,
+      hasConclusion: conclusion.content && conclusion.content.trim().length > 50,
+      chaptersComplete: chaptersWithContent.length,
+      totalChapters: chapters.length,
+      allChaptersComplete: chaptersWithContent.length === chapters.length
+    }
+  }
+
+  // Navigate to design with content check
+  const goToDesign = () => {
+    const status = getContentStatus()
+    if (!status.allChaptersComplete) {
+      const missing = status.totalChapters - status.chaptersComplete
+      toast({
+        title: "Content Missing",
+        description: `${missing} chapter(s) have no content. Click "Generate All Content" or write your own content before proceeding.`,
+        variant: "destructive"
+      })
+      return
+    }
+    setStep(4)
+  }
+
   // Step 1: Generate Outline
   const generateOutline = async () => {
     if (!topic.trim()) {
