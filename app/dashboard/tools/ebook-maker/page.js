@@ -73,6 +73,7 @@ export default function EbookMakerPage() {
 
   // Step 4: Design settings
   const [colorScheme, setColorScheme] = useState('ocean-blue')
+  const [customColor, setCustomColor] = useState('#6366f1')
   const [coverStyle, setCoverStyle] = useState('elegant')
 
   // Generated result
