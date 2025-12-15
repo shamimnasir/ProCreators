@@ -715,10 +715,31 @@ export default function EbookMakerPage() {
                 <Button variant="outline" onClick={() => setStep(2)}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Back to Outline
                 </Button>
-                <Button className="flex-1" onClick={() => setStep(4)}>
+                <Button className="flex-1" onClick={goToDesign}>
                   Continue to Design <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Content Status Indicator */}
+              {(() => {
+                const status = getContentStatus()
+                return (
+                  <div className={`p-3 rounded-lg text-sm ${status.allChaptersComplete ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {status.allChaptersComplete ? (
+                      <span className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        All {status.totalChapters} chapters have content. Ready to design!
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Edit3 className="h-4 w-4" />
+                        {status.chaptersComplete}/{status.totalChapters} chapters have content. 
+                        Generate or write content for remaining chapters.
+                      </span>
+                    )}
+                  </div>
+                )
+              })()}
             </CardContent>
           </Card>
         </div>
