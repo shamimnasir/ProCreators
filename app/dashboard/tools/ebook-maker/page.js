@@ -706,6 +706,43 @@ export default function EbookMakerPage() {
                   </div>
                 </div>
 
+                {/* Custom Color Picker - Shows when "Custom" is selected */}
+                {colorScheme === 'custom' && (
+                  <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                    <Label className="flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      Pick Your Custom Color
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="color"
+                        value={customColor}
+                        onChange={(e) => setCustomColor(e.target.value)}
+                        className="w-16 h-12 rounded-lg cursor-pointer border-2 border-border"
+                      />
+                      <div className="flex-1">
+                        <Input
+                          value={customColor}
+                          onChange={(e) => setCustomColor(e.target.value)}
+                          placeholder="#6366f1"
+                          className="font-mono uppercase"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'].map((hex) => (
+                        <button
+                          key={hex}
+                          onClick={() => setCustomColor(hex)}
+                          className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                          style={{ backgroundColor: hex }}
+                          title={hex}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   <Label>Cover Style</Label>
                   <div className="grid grid-cols-3 gap-2">
@@ -726,7 +763,14 @@ export default function EbookMakerPage() {
 
               <div className="space-y-4">
                 <Label>Preview</Label>
-                <div className={`aspect-[3/4] rounded-lg ${COLOR_SCHEMES.find(c => c.id === colorScheme)?.color} p-6 text-white flex flex-col justify-between shadow-xl`}>
+                <div 
+                  className="aspect-[3/4] rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
+                  style={{ 
+                    backgroundColor: colorScheme === 'custom' 
+                      ? customColor 
+                      : COLOR_SCHEMES.find(c => c.id === colorScheme)?.hex || '#3b82f6'
+                  }}
+                >
                   <div className="text-center pt-8">
                     <h3 className="text-lg font-bold">{cover.title || 'Your Ebook Title'}</h3>
                     <p className="text-sm opacity-80 mt-2">{cover.subtitle}</p>
