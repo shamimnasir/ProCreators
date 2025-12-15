@@ -4,384 +4,554 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Download, Sparkles, ArrowLeft, CheckCircle, DollarSign, GraduationCap } from 'lucide-react'
+import { 
+  Loader2, Download, Sparkles, ArrowLeft, ArrowRight,
+  FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
+  GraduationCap, ChevronDown, ChevronUp, BookOpen
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 
-const WORKSHEET_TYPES = [
-  { id: 'math', name: 'Math Practice', icon: '🔢', description: 'Addition, subtraction, etc.' },
-  { id: 'reading', name: 'Reading Comprehension', icon: '📖', description: 'Passages & questions' },
-  { id: 'writing', name: 'Writing Practice', icon: '✍️', description: 'Prompts & exercises' },
-  { id: 'science', name: 'Science', icon: '🔬', description: 'Biology, chemistry, etc.' },
-  { id: 'language', name: 'Language Learning', icon: '🌍', description: 'Vocabulary & grammar' },
-  { id: 'social-studies', name: 'Social Studies', icon: '🌎', description: 'History & geography' },
-  { id: 'critical-thinking', name: 'Critical Thinking', icon: '🧩', description: 'Logic & puzzles' },
+const SUBJECTS = [
+  { id: 'math', name: 'Mathematics', icon: '🔢' },
+  { id: 'science', name: 'Science', icon: '🔬' },
+  { id: 'english', name: 'English/Language Arts', icon: '📖' },
+  { id: 'history', name: 'History/Social Studies', icon: '🏛️' },
+  { id: 'geography', name: 'Geography', icon: '🌍' },
+  { id: 'art', name: 'Art', icon: '🎨' },
+  { id: 'music', name: 'Music', icon: '🎵' },
+  { id: 'computer', name: 'Computer Science', icon: '💻' },
 ]
 
 const GRADE_LEVELS = [
-  { id: 'pre-k', name: 'Pre-K' },
-  { id: 'k', name: 'Kindergarten' },
-  { id: '1st', name: '1st Grade' },
-  { id: '2nd', name: '2nd Grade' },
-  { id: '3rd', name: '3rd Grade' },
-  { id: '4th', name: '4th Grade' },
-  { id: '5th', name: '5th Grade' },
-  { id: '6th', name: '6th Grade' },
-  { id: '7th', name: '7th Grade' },
-  { id: '8th', name: '8th Grade' },
-  { id: 'high-school', name: 'High School' },
-  { id: 'adult', name: 'Adult' },
+  'Kindergarten', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', '5th Grade',
+  '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'College'
+]
+
+const QUESTION_TYPES = [
+  { id: 'multiple-choice', name: 'Multiple Choice' },
+  { id: 'fill-blank', name: 'Fill in the Blank' },
+  { id: 'short-answer', name: 'Short Answer' },
+  { id: 'true-false', name: 'True/False' },
+  { id: 'matching', name: 'Matching' },
+]
+
+const COLOR_SCHEMES = [
+  { id: 'ocean-blue', name: 'Ocean Blue', color: 'bg-blue-500' },
+  { id: 'forest-green', name: 'Forest Green', color: 'bg-green-600' },
+  { id: 'lavender', name: 'Lavender', color: 'bg-purple-400' },
+  { id: 'sunset', name: 'Sunset', color: 'bg-orange-400' },
 ]
 
 export default function WorksheetMakerPage() {
-  const [mode, setMode] = useState('easy')
-  const [worksheetType, setWorksheetType] = useState('math')
-  const [gradeLevel, setGradeLevel] = useState('3rd')
-  const [topic, setTopic] = useState('')
-  const [questionCount, setQuestionCount] = useState(10)
-  const [includeAnswerKey, setIncludeAnswerKey] = useState(true)
+  const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [generated, setGenerated] = useState(null)
   const { toast } = useToast()
 
-  const handleGenerate = async () => {
+  // Step 1
+  const [subject, setSubject] = useState('math')
+  const [topic, setTopic] = useState('')
+  const [gradeLevel, setGradeLevel] = useState('6th Grade')
+  const [questionCount, setQuestionCount] = useState(10)
+
+  // Step 2: Worksheet content (editable)
+  const [cover, setCover] = useState({ title: '', subtitle: '', instructions: '', teacherName: '', subject: '', gradeLevel: '' })
+  const [sections, setSections] = useState([])
+  const [bonusQuestions, setBonusQuestions] = useState([])
+  const [expandedSection, setExpandedSection] = useState(null)
+
+  // Step 3: Settings
+  const [colorScheme, setColorScheme] = useState('ocean-blue')
+  const [coverStyle, setCoverStyle] = useState('modern')
+  const [includeAnswerKey, setIncludeAnswerKey] = useState(true)
+
+  // Result
+  const [result, setResult] = useState(null)
+
+  // Generate structure
+  const generateStructure = async () => {
     if (!topic.trim()) {
-      toast({
-        title: "Topic Required",
-        description: "Please enter a topic for the worksheet",
-        variant: "destructive"
-      })
+      toast({ title: "Topic Required", description: "Please enter a topic", variant: "destructive" })
       return
     }
 
     setLoading(true)
-    setGenerated(null)
-    
     try {
-      const response = await fetch('/api/worksheet-maker/generate', {
+      const response = await fetch('/api/worksheet-maker/generate-structure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          worksheetType,
-          gradeLevel,
-          topic,
-          questionCount,
-          includeAnswerKey
-        })
+        body: JSON.stringify({ subject, topic, gradeLevel, questionCount })
       })
 
       const data = await response.json()
-      
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to generate worksheet')
-      }
-      
-      setGenerated(data)
-      toast({
-        title: "📝 Worksheet Created!",
-        description: `"${data.title}" with ${data.questionCount} questions is ready!`
+      if (!data.success) throw new Error(data.error)
+
+      const w = data.worksheet
+      setCover({
+        title: w.title,
+        subtitle: `${w.subject} - ${w.gradeLevel}`,
+        instructions: w.instructions,
+        teacherName: '',
+        subject: w.subject,
+        gradeLevel: w.gradeLevel
       })
+      setSections(w.sections || [])
+      setBonusQuestions(w.bonusQuestions || [])
+      
+      setStep(2)
+      toast({ title: "Worksheet Generated!", description: "Review and customize your questions." })
     } catch (error) {
-      toast({
-        title: "Generation Failed",
-        description: error.message,
-        variant: "destructive"
-      })
+      toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)
     }
   }
 
-  const selectedType = WORKSHEET_TYPES.find(w => w.id === worksheetType)
+  // Generate PDF
+  const generatePDF = async () => {
+    if (!cover.title || sections.length === 0) {
+      toast({ title: "Missing Content", description: "Please add a title and questions", variant: "destructive" })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/worksheet-maker/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cover,
+          sections,
+          bonusQuestions,
+          includeAnswerKey,
+          settings: { colorScheme, coverStyle, subject, generateCoverImage: true }
+        })
+      })
+
+      const data = await response.json()
+      if (!data.success) throw new Error(data.error)
+
+      setResult(data)
+      setStep(4)
+      toast({ title: "Worksheet Created!", description: `${data.pageCount} pages ready!` })
+    } catch (error) {
+      toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Section management
+  const addSection = () => {
+    setSections([...sections, { name: 'New Section', type: 'multiple-choice', instructions: '', questions: [] }])
+  }
+
+  const updateSection = (idx, field, value) => {
+    const updated = [...sections]
+    updated[idx] = { ...updated[idx], [field]: value }
+    setSections(updated)
+  }
+
+  const addQuestion = (sectionIdx) => {
+    const updated = [...sections]
+    updated[sectionIdx].questions = [...(updated[sectionIdx].questions || []), 
+      { question: '', options: ['A) ', 'B) ', 'C) ', 'D) '], answer: '', points: 1 }
+    ]
+    setSections(updated)
+  }
+
+  const updateQuestion = (sectionIdx, qIdx, field, value) => {
+    const updated = [...sections]
+    updated[sectionIdx].questions[qIdx] = { ...updated[sectionIdx].questions[qIdx], [field]: value }
+    setSections(updated)
+  }
+
+  const selectedSubject = SUBJECTS.find(s => s.id === subject)
+  const selectedColor = COLOR_SCHEMES.find(c => c.id === colorScheme)
+  const totalQuestions = sections.reduce((sum, s) => sum + (s.questions?.length || 0), 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/digital-products">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <Button variant="ghost" size="icon"><ArrowLeft className="h-5 w-5" /></Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <span className="text-4xl">📝</span>
-            Worksheet Generator
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <GraduationCap className="h-6 w-6 text-blue-500" />
+            Worksheet Generator Pro
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Create educational worksheets for any grade level
-          </p>
+          <p className="text-muted-foreground">Create educational worksheets with AI-generated questions</p>
         </div>
-        <Badge variant="secondary" className="gap-1">
-          <DollarSign className="h-3 w-3" />
-          Sell for $5-$20
-        </Badge>
       </div>
 
-      {/* Platform badges */}
-      <Card className="border-dashed bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30">
-        <CardContent className="py-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Perfect for:</span>
-            {['Teachers Pay Teachers', 'Etsy', 'Gumroad', 'Homeschool Markets'].map((platform) => (
-              <Badge key={platform} variant="outline" className="bg-white dark:bg-blue-900/50">
-                {platform}
-              </Badge>
-            ))}
+      {/* Progress Steps */}
+      <div className="flex items-center justify-center gap-2">
+        {[1, 2, 3, 4].map((s) => (
+          <div key={s} className="flex items-center">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+              step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
+              {step > s ? <CheckCircle className="h-5 w-5" /> : s}
+            </div>
+            {s < 4 && <div className={`w-16 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
+      <div className="flex justify-center gap-12 text-xs text-muted-foreground">
+        <span>Topic</span>
+        <span>Questions</span>
+        <span>Design</span>
+        <span>Download</span>
+      </div>
 
-      <Tabs value={mode} onValueChange={setMode}>
-        <TabsList>
-          <TabsTrigger value="easy">✨ Easy Mode</TabsTrigger>
-          <TabsTrigger value="pro">⚙️ Pro Mode</TabsTrigger>
-        </TabsList>
+      {/* Step 1: Subject & Topic */}
+      {step === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+              Step 1: What Would You Like to Teach?
+            </CardTitle>
+            <CardDescription>Select subject and topic for AI-generated questions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {SUBJECTS.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSubject(s.id)}
+                  className={`p-4 rounded-lg border text-center transition-all ${
+                    subject === s.id ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">{s.icon}</div>
+                  <div className="font-medium text-sm">{s.name}</div>
+                </button>
+              ))}
+            </div>
 
-        {/* Easy Mode */}
-        <TabsContent value="easy" className="mt-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-6">
-              {/* Subject Selection */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Choose Subject</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <div className="space-y-2">
+              <Label>Topic</Label>
+              <Input
+                placeholder="e.g., Fractions and Decimals, World War II, Photosynthesis"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="text-lg"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Grade Level</Label>
+                <Select value={gradeLevel} onValueChange={setGradeLevel}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {GRADE_LEVELS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Number of Questions: {questionCount}</Label>
+                <Slider
+                  value={[questionCount]}
+                  onValueChange={([v]) => setQuestionCount(v)}
+                  min={5}
+                  max={30}
+                  step={5}
+                />
+              </div>
+            </div>
+
+            <Button className="w-full" size="lg" onClick={generateStructure} disabled={loading}>
+              {loading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
+              ) : (
+                <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 2: Edit Questions */}
+      {step === 2 && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-green-500" />
+                Step 2: Edit Questions
+              </CardTitle>
+              <CardDescription>Review, edit, or add your own questions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Cover Info */}
+              <div className="border rounded-lg p-4 space-y-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" /> Worksheet Info
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Title</Label>
+                    <Input value={cover.title} onChange={(e) => setCover({ ...cover, title: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Teacher Name (optional)</Label>
+                    <Input value={cover.teacherName} onChange={(e) => setCover({ ...cover, teacherName: e.target.value })} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Instructions</Label>
+                  <Textarea
+                    value={cover.instructions}
+                    onChange={(e) => setCover({ ...cover, instructions: e.target.value })}
+                    rows={2}
+                  />
+                </div>
+              </div>
+
+              {/* Sections */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Question Sections</h4>
+                  <Button variant="outline" size="sm" onClick={addSection}>
+                    <Plus className="h-4 w-4 mr-1" /> Add Section
+                  </Button>
+                </div>
+
+                {sections.map((section, sIdx) => (
+                  <div key={sIdx} className="border rounded-lg overflow-hidden">
+                    <div 
+                      className="flex items-center justify-between p-3 bg-muted cursor-pointer"
+                      onClick={() => setExpandedSection(expandedSection === sIdx ? null : sIdx)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Badge>{section.type}</Badge>
+                        <span className="font-medium">{section.name}</span>
+                        <span className="text-sm text-muted-foreground">({section.questions?.length || 0} questions)</span>
+                      </div>
+                      {expandedSection === sIdx ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+
+                    {expandedSection === sIdx && (
+                      <div className="p-4 space-y-4">
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Section Name</Label>
+                            <Input
+                              value={section.name}
+                              onChange={(e) => updateSection(sIdx, 'name', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Question Type</Label>
+                            <Select 
+                              value={section.type} 
+                              onValueChange={(v) => updateSection(sIdx, 'type', v)}
+                            >
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {QUESTION_TYPES.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Questions</Label>
+                            <Button variant="ghost" size="sm" onClick={() => addQuestion(sIdx)}>
+                              <Plus className="h-3 w-3 mr-1" /> Add Question
+                            </Button>
+                          </div>
+                          
+                          {(section.questions || []).map((q, qIdx) => (
+                            <div key={qIdx} className="p-3 bg-muted/50 rounded-lg space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{qIdx + 1}</Badge>
+                                <Input
+                                  value={q.question}
+                                  onChange={(e) => updateQuestion(sIdx, qIdx, 'question', e.target.value)}
+                                  placeholder="Enter question..."
+                                  className="flex-1"
+                                />
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => {
+                                    const updated = [...sections]
+                                    updated[sIdx].questions = updated[sIdx].questions.filter((_, i) => i !== qIdx)
+                                    setSections(updated)
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                              
+                              {section.type === 'multiple-choice' && (
+                                <div className="grid grid-cols-2 gap-2 pl-8">
+                                  {(q.options || []).map((opt, oIdx) => (
+                                    <Input
+                                      key={oIdx}
+                                      value={opt}
+                                      onChange={(e) => {
+                                        const updated = [...sections]
+                                        updated[sIdx].questions[qIdx].options[oIdx] = e.target.value
+                                        setSections(updated)
+                                      }}
+                                      placeholder={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                      className="text-sm"
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center gap-2 pl-8">
+                                <Label className="text-sm">Answer:</Label>
+                                <Input
+                                  value={q.answer}
+                                  onChange={(e) => updateQuestion(sIdx, qIdx, 'answer', e.target.value)}
+                                  placeholder="Correct answer"
+                                  className="flex-1 text-sm"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
+                <Button className="flex-1" onClick={() => setStep(3)}>
+                  Continue to Design <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Step 3: Design */}
+      {step === 3 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5 text-purple-500" />
+              Step 3: Design Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Label>Color Scheme</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {WORKSHEET_TYPES.map((type) => (
+                    {COLOR_SCHEMES.map((color) => (
                       <button
-                        key={type.id}
-                        onClick={() => setWorksheetType(type.id)}
-                        className={`p-3 rounded-lg border-2 text-left transition-all hover:shadow-md ${
-                          worksheetType === type.id 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-border hover:border-primary/50'
+                        key={color.id}
+                        onClick={() => setColorScheme(color.id)}
+                        className={`p-3 rounded-lg ${color.color} text-white text-sm font-medium transition-all ${
+                          colorScheme === color.id ? 'ring-2 ring-offset-2 ring-primary scale-105' : ''
                         }`}
                       >
-                        <span className="text-2xl block mb-1">{type.icon}</span>
-                        <span className="font-medium text-sm block">{type.name}</span>
-                        <span className="text-xs text-muted-foreground">{type.description}</span>
+                        {color.name}
                       </button>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Configuration */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Worksheet Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Topic / Skill</Label>
-                    <Input
-                      placeholder={worksheetType === 'math' ? 'e.g., Multiplication tables 1-10' : 'e.g., Main idea and details'}
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Grade Level</Label>
-                      <Select value={gradeLevel} onValueChange={setGradeLevel}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GRADE_LEVELS.map((g) => (
-                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Questions: {questionCount}</Label>
-                      <Slider
-                        value={[questionCount]}
-                        onValueChange={([v]) => setQuestionCount(v)}
-                        min={5}
-                        max={25}
-                        step={5}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div>
                     <Label>Include Answer Key</Label>
-                    <Switch checked={includeAnswerKey} onCheckedChange={setIncludeAnswerKey} />
+                    <p className="text-sm text-muted-foreground">Add answer key page at the end</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <Switch checked={includeAnswerKey} onCheckedChange={setIncludeAnswerKey} />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label>Preview</Label>
+                <div className={`aspect-[3/4] rounded-lg ${selectedColor?.color} p-6 text-white flex flex-col justify-between shadow-xl`}>
+                  <div className="text-center pt-8">
+                    <h3 className="text-lg font-bold">{cover.title || 'Worksheet Title'}</h3>
+                    <p className="text-sm opacity-80 mt-2">{cover.gradeLevel}</p>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-xs opacity-60">{totalQuestions} questions • {sections.length} sections</p>
+                    {includeAnswerKey && <Badge variant="secondary" className="text-xs">+ Answer Key</Badge>}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Preview & Generate */}
-            <div className="space-y-6">
-              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800">
-                <CardContent className="py-8">
-                  <div className="text-center space-y-4">
-                    <div className="text-6xl">{selectedType?.icon}</div>
-                    <div>
-                      <h3 className="text-xl font-bold">{topic || 'Your Worksheet'}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {GRADE_LEVELS.find(g => g.id === gradeLevel)?.name} • {questionCount} questions
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-center gap-4">
-                      <Badge variant="outline">{selectedType?.name}</Badge>
-                      {includeAnswerKey && <Badge variant="outline">+ Answer Key</Badge>}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Button size="lg" className="w-full" onClick={handleGenerate} disabled={loading}>
-                {loading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Worksheet (15-30s)...</>
-                ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
-                )}
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setStep(2)}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
-
-              {generated && (
-                <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
-                  <CardContent className="py-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <CheckCircle className="h-8 w-8 text-green-600" />
-                      <div>
-                        <h3 className="font-bold text-green-800 dark:text-green-200">Worksheet Ready!</h3>
-                        <p className="text-sm text-green-600 dark:text-green-400">
-                          {generated.questionCount} questions{includeAnswerKey ? ' + answer key' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <a href={generated.downloadUrl} download target="_blank" rel="noopener noreferrer">
-                      <Button className="w-full bg-green-600 hover:bg-green-700">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download PDF
-                      </Button>
-                    </a>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Pro Mode */}
-        <TabsContent value="pro" className="mt-6">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Worksheet Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Subject</Label>
-                      <Select value={worksheetType} onValueChange={setWorksheetType}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {WORKSHEET_TYPES.map((type) => (
-                            <SelectItem key={type.id} value={type.id}>
-                              {type.icon} {type.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Grade Level</Label>
-                      <Select value={gradeLevel} onValueChange={setGradeLevel}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {GRADE_LEVELS.map((g) => (
-                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Topic / Skill Focus</Label>
-                    <Input
-                      placeholder="Be specific for better results..."
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Questions: {questionCount}</Label>
-                      <Slider
-                        value={[questionCount]}
-                        onValueChange={([v]) => setQuestionCount(v)}
-                        min={5}
-                        max={30}
-                        step={5}
-                      />
-                    </div>
-                    <div className="flex items-center gap-4 pt-6">
-                      <Switch checked={includeAnswerKey} onCheckedChange={setIncludeAnswerKey} />
-                      <Label>Include Answer Key</Label>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {generated && (
-                <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
-                  <CardContent className="py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                      <div>
-                        <p className="font-medium text-green-800">"{generated.title}" is ready!</p>
-                        <p className="text-sm text-green-600">{generated.pageCount} pages</p>
-                      </div>
-                    </div>
-                    <a href={generated.downloadUrl} download target="_blank" rel="noopener noreferrer">
-                      <Button className="bg-green-600 hover:bg-green-700">
-                        <Download className="mr-2 h-4 w-4" /> Download
-                      </Button>
-                    </a>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Button size="lg" className="w-full" onClick={handleGenerate} disabled={loading}>
+              <Button className="flex-1" size="lg" onClick={generatePDF} disabled={loading}>
                 {loading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating PDF...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
+                  <><FileText className="mr-2 h-4 w-4" /> Generate Worksheet PDF</>
                 )}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
 
-            <div className="space-y-4">
-              <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base text-blue-800 dark:text-blue-200">💡 Tips</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-3 text-blue-700 dark:text-blue-300">
-                  <p>• Bundle 10+ worksheets for $15-20</p>
-                  <p>• Seasonal themes sell well</p>
-                  <p>• Math & reading have highest demand</p>
-                  <p>• Answer keys add perceived value</p>
-                </CardContent>
-              </Card>
+      {/* Step 4: Download */}
+      {step === 4 && result && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="h-6 w-6" />
+              Your Worksheet is Ready!
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-green-50 rounded-lg p-6 text-center space-y-4">
+              <div className="text-6xl">{selectedSubject?.icon || '📝'}</div>
+              <h3 className="text-xl font-bold">{cover.title}</h3>
+              <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+                <span>{result.pageCount} pages</span>
+                <span>•</span>
+                <span>{totalQuestions} questions</span>
+                {includeAnswerKey && <><span>•</span><span>Answer Key included</span></>}
+              </div>
+              
+              <a href={result.downloadUrl} download>
+                <Button size="lg" className="mt-4">
+                  <Download className="mr-2 h-5 w-5" /> Download PDF
+                </Button>
+              </a>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => { setStep(1); setResult(null); }}>
+                Create Another Worksheet
+              </Button>
+              <Link href="/dashboard/library" className="flex-1">
+                <Button variant="outline" className="w-full">View in Library</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
