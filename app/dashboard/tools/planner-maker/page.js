@@ -343,6 +343,46 @@ export default function PlannerMakerPage() {
                       />
                     </CardContent>
                   </Card>
+                  
+                  {/* Custom Habits - Only show for tracker types */}
+                  {isTrackerType && (
+                    <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2 text-green-700 dark:text-green-300">
+                          ✏️ Customize Your Habits
+                          <Badge variant="secondary" className="text-xs">New!</Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Your Habits (one per line)</Label>
+                          <Textarea
+                            placeholder="Enter your habits, one per line:&#10;&#10;Exercise 30 minutes&#10;Read 20 pages&#10;Drink 8 glasses water&#10;Meditate 10 mins&#10;No junk food&#10;Sleep by 10pm"
+                            value={customHabits}
+                            onChange={(e) => setCustomHabits(e.target.value)}
+                            rows={6}
+                            className="font-mono text-sm"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            💡 Leave empty for AI-generated habits based on your planner type
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Tracking Days: {trackingDays}</Label>
+                          <Slider
+                            value={[trackingDays]}
+                            onValueChange={([v]) => setTrackingDays(v)}
+                            min={30}
+                            max={365}
+                            step={30}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            📚 KDP requires min 24 pages. {trackingDays} days ≈ {Math.ceil(trackingDays / 7) + 4} pages
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
 
                 {/* Right: Preview & Generate */}
