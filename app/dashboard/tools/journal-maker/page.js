@@ -537,7 +537,7 @@ export default function JournalMakerPage() {
               {/* Quotes */}
               <div className="border rounded-lg p-4 space-y-3">
                 <h4 className="font-semibold">Inspirational Quotes</h4>
-                <div className="text-sm text-muted-foreground mb-2">Format: "Quote text" - Author</div>
+                <div className="text-sm text-muted-foreground mb-2">Format: &quot;Quote text&quot; - Author</div>
                 <Textarea
                   value={quotes.map(q => `"${q.text}" - ${q.author}`).join('\n')}
                   onChange={(e) => {
