@@ -41,11 +41,7 @@ const DESIGN_STYLES = [
   { id: 'nature', name: 'Nature' },
 ]
 
-const PAPER_SIZES = [
-  { id: 'letter', name: 'US Letter' },
-  { id: 'a4', name: 'A4' },
-  { id: 'a5', name: 'A5' },
-]
+// Paper sizes now imported from shared config
 
 export default function ChecklistMakerPage() {
   const [mode, setMode] = useState('easy')
