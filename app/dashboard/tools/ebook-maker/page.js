@@ -171,6 +171,11 @@ export default function EbookMakerPage() {
         loadEbookData(data)
         if (data.draftId) setCurrentDraftId(data.draftId)
         
+        // If progress is on step 5 but no result, go back to step 4
+        if (data.step === 5 && !data.result) {
+          setStep(4)
+        }
+        
         if (data.cover?.title) {
           toast({ 
             title: "Progress Restored", 
