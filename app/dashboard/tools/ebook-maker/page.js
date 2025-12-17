@@ -230,7 +230,18 @@ export default function EbookMakerPage() {
     loadEbookData(draft.data)
     setCurrentDraftId(draft.id)
     setShowDrafts(false)
-    toast({ title: "Draft Loaded", description: `Now editing "${draft.title}"` })
+    
+    // If draft is on step 5 but has no result/PDF, go back to step 4 (Design)
+    // Step 5 is only valid after PDF generation
+    if (draft.data.step === 5 && !draft.data.result) {
+      setStep(4)
+      toast({ 
+        title: "Draft Loaded", 
+        description: `Continuing "${draft.title}" from Design step (PDF not yet generated)` 
+      })
+    } else {
+      toast({ title: "Draft Loaded", description: `Now editing "${draft.title}"` })
+    }
   }
 
   // Delete a draft
