@@ -147,10 +147,15 @@ export default function PlannerMakerPage() {
     setAuthorName('')
     setYear(new Date().getFullYear().toString())
     setCustomInstructions('')
+    setCustomHabits('')
+    setTrackingDays(30)
     setCoverImageStyle('abstract')
     setCustomImagePrompt('')
     setGeneratedPDF(null)
   }
+  
+  // Check if selected type is a tracker that needs habit customization
+  const isTrackerType = ['habit', 'fitness', 'goals'].includes(plannerType)
 
   const handleGenerate = async () => {
     setGenerating(true)
