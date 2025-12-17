@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import 'regenerator-runtime/runtime'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import * as fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
