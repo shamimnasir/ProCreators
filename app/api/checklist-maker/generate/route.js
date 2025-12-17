@@ -7,6 +7,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { generateCoverImage, getChecklistTheme } from '@/lib/cover-image-generator'
 import { drawCoverPageWithImage, drawCoverPage } from '@/lib/pdf-design'
+import { getSizeById } from '@/lib/paper-sizes'
 
 const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
 
