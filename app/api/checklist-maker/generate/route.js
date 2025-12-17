@@ -132,13 +132,17 @@ export async function POST(request) {
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     
-    const sizes = {
-      letter: { width: 612, height: 792 },
-      a4: { width: 595, height: 842 },
-      a5: { width: 420, height: 595 }
-    }
-    const { width, height } = sizes[paperSize] || sizes.letter
-    const margin = 40
+    // Use new paper size system
+    const sizeConfig = getSizeById(paperSize)
+    const { width, height } = sizeConfig?.points || { width: 612, height: 792 }
+    
+    // Calculate margins based on page count (KDP compliance)
+    const { getMargins } = await import('@/lib/paper-sizes')
+    const estimatedPages = Math.max(24, Math.ceil((trackingDays || 30) / 7) + 4)
+    const margins = getMargins(estimatedPages, false)
+    const margin = margins.inside.points
+    
+    console.log(`Checklist PDF: ${sizeConfig?.name || 'default'} (${width}x${height} points), margin: ${margin}pt`)
     
     const colors = {
       modern: { primary: rgb(0.1, 0.1, 0.3), accent: rgb(0.3, 0.5, 0.8), bg: rgb(0.95, 0.97, 1) },
@@ -149,8 +153,9 @@ export async function POST(request) {
     const scheme = colors[designStyle] || colors.modern
     
     // Is this a tracking type (needs grid)?
-    const isTracker = ['habit', 'fitness', 'savings', 'goal'].includes(checklistType)
-    const days = trackingDays || 30
+    const isTracker = ['habit', 'fitness', 'savings', 'goal', 'morning', 'evening'].includes(checklistType)
+    // KDP requires minimum 24 pages - default to 30 days minimum for trackers
+    const days = Math.max(trackingDays || 30, 30)
     
     if (isTracker) {
       // Create tracker grid
