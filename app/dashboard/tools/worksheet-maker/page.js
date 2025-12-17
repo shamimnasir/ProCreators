@@ -248,7 +248,7 @@ export default function WorksheetMakerPage() {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Grade Level</Label>
                 <Select value={gradeLevel} onValueChange={setGradeLevel}>
@@ -266,6 +266,14 @@ export default function WorksheetMakerPage() {
                   min={5}
                   max={30}
                   step={5}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Teacher / Institute Name</Label>
+                <Input
+                  placeholder="e.g., Mrs. Smith or ABC Academy"
+                  value={cover.teacherName}
+                  onChange={(e) => setCover({ ...cover, teacherName: e.target.value })}
                 />
               </div>
             </div>
