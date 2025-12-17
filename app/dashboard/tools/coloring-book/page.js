@@ -414,7 +414,7 @@ export default function ColoringBookPage() {
               {pages.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Image className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No pages yet. Click "Add Page" to create one.</p>
+                  <p>No pages yet. Click &quot;Add Page&quot; to create one.</p>
                 </div>
               ) : (
                 pages.map((page, idx) => (
