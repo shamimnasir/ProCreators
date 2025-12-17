@@ -215,7 +215,15 @@ export default function JournalMakerPage() {
           monthlyReview,
           affirmations,
           quotes,
-          settings: { colorScheme, coverStyle, journalType, pageCount, generateCoverImage: true }
+          settings: { 
+            colorScheme, 
+            coverStyle, 
+            journalType, 
+            pageCount, 
+            generateCoverImage: true,
+            coverImageStyle,
+            customImagePrompt
+          }
         })
       })
 
