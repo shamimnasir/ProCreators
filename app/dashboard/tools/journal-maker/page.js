@@ -694,6 +694,8 @@ export default function JournalMakerPage() {
           </CardContent>
         </Card>
       )}
+        </div>
+      </div>
     </div>
   )
 }
