@@ -216,6 +216,8 @@ export default function ColoringBookPage() {
     useCustomColor,
     generateCoverImage,
     generatePageImages,
+    paperSize,
+    useBleed,
     step,
   })
 
