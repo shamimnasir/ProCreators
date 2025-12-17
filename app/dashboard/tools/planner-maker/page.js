@@ -352,11 +352,31 @@ export default function PlannerMakerPage() {
                     <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-lg flex items-center gap-2 text-green-700 dark:text-green-300">
-                          ✏️ Customize Your Habits
+                          ✏️ Customize Your Tracker
                           <Badge variant="secondary" className="text-xs">New!</Badge>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        {/* Author/Institute Name */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Author / Institute Name</Label>
+                            <Input
+                              placeholder="Your name or brand"
+                              value={authorName}
+                              onChange={(e) => setAuthorName(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Custom Title (Optional)</Label>
+                            <Input
+                              placeholder="e.g., 30-Day Fitness Challenge"
+                              value={customTitle}
+                              onChange={(e) => setCustomTitle(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        
                         <div className="space-y-2">
                           <Label>Your Habits (one per line)</Label>
                           <Textarea
