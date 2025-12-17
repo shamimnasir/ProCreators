@@ -20,7 +20,7 @@ function sanitizeText(text) {
 
 export async function POST(request) {
   try {
-    const { subject, topic, gradeLevel, worksheetType, questionCount } = await request.json()
+    const { subject, topic, gradeLevel, worksheetType, questionCount, language } = await request.json()
     
     if (!subject || !topic) {
       return NextResponse.json(
@@ -29,7 +29,17 @@ export async function POST(request) {
       )
     }
     
+    // Determine target language
+    const targetLanguage = language && language.trim() && language.toLowerCase() !== 'english' 
+      ? language.trim() 
+      : 'English'
+    
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    
+    // Build language instruction
+    const languageInstruction = targetLanguage !== 'English'
+      ? `\n\nIMPORTANT LANGUAGE REQUIREMENT: Generate ALL content (title, instructions, questions, answers, everything) in ${targetLanguage}. The entire worksheet must be written in ${targetLanguage} language. Do NOT translate - write naturally in ${targetLanguage}.`
+      : '\n\nGenerate all content in English.'
     
     const prompt = `You are an expert educator. Create a comprehensive worksheet for:
 
@@ -38,6 +48,7 @@ Topic: ${topic}
 Grade Level: ${gradeLevel || 'Middle School'}
 Worksheet Type: ${worksheetType || 'Practice'}
 Number of Questions: ${questionCount || 10}
+Target Language: ${targetLanguage}
 
 Generate a detailed worksheet with:
 1. An engaging title
@@ -74,8 +85,8 @@ Format your response as JSON:
   "totalPoints": 100
 }
 
-Make questions educational, age-appropriate, and progressively challenging.
-IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII characters only.`
+Make questions educational, age-appropriate, and progressively challenging.${languageInstruction}
+IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
 
     const result = await model.generateContent(prompt)
     const response = await result.response
