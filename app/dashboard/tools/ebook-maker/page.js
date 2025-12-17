@@ -27,40 +27,97 @@ import Link from 'next/link'
 function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
   const textareaRef = useRef(null)
   
-  // Insert block formatting (adds newlines)
-  const insertBlock = (format) => {
+  // Get selected text from textarea
+  const getSelection = () => {
+    const textarea = textareaRef.current
+    if (!textarea) return { start: 0, end: 0, text: '' }
+    return {
+      start: textarea.selectionStart,
+      end: textarea.selectionEnd,
+      text: value.substring(textarea.selectionStart, textarea.selectionEnd)
+    }
+  }
+  
+  // Wrap selected text with prefix/suffix (for inline formatting like bold/italic)
+  const wrapSelection = (prefix, suffix) => {
     const textarea = textareaRef.current
     if (!textarea) return
     
-    const start = textarea.selectionStart
+    const { start, end, text } = getSelection()
+    const selectedText = text || 'text'
     const before = value.substring(0, start)
-    const after = value.substring(start)
+    const after = value.substring(end)
+    
+    const newValue = before + prefix + selectedText + suffix + after
+    onChange(newValue)
+    
+    setTimeout(() => {
+      textarea.focus()
+      // Select the wrapped text (without the formatting markers)
+      const newStart = start + prefix.length
+      const newEnd = newStart + selectedText.length
+      textarea.setSelectionRange(newStart, newEnd)
+    }, 0)
+  }
+  
+  // Insert block formatting - uses selected text if available
+  const insertBlock = (formatPrefix, formatSuffix = '', defaultText = '') => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    
+    const { start, end, text } = getSelection()
+    const selectedText = text || defaultText
+    const before = value.substring(0, start)
+    const after = value.substring(end)
     
     // Add newline if not at start and previous char is not newline
     const needsNewlineBefore = before.length > 0 && !before.endsWith('\n')
     const prefix = needsNewlineBefore ? '\n\n' : ''
     
-    const newValue = before + prefix + format + after
+    const newValue = before + prefix + formatPrefix + selectedText + formatSuffix + after
     onChange(newValue)
     
     setTimeout(() => {
       textarea.focus()
-      const newCursorPos = start + prefix.length + format.length
+      // Position cursor after the inserted content
+      const newCursorPos = start + prefix.length + formatPrefix.length + selectedText.length + formatSuffix.length
       textarea.setSelectionRange(newCursorPos, newCursorPos)
     }, 0)
   }
   
-  // Button handlers
-  const handleHeading1 = () => insertBlock('# Your Heading Here\n')
-  const handleHeading2 = () => insertBlock('## Section Title\n')
-  const handleHeading3 = () => insertBlock('### Subsection\n')
-  const handleQuote = () => insertBlock('> Write your quote here\n')
-  const handleBulletList = () => insertBlock('- First item\n- Second item\n- Third item\n')
-  const handleNumberedList = () => insertBlock('1. First step\n2. Second step\n3. Third step\n')
-  const handleTipBox = () => insertBlock('[TIP] Your helpful tip or advice here\n')
-  const handleNoteBox = () => insertBlock('[NOTE] Important information to remember\n')
-  const handleWarningBox = () => insertBlock('[WARNING] Caution or warning message here\n')
-  const handleHighlightBox = () => insertBlock('[HIGHLIGHT] Key point to emphasize\n')
+  // Button handlers - now use selected text or show placeholder
+  const handleBold = () => wrapSelection('**', '**')
+  const handleItalic = () => wrapSelection('*', '*')
+  const handleHeading1 = () => insertBlock('# ', '\n', 'Your Heading Here')
+  const handleHeading2 = () => insertBlock('## ', '\n', 'Section Title')
+  const handleHeading3 = () => insertBlock('### ', '\n', 'Subsection')
+  const handleQuote = () => insertBlock('> ', '\n', 'Write your quote here')
+  const handleBulletList = () => {
+    const { text } = getSelection()
+    if (text) {
+      // Convert selected text to bullet list
+      const lines = text.split('\n').filter(l => l.trim())
+      const bulletText = lines.map(l => `- ${l.trim()}`).join('\n')
+      insertBlock('', '\n', bulletText)
+    } else {
+      insertBlock('', '\n', '- First item\n- Second item\n- Third item')
+    }
+  }
+  const handleNumberedList = () => {
+    const { text } = getSelection()
+    if (text) {
+      // Convert selected text to numbered list
+      const lines = text.split('\n').filter(l => l.trim())
+      const numberedText = lines.map((l, i) => `${i + 1}. ${l.trim()}`).join('\n')
+      insertBlock('', '\n', numberedText)
+    } else {
+      insertBlock('', '\n', '1. First step\n2. Second step\n3. Third step')
+    }
+  }
+  const handleTipBox = () => insertBlock('[TIP] ', '\n', 'Your helpful tip or advice here')
+  const handleNoteBox = () => insertBlock('[NOTE] ', '\n', 'Important information to remember')
+  const handleWarningBox = () => insertBlock('[WARNING] ', '\n', 'Caution or warning message here')
+  const handleHighlightBox = () => insertBlock('[HIGHLIGHT] ', '\n', 'Key point to emphasize')
   
   return (
     <div className="space-y-2">
