@@ -170,9 +170,73 @@ export async function POST(request) {
     const contentSample = `${cover.title} ${cover.subtitle || ''} ${chapters.map(c => c.title).join(' ')}`
     const needsUnicodeFont = hasNonLatinChars(contentSample)
     
+    // For complex scripts (Bengali, Hindi, Arabic, etc.), use HTML-to-PDF approach
+    // which properly handles ligatures, conjuncts, and RTL text
     if (needsUnicodeFont) {
-      console.log('Detected non-Latin characters, using Unicode font...')
+      console.log('Detected complex script, using HTML-to-PDF generation for proper text rendering...')
+      
+      try {
+        // Generate HTML content
+        const htmlContent = generateEbookHTML({
+          cover,
+          introduction,
+          chapters,
+          conclusion,
+          settings: {
+            ...settings,
+            customColor: customColor || (colorScheme === 'custom' ? settings?.customColor : 
+              PDF_COLOR_SCHEMES[colorScheme]?.coverGradient?.[0] || '#3b82f6')
+          }
+        })
+        
+        // Generate PDF from HTML
+        const pdfBuffer = await generatePDFFromHTML(htmlContent)
+        
+        // Save PDF
+        const ebooksDir = path.join(process.cwd(), 'public', 'ebooks')
+        await fs.mkdir(ebooksDir, { recursive: true })
+        
+        const filename = `${randomUUID()}.pdf`
+        const filePath = path.join(ebooksDir, filename)
+        await fs.writeFile(filePath, pdfBuffer)
+        
+        // Save to library
+        const library = await getCollection('library')
+        const libraryEntry = {
+          id: randomUUID(),
+          url: `/ebooks/${filename}`,
+          filePath: `/ebooks/${filename}`,
+          title: cover.title,
+          type: 'document',
+          tool: 'ebook-maker',
+          metadata: {
+            subtitle: cover.subtitle,
+            authorName: cover.authorName,
+            chaptersCount: chapters.length,
+            colorScheme,
+            renderMethod: 'html-to-pdf'
+          },
+          createdAt: new Date().toISOString()
+        }
+        
+        await library.insertOne(libraryEntry)
+        
+        console.log('Ebook PDF generated (HTML method):', filePath)
+        
+        return NextResponse.json({
+          success: true,
+          url: `/ebooks/${filename}`,
+          title: cover.title,
+          message: 'Ebook PDF generated with proper complex script support'
+        })
+      } catch (htmlError) {
+        console.error('HTML-to-PDF generation failed:', htmlError.message)
+        console.log('Falling back to pdf-lib method...')
+        // Fall through to pdf-lib method
+      }
     }
+    
+    // For Latin scripts OR as fallback, use pdf-lib method
     
     // Generate cover image if requested
     let coverImageUrl = null
