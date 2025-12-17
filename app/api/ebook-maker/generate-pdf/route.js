@@ -128,16 +128,13 @@ function wrapText(text, font, fontSize, maxWidth) {
   for (const word of words) {
     if (!word) continue
     const testLine = currentLine ? `${currentLine} ${word}` : word
-    try {
-      const width = font.widthOfTextAtSize(testLine, fontSize)
-      if (width <= maxWidth) {
-        currentLine = testLine
-      } else {
-        if (currentLine) lines.push(currentLine)
-        currentLine = word
-      }
-    } catch (e) {
-      continue
+    // Use safe width calculation
+    const width = safeGetTextWidth(testLine, font, fontSize)
+    if (width <= maxWidth) {
+      currentLine = testLine
+    } else {
+      if (currentLine) lines.push(currentLine)
+      currentLine = word
     }
   }
   if (currentLine) lines.push(currentLine)
