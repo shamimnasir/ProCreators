@@ -121,6 +121,10 @@ export default function ColoringBookPage() {
   const [useCustomColor, setUseCustomColor] = useState(false)
   const [generateCoverImage, setGenerateCoverImage] = useState(true)
   const [generatePageImages, setGeneratePageImages] = useState(false)
+  
+  // Paper Size & KDP Settings
+  const [paperSize, setPaperSize] = useState('8.5x11')
+  const [useBleed, setUseBleed] = useState(true) // Recommended for coloring books
 
   // Result
   const [result, setResult] = useState(null)
