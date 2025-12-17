@@ -18,6 +18,8 @@ import Link from 'next/link'
 import RichTextEditor from '@/components/shared/RichTextEditor'
 import DraftsManager from '@/components/shared/DraftsManager'
 import CoverImagePrompt from '@/components/shared/CoverImagePrompt'
+import PaperSizeSelector from '@/components/shared/PaperSizeSelector'
+import { getSizeById } from '@/lib/paper-sizes'
 
 const CHECKLIST_TYPES = [
   { id: 'habit', name: 'Habit Tracker', icon: '✓', description: '30-day habit tracking grid', isTracker: true },
