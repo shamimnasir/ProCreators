@@ -14,6 +14,7 @@ import {
   generateCustomColors
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
+import { generatePDFFromHTML, generateEbookHTML } from '@/lib/html-pdf-generator'
 
 // Helper to sanitize text - PRESERVES Unicode characters (Bengali, Hindi, Chinese, etc.)
 function sanitizeText(text, preserveNewlines = false) {
