@@ -448,6 +448,25 @@ export default function ChecklistMakerPage() {
                       </Select>
                     </div>
                   </div>
+                  
+                  {/* Cover Image Customization */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <CoverImagePrompt
+                      coverImageStyle={coverImageStyle}
+                      setCoverImageStyle={setCoverImageStyle}
+                      customImagePrompt={customImagePrompt}
+                      setCustomImagePrompt={setCustomImagePrompt}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Custom Title (Optional)</Label>
+                    <Input
+                      placeholder="e.g., My 30-Day Habit Challenge"
+                      value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
