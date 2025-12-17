@@ -248,7 +248,7 @@ export default function ColoringBookPage() {
     setTheme('animals')
     setCustomTheme('')
     setDifficulty('medium')
-    setPageCount(10)
+    setPageCount(24) // KDP minimum
     setBookTitle('')
     setAuthorName('')
     setPages([])
@@ -258,6 +258,8 @@ export default function ColoringBookPage() {
     setUseCustomColor(false)
     setGenerateCoverImage(true)
     setGeneratePageImages(false)
+    setPaperSize('8.5x11')
+    setUseBleed(true)
     setCurrentDraftId(null)
     setResult(null)
   }
