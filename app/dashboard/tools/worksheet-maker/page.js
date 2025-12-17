@@ -214,6 +214,10 @@ export default function WorksheetMakerPage() {
 
     setLoading(true)
     try {
+      // Determine colors to use
+      const primaryColor = useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary || '#1e40af')
+      const secondaryColor = useCustomColor ? customSecondaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.secondary || '#3b82f6')
+      
       const response = await fetch('/api/worksheet-maker/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -222,7 +226,15 @@ export default function WorksheetMakerPage() {
           sections,
           bonusQuestions,
           includeAnswerKey,
-          settings: { colorScheme, coverStyle, subject, generateCoverImage: true }
+          language: language || 'English',
+          settings: { 
+            colorScheme: selectedPreset, 
+            customPrimaryColor: primaryColor,
+            customSecondaryColor: secondaryColor,
+            coverStyle, 
+            subject, 
+            generateCoverImage: true 
+          }
         })
       })
 
