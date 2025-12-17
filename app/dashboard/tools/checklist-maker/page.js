@@ -511,6 +511,8 @@ export default function ChecklistMakerPage() {
           </div>
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   )
 }
