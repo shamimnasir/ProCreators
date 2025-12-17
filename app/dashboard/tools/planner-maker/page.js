@@ -577,19 +577,11 @@ export default function PlannerMakerPage() {
                             step={4}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label>Paper Size</Label>
-                          <Select value={paperSize} onValueChange={setPaperSize}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {PAPER_SIZES.map((s) => (
-                                <SelectItem key={s.id} value={s.id}>{s.name} ({s.size})</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <PaperSizeSelector
+                          value={paperSize}
+                          onChange={setPaperSize}
+                          toolType="planner"
+                        />
                       </div>
                     </CardContent>
                   </Card>
