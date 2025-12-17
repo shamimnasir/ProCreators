@@ -57,10 +57,17 @@ export async function POST(request) {
       )
     }
     
-    // Detect language from chapter title or book title
-    const detectedLang = detectLanguage(chapterTitle) || detectLanguage(bookTitle)
+    // Detect language - prioritize bookTitle since chapter titles like "Introduction" might be in English
+    // even when the book is in another language
+    const bookLang = detectLanguage(bookTitle)
+    const chapterLang = detectLanguage(chapterTitle)
+    const summaryLang = detectLanguage(chapterSummary)
+    
+    // Use book language if detected, otherwise fall back to chapter/summary
+    const detectedLang = bookLang !== 'en' ? bookLang : (chapterLang !== 'en' ? chapterLang : summaryLang)
+    
     const languageInstruction = detectedLang !== 'en' 
-      ? `CRITICAL: The content is in a non-English language. Write ALL content in the SAME language as the chapter title. Do NOT translate to English.`
+      ? `CRITICAL LANGUAGE REQUIREMENT: The book "${bookTitle}" is written in a non-English language. You MUST write ALL content (including headings, tips, bullets, and takeaways) in the SAME language as the book title. Do NOT write in English. Match the language exactly.`
       : ''
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
