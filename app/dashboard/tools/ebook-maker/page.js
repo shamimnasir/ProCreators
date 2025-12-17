@@ -126,6 +126,28 @@ function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
       {/* Formatting Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-2 bg-muted rounded-t-lg border border-b-0">
         <TooltipProvider>
+          {/* Bold Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-2 font-bold" onClick={handleBold}>
+                B
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Bold (select text first)</TooltipContent>
+          </Tooltip>
+          
+          {/* Italic Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-2 italic" onClick={handleItalic}>
+                I
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Italic (select text first)</TooltipContent>
+          </Tooltip>
+          
+          <div className="h-6 w-px bg-border mx-1" />
+          
           {/* Headings Dropdown */}
           <DropdownMenu>
             <Tooltip>
