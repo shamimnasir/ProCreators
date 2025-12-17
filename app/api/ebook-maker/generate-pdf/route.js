@@ -336,27 +336,37 @@ function renderRichContent(pdfDoc, page, blocks, options) {
         
       case 'box':
         y -= 10
-        const boxLines = wrapText(block.text, regularFont, 10, contentWidth - 50)
-        const boxHeight = boxLines.length * 14 + 30
+        const boxLines = wrapText(block.text, regularFont, 11, contentWidth - 30)
+        const boxHeight = boxLines.length * 15 + 20
         
         if (y - boxHeight < margin + 50) currentPage = newPage()
         
-        // Box colors based on type
+        // Box colors based on type - clean design without labels
         let boxBorderColor = colors.primary
-        let boxLabel = block.boxType
-        if (block.boxType === 'WARNING') boxBorderColor = rgb(0.9, 0.4, 0.2)
-        else if (block.boxType === 'TIP') boxBorderColor = rgb(0.2, 0.7, 0.4)
-        else if (block.boxType === 'NOTE') boxBorderColor = rgb(0.3, 0.5, 0.8)
+        let boxBgColor = colors.accent
+        if (block.boxType === 'WARNING') {
+          boxBorderColor = rgb(0.9, 0.4, 0.2)
+          boxBgColor = rgb(1, 0.95, 0.9) // Light orange/cream
+        } else if (block.boxType === 'TIP') {
+          boxBorderColor = rgb(0.2, 0.7, 0.4)
+          boxBgColor = rgb(0.93, 0.98, 0.93) // Light green
+        } else if (block.boxType === 'NOTE') {
+          boxBorderColor = rgb(0.3, 0.5, 0.8)
+          boxBgColor = rgb(0.93, 0.96, 1) // Light blue
+        } else if (block.boxType === 'HIGHLIGHT' || block.boxType === 'IMPORTANT') {
+          boxBorderColor = rgb(0.6, 0.4, 0.8)
+          boxBgColor = rgb(0.97, 0.95, 1) // Light purple
+        }
         
+        // Draw box background
         currentPage.drawRectangle({
           x: margin,
           y: y - boxHeight + 10,
           width: contentWidth,
           height: boxHeight,
-          color: colors.accent,
-          borderColor: boxBorderColor,
-          borderWidth: 1,
+          color: boxBgColor,
         })
+        // Left accent border
         currentPage.drawRectangle({
           x: margin,
           y: y - boxHeight + 10,
@@ -365,25 +375,17 @@ function renderRichContent(pdfDoc, page, blocks, options) {
           color: boxBorderColor,
         })
         
-        // Label
-        safeDrawText(currentPage, `💡 ${boxLabel}`, {
-          x: margin + 12,
-          y: y - 2,
-          size: 10,
-          font: boldFont,
-          color: boxBorderColor
-        })
-        
-        let boxY = y - 18
+        // Content only - no label, clean design
+        let boxY = y - 8
         for (const line of boxLines) {
           safeDrawText(currentPage, line, {
-            x: margin + 12,
+            x: margin + 15,
             y: boxY,
-            size: 10,
+            size: 11,
             font: regularFont,
             color: colors.text
           })
-          boxY -= 14
+          boxY -= 15
         }
         y -= boxHeight + 12
         break
