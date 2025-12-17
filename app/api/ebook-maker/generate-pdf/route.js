@@ -895,7 +895,7 @@ export async function POST(request) {
             }
           }
           
-          // Section tips (Pro Tips / Quick Tips callout boxes)
+          // Section tips (Pro Tips / Quick Tips callout boxes) - clean design without duplicate labels
           if (section.tips && section.tips.length > 0) {
             for (const tip of section.tips) {
               if (y < margin + 80) {
@@ -904,50 +904,44 @@ export async function POST(request) {
                 y = pageHeight - margin - 50
               }
               
-              y -= 10
-              const tipLines = wrapText(tip, italicFont, 10, contentWidth - 40)
-              const tipBoxHeight = 20 + (tipLines.length * 14)
+              // Clean the tip text - remove any "Pro Tip:" or "Tip:" prefix to avoid duplication
+              const cleanTip = tip.replace(/^(Pro\s*Tip|Tip|Quick\s*Tip)\s*[:：]\s*/i, '').trim()
               
-              // Tip box background
+              y -= 10
+              const tipLines = wrapText(cleanTip, regularFont, 11, contentWidth - 30)
+              const tipBoxHeight = 12 + (tipLines.length * 15)
+              
+              // Tip box background - light green tint
               page.drawRectangle({
                 x: margin + 10,
-                y: y - tipBoxHeight + 15,
+                y: y - tipBoxHeight + 10,
                 width: contentWidth - 20,
                 height: tipBoxHeight,
-                color: colors.accent,
+                color: rgb(0.93, 0.98, 0.93),
               })
               
-              // Tip box left border
+              // Tip box left border - green accent
               page.drawRectangle({
                 x: margin + 10,
-                y: y - tipBoxHeight + 15,
+                y: y - tipBoxHeight + 10,
                 width: 4,
                 height: tipBoxHeight,
-                color: colors.primary,
+                color: rgb(0.2, 0.7, 0.4),
               })
               
-              // Tip label
-              safeDrawText(page, 'Pro Tip', { 
-                x: margin + 22, 
-                y: y, 
-                size: 10, 
-                font: boldFont, 
-                color: colors.primary 
-              })
-              y -= 16
-              
-              // Tip content
+              // Tip content only - no separate label
+              let tipY = y - 5
               tipLines.forEach((line) => {
                 safeDrawText(page, line, { 
                   x: margin + 22, 
-                  y, 
-                  size: 10, 
-                  font: italicFont, 
+                  y: tipY, 
+                  size: 11, 
+                  font: regularFont, 
                   color: colors.text 
                 })
-                y -= 14
+                tipY -= 15
               })
-              y -= 10
+              y -= tipBoxHeight + 8
             }
           }
           
