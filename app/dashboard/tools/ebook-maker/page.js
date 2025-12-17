@@ -12,7 +12,7 @@ import {
   Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
   RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp,
-  Type, Image, Layout
+  Type, Image, Layout, FolderOpen, Clock, FilePlus
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
