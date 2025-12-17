@@ -973,21 +973,16 @@ export async function POST(request) {
           y -= 10 // Space between sections
         }
       } else if (chapter.content) {
-        // Plain content (fallback) - with paragraph support
-        const paragraphs = chapter.content.split(/\n\n+/).filter(p => p.trim())
-        for (const paragraph of paragraphs) {
-          const lines = wrapText(paragraph, regularFont, 11, contentWidth)
-          for (const line of lines) {
-            if (y < margin + 60) {
-              page = pdfDoc.addPage([pageWidth, pageHeight])
-              page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
-              y = pageHeight - margin - 50
-            }
-            safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
-            y -= lineHeight
-          }
-          y -= 12
-        }
+        // Parse and render rich content (supports headings, quotes, bullets, highlight boxes)
+        const chapterBlocks = parseRichContent(chapter.content)
+        const chapterResult = renderRichContent(pdfDoc, page, chapterBlocks, {
+          margin, pageWidth, pageHeight, contentWidth,
+          regularFont, boldFont, italicFont, colors, lineHeight,
+          safeDrawText, safeGetTextWidth,
+          startY: y
+        })
+        page = chapterResult.page
+        y = chapterResult.y
       }
       
       // Key Takeaways
