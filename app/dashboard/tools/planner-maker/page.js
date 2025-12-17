@@ -69,6 +69,8 @@ export default function PlannerMakerPage() {
   const [authorName, setAuthorName] = useState('')
   const [year, setYear] = useState(new Date().getFullYear().toString())
   const [customInstructions, setCustomInstructions] = useState('')
+  const [customHabits, setCustomHabits] = useState('') // For habit tracker customization
+  const [trackingDays, setTrackingDays] = useState(30) // Days for habit trackers
   const [generating, setGenerating] = useState(false)
   const [generatedPDF, setGeneratedPDF] = useState(null)
   
