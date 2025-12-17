@@ -593,27 +593,86 @@ export default function WorksheetMakerPage() {
               <Palette className="h-5 w-5 text-purple-500" />
               Step 3: Design Settings
             </CardTitle>
+            <CardDescription>Customize the look and feel of your worksheet</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Color Presets */}
                 <div className="space-y-3">
-                  <Label>Color Scheme</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {COLOR_SCHEMES.map((color) => (
+                  <Label>Color Presets</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {COLOR_PRESETS.map((preset) => (
                       <button
-                        key={color.id}
-                        onClick={() => setColorScheme(color.id)}
-                        className={`p-3 rounded-lg ${color.color} text-white text-sm font-medium transition-all ${
-                          colorScheme === color.id ? 'ring-2 ring-offset-2 ring-primary scale-105' : ''
+                        key={preset.id}
+                        onClick={() => {
+                          setSelectedPreset(preset.id)
+                          setCustomPrimaryColor(preset.primary)
+                          setCustomSecondaryColor(preset.secondary)
+                          setUseCustomColor(false)
+                        }}
+                        className={`p-3 rounded-lg text-white text-xs font-medium transition-all ${
+                          selectedPreset === preset.id && !useCustomColor ? 'ring-2 ring-offset-2 ring-primary scale-105' : ''
                         }`}
+                        style={{ backgroundColor: preset.primary }}
                       >
-                        {color.name}
+                        {preset.name}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Custom Color Picker */}
+                <div className="space-y-3 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2">
+                      <Pipette className="h-4 w-4" />
+                      Custom Colors
+                    </Label>
+                    <Switch checked={useCustomColor} onCheckedChange={setUseCustomColor} />
+                  </div>
+                  
+                  {useCustomColor && (
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-2">
+                        <Label className="text-sm">Primary Color</Label>
+                        <div className="flex gap-2">
+                          <input
+                            type="color"
+                            value={customPrimaryColor}
+                            onChange={(e) => setCustomPrimaryColor(e.target.value)}
+                            className="w-12 h-10 rounded cursor-pointer border-0"
+                          />
+                          <Input
+                            value={customPrimaryColor}
+                            onChange={(e) => setCustomPrimaryColor(e.target.value)}
+                            placeholder="#1e40af"
+                            className="flex-1 font-mono"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm">Secondary Color</Label>
+                        <div className="flex gap-2">
+                          <input
+                            type="color"
+                            value={customSecondaryColor}
+                            onChange={(e) => setCustomSecondaryColor(e.target.value)}
+                            className="w-12 h-10 rounded cursor-pointer border-0"
+                          />
+                          <Input
+                            value={customSecondaryColor}
+                            onChange={(e) => setCustomSecondaryColor(e.target.value)}
+                            placeholder="#3b82f6"
+                            className="flex-1 font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Answer Key Toggle */}
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div>
                     <Label>Include Answer Key</Label>
@@ -623,18 +682,29 @@ export default function WorksheetMakerPage() {
                 </div>
               </div>
 
+              {/* Preview */}
               <div className="space-y-4">
                 <Label>Preview</Label>
-                <div className={`aspect-[3/4] rounded-lg ${selectedColor?.color} p-6 text-white flex flex-col justify-between shadow-xl`}>
+                <div 
+                  className="aspect-[3/4] rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
+                  style={{ backgroundColor: useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary || '#1e40af') }}
+                >
                   <div className="text-center pt-8">
-                    <h3 className="text-lg font-bold">{cover.title || 'Worksheet Title'}</h3>
+                    <h3 className="text-lg font-bold drop-shadow">{cover.title || 'Worksheet Title'}</h3>
                     <p className="text-sm opacity-80 mt-2">{cover.gradeLevel}</p>
+                    {cover.teacherName && (
+                      <p className="text-xs opacity-70 mt-4">{cover.teacherName}</p>
+                    )}
                   </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-xs opacity-60">{totalQuestions} questions • {sections.length} sections</p>
+                  <div className="text-center space-y-2">
+                    <p className="text-xs opacity-70">{totalQuestions} questions • {sections.length} sections</p>
+                    {language && <Badge variant="secondary" className="text-xs">{language}</Badge>}
                     {includeAnswerKey && <Badge variant="secondary" className="text-xs">+ Answer Key</Badge>}
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Colors: Primary {useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary)}
+                </p>
               </div>
             </div>
 
