@@ -1067,17 +1067,16 @@ export async function POST(request) {
         color: colors.secondary,
       })
       
-      y = pageHeight - margin - 85
-      const conclusionLines = wrapText(conclusion.content, regularFont, 11, contentWidth)
-      for (const line of conclusionLines) {
-        if (y < margin + 60) {
-          page = pdfDoc.addPage([pageWidth, pageHeight])
-          page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
-          y = pageHeight - margin - 50
-        }
-        safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
-        y -= lineHeight
-      }
+      // Parse and render rich content
+      const conclusionBlocks = parseRichContent(conclusion.content)
+      const conclusionResult = renderRichContent(pdfDoc, page, conclusionBlocks, {
+        margin, pageWidth, pageHeight, contentWidth,
+        regularFont, boldFont, italicFont, colors, lineHeight,
+        safeDrawText, safeGetTextWidth,
+        startY: pageHeight - margin - 85
+      })
+      page = conclusionResult.page
+      y = conclusionResult.y
     }
     
     // ===== ABOUT AUTHOR =====
