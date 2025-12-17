@@ -158,18 +158,19 @@ export async function POST(request) {
         const hasBengali = /[\u0980-\u09FF]/.test(contentSample)
         
         if (hasBengali) {
-          // Load Bengali font
+          // Load Bengali font with subset: false for full Unicode support
           const bengaliRegularPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Regular.ttf')
           const bengaliBoldPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Bold.ttf')
           
           const regularFontBytes = await fs.readFile(bengaliRegularPath)
           const boldFontBytes = await fs.readFile(bengaliBoldPath)
           
-          regularFont = await pdfDoc.embedFont(regularFontBytes)
-          boldFont = await pdfDoc.embedFont(boldFontBytes)
+          // CRITICAL: Use subset: false to embed full font with all Unicode glyphs
+          regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: false })
+          boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: false })
           italicFont = regularFont // Bengali fonts typically don't have italic variant
           
-          console.log('Bengali fonts embedded successfully')
+          console.log('Bengali fonts embedded successfully with full Unicode support')
         } else {
           // Fallback to standard Noto Sans for other scripts
           const notoRegularPath = path.join(process.cwd(), 'public/fonts/NotoSans-Regular.ttf')
@@ -178,8 +179,8 @@ export async function POST(request) {
           const regularFontBytes = await fs.readFile(notoRegularPath)
           const boldFontBytes = await fs.readFile(notoBoldPath)
           
-          regularFont = await pdfDoc.embedFont(regularFontBytes)
-          boldFont = await pdfDoc.embedFont(boldFontBytes)
+          regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: false })
+          boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: false })
           italicFont = regularFont
           
           console.log('Noto Sans fonts embedded successfully')
