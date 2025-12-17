@@ -56,6 +56,73 @@ export default function ChecklistMakerPage() {
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(null)
   const { toast } = useToast()
+  
+  // NEW: Cover image customization
+  const [coverImageStyle, setCoverImageStyle] = useState('abstract')
+  const [customImagePrompt, setCustomImagePrompt] = useState('')
+  const [customTitle, setCustomTitle] = useState('')
+  
+  // NEW: Drafts management
+  const [drafts, setDrafts] = useState([])
+  const [currentDraftId, setCurrentDraftId] = useState(null)
+  
+  // Load drafts on mount
+  useEffect(() => {
+    const loadDrafts = async () => {
+      try {
+        const res = await fetch('/api/drafts?toolType=checklist')
+        const data = await res.json()
+        if (data.success && data.drafts) {
+          setDrafts(data.drafts)
+        }
+      } catch (e) {
+        console.log('Failed to load drafts:', e)
+      }
+    }
+    loadDrafts()
+  }, [])
+  
+  // Get current form data for saving
+  const getCurrentData = () => ({
+    title: customTitle || `My ${CHECKLIST_TYPES.find(c => c.id === checklistType)?.name}`,
+    checklistType,
+    customItems,
+    itemCount,
+    designStyle,
+    paperSize,
+    trackingDays,
+    coverImageStyle,
+    customImagePrompt,
+    customTitle,
+  })
+  
+  // Load draft data into form
+  const loadDraftData = (data) => {
+    if (data.checklistType) setChecklistType(data.checklistType)
+    if (data.customItems) setCustomItems(data.customItems)
+    if (data.itemCount) setItemCount(data.itemCount)
+    if (data.designStyle) setDesignStyle(data.designStyle)
+    if (data.paperSize) setPaperSize(data.paperSize)
+    if (data.trackingDays) setTrackingDays(data.trackingDays)
+    if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
+    if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
+    if (data.customTitle) setCustomTitle(data.customTitle)
+    setGenerated(null)
+  }
+  
+  // Start new checklist
+  const handleStartNew = () => {
+    setChecklistType('habit')
+    setCustomItems('')
+    setItemCount(15)
+    setDesignStyle('modern')
+    setPaperSize('letter')
+    setTrackingDays(30)
+    setCoverImageStyle('abstract')
+    setCustomImagePrompt('')
+    setCustomTitle('')
+    setGenerated(null)
+  }
 
   const handleGenerate = async () => {
     setLoading(true)
