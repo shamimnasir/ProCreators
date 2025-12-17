@@ -68,7 +68,7 @@ export async function POST(request) {
     
     const languageInstruction = detectedLang !== 'en' 
       ? `CRITICAL LANGUAGE REQUIREMENT: The book "${bookTitle}" is written in a non-English language. You MUST write ALL content (including headings, tips, bullets, and takeaways) in the SAME language as the book title. Do NOT write in English. Match the language exactly.`
-      : ''
+      : `CRITICAL: Write ALL content in ENGLISH only. Do NOT use any other language like Portuguese, Spanish, French, German, etc. The book "${bookTitle}" is in English, so all content must be in English.`
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
