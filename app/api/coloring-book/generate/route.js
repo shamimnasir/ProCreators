@@ -176,12 +176,21 @@ export async function POST(request) {
         color: rgb(0.3, 0.3, 0.3)
       })
       
-      // Placeholder text (in a real implementation, this would be actual line art)
-      page.drawText('🎨', {
-        x: pageWidth / 2 - 20,
+      // Placeholder area (in a real implementation, this would be actual line art)
+      // Draw a decorative border for the coloring area
+      page.drawRectangle({
+        x: 60, y: 80,
+        width: pageWidth - 120, height: pageHeight - 180,
+        borderColor: rgb(0.8, 0.8, 0.8),
+        borderWidth: 2
+      })
+      
+      // Draw placeholder text
+      page.drawText('[ Coloring Area ]', {
+        x: pageWidth / 2 - 60,
         y: pageHeight / 2,
-        size: 80,
-        color: rgb(0.9, 0.9, 0.9)
+        size: 16,
+        color: rgb(0.85, 0.85, 0.85)
       })
       
       // Description at bottom (small, for reference)
