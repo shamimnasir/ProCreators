@@ -20,6 +20,7 @@ import Link from 'next/link'
 import RichTextEditor from '@/components/shared/RichTextEditor'
 import DraftsManager from '@/components/shared/DraftsManager'
 import CoverImagePrompt from '@/components/shared/CoverImagePrompt'
+import PaperSizeSelector from '@/components/shared/PaperSizeSelector'
 
 const PLANNER_TYPES = [
   { id: 'daily', name: 'Daily Planner', icon: '📅', description: 'Day-by-day planning' },
