@@ -7,7 +7,7 @@ import path from 'path'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { spawn } from 'child_process'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY || process.env.GOOGLE_API_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
 // Generate a single coloring page image using Nano Banana
 async function generateColoringPageImage(description, difficulty) {
