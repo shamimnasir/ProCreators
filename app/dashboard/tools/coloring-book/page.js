@@ -860,7 +860,29 @@ export default function ColoringBookPage() {
                     </div>
                     <Switch checked={generatePageImages} onCheckedChange={setGeneratePageImages} />
                   </div>
+                  
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
+                    <div>
+                      <Label className="text-blue-800 dark:text-blue-200">Enable Bleed (KDP Recommended)</Label>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">Add 0.125&quot; bleed for edge-to-edge printing</p>
+                    </div>
+                    <Switch checked={useBleed} onCheckedChange={setUseBleed} />
+                  </div>
                 </div>
+
+                {/* KDP Compliance Warning */}
+                {pages.length < KDP_MIN_PAGES && (
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-300 flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-amber-800 dark:text-amber-200">KDP Page Count Warning</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">
+                        Your book has {pages.length} pages. Amazon KDP requires minimum 24 pages.
+                        Add {KDP_MIN_PAGES - pages.length} more pages to be KDP compliant.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Preview */}
