@@ -49,7 +49,7 @@ export default function ChecklistMakerPage() {
   const [customItems, setCustomItems] = useState('')
   const [itemCount, setItemCount] = useState(15)
   const [designStyle, setDesignStyle] = useState('modern')
-  const [paperSize, setPaperSize] = useState('letter')
+  const [paperSize, setPaperSize] = useState('8.5x11')
   const [trackingDays, setTrackingDays] = useState(30)
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(null)
