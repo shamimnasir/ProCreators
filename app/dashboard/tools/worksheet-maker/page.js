@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,13 +10,16 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Loader2, Download, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
-  GraduationCap, ChevronDown, ChevronUp, BookOpen
+  GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
+
+// Import shared components
+import DraftsManager from '@/components/shared/DraftsManager'
 
 const SUBJECTS = [
   { id: 'math', name: 'Mathematics', icon: '🔢' },
