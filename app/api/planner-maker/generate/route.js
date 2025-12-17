@@ -518,6 +518,11 @@ export async function POST(request) {
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
     const fonts = { regular: regularFont, bold: boldFont, italic: italicFont }
+    
+    // Import margin calculator for KDP compliance
+    const { getMargins } = await import('@/lib/paper-sizes')
+    const margins = getMargins(pageCount, false)
+    const margin = margins.inside.points // Use inside margin (gutter) for binding
 
     // Cover page - use image version if available
     const coverPage = pdfDoc.addPage([size.width, size.height])
