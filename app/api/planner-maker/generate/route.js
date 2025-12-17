@@ -477,11 +477,19 @@ export async function POST(request) {
     // Get configurations
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['rose-gold']
     const cover = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
-    // Get paper size from new centralized config
-    const sizeConfig = getSizeById(paperSize)
-    const size = sizeConfig.points
     
-    console.log(`Paper size requested: ${paperSize} -> ${sizeConfig.name} (${size.width}x${size.height} points)`)
+    // Get paper size from new centralized config with validation
+    const sizeConfig = getSizeById(paperSize)
+    if (!sizeConfig || !sizeConfig.points) {
+      console.error(`Invalid paper size: ${paperSize}, using default 6x9`)
+    }
+    // Ensure we have valid dimensions - default to 6x9 (432x648) if anything is wrong
+    const size = {
+      width: sizeConfig?.points?.width || 432,
+      height: sizeConfig?.points?.height || 648
+    }
+    
+    console.log(`Paper size: ${paperSize} -> ${sizeConfig?.name || 'default'} (${size.width}x${size.height} points = ${size.width/72}"x${size.height/72}")`)
 
     // Generate AI content
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions)
