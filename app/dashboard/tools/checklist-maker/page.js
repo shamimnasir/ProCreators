@@ -327,7 +327,7 @@ export default function ChecklistMakerPage() {
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <Badge variant="outline">{DESIGN_STYLES.find(s => s.id === designStyle)?.name}</Badge>
-                      <Badge variant="outline">{PAPER_SIZES.find(s => s.id === paperSize)?.name}</Badge>
+                      <Badge variant="outline">{getSizeById(paperSize)?.name}</Badge>
                     </div>
                   </div>
                 </CardContent>
