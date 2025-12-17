@@ -8,13 +8,13 @@ import path from 'path'
 import { 
   PDF_COLOR_SCHEMES, 
   COVER_STYLES, 
-  PAPER_SIZES,
   drawCoverPage,
   drawCoverPageWithImage,
   drawCornerDecorations,
   getCurrentYear
 } from '@/lib/pdf-design'
 import { generateCoverImage, getPlannerTheme } from '@/lib/cover-image-generator'
+import { getSizeById } from '@/lib/paper-sizes'
 
 // Use Google Generative AI with the proper Google API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
