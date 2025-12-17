@@ -13,11 +13,58 @@ import { Switch } from '@/components/ui/switch'
 import { 
   Palette, Download, Sparkles, Loader2, DollarSign, Image,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, Save, Pipette, ImagePlus
+  ChevronDown, ChevronUp, RefreshCw, Save, Pipette, ImagePlus,
+  FileText, AlertTriangle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import DraftsManager from '@/components/shared/DraftsManager'
+
+// KDP Coloring Book Paper Sizes
+const PAPER_SIZES = [
+  { 
+    id: '8.5x11', 
+    name: '8.5" × 11"', 
+    width: 612, 
+    height: 792,
+    recommended: true,
+    description: 'Gold standard for coloring books'
+  },
+  { 
+    id: '8x10', 
+    name: '8" × 10"', 
+    width: 576, 
+    height: 720,
+    recommended: true,
+    description: 'Premium feel, slightly smaller'
+  },
+  { 
+    id: '8.5x8.5', 
+    name: '8.5" × 8.5" (Square)', 
+    width: 612, 
+    height: 612,
+    recommended: true,
+    description: 'Perfect for mandalas & patterns'
+  },
+  { 
+    id: '7x10', 
+    name: '7" × 10"', 
+    width: 504, 
+    height: 720,
+    description: 'Common choice for B&W books'
+  },
+  { 
+    id: '8.25x8.25', 
+    name: '8.25" × 8.25" (Square)', 
+    width: 594, 
+    height: 594,
+    description: 'Square format for designs'
+  },
+]
+
+// KDP Requirements
+const KDP_MIN_PAGES = 24
+const KDP_BLEED = 0.125 // inches
 
 const COLORING_THEMES = [
   { id: 'animals', name: 'Animals', icon: '🦁', examples: 'Lions, elephants, butterflies' },
