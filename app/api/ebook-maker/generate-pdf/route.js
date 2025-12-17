@@ -793,17 +793,16 @@ export async function POST(request) {
         color: colors.secondary,
       })
       
-      y = pageHeight - margin - 85
-      const introLines = wrapText(introduction.content, regularFont, 11, contentWidth)
-      for (const line of introLines) {
-        if (y < margin + 60) {
-          page = pdfDoc.addPage([pageWidth, pageHeight])
-          page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
-          y = pageHeight - margin - 50
-        }
-        safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
-        y -= lineHeight
-      }
+      // Parse and render rich content (supports headings, quotes, bullets, highlight boxes)
+      const introBlocks = parseRichContent(introduction.content)
+      const introResult = renderRichContent(pdfDoc, page, introBlocks, {
+        margin, pageWidth, pageHeight, contentWidth,
+        regularFont, boldFont, italicFont, colors, lineHeight,
+        safeDrawText, safeGetTextWidth,
+        startY: pageHeight - margin - 85
+      })
+      page = introResult.page
+      y = introResult.y
     }
     
     // ===== CHAPTERS =====
