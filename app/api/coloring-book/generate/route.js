@@ -198,11 +198,12 @@ IMPORTANT: Return ONLY valid JSON array, no markdown.`
     }
     
     const examples = themeExamples[theme] || themeExamples.animals
+    const themeName = customTheme || theme
     
     return Array.from({ length: pageCount }, (_, i) => ({
-      title: `${themeDescription} Page ${i + 1}`,
-      description: examples[i % examples.length] || `A beautiful ${themeDescription} scene with interesting details`,
-      elements: [themeDescription, 'decorative elements', 'background details']
+      title: `${themeName} Page ${i + 1}`,
+      description: examples[i % examples.length] || `A beautiful ${themeName} scene with interesting details`,
+      elements: [themeName, 'decorative elements', 'background details']
     }))
   }
 }
