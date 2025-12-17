@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,12 +10,17 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
-  RefreshCw, Heart, ChevronDown, ChevronUp
+  RefreshCw, Heart, ChevronDown, ChevronUp, Image
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import Link from 'next/link'
+
+// Import shared components for Pro features
+import RichTextEditor from '@/components/shared/RichTextEditor'
+import DraftsManager from '@/components/shared/DraftsManager'
+import CoverImagePrompt from '@/components/shared/CoverImagePrompt'
 
 const JOURNAL_TYPES = [
   { id: 'gratitude', name: 'Gratitude Journal', icon: '🙏', description: 'Daily thankfulness practice' },
