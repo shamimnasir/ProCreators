@@ -693,7 +693,16 @@ export default function EbookMakerPage() {
                     }`}
                   >
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                      <div 
+                        className="flex-1 cursor-pointer hover:opacity-80"
+                        onClick={() => {
+                          if (currentDraftId !== draft.id) {
+                            loadDraft(draft)
+                          } else {
+                            setShowDrafts(false) // Just close panel if already editing this draft
+                          }
+                        }}
+                      >
                         <h4 className="font-semibold">{draft.title}</h4>
                         {draft.subtitle && <p className="text-sm text-muted-foreground">{draft.subtitle}</p>}
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
@@ -710,9 +719,11 @@ export default function EbookMakerPage() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         {currentDraftId === draft.id ? (
-                          <Badge variant="outline" className="text-xs">Current</Badge>
+                          <Button size="sm" variant="outline" onClick={() => setShowDrafts(false)}>
+                            <Edit3 className="h-3 w-3 mr-1" /> Continue Editing
+                          </Button>
                         ) : (
                           <Button size="sm" onClick={() => loadDraft(draft)}>
                             <Edit3 className="h-3 w-3 mr-1" /> Open
@@ -722,7 +733,10 @@ export default function EbookMakerPage() {
                           size="sm" 
                           variant="ghost" 
                           className="text-destructive hover:text-destructive"
-                          onClick={() => deleteDraft(draft.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteDraft(draft.id)
+                          }}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
