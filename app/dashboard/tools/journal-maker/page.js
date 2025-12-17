@@ -623,6 +623,16 @@ export default function JournalMakerPage() {
                     step={30}
                   />
                 </div>
+                
+                {/* Cover Image Customization */}
+                <div className="border rounded-lg p-4 space-y-3">
+                  <CoverImagePrompt
+                    coverImageStyle={coverImageStyle}
+                    setCoverImageStyle={setCoverImageStyle}
+                    customImagePrompt={customImagePrompt}
+                    setCustomImagePrompt={setCustomImagePrompt}
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">
