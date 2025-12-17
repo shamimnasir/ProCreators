@@ -55,8 +55,15 @@ export async function POST(request) {
     
     // Detect language from topic
     const detectedLang = detectLanguage(topic)
+    const isBengali = detectedLang === 'bn'
+    const isHindi = detectedLang === 'hi'
+    
+    // Get language-appropriate labels
+    const introLabel = isBengali ? 'ভূমিকা' : (isHindi ? 'प्रस्तावना' : 'Introduction')
+    const conclusionLabel = isBengali ? 'উপসংহার' : (isHindi ? 'निष्कर्ष' : 'Conclusion')
+    
     const languageInstruction = detectedLang !== 'en' 
-      ? `IMPORTANT: The topic is in a non-English language. Generate ALL content (title, subtitle, chapters, descriptions) in the SAME language as the topic. Do not translate to English.`
+      ? `CRITICAL: The topic is in ${isBengali ? 'Bengali (বাংলা)' : isHindi ? 'Hindi (हिंदी)' : 'a non-English language'}. You MUST generate ALL content (title, subtitle, chapter titles, descriptions, summaries, key points) in the SAME language. Do NOT use English anywhere in the content.`
       : ''
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
@@ -72,16 +79,16 @@ Tone: ${tone || 'professional and engaging'}
 ${languageInstruction}
 
 Generate a comprehensive outline with:
-1. A compelling book title
-2. A catchy subtitle
-3. A brief book description (2-3 sentences)
-4. An introduction summary
+1. A compelling book title (in the same language as the topic)
+2. A catchy subtitle (in the same language as the topic)
+3. A brief book description (2-3 sentences, in the same language)
+4. An introduction summary (in the same language)
 5. Detailed chapter outlines with:
-   - Chapter title
-   - Chapter summary (what this chapter covers)
-   - 3-5 key points/sections within each chapter
+   - Chapter title (in the same language)
+   - Chapter summary (what this chapter covers, in the same language)
+   - 3-5 key points/sections within each chapter (in the same language)
    - Estimated word count
-6. A conclusion summary
+6. A conclusion summary (in the same language)
 
 Format your response as JSON:
 {
@@ -90,7 +97,7 @@ Format your response as JSON:
   "description": "...",
   "targetAudience": "...",
   "introduction": {
-    "title": "Introduction",
+    "title": "${introLabel}",
     "summary": "...",
     "keyPoints": ["...", "..."]
   },
