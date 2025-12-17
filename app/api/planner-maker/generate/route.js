@@ -477,7 +477,9 @@ export async function POST(request) {
     // Get configurations
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['rose-gold']
     const cover = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
-    const size = PAPER_SIZES[paperSize] || PAPER_SIZES.letter
+    // Get paper size from new centralized config
+    const sizeConfig = getSizeById(paperSize)
+    const size = sizeConfig.points
 
     // Generate AI content
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions)
