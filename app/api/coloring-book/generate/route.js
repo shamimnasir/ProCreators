@@ -454,7 +454,11 @@ export async function POST(request) {
         pageCount: coloringPages.length,
         primaryColor,
         secondaryColor,
-        hasImages: coloringPages.some(p => p.imageUrl)
+        hasImages: coloringPages.some(p => p.imageUrl),
+        paperSize: paperSize?.name || '8.5" × 11"',
+        paperSizeId: paperSize?.id || '8.5x11',
+        hasBleed: useBleed || false,
+        kdpCompliant: coloringPages.length >= 24
       },
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
