@@ -468,6 +468,8 @@ export async function POST(request) {
       authorName,
       year,
       customInstructions,
+      customHabits,
+      trackingDays = 30,
       coverImageStyle = 'abstract',
       customImagePrompt
     } = await request.json()
