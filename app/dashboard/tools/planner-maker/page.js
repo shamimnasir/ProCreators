@@ -112,6 +112,8 @@ export default function PlannerMakerPage() {
     authorName,
     year,
     customInstructions,
+    customHabits,
+    trackingDays,
     coverImageStyle,
     customImagePrompt,
   })
