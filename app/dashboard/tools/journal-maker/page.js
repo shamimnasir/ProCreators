@@ -261,7 +261,7 @@ export default function JournalMakerPage() {
   const selectedColor = COLOR_SCHEMES.find(c => c.id === colorScheme)
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/digital-products">
@@ -275,6 +275,24 @@ export default function JournalMakerPage() {
           <p className="text-muted-foreground">Create beautiful guided journals with AI-generated prompts</p>
         </div>
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Left sidebar - Drafts */}
+        <div className="lg:col-span-1">
+          <DraftsManager
+            toolType="journal"
+            drafts={drafts}
+            setDrafts={setDrafts}
+            currentDraftId={currentDraftId}
+            setCurrentDraftId={setCurrentDraftId}
+            getCurrentData={getCurrentData}
+            loadDraftData={loadDraftData}
+            onStartNew={handleStartNew}
+          />
+        </div>
+
+        {/* Main content */}
+        <div className="lg:col-span-3 space-y-6">
 
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-2">
