@@ -138,7 +138,10 @@ export default function ChecklistMakerPage() {
           itemCount,
           designStyle,
           paperSize,
-          trackingDays: selectedType?.isTracker ? trackingDays : undefined
+          trackingDays: selectedType?.isTracker ? trackingDays : undefined,
+          coverImageStyle,
+          customImagePrompt: customImagePrompt || undefined,
+          customTitle: customTitle || undefined
         })
       })
 
