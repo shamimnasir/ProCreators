@@ -142,6 +142,331 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines
 }
 
+// Parse and render rich formatted content
+// Supports: ## Headings, **bold**, *italic*, > quotes, - bullets, [HIGHLIGHT] boxes
+function parseRichContent(content) {
+  if (!content) return []
+  
+  const blocks = []
+  const lines = content.split('\n')
+  let i = 0
+  
+  while (i < lines.length) {
+    const line = lines[i].trim()
+    
+    // Skip empty lines
+    if (!line) {
+      i++
+      continue
+    }
+    
+    // Heading (## or ###)
+    if (line.startsWith('## ')) {
+      blocks.push({ type: 'heading', level: 2, text: line.substring(3).trim() })
+      i++
+      continue
+    }
+    if (line.startsWith('### ')) {
+      blocks.push({ type: 'heading', level: 3, text: line.substring(4).trim() })
+      i++
+      continue
+    }
+    if (line.startsWith('# ')) {
+      blocks.push({ type: 'heading', level: 1, text: line.substring(2).trim() })
+      i++
+      continue
+    }
+    
+    // Quote block (> at start)
+    if (line.startsWith('>')) {
+      const quoteLines = [line.substring(1).trim()]
+      i++
+      while (i < lines.length && lines[i].trim().startsWith('>')) {
+        quoteLines.push(lines[i].trim().substring(1).trim())
+        i++
+      }
+      blocks.push({ type: 'quote', text: quoteLines.join(' ') })
+      continue
+    }
+    
+    // Highlight box [HIGHLIGHT] or [NOTE] or [TIP]
+    if (line.match(/^\[(HIGHLIGHT|NOTE|TIP|IMPORTANT|WARNING)\]/i)) {
+      const match = line.match(/^\[(HIGHLIGHT|NOTE|TIP|IMPORTANT|WARNING)\]\s*(.*)/i)
+      const boxType = match[1].toUpperCase()
+      const boxLines = [match[2] || '']
+      i++
+      // Continue until next block indicator or empty line
+      while (i < lines.length && lines[i].trim() && 
+             !lines[i].trim().startsWith('#') && 
+             !lines[i].trim().startsWith('[') &&
+             !lines[i].trim().startsWith('>') &&
+             !lines[i].trim().match(/^[-*]\s/)) {
+        boxLines.push(lines[i].trim())
+        i++
+      }
+      blocks.push({ type: 'box', boxType, text: boxLines.join(' ').trim() })
+      continue
+    }
+    
+    // Bullet list (- or * at start)
+    if (line.match(/^[-*]\s/)) {
+      const bullets = [line.substring(2).trim()]
+      i++
+      while (i < lines.length && lines[i].trim().match(/^[-*]\s/)) {
+        bullets.push(lines[i].trim().substring(2).trim())
+        i++
+      }
+      blocks.push({ type: 'bullets', items: bullets })
+      continue
+    }
+    
+    // Numbered list (1. 2. etc)
+    if (line.match(/^\d+\.\s/)) {
+      const items = [line.replace(/^\d+\.\s/, '').trim()]
+      i++
+      while (i < lines.length && lines[i].trim().match(/^\d+\.\s/)) {
+        items.push(lines[i].trim().replace(/^\d+\.\s/, '').trim())
+        i++
+      }
+      blocks.push({ type: 'numbered', items })
+      continue
+    }
+    
+    // Regular paragraph - collect consecutive non-special lines
+    const paraLines = [line]
+    i++
+    while (i < lines.length && lines[i].trim() && 
+           !lines[i].trim().startsWith('#') && 
+           !lines[i].trim().startsWith('>') &&
+           !lines[i].trim().startsWith('[') &&
+           !lines[i].trim().match(/^[-*]\s/) &&
+           !lines[i].trim().match(/^\d+\.\s/)) {
+      paraLines.push(lines[i].trim())
+      i++
+    }
+    blocks.push({ type: 'paragraph', text: paraLines.join(' ') })
+  }
+  
+  return blocks
+}
+
+// Render rich content blocks to PDF
+function renderRichContent(pdfDoc, page, blocks, options) {
+  const { 
+    margin, pageWidth, pageHeight, contentWidth, 
+    regularFont, boldFont, italicFont, colors, lineHeight,
+    safeDrawText, safeGetTextWidth 
+  } = options
+  
+  let currentPage = page
+  let y = options.startY
+  
+  const newPage = () => {
+    currentPage = pdfDoc.addPage([pageWidth, pageHeight])
+    currentPage.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
+    y = pageHeight - margin - 50
+    return currentPage
+  }
+  
+  for (const block of blocks) {
+    // Check if need new page
+    if (y < margin + 80) {
+      currentPage = newPage()
+    }
+    
+    switch (block.type) {
+      case 'heading':
+        y -= 15 // Space before heading
+        const headingSize = block.level === 1 ? 18 : (block.level === 2 ? 15 : 13)
+        safeDrawText(currentPage, block.text, {
+          x: margin,
+          y,
+          size: headingSize,
+          font: boldFont,
+          color: colors.primary
+        })
+        y -= headingSize + 12
+        break
+        
+      case 'quote':
+        y -= 8
+        // Draw quote background
+        const quoteLines = wrapText(block.text, italicFont, 10, contentWidth - 40)
+        const quoteHeight = quoteLines.length * 14 + 16
+        
+        if (y - quoteHeight < margin + 50) currentPage = newPage()
+        
+        currentPage.drawRectangle({
+          x: margin + 10,
+          y: y - quoteHeight + 10,
+          width: contentWidth - 20,
+          height: quoteHeight,
+          color: colors.accent,
+        })
+        currentPage.drawRectangle({
+          x: margin + 10,
+          y: y - quoteHeight + 10,
+          width: 4,
+          height: quoteHeight,
+          color: colors.secondary,
+        })
+        
+        // Draw quote mark
+        safeDrawText(currentPage, '"', {
+          x: margin + 20,
+          y: y - 4,
+          size: 20,
+          font: boldFont,
+          color: colors.secondary
+        })
+        
+        let quoteY = y - 12
+        for (const line of quoteLines) {
+          safeDrawText(currentPage, line, {
+            x: margin + 35,
+            y: quoteY,
+            size: 10,
+            font: italicFont,
+            color: colors.text
+          })
+          quoteY -= 14
+        }
+        y -= quoteHeight + 10
+        break
+        
+      case 'box':
+        y -= 10
+        const boxLines = wrapText(block.text, regularFont, 10, contentWidth - 50)
+        const boxHeight = boxLines.length * 14 + 30
+        
+        if (y - boxHeight < margin + 50) currentPage = newPage()
+        
+        // Box colors based on type
+        let boxBorderColor = colors.primary
+        let boxLabel = block.boxType
+        if (block.boxType === 'WARNING') boxBorderColor = rgb(0.9, 0.4, 0.2)
+        else if (block.boxType === 'TIP') boxBorderColor = rgb(0.2, 0.7, 0.4)
+        else if (block.boxType === 'NOTE') boxBorderColor = rgb(0.3, 0.5, 0.8)
+        
+        currentPage.drawRectangle({
+          x: margin,
+          y: y - boxHeight + 10,
+          width: contentWidth,
+          height: boxHeight,
+          color: colors.accent,
+          borderColor: boxBorderColor,
+          borderWidth: 1,
+        })
+        currentPage.drawRectangle({
+          x: margin,
+          y: y - boxHeight + 10,
+          width: 4,
+          height: boxHeight,
+          color: boxBorderColor,
+        })
+        
+        // Label
+        safeDrawText(currentPage, `💡 ${boxLabel}`, {
+          x: margin + 12,
+          y: y - 2,
+          size: 10,
+          font: boldFont,
+          color: boxBorderColor
+        })
+        
+        let boxY = y - 18
+        for (const line of boxLines) {
+          safeDrawText(currentPage, line, {
+            x: margin + 12,
+            y: boxY,
+            size: 10,
+            font: regularFont,
+            color: colors.text
+          })
+          boxY -= 14
+        }
+        y -= boxHeight + 12
+        break
+        
+      case 'bullets':
+        y -= 5
+        for (const item of block.items) {
+          if (y < margin + 60) currentPage = newPage()
+          
+          currentPage.drawCircle({ 
+            x: margin + 10, 
+            y: y + 4, 
+            size: 3, 
+            color: colors.primary 
+          })
+          
+          const bulletLines = wrapText(item, regularFont, 11, contentWidth - 25)
+          for (let li = 0; li < bulletLines.length; li++) {
+            safeDrawText(currentPage, bulletLines[li], {
+              x: margin + 20,
+              y: y - (li * lineHeight),
+              size: 11,
+              font: regularFont,
+              color: colors.text
+            })
+          }
+          y -= bulletLines.length * lineHeight + 5
+        }
+        y -= 10
+        break
+        
+      case 'numbered':
+        y -= 5
+        for (let ni = 0; ni < block.items.length; ni++) {
+          if (y < margin + 60) currentPage = newPage()
+          
+          safeDrawText(currentPage, `${ni + 1}.`, {
+            x: margin + 5,
+            y,
+            size: 11,
+            font: boldFont,
+            color: colors.primary
+          })
+          
+          const numLines = wrapText(block.items[ni], regularFont, 11, contentWidth - 25)
+          for (let li = 0; li < numLines.length; li++) {
+            safeDrawText(currentPage, numLines[li], {
+              x: margin + 22,
+              y: y - (li * lineHeight),
+              size: 11,
+              font: regularFont,
+              color: colors.text
+            })
+          }
+          y -= numLines.length * lineHeight + 5
+        }
+        y -= 10
+        break
+        
+      case 'paragraph':
+      default:
+        // Handle **bold** and *italic* inline formatting
+        const paraText = block.text || block
+        const paraLines = wrapText(paraText, regularFont, 11, contentWidth)
+        for (const line of paraLines) {
+          if (y < margin + 60) currentPage = newPage()
+          safeDrawText(currentPage, line, {
+            x: margin,
+            y,
+            size: 11,
+            font: regularFont,
+            color: colors.text
+          })
+          y -= lineHeight
+        }
+        y -= 8 // Extra space between paragraphs
+        break
+    }
+  }
+  
+  return { page: currentPage, y }
+}
+
 export async function POST(request) {
   try {
     const { 
