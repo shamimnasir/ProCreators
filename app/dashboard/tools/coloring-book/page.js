@@ -905,18 +905,27 @@ export default function ColoringBookPage() {
               <div className="space-y-4">
                 <Label>Preview</Label>
                 <div 
-                  className="aspect-[3/4] rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
-                  style={{ backgroundColor: useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary || '#6b21a8') }}
+                  className="rounded-lg p-6 text-white flex flex-col justify-between shadow-xl"
+                  style={{ 
+                    backgroundColor: useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary || '#6b21a8'),
+                    aspectRatio: `${PAPER_SIZES.find(s => s.id === paperSize)?.width || 612} / ${PAPER_SIZES.find(s => s.id === paperSize)?.height || 792}`
+                  }}
                 >
-                  <div className="text-center pt-12">
-                    <h3 className="text-xl font-bold drop-shadow">{bookTitle || `${customTheme || selectedTheme?.name} Coloring Book`}</h3>
+                  <div className="text-center pt-8">
+                    <h3 className="text-lg font-bold drop-shadow">{bookTitle || `${customTheme || selectedTheme?.name} Coloring Book`}</h3>
                     <p className="text-sm opacity-80 mt-2">{pages.length} Pages</p>
-                    {authorName && <p className="text-xs opacity-70 mt-4">By {authorName}</p>}
+                    {authorName && <p className="text-xs opacity-70 mt-3">By {authorName}</p>}
                   </div>
                   <div className="text-center space-y-2">
-                    <Badge variant="secondary" className="text-xs">{DIFFICULTY_LEVELS.find(l => l.id === difficulty)?.name}</Badge>
-                    {pagesWithImages > 0 && <Badge variant="secondary" className="text-xs ml-2">{pagesWithImages} AI Images</Badge>}
+                    <Badge variant="secondary" className="text-xs">{PAPER_SIZES.find(s => s.id === paperSize)?.name}</Badge>
+                    <Badge variant="secondary" className="text-xs ml-2">{DIFFICULTY_LEVELS.find(l => l.id === difficulty)?.name}</Badge>
+                    {useBleed && <Badge variant="secondary" className="text-xs ml-2">With Bleed</Badge>}
                   </div>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p><strong>Paper:</strong> {PAPER_SIZES.find(s => s.id === paperSize)?.name}</p>
+                  <p><strong>Bleed:</strong> {useBleed ? '0.125" (KDP Standard)' : 'None'}</p>
+                  <p><strong>Pages:</strong> {pages.length} {pages.length >= KDP_MIN_PAGES ? '✓ KDP Compliant' : `(Need ${KDP_MIN_PAGES - pages.length} more for KDP)`}</p>
                 </div>
               </div>
             </div>
