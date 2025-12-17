@@ -84,16 +84,30 @@ export async function POST(request) {
     const journalType = settings?.journalType || 'gratitude'
     const pageCount = settings?.pageCount || 90
     
-    // Generate cover image
+    // Generate cover image - supports custom prompts
     let coverImageUrl = null
-    if (settings?.generateCoverImage !== false) {
+    const coverImageStyle = settings?.coverImageStyle || 'abstract'
+    const customImagePrompt = settings?.customImagePrompt
+    
+    if (settings?.generateCoverImage !== false && coverImageStyle !== 'gradient') {
       try {
-        const themeKey = getJournalTheme(journalType)
-        console.log(`Generating cover image for theme: ${themeKey}`)
-        const imageResult = await generateCoverImage(themeKey)
-        if (imageResult.success && imageResult.imageUrl) {
-          coverImageUrl = imageResult.imageUrl
-          console.log('Cover image generated successfully')
+        if (coverImageStyle === 'custom' && customImagePrompt) {
+          // User provided custom description
+          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Custom cover image generated successfully')
+          }
+        } else {
+          // Use theme-based prompt
+          const themeKey = getJournalTheme(journalType)
+          console.log(`Generating cover image for theme: ${themeKey}`)
+          const imageResult = await generateCoverImage(themeKey)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Cover image generated successfully')
+          }
         }
       } catch (imgError) {
         console.log('Cover image generation failed:', imgError.message)
