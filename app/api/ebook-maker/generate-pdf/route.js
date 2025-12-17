@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server'
-import 'regenerator-runtime/runtime'
+
+// Polyfill for regeneratorRuntime required by @pdf-lib/fontkit
+import regeneratorRuntime from 'regenerator-runtime'
+if (typeof globalThis.regeneratorRuntime === 'undefined') {
+  globalThis.regeneratorRuntime = regeneratorRuntime
+}
+
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import * as fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
