@@ -52,6 +52,28 @@ const COLOR_SCHEMES = [
   { id: 'sunset', name: 'Sunset', color: 'bg-orange-400' },
 ]
 
+// Language options
+const LANGUAGES = [
+  { id: 'en', name: 'English', flag: '🇺🇸' },
+  { id: 'bn', name: 'Bengali (বাংলা)', flag: '🇧🇩' },
+  { id: 'hi', name: 'Hindi (हिंदी)', flag: '🇮🇳' },
+  { id: 'es', name: 'Spanish (Español)', flag: '🇪🇸' },
+  { id: 'fr', name: 'French (Français)', flag: '🇫🇷' },
+  { id: 'ar', name: 'Arabic (العربية)', flag: '🇸🇦' },
+  { id: 'zh', name: 'Chinese (中文)', flag: '🇨🇳' },
+]
+
+// Custom color presets
+const COLOR_PRESETS = [
+  { id: 'ocean-blue', name: 'Ocean Blue', primary: '#1e40af', secondary: '#3b82f6' },
+  { id: 'forest-green', name: 'Forest Green', primary: '#166534', secondary: '#22c55e' },
+  { id: 'sunset-orange', name: 'Sunset Orange', primary: '#c2410c', secondary: '#f97316' },
+  { id: 'royal-purple', name: 'Royal Purple', primary: '#7c3aed', secondary: '#a78bfa' },
+  { id: 'rose-pink', name: 'Rose Pink', primary: '#be185d', secondary: '#ec4899' },
+  { id: 'slate-gray', name: 'Slate Gray', primary: '#334155', secondary: '#64748b' },
+  { id: 'custom', name: 'Custom Color', primary: '#000000', secondary: '#666666' },
+]
+
 export default function WorksheetMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -62,6 +84,7 @@ export default function WorksheetMakerPage() {
   const [topic, setTopic] = useState('')
   const [gradeLevel, setGradeLevel] = useState('6th Grade')
   const [questionCount, setQuestionCount] = useState(10)
+  const [language, setLanguage] = useState('en') // New: Language selection
 
   // Step 2: Worksheet content (editable)
   const [cover, setCover] = useState({ title: '', subtitle: '', instructions: '', teacherName: '', subject: '', gradeLevel: '' })
@@ -71,11 +94,90 @@ export default function WorksheetMakerPage() {
 
   // Step 3: Settings
   const [colorScheme, setColorScheme] = useState('ocean-blue')
+  const [customPrimaryColor, setCustomPrimaryColor] = useState('#1e40af')
+  const [customSecondaryColor, setCustomSecondaryColor] = useState('#3b82f6')
   const [coverStyle, setCoverStyle] = useState('modern')
   const [includeAnswerKey, setIncludeAnswerKey] = useState(true)
 
+  // Drafts management
+  const [drafts, setDrafts] = useState([])
+  const [currentDraftId, setCurrentDraftId] = useState(null)
+
   // Result
   const [result, setResult] = useState(null)
+  
+  // Load drafts on mount
+  useEffect(() => {
+    const loadDrafts = async () => {
+      try {
+        const res = await fetch('/api/drafts?toolType=worksheet')
+        const data = await res.json()
+        if (data.success && data.drafts) {
+          setDrafts(data.drafts)
+        }
+      } catch (e) {
+        console.log('Failed to load drafts:', e)
+      }
+    }
+    loadDrafts()
+  }, [])
+  
+  // Get current form data for saving
+  const getCurrentData = () => ({
+    title: cover.title || `${topic} Worksheet`,
+    subject,
+    topic,
+    gradeLevel,
+    questionCount,
+    language,
+    cover,
+    sections,
+    bonusQuestions,
+    colorScheme,
+    customPrimaryColor,
+    customSecondaryColor,
+    coverStyle,
+    includeAnswerKey,
+    step,
+  })
+  
+  // Load draft data into form
+  const loadDraftData = (data) => {
+    if (data.subject) setSubject(data.subject)
+    if (data.topic) setTopic(data.topic)
+    if (data.gradeLevel) setGradeLevel(data.gradeLevel)
+    if (data.questionCount) setQuestionCount(data.questionCount)
+    if (data.language) setLanguage(data.language)
+    if (data.cover) setCover(data.cover)
+    if (data.sections) setSections(data.sections)
+    if (data.bonusQuestions) setBonusQuestions(data.bonusQuestions)
+    if (data.colorScheme) setColorScheme(data.colorScheme)
+    if (data.customPrimaryColor) setCustomPrimaryColor(data.customPrimaryColor)
+    if (data.customSecondaryColor) setCustomSecondaryColor(data.customSecondaryColor)
+    if (data.coverStyle) setCoverStyle(data.coverStyle)
+    if (data.includeAnswerKey !== undefined) setIncludeAnswerKey(data.includeAnswerKey)
+    if (data.step && data.step > 1) setStep(Math.min(data.step, 3))
+    setResult(null)
+  }
+  
+  // Start new worksheet
+  const handleStartNew = () => {
+    setStep(1)
+    setSubject('math')
+    setTopic('')
+    setGradeLevel('6th Grade')
+    setQuestionCount(10)
+    setLanguage('en')
+    setCover({ title: '', subtitle: '', instructions: '', teacherName: '', subject: '', gradeLevel: '' })
+    setSections([])
+    setBonusQuestions([])
+    setColorScheme('ocean-blue')
+    setCustomPrimaryColor('#1e40af')
+    setCustomSecondaryColor('#3b82f6')
+    setCoverStyle('modern')
+    setIncludeAnswerKey(true)
+    setResult(null)
+  }
 
   // Generate structure
   const generateStructure = async () => {
