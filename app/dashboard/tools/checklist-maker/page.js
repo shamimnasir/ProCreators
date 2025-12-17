@@ -207,6 +207,24 @@ export default function ChecklistMakerPage() {
         </CardContent>
       </Card>
 
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Left sidebar - Drafts */}
+        <div className="lg:col-span-1">
+          <DraftsManager
+            toolType="checklist"
+            drafts={drafts}
+            setDrafts={setDrafts}
+            currentDraftId={currentDraftId}
+            setCurrentDraftId={setCurrentDraftId}
+            getCurrentData={getCurrentData}
+            loadDraftData={loadDraftData}
+            onStartNew={handleStartNew}
+          />
+        </div>
+
+        {/* Main content */}
+        <div className="lg:col-span-3">
+
       <Tabs value={mode} onValueChange={setMode}>
         <TabsList>
           <TabsTrigger value="easy">✨ Easy Mode</TabsTrigger>
