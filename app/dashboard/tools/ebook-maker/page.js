@@ -151,19 +151,23 @@ export default function EbookMakerPage() {
     if (data.step) setStep(data.step)
   }
 
-  // LOAD DRAFTS on mount
+  // LOAD DRAFTS from database on mount
   useEffect(() => {
-    // Load all drafts
-    const savedDrafts = localStorage.getItem('ebook-maker-drafts')
-    if (savedDrafts) {
+    const loadDraftsFromDB = async () => {
       try {
-        setDrafts(JSON.parse(savedDrafts))
+        const res = await fetch('/api/ebook-maker/drafts')
+        const data = await res.json()
+        if (data.success && data.drafts) {
+          setDrafts(data.drafts)
+        }
       } catch (e) {
-        console.log('Failed to load drafts:', e)
+        console.log('Failed to load drafts from DB:', e)
       }
     }
+    
+    loadDraftsFromDB()
 
-    // Load current working progress
+    // Load current working progress from localStorage (session state)
     const currentProgress = localStorage.getItem('ebook-maker-progress')
     if (currentProgress) {
       try {
