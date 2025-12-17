@@ -401,13 +401,23 @@ export default function ChecklistMakerPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Custom Items (Optional)</Label>
+                    <Label className="flex items-center gap-2">
+                      {selectedType?.isTracker ? '✏️ Your Habits/Items' : 'Custom Items (Optional)'}
+                      {selectedType?.isTracker && <Badge variant="secondary" className="text-xs">Customize!</Badge>}
+                    </Label>
                     <Textarea
-                      placeholder="Add your own items, one per line...&#10;e.g., Exercise 30 mins&#10;Read 20 pages&#10;Drink 8 glasses water"
+                      placeholder={selectedType?.isTracker 
+                        ? "Enter your habits, one per line:\n\nExercise 30 mins\nRead 20 pages\nDrink 8 glasses water\nMeditate 10 mins\nNo junk food\nSleep by 10pm"
+                        : "Add your own items, one per line..."}
                       value={customItems}
                       onChange={(e) => setCustomItems(e.target.value)}
-                      rows={4}
+                      rows={6}
                     />
+                    {selectedType?.isTracker && (
+                      <p className="text-xs text-muted-foreground">
+                        💡 Leave empty for AI-generated habits, or enter your own above
+                      </p>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4">
