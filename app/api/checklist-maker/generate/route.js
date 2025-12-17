@@ -5,6 +5,8 @@ import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
+import { generateCoverImage, getChecklistTheme } from '@/lib/cover-image-generator'
+import { drawCoverPageWithImage, drawCoverPage } from '@/lib/pdf-design'
 
 const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
 
