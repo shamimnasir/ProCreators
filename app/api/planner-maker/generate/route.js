@@ -581,7 +581,7 @@ export async function POST(request) {
 
     // Tips page at the end
     const tipsPage = pdfDoc.addPage([size.width, size.height])
-    const margin = 50
+    // margin already defined above from KDP margins
     const contentWidth = size.width - (margin * 2)
     
     tipsPage.drawRectangle({ x: 0, y: 0, width: size.width, height: size.height, color: colors.background })
