@@ -304,8 +304,12 @@ export default function WorksheetMakerPage() {
                     <Input value={cover.title} onChange={(e) => setCover({ ...cover, title: e.target.value })} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Teacher Name (optional)</Label>
-                    <Input value={cover.teacherName} onChange={(e) => setCover({ ...cover, teacherName: e.target.value })} />
+                    <Label>Teacher / Institute Name</Label>
+                    <Input 
+                      value={cover.teacherName} 
+                      onChange={(e) => setCover({ ...cover, teacherName: e.target.value })}
+                      placeholder="e.g., Mrs. Smith or ABC Academy"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
