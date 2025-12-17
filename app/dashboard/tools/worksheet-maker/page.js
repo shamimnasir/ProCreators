@@ -191,7 +191,7 @@ export default function WorksheetMakerPage() {
       const response = await fetch('/api/worksheet-maker/generate-structure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, topic, gradeLevel, questionCount })
+        body: JSON.stringify({ subject, topic, gradeLevel, questionCount, language })
       })
 
       const data = await response.json()
@@ -202,7 +202,7 @@ export default function WorksheetMakerPage() {
         title: w.title,
         subtitle: `${w.subject} - ${w.gradeLevel}`,
         instructions: w.instructions,
-        teacherName: '',
+        teacherName: cover.teacherName || '', // Preserve teacher name if already entered
         subject: w.subject,
         gradeLevel: w.gradeLevel
       })
