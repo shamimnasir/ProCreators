@@ -27,30 +27,6 @@ import Link from 'next/link'
 function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
   const textareaRef = useRef(null)
   
-  // Insert formatting at cursor position
-  const insertFormatting = (prefix, suffix = '', placeholder = '') => {
-    const textarea = textareaRef.current
-    if (!textarea) return
-    
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const selectedText = value.substring(start, end)
-    const textToInsert = selectedText || placeholder
-    
-    const before = value.substring(0, start)
-    const after = value.substring(end)
-    
-    const newValue = before + prefix + textToInsert + suffix + after
-    onChange(newValue)
-    
-    // Set cursor position after insert
-    setTimeout(() => {
-      textarea.focus()
-      const newCursorPos = start + prefix.length + textToInsert.length + suffix.length
-      textarea.setSelectionRange(newCursorPos, newCursorPos)
-    }, 0)
-  }
-  
   // Insert block formatting (adds newlines)
   const insertBlock = (format) => {
     const textarea = textareaRef.current
@@ -74,92 +50,131 @@ function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
     }, 0)
   }
   
-  const formatButtons = [
-    { 
-      type: 'dropdown',
-      label: 'Headings',
-      icon: <Heading1 className="h-4 w-4" />,
-      items: [
-        { label: 'Heading 1', icon: <Heading1 className="h-4 w-4" />, action: () => insertBlock('# Your Heading Here\n') },
-        { label: 'Heading 2', icon: <Heading2 className="h-4 w-4" />, action: () => insertBlock('## Section Title\n') },
-        { label: 'Heading 3', icon: <Heading3 className="h-4 w-4" />, action: () => insertBlock('### Subsection\n') },
-      ]
-    },
-    {
-      type: 'button',
-      label: 'Quote',
-      icon: <Quote className="h-4 w-4" />,
-      action: () => insertBlock('> Write your quote here\n')
-    },
-    {
-      type: 'dropdown',
-      label: 'Lists',
-      icon: <List className="h-4 w-4" />,
-      items: [
-        { label: 'Bullet List', icon: <List className="h-4 w-4" />, action: () => insertBlock('- First item\n- Second item\n- Third item\n') },
-        { label: 'Numbered List', icon: <ListOrdered className="h-4 w-4" />, action: () => insertBlock('1. First step\n2. Second step\n3. Third step\n') },
-      ]
-    },
-    {
-      type: 'dropdown',
-      label: 'Highlight Boxes',
-      icon: <Lightbulb className="h-4 w-4" />,
-      items: [
-        { label: '💡 Tip Box', icon: <Lightbulb className="h-4 w-4 text-green-500" />, action: () => insertBlock('[TIP] Your helpful tip or advice here\n') },
-        { label: '📝 Note Box', icon: <Info className="h-4 w-4 text-blue-500" />, action: () => insertBlock('[NOTE] Important information to remember\n') },
-        { label: '⚠️ Warning Box', icon: <AlertTriangle className="h-4 w-4 text-orange-500" />, action: () => insertBlock('[WARNING] Caution or warning message here\n') },
-        { label: '✨ Highlight Box', icon: <MessageSquare className="h-4 w-4 text-purple-500" />, action: () => insertBlock('[HIGHLIGHT] Key point to emphasize\n') },
-      ]
-    },
-  ]
+  // Button handlers
+  const handleHeading1 = () => insertBlock('# Your Heading Here\n')
+  const handleHeading2 = () => insertBlock('## Section Title\n')
+  const handleHeading3 = () => insertBlock('### Subsection\n')
+  const handleQuote = () => insertBlock('> Write your quote here\n')
+  const handleBulletList = () => insertBlock('- First item\n- Second item\n- Third item\n')
+  const handleNumberedList = () => insertBlock('1. First step\n2. Second step\n3. Third step\n')
+  const handleTipBox = () => insertBlock('[TIP] Your helpful tip or advice here\n')
+  const handleNoteBox = () => insertBlock('[NOTE] Important information to remember\n')
+  const handleWarningBox = () => insertBlock('[WARNING] Caution or warning message here\n')
+  const handleHighlightBox = () => insertBlock('[HIGHLIGHT] Key point to emphasize\n')
   
   return (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
       
       {/* Formatting Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-muted rounded-t-lg border border-b-0">
+      <div className="flex flex-wrap items-center gap-1 p-2 bg-muted rounded-t-lg border border-b-0">
         <TooltipProvider>
-          {formatButtons.map((btn, idx) => (
-            btn.type === 'dropdown' ? (
-              <DropdownMenu key={idx}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        {btn.icon}
-                        <ChevronDown className="h-3 w-3 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>{btn.label}</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>{btn.label}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {btn.items.map((item, itemIdx) => (
-                    <DropdownMenuItem key={itemIdx} onClick={item.action}>
-                      {item.icon}
-                      <span className="ml-2">{item.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Tooltip key={idx}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 px-2" onClick={btn.action}>
-                    {btn.icon}
+          {/* Headings Dropdown */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 px-2">
+                    <Heading1 className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>{btn.label}</TooltipContent>
-              </Tooltip>
-            )
-          ))}
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Headings</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Headings</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleHeading1}>
+                <Heading1 className="h-4 w-4" />
+                <span className="ml-2">Heading 1</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHeading2}>
+                <Heading2 className="h-4 w-4" />
+                <span className="ml-2">Heading 2</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHeading3}>
+                <Heading3 className="h-4 w-4" />
+                <span className="ml-2">Heading 3</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Quote Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-2" onClick={handleQuote}>
+                <Quote className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Quote Block</TooltipContent>
+          </Tooltip>
+          
+          {/* Lists Dropdown */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 px-2">
+                    <List className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Lists</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Lists</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleBulletList}>
+                <List className="h-4 w-4" />
+                <span className="ml-2">Bullet List</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleNumberedList}>
+                <ListOrdered className="h-4 w-4" />
+                <span className="ml-2">Numbered List</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Highlight Boxes Dropdown */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 px-2">
+                    <Lightbulb className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Highlight Boxes</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Highlight Boxes</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleTipBox}>
+                <Lightbulb className="h-4 w-4 text-green-500" />
+                <span className="ml-2">💡 Tip Box</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleNoteBox}>
+                <Info className="h-4 w-4 text-blue-500" />
+                <span className="ml-2">📝 Note Box</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleWarningBox}>
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <span className="ml-2">⚠️ Warning Box</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHighlightBox}>
+                <MessageSquare className="h-4 w-4 text-purple-500" />
+                <span className="ml-2">✨ Highlight Box</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           <div className="h-6 w-px bg-border mx-1" />
           
-          <span className="text-xs text-muted-foreground ml-2">
+          <span className="text-xs text-muted-foreground ml-2 hidden sm:inline">
             Use toolbar to add formatting
           </span>
         </TooltipProvider>
