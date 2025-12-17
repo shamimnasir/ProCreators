@@ -129,6 +129,8 @@ export default function PlannerMakerPage() {
     if (data.authorName) setAuthorName(data.authorName)
     if (data.year) setYear(data.year)
     if (data.customInstructions) setCustomInstructions(data.customInstructions)
+    if (data.customHabits) setCustomHabits(data.customHabits)
+    if (data.trackingDays) setTrackingDays(data.trackingDays)
     if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
     if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
     setGeneratedPDF(null)
