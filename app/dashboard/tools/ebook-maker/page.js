@@ -270,16 +270,34 @@ export default function EbookMakerPage() {
     }
   }
 
-  // Delete a draft
-  const deleteDraft = (draftId) => {
-    const updatedDrafts = drafts.filter(d => d.id !== draftId)
-    setDrafts(updatedDrafts)
-    localStorage.setItem('ebook-maker-drafts', JSON.stringify(updatedDrafts))
-    
-    if (currentDraftId === draftId) {
-      setCurrentDraftId(null)
+  // Delete a draft (from database)
+  const deleteDraft = async (draftId) => {
+    try {
+      const res = await fetch(`/api/ebook-maker/drafts?id=${draftId}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await res.json()
+      
+      if (result.success) {
+        // Remove from local state
+        setDrafts(drafts.filter(d => d.id !== draftId))
+        
+        if (currentDraftId === draftId) {
+          setCurrentDraftId(null)
+        }
+        toast({ title: "Draft Deleted" })
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Failed to delete draft:', error)
+      toast({ 
+        title: "Delete Failed", 
+        description: "Could not delete draft. Please try again.",
+        variant: "destructive"
+      })
     }
-    toast({ title: "Draft Deleted" })
   }
 
   // Start new ebook (clear current and optionally save first)
