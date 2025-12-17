@@ -628,7 +628,126 @@ export default function EbookMakerPage() {
           </h1>
           <p className="text-muted-foreground">Create professional ebooks with AI-powered content generation</p>
         </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowDrafts(!showDrafts)}
+            className="flex items-center gap-2"
+          >
+            <FolderOpen className="h-4 w-4" />
+            My Drafts {drafts.length > 0 && `(${drafts.length})`}
+          </Button>
+          {(cover.title || topic) && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={saveDraft}
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Save Draft
+            </Button>
+          )}
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => startNewEbook(true)}
+            className="flex items-center gap-2"
+          >
+            <FilePlus className="h-4 w-4" />
+            New Ebook
+          </Button>
+        </div>
       </div>
+
+      {/* Drafts Panel */}
+      {showDrafts && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                My Saved Drafts
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setShowDrafts(false)}>
+                Close
+              </Button>
+            </div>
+            <CardDescription>Continue working on your saved ebooks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {drafts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <BookMarked className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No saved drafts yet.</p>
+                <p className="text-sm">Click "Save Draft" to save your current work.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {drafts.map((draft) => (
+                  <div 
+                    key={draft.id}
+                    className={`p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors ${
+                      currentDraftId === draft.id ? 'border-primary ring-1 ring-primary' : 'border-border'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{draft.title}</h4>
+                        {draft.subtitle && <p className="text-sm text-muted-foreground">{draft.subtitle}</p>}
+                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <List className="h-3 w-3" />
+                            {draft.chaptersComplete}/{draft.chaptersCount} chapters
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(draft.updatedAt).toLocaleDateString()}
+                          </span>
+                          <Badge variant={draft.step >= 4 ? "default" : "secondary"} className="text-xs">
+                            Step {draft.step}/5
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {currentDraftId === draft.id ? (
+                          <Badge variant="outline" className="text-xs">Current</Badge>
+                        ) : (
+                          <Button size="sm" onClick={() => loadDraft(draft)}>
+                            <Edit3 className="h-3 w-3 mr-1" /> Open
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => deleteDraft(draft.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Current Draft Indicator */}
+      {currentDraftId && cover.title && !showDrafts && (
+        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+          <div className="flex items-center gap-2 text-sm">
+            <BookMarked className="h-4 w-4 text-primary" />
+            <span>Editing: <strong>{cover.title}</strong></span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setShowDrafts(true)}>
+            Switch Draft
+          </Button>
+        </div>
+      )}
 
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-2">
