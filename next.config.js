@@ -5,6 +5,10 @@ const nextConfig = {
   },
   // Moved from experimental in Next.js 15
   serverExternalPackages: ['mongodb'],
+  // Enable instrumentation for polyfills
+  experimental: {
+    instrumentationHook: true,
+  },
   // Empty turbopack config to silence warning
   turbopack: {},
   webpack(config, { dev }) {
