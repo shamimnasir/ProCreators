@@ -244,12 +244,26 @@ export async function POST(request) {
     let coverImageUrl = null
     if (settings?.generateCoverImage !== false) {
       try {
-        const themeKey = getEbookTheme(genre)
-        console.log(`Generating cover image for theme: ${themeKey}`)
-        const imageResult = await generateCoverImage(themeKey)
-        if (imageResult.success && imageResult.imageUrl) {
-          coverImageUrl = imageResult.imageUrl
-          console.log('Cover image generated successfully')
+        const coverImageStyle = settings?.coverImageStyle || 'abstract'
+        const customImagePrompt = settings?.customImagePrompt || ''
+        
+        // For custom prompts, use the user's description directly
+        if (coverImageStyle === 'custom' && customImagePrompt) {
+          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Custom cover image generated successfully')
+          }
+        } else {
+          // Use theme-based prompt
+          const themeKey = getEbookTheme(genre)
+          console.log(`Generating cover image for theme: ${themeKey}`)
+          const imageResult = await generateCoverImage(themeKey)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Cover image generated successfully')
+          }
         }
       } catch (imgError) {
         console.log('Cover image generation failed:', imgError.message)
