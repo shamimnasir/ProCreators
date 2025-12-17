@@ -306,79 +306,115 @@ export default function WorksheetMakerPage() {
 
       {/* Step 1: Subject & Topic */}
       {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
-              Step 1: What Would You Like to Teach?
-            </CardTitle>
-            <CardDescription>Select subject and topic for AI-generated questions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {SUBJECTS.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setSubject(s.id)}
-                  className={`p-4 rounded-lg border text-center transition-all ${
-                    subject === s.id ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="text-2xl mb-2">{s.icon}</div>
-                  <div className="font-medium text-sm">{s.name}</div>
-                </button>
-              ))}
-            </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Form */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  Step 1: What Would You Like to Teach?
+                </CardTitle>
+                <CardDescription>Select subject and topic for AI-generated questions</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {SUBJECTS.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSubject(s.id)}
+                      className={`p-4 rounded-lg border text-center transition-all ${
+                        subject === s.id ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">{s.icon}</div>
+                      <div className="font-medium text-sm">{s.name}</div>
+                    </button>
+                  ))}
+                </div>
 
-            <div className="space-y-2">
-              <Label>Topic</Label>
-              <Input
-                placeholder="e.g., Fractions and Decimals, World War II, Photosynthesis"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                className="text-lg"
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label>Topic</Label>
+                  <Input
+                    placeholder="e.g., Fractions and Decimals, World War II, Photosynthesis"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    className="text-lg"
+                  />
+                </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Grade Level</Label>
-                <Select value={gradeLevel} onValueChange={setGradeLevel}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {GRADE_LEVELS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Number of Questions: {questionCount}</Label>
-                <Slider
-                  value={[questionCount]}
-                  onValueChange={([v]) => setQuestionCount(v)}
-                  min={5}
-                  max={30}
-                  step={5}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Teacher / Institute Name</Label>
-                <Input
-                  placeholder="e.g., Mrs. Smith or ABC Academy"
-                  value={cover.teacherName}
-                  onChange={(e) => setCover({ ...cover, teacherName: e.target.value })}
-                />
-              </div>
-            </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Grade Level</Label>
+                    <Select value={gradeLevel} onValueChange={setGradeLevel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {GRADE_LEVELS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Number of Questions: {questionCount}</Label>
+                    <Slider
+                      value={[questionCount]}
+                      onValueChange={([v]) => setQuestionCount(v)}
+                      min={5}
+                      max={30}
+                      step={5}
+                    />
+                  </div>
+                </div>
 
-            <Button className="w-full" size="lg" onClick={generateStructure} disabled={loading}>
-              {loading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
-              ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Teacher / Institute Name</Label>
+                    <Input
+                      placeholder="e.g., Mrs. Smith or ABC Academy"
+                      value={cover.teacherName}
+                      onChange={(e) => setCover({ ...cover, teacherName: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Language (Optional)
+                    </Label>
+                    <Input
+                      placeholder="e.g., Bengali, Hindi, Spanish, French..."
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty for English. Enter any language name for worksheets in that language.
+                    </p>
+                  </div>
+                </div>
+
+                <Button className="w-full" size="lg" onClick={generateStructure} disabled={loading}>
+                  {loading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
+                  ) : (
+                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Drafts Panel */}
+          <div className="lg:col-span-1">
+            <DraftsManager
+              toolType="worksheet"
+              drafts={drafts}
+              setDrafts={setDrafts}
+              currentDraftId={currentDraftId}
+              setCurrentDraftId={setCurrentDraftId}
+              getCurrentData={getCurrentData}
+              loadDraftData={loadDraftData}
+              onStartNew={handleStartNew}
+            />
+          </div>
+        </div>
       )}
 
       {/* Step 2: Edit Questions */}
