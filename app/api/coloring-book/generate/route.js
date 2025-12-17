@@ -232,15 +232,20 @@ export async function POST(request) {
       generateImages,
       primaryColor,
       secondaryColor,
-      generateCover
+      generateCover,
+      // KDP Settings
+      paperSize,
+      useBleed,
+      bleed
     } = await request.json()
     
     console.log(`Coloring Book Request: theme=${customTheme || theme}, pages=${pageCount}, generateImages=${generateImages}`)
+    console.log(`Paper Size: ${paperSize?.name || '8.5x11'}, Bleed: ${useBleed ? '0.125"' : 'none'}`)
     
     // If pages are provided (from editor), use them. Otherwise generate new ones.
     let coloringPages = pages
     if (!coloringPages || coloringPages.length === 0) {
-      coloringPages = await generatePageDescriptions(theme, customTheme, difficulty, pageCount || 10)
+      coloringPages = await generatePageDescriptions(theme, customTheme, difficulty, pageCount || 24)
     }
     
     // Generate actual coloring page images if requested
@@ -274,10 +279,17 @@ export async function POST(request) {
       }
     }
     
-    // Create PDF
+    // Create PDF with KDP dimensions
     const pdfDoc = await PDFDocument.create()
-    const pageWidth = 612
-    const pageHeight = 792
+    
+    // Get page dimensions from settings or use default 8.5x11
+    const baseWidth = paperSize?.width || 612  // 8.5" × 72
+    const baseHeight = paperSize?.height || 792 // 11" × 72
+    
+    // Add bleed if enabled (0.125" = 9 points on each side)
+    const bleedPoints = useBleed ? 9 : 0
+    const pageWidth = baseWidth + (bleedPoints * 2)
+    const pageHeight = baseHeight + (bleedPoints * 2)
     
     // Colors
     const pColor = hexToRgb(primaryColor || '#6b21a8')
