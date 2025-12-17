@@ -107,35 +107,76 @@ export default function EbookMakerPage() {
   // Generated result
   const [result, setResult] = useState(null)
 
-  // SAVE/LOAD PROGRESS - Load saved state on mount
+  // Get current ebook data as an object
+  const getCurrentEbookData = () => ({
+    topic,
+    genre,
+    targetAudience,
+    chapterCount,
+    outline,
+    cover,
+    introduction,
+    chapters,
+    conclusion,
+    colorScheme,
+    customColor,
+    coverStyle,
+    fontStyle,
+    coverImageStyle,
+    customImagePrompt,
+    internalPageColor,
+    internalCustomColor,
+    step
+  })
+
+  // Load ebook data from object
+  const loadEbookData = (data) => {
+    if (data.topic) setTopic(data.topic)
+    if (data.genre) setGenre(data.genre)
+    if (data.targetAudience) setTargetAudience(data.targetAudience)
+    if (data.chapterCount) setChapterCount(data.chapterCount)
+    if (data.outline) setOutline(data.outline)
+    if (data.cover) setCover(data.cover)
+    if (data.introduction) setIntroduction(data.introduction)
+    if (data.chapters) setChapters(data.chapters)
+    if (data.conclusion) setConclusion(data.conclusion)
+    if (data.colorScheme) setColorScheme(data.colorScheme)
+    if (data.customColor) setCustomColor(data.customColor)
+    if (data.coverStyle) setCoverStyle(data.coverStyle)
+    if (data.fontStyle) setFontStyle(data.fontStyle)
+    if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
+    if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
+    if (data.internalPageColor) setInternalPageColor(data.internalPageColor)
+    if (data.internalCustomColor) setInternalCustomColor(data.internalCustomColor)
+    if (data.step) setStep(data.step)
+  }
+
+  // LOAD DRAFTS on mount
   useEffect(() => {
-    const saved = localStorage.getItem('ebook-maker-progress')
-    if (saved) {
+    // Load all drafts
+    const savedDrafts = localStorage.getItem('ebook-maker-drafts')
+    if (savedDrafts) {
       try {
-        const data = JSON.parse(saved)
-        if (data.topic) setTopic(data.topic)
-        if (data.genre) setGenre(data.genre)
-        if (data.targetAudience) setTargetAudience(data.targetAudience)
-        if (data.chapterCount) setChapterCount(data.chapterCount)
-        if (data.outline) setOutline(data.outline)
-        if (data.cover) setCover(data.cover)
-        if (data.introduction) setIntroduction(data.introduction)
-        if (data.chapters) setChapters(data.chapters)
-        if (data.conclusion) setConclusion(data.conclusion)
-        if (data.colorScheme) setColorScheme(data.colorScheme)
-        if (data.customColor) setCustomColor(data.customColor)
-        if (data.coverStyle) setCoverStyle(data.coverStyle)
-        if (data.fontStyle) setFontStyle(data.fontStyle)
-        if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
-        if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
-        if (data.internalPageColor) setInternalPageColor(data.internalPageColor)
-        if (data.internalCustomColor) setInternalCustomColor(data.internalCustomColor)
-        if (data.step) setStep(data.step)
+        setDrafts(JSON.parse(savedDrafts))
+      } catch (e) {
+        console.log('Failed to load drafts:', e)
+      }
+    }
+
+    // Load current working progress
+    const currentProgress = localStorage.getItem('ebook-maker-progress')
+    if (currentProgress) {
+      try {
+        const data = JSON.parse(currentProgress)
+        loadEbookData(data)
+        if (data.draftId) setCurrentDraftId(data.draftId)
         
-        toast({ 
-          title: "Progress Restored", 
-          description: "Your previous work has been loaded. Click 'Clear Progress' to start fresh." 
-        })
+        if (data.cover?.title) {
+          toast({ 
+            title: "Progress Restored", 
+            description: `Continuing "${data.cover.title}". View drafts to switch.` 
+          })
+        }
       } catch (e) {
         console.log('Failed to restore progress:', e)
       }
@@ -143,37 +184,74 @@ export default function EbookMakerPage() {
     setIsHydrated(true)
   }, [])
 
-  // SAVE PROGRESS - Auto-save whenever state changes
+  // AUTO-SAVE current progress
   useEffect(() => {
-    if (!isHydrated) return // Don't save during initial load
+    if (!isHydrated) return
     
     const saveData = {
-      topic,
-      genre,
-      targetAudience,
-      chapterCount,
-      outline,
-      cover,
-      introduction,
-      chapters,
-      conclusion,
-      colorScheme,
-      customColor,
-      coverStyle,
-      fontStyle,
-      coverImageStyle,
-      customImagePrompt,
-      internalPageColor,
-      internalCustomColor,
-      step,
+      ...getCurrentEbookData(),
+      draftId: currentDraftId,
       savedAt: new Date().toISOString()
     }
     localStorage.setItem('ebook-maker-progress', JSON.stringify(saveData))
-  }, [isHydrated, topic, genre, targetAudience, chapterCount, outline, cover, introduction, chapters, conclusion, colorScheme, customColor, coverStyle, fontStyle, coverImageStyle, customImagePrompt, internalPageColor, internalCustomColor, step])
+  }, [isHydrated, topic, genre, targetAudience, chapterCount, outline, cover, introduction, chapters, conclusion, colorScheme, customColor, coverStyle, fontStyle, coverImageStyle, customImagePrompt, internalPageColor, internalCustomColor, step, currentDraftId])
 
-  // Clear saved progress
-  const clearProgress = () => {
-    localStorage.removeItem('ebook-maker-progress')
+  // Save current work as a draft
+  const saveDraft = () => {
+    const draftId = currentDraftId || `draft-${Date.now()}`
+    const draftTitle = cover.title || topic || 'Untitled Draft'
+    
+    const newDraft = {
+      id: draftId,
+      title: draftTitle,
+      subtitle: cover.subtitle || '',
+      step,
+      chaptersCount: chapters.length,
+      chaptersComplete: chapters.filter(ch => ch.content && ch.content.trim().length > 50).length,
+      createdAt: currentDraftId ? drafts.find(d => d.id === draftId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      data: getCurrentEbookData()
+    }
+    
+    // Update or add draft
+    const updatedDrafts = currentDraftId 
+      ? drafts.map(d => d.id === draftId ? newDraft : d)
+      : [newDraft, ...drafts]
+    
+    setDrafts(updatedDrafts)
+    setCurrentDraftId(draftId)
+    localStorage.setItem('ebook-maker-drafts', JSON.stringify(updatedDrafts))
+    
+    toast({ title: "Draft Saved!", description: `"${draftTitle}" has been saved to your drafts.` })
+  }
+
+  // Load a draft
+  const loadDraft = (draft) => {
+    loadEbookData(draft.data)
+    setCurrentDraftId(draft.id)
+    setShowDrafts(false)
+    toast({ title: "Draft Loaded", description: `Now editing "${draft.title}"` })
+  }
+
+  // Delete a draft
+  const deleteDraft = (draftId) => {
+    const updatedDrafts = drafts.filter(d => d.id !== draftId)
+    setDrafts(updatedDrafts)
+    localStorage.setItem('ebook-maker-drafts', JSON.stringify(updatedDrafts))
+    
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null)
+    }
+    toast({ title: "Draft Deleted" })
+  }
+
+  // Start new ebook (clear current and optionally save first)
+  const startNewEbook = (saveCurrent = false) => {
+    if (saveCurrent && (cover.title || topic)) {
+      saveDraft()
+    }
+    
+    // Reset all state
     setTopic('')
     setGenre('self-help')
     setTargetAudience('')
@@ -193,8 +271,15 @@ export default function EbookMakerPage() {
     setInternalCustomColor('#ffffff')
     setStep(1)
     setResult(null)
-    toast({ title: "Progress Cleared", description: "Starting fresh!" })
+    setCurrentDraftId(null)
+    setShowDrafts(false)
+    
+    localStorage.removeItem('ebook-maker-progress')
+    toast({ title: "Ready for New Ebook", description: "Start creating your new book!" })
   }
+
+  // Clear saved progress (legacy - now starts new)
+  const clearProgress = () => startNewEbook(false)
 
   // Helper to check if content is complete
   const getContentStatus = () => {
