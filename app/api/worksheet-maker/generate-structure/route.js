@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
+// Sanitize text while preserving Unicode characters (for multi-language support)
 function sanitizeText(text) {
   if (!text) return ''
   return String(text)
@@ -13,7 +14,7 @@ function sanitizeText(text) {
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E]/g, '')
+    // Removed: .replace(/[^\x20-\x7E]/g, '') - this was stripping non-Latin characters
     .replace(/\s+/g, ' ')
     .trim()
 }
