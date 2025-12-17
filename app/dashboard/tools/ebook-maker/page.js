@@ -65,6 +65,7 @@ export default function EbookMakerPage() {
   const [loading, setLoading] = useState(false)
   const [generatingChapter, setGeneratingChapter] = useState(null)
   const { toast } = useToast()
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Step 1: Topic input
   const [topic, setTopic] = useState('')
@@ -100,6 +101,95 @@ export default function EbookMakerPage() {
 
   // Generated result
   const [result, setResult] = useState(null)
+
+  // SAVE/LOAD PROGRESS - Load saved state on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('ebook-maker-progress')
+    if (saved) {
+      try {
+        const data = JSON.parse(saved)
+        if (data.topic) setTopic(data.topic)
+        if (data.genre) setGenre(data.genre)
+        if (data.targetAudience) setTargetAudience(data.targetAudience)
+        if (data.chapterCount) setChapterCount(data.chapterCount)
+        if (data.outline) setOutline(data.outline)
+        if (data.cover) setCover(data.cover)
+        if (data.introduction) setIntroduction(data.introduction)
+        if (data.chapters) setChapters(data.chapters)
+        if (data.conclusion) setConclusion(data.conclusion)
+        if (data.colorScheme) setColorScheme(data.colorScheme)
+        if (data.customColor) setCustomColor(data.customColor)
+        if (data.coverStyle) setCoverStyle(data.coverStyle)
+        if (data.fontStyle) setFontStyle(data.fontStyle)
+        if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
+        if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
+        if (data.internalPageColor) setInternalPageColor(data.internalPageColor)
+        if (data.internalCustomColor) setInternalCustomColor(data.internalCustomColor)
+        if (data.step) setStep(data.step)
+        
+        toast({ 
+          title: "Progress Restored", 
+          description: "Your previous work has been loaded. Click 'Clear Progress' to start fresh." 
+        })
+      } catch (e) {
+        console.log('Failed to restore progress:', e)
+      }
+    }
+    setIsHydrated(true)
+  }, [])
+
+  // SAVE PROGRESS - Auto-save whenever state changes
+  useEffect(() => {
+    if (!isHydrated) return // Don't save during initial load
+    
+    const saveData = {
+      topic,
+      genre,
+      targetAudience,
+      chapterCount,
+      outline,
+      cover,
+      introduction,
+      chapters,
+      conclusion,
+      colorScheme,
+      customColor,
+      coverStyle,
+      fontStyle,
+      coverImageStyle,
+      customImagePrompt,
+      internalPageColor,
+      internalCustomColor,
+      step,
+      savedAt: new Date().toISOString()
+    }
+    localStorage.setItem('ebook-maker-progress', JSON.stringify(saveData))
+  }, [isHydrated, topic, genre, targetAudience, chapterCount, outline, cover, introduction, chapters, conclusion, colorScheme, customColor, coverStyle, fontStyle, coverImageStyle, customImagePrompt, internalPageColor, internalCustomColor, step])
+
+  // Clear saved progress
+  const clearProgress = () => {
+    localStorage.removeItem('ebook-maker-progress')
+    setTopic('')
+    setGenre('self-help')
+    setTargetAudience('')
+    setChapterCount(5)
+    setOutline(null)
+    setCover({ title: '', subtitle: '', authorName: '', authorBio: '', year: new Date().getFullYear() })
+    setIntroduction({ content: '' })
+    setChapters([])
+    setConclusion({ content: '' })
+    setColorScheme('ocean-blue')
+    setCustomColor('#6366f1')
+    setCoverStyle('elegant')
+    setFontStyle('serif')
+    setCoverImageStyle('abstract')
+    setCustomImagePrompt('')
+    setInternalPageColor('same')
+    setInternalCustomColor('#ffffff')
+    setStep(1)
+    setResult(null)
+    toast({ title: "Progress Cleared", description: "Starting fresh!" })
+  }
 
   // Helper to check if content is complete
   const getContentStatus = () => {
