@@ -750,20 +750,6 @@ export default function EbookMakerPage() {
       )}
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs text-muted-foreground">
-          {isHydrated && outline ? (
-            <span className="flex items-center gap-1 text-green-600">
-              <Save className="h-3 w-3" /> Auto-saved
-            </span>
-          ) : null}
-        </div>
-        {isHydrated && (topic || outline) && (
-          <Button variant="ghost" size="sm" onClick={clearProgress} className="text-xs">
-            <Trash2 className="h-3 w-3 mr-1" /> Clear Progress
-          </Button>
-        )}
-      </div>
       <div className="flex items-center justify-center gap-2">
         {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className="flex items-center">
