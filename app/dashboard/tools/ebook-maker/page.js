@@ -232,17 +232,31 @@ export default function EbookMakerPage() {
     toast({ title: "All Chapters Generated!", description: "Review and edit the content before generating PDF." })
   }
 
+  // Helper to detect if text is in Bengali/non-English
+  const isNonEnglish = (text) => {
+    if (!text) return false
+    return /[\u0980-\u09FF\u0900-\u097F\u4E00-\u9FFF\u0600-\u06FF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text)
+  }
+
   // Generate introduction content
   const generateIntroduction = async () => {
     setLoading(true)
     try {
+      // Use Bengali title for introduction if book is in Bengali
+      const introTitle = isNonEnglish(cover.title) ? 'ভূমিকা' : 'Introduction'
+      const introSummary = isNonEnglish(cover.title) 
+        ? `${cover.title} বইয়ের ভূমিকা` 
+        : `Introduction to ${cover.title}`
+      
       const response = await fetch('/api/ebook-maker/generate-chapter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chapterTitle: 'Introduction',
-          chapterSummary: introduction.content || `Introduction to ${cover.title}`,
-          keyPoints: introduction.keyPoints || ['Overview of the book', 'What readers will learn'],
+          chapterTitle: introTitle,
+          chapterSummary: introduction.content || introSummary,
+          keyPoints: introduction.keyPoints || (isNonEnglish(cover.title) 
+            ? ['বইয়ের সারসংক্ষেপ', 'পাঠক কী শিখবেন'] 
+            : ['Overview of the book', 'What readers will learn']),
           bookTitle: cover.title,
           bookContext: outline?.description,
           wordCount: 800
@@ -269,13 +283,21 @@ export default function EbookMakerPage() {
   const generateConclusion = async () => {
     setLoading(true)
     try {
+      // Use Bengali title for conclusion if book is in Bengali
+      const conclusionTitle = isNonEnglish(cover.title) ? 'উপসংহার' : 'Conclusion'
+      const conclusionSummary = isNonEnglish(cover.title)
+        ? `${cover.title} বইয়ের উপসংহার ও চূড়ান্ত চিন্তাভাবনা`
+        : `Conclusion and final thoughts on ${cover.title}`
+      
       const response = await fetch('/api/ebook-maker/generate-chapter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chapterTitle: 'Conclusion',
-          chapterSummary: conclusion.content || `Conclusion and final thoughts on ${cover.title}`,
-          keyPoints: conclusion.keyPoints || ['Summary of key concepts', 'Next steps for readers'],
+          chapterTitle: conclusionTitle,
+          chapterSummary: conclusion.content || conclusionSummary,
+          keyPoints: conclusion.keyPoints || (isNonEnglish(cover.title)
+            ? ['মূল ধারণার সারসংক্ষেপ', 'পাঠকদের জন্য পরবর্তী পদক্ষেপ']
+            : ['Summary of key concepts', 'Next steps for readers']),
           bookTitle: cover.title,
           bookContext: outline?.description,
           wordCount: 600
