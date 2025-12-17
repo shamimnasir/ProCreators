@@ -111,7 +111,7 @@ Format your response as JSON:
     }
   ],
   "conclusion": {
-    "title": "Conclusion",
+    "title": "${conclusionLabel}",
     "summary": "...",
     "keyPoints": ["...", "..."]
   }
