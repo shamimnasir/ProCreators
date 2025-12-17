@@ -1294,7 +1294,7 @@ export default function EbookMakerPage() {
 
               {/* Conclusion */}
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold">Conclusion</h4>
                   <Button 
                     variant="outline" 
@@ -1306,11 +1306,11 @@ export default function EbookMakerPage() {
                     Generate
                   </Button>
                 </div>
-                <Textarea
+                <RichTextEditor
                   value={conclusion.content}
-                  onChange={(e) => setConclusion({ ...conclusion, content: e.target.value })}
-                  placeholder="Write or generate conclusion content..."
-                  rows={4}
+                  onChange={(content) => setConclusion({ ...conclusion, content })}
+                  placeholder="Write or generate conclusion content... Use the toolbar to add headings, quotes, lists, and highlight boxes."
+                  rows={6}
                 />
               </div>
 
