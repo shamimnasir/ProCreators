@@ -61,12 +61,12 @@ export default function WorksheetMakerPage() {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
-  // Step 1
+  // Step 1 - Topic & Language
   const [subject, setSubject] = useState('math')
   const [topic, setTopic] = useState('')
   const [gradeLevel, setGradeLevel] = useState('6th Grade')
   const [questionCount, setQuestionCount] = useState(10)
-  const [language, setLanguage] = useState('en') // New: Language selection
+  const [language, setLanguage] = useState('') // Free text input for any language
 
   // Step 2: Worksheet content (editable)
   const [cover, setCover] = useState({ title: '', subtitle: '', instructions: '', teacherName: '', subject: '', gradeLevel: '' })
@@ -74,10 +74,11 @@ export default function WorksheetMakerPage() {
   const [bonusQuestions, setBonusQuestions] = useState([])
   const [expandedSection, setExpandedSection] = useState(null)
 
-  // Step 3: Settings
-  const [colorScheme, setColorScheme] = useState('ocean-blue')
+  // Step 3: Design Settings
+  const [selectedPreset, setSelectedPreset] = useState('ocean-blue')
   const [customPrimaryColor, setCustomPrimaryColor] = useState('#1e40af')
   const [customSecondaryColor, setCustomSecondaryColor] = useState('#3b82f6')
+  const [useCustomColor, setUseCustomColor] = useState(false)
   const [coverStyle, setCoverStyle] = useState('modern')
   const [includeAnswerKey, setIncludeAnswerKey] = useState(true)
 
