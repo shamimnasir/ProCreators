@@ -168,13 +168,23 @@ export async function POST(request) {
           const bengaliRegularPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Regular.ttf')
           const bengaliBoldPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Bold.ttf')
           
+          console.log('Loading Bengali fonts from:', bengaliRegularPath)
+          
           const regularFontBytes = await fs.readFile(bengaliRegularPath)
           const boldFontBytes = await fs.readFile(bengaliBoldPath)
+          
+          console.log('Font bytes loaded:', regularFontBytes.length, boldFontBytes.length)
           
           // CRITICAL: Use subset: false to embed full font with all Unicode glyphs
           regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: false })
           boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: false })
           italicFont = regularFont // Bengali fonts typically don't have italic variant
+          
+          console.log('Bengali fonts embedded:', { regularFont: !!regularFont, boldFont: !!boldFont })
+          
+          if (!regularFont || !boldFont) {
+            throw new Error('Font embedding returned null')
+          }
           
           console.log('Bengali fonts embedded successfully with full Unicode support')
         } else {
@@ -193,6 +203,7 @@ export async function POST(request) {
         }
       } catch (fontError) {
         console.log('Custom font loading failed, falling back to standard fonts:', fontError.message)
+        console.log('Font error stack:', fontError.stack)
         regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
         boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
         italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
@@ -203,6 +214,17 @@ export async function POST(request) {
       boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
       italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
     }
+    
+    // Final validation - ensure fonts are not null
+    if (!regularFont || !boldFont) {
+      console.log('CRITICAL: Font embedding failed, fonts are null')
+      console.log('Falling back to standard fonts')
+      regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+      boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+      italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
+    }
+    
+    console.log('Final font check:', { regularFont: !!regularFont, boldFont: !!boldFont, italicFont: !!italicFont })
     
     const pageWidth = 612
     const pageHeight = 792
