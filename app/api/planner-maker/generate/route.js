@@ -467,7 +467,9 @@ export async function POST(request) {
       customTitle,
       authorName,
       year,
-      customInstructions
+      customInstructions,
+      coverImageStyle = 'abstract',
+      customImagePrompt
     } = await request.json()
 
     console.log(`Generating ${plannerType} planner with ${pageCount} pages...`)
