@@ -81,11 +81,51 @@ IMPORTANT: Return ONLY valid JSON.`
 
 export async function POST(request) {
   try {
-    const { checklistType, customItems, itemCount, designStyle, paperSize, trackingDays } = await request.json()
+    const { 
+      checklistType, 
+      customItems, 
+      itemCount, 
+      designStyle, 
+      paperSize, 
+      trackingDays,
+      coverImageStyle = 'abstract',
+      customImagePrompt,
+      customTitle
+    } = await request.json()
     
     console.log(`Generating ${checklistType} checklist...`)
     
     const content = await generateChecklistContent(checklistType, customItems, itemCount)
+    
+    // Override title if custom title provided
+    if (customTitle) {
+      content.title = customTitle
+    }
+    
+    // Generate cover image
+    let coverImageUrl = null
+    if (coverImageStyle !== 'gradient') {
+      try {
+        if (coverImageStyle === 'custom' && customImagePrompt) {
+          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Custom cover image generated successfully')
+          }
+        } else {
+          const themeKey = getChecklistTheme(checklistType)
+          console.log(`Generating cover image for theme: ${themeKey}`)
+          const imageResult = await generateCoverImage(themeKey)
+          if (imageResult.success && imageResult.imageUrl) {
+            coverImageUrl = imageResult.imageUrl
+            console.log('Cover image generated successfully')
+          }
+        }
+      } catch (imgError) {
+        console.log('Cover image generation failed:', imgError.message)
+      }
+    }
     
     // Create PDF
     const pdfDoc = await PDFDocument.create()
