@@ -1269,12 +1269,12 @@ export default function EbookMakerPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Content</Label>
-                          <Textarea
+                          <RichTextEditor
+                            label="Content"
                             value={chapter.content}
-                            onChange={(e) => updateChapter(idx, 'content', e.target.value)}
-                            placeholder="Chapter content..."
-                            rows={8}
+                            onChange={(content) => updateChapter(idx, 'content', content)}
+                            placeholder="Write chapter content... Use the toolbar to add headings, quotes, lists, and highlight boxes."
+                            rows={10}
                           />
                         </div>
                         <div className="space-y-2">
