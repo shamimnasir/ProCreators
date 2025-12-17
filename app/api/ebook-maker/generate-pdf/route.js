@@ -149,6 +149,9 @@ export async function POST(request) {
     // Create PDF
     const pdfDoc = await PDFDocument.create()
     
+    // Register fontkit for custom font support (Unicode)
+    pdfDoc.registerFontkit(fontkit)
+    
     // Embed fonts - use Unicode fonts if needed
     let regularFont, boldFont, italicFont
     
