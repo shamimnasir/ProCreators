@@ -681,7 +681,7 @@ export default function EbookMakerPage() {
               <div className="text-center py-8 text-muted-foreground">
                 <BookMarked className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No saved drafts yet.</p>
-                <p className="text-sm">Click "Save Draft" to save your current work.</p>
+                <p className="text-sm">Click Save Draft to save your current work.</p>
               </div>
             ) : (
               <div className="space-y-3">
