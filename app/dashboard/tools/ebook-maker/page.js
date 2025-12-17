@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,11 +12,171 @@ import {
   Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
   RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp,
-  Type, Image, Layout, FolderOpen, Clock, FilePlus
+  Type, Image, Layout, FolderOpen, Clock, FilePlus,
+  Heading1, Heading2, Heading3, Quote, ListOrdered, 
+  Lightbulb, AlertTriangle, Info, MessageSquare
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import Link from 'next/link'
+
+// ===== RICH TEXT EDITOR COMPONENT =====
+// Provides formatting toolbar for book content
+function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
+  const textareaRef = useRef(null)
+  
+  // Insert formatting at cursor position
+  const insertFormatting = (prefix, suffix = '', placeholder = '') => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selectedText = value.substring(start, end)
+    const textToInsert = selectedText || placeholder
+    
+    const before = value.substring(0, start)
+    const after = value.substring(end)
+    
+    const newValue = before + prefix + textToInsert + suffix + after
+    onChange(newValue)
+    
+    // Set cursor position after insert
+    setTimeout(() => {
+      textarea.focus()
+      const newCursorPos = start + prefix.length + textToInsert.length + suffix.length
+      textarea.setSelectionRange(newCursorPos, newCursorPos)
+    }, 0)
+  }
+  
+  // Insert block formatting (adds newlines)
+  const insertBlock = (format) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    
+    const start = textarea.selectionStart
+    const before = value.substring(0, start)
+    const after = value.substring(start)
+    
+    // Add newline if not at start and previous char is not newline
+    const needsNewlineBefore = before.length > 0 && !before.endsWith('\n')
+    const prefix = needsNewlineBefore ? '\n\n' : ''
+    
+    const newValue = before + prefix + format + after
+    onChange(newValue)
+    
+    setTimeout(() => {
+      textarea.focus()
+      const newCursorPos = start + prefix.length + format.length
+      textarea.setSelectionRange(newCursorPos, newCursorPos)
+    }, 0)
+  }
+  
+  const formatButtons = [
+    { 
+      type: 'dropdown',
+      label: 'Headings',
+      icon: <Heading1 className="h-4 w-4" />,
+      items: [
+        { label: 'Heading 1', icon: <Heading1 className="h-4 w-4" />, action: () => insertBlock('# Your Heading Here\n') },
+        { label: 'Heading 2', icon: <Heading2 className="h-4 w-4" />, action: () => insertBlock('## Section Title\n') },
+        { label: 'Heading 3', icon: <Heading3 className="h-4 w-4" />, action: () => insertBlock('### Subsection\n') },
+      ]
+    },
+    {
+      type: 'button',
+      label: 'Quote',
+      icon: <Quote className="h-4 w-4" />,
+      action: () => insertBlock('> Write your quote here\n')
+    },
+    {
+      type: 'dropdown',
+      label: 'Lists',
+      icon: <List className="h-4 w-4" />,
+      items: [
+        { label: 'Bullet List', icon: <List className="h-4 w-4" />, action: () => insertBlock('- First item\n- Second item\n- Third item\n') },
+        { label: 'Numbered List', icon: <ListOrdered className="h-4 w-4" />, action: () => insertBlock('1. First step\n2. Second step\n3. Third step\n') },
+      ]
+    },
+    {
+      type: 'dropdown',
+      label: 'Highlight Boxes',
+      icon: <Lightbulb className="h-4 w-4" />,
+      items: [
+        { label: '💡 Tip Box', icon: <Lightbulb className="h-4 w-4 text-green-500" />, action: () => insertBlock('[TIP] Your helpful tip or advice here\n') },
+        { label: '📝 Note Box', icon: <Info className="h-4 w-4 text-blue-500" />, action: () => insertBlock('[NOTE] Important information to remember\n') },
+        { label: '⚠️ Warning Box', icon: <AlertTriangle className="h-4 w-4 text-orange-500" />, action: () => insertBlock('[WARNING] Caution or warning message here\n') },
+        { label: '✨ Highlight Box', icon: <MessageSquare className="h-4 w-4 text-purple-500" />, action: () => insertBlock('[HIGHLIGHT] Key point to emphasize\n') },
+      ]
+    },
+  ]
+  
+  return (
+    <div className="space-y-2">
+      {label && <Label>{label}</Label>}
+      
+      {/* Formatting Toolbar */}
+      <div className="flex items-center gap-1 p-2 bg-muted rounded-t-lg border border-b-0">
+        <TooltipProvider>
+          {formatButtons.map((btn, idx) => (
+            btn.type === 'dropdown' ? (
+              <DropdownMenu key={idx}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        {btn.icon}
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>{btn.label}</TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>{btn.label}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {btn.items.map((item, itemIdx) => (
+                    <DropdownMenuItem key={itemIdx} onClick={item.action}>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Tooltip key={idx}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 px-2" onClick={btn.action}>
+                    {btn.icon}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{btn.label}</TooltipContent>
+              </Tooltip>
+            )
+          ))}
+          
+          <div className="h-6 w-px bg-border mx-1" />
+          
+          <span className="text-xs text-muted-foreground ml-2">
+            Use toolbar to add formatting
+          </span>
+        </TooltipProvider>
+      </div>
+      
+      {/* Textarea */}
+      <Textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="rounded-t-none font-mono text-sm"
+      />
+    </div>
+  )
+}
 
 const GENRES = [
   { id: 'self-help', name: 'Self-Help' },
