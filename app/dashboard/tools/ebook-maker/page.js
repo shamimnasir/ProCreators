@@ -67,6 +67,11 @@ export default function EbookMakerPage() {
   const { toast } = useToast()
   const [isHydrated, setIsHydrated] = useState(false)
 
+  // Drafts management
+  const [drafts, setDrafts] = useState([])
+  const [currentDraftId, setCurrentDraftId] = useState(null)
+  const [showDrafts, setShowDrafts] = useState(false)
+
   // Step 1: Topic input
   const [topic, setTopic] = useState('')
   const [genre, setGenre] = useState('self-help')
