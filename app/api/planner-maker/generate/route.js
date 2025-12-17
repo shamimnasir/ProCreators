@@ -506,7 +506,7 @@ export async function POST(request) {
     console.log(`Paper size: ${paperSize} -> ${sizeConfig?.name || 'default'} (${size.width}x${size.height} points = ${size.width/72}"x${size.height/72}")`)
 
     // Generate AI content
-    const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions)
+    const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions, customHabits)
     console.log('Content generated:', content.title)
 
     // Generate cover image (AI-powered) - supports custom prompts
