@@ -1,11 +1,8 @@
+// CRITICAL: Load regenerator-runtime FIRST before any fontkit usage
+// This polyfill is required for @pdf-lib/fontkit's async generators
+require('regenerator-runtime/runtime')
+
 import { NextResponse } from 'next/server'
-
-// Polyfill for regeneratorRuntime required by @pdf-lib/fontkit
-import regeneratorRuntime from 'regenerator-runtime'
-if (typeof globalThis.regeneratorRuntime === 'undefined') {
-  globalThis.regeneratorRuntime = regeneratorRuntime
-}
-
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import * as fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
