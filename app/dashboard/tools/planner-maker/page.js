@@ -56,11 +56,7 @@ const COVER_STYLES = [
   { id: 'boho', name: 'Boho', description: 'Bohemian organic shapes' },
 ]
 
-const PAPER_SIZES = [
-  { id: 'letter', name: 'US Letter', size: '8.5 x 11"' },
-  { id: 'a4', name: 'A4', size: '210 x 297mm' },
-  { id: 'a5', name: 'A5', size: '148 x 210mm' },
-]
+// Paper sizes now imported from shared config via PaperSizeSelector
 
 export default function PlannerMakerPage() {
   const [mode, setMode] = useState('easy')
