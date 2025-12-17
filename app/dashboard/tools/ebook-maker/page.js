@@ -313,11 +313,57 @@ export default function EbookMakerPage() {
   // Generate all chapter content
   const generateAllChapters = async () => {
     setLoading(true)
-    for (let i = 0; i < chapters.length; i++) {
-      if (!chapters[i].content) {
-        await generateChapterContent(i)
+    
+    // Get current chapters state fresh
+    let currentChapters = [...chapters]
+    
+    for (let i = 0; i < currentChapters.length; i++) {
+      // Check if chapter already has content
+      if (currentChapters[i].content && currentChapters[i].content.trim().length > 50) {
+        continue // Skip already generated chapters
+      }
+      
+      const chapter = currentChapters[i]
+      setGeneratingChapter(i)
+      
+      try {
+        const response = await fetch('/api/ebook-maker/generate-chapter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chapterTitle: chapter.title,
+            chapterSummary: chapter.summary,
+            keyPoints: chapter.keyPoints,
+            bookTitle: cover.title,
+            bookContext: outline?.description,
+            targetAudience,
+            wordCount: 1500
+          })
+        })
+
+        const data = await response.json()
+        if (!data.success) throw new Error(data.error)
+
+        // Update the chapter with generated content
+        currentChapters = currentChapters.map((ch, idx) => 
+          idx === i ? {
+            ...ch,
+            content: data.chapter.content,
+            sections: data.chapter.sections || [],
+            keyTakeaways: data.chapter.keyTakeaways || []
+          } : ch
+        )
+        
+        // Update state with each chapter - this ensures content persists
+        setChapters([...currentChapters])
+        
+        toast({ title: `Chapter ${i + 1} Generated!`, description: `"${chapter.title}" is ready.` })
+      } catch (error) {
+        toast({ title: "Generation Failed", description: `Chapter ${i + 1}: ${error.message}`, variant: "destructive" })
       }
     }
+    
+    setGeneratingChapter(null)
     setLoading(false)
     toast({ title: "All Chapters Generated!", description: "Review and edit the content before generating PDF." })
   }
