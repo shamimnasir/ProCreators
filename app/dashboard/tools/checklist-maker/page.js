@@ -475,7 +475,7 @@ export default function ChecklistMakerPage() {
                   <CardContent className="py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-6 w-6 text-green-600" />
-                      <p className="font-medium text-green-800">"{generated.title}" is ready!</p>
+                      <p className="font-medium text-green-800">&quot;{generated.title}&quot; is ready!</p>
                     </div>
                     <a href={generated.downloadUrl} download target="_blank" rel="noopener noreferrer">
                       <Button className="bg-green-600 hover:bg-green-700">
