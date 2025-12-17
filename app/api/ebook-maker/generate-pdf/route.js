@@ -84,7 +84,7 @@ function safeDrawText(page, text, options) {
       for (let i = 0; i < text.length; i++) {
         const char = text[i]
         try {
-          page.drawText(char, { ...options, x: xPos })
+          safeDrawText(page, char, { ...options, x: xPos })
           xPos += options.font.widthOfTextAtSize(char, options.size)
         } catch (charError) {
           // Skip this character, add estimated space
@@ -322,7 +322,7 @@ export async function POST(request) {
     page = pdfDoc.addPage([pageWidth, pageHeight])
     page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
     
-    page.drawText('Table of Contents', {
+    safeDrawText(page, 'Table of Contents', {
       x: margin,
       y: pageHeight - margin - 30,
       size: 26,
@@ -342,7 +342,7 @@ export async function POST(request) {
     // Introduction
     if (introduction?.content) {
       page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
-      page.drawText('Introduction', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
+      safeDrawText(page, 'Introduction', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
       y -= 35
     }
     
@@ -350,7 +350,7 @@ export async function POST(request) {
     chapters.forEach((ch, idx) => {
       const chapterText = sanitizeText(`Chapter ${idx + 1}: ${ch.title}`)
       page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
-      page.drawText(chapterText, { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
+      safeDrawText(page, chapterText, { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
       y -= 35
       
       if (y < margin + 50) {
@@ -363,7 +363,7 @@ export async function POST(request) {
     // Conclusion
     if (conclusion?.content) {
       page.drawCircle({ x: margin + 10, y: y + 4, size: 3, color: colors.primary })
-      page.drawText('Conclusion', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
+      safeDrawText(page, 'Conclusion', { x: margin + 25, y, size: 13, font: regularFont, color: colors.text })
     }
     
     // ===== INTRODUCTION =====
@@ -372,7 +372,7 @@ export async function POST(request) {
       page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       
       page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
-      page.drawText('Introduction', {
+      safeDrawText(page, 'Introduction', {
         x: margin,
         y: pageHeight - margin - 30,
         size: 26,
@@ -395,7 +395,7 @@ export async function POST(request) {
           page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
           y = pageHeight - margin - 50
         }
-        page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+        safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
         y -= lineHeight
       }
     }
@@ -415,7 +415,7 @@ export async function POST(request) {
         height: 25,
         color: colors.primary,
       })
-      page.drawText(`Chapter ${chIdx + 1}`, {
+      safeDrawText(page, `Chapter ${chIdx + 1}`, {
         x: margin - 5,
         y: pageHeight - margin - 14,
         size: 11,
@@ -427,7 +427,7 @@ export async function POST(request) {
       const chapterTitleLines = wrapText(chapter.title, boldFont, 22, contentWidth)
       y = pageHeight - margin - 55
       chapterTitleLines.forEach(line => {
-        page.drawText(line, { x: margin, y, size: 22, font: boldFont, color: colors.primary })
+        safeDrawText(page, line, { x: margin, y, size: 22, font: boldFont, color: colors.primary })
         y -= 28
       })
       
@@ -452,7 +452,7 @@ export async function POST(request) {
             }
             
             y -= 18
-            page.drawText(sanitizeText(section.heading), {
+            safeDrawText(page, sanitizeText(section.heading), {
               x: margin,
               y,
               size: 14,
@@ -474,7 +474,7 @@ export async function POST(request) {
                   page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
                   y = pageHeight - margin - 50
                 }
-                page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+                safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
                 y -= lineHeight
               }
               y -= 8 // Extra space between paragraphs
@@ -513,7 +513,7 @@ export async function POST(request) {
               })
               
               // Tip label
-              page.drawText('Pro Tip', { 
+              safeDrawText(page, 'Pro Tip', { 
                 x: margin + 22, 
                 y: y, 
                 size: 10, 
@@ -524,7 +524,7 @@ export async function POST(request) {
               
               // Tip content
               tipLines.forEach((line) => {
-                page.drawText(line, { 
+                safeDrawText(page, line, { 
                   x: margin + 22, 
                   y, 
                   size: 10, 
@@ -552,7 +552,7 @@ export async function POST(request) {
               
               const bulletLines = wrapText(bullet, regularFont, 11, contentWidth - 30)
               bulletLines.forEach((line, lineIdx) => {
-                page.drawText(line, { 
+                safeDrawText(page, line, { 
                   x: margin + 22, 
                   y: y - (lineIdx * lineHeight), 
                   size: 11, 
@@ -578,7 +578,7 @@ export async function POST(request) {
               page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
               y = pageHeight - margin - 50
             }
-            page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+            safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
             y -= lineHeight
           }
           y -= 12
@@ -614,7 +614,7 @@ export async function POST(request) {
           color: colors.primary,
         })
         
-        page.drawText('Key Takeaways', { 
+        safeDrawText(page, 'Key Takeaways', { 
           x: margin + 18, 
           y, 
           size: 13, 
@@ -628,7 +628,7 @@ export async function POST(request) {
           page.drawCircle({ x: margin + 20, y: y + 4, size: 3, color: colors.primary })
           const takeawayLines = wrapText(takeaway, italicFont, 10, contentWidth - 50)
           takeawayLines.forEach((line, lineIdx) => {
-            page.drawText(line, { 
+            safeDrawText(page, line, { 
               x: margin + 30, 
               y: y - (lineIdx * 14), 
               size: 10, 
@@ -647,7 +647,7 @@ export async function POST(request) {
       page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       
       page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
-      page.drawText('Conclusion', {
+      safeDrawText(page, 'Conclusion', {
         x: margin,
         y: pageHeight - margin - 30,
         size: 26,
@@ -670,7 +670,7 @@ export async function POST(request) {
           page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
           y = pageHeight - margin - 50
         }
-        page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+        safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
         y -= lineHeight
       }
     }
@@ -681,7 +681,7 @@ export async function POST(request) {
       page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: colors.background })
       
       page.drawRectangle({ x: margin - 10, y: pageHeight - margin - 40, width: 4, height: 35, color: colors.primary })
-      page.drawText('About the Author', {
+      safeDrawText(page, 'About the Author', {
         x: margin,
         y: pageHeight - margin - 30,
         size: 26,
@@ -699,7 +699,7 @@ export async function POST(request) {
       y = pageHeight - margin - 85
       const aboutLines = wrapText(cover.authorBio, regularFont, 11, contentWidth)
       for (const line of aboutLines) {
-        page.drawText(line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
+        safeDrawText(page, line, { x: margin, y, size: 11, font: regularFont, color: colors.text })
         y -= lineHeight
       }
     }
