@@ -135,7 +135,7 @@ export default function PlannerMakerPage() {
     setPlannerType('weekly')
     setColorScheme('rose-gold')
     setCoverStyle('elegant')
-    setPaperSize('letter')
+    setPaperSize('8.5x11')
     setPageCount(12)
     setCustomTitle('')
     setAuthorName('')
