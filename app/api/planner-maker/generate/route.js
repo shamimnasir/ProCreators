@@ -561,16 +561,51 @@ export async function POST(request) {
 
     // Tips page at the end
     const tipsPage = pdfDoc.addPage([size.width, size.height])
+    const margin = 50
+    const contentWidth = size.width - (margin * 2)
+    
     tipsPage.drawRectangle({ x: 0, y: 0, width: size.width, height: size.height, color: colors.background })
     
     tipsPage.drawText('Tips for Success', {
-      x: 50, y: size.height - 60, size: 24, font: boldFont, color: colors.primary,
+      x: margin, y: size.height - 60, size: 24, font: boldFont, color: colors.primary,
     })
     
+    // Helper function to wrap text
+    const wrapText = (text, font, fontSize, maxWidth) => {
+      const words = text.split(' ')
+      const lines = []
+      let currentLine = ''
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word
+        const width = font.widthOfTextAtSize(testLine, fontSize)
+        if (width <= maxWidth) {
+          currentLine = testLine
+        } else {
+          if (currentLine) lines.push(currentLine)
+          currentLine = word
+        }
+      }
+      if (currentLine) lines.push(currentLine)
+      return lines
+    }
+    
+    let tipsY = size.height - 120
     content.tips.forEach((tip, index) => {
-      tipsPage.drawText(`${index + 1}. ${tip}`, {
-        x: 50, y: size.height - 120 - (index * 50), size: 14, font: regularFont, color: colors.text,
+      // Number
+      tipsPage.drawText(`${index + 1}.`, {
+        x: margin, y: tipsY, size: 12, font: boldFont, color: colors.primary,
       })
+      
+      // Wrap the tip text to fit within margins
+      const tipLines = wrapText(tip, regularFont, 12, contentWidth - 30)
+      tipLines.forEach((line, lineIdx) => {
+        tipsPage.drawText(line, {
+          x: margin + 25, y: tipsY - (lineIdx * 18), size: 12, font: regularFont, color: colors.text,
+        })
+      })
+      
+      tipsY -= (tipLines.length * 18) + 25 // Space between tips
     })
 
     // Save PDF
