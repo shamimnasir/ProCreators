@@ -64,7 +64,7 @@ export async function POST(request) {
     
     const languageInstruction = detectedLang !== 'en' 
       ? `CRITICAL: The topic is in ${isBengali ? 'Bengali (বাংলা)' : isHindi ? 'Hindi (हिंदी)' : 'a non-English language'}. You MUST generate ALL content (title, subtitle, chapter titles, descriptions, summaries, key points) in the SAME language. Do NOT use English anywhere in the content.`
-      : ''
+      : `CRITICAL: The topic is in ENGLISH. You MUST generate ALL content (title, subtitle, chapter titles, descriptions, summaries, key points) in ENGLISH only. Do NOT use any other language like Portuguese, Spanish, French, German, etc. - strictly English only.`
     
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
