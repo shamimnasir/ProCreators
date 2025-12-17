@@ -1197,7 +1197,7 @@ export default function EbookMakerPage() {
 
               {/* Introduction */}
               <div className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold">Introduction</h4>
                   <Button 
                     variant="outline" 
@@ -1209,11 +1209,11 @@ export default function EbookMakerPage() {
                     Generate
                   </Button>
                 </div>
-                <Textarea
+                <RichTextEditor
                   value={introduction.content}
-                  onChange={(e) => setIntroduction({ ...introduction, content: e.target.value })}
-                  placeholder="Write or generate introduction content..."
-                  rows={4}
+                  onChange={(content) => setIntroduction({ ...introduction, content })}
+                  placeholder="Write or generate introduction content... Use the toolbar above to add headings, quotes, lists, and highlight boxes."
+                  rows={6}
                 />
               </div>
 
