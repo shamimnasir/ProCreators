@@ -63,7 +63,7 @@ export default function PlannerMakerPage() {
   const [plannerType, setPlannerType] = useState('weekly')
   const [colorScheme, setColorScheme] = useState('rose-gold')
   const [coverStyle, setCoverStyle] = useState('elegant')
-  const [paperSize, setPaperSize] = useState('letter')
+  const [paperSize, setPaperSize] = useState('8.5x11')
   const [pageCount, setPageCount] = useState(12)
   const [customTitle, setCustomTitle] = useState('')
   const [authorName, setAuthorName] = useState('')
