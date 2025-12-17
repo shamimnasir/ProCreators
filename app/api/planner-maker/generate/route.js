@@ -34,7 +34,7 @@ const PLANNER_CONFIGS = {
 }
 
 // Generate planner content with AI using Google Gemini
-async function generatePlannerContent(plannerType, customTitle, pageCount, customInstructions) {
+async function generatePlannerContent(plannerType, customTitle, pageCount, customInstructions, customHabits = '') {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const config = PLANNER_CONFIGS[plannerType] || PLANNER_CONFIGS.weekly
