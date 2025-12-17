@@ -73,9 +73,96 @@ export default function JournalMakerPage() {
   const [colorScheme, setColorScheme] = useState('lavender')
   const [coverStyle, setCoverStyle] = useState('floral')
   const [pageCount, setPageCount] = useState(90)
+  
+  // NEW: Cover image customization
+  const [coverImageStyle, setCoverImageStyle] = useState('abstract')
+  const [customImagePrompt, setCustomImagePrompt] = useState('')
+  
+  // NEW: Drafts management
+  const [drafts, setDrafts] = useState([])
+  const [currentDraftId, setCurrentDraftId] = useState(null)
 
   // Result
   const [result, setResult] = useState(null)
+  
+  // Load drafts on mount
+  useEffect(() => {
+    const loadDrafts = async () => {
+      try {
+        const res = await fetch('/api/drafts?toolType=journal')
+        const data = await res.json()
+        if (data.success && data.drafts) {
+          setDrafts(data.drafts)
+        }
+      } catch (e) {
+        console.log('Failed to load drafts:', e)
+      }
+    }
+    loadDrafts()
+  }, [])
+  
+  // Get current form data for saving
+  const getCurrentData = () => ({
+    title: cover.title || `My ${JOURNAL_TYPES.find(j => j.id === journalType)?.name}`,
+    journalType,
+    purpose,
+    duration,
+    cover,
+    introduction,
+    sections,
+    weeklyReflection,
+    monthlyReview,
+    affirmations,
+    quotes,
+    colorScheme,
+    coverStyle,
+    pageCount,
+    coverImageStyle,
+    customImagePrompt,
+    step,
+  })
+  
+  // Load draft data into form
+  const loadDraftData = (data) => {
+    if (data.journalType) setJournalType(data.journalType)
+    if (data.purpose) setPurpose(data.purpose)
+    if (data.duration) setDuration(data.duration)
+    if (data.cover) setCover(data.cover)
+    if (data.introduction) setIntroduction(data.introduction)
+    if (data.sections) setSections(data.sections)
+    if (data.weeklyReflection) setWeeklyReflection(data.weeklyReflection)
+    if (data.monthlyReview) setMonthlyReview(data.monthlyReview)
+    if (data.affirmations) setAffirmations(data.affirmations)
+    if (data.quotes) setQuotes(data.quotes)
+    if (data.colorScheme) setColorScheme(data.colorScheme)
+    if (data.coverStyle) setCoverStyle(data.coverStyle)
+    if (data.pageCount) setPageCount(data.pageCount)
+    if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
+    if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
+    if (data.step && data.step > 1) setStep(Math.min(data.step, 3))
+    setResult(null)
+  }
+  
+  // Start new journal
+  const handleStartNew = () => {
+    setStep(1)
+    setJournalType('gratitude')
+    setPurpose('')
+    setDuration('90')
+    setCover({ title: '', subtitle: '', authorName: '', year: new Date().getFullYear() })
+    setIntroduction('')
+    setSections([])
+    setWeeklyReflection({ title: 'Weekly Reflection', questions: [] })
+    setMonthlyReview({ title: 'Monthly Review', questions: [] })
+    setAffirmations([])
+    setQuotes([])
+    setColorScheme('lavender')
+    setCoverStyle('floral')
+    setPageCount(90)
+    setCoverImageStyle('abstract')
+    setCustomImagePrompt('')
+    setResult(null)
+  }
 
   // Generate structure
   const generateStructure = async () => {
