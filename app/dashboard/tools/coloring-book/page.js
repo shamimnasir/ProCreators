@@ -508,6 +508,35 @@ export default function ColoringBookPage() {
                   </div>
                 )}
 
+                {/* Paper Size Selection */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Paper Size (KDP Standard)
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {PAPER_SIZES.map((size) => (
+                      <button
+                        key={size.id}
+                        onClick={() => setPaperSize(size.id)}
+                        className={`p-3 rounded-lg border text-left transition-all ${
+                          paperSize === size.id 
+                            ? 'border-primary bg-primary/10 ring-2 ring-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{size.name}</span>
+                          {size.recommended && (
+                            <Badge className="text-xs bg-green-100 text-green-800">Recommended</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{size.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Settings */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -524,14 +553,25 @@ export default function ColoringBookPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Number of Pages: {pageCount}</Label>
+                    <Label className="flex items-center gap-2">
+                      Number of Pages: {pageCount}
+                      {pageCount < KDP_MIN_PAGES && (
+                        <Badge className="text-xs bg-amber-100 text-amber-800">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Min 24 for KDP
+                        </Badge>
+                      )}
+                    </Label>
                     <Slider
                       value={[pageCount]}
                       onValueChange={(v) => setPageCount(v[0])}
-                      min={5}
-                      max={30}
-                      step={5}
+                      min={10}
+                      max={50}
+                      step={2}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Amazon KDP requires minimum 24 pages for coloring books
+                    </p>
                   </div>
                 </div>
 
