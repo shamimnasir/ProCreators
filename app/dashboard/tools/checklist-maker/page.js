@@ -437,9 +437,13 @@ export default function ChecklistMakerPage() {
                         <Slider
                           value={[trackingDays]}
                           onValueChange={([v]) => setTrackingDays(v)}
-                          min={7}
-                          max={31}
+                          min={30}
+                          max={365}
+                          step={30}
                         />
+                        <p className="text-xs text-muted-foreground">
+                          📚 KDP requires min 24 pages. {trackingDays} days = ~{Math.ceil(trackingDays/7) + 4} pages
+                        </p>
                       </div>
                     )}
                     <div className="space-y-2">
