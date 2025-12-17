@@ -254,7 +254,7 @@ function RichTextEditor({ value, onChange, placeholder, rows = 6, label }) {
           <div className="h-6 w-px bg-border mx-1" />
           
           <span className="text-xs text-muted-foreground ml-2 hidden sm:inline">
-            Use toolbar to add formatting
+            Select text, then click format • Or click to insert
           </span>
         </TooltipProvider>
       </div>
