@@ -1,95 +1,87 @@
 <analysis>
-**original_problem_statement**: The user's initial high-level goal was to standardize all PDF-generating tools (Ebook, Journal, Planner, etc.) to a new multi-step Pro wizard interface. However, the user interrupted this plan to request a series of major feature additions and bug fixes specifically for the **Ebook Maker**, which has now become a much more advanced tool.
 
-The user's recent requests for the Ebook Maker included:
-1.  **Custom Color Picker**: Allow users to select their own cover colors, not just presets.
-2.  **Advanced Styling**: Add options to customize internal page elements like fonts and colors.
-3.  **Content Generation Bugs**: Fix a critical bug where chapter content was not being generated or saved correctly.
-4.  **Improved Content Quality**: Rework the AI prompts to generate content formatted like a real book (short paragraphs, subheadings, lists, callouts) instead of a wall of text.
-5.  **Multi-Language Support (Bengali)**: Fix bugs that stripped non-ASCII characters and prevented PDF generation for languages like Bengali. This evolved into a major technical challenge.
-6.  **State Persistence**: Save a user's progress so they don't lose work on a page refresh.
-7.  **Draft Management**: Allow users to save, load, and manage multiple different ebook drafts.
+**original_problem_statement**: The user's primary goal is to standardize all PDF-generating tools (Planner, Journal, Checklist, Worksheet, etc.) by upgrading them with the advanced features developed for the Ebook Maker. This includes a consistent Pro wizard UI, a database-backed drafts system, custom AI cover image prompts, and rich text editing capabilities.
+
+Most recently, the user requested the following features for the **Worksheet Generator Pro**:
+1.  Implement a draft system to save and load worksheets.
+2.  Add a custom color picker for design.
+3.  Add multi-language support (e.g., Bengali), as it currently defaults to English even for non-English topics.
+
+The user has also emphasized adherence to Amazon KDP standards for paper sizes, margins, and bleed across all tools.
 
 **User's preferred language**: English
 
 **what currently exists?**
-- The **Ebook Maker** has been significantly overhauled into a highly advanced, feature-rich tool.
-- **Frontend ():**
-    - A multi-step wizard UI.
-    - A full-featured drafts management system using  to save and load multiple ebook projects.
-    - Extensive design customization in Step 4, organized into tabs:
-        - **Cover Design**: Custom color picker, AI-generated cover image styles.
-        - **Internal Pages**: Font selection and color themes for the book's content.
-    - Content validation that prevents users from proceeding to the design step until all chapters have generated content.
-    - Robust state management that correctly handles asynchronous content generation and persists progress.
-- **Backend (API routes & Libraries):**
-    - **Dual PDF Generation System**: A major architectural change was implemented to support multi-language content.
-        - For standard Latin-script languages, it uses the  library.
-        - For complex scripts (like Bengali), it now uses a new **-based HTML-to-PDF generator** () which correctly renders complex ligatures and characters. The API automatically switches between these two methods based on language detection.
-    - **Advanced Content Generation**: The AI prompt for chapter generation () has been rewritten to produce well-structured, book-style content with special tags (e.g., , ).
-    - **Advanced PDF Rendering**: The backend logic parses the AI-generated tags to create well-formatted PDFs with styled Key Takeaway boxes, bullet points, and proper spacing.
-    - **Global Polyfill**: A critical  error, caused by the  dependency, has been fixed globally by creating an  file to load the required polyfill, making PDF generation stable.
+- A feature-rich **Ebook Maker** that serves as the template for all other tools. It includes a multi-step UI, MongoDB-backed drafts, a rich text editor with a formatting toolbar, advanced styling options, and a dual-path PDF generation system (pdf-lib for Latin scripts, Puppeteer for complex scripts like Bengali).
+- A centralized configuration for **KDP-compliant paper sizes** () and **margins** ().
+- Shared React components for a **Paper Size Selector** (), a **Drafts Manager** (), and a **Rich Text Editor** ().
+- A unified API endpoint () for managing drafts for all tools in MongoDB.
+- **Planner Maker** and **Checklist Maker** have been partially refactored to use some of these new features (like the new paper size system and drafts).
+- The **Worksheet Generator** has had its author name field improved, but the major new features (drafts, custom colors, multi-language) have just begun implementation.
 
 **Last working item**:
-    - Last item agent was working: Fixing a bug where the Download PDF button was not working after a user re-generated a PDF from a saved draft. The issue was a key mismatch in the API response: the backend returned  while the frontend expected . The agent corrected the API response in both the  and  code paths.
-    - Status: USER VERIFICATION PENDING
+    - Last item agent was working: Implementing three major features for the **Worksheet Generator Pro**: Drafts, Custom Colors, and Multi-language support. The agent had just started by adding the necessary state variables (, , , etc.) to the frontend component () and updating the  API call to pass the  parameter.
+    - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? manual testing by curl. The agent should manually test the flow: create and save a draft, load it, generate the PDF again, and confirm the download button works.
+    - Which testing method agent to use? backend testing agent. Once the backend API is updated to handle multi-language, drafts, and custom colors, it should be tested. The frontend will require testing via the frontend testing agent or screenshot tool.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Download button not working after re-generating from a draft.
+  - Issue 1: Worksheet Generator Pro is missing key features. (P0)
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: The agent identified that the API was returning the key  for the download path, but the frontend UI expected the key to be . The agent has edited the API route  to ensure the response JSON consistently uses the  key for both the Puppeteer and pdf-lib generation paths.
-     - Next debug checklist: The fix is implemented but not tested or verified by the user. The next agent should first confirm with the user if the issue is resolved. If not, verify the API response manually and check the browser's developer console on the frontend for any errors when the download button is clicked.
-     - Why fix this issue and what will be achieved with the fix? This is a critical bug that breaks the core functionality of the tool. Fixing it allows users to download their final generated ebook.
-     - Status: USER VERIFICATION PENDING
+     - Attempted fixes: The agent has begun the implementation by adding state variables to the frontend component. No complete fix has been attempted yet.
+     - Next debug checklist:
+        1.  **Drafts**: Integrate the  component and wire it up to the  endpoint. Update  and  functions in .
+        2.  **Custom Colors**: Add a color picker UI to the design step. Pass the selected color to the backend PDF generation API. Update the backend to use this custom color.
+        3.  **Multi-language**: In the backend API (), replicate the logic from the Ebook Maker API. Detect the language and use Puppeteer () for non-Latin scripts to ensure correct character rendering. Update the AI prompt to specify the output language.
+     - Why fix this issue and what will be achieved with the fix? This will bring the Worksheet Generator up to par with the other Pro tools, providing a consistent and powerful user experience.
+     - Status: IN PROGRESS
      - Is recurring issue? N
      - Should Test frontend/backend/both after fix? both
      - Blocked on other issue: None
 
 **In progress Task List**:
-  - Task 1: Complete and stabilize the Ebook Maker Pro tool.
- 
+  - Task 1: Standardize all PDF tools to the Pro feature set. (P0)
+
  Task Detail:
   - Task 1: 
-     - Where to resume: The last bug fix for the download button needs to be verified by the user. Once the user confirms the Ebook Maker is fully functional and stable, this task can be considered complete.
-     - What will be achieved with this?: A fully functional, feature-rich, and stable Ebook Maker Pro tool that meets all of the user's recent, detailed requirements.
-     - Status:  IN PROGRESS
+     - Where to resume: The immediate next step is to complete the feature implementation for the **Worksheet Generator Pro** (see Issue 1 above). After that, the following tools still need to be upgraded:
+        - **Journal Maker** (partially complete)
+        - **Recipe Book Generator**
+        - **Coloring Book Creator**
+        - **Printables Creator**
+     - What will be achieved with this?: All digital product tools will have a consistent, advanced feature set, including drafts, rich text editing, custom covers, and standard paper sizes, creating a cohesive product suite.
+     - Status: IN PROGRESS
      - Should Test frontend/backend/both after fix?: both
-     - Blocked on something: User verification of the last fix.
+     - Blocked on something: None
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **Task 1: Apply Pro Wizard UI/UX to All Remaining PDF Tools (P0, Highest Priority)**: This was the original task before the deep-dive on the Ebook Maker. Now that the Ebook Maker is the new, highly advanced standard, this task needs to be resumed.
-        - **Next Step**: Start with the **Checklist Maker**.
-        - **Plan**:
-            1. Create new API endpoints for the Checklist Maker (, ) based on the Ebook Maker's architecture.
-            2. Rewrite the frontend page () to use the multi-step wizard UI.
-            3. Repeat this process for the **Planner Maker** and any other remaining PDF tools.
+    - **Task 1: Complete Refactor of Journal Maker (P1)**: The agent started refactoring this tool but it is not complete. It needs to be fully integrated with the shared components and unified APIs for drafts, rich text, and custom covers.
+    - **Task 2: Refactor Recipe Book Generator (P1)**: Upgrade this tool to the Pro standard.
+    - **Task 3: Refactor Coloring Book Creator (P1)**: Upgrade this tool to the Pro standard.
+    - **Task 4: Refactor Printables Creator (P1)**: Upgrade this tool to the Pro standard.
     
     Future Tasks:
-    - **Task 2: Implement Remaining Digital Product Tools (P1)**: The backend for tools like Coloring Book Creator, Recipe Book Generator, etc., still needs to be built from scratch, following the new Pro wizard pattern.
-    - **Task 3: Full Content Editability in Wizard (P2)**: While the outline is editable, a future enhancement would be to allow editing the full, generated chapter content directly within the UI before the final PDF is created.
+    - None specified. The current priority is feature parity across all existing tools.
 
 **Completed work in this session**
-- **Feature: Custom Color Picker**: Implemented a color picker and swatches for the Ebook Maker cover design.
-- **Feature: Advanced Internal Page Styling**: Added UI and backend logic for selecting fonts for the ebook content.
-- **Feature: Rich Content Formatting**: Reworked AI prompts and PDF rendering to support structured content like subheadings, bullet points, and styled Tip boxes.
-- **CRITICAL FIX & FEATURE: Full Multi-language (Unicode) Support**:
-  - **Solved  limitations** for complex scripts (like Bengali) by implementing a new, parallel PDF generation pipeline using **Puppeteer** (). The API now intelligently chooses the correct generator based on the content's language.
-  - Fixed a  crash by adding a global polyfill via  and .
-- **CRITICAL FEATURE: Drafts Management System**: Built a complete system using  to allow users to save, view, load, and delete multiple ebook drafts, preventing loss of work.
-- **Bug Fixes**:
-  - Fixed content validation to prevent creating empty ebooks.
-  - Fixed a React stale state bug where generated content would disappear.
-  - Fixed multiple bugs related to loading drafts and inconsistent UI states.
-  - Fixed API response key mismatch for the PDF download URL.
+- List of all completed tasks with file and method name:
+  - **Feature: Ebook Drafts Migrated to MongoDB**: Replaced  with a new API () and database storage.
+  - **Feature: Rich Text Editor GUI for All Ebook Content**: Created a reusable  component with a toolbar for headings, quotes, boxes, bold, and italic, and implemented it for the introduction, chapters, and conclusion.
+  - **Feature: Standardized KDP Paper Sizes & Margins**: Created a central config for paper sizes () and margins () and implemented a shared selector component. Updated Planner and Ebook makers to use this system.
+  - **Feature: Custom Habits for Planner Maker**: Added a UI and backend logic to allow users to define their own habits for the habit tracker generated via the Planner Maker.
+  - **Bug Fix: Ebook Custom Cover Prompt**: Fixed a bug where the user's custom prompt for an AI cover image was ignored.
+  - **Bug Fix: Incorrect Language Generation in Ebook Maker**: Forced the AI to respond in English when the topic is English.
+  - **Bug Fix: Planner Content Overflow**: Fixed text wrapping issues on the Tips page of the Planner Maker.
+  - **Bug Fix: KDP Page Count Compliance for Habit Trackers**: Added a warning and logic to ensure generated habit trackers meet the 24-page minimum for KDP.
+  - **UI/UX: Ebook Cover Design Cleanup**: Removed by, year, branding, and decorative lines from the cover. Made the AI cover image full-page.
+  - **UI/UX: Author Name Field in Worksheet Generator**: Made the Teacher / Institute Name field more prominent.
 
 **Earlier issues found/mentioned but not fixed**
-   - None. The agent has been diligent in addressing all user-reported issues for the Ebook Maker.
+   - None. All issues raised by the user during the session were addressed or are currently in progress.
 
 **Known issue recurrence from previous fork**
   - None.
@@ -98,69 +90,87 @@ The user's recent requests for the Ebook Maker included:
 
 
 **Key Technical Concepts**
-- **Frontend**: Next.js, React (, ), Tailwind CSS, shadcn/ui.
-- **Client-side State**:  is used to persist multiple user drafts.
+- **Frontend**: Next.js, React (, , custom hooks), Tailwind CSS, shadcn/ui.
 - **Backend**: Next.js API Routes.
-- **PDF Generation**: A hybrid system:
-    - ****: For standard Latin-script languages.
-    - ****: For complex scripts (e.g., Bengali), generating a PDF from dynamically created HTML. This is the definitive solution for Unicode issues.
-- **AI Text Generation**:  SDK ().
-- **Node.js Environment**: The agent fixed a critical build issue by using  to polyfill , a requirement for .
+- **Database**: **MongoDB** is now used for persisting user drafts across all tools. A Mongoose schema () was created.
+- **PDF Generation**:
+    - **Hybrid System**:  for Latin scripts and **** for complex scripts remains the core architecture.
+    - **Rich Content Parsing**: A custom parser in the PDF generation APIs handles markdown-like syntax (, , , etc.) to render formatted text.
+- **AI**:  () for content and image prompt generation.
+- **Code Architecture**: A shift towards shared, reusable components (, ) and centralized configuration (, ) to standardize features across multiple tools.
 
 **key DB schema**
-  - No database changes were made. All new state (drafts) is being stored on the client-side in .
+  - **drafts**: 
 
 **changes in tech stack**
-  - ****: Added for robust, multi-language PDF generation.
-  - ****: Added to support custom font embedding with .
-  - ****: Added as a dev dependency to polyfill for .
+  - **MongoDB/Mongoose**: Added for persistent, server-side storage of drafts, replacing the client-side  solution.
 
 **All files of reference**
-- : The main file for the entire Ebook Maker UI, logic, and state management, including the new drafts system.
-- : The core of the backend, containing the dual-logic for PDF generation via  or .
-- : The new, critical library for generating PDFs from HTML using Puppeteer.
--  & : These files implement the global fix for the  error.
+- : The current file being actively modified.
+- : The backend API that needs to be updated next for the Worksheet Generator.
+- : The new central source of truth for all KDP-compliant paper sizes.
+- : The new central source for KDP-compliant margin calculations.
+- : The unified API for managing all drafts.
+- : Directory containing the new reusable components for drafts, paper sizes, and the rich text editor.
 
 **Areas that need refactoring**:
-- The original goal of refactoring all tools has been paused. All other tools like **Checklist Maker**, **Planner Maker**, etc., are now significantly behind the Ebook Maker in terms of functionality and UI. They need to be upgraded to the new Pro standard.
+- The core task is a large-scale refactoring. **Journal Maker**, **Recipe Book Generator**, **Coloring Book Creator**, and **Printables Creator** still need to be updated to use the new shared components and Pro features.
 
 **key api endpoints**
-- : Heavily modified to support two different generation pipelines (pdf-lib and Puppeteer) and a wide array of new design settings.
+- : Saves a new draft or updates an existing one for any tool.
+- : Fetches all drafts for a specific tool.
+- : Deletes a specific draft.
+- : All of these endpoints are being modified to accept new parameters like , , and rich text content, and to use the new KDP margin logic.
 
 **Critical Info for New Agent**
-- **Your Top Priority is NOT the Ebook Maker anymore**: The Ebook Maker is now feature-complete and stable (pending user verification of the last fix). Your main goal is to **resume the original task** from the previous handover: upgrade all other PDF tools (Checklist Maker, Planner Maker, etc.) to use the new Pro wizard standard, using the now-advanced Ebook Maker as the template.
-- **The Multi-language PDF Bug is SOLVED**: Do not waste time trying to fix  for complex scripts. The solution is . The API route  already contains the logic to switch between  and the new Puppeteer-based generator (). Use this pattern for other tools if they need to support multi-language content.
-- **The  Bug is SOLVED**: The server-side crash related to  is fixed globally with . Do not try to add polyfills to individual route files.
-- **Drafts are  ONLY**: The new draft management system is purely client-side. There is no backend database for drafts.
+- **Your immediate priority is the Worksheet Generator Pro.** You need to finish implementing Drafts, Custom Colors, and Multi-language support. Follow the pattern established by the Ebook Maker for these features. For multi-language, you must use the Puppeteer path () for non-Latin scripts.
+- **The main overarching goal is to standardize all PDF tools.** After the Worksheet Generator is done, you must continue the refactoring process for the remaining tools (Journal, Recipe, Coloring Book, etc.).
+- **Reuse, Don't Rebuild.** Use the new shared components in  and the centralized configs in  (e.g., , ) for all tools.
+- **Drafts are now in MongoDB.** All tools should use the  endpoint. Do not use  for drafts.
+- **KDP Compliance is key.** All generated PDFs must respect the page count minimum (24 pages) and use the dynamic margin calculations from .
 
 **documents created in this job**
-  - None.
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
 
 **Last 10 User Messages and any pending user messages**
-- **User (Msg 412)**: Reported that Bengali text was broken in the PDF. (Addressed by switching to Puppeteer).
-- **User (Msg 441)**: Reported they couldn't edit a draft. (Fixed).
-- **User (Msg 452)**: Reported that loading a draft showed an empty page. (Fixed by adding logic to revert to the previous step).
-- **User (Msg 463)**: **(PENDING VERIFICATION)** Reported that the download button was not working after re-generating a PDF from a draft.
-- **Agent's last response**: Summarized the fix for the download button (API was returning  instead of ) and asked the user to test.
+- **User (Msg 555-560)**: Asked for an Author/Institute Name field, clarifying it was for the **Worksheet Generator**. (Completed)
+- **User (Msg 581)**: **(IN PROGRESS)** Requested three major features for the **Worksheet Generator**: Drafts, Custom Colors, and Multi-language support (specifically mentioning Bengali). This is the current active task.
+- **User (Msg 477-482)**: Pointed out issues with a generated habit tracker: inability to customize habits and non-compliance with KDP's 24-page minimum. (Completed - fixed in Planner Maker)
+- **User (Msg 412, 438)**: Asked for a review of the implementation against Amazon KDP standards for trim size, bleed, and margins. (Completed - new margin/size system implemented)
+- **User (Msg 355)**: Provided a detailed list of KDP-standard paper sizes to be implemented. (Completed)
+- **User (Msg 244-246)**: Confirmed the plan to apply all Pro features from the Ebook Maker to all other PDF tools at once. (This is the main ongoing task).
+- **User (Msg 233)**: Reported a bug where content was flowing out of the page in the Digital Planner Maker. (Completed)
+- **User (Msg 218)**: Requested to clean up the Ebook cover by removing decorative elements and branding. (Completed)
+- **User (Msg 203)**: Reported duplicate Pro Tip labels in the Ebook PDF. (Completed)
+- **User (Msg 192)**: Reported UI glitches with the Ebook cover overlay and highlight boxes. (Completed)
 
 **Project Health Check:**
-- **Broken**: The download button for re-generated PDFs was broken, but a fix has been implemented and is pending user verification. All other PDF tools are now inconsistent with the Ebook Maker.
-- **Mocked**: Many tool pages are still UI-only placeholders with no backend functionality.
+- **Broken**: No tool is completely broken, but there is significant feature inconsistency across the product suite. Tools that have not been refactored (e.g., Recipe Book) are now severely outdated compared to the Ebook and Planner makers.
+- **Mocked**: Some tool pages may still have placeholder UI elements from before the refactoring began.
 
 **3rd Party Integrations**
-- **Google Generative AI (Gemini)**: (WORKING) Used for text generation.
+- **Google Generative AI (Gemini)**: (WORKING) Used for text content generation and AI image prompts.
+- **MongoDB**: (NEW & WORKING) Used for the persistent storage of all user drafts via Mongoose.
 - ****: (WORKING) Used for PDF generation for simple/Latin-script languages.
-- ****: (NEW & WORKING) Used for PDF generation from HTML, providing robust support for complex/Unicode scripts.  is installed on the server for it.
+- ****: (WORKING) Used for PDF generation from HTML for complex/Unicode scripts.
 
 **Testing status**
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: None.
-  - Known regressions: None identified, but the Ebook Maker has undergone massive changes and would benefit from a full regression test.
+  - Known regressions: None explicitly identified, but the large-scale refactoring introduces a high risk of regressions. Full testing is recommended for each tool after it is updated.
 
 **Credentials to test flow:**
 - : Found in .
+- : Found in .
 
 **What agent forgot to execute**
-- The agent was repeatedly interrupted by the user with high-priority requests for the Ebook Maker. As a result, the original and most important task—**standardizing all other PDF tools**—has been completely deferred and is now the top priority for the next agent.
+- The agent has not forgotten specific tasks but is in the middle of a very large, multi-step refactoring project. The primary miss is that the standardization of all tools is not yet complete. The agent correctly identified the work but was interrupted by subsequent user requests before completing the full refactor.
+
 </analysis>
