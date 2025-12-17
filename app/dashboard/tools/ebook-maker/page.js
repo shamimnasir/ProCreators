@@ -205,33 +205,50 @@ export default function EbookMakerPage() {
     localStorage.setItem('ebook-maker-progress', JSON.stringify(saveData))
   }, [isHydrated, topic, genre, targetAudience, chapterCount, outline, cover, introduction, chapters, conclusion, colorScheme, customColor, coverStyle, fontStyle, coverImageStyle, customImagePrompt, internalPageColor, internalCustomColor, step, currentDraftId])
 
-  // Save current work as a draft
-  const saveDraft = () => {
-    const draftId = currentDraftId || `draft-${Date.now()}`
+  // Save current work as a draft (to database)
+  const saveDraft = async () => {
     const draftTitle = cover.title || topic || 'Untitled Draft'
     
-    const newDraft = {
-      id: draftId,
+    const draftData = {
+      id: currentDraftId || undefined,
       title: draftTitle,
       subtitle: cover.subtitle || '',
       step,
       chaptersCount: chapters.length,
       chaptersComplete: chapters.filter(ch => ch.content && ch.content.trim().length > 50).length,
-      createdAt: currentDraftId ? drafts.find(d => d.id === draftId)?.createdAt || new Date().toISOString() : new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       data: getCurrentEbookData()
     }
     
-    // Update or add draft
-    const updatedDrafts = currentDraftId 
-      ? drafts.map(d => d.id === draftId ? newDraft : d)
-      : [newDraft, ...drafts]
-    
-    setDrafts(updatedDrafts)
-    setCurrentDraftId(draftId)
-    localStorage.setItem('ebook-maker-drafts', JSON.stringify(updatedDrafts))
-    
-    toast({ title: "Draft Saved!", description: `"${draftTitle}" has been saved to your drafts.` })
+    try {
+      const res = await fetch('/api/ebook-maker/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(draftData)
+      })
+      
+      const result = await res.json()
+      
+      if (result.success) {
+        // Refresh drafts list from DB
+        const draftsRes = await fetch('/api/ebook-maker/drafts')
+        const draftsData = await draftsRes.json()
+        if (draftsData.success) {
+          setDrafts(draftsData.drafts)
+        }
+        
+        setCurrentDraftId(result.id)
+        toast({ title: "Draft Saved!", description: `"${draftTitle}" has been saved to the database.` })
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Failed to save draft:', error)
+      toast({ 
+        title: "Save Failed", 
+        description: "Could not save draft. Please try again.",
+        variant: "destructive"
+      })
+    }
   }
 
   // Load a draft
