@@ -54,6 +54,52 @@ function hasNonLatinChars(text) {
   return /[\u0900-\u097F\u0980-\u09FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0B80-\u0BFF\u0C00-\u0C7F]/.test(text)
 }
 
+// ===== SAFE TEXT UTILITIES FOR COMPLEX SCRIPTS (Bengali, Hindi, etc.) =====
+
+// Safe text width calculation that handles Unicode/complex scripts
+function safeGetTextWidth(text, font, fontSize) {
+  if (!text) return 0
+  try {
+    return font.widthOfTextAtSize(text, fontSize)
+  } catch (e) {
+    // Fallback for complex scripts where glyph lookup fails
+    console.log('Using fallback width for complex script text')
+    return text.length * fontSize * 0.55
+  }
+}
+
+// Safe text drawing that handles Unicode/complex scripts
+function safeDrawText(page, text, options) {
+  if (!text) return true
+  try {
+    page.drawText(text, options)
+    return true
+  } catch (e) {
+    console.log('Text drawing error, using fallback:', e.message.substring(0, 50))
+    // For complex scripts, the font may not support all glyphs
+    // Try to draw what we can
+    try {
+      // Attempt to draw character by character, skipping problematic ones
+      let xPos = options.x
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i]
+        try {
+          page.drawText(char, { ...options, x: xPos })
+          xPos += options.font.widthOfTextAtSize(char, options.size)
+        } catch (charError) {
+          // Skip this character, add estimated space
+          xPos += options.size * 0.5
+        }
+      }
+      return true
+    } catch (fallbackError) {
+      // Complete failure - skip this text
+      console.log('Complete text drawing failure, skipping')
+      return false
+    }
+  }
+}
+
 // Transliterate text for PDF if needed (fallback for fonts that don't support Unicode)
 function getDisplayText(text, font, fontSize) {
   if (!text) return ''
