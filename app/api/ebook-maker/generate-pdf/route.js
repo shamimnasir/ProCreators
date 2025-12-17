@@ -244,6 +244,8 @@ export async function POST(request) {
     // ===== COVER PAGE =====
     let page = pdfDoc.addPage([pageWidth, pageHeight])
     
+    console.log('About to create cover page, fonts:', { boldFont: !!boldFont, regularFont: !!regularFont })
+    
     if (coverImageUrl) {
       await drawCoverPageWithImage(page, pdfDoc, {
         width: pageWidth,
