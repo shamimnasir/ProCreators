@@ -116,9 +116,10 @@ export default function WorksheetMakerPage() {
     cover,
     sections,
     bonusQuestions,
-    colorScheme,
+    selectedPreset,
     customPrimaryColor,
     customSecondaryColor,
+    useCustomColor,
     coverStyle,
     includeAnswerKey,
     step,
@@ -130,13 +131,14 @@ export default function WorksheetMakerPage() {
     if (data.topic) setTopic(data.topic)
     if (data.gradeLevel) setGradeLevel(data.gradeLevel)
     if (data.questionCount) setQuestionCount(data.questionCount)
-    if (data.language) setLanguage(data.language)
+    if (data.language !== undefined) setLanguage(data.language)
     if (data.cover) setCover(data.cover)
     if (data.sections) setSections(data.sections)
     if (data.bonusQuestions) setBonusQuestions(data.bonusQuestions)
-    if (data.colorScheme) setColorScheme(data.colorScheme)
+    if (data.selectedPreset) setSelectedPreset(data.selectedPreset)
     if (data.customPrimaryColor) setCustomPrimaryColor(data.customPrimaryColor)
     if (data.customSecondaryColor) setCustomSecondaryColor(data.customSecondaryColor)
+    if (data.useCustomColor !== undefined) setUseCustomColor(data.useCustomColor)
     if (data.coverStyle) setCoverStyle(data.coverStyle)
     if (data.includeAnswerKey !== undefined) setIncludeAnswerKey(data.includeAnswerKey)
     if (data.step && data.step > 1) setStep(Math.min(data.step, 3))
@@ -150,15 +152,17 @@ export default function WorksheetMakerPage() {
     setTopic('')
     setGradeLevel('6th Grade')
     setQuestionCount(10)
-    setLanguage('en')
+    setLanguage('')
     setCover({ title: '', subtitle: '', instructions: '', teacherName: '', subject: '', gradeLevel: '' })
     setSections([])
     setBonusQuestions([])
-    setColorScheme('ocean-blue')
+    setSelectedPreset('ocean-blue')
     setCustomPrimaryColor('#1e40af')
     setCustomSecondaryColor('#3b82f6')
+    setUseCustomColor(false)
     setCoverStyle('modern')
     setIncludeAnswerKey(true)
+    setCurrentDraftId(null)
     setResult(null)
   }
 
