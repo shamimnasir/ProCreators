@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Loader2, Download, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
-  GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe
+  GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe,
+  Pipette
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -45,25 +46,7 @@ const QUESTION_TYPES = [
   { id: 'matching', name: 'Matching' },
 ]
 
-const COLOR_SCHEMES = [
-  { id: 'ocean-blue', name: 'Ocean Blue', color: 'bg-blue-500' },
-  { id: 'forest-green', name: 'Forest Green', color: 'bg-green-600' },
-  { id: 'lavender', name: 'Lavender', color: 'bg-purple-400' },
-  { id: 'sunset', name: 'Sunset', color: 'bg-orange-400' },
-]
-
-// Language options
-const LANGUAGES = [
-  { id: 'en', name: 'English', flag: '🇺🇸' },
-  { id: 'bn', name: 'Bengali (বাংলা)', flag: '🇧🇩' },
-  { id: 'hi', name: 'Hindi (हिंदी)', flag: '🇮🇳' },
-  { id: 'es', name: 'Spanish (Español)', flag: '🇪🇸' },
-  { id: 'fr', name: 'French (Français)', flag: '🇫🇷' },
-  { id: 'ar', name: 'Arabic (العربية)', flag: '🇸🇦' },
-  { id: 'zh', name: 'Chinese (中文)', flag: '🇨🇳' },
-]
-
-// Custom color presets
+// Custom color presets for the design step
 const COLOR_PRESETS = [
   { id: 'ocean-blue', name: 'Ocean Blue', primary: '#1e40af', secondary: '#3b82f6' },
   { id: 'forest-green', name: 'Forest Green', primary: '#166534', secondary: '#22c55e' },
@@ -71,7 +54,6 @@ const COLOR_PRESETS = [
   { id: 'royal-purple', name: 'Royal Purple', primary: '#7c3aed', secondary: '#a78bfa' },
   { id: 'rose-pink', name: 'Rose Pink', primary: '#be185d', secondary: '#ec4899' },
   { id: 'slate-gray', name: 'Slate Gray', primary: '#334155', secondary: '#64748b' },
-  { id: 'custom', name: 'Custom Color', primary: '#000000', secondary: '#666666' },
 ]
 
 export default function WorksheetMakerPage() {
