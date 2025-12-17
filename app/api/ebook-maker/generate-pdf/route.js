@@ -684,9 +684,19 @@ export async function POST(request) {
     
     console.log('Final font check:', { regularFont: !!regularFont, boldFont: !!boldFont, italicFont: !!italicFont })
     
-    const pageWidth = 612
-    const pageHeight = 792
-    const margin = 65
+    // Page setup - use 6x9 (most popular) by default, with proper margins
+    // Import dynamic margins based on page count for proper KDP compliance
+    const { getMargins } = await import('@/lib/paper-sizes')
+    
+    const pageWidth = 432   // 6 inches * 72 points
+    const pageHeight = 648  // 9 inches * 72 points
+    
+    // Calculate page count for margin determination
+    const estimatedPageCount = Math.max(chapters.length * 5, 24) // Rough estimate
+    const margins = getMargins(estimatedPageCount, false) // No bleed for ebooks typically
+    
+    // Use inside margin (gutter) as base - accounts for binding
+    const margin = margins.inside.points // Dynamic based on page count
     const contentWidth = pageWidth - (margin * 2)
     const lineHeight = 20
     
