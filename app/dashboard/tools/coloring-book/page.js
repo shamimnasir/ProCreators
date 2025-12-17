@@ -353,10 +353,17 @@ export default function ColoringBookPage() {
       return
     }
 
+    // Warn about KDP compliance
+    if (pages.length < KDP_MIN_PAGES) {
+      const proceed = confirm(`Your book has ${pages.length} pages. Amazon KDP requires minimum 24 pages. Continue anyway?`)
+      if (!proceed) return
+    }
+
     setLoading(true)
     try {
       const primaryColor = useCustomColor ? customPrimaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.primary || '#6b21a8')
       const secondaryColor = useCustomColor ? customSecondaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.secondary || '#a855f7')
+      const selectedSize = PAPER_SIZES.find(s => s.id === paperSize)
       
       const response = await fetch('/api/coloring-book/generate', {
         method: 'POST',
@@ -372,7 +379,16 @@ export default function ColoringBookPage() {
           generateImages: generatePageImages,
           generateCover: generateCoverImage,
           primaryColor,
-          secondaryColor
+          secondaryColor,
+          // KDP Settings
+          paperSize: {
+            id: paperSize,
+            width: selectedSize?.width || 612,
+            height: selectedSize?.height || 792,
+            name: selectedSize?.name || '8.5" × 11"'
+          },
+          useBleed,
+          bleed: useBleed ? KDP_BLEED : 0
         })
       })
 
