@@ -39,9 +39,19 @@ async function generatePlannerContent(plannerType, customTitle, pageCount, custo
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const config = PLANNER_CONFIGS[plannerType] || PLANNER_CONFIGS.weekly
     
+    // Check if user provided custom habits
+    const hasCustomHabits = customHabits && customHabits.trim().length > 0
+    const customHabitsList = hasCustomHabits 
+      ? customHabits.split('\n').filter(h => h.trim()).map(h => h.trim())
+      : []
+    
     const prompt = `Create content for a ${config.name} with ${pageCount} pages.
 ${customTitle ? `Title: "${customTitle}"` : ''}
 ${customInstructions ? `Special instructions: ${customInstructions}` : ''}
+${hasCustomHabits ? `
+IMPORTANT - User's Custom Habits/Items to track (use these EXACTLY):
+${customHabitsList.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+` : ''}
 
 Generate:
 1. A catchy title (or use provided title)
@@ -49,6 +59,7 @@ Generate:
 3. 10 motivational quotes related to ${plannerType} planning${customInstructions ? ` and incorporating themes from: ${customInstructions}` : ''}
 4. 5 tips for using this planner effectively${customInstructions ? ` (include tips related to: ${customInstructions})` : ''}
 5. Section descriptions for: ${config.sections.join(', ')}
+${hasCustomHabits ? `6. Include the user's custom habits/items list: ${customHabitsList.join(', ')}` : ''}
 
 Format as JSON:
 {
@@ -56,7 +67,8 @@ Format as JSON:
   "subtitle": "...",
   "quotes": ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."],
   "tips": ["...", "...", "...", "...", "..."],
-  "sections": [{ "name": "...", "description": "..." }]
+  "sections": [{ "name": "...", "description": "..." }]${hasCustomHabits ? `,
+  "customItems": ${JSON.stringify(customHabitsList)}` : ''}
 }
 
 IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
