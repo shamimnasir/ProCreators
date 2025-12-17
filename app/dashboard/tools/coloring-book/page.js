@@ -106,7 +106,7 @@ export default function ColoringBookPage() {
   const [theme, setTheme] = useState('animals')
   const [customTheme, setCustomTheme] = useState('')
   const [difficulty, setDifficulty] = useState('medium')
-  const [pageCount, setPageCount] = useState(10)
+  const [pageCount, setPageCount] = useState(24) // KDP minimum is 24 pages
   const [bookTitle, setBookTitle] = useState('')
   const [authorName, setAuthorName] = useState('')
 
