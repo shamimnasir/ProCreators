@@ -480,6 +480,8 @@ export async function POST(request) {
     // Get paper size from new centralized config
     const sizeConfig = getSizeById(paperSize)
     const size = sizeConfig.points
+    
+    console.log(`Paper size requested: ${paperSize} -> ${sizeConfig.name} (${size.width}x${size.height} points)`)
 
     // Generate AI content
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions)
