@@ -277,7 +277,6 @@ export default function WorksheetMakerPage() {
   }
 
   const selectedSubject = SUBJECTS.find(s => s.id === subject)
-  const selectedColor = COLOR_SCHEMES.find(c => c.id === colorScheme)
   const totalQuestions = sections.reduce((sum, s) => sum + (s.questions?.length || 0), 0)
 
   return (
