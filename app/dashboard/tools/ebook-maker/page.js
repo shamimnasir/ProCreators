@@ -293,14 +293,15 @@ export default function EbookMakerPage() {
       const data = await response.json()
       if (!data.success) throw new Error(data.error)
 
-      const updatedChapters = [...chapters]
-      updatedChapters[chapterIndex] = {
-        ...chapter,
-        content: data.chapter.content,
-        sections: data.chapter.sections || [],
-        keyTakeaways: data.chapter.keyTakeaways || []
-      }
-      setChapters(updatedChapters)
+      // Use functional update to get latest state
+      setChapters(prevChapters => prevChapters.map((ch, idx) => 
+        idx === chapterIndex ? {
+          ...ch,
+          content: data.chapter.content,
+          sections: data.chapter.sections || [],
+          keyTakeaways: data.chapter.keyTakeaways || []
+        } : ch
+      ))
       
       toast({ title: "Chapter Generated!", description: `"${chapter.title}" content is ready.` })
     } catch (error) {
