@@ -226,7 +226,9 @@ export async function POST(request) {
         return NextResponse.json({
           success: true,
           url: `/ebooks/${filename}`,
+          downloadUrl: `/ebooks/${filename}`,
           title: cover.title,
+          pageCount: chapters.length * 3 + 5, // Estimated pages
           message: 'Ebook PDF generated with proper complex script support'
         })
       } catch (htmlError) {
