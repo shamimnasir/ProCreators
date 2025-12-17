@@ -84,8 +84,8 @@ function safeDrawText(page, text, options) {
       for (let i = 0; i < text.length; i++) {
         const char = text[i]
         try {
-          safeDrawText(page, char, { ...options, x: xPos })
-          xPos += options.font.widthOfTextAtSize(char, options.size)
+          page.drawText(char, { ...options, x: xPos })
+          xPos += safeGetTextWidth(char, options.font, options.size)
         } catch (charError) {
           // Skip this character, add estimated space
           xPos += options.size * 0.5
