@@ -485,12 +485,31 @@ export async function POST(request) {
         drawPlaceholder(page, pageWidth, pageHeight, bleedPoints, pageData.description)
       }
       
-      // Page number
+      // Stylish page number footer
+      const footerY = bleedPoints + 12
+      
+      // Decorative line above page number
+      page.drawLine({
+        start: { x: pageWidth / 2 - 30, y: footerY + 12 },
+        end: { x: pageWidth / 2 + 30, y: footerY + 12 },
+        thickness: 1,
+        color: sColor
+      })
+      
+      // Page number with circle background
+      page.drawCircle({ 
+        x: pageWidth / 2, 
+        y: footerY, 
+        size: 12, 
+        color: rgb(0.97, 0.97, 0.97),
+        borderColor: sColor,
+        borderWidth: 1
+      })
       page.drawText(`${i + 1}`, {
-        x: pageWidth / 2 - 5,
-        y: 15,
+        x: pageWidth / 2 - (i + 1 >= 10 ? 6 : 3),
+        y: footerY - 4,
         size: 10,
-        color: rgb(0.5, 0.5, 0.5)
+        color: pColor
       })
     }
     
