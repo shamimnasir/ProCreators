@@ -350,7 +350,7 @@ export async function POST(request) {
         })
         
         if (authorName) {
-          page.drawText(`By ${authorName}`, {
+          page.drawText(authorName, {
             x: pageWidth / 2 - (authorName.length * 4),
             y: pageHeight - 170,
             size: 12,
