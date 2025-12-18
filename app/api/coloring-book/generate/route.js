@@ -378,15 +378,40 @@ export async function POST(request) {
         color: rgb(1, 1, 1)
       })
       
-      // Page title at top
-      const pageTitle = pageData.title || `Page ${i + 1}`
-      const titleX = Math.max(50, pageWidth / 2 - (pageTitle.length * 5))
-      page.drawText(pageTitle, {
-        x: titleX,
-        y: pageHeight - 40,
-        size: 14,
+      // Stylish page header with decorative banner
+      const headerHeight = 55
+      const margin = bleedPoints + 20
+      
+      // Header background with gradient effect (light to dark)
+      page.drawRectangle({
+        x: margin, y: pageHeight - headerHeight - bleedPoints,
+        width: pageWidth - (margin * 2), height: headerHeight,
+        color: rgb(0.98, 0.98, 0.98),
+        borderColor: pColor,
+        borderWidth: 2
+      })
+      
+      // Decorative accent bar at top of header
+      page.drawRectangle({
+        x: margin, y: pageHeight - bleedPoints - 6,
+        width: pageWidth - (margin * 2), height: 6,
         color: pColor
       })
+      
+      // Page title centered in header
+      const pageTitle = pageData.title || `Page ${i + 1}`
+      const titleFontSize = Math.min(18, 400 / pageTitle.length)
+      const titleWidth = pageTitle.length * titleFontSize * 0.55
+      page.drawText(pageTitle, {
+        x: Math.max(margin + 20, (pageWidth - titleWidth) / 2),
+        y: pageHeight - 42 - bleedPoints,
+        size: titleFontSize,
+        color: pColor
+      })
+      
+      // Small decorative circles on header corners
+      page.drawCircle({ x: margin + 15, y: pageHeight - 30 - bleedPoints, size: 6, color: sColor })
+      page.drawCircle({ x: pageWidth - margin - 15, y: pageHeight - 30 - bleedPoints, size: 6, color: sColor })
       
       // Embed coloring page image if available
       if (pageData.imageUrl) {
