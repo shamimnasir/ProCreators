@@ -335,6 +335,8 @@ export default function ColoringBookPage() {
 
       // Update pages with generated images
       if (data.pages) {
+        console.log('Updating pages with images:', data.pages.filter(p => p.imageUrl).length, 'pages have images')
+        data.pages.forEach((p, i) => console.log(`Page ${i+1}: imageUrl = ${p.imageUrl ? p.imageUrl.substring(0, 50) + '...' : 'none'}`))
         setPages(data.pages)
       }
       
