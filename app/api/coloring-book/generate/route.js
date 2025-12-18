@@ -530,65 +530,116 @@ export async function POST(request) {
   }
 }
 
-// Helper: Draw text-only cover
+// Helper: Draw colorful playful cover
 function drawTextCover(page, pageWidth, pageHeight, bookTitle, pageCount, authorName, difficulty, pColor, sColor) {
-  // Background
+  // Pastel yellow/cream background
   page.drawRectangle({
     x: 0, y: 0,
     width: pageWidth, height: pageHeight,
-    color: rgb(0.98, 0.98, 0.95)
+    color: rgb(1, 0.98, 0.9) // Warm cream
   })
   
-  // Decorative border
+  // Colorful decorative circles at corners and edges (like coloring book covers)
+  const decorColors = [
+    rgb(0.98, 0.6, 0.6),   // Coral pink
+    rgb(0.6, 0.85, 0.95),  // Sky blue
+    rgb(0.95, 0.85, 0.5),  // Golden yellow
+    rgb(0.7, 0.9, 0.7),    // Mint green
+    rgb(0.9, 0.7, 0.9),    // Lavender
+    rgb(0.98, 0.75, 0.5),  // Peach
+  ]
+  
+  // Top decorative circles
+  page.drawCircle({ x: 80, y: pageHeight - 80, size: 50, color: decorColors[0] })
+  page.drawCircle({ x: pageWidth - 80, y: pageHeight - 80, size: 45, color: decorColors[1] })
+  page.drawCircle({ x: pageWidth / 2 - 100, y: pageHeight - 60, size: 35, color: decorColors[2] })
+  page.drawCircle({ x: pageWidth / 2 + 100, y: pageHeight - 70, size: 40, color: decorColors[3] })
+  
+  // Bottom decorative shapes
+  page.drawCircle({ x: 70, y: 100, size: 45, color: decorColors[4] })
+  page.drawCircle({ x: pageWidth - 70, y: 120, size: 50, color: decorColors[5] })
+  page.drawCircle({ x: pageWidth / 2, y: 80, size: 35, color: decorColors[0] })
+  
+  // Side decorative elements
+  page.drawCircle({ x: 50, y: pageHeight / 2 + 100, size: 30, color: decorColors[2] })
+  page.drawCircle({ x: 60, y: pageHeight / 2 - 50, size: 25, color: decorColors[1] })
+  page.drawCircle({ x: pageWidth - 50, y: pageHeight / 2, size: 35, color: decorColors[3] })
+  page.drawCircle({ x: pageWidth - 60, y: pageHeight / 2 + 120, size: 28, color: decorColors[4] })
+  
+  // Stars/sparkles using small shapes
+  for (let i = 0; i < 12; i++) {
+    const starX = 100 + Math.random() * (pageWidth - 200)
+    const starY = 200 + Math.random() * (pageHeight - 400)
+    page.drawCircle({ x: starX, y: starY, size: 3 + Math.random() * 5, color: rgb(1, 0.9, 0.5) })
+  }
+  
+  // Main title background banner
   page.drawRectangle({
-    x: 30, y: 30,
-    width: pageWidth - 60, height: pageHeight - 60,
+    x: 40, y: pageHeight / 2 + 30,
+    width: pageWidth - 80, height: 140,
+    color: rgb(1, 1, 1),
     borderColor: pColor,
-    borderWidth: 3
+    borderWidth: 4
   })
   
-  // Inner border
-  page.drawRectangle({
-    x: 40, y: 40,
-    width: pageWidth - 80, height: pageHeight - 80,
-    borderColor: sColor,
-    borderWidth: 1
-  })
-  
-  // Title
-  const titleX = Math.max(50, pageWidth / 2 - (bookTitle.length * 10))
+  // Title text
+  const titleFontSize = Math.min(36, 520 / bookTitle.length)
+  const titleWidth = bookTitle.length * titleFontSize * 0.55
   page.drawText(bookTitle.toUpperCase(), {
-    x: titleX,
-    y: pageHeight - 250,
-    size: Math.min(28, 500 / bookTitle.length),
+    x: Math.max(60, (pageWidth - titleWidth) / 2),
+    y: pageHeight / 2 + 100,
+    size: titleFontSize,
     color: pColor
   })
   
-  // Subtitle
-  const subtitle = `${pageCount} Beautiful Pages to Color`
+  // Subtitle in banner
+  const subtitle = 'COLORING BOOK'
   page.drawText(subtitle, {
-    x: pageWidth / 2 - (subtitle.length * 4),
-    y: pageHeight - 300,
-    size: 14,
+    x: pageWidth / 2 - (subtitle.length * 6),
+    y: pageHeight / 2 + 50,
+    size: 20,
+    color: sColor
+  })
+  
+  // Page count badge
+  const pageLabel = `${pageCount} Fun Pages to Color!`
+  page.drawRectangle({
+    x: pageWidth / 2 - 90, y: pageHeight / 2 - 50,
+    width: 180, height: 35,
+    color: decorColors[2],
+    borderColor: rgb(0.8, 0.7, 0.3),
+    borderWidth: 2
+  })
+  page.drawText(pageLabel, {
+    x: pageWidth / 2 - 70,
+    y: pageHeight / 2 - 40,
+    size: 12,
+    color: rgb(0.3, 0.2, 0.1)
+  })
+  
+  // Difficulty indicator with fun styling
+  const diffLabel = difficulty.charAt(0).toUpperCase() + difficulty.slice(1) + ' Level'
+  page.drawRectangle({
+    x: pageWidth / 2 - 50, y: pageHeight / 2 - 100,
+    width: 100, height: 25,
+    color: rgb(0.95, 0.95, 0.95),
+    borderColor: rgb(0.8, 0.8, 0.8),
+    borderWidth: 1
+  })
+  page.drawText(diffLabel, {
+    x: pageWidth / 2 - 35,
+    y: pageHeight / 2 - 92,
+    size: 10,
     color: rgb(0.4, 0.4, 0.4)
   })
   
-  // Difficulty badge
-  const diffLabel = `Difficulty: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`
-  page.drawText(diffLabel, {
-    x: pageWidth / 2 - (diffLabel.length * 4),
-    y: pageHeight - 340,
-    size: 12,
-    color: rgb(0.5, 0.5, 0.5)
-  })
-  
-  // Author if provided
+  // Author name (no "by" prefix)
   if (authorName) {
-    page.drawText(`By ${authorName}`, {
-      x: pageWidth / 2 - (authorName.length * 4),
-      y: 150,
-      size: 14,
-      color: sColor
+    page.drawText(authorName, {
+      x: pageWidth / 2 - (authorName.length * 5),
+      y: 160,
+      size: 16,
+      color: pColor
     })
   }
 }
