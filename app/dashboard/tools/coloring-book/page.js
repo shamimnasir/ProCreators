@@ -368,9 +368,14 @@ export default function ColoringBookPage() {
       const selectedSize = PAPER_SIZES.find(s => s.id === paperSize)
       
       // Debug: log pages with imageUrls
+      console.log('=== PDF GENERATION DEBUG ===')
       console.log('Pages being sent to PDF generation:', pages.length)
       console.log('Pages with images:', pages.filter(p => p.imageUrl).length)
-      pages.forEach((p, i) => console.log(`Page ${i+1}: ${p.title}, hasImage: ${!!p.imageUrl}`))
+      pages.forEach((p, i) => {
+        console.log(`Page ${i+1}: ${p.title}`)
+        console.log(`  imageUrl: ${p.imageUrl ? p.imageUrl.substring(0, 80) : 'NONE'}`)
+      })
+      console.log('=== END DEBUG ===')
       
       const response = await fetch('/api/coloring-book/generate', {
         method: 'POST',
