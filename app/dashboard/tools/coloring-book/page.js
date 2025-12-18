@@ -365,6 +365,11 @@ export default function ColoringBookPage() {
       const secondaryColor = useCustomColor ? customSecondaryColor : (COLOR_PRESETS.find(p => p.id === selectedPreset)?.secondary || '#a855f7')
       const selectedSize = PAPER_SIZES.find(s => s.id === paperSize)
       
+      // Debug: log pages with imageUrls
+      console.log('Pages being sent to PDF generation:', pages.length)
+      console.log('Pages with images:', pages.filter(p => p.imageUrl).length)
+      pages.forEach((p, i) => console.log(`Page ${i+1}: ${p.title}, hasImage: ${!!p.imageUrl}`))
+      
       const response = await fetch('/api/coloring-book/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
