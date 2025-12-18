@@ -386,33 +386,74 @@ export async function POST(request) {
       
       // Embed coloring page image if available
       if (pageData.imageUrl) {
+        console.log(`Embedding image for page ${i + 1}: ${pageData.imageUrl.substring(0, 80)}...`)
         try {
           const imageResponse = await fetch(pageData.imageUrl)
+          
+          if (!imageResponse.ok) {
+            throw new Error(`Failed to fetch image: ${imageResponse.status}`)
+          }
+          
+          const contentType = imageResponse.headers.get('content-type') || ''
           const imageArrayBuffer = await imageResponse.arrayBuffer()
           const imageBytes = new Uint8Array(imageArrayBuffer)
           
+          console.log(`Image fetched: ${imageBytes.length} bytes, type: ${contentType}`)
+          
           let embeddedImage
-          if (pageData.imageUrl.includes('.png') || pageData.imageUrl.includes('png')) {
-            embeddedImage = await pdfDoc.embedPng(imageBytes)
-          } else {
-            embeddedImage = await pdfDoc.embedJpg(imageBytes)
+          // Check content type or URL for format, try PNG first then JPG
+          const isPng = contentType.includes('png') || pageData.imageUrl.includes('.png') || pageData.imageUrl.includes('png')
+          
+          try {
+            if (isPng) {
+              embeddedImage = await pdfDoc.embedPng(imageBytes)
+            } else {
+              embeddedImage = await pdfDoc.embedJpg(imageBytes)
+            }
+          } catch (formatError) {
+            // Try the other format
+            console.log(`First format failed, trying alternative...`)
+            try {
+              embeddedImage = isPng 
+                ? await pdfDoc.embedJpg(imageBytes) 
+                : await pdfDoc.embedPng(imageBytes)
+            } catch (altError) {
+              throw new Error(`Both PNG and JPG embedding failed: ${altError.message}`)
+            }
           }
           
-          // Draw image in the coloring area
-          const margin = 50
-          const imgWidth = pageWidth - (margin * 2)
-          const imgHeight = pageHeight - 120
+          // Get original dimensions and scale to fit
+          const imgDims = embeddedImage.scale(1)
+          const margin = 50 + bleedPoints
+          const maxWidth = pageWidth - (margin * 2)
+          const maxHeight = pageHeight - 100 - margin
+          
+          // Calculate scale to fit while maintaining aspect ratio
+          const widthScale = maxWidth / imgDims.width
+          const heightScale = maxHeight / imgDims.height
+          const scale = Math.min(widthScale, heightScale)
+          
+          const scaledWidth = imgDims.width * scale
+          const scaledHeight = imgDims.height * scale
+          
+          // Center the image
+          const imgX = margin + (maxWidth - scaledWidth) / 2
+          const imgY = margin + (maxHeight - scaledHeight) / 2
           
           page.drawImage(embeddedImage, {
-            x: margin, y: 40,
-            width: imgWidth, height: imgHeight
+            x: imgX, 
+            y: imgY,
+            width: scaledWidth, 
+            height: scaledHeight
           })
+          
+          console.log(`Image embedded successfully for page ${i + 1}`)
         } catch (imgError) {
-          console.log(`Failed to embed page ${i + 1} image:`, imgError.message)
-          drawPlaceholder(page, pageWidth, pageHeight, pageData.description)
+          console.error(`Failed to embed page ${i + 1} image:`, imgError.message)
+          drawPlaceholder(page, pageWidth, pageHeight, bleedPoints, pageData.description)
         }
       } else {
-        drawPlaceholder(page, pageWidth, pageHeight, pageData.description)
+        drawPlaceholder(page, pageWidth, pageHeight, bleedPoints, pageData.description)
       }
       
       // Page number
