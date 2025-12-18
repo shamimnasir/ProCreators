@@ -591,11 +591,13 @@ function drawTextCover(page, pageWidth, pageHeight, bookTitle, pageCount, author
 }
 
 // Helper: Draw placeholder for pages without images
-function drawPlaceholder(page, pageWidth, pageHeight, description) {
+function drawPlaceholder(page, pageWidth, pageHeight, bleedPoints, description) {
+  const margin = 50 + bleedPoints
+  
   // Coloring area border
   page.drawRectangle({
-    x: 50, y: 50,
-    width: pageWidth - 100, height: pageHeight - 120,
+    x: margin, y: margin,
+    width: pageWidth - (margin * 2), height: pageHeight - margin - 70,
     borderColor: rgb(0.85, 0.85, 0.85),
     borderWidth: 2
   })
@@ -612,7 +614,7 @@ function drawPlaceholder(page, pageWidth, pageHeight, description) {
   if (description) {
     const shortDesc = description.substring(0, 60) + (description.length > 60 ? '...' : '')
     page.drawText(shortDesc, {
-      x: 60,
+      x: margin + 10,
       y: pageHeight / 2 - 10,
       size: 10,
       color: rgb(0.75, 0.75, 0.75)
