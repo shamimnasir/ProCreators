@@ -242,6 +242,9 @@ export async function POST(request) {
     console.log(`Coloring Book Request: theme=${customTheme || theme}, pages=${pageCount}, generateImages=${generateImages}`)
     console.log(`Paper Size: ${paperSize?.name || '8.5x11'}, Bleed: ${useBleed ? '0.125"' : 'none'}`)
     console.log(`Pages received: ${pages?.length || 0}, with images: ${pages?.filter(p => p.imageUrl)?.length || 0}`)
+    if (pages?.length > 0) {
+      console.log('First page data:', JSON.stringify(pages[0]).substring(0, 200))
+    }
     
     // If pages are provided (from editor), use them. Otherwise generate new ones.
     let coloringPages = pages
