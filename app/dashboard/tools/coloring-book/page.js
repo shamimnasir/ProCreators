@@ -874,12 +874,33 @@ export default function ColoringBookPage() {
 
                 {/* Generation Options */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div>
-                      <Label>Generate AI Cover Image</Label>
-                      <p className="text-sm text-muted-foreground">Create a themed cover image</p>
+                  <div className="p-4 bg-muted rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>Generate AI Cover Image</Label>
+                        <p className="text-sm text-muted-foreground">Create a themed cover image</p>
+                      </div>
+                      <Switch checked={generateCoverImage} onCheckedChange={setGenerateCoverImage} />
                     </div>
-                    <Switch checked={generateCoverImage} onCheckedChange={setGenerateCoverImage} />
+                    
+                    {generateCoverImage && (
+                      <div className="space-y-2 pt-2 border-t">
+                        <Label className="text-sm flex items-center gap-2">
+                          <Edit3 className="h-4 w-4" />
+                          Custom Cover Prompt (Optional)
+                        </Label>
+                        <Textarea
+                          placeholder="e.g., A whimsical garden scene with colorful butterflies and flowers, watercolor style, magical forest background..."
+                          value={customCoverPrompt}
+                          onChange={(e) => setCustomCoverPrompt(e.target.value)}
+                          rows={3}
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Leave empty for automatic cover based on your theme. Add a custom prompt for more control over the cover design.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
