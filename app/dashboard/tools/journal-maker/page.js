@@ -168,6 +168,7 @@ export default function JournalMakerPage() {
     colorScheme,
     coverStyle,
     pageCount,
+    paperSize,
     coverImageStyle,
     customImagePrompt,
     step,
