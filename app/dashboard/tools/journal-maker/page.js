@@ -701,6 +701,41 @@ export default function JournalMakerPage() {
                     step={30}
                   />
                 </div>
+
+                {/* KDP Paper Size Selection */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Paper Size (KDP Standard)
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {KDP_JOURNAL_SIZES.map((size) => (
+                      <button
+                        key={size.id}
+                        onClick={() => setPaperSize(size.id)}
+                        className={`p-2 rounded-lg border text-left transition-all ${
+                          paperSize === size.id 
+                            ? 'border-primary bg-primary/10 ring-2 ring-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{size.name}</span>
+                          {size.recommended && (
+                            <Badge className="text-xs bg-green-100 text-green-800">Popular</Badge>
+                          )}
+                          {size.largeTrim && (
+                            <Badge className="text-xs bg-amber-100 text-amber-800">Large</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{size.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Large trim sizes (7"+ wide or 9"+ tall) have higher print costs on KDP
+                  </p>
+                </div>
                 
                 {/* Cover Image Customization */}
                 <div className="border rounded-lg p-4 space-y-3">
