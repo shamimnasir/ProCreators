@@ -27,13 +27,27 @@ const CHECKLIST_TYPES = {
 
 // Generate checklist items with AI
 async function generateChecklistContent(checklistType, customItems, itemCount) {
+  const config = CHECKLIST_TYPES[checklistType] || CHECKLIST_TYPES['habit']
+  
+  // If user provided custom items, use them directly
+  if (customItems && customItems.trim()) {
+    const userItems = customItems.split('\n').filter(line => line.trim()).map(line => line.trim())
+    console.log(`Using ${userItems.length} custom items provided by user`)
+    return {
+      title: `My ${config.name}`,
+      subtitle: config.description,
+      categories: [
+        { name: 'My Items', items: userItems }
+      ],
+      tips: ['Check items as you complete them', 'Review your progress regularly', 'Celebrate your achievements']
+    }
+  }
+  
+  // Otherwise try AI generation
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-    const config = CHECKLIST_TYPES[checklistType] || CHECKLIST_TYPES['habit']
     
     const prompt = `Create a comprehensive ${config.name} with ${itemCount || 20} items.
-
-${customItems ? `Include these items: ${customItems}` : ''}
 
 Generate:
 1. A catchy title
@@ -68,12 +82,23 @@ IMPORTANT: Return ONLY valid JSON.`
     return JSON.parse(text)
   } catch (error) {
     console.error('AI checklist generation error:', error)
-    const config = CHECKLIST_TYPES[checklistType] || CHECKLIST_TYPES['habit']
+    // Fallback with sensible defaults based on type
+    const defaultItems = {
+      'habit': ['Exercise 30 minutes', 'Read for 20 minutes', 'Drink 8 glasses of water', 'Meditate 10 minutes', 'No social media before noon', 'Walk 10,000 steps', 'Practice gratitude', 'Sleep by 10pm'],
+      'fitness': ['Warm-up', 'Cardio', 'Strength training', 'Core workout', 'Stretching', 'Track calories', 'Drink water', 'Log workout'],
+      'cleaning': ['Make beds', 'Do dishes', 'Wipe counters', 'Vacuum floors', 'Take out trash', 'Do laundry', 'Clean bathroom', 'Organize clutter'],
+      'travel': ['Passport', 'Phone charger', 'Toiletries', 'Medications', 'Clothes', 'Camera', 'Snacks', 'Travel documents'],
+      'morning': ['Wake up early', 'Drink water', 'Exercise', 'Healthy breakfast', 'Review goals', 'Shower', 'Plan the day', 'Positive affirmations'],
+      'evening': ['Review the day', 'Prepare tomorrow', 'Light stretching', 'No screens 1hr before bed', 'Read a book', 'Gratitude journal', 'Skincare routine', 'Sleep on time'],
+      'goal': ['Define clear goal', 'Set deadline', 'Break into tasks', 'Track progress', 'Review weekly', 'Adjust as needed', 'Celebrate milestones', 'Stay consistent'],
+      'savings': ['Track expenses', 'Set budget', 'Save 10%', 'Cut unnecessary costs', 'Pack lunch', 'Cancel unused subscriptions', 'Shop with list', 'Compare prices']
+    }
+    
     return {
       title: config.name,
       subtitle: config.description,
       categories: [
-        { name: 'Main Items', items: Array.from({ length: itemCount || 10 }, (_, i) => `Item ${i + 1}`) }
+        { name: 'Main Items', items: defaultItems[checklistType] || defaultItems['habit'] }
       ],
       tips: ['Check items as you complete them', 'Review regularly', 'Celebrate progress']
     }
