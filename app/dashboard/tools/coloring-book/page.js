@@ -391,6 +391,7 @@ export default function ColoringBookPage() {
           authorName,
           generateImages: generatePageImages,
           generateCover: generateCoverImage,
+          customCoverPrompt: customCoverPrompt.trim() || null,
           primaryColor,
           secondaryColor,
           // KDP Settings
