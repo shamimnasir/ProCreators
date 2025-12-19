@@ -177,7 +177,10 @@ export default function ChecklistMakerPage() {
     if (data.paperSize) setPaperSize(data.paperSize)
     if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
     if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
-    if (data.step) setStep(data.step)
+    if (data.step) {
+      setStep(data.step)
+      setHighestStep(data.step)
+    }
     if (data.generated) setGenerated(data.generated)
     
     setCurrentDraftId(draft.id)
