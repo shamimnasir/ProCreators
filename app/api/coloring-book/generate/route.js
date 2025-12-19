@@ -301,23 +301,53 @@ export async function POST(request) {
       coloringPages = await generatePageDescriptions(theme, customTheme, difficulty, pageCount || 24)
     }
     
-    // Generate actual coloring page images if requested
+    // Generate actual coloring page images if requested - PARALLEL for speed
     if (generateImages) {
-      console.log('Generating actual coloring page images...')
-      for (let i = 0; i < coloringPages.length; i++) {
-        const page = coloringPages[i]
-        if (!page.imageUrl) {
-          console.log(`Generating image ${i + 1}/${coloringPages.length}: ${page.title}`)
-          const imageResult = await generateColoringPageImage(page.description, difficulty)
-          if (imageResult.success && imageResult.imageUrl) {
-            coloringPages[i].imageUrl = imageResult.imageUrl
-            console.log(`Image ${i + 1} generated successfully`)
-          } else {
-            console.log(`Image ${i + 1} failed: ${imageResult.error}`)
-          }
-          // Small delay between requests
-          await new Promise(r => setTimeout(r, 1000))
+      console.log('Generating actual coloring page images in parallel...')
+      const pagesToGenerate = coloringPages.filter(p => !p.imageUrl)
+      
+      if (pagesToGenerate.length > 0) {
+        // Process in batches of 3 for parallel generation (to avoid overwhelming API)
+        const BATCH_SIZE = 3
+        const batches = []
+        for (let i = 0; i < pagesToGenerate.length; i += BATCH_SIZE) {
+          batches.push(pagesToGenerate.slice(i, i + BATCH_SIZE))
         }
+        
+        console.log(`Processing ${pagesToGenerate.length} pages in ${batches.length} batches of ${BATCH_SIZE}...`)
+        
+        for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+          const batch = batches[batchIdx]
+          console.log(`Batch ${batchIdx + 1}/${batches.length}: Generating ${batch.length} images in parallel...`)
+          
+          // Generate all images in this batch simultaneously
+          const batchPromises = batch.map(async (page) => {
+            const pageIndex = coloringPages.findIndex(p => p.title === page.title)
+            console.log(`  Starting: ${page.title}`)
+            const imageResult = await generateColoringPageImage(page.description, difficulty)
+            return { pageIndex, imageResult, title: page.title }
+          })
+          
+          // Wait for all in batch to complete
+          const batchResults = await Promise.all(batchPromises)
+          
+          // Update pages with results
+          for (const { pageIndex, imageResult, title } of batchResults) {
+            if (imageResult.success && imageResult.imageUrl) {
+              coloringPages[pageIndex].imageUrl = imageResult.imageUrl
+              console.log(`  ✓ ${title} - Success`)
+            } else {
+              console.log(`  ✗ ${title} - Failed: ${imageResult.error}`)
+            }
+          }
+          
+          // Small delay between batches to be nice to the API
+          if (batchIdx < batches.length - 1) {
+            await new Promise(r => setTimeout(r, 500))
+          }
+        }
+        
+        console.log(`Image generation complete: ${coloringPages.filter(p => p.imageUrl).length}/${coloringPages.length} pages have images`)
       }
     }
     
