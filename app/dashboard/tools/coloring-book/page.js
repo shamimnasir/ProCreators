@@ -238,6 +238,7 @@ export default function ColoringBookPage() {
     if (data.useCustomColor !== undefined) setUseCustomColor(data.useCustomColor)
     if (data.generateCoverImage !== undefined) setGenerateCoverImage(data.generateCoverImage)
     if (data.generatePageImages !== undefined) setGeneratePageImages(data.generatePageImages)
+    if (data.customCoverPrompt !== undefined) setCustomCoverPrompt(data.customCoverPrompt)
     if (data.paperSize) setPaperSize(data.paperSize)
     if (data.useBleed !== undefined) setUseBleed(data.useBleed)
     if (data.step && data.step > 1) setStep(Math.min(data.step, 3))
