@@ -405,58 +405,40 @@ export async function POST(request) {
           width: pageWidth, height: pageHeight
         })
         
-        // Calculate text dimensions for minimal overlay
-        const titleFontSize = Math.min(28, 480 / bookTitle.length)
-        const titleWidth = bookTitle.length * titleFontSize * 0.6
-        const subtitle = `${coloringPages.length} Beautiful Pages to Color`
-        const subtitleWidth = subtitle.length * 7
-        const authorWidth = cleanAuthor ? cleanAuthor.length * 7 : 0
-        
-        // Get the widest text element + padding
-        const maxTextWidth = Math.max(titleWidth, subtitleWidth, authorWidth) + 60
-        const overlayWidth = Math.min(maxTextWidth, pageWidth - 80)
-        const overlayX = (pageWidth - overlayWidth) / 2
-        
-        // Compact overlay height based on content
+        // Professional title bar at BOTTOM of cover
         const hasAuthor = cleanAuthor && cleanAuthor.length > 0
-        const overlayHeight = hasAuthor ? 90 : 70
-        const overlayY = pageHeight - overlayHeight - 30
+        const barHeight = hasAuthor ? 80 : 60
+        const barY = 40 // Distance from bottom
         
-        // Small, elegant rounded-corner-style overlay (just for title area)
+        // Elegant dark semi-transparent bar at bottom
         page.drawRectangle({
-          x: overlayX,
-          y: overlayY,
-          width: overlayWidth,
-          height: overlayHeight,
-          color: rgb(1, 1, 1),
-          opacity: 0.92,
-          borderColor: pColor,
-          borderWidth: 2
+          x: 0,
+          y: barY,
+          width: pageWidth,
+          height: barHeight,
+          color: rgb(0, 0, 0),
+          opacity: 0.75
         })
         
-        // Title - centered in overlay
+        // Title - clean white text, centered
+        const titleFontSize = Math.min(26, 450 / bookTitle.length)
+        const titleWidth = bookTitle.length * titleFontSize * 0.55
         page.drawText(bookTitle.toUpperCase(), {
-          x: overlayX + (overlayWidth - titleWidth) / 2,
-          y: overlayY + overlayHeight - 30,
+          x: (pageWidth - titleWidth) / 2,
+          y: barY + (hasAuthor ? barHeight - 35 : barHeight / 2 - 8),
           size: titleFontSize,
-          color: pColor
+          color: rgb(1, 1, 1)
         })
         
-        // Subtitle
-        page.drawText(subtitle, {
-          x: overlayX + (overlayWidth - subtitleWidth) / 2,
-          y: overlayY + overlayHeight - 55,
-          size: 12,
-          color: rgb(0.4, 0.4, 0.4)
-        })
-        
-        // Author name (if provided)
+        // Author name below title (if provided)
         if (hasAuthor) {
+          const authorFontSize = 12
+          const authorWidth = cleanAuthor.length * authorFontSize * 0.55
           page.drawText(cleanAuthor, {
-            x: overlayX + (overlayWidth - authorWidth) / 2,
-            y: overlayY + overlayHeight - 75,
-            size: 11,
-            color: sColor
+            x: (pageWidth - authorWidth) / 2,
+            y: barY + 18,
+            size: authorFontSize,
+            color: rgb(0.85, 0.85, 0.85)
           })
         }
         
