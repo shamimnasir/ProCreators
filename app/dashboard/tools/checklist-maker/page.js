@@ -262,12 +262,26 @@ export default function ChecklistMakerPage() {
     }
   }
 
-  // Navigation helpers
+  // Track highest step reached for navigation
+  const [highestStep, setHighestStep] = useState(1)
+  
+  // Update highest step when moving forward
+  useEffect(() => {
+    if (step > highestStep) {
+      setHighestStep(step)
+    }
+  }, [step, highestStep])
+
+  // Navigation helpers - allow going back to any visited step
   const canGoToStep = (targetStep) => {
-    if (targetStep <= step) return true
-    if (targetStep === 2 && checklistType) return true
-    if (targetStep === 3 && step >= 2) return true
-    if (targetStep === 4 && step >= 3) return true
+    // Can always go to current or previous steps
+    if (targetStep <= highestStep) return true
+    // Can go to next step if requirements met
+    if (targetStep === step + 1) {
+      if (targetStep === 2 && checklistType) return true
+      if (targetStep === 3) return true  // Can always go to design after content
+      if (targetStep === 4) return true  // Can always go to generate after design
+    }
     return false
   }
 
