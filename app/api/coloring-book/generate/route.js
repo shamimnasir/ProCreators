@@ -375,37 +375,57 @@ export async function POST(request) {
           width: pageWidth, height: pageHeight
         })
         
-        // Add semi-transparent overlay for title at top
+        // Calculate text dimensions for minimal overlay
+        const titleFontSize = Math.min(28, 480 / bookTitle.length)
+        const titleWidth = bookTitle.length * titleFontSize * 0.6
+        const subtitle = `${coloringPages.length} Beautiful Pages to Color`
+        const subtitleWidth = subtitle.length * 7
+        const authorWidth = cleanAuthor ? cleanAuthor.length * 7 : 0
+        
+        // Get the widest text element + padding
+        const maxTextWidth = Math.max(titleWidth, subtitleWidth, authorWidth) + 60
+        const overlayWidth = Math.min(maxTextWidth, pageWidth - 80)
+        const overlayX = (pageWidth - overlayWidth) / 2
+        
+        // Compact overlay height based on content
+        const hasAuthor = cleanAuthor && cleanAuthor.length > 0
+        const overlayHeight = hasAuthor ? 90 : 70
+        const overlayY = pageHeight - overlayHeight - 30
+        
+        // Small, elegant rounded-corner-style overlay (just for title area)
         page.drawRectangle({
-          x: 0, y: pageHeight - 180,
-          width: pageWidth, height: 180,
+          x: overlayX,
+          y: overlayY,
+          width: overlayWidth,
+          height: overlayHeight,
           color: rgb(1, 1, 1),
-          opacity: 0.88
+          opacity: 0.92,
+          borderColor: pColor,
+          borderWidth: 2
         })
         
-        // Title
-        const titleFontSize = Math.min(32, 520 / bookTitle.length)
+        // Title - centered in overlay
         page.drawText(bookTitle.toUpperCase(), {
-          x: Math.max(40, pageWidth / 2 - (bookTitle.length * titleFontSize * 0.35)),
-          y: pageHeight - 80,
+          x: overlayX + (overlayWidth - titleWidth) / 2,
+          y: overlayY + overlayHeight - 30,
           size: titleFontSize,
           color: pColor
         })
         
         // Subtitle
-        const subtitle = `${coloringPages.length} Beautiful Pages to Color`
         page.drawText(subtitle, {
-          x: pageWidth / 2 - (subtitle.length * 4),
-          y: pageHeight - 120,
-          size: 14,
+          x: overlayX + (overlayWidth - subtitleWidth) / 2,
+          y: overlayY + overlayHeight - 55,
+          size: 12,
           color: rgb(0.4, 0.4, 0.4)
         })
         
-        if (cleanAuthor) {
+        // Author name (if provided)
+        if (hasAuthor) {
           page.drawText(cleanAuthor, {
-            x: pageWidth / 2 - (cleanAuthor.length * 4),
-            y: pageHeight - 150,
-            size: 12,
+            x: overlayX + (overlayWidth - authorWidth) / 2,
+            y: overlayY + overlayHeight - 75,
+            size: 11,
             color: sColor
           })
         }
