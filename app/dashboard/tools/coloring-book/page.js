@@ -261,6 +261,7 @@ export default function ColoringBookPage() {
     setUseCustomColor(false)
     setGenerateCoverImage(true)
     setGeneratePageImages(false)
+    setCustomCoverPrompt('')
     setPaperSize('8.5x11')
     setUseBleed(true)
     setCurrentDraftId(null)
