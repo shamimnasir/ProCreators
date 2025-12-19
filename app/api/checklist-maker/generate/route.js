@@ -183,6 +183,61 @@ export async function POST(request) {
     // KDP requires minimum 24 pages - default to 30 days minimum for trackers
     const days = Math.max(trackingDays || 30, 30)
     
+    // Add cover page with image if available
+    if (coverImageUrl) {
+      console.log('Adding cover page with image to PDF')
+      const coverPage = pdfDoc.addPage([width, height])
+      const colorSchemeMap = {
+        modern: {
+          primary: rgb(0.1, 0.1, 0.3),
+          secondary: rgb(0.3, 0.5, 0.8),
+          accent: rgb(0.7, 0.85, 0.95),
+          background: rgb(0.95, 0.97, 1),
+          text: rgb(0.1, 0.1, 0.2)
+        },
+        minimal: {
+          primary: rgb(0.1, 0.1, 0.1),
+          secondary: rgb(0.4, 0.4, 0.4),
+          accent: rgb(0.85, 0.85, 0.85),
+          background: rgb(1, 1, 1),
+          text: rgb(0.1, 0.1, 0.1)
+        },
+        colorful: {
+          primary: rgb(0.5, 0.2, 0.6),
+          secondary: rgb(0.8, 0.4, 0.6),
+          accent: rgb(0.95, 0.85, 0.9),
+          background: rgb(1, 0.98, 0.98),
+          text: rgb(0.3, 0.15, 0.35)
+        },
+        nature: {
+          primary: rgb(0.2, 0.45, 0.25),
+          secondary: rgb(0.4, 0.6, 0.4),
+          accent: rgb(0.85, 0.92, 0.85),
+          background: rgb(0.97, 1, 0.97),
+          text: rgb(0.15, 0.25, 0.15)
+        }
+      }
+      
+      try {
+        await drawCoverPageWithImage(coverPage, pdfDoc, {
+          width,
+          height,
+          title: content.title,
+          subtitle: content.subtitle || 'Track your progress',
+          authorName: '',
+          year: new Date().getFullYear(),
+          colors: colorSchemeMap[designStyle] || colorSchemeMap.colorful,
+          coverStyle: { hasFrame: false, hasPattern: false },
+          boldFont,
+          regularFont,
+          coverImageUrl
+        })
+        console.log('Cover page added successfully')
+      } catch (coverError) {
+        console.error('Error adding cover page:', coverError.message)
+      }
+    }
+    
     if (isTracker) {
       // Create tracker grid
       let page = pdfDoc.addPage([width, height])
