@@ -80,14 +80,18 @@ async function generateColoringPageImage(description, difficulty) {
   })
 }
 
-// Generate cover image
-async function generateCoverImage(theme, customTheme, primaryColor) {
+// Generate cover image with custom prompt support
+async function generateCoverImage(theme, customTheme, primaryColor, customCoverPrompt) {
   return new Promise((resolve) => {
     try {
       const themeDesc = customTheme || theme
-      const fullPrompt = `Beautiful coloring book cover design for "${themeDesc}" theme. Artistic elegant design with decorative borders, suitable for a coloring book cover, vibrant colors representing ${themeDesc}, professional book cover quality, no text on the image.`
       
-      console.log(`Generating cover for: ${themeDesc}`)
+      // Use custom prompt if provided, otherwise generate automatic one
+      const fullPrompt = customCoverPrompt 
+        ? `${customCoverPrompt}. Professional book cover quality, vibrant colors, artistic and eye-catching design.`
+        : `Beautiful coloring book cover design for "${themeDesc}" theme. Artistic elegant design with decorative borders, suitable for a coloring book cover, vibrant colors representing ${themeDesc}, professional book cover quality, no text on the image.`
+      
+      console.log(`Generating cover with prompt: ${fullPrompt.substring(0, 100)}...`)
       
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
@@ -113,31 +117,63 @@ async function generateCoverImage(theme, customTheme, primaryColor) {
       
       pythonProcess.on('close', (code) => {
         if (code !== 0) {
-          resolve({ success: false, imageUrl: null })
+          console.error('Cover image generation error:', stderr)
+          resolve({ success: false, imageUrl: null, error: stderr })
           return
         }
         
         try {
           const result = JSON.parse(stdout)
+          console.log('Cover generation result:', result.success ? 'SUCCESS' : `FAILED: ${result.error}`)
           resolve(result)
         } catch (error) {
-          resolve({ success: false, imageUrl: null })
+          resolve({ success: false, imageUrl: null, error: 'Failed to parse response' })
         }
       })
       
-      pythonProcess.on('error', () => {
-        resolve({ success: false, imageUrl: null })
+      pythonProcess.on('error', (error) => {
+        resolve({ success: false, imageUrl: null, error: error.message })
       })
       
       setTimeout(() => {
         pythonProcess.kill()
-        resolve({ success: false, imageUrl: null })
+        resolve({ success: false, imageUrl: null, error: 'Cover generation timed out' })
       }, 45000)
       
     } catch (error) {
-      resolve({ success: false, imageUrl: null })
+      resolve({ success: false, imageUrl: null, error: error.message })
     }
   })
+}
+
+// Helper function to get image bytes from URL or base64 data URL
+async function getImageBytes(imageUrl) {
+  if (!imageUrl) {
+    throw new Error('No image URL provided')
+  }
+  
+  // Check if it's a base64 data URL
+  if (imageUrl.startsWith('data:')) {
+    // Extract the base64 part
+    const matches = imageUrl.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (!matches) {
+      throw new Error('Invalid base64 data URL format')
+    }
+    const format = matches[1] // 'png' or 'jpeg' etc.
+    const base64Data = matches[2]
+    const imageBytes = Buffer.from(base64Data, 'base64')
+    return { imageBytes: new Uint8Array(imageBytes), format }
+  }
+  
+  // Otherwise fetch from URL
+  const response = await fetch(imageUrl)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status}`)
+  }
+  const contentType = response.headers.get('content-type') || ''
+  const format = contentType.includes('png') ? 'png' : 'jpeg'
+  const arrayBuffer = await response.arrayBuffer()
+  return { imageBytes: new Uint8Array(arrayBuffer), format }
 }
 
 // Generate coloring page descriptions with AI
@@ -219,6 +255,13 @@ function hexToRgb(hex) {
   )
 }
 
+// Helper: Strip emojis from text for pdf-lib compatibility
+function stripEmojis(text) {
+  if (!text) return ''
+  // Remove emojis and other non-BMP characters
+  return text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{FE00}-\u{FE0F}]|[\u{1F000}-\u{1F02F}]/gu, '').trim()
+}
+
 export async function POST(request) {
   try {
     const { 
@@ -233,17 +276,23 @@ export async function POST(request) {
       primaryColor,
       secondaryColor,
       generateCover,
+      customCoverPrompt, // NEW: Custom cover prompt
       // KDP Settings
       paperSize,
       useBleed,
       bleed
     } = await request.json()
     
-    console.log(`Coloring Book Request: theme=${customTheme || theme}, pages=${pageCount}, generateImages=${generateImages}`)
+    // Clean theme for display (strip emojis)
+    const cleanTheme = stripEmojis(customTheme) || stripEmojis(theme) || 'Coloring Book'
+    const cleanAuthor = stripEmojis(authorName) || ''
+    const cleanTitle = stripEmojis(title) || ''
+    
+    console.log(`Coloring Book Request: theme=${cleanTheme}, pages=${pageCount}, generateImages=${generateImages}`)
     console.log(`Paper Size: ${paperSize?.name || '8.5x11'}, Bleed: ${useBleed ? '0.125"' : 'none'}`)
     console.log(`Pages received: ${pages?.length || 0}, with images: ${pages?.filter(p => p.imageUrl)?.length || 0}`)
-    if (pages?.length > 0) {
-      console.log('First page data:', JSON.stringify(pages[0]).substring(0, 200))
+    if (customCoverPrompt) {
+      console.log(`Custom cover prompt: ${customCoverPrompt.substring(0, 80)}...`)
     }
     
     // If pages are provided (from editor), use them. Otherwise generate new ones.
@@ -276,10 +325,12 @@ export async function POST(request) {
     let coverImageUrl = null
     if (generateCover !== false) {
       console.log('Generating cover image...')
-      const coverResult = await generateCoverImage(theme, customTheme, primaryColor)
+      const coverResult = await generateCoverImage(theme, customTheme, primaryColor, customCoverPrompt)
       if (coverResult.success && coverResult.imageUrl) {
         coverImageUrl = coverResult.imageUrl
         console.log('Cover image generated successfully')
+      } else {
+        console.log('Cover generation failed:', coverResult.error)
       }
     }
     
@@ -299,7 +350,7 @@ export async function POST(request) {
     const pColor = hexToRgb(primaryColor || '#6b21a8')
     const sColor = hexToRgb(secondaryColor || '#a855f7')
     
-    const bookTitle = title || `${customTheme || theme} Coloring Book`
+    const bookTitle = cleanTitle || `${cleanTheme} Coloring Book`
     
     // ===== COVER PAGE =====
     let page = pdfDoc.addPage([pageWidth, pageHeight])
@@ -307,12 +358,12 @@ export async function POST(request) {
     if (coverImageUrl) {
       // Embed cover image
       try {
-        const imageResponse = await fetch(coverImageUrl)
-        const imageArrayBuffer = await imageResponse.arrayBuffer()
-        const imageBytes = new Uint8Array(imageArrayBuffer)
+        console.log('Embedding cover image into PDF...')
+        const { imageBytes, format } = await getImageBytes(coverImageUrl)
+        console.log(`Cover image: ${imageBytes.length} bytes, format: ${format}`)
         
         let embeddedImage
-        if (coverImageUrl.includes('.png') || coverImageUrl.includes('png')) {
+        if (format === 'png') {
           embeddedImage = await pdfDoc.embedPng(imageBytes)
         } else {
           embeddedImage = await pdfDoc.embedJpg(imageBytes)
@@ -324,19 +375,20 @@ export async function POST(request) {
           width: pageWidth, height: pageHeight
         })
         
-        // Add semi-transparent overlay for title
+        // Add semi-transparent overlay for title at top
         page.drawRectangle({
-          x: 0, y: pageHeight - 200,
-          width: pageWidth, height: 200,
+          x: 0, y: pageHeight - 180,
+          width: pageWidth, height: 180,
           color: rgb(1, 1, 1),
-          opacity: 0.85
+          opacity: 0.88
         })
         
         // Title
+        const titleFontSize = Math.min(32, 520 / bookTitle.length)
         page.drawText(bookTitle.toUpperCase(), {
-          x: pageWidth / 2 - Math.min(bookTitle.length * 10, 250),
-          y: pageHeight - 100,
-          size: Math.min(32, 600 / bookTitle.length),
+          x: Math.max(40, pageWidth / 2 - (bookTitle.length * titleFontSize * 0.35)),
+          y: pageHeight - 80,
+          size: titleFontSize,
           color: pColor
         })
         
@@ -344,26 +396,28 @@ export async function POST(request) {
         const subtitle = `${coloringPages.length} Beautiful Pages to Color`
         page.drawText(subtitle, {
           x: pageWidth / 2 - (subtitle.length * 4),
-          y: pageHeight - 140,
+          y: pageHeight - 120,
           size: 14,
           color: rgb(0.4, 0.4, 0.4)
         })
         
-        if (authorName) {
-          page.drawText(authorName, {
-            x: pageWidth / 2 - (authorName.length * 4),
-            y: pageHeight - 170,
+        if (cleanAuthor) {
+          page.drawText(cleanAuthor, {
+            x: pageWidth / 2 - (cleanAuthor.length * 4),
+            y: pageHeight - 150,
             size: 12,
             color: sColor
           })
         }
+        
+        console.log('Cover image embedded successfully!')
       } catch (imgError) {
-        console.log('Failed to embed cover image:', imgError.message)
+        console.error('Failed to embed cover image:', imgError.message)
         // Fall back to text-only cover
-        drawTextCover(page, pageWidth, pageHeight, bookTitle, coloringPages.length, authorName, difficulty, pColor, sColor)
+        drawTextCover(page, pageWidth, pageHeight, bookTitle, coloringPages.length, cleanAuthor, difficulty, pColor, sColor)
       }
     } else {
-      drawTextCover(page, pageWidth, pageHeight, bookTitle, coloringPages.length, authorName, difficulty, pColor, sColor)
+      drawTextCover(page, pageWidth, pageHeight, bookTitle, coloringPages.length, cleanAuthor, difficulty, pColor, sColor)
     }
     
     // ===== COLORING PAGES =====
@@ -398,8 +452,8 @@ export async function POST(request) {
         color: pColor
       })
       
-      // Page title centered in header
-      const pageTitle = pageData.title || `Page ${i + 1}`
+      // Page title centered in header (strip emojis)
+      const pageTitle = stripEmojis(pageData.title) || `Page ${i + 1}`
       const titleFontSize = Math.min(18, 400 / pageTitle.length)
       const titleWidth = pageTitle.length * titleFontSize * 0.55
       page.drawText(pageTitle, {
@@ -415,47 +469,31 @@ export async function POST(request) {
       
       // Embed coloring page image if available
       if (pageData.imageUrl) {
-        console.log(`Embedding image for page ${i + 1}: ${pageData.imageUrl.substring(0, 80)}...`)
+        console.log(`Embedding image for page ${i + 1}...`)
         try {
-          const imageResponse = await fetch(pageData.imageUrl)
-          
-          if (!imageResponse.ok) {
-            throw new Error(`Failed to fetch image: ${imageResponse.status}`)
-          }
-          
-          const contentType = imageResponse.headers.get('content-type') || ''
-          const imageArrayBuffer = await imageResponse.arrayBuffer()
-          const imageBytes = new Uint8Array(imageArrayBuffer)
-          
-          console.log(`Image fetched: ${imageBytes.length} bytes, type: ${contentType}`)
+          const { imageBytes, format } = await getImageBytes(pageData.imageUrl)
+          console.log(`Page ${i + 1} image: ${imageBytes.length} bytes, format: ${format}`)
           
           let embeddedImage
-          // Check content type or URL for format, try PNG first then JPG
-          const isPng = contentType.includes('png') || pageData.imageUrl.includes('.png') || pageData.imageUrl.includes('png')
-          
           try {
-            if (isPng) {
+            if (format === 'png') {
               embeddedImage = await pdfDoc.embedPng(imageBytes)
             } else {
               embeddedImage = await pdfDoc.embedJpg(imageBytes)
             }
           } catch (formatError) {
             // Try the other format
-            console.log(`First format failed, trying alternative...`)
-            try {
-              embeddedImage = isPng 
-                ? await pdfDoc.embedJpg(imageBytes) 
-                : await pdfDoc.embedPng(imageBytes)
-            } catch (altError) {
-              throw new Error(`Both PNG and JPG embedding failed: ${altError.message}`)
-            }
+            console.log(`First format (${format}) failed, trying alternative...`)
+            embeddedImage = format === 'png' 
+              ? await pdfDoc.embedJpg(imageBytes) 
+              : await pdfDoc.embedPng(imageBytes)
           }
           
           // Get original dimensions and scale to fit
           const imgDims = embeddedImage.scale(1)
-          const margin = 50 + bleedPoints
-          const maxWidth = pageWidth - (margin * 2)
-          const maxHeight = pageHeight - 100 - margin
+          const imgMargin = 50 + bleedPoints
+          const maxWidth = pageWidth - (imgMargin * 2)
+          const maxHeight = pageHeight - 100 - imgMargin
           
           // Calculate scale to fit while maintaining aspect ratio
           const widthScale = maxWidth / imgDims.width
@@ -466,8 +504,8 @@ export async function POST(request) {
           const scaledHeight = imgDims.height * scale
           
           // Center the image
-          const imgX = margin + (maxWidth - scaledWidth) / 2
-          const imgY = margin + (maxHeight - scaledHeight) / 2
+          const imgX = imgMargin + (maxWidth - scaledWidth) / 2
+          const imgY = imgMargin + (maxHeight - scaledHeight) / 2
           
           page.drawImage(embeddedImage, {
             x: imgX, 
@@ -538,7 +576,7 @@ export async function POST(request) {
       fileSize: pdfBytes.length,
       tool: 'coloring-book',
       metadata: { 
-        theme: customTheme || theme, 
+        theme: cleanTheme, 
         difficulty, 
         pageCount: coloringPages.length,
         primaryColor,
@@ -547,7 +585,8 @@ export async function POST(request) {
         paperSize: paperSize?.name || '8.5" × 11"',
         paperSizeId: paperSize?.id || '8.5x11',
         hasBleed: useBleed || false,
-        kdpCompliant: coloringPages.length >= 24
+        kdpCompliant: coloringPages.length >= 24,
+        hasCustomCoverPrompt: !!customCoverPrompt
       },
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -708,9 +747,10 @@ function drawPlaceholder(page, pageWidth, pageHeight, bleedPoints, description) 
     color: rgb(0.8, 0.8, 0.8)
   })
   
-  // Description hint
+  // Description hint (strip emojis)
   if (description) {
-    const shortDesc = description.substring(0, 60) + (description.length > 60 ? '...' : '')
+    const cleanDesc = stripEmojis(description)
+    const shortDesc = cleanDesc.substring(0, 60) + (cleanDesc.length > 60 ? '...' : '')
     page.drawText(shortDesc, {
       x: margin + 10,
       y: pageHeight / 2 - 10,
