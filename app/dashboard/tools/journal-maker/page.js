@@ -212,6 +212,7 @@ export default function JournalMakerPage() {
     setColorScheme('lavender')
     setCoverStyle('floral')
     setPageCount(90)
+    setPaperSize('6x9') // KDP most popular
     setCoverImageStyle('abstract')
     setCustomImagePrompt('')
     setResult(null)
