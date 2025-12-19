@@ -295,24 +295,51 @@ export default function WorksheetMakerPage() {
         </div>
       </div>
 
-      {/* Progress Steps */}
+      {/* Progress Steps - Clickable */}
       <div className="flex items-center justify-center gap-2">
-        {[1, 2, 3, 4].map((s) => (
-          <div key={s} className="flex items-center">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-              step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              {step > s ? <CheckCircle className="h-5 w-5" /> : s}
+        {[1, 2, 3, 4].map((s) => {
+          // Can navigate if it's a previous step OR we have required data
+          const canNavigate = s < step || 
+            (s === 2 && sections.length > 0) || 
+            (s === 3 && sections.length > 0) ||
+            (s === 4 && result)
+          
+          return (
+            <div key={s} className="flex items-center">
+              <button
+                onClick={() => canNavigate && setStep(s)}
+                disabled={!canNavigate && s > step}
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                  step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                } ${canNavigate ? 'cursor-pointer hover:scale-110 hover:ring-2 hover:ring-primary/50 hover:ring-offset-2' : s > step ? 'cursor-not-allowed opacity-60' : ''}`}
+                title={canNavigate ? `Go to Step ${s}` : s > step ? 'Complete current step first' : ''}
+              >
+                {step > s ? <CheckCircle className="h-5 w-5" /> : s}
+              </button>
+              {s < 4 && <div className={`w-16 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
             </div>
-            {s < 4 && <div className={`w-16 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
-          </div>
-        ))}
+          )
+        })}
       </div>
       <div className="flex justify-center gap-12 text-xs text-muted-foreground">
-        <span>Topic</span>
-        <span>Questions</span>
-        <span>Design</span>
-        <span>Download</span>
+        {['Topic', 'Questions', 'Design', 'Download'].map((label, idx) => (
+          <button
+            key={label}
+            onClick={() => {
+              const targetStep = idx + 1
+              const canGo = targetStep <= step || 
+                (targetStep === 2 && sections.length > 0) || 
+                (targetStep === 3 && sections.length > 0) ||
+                (targetStep === 4 && result)
+              if (canGo) setStep(targetStep)
+            }}
+            className={`hover:text-primary transition-colors ${step === idx + 1 ? 'text-primary font-medium' : ''} ${
+              idx + 1 <= step ? 'cursor-pointer' : 'cursor-not-allowed'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Step 1: Subject & Topic */}
