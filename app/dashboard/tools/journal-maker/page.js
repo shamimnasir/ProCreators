@@ -49,6 +49,56 @@ const COVER_STYLES = [
   { id: 'boho', name: 'Boho', description: 'Bohemian organic shapes' },
 ]
 
+// KDP Journal Trim Sizes (Interior Dimensions)
+const KDP_JOURNAL_SIZES = [
+  { 
+    id: '6x9', 
+    name: '6" × 9"', 
+    width: 432,  // 6 * 72
+    height: 648, // 9 * 72
+    recommended: true,
+    description: 'Most popular for journals & non-fiction'
+  },
+  { 
+    id: '5.5x8.5', 
+    name: '5.5" × 8.5"', 
+    width: 396,  // 5.5 * 72
+    height: 612, // 8.5 * 72
+    recommended: true,
+    description: 'Portable & compact - great for on-the-go'
+  },
+  { 
+    id: '5x8', 
+    name: '5" × 8"', 
+    width: 360,  // 5 * 72
+    height: 576, // 8 * 72
+    description: 'Pocket-sized journal'
+  },
+  { 
+    id: '6.14x9.21', 
+    name: '6.14" × 9.21"', 
+    width: 442,  // 6.14 * 72
+    height: 663, // 9.21 * 72
+    description: 'Slightly larger variant'
+  },
+  { 
+    id: '8.5x11', 
+    name: '8.5" × 11"', 
+    width: 612,  // 8.5 * 72
+    height: 792, // 11 * 72
+    largeTrim: true,
+    description: 'Large format - higher print cost'
+  },
+  { 
+    id: '7x10', 
+    name: '7" × 10"', 
+    width: 504,  // 7 * 72
+    height: 720, // 10 * 72
+    largeTrim: true,
+    description: 'Large format journal'
+  },
+]
+
 export default function JournalMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
