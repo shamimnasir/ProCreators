@@ -189,6 +189,7 @@ export default function JournalMakerPage() {
     if (data.colorScheme) setColorScheme(data.colorScheme)
     if (data.coverStyle) setCoverStyle(data.coverStyle)
     if (data.pageCount) setPageCount(data.pageCount)
+    if (data.paperSize) setPaperSize(data.paperSize)
     if (data.coverImageStyle) setCoverImageStyle(data.coverImageStyle)
     if (data.customImagePrompt) setCustomImagePrompt(data.customImagePrompt)
     if (data.step && data.step > 1) setStep(Math.min(data.step, 3))
