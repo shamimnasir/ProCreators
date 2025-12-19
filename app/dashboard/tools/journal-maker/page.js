@@ -123,6 +123,7 @@ export default function JournalMakerPage() {
   const [colorScheme, setColorScheme] = useState('lavender')
   const [coverStyle, setCoverStyle] = useState('floral')
   const [pageCount, setPageCount] = useState(90)
+  const [paperSize, setPaperSize] = useState('6x9') // KDP most popular
   
   // NEW: Cover image customization
   const [coverImageStyle, setCoverImageStyle] = useState('abstract')
