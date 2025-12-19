@@ -120,10 +120,14 @@ export async function POST(request) {
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
     
-    const pageWidth = 612
-    const pageHeight = 792
-    const margin = 55
+    // KDP Paper Size - default to 6x9 (most popular for journals)
+    const paperSize = settings?.paperSize
+    const pageWidth = paperSize?.width || 432   // 6" × 72 = 432
+    const pageHeight = paperSize?.height || 648 // 9" × 72 = 648
+    const margin = Math.min(50, pageWidth * 0.08) // Scale margin with page size
     const contentWidth = pageWidth - (margin * 2)
+    
+    console.log(`Journal PDF: ${paperSize?.name || '6x9'} (${pageWidth}x${pageHeight})`)
     
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['lavender']
     const coverStyleObj = COVER_STYLES[coverStyle] || COVER_STYLES['floral']
