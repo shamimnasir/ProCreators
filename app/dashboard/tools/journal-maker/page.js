@@ -255,6 +255,9 @@ export default function JournalMakerPage() {
 
     setLoading(true)
     try {
+      // Get selected paper size dimensions
+      const selectedPaperSize = KDP_JOURNAL_SIZES.find(s => s.id === paperSize)
+      
       const response = await fetch('/api/journal-maker/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -273,7 +276,14 @@ export default function JournalMakerPage() {
             pageCount, 
             generateCoverImage: true,
             coverImageStyle,
-            customImagePrompt
+            customImagePrompt,
+            // KDP Paper Size
+            paperSize: {
+              id: paperSize,
+              name: selectedPaperSize?.name || '6" × 9"',
+              width: selectedPaperSize?.width || 432,
+              height: selectedPaperSize?.height || 648
+            }
           }
         })
       })
