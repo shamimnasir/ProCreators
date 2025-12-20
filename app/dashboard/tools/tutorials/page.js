@@ -1263,7 +1263,7 @@ Welcome to this guide...
                           Your Guide is Ready!
                         </h3>
                         <p className="text-green-600 dark:text-green-400">
-                          "{generated.title}" - {generated.pageCount} pages
+                          &quot;{generated.title}&quot; - {generated.pageCount} pages
                         </p>
                       </div>
                     </div>
