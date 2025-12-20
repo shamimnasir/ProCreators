@@ -84,6 +84,13 @@ export default function RecipeBookPage() {
   const [includeNutrition, setIncludeNutrition] = useState(true)
   const [includePhotos, setIncludePhotos] = useState(true)
   
+  // Custom recipe editing state
+  const [expandedCategory, setExpandedCategory] = useState(null)
+  const [expandedRecipe, setExpandedRecipe] = useState(null)
+  const [showImport, setShowImport] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [importCategory, setImportCategory] = useState('')
+  
   // Step 4: Design
   const [colorScheme, setColorScheme] = useState('warm')
   const [coverStyle, setCoverStyle] = useState('classic')
