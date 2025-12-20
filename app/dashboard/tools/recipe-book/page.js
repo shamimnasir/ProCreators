@@ -374,7 +374,9 @@ export default function RecipeBookPage() {
 
   // Category management
   const addCategory = () => {
-    setCategories([...categories, { name: 'New Category', recipes: [] }])
+    const newCategories = [...categories, { name: 'New Category', recipes: [] }]
+    setCategories(newCategories)
+    setExpandedCategory(newCategories.length - 1)
   }
 
   const updateCategory = (idx, field, value) => {
@@ -385,19 +387,139 @@ export default function RecipeBookPage() {
 
   const deleteCategory = (idx) => {
     setCategories(categories.filter((_, i) => i !== idx))
+    if (expandedCategory === idx) setExpandedCategory(null)
   }
 
-  const addRecipe = (categoryIdx) => {
+  // Recipe management
+  const addRecipeToCategory = (categoryIdx) => {
     const updated = [...categories]
     updated[categoryIdx].recipes = [...(updated[categoryIdx].recipes || []), {
       name: 'New Recipe',
       servings: 4,
       prepTime: '15 mins',
       cookTime: '30 mins',
-      ingredients: [],
-      instructions: []
+      ingredients: ['Add your ingredients here'],
+      instructions: ['Add your instructions here'],
+      tips: ''
     }]
     setCategories(updated)
+    setExpandedCategory(categoryIdx)
+    setExpandedRecipe(`${categoryIdx}-${updated[categoryIdx].recipes.length - 1}`)
+  }
+
+  const updateRecipe = (categoryIdx, recipeIdx, field, value) => {
+    const updated = [...categories]
+    if (updated[categoryIdx]?.recipes?.[recipeIdx]) {
+      updated[categoryIdx].recipes[recipeIdx] = {
+        ...updated[categoryIdx].recipes[recipeIdx],
+        [field]: value
+      }
+      setCategories(updated)
+    }
+  }
+
+  const deleteRecipe = (categoryIdx, recipeIdx) => {
+    const updated = [...categories]
+    updated[categoryIdx].recipes = updated[categoryIdx].recipes.filter((_, i) => i !== recipeIdx)
+    setCategories(updated)
+    if (expandedRecipe === `${categoryIdx}-${recipeIdx}`) {
+      setExpandedRecipe(null)
+    }
+  }
+
+  // Import recipe from text
+  const handleImportRecipe = () => {
+    if (!importText.trim()) return
+    
+    // Parse the pasted text
+    const lines = importText.split('\n').map(l => l.trim()).filter(l => l)
+    
+    // Try to extract recipe components
+    let recipeName = lines[0] || 'Imported Recipe'
+    let servings = 4
+    let prepTime = '15 mins'
+    let cookTime = '30 mins'
+    let ingredients = []
+    let instructions = []
+    let tips = ''
+    
+    let currentSection = ''
+    
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i]
+      const lowerLine = line.toLowerCase()
+      
+      // Check for meta info
+      if (lowerLine.includes('serving')) {
+        const match = line.match(/(\d+)/);
+        if (match) servings = parseInt(match[1])
+      }
+      if (lowerLine.includes('prep')) {
+        const match = line.match(/prep[:\s]*(.+)/i)
+        if (match) prepTime = match[1].trim()
+      }
+      if (lowerLine.includes('cook') && !lowerLine.includes('cooking')) {
+        const match = line.match(/cook[:\s]*(.+)/i)
+        if (match) cookTime = match[1].trim()
+      }
+      
+      // Detect sections
+      if (lowerLine.includes('ingredient')) {
+        currentSection = 'ingredients'
+        continue
+      }
+      if (lowerLine.includes('instruction') || lowerLine.includes('direction') || lowerLine.includes('method') || lowerLine.includes('step')) {
+        currentSection = 'instructions'
+        continue
+      }
+      if (lowerLine.includes('tip') || lowerLine.includes('note')) {
+        currentSection = 'tips'
+        continue
+      }
+      
+      // Add to appropriate section
+      if (currentSection === 'ingredients' && line.length > 1) {
+        // Remove common prefixes like -, *, •, numbers
+        const cleaned = line.replace(/^[-*•\d.)\s]+/, '').trim()
+        if (cleaned) ingredients.push(cleaned)
+      } else if (currentSection === 'instructions' && line.length > 1) {
+        const cleaned = line.replace(/^[-*•\d.)\s]+/, '').trim()
+        if (cleaned) instructions.push(cleaned)
+      } else if (currentSection === 'tips') {
+        tips += (tips ? ' ' : '') + line
+      }
+    }
+    
+    // Create the recipe object
+    const newRecipe = {
+      name: recipeName,
+      servings,
+      prepTime,
+      cookTime,
+      ingredients: ingredients.length > 0 ? ingredients : ['Add ingredients'],
+      instructions: instructions.length > 0 ? instructions : ['Add instructions'],
+      tips
+    }
+    
+    // Add to category
+    let targetCategoryIdx
+    if (importCategory === 'new' || !importCategory) {
+      // Create new category
+      const newCategories = [...categories, { name: 'Imported Recipes', recipes: [newRecipe] }]
+      setCategories(newCategories)
+      targetCategoryIdx = newCategories.length - 1
+    } else {
+      targetCategoryIdx = parseInt(importCategory)
+      const updated = [...categories]
+      updated[targetCategoryIdx].recipes = [...(updated[targetCategoryIdx].recipes || []), newRecipe]
+      setCategories(updated)
+    }
+    
+    // Reset and show success
+    setImportText('')
+    setImportCategory('')
+    setExpandedCategory(targetCategoryIdx)
+    toast({ title: "Recipe Imported!", description: `"${recipeName}" has been added.` })
   }
 
   // Navigation
