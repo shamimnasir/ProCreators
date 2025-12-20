@@ -950,7 +950,7 @@ Welcome to this guide...
                             <div className="p-3 space-y-3">
                               {(!chapter.sections || chapter.sections.length === 0) ? (
                                 <div className="text-center py-4 text-sm text-muted-foreground">
-                                  No sections in this chapter. Click "+ Section" to add one.
+                                  No sections in this chapter. Click &quot;+ Section&quot; to add one.
                                 </div>
                               ) : (
                                 chapter.sections.map((section, sectionIdx) => (
