@@ -160,15 +160,19 @@ function detectCuisineFromTitle(title) {
   if (!title) return null
   const lowerTitle = title.toLowerCase()
   
-  // Check for specific cuisines mentioned in title
-  if (lowerTitle.includes('chinese') || lowerTitle.includes('china') || lowerTitle.includes('cantonese') || lowerTitle.includes('szechuan')) {
+  // Check for Indo-Chinese (fusion) first - more specific
+  if (lowerTitle.includes('indo-chinese') || lowerTitle.includes('indo chinese') || 
+      lowerTitle.includes('manchurian') || lowerTitle.includes('hakka') ||
+      (lowerTitle.includes('chinese') && (lowerTitle.includes('masala') || lowerTitle.includes('indian')))) {
+    return 'Indo-Chinese'
+  }
+  // Check for Chinese
+  if (lowerTitle.includes('chinese') || lowerTitle.includes('china') || lowerTitle.includes('cantonese') || lowerTitle.includes('szechuan') || lowerTitle.includes('sichuan') || lowerTitle.includes('dim sum') || lowerTitle.includes('wok')) {
     return 'Chinese'
   }
-  if (lowerTitle.includes('indian') || lowerTitle.includes('india') || lowerTitle.includes('curry') || lowerTitle.includes('masala') || lowerTitle.includes('tikka')) {
+  // Check for Indian
+  if (lowerTitle.includes('indian') || lowerTitle.includes('india') || lowerTitle.includes('curry') || lowerTitle.includes('masala') || lowerTitle.includes('tikka') || lowerTitle.includes('biryani') || lowerTitle.includes('tandoori')) {
     return 'Indian'
-  }
-  if (lowerTitle.includes('indo-chinese') || lowerTitle.includes('indo chinese') || lowerTitle.includes('manchurian') || lowerTitle.includes('hakka')) {
-    return 'Indo-Chinese'
   }
   if (lowerTitle.includes('italian') || lowerTitle.includes('italy') || lowerTitle.includes('pasta') || lowerTitle.includes('pizza')) {
     return 'Italian'
