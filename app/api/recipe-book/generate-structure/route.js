@@ -134,7 +134,16 @@ function getRecipesForCategory(categoryName, count) {
   if (normalizedName.includes('italian') || normalizedName.includes('pasta') || normalizedName.includes('pizza')) {
     return FALLBACK_RECIPES['Italian'].slice(0, count)
   }
-  if (normalizedName.includes('asian') || normalizedName.includes('chinese') || normalizedName.includes('thai')) {
+  if (normalizedName.includes('chinese') || normalizedName.includes('china') || normalizedName.includes('cantonese') || normalizedName.includes('szechuan') || normalizedName.includes('sichuan')) {
+    return FALLBACK_RECIPES['Chinese'].slice(0, count)
+  }
+  if (normalizedName.includes('indian') || normalizedName.includes('india') || normalizedName.includes('curry') || normalizedName.includes('masala') || normalizedName.includes('tikka') || normalizedName.includes('biryani')) {
+    return FALLBACK_RECIPES['Indian'].slice(0, count)
+  }
+  if (normalizedName.includes('indo-chinese') || normalizedName.includes('indo chinese') || normalizedName.includes('manchurian') || normalizedName.includes('hakka')) {
+    return FALLBACK_RECIPES['Indo-Chinese'].slice(0, count)
+  }
+  if (normalizedName.includes('asian') || normalizedName.includes('thai') || normalizedName.includes('vietnamese') || normalizedName.includes('korean') || normalizedName.includes('japanese')) {
     return FALLBACK_RECIPES['Asian'].slice(0, count)
   }
   if (normalizedName.includes('mexican') || normalizedName.includes('taco') || normalizedName.includes('burrito')) {
@@ -143,6 +152,57 @@ function getRecipesForCategory(categoryName, count) {
   
   // Default to main courses
   return FALLBACK_RECIPES['Main Courses'].slice(0, count)
+}
+
+// Detect cuisine/theme from title
+function detectCuisineFromTitle(title) {
+  if (!title) return null
+  const lowerTitle = title.toLowerCase()
+  
+  // Check for specific cuisines mentioned in title
+  if (lowerTitle.includes('chinese') || lowerTitle.includes('china') || lowerTitle.includes('cantonese') || lowerTitle.includes('szechuan')) {
+    return 'Chinese'
+  }
+  if (lowerTitle.includes('indian') || lowerTitle.includes('india') || lowerTitle.includes('curry') || lowerTitle.includes('masala') || lowerTitle.includes('tikka')) {
+    return 'Indian'
+  }
+  if (lowerTitle.includes('indo-chinese') || lowerTitle.includes('indo chinese') || lowerTitle.includes('manchurian') || lowerTitle.includes('hakka')) {
+    return 'Indo-Chinese'
+  }
+  if (lowerTitle.includes('italian') || lowerTitle.includes('italy') || lowerTitle.includes('pasta') || lowerTitle.includes('pizza')) {
+    return 'Italian'
+  }
+  if (lowerTitle.includes('mexican') || lowerTitle.includes('mexico') || lowerTitle.includes('taco') || lowerTitle.includes('burrito')) {
+    return 'Mexican'
+  }
+  if (lowerTitle.includes('asian') || lowerTitle.includes('thai') || lowerTitle.includes('vietnamese') || lowerTitle.includes('korean') || lowerTitle.includes('japanese')) {
+    return 'Asian'
+  }
+  if (lowerTitle.includes('mediterranean') || lowerTitle.includes('greek') || lowerTitle.includes('turkish')) {
+    return 'Mediterranean'
+  }
+  
+  return null
+}
+
+// Generate themed categories based on detected cuisine
+function getThemedCategories(cuisine) {
+  switch (cuisine) {
+    case 'Chinese':
+      return ['Appetizers & Dim Sum', 'Stir-Fry Dishes', 'Noodles & Rice', 'Soups', 'Desserts']
+    case 'Indian':
+      return ['Appetizers & Snacks', 'Curries & Gravies', 'Rice & Biryani', 'Breads & Rotis', 'Desserts & Sweets']
+    case 'Indo-Chinese':
+      return ['Starters', 'Dry Preparations', 'Gravy Dishes', 'Noodles & Rice', 'Soups']
+    case 'Italian':
+      return ['Antipasti', 'Pasta', 'Pizza', 'Risotto', 'Dolci']
+    case 'Mexican':
+      return ['Appetizers', 'Tacos & Burritos', 'Main Dishes', 'Sides & Salsas', 'Desserts']
+    case 'Asian':
+      return ['Starters', 'Noodles', 'Rice Dishes', 'Stir-Fries', 'Desserts']
+    default:
+      return null
+  }
 }
 
 export async function POST(request) {
