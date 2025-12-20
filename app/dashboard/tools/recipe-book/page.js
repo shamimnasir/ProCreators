@@ -686,65 +686,285 @@ export default function RecipeBookPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <span className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
-                  Recipe Categories
+                  Your Recipes
                 </CardTitle>
                 <CardDescription>
-                  Generate AI recipes or add your own categories
+                  Add your own recipes, generate with AI, or import from other sources
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* AI Generation button */}
-                <Button 
-                  onClick={generateStructure} 
-                  disabled={generatingStructure}
-                  className="w-full"
-                  variant="secondary"
-                >
-                  {generatingStructure ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Recipes...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate {recipeCount} AI Recipes</>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button 
+                    onClick={generateStructure} 
+                    disabled={generatingStructure}
+                    variant="secondary"
+                    className="h-auto py-3"
+                  >
+                    {generatingStructure ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                    ) : (
+                      <div className="text-left">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          <span className="font-medium">Generate AI Recipes</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">Create {recipeCount} recipes automatically</span>
+                      </div>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="h-auto py-3"
+                    onClick={addCategory}
+                  >
+                    <div className="text-left">
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        <span className="font-medium">Add Custom Category</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Create your own recipe sections</span>
+                    </div>
+                  </Button>
+                </div>
+
+                {/* Import from text */}
+                <div className="border rounded-lg p-3 bg-muted/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Quick Import (Paste Recipe)
+                    </Label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowImport(!showImport)}
+                    >
+                      {showImport ? 'Hide' : 'Show'}
+                    </Button>
+                  </div>
+                  {showImport && (
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder={`Paste a recipe here in any format, e.g.:
+
+Chocolate Chip Cookies
+Servings: 24 | Prep: 15 mins | Cook: 12 mins
+
+Ingredients:
+- 2 cups flour
+- 1 cup sugar
+- 1 cup butter
+- 2 eggs
+
+Instructions:
+1. Preheat oven to 350°F
+2. Mix dry ingredients
+3. Add wet ingredients
+4. Bake for 12 minutes`}
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                        rows={8}
+                        className="font-mono text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Select value={importCategory} onValueChange={setImportCategory}>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Select category to import into" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat, idx) => (
+                              <SelectItem key={idx} value={String(idx)}>{cat.name}</SelectItem>
+                            ))}
+                            <SelectItem value="new">+ Create New Category</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button onClick={handleImportRecipe} disabled={!importText.trim()}>
+                          Import Recipe
+                        </Button>
+                      </div>
+                    </div>
                   )}
-                </Button>
+                </div>
                 
+                {/* Categories List */}
                 <div className="border-t pt-4">
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-base font-medium">Categories ({categories.length})</Label>
-                    <Button variant="outline" size="sm" onClick={addCategory}>
-                      <Plus className="h-4 w-4 mr-1" /> Add Category
-                    </Button>
+                    <Label className="text-base font-medium">
+                      Categories ({categories.length}) - {categories.reduce((acc, c) => acc + (c.recipes?.length || 0), 0)} recipes total
+                    </Label>
                   </div>
                   
                   {categories.length === 0 ? (
                     <div className="text-center py-8 bg-muted/30 rounded-lg">
                       <UtensilsCrossed className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                       <p className="text-muted-foreground">No categories yet</p>
-                      <p className="text-sm text-muted-foreground">Click "Generate AI Recipes" or "Add Category"</p>
+                      <p className="text-sm text-muted-foreground">Generate AI recipes or add your own categories above</p>
                     </div>
                   ) : (
-                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                      {categories.map((category, idx) => (
-                        <div key={idx} className="border rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Input
-                              value={category.name}
-                              onChange={(e) => updateCategory(idx, 'name', e.target.value)}
-                              className="flex-1 font-medium"
-                            />
-                            <Badge variant="secondary">{category.recipes?.length || 0} recipes</Badge>
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                      {categories.map((category, catIdx) => (
+                        <div key={catIdx} className="border rounded-lg overflow-hidden">
+                          {/* Category Header */}
+                          <div className="bg-muted/50 p-3 flex items-center gap-2">
+                            <button
+                              onClick={() => setExpandedCategory(expandedCategory === catIdx ? null : catIdx)}
+                              className="flex-1 flex items-center gap-2 text-left"
+                            >
+                              <ChefHat className="h-4 w-4" />
+                              <Input
+                                value={category.name}
+                                onChange={(e) => { e.stopPropagation(); updateCategory(catIdx, 'name', e.target.value) }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex-1 font-medium bg-transparent border-0 p-0 h-auto focus-visible:ring-0"
+                              />
+                            </button>
+                            <Badge variant="secondary">{category.recipes?.length || 0}</Badge>
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => deleteCategory(idx)}
-                              className="text-destructive"
+                              onClick={() => addRecipeToCategory(catIdx)}
+                              className="h-7 px-2"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Plus className="h-3 w-3 mr-1" /> Recipe
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => deleteCategory(catIdx)}
+                              className="h-7 px-2 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {category.recipes?.slice(0, 3).map(r => r.name).join(', ')}
-                            {category.recipes?.length > 3 && ` +${category.recipes.length - 3} more`}
-                          </div>
+                          
+                          {/* Recipes in Category */}
+                          {expandedCategory === catIdx && (
+                            <div className="p-3 space-y-3">
+                              {(!category.recipes || category.recipes.length === 0) ? (
+                                <div className="text-center py-4 text-sm text-muted-foreground">
+                                  No recipes in this category. Click "+ Recipe" to add one.
+                                </div>
+                              ) : (
+                                category.recipes.map((recipe, recipeIdx) => (
+                                  <div key={recipeIdx} className="border rounded-lg p-3 bg-background">
+                                    {/* Recipe Header */}
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <Input
+                                        value={recipe.name}
+                                        onChange={(e) => updateRecipe(catIdx, recipeIdx, 'name', e.target.value)}
+                                        className="flex-1 font-medium"
+                                        placeholder="Recipe Name"
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setExpandedRecipe(expandedRecipe === `${catIdx}-${recipeIdx}` ? null : `${catIdx}-${recipeIdx}`)}
+                                      >
+                                        {expandedRecipe === `${catIdx}-${recipeIdx}` ? 'Collapse' : 'Edit'}
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => deleteRecipe(catIdx, recipeIdx)}
+                                        className="text-destructive hover:text-destructive"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                    
+                                    {/* Recipe Details (Expanded) */}
+                                    {expandedRecipe === `${catIdx}-${recipeIdx}` && (
+                                      <div className="space-y-3 pt-3 border-t">
+                                        {/* Meta info */}
+                                        <div className="grid grid-cols-3 gap-2">
+                                          <div>
+                                            <Label className="text-xs">Servings</Label>
+                                            <Input
+                                              type="number"
+                                              value={recipe.servings || 4}
+                                              onChange={(e) => updateRecipe(catIdx, recipeIdx, 'servings', parseInt(e.target.value) || 4)}
+                                              className="h-8"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label className="text-xs">Prep Time</Label>
+                                            <Input
+                                              value={recipe.prepTime || ''}
+                                              onChange={(e) => updateRecipe(catIdx, recipeIdx, 'prepTime', e.target.value)}
+                                              placeholder="15 mins"
+                                              className="h-8"
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label className="text-xs">Cook Time</Label>
+                                            <Input
+                                              value={recipe.cookTime || ''}
+                                              onChange={(e) => updateRecipe(catIdx, recipeIdx, 'cookTime', e.target.value)}
+                                              placeholder="30 mins"
+                                              className="h-8"
+                                            />
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Ingredients */}
+                                        <div>
+                                          <Label className="text-xs mb-1 block">Ingredients (one per line)</Label>
+                                          <Textarea
+                                            value={(recipe.ingredients || []).join('\n')}
+                                            onChange={(e) => updateRecipe(catIdx, recipeIdx, 'ingredients', e.target.value.split('\n').filter(l => l.trim()))}
+                                            placeholder="1 cup flour&#10;2 eggs&#10;1/2 cup sugar"
+                                            rows={4}
+                                            className="font-mono text-sm"
+                                          />
+                                        </div>
+                                        
+                                        {/* Instructions */}
+                                        <div>
+                                          <Label className="text-xs mb-1 block">Instructions (one step per line)</Label>
+                                          <Textarea
+                                            value={(recipe.instructions || []).join('\n')}
+                                            onChange={(e) => updateRecipe(catIdx, recipeIdx, 'instructions', e.target.value.split('\n').filter(l => l.trim()))}
+                                            placeholder="Preheat oven to 350F&#10;Mix dry ingredients&#10;Add wet ingredients&#10;Bake for 25 minutes"
+                                            rows={4}
+                                            className="font-mono text-sm"
+                                          />
+                                        </div>
+                                        
+                                        {/* Tips */}
+                                        <div>
+                                          <Label className="text-xs mb-1 block">Tips (optional)</Label>
+                                          <Input
+                                            value={recipe.tips || ''}
+                                            onChange={(e) => updateRecipe(catIdx, recipeIdx, 'tips', e.target.value)}
+                                            placeholder="Any helpful tips for this recipe..."
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Recipe Preview (Collapsed) */}
+                                    {expandedRecipe !== `${catIdx}-${recipeIdx}` && (
+                                      <div className="text-xs text-muted-foreground">
+                                        {recipe.servings && `${recipe.servings} servings`}
+                                        {recipe.prepTime && ` • Prep: ${recipe.prepTime}`}
+                                        {recipe.cookTime && ` • Cook: ${recipe.cookTime}`}
+                                        {recipe.ingredients?.length > 0 && ` • ${recipe.ingredients.length} ingredients`}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Collapsed preview */}
+                          {expandedCategory !== catIdx && category.recipes?.length > 0 && (
+                            <div className="px-3 pb-2 text-xs text-muted-foreground">
+                              {category.recipes.slice(0, 3).map(r => r.name).join(', ')}
+                              {category.recipes.length > 3 && ` +${category.recipes.length - 3} more`}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -755,7 +975,7 @@ export default function RecipeBookPage() {
                   <Button variant="outline" onClick={() => setStep(2)}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                   </Button>
-                  <Button onClick={() => setStep(4)}>
+                  <Button onClick={() => setStep(4)} disabled={categories.length === 0}>
                     Next: Design <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
