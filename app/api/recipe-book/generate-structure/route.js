@@ -275,17 +275,45 @@ Return ONLY valid JSON.`
     } catch (aiError) {
       console.error('AI generation failed, using real recipe fallback:', aiError.message)
       
-      // Fallback with REAL recipes
-      const fallbackCategories = config.categories.map(catName => ({
-        name: catName,
-        recipes: getRecipesForCategory(catName, recipesPerCategory)
-      }))
+      // Detect cuisine from user's title to generate relevant recipes
+      const detectedCuisine = detectCuisineFromTitle(title)
+      console.log(`Detected cuisine from title "${title}": ${detectedCuisine || 'none - using default'}`)
+      
+      let fallbackCategories
+      
+      if (detectedCuisine) {
+        // Use themed categories based on detected cuisine
+        const themedCats = getThemedCategories(detectedCuisine) || config.categories
+        const cuisineRecipes = FALLBACK_RECIPES[detectedCuisine] || []
+        
+        fallbackCategories = themedCats.map((catName, idx) => ({
+          name: catName,
+          // Distribute cuisine recipes across categories
+          recipes: cuisineRecipes.slice(
+            Math.floor(idx * cuisineRecipes.length / themedCats.length),
+            Math.floor((idx + 1) * cuisineRecipes.length / themedCats.length)
+          ).concat(
+            // If not enough cuisine-specific recipes, get more
+            getRecipesForCategory(catName, recipesPerCategory).slice(0, Math.max(0, recipesPerCategory - Math.ceil(cuisineRecipes.length / themedCats.length)))
+          ).slice(0, recipesPerCategory)
+        }))
+      } else {
+        // Use default categories from config
+        fallbackCategories = config.categories.map(catName => ({
+          name: catName,
+          recipes: getRecipesForCategory(catName, recipesPerCategory)
+        }))
+      }
       
       return NextResponse.json({
         success: true,
         title: title || config.name,
-        subtitle: `A Collection of ${recipeCount} Delicious Recipes`,
-        introduction: `Welcome to your personal cookbook! This collection features ${recipeCount} carefully curated recipes to inspire your culinary adventures. Each recipe has been crafted with clear instructions and helpful tips to ensure success in your kitchen.`,
+        subtitle: detectedCuisine 
+          ? `Authentic ${detectedCuisine} Recipes for Every Occasion`
+          : `A Collection of ${recipeCount} Delicious Recipes`,
+        introduction: detectedCuisine
+          ? `Welcome to your ${detectedCuisine} cookbook! This collection features authentic recipes from ${detectedCuisine} cuisine, carefully crafted with traditional ingredients and modern techniques. Whether you're a beginner or an experienced cook, these recipes will help you create delicious ${detectedCuisine} dishes at home.`
+          : `Welcome to your personal cookbook! This collection features ${recipeCount} carefully curated recipes to inspire your culinary adventures. Each recipe has been crafted with clear instructions and helpful tips to ensure success in your kitchen.`,
         categories: fallbackCategories
       })
     }
