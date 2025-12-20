@@ -486,8 +486,8 @@ export async function POST(request) {
       }
     }
     
-    // ===== NOTES PAGES =====
-    for (let n = 0; n < 5; n++) {
+    // ===== NOTES PAGES (2 pages for personal notes) =====
+    for (let n = 0; n < 2; n++) {
       const notesPage = pdfDoc.addPage([width, height])
       y = height - margin
       
