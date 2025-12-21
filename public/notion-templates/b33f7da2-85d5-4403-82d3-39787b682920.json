@@ -1,0 +1,431 @@
+{
+  "version": "1.0",
+  "type": "notion_template",
+  "template": {
+    "object": "block",
+    "type": "page",
+    "page": {
+      "title": "Product Management Dashboard",
+      "icon": {
+        "type": "emoji",
+        "emoji": "📦"
+      },
+      "cover": {
+        "type": "external",
+        "external": {
+          "url": "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200"
+        }
+      }
+    },
+    "children": [
+      {
+        "object": "block",
+        "type": "heading_1",
+        "heading_1": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Product Management Dashboard"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Roadmaps, sprints, feature tracking"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": "block",
+        "type": "divider",
+        "divider": {}
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "📊 Database"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "database": {
+      "object": "database",
+      "title": [
+        {
+          "type": "text",
+          "text": {
+            "content": "Product Management Dashboard"
+          }
+        }
+      ],
+      "icon": {
+        "type": "emoji",
+        "emoji": "📦"
+      },
+      "properties": {
+        "Name": {
+          "name": "Name",
+          "type": "title",
+          "title": {}
+        },
+        "Status": {
+          "name": "Status",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Backlog",
+                "color": "default"
+              },
+              {
+                "name": "In Progress",
+                "color": "default"
+              },
+              {
+                "name": "Review",
+                "color": "default"
+              },
+              {
+                "name": "Done",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Priority": {
+          "name": "Priority",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "High",
+                "color": "default"
+              },
+              {
+                "name": "Medium",
+                "color": "default"
+              },
+              {
+                "name": "Low",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Sprint": {
+          "name": "Sprint",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Sprint 1",
+                "color": "default"
+              },
+              {
+                "name": "Sprint 2",
+                "color": "default"
+              },
+              {
+                "name": "Sprint 3",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Assignee": {
+          "name": "Assignee",
+          "type": "people",
+          "people": {}
+        },
+        "Due Date": {
+          "name": "Due Date",
+          "type": "date",
+          "date": {}
+        },
+        "Story Points": {
+          "name": "Story Points",
+          "type": "number",
+          "number": {
+            "format": "number"
+          }
+        },
+        "Type": {
+          "name": "Type",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Feature",
+                "color": "default"
+              },
+              {
+                "name": "Bug",
+                "color": "default"
+              },
+              {
+                "name": "Task",
+                "color": "default"
+              },
+              {
+                "name": "Epic",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Tags": {
+          "name": "Tags",
+          "type": "multi_select",
+          "multi_select": {
+            "options": [
+              {
+                "name": "Frontend",
+                "color": "default"
+              },
+              {
+                "name": "Backend",
+                "color": "default"
+              },
+              {
+                "name": "Design",
+                "color": "default"
+              },
+              {
+                "name": "Research",
+                "color": "default"
+              }
+            ]
+          }
+        }
+      },
+      "views": [
+        {
+          "type": "table",
+          "name": "All Items"
+        }
+      ]
+    },
+    "sample_data": [
+      {
+        "object": "page",
+        "properties": {
+          "Name": {
+            "title": [
+              {
+                "text": {
+                  "content": "User Authentication Flow"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "In Progress"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "High"
+            }
+          },
+          "Sprint": {
+            "select": {
+              "name": "Sprint 1"
+            }
+          },
+          "Story Points": {
+            "number": 8
+          },
+          "Type": {
+            "select": {
+              "name": "Feature"
+            }
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Name": {
+            "title": [
+              {
+                "text": {
+                  "content": "Fix Login Bug"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Backlog"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "High"
+            }
+          },
+          "Sprint": {
+            "select": {
+              "name": "Sprint 1"
+            }
+          },
+          "Story Points": {
+            "number": 3
+          },
+          "Type": {
+            "select": {
+              "name": "Bug"
+            }
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Name": {
+            "title": [
+              {
+                "text": {
+                  "content": "Dashboard Redesign"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Review"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Medium"
+            }
+          },
+          "Sprint": {
+            "select": {
+              "name": "Sprint 2"
+            }
+          },
+          "Story Points": {
+            "number": 13
+          },
+          "Type": {
+            "select": {
+              "name": "Feature"
+            }
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Name": {
+            "title": [
+              {
+                "text": {
+                  "content": "API Documentation"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Done"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Low"
+            }
+          },
+          "Sprint": {
+            "select": {
+              "name": "Sprint 1"
+            }
+          },
+          "Story Points": {
+            "number": 5
+          },
+          "Type": {
+            "select": {
+              "name": "Task"
+            }
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Name": {
+            "title": [
+              {
+                "text": {
+                  "content": "Performance Optimization"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Backlog"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Medium"
+            }
+          },
+          "Sprint": {
+            "select": {
+              "name": "Sprint 2"
+            }
+          },
+          "Story Points": {
+            "number": 8
+          },
+          "Type": {
+            "select": {
+              "name": "Task"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "name": "Product Management Dashboard",
+    "description": "Roadmaps, sprints, feature tracking",
+    "category": "work",
+    "subcategory": "product",
+    "created_at": "2025-12-21T15:06:35.604Z",
+    "properties_count": 9,
+    "views_count": 1,
+    "sample_data_count": 5
+  },
+  "import_instructions": {
+    "step1": "Open Notion and navigate to your workspace",
+    "step2": "Click \"Import\" from the sidebar menu",
+    "step3": "Select this JSON file or paste the content",
+    "step4": "The template will be created as a new page with the database",
+    "note": "You may need to use the Notion API for programmatic import"
+  }
+}
