@@ -611,6 +611,20 @@ export async function POST(request) {
         break
       }
       
+      case 'csv': {
+        const csv = generateCSV(template)
+        result.csv = csv
+        
+        const outputDir = path.join(process.cwd(), 'public', 'notion-templates')
+        await fs.mkdir(outputDir, { recursive: true })
+        
+        const filename = `${fileId}.csv`
+        await fs.writeFile(path.join(outputDir, filename), csv)
+        
+        result.downloadUrl = `/notion-templates/${filename}`
+        break
+      }
+      
       default:
         return NextResponse.json({ success: false, error: 'Invalid format' }, { status: 400 })
     }
