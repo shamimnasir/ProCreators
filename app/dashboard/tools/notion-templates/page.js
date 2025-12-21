@@ -946,7 +946,7 @@ export default function NotionTemplateMakerPage() {
               {/* What's Inside Section */}
               <div className="border rounded-lg p-5 bg-gradient-to-br from-muted/30 to-muted/10">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" /> What's Inside?
+                  <Sparkles className="h-5 w-5 text-yellow-500" /> What&apos;s Inside?
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {generatedTemplate.databases?.map((db, idx) => (
