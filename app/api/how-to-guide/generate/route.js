@@ -409,10 +409,10 @@ export async function POST(request) {
         })
       }
       
-      // Decorative line
+      // Decorative line - positioned below the title
       chapterTitlePage.drawLine({
-        start: { x: width * 0.35, y: height / 2 - 10 },
-        end: { x: width * 0.65, y: height / 2 - 10 },
+        start: { x: width * 0.35, y: height / 2 - 30 },
+        end: { x: width * 0.65, y: height / 2 - 30 },
         thickness: 2,
         color: colors.secondary
       })
