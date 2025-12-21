@@ -3,218 +3,142 @@
 <original_problem_statement>
 The user's initial high-level goal is to standardize all PDF-generating tools (Planner, Journal, Checklist, Worksheet, Coloring Book, etc.) by upgrading them with the advanced Pro features developed for the Ebook Maker.
 
-During this session, the user's requests evolved:
-1.  **Initial Bug**: User encountered a build error when trying to use the Habit and Checklist Generator.
-2.  **Checklist Maker Pro Upgrade**: After the build error was fixed, the user requested a full Pro upgrade for the Checklist & Tracker Maker, including a step-by-step wizard, custom options, a download button, and auto-saving drafts.
-3.  **Checklist Maker Bug Fixes**: The user reported that the newly upgraded tool wasn't using manually entered checklist items and wasn't generating a cover image.
-4.  **Cover Design Refinement**: The user requested a design change for the PDF cover overlay across tools, wanting a smaller, more focused transparent bar behind the title instead of a large bottom banner.
-5.  **Recipe Book Maker Creation**: The user requested the creation of a brand new Recipe Book Maker from scratch, specifying it should be KDP compliant and include all the Pro features from the other advanced tools (Journal/Planner).
-6.  **Recipe Book Customization**: The user requested the ability to add their own custom recipes to the Recipe Book Maker.
-7.  **Recipe Book Bug Fixes & Features**:
-    *   The generated book was using generic placeholder content.
-    *   AI-generated recipes did not respect the user's book title/theme (e.g., generating Italian food for a Chinese Masala book).
-    *   The final PDF contained too many blank Notes pages at the end.
+During this session, the user's requests were:
+1.  **Initial Request**: Make it functional with all the features we have built so far for other PDF tools. The target tool was the How-To Guide Creator, which was essentially a placeholder.
+2.  **Bug Report 1 (404 Error)**: After the agent built the tool, the user reported a 404 error when trying to access it from the main dashboard, noting the URL was .
+3.  **Bug Report 2 (Content Mismatch)**: The user reported that the AI content generation was not respecting the user-provided title. For a title of How to start a KDP business, the tool generated content about photography.
+4.  **Bug Report 3 (Text Overflow)**: The user reported that long chapter titles in the generated PDF were not wrapping and were overflowing the page margins, making the document look unprofessional.
 </original_problem_statement>
 
 **User's preferred language**: English
 
 **what currently exists?**
-- A suite of PDF generation tools.
-- The **Checklist & Tracker Maker** has been completely overhauled into a Pro version. It now features a 4-step wizard UI, auto-saving drafts, custom item input, and AI-generated cover images. Bugs related to custom item usage and cover image embedding have been fixed.
-- A new **Recipe Book Maker** has been built from the ground up to Pro standards. It includes a 5-step wizard, KDP-compliant paper sizes, auto-saving drafts, AI-generated cover images, and color schemes.
-- **Advanced Recipe Features**: The Recipe Book Maker supports fully custom recipe input (manual entry, category creation, and pasting from text) and has an intelligent fallback system. The system can detect the desired cuisine (e.g., Chinese, Indo-Chinese) from the user's book title and generate appropriately themed recipes, even when the primary AI generation fails.
-- The shared PDF design library, , has been modified to produce a more refined, compact title overlay on covers.
-- The API for  has been fixed by creating a proper dynamic route ().
+- A new **How-To Guide Creator** has been built from the ground up to Pro standards. It features a multi-step wizard UI, auto-saving drafts (implicitly via the framework), KDP-compliant paper sizes, custom cover image generation, and color schemes.
+- **Intelligent Content Generation**: The backend for the guide creator now uses a keyword-matching algorithm. It parses the user's book title for themes (e.g., KDP, Photography, Etsy) and selects appropriately themed content from a large, hardcoded database. This ensures the generated guide is highly relevant to the user's topic.
+- **PDF Layout Fixes**: The PDF generation logic has been updated to correctly wrap long chapter titles on both the Table of Contents page and the chapter separator pages, preventing text from overflowing the page margins.
+- **URL/Routing Fix**: The tool's folder was renamed from  to  to match the link in the site's configuration, resolving a 404 error.
 
 **Last working item**:
-    - Last item agent was working: Fixing a bug in the new **Recipe Book Maker** where an excessive number of blank Notes pages (5) were being added to the end of every generated PDF. The agent changed the logic to only add 2 notes pages.
+    - Last item agent was working: Fixing a bug in the new **How-To Guide Creator** where long chapter titles would overflow the page margins in the generated PDF. The agent modified the PDF generation code to wrap the text.
     - Status: USER VERIFICATION PENDING
     - Agent Testing Done: Y
-    - Which testing method agent to use? The user should be asked to generate a recipe book with several recipes and check the end of the PDF to confirm there are only two Notes pages, not a large number of blank pages.
+    - Which testing method agent to use? The user should be asked to generate a guide with a long chapter title (e.g., using the KDP theme which has a title like Understanding the KDP Opportunity) and check the generated PDF to confirm the titles wrap correctly in the table of contents and on the chapter pages.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Recipe Book Maker - Excessive blank pages fix needs user verification. (P0)
-  - Issue 2: Recipe Book Maker - Themed recipe generation based on book title needs user verification. (P1)
-  - Issue 3: Checklist Maker - PDF cover design change (compact overlay) needs user verification. (P2)
-  - Issue 4: Invalid/Expired Gemini API Key. (P3)
-  - Issue 5: Journal Maker - Pocket-size title overflow fix needs user verification. (P4)
-  - Issue 6: Worksheet Generator - Multi-language support fix needs user verification. (P5)
-  - Issue 7: Coloring Book - Final cover design needs user verification. (P6)
-  - Issue 8: Coloring Book - Generator crashes when using a theme with an emoji. (P7)
+  - Issue 1: How-To Guide Maker - Long chapter title text wrapping fix needs user verification. (P0)
+  - Issue 2: How-To Guide Maker - Themed content generation based on book title needs user verification. (P1)
+  - Issue 3: Recipe Book Maker - Excessive blank pages fix needs user verification. (P2)
+  - Issue 4: Recipe Book Maker - Themed recipe generation based on book title needs user verification. (P3)
+  - Issue 5: Checklist Maker - PDF cover design change (compact overlay) needs user verification. (P4)
+  - Issue 6: Invalid/Expired Gemini API Key. (P5)
+  - Issue 7: Journal Maker - Pocket-size title overflow fix needs user verification. (P6)
+  - Issue 8: Worksheet Generator - Multi-language support fix needs user verification. (P7)
+  - Issue 9: Coloring Book - Final cover design needs user verification. (P8)
+  - Issue 10: Coloring Book - Generator crashes when using a theme with an emoji. (P9)
 
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: The agent located the loop in  that added 5 notes pages and changed it to add only 2.
-     - Next debug checklist: Ask the user to generate a recipe book and confirm the page count is reasonable and there are only two blank notes pages at the end.
-     - Why fix this issue and what will be achieved with the fix? Prevents generating unprofessional-looking PDFs with unnecessary padding and wasted pages.
+     - Attempted fixes: The agent located the  calls for chapter titles in  and replaced them with a text-wrapping utility. It also adjusted the positioning of decorative elements to accommodate multi-line titles.
+     - Next debug checklist: Ask the user to generate a guide (e.g., with the KDP theme) and visually inspect the PDF to confirm long titles are wrapped.
+     - Why fix this issue and what will be achieved with the fix? Ensures the generated PDFs are professional and readable, a critical quality issue.
      - Status:  USER VERIFICATION PENDING
      - Is recurring issue? N
      - Should Test frontend/backend/both after fix? backend
      - Blocked on other issue: None
   - Issue 2: 
-     - Attempted fixes: The agent significantly rewrote  to parse the book title for keywords (e.g., Chinese, Indian, Masala) and select recipes from a themed database if a match is found. More recipes were added to the internal database to support this.
-     - Next debug checklist: Ask the user to test by creating a recipe book with a cuisine-specific title (e.g., My Italian Kitchen) and verify that the generated recipes match the theme.
-     - Why fix this issue and what will be achieved with the fix? Provides a magical and highly relevant user experience, making the tool far more powerful and useful.
+     - Attempted fixes: The agent completely rewrote  to implement a keyword-matching system that selects relevant content from a large internal database based on the user's title.
+     - Next debug checklist: Ask the user to try again with their title How to start a KDP business and confirm the generated content is now relevant.
+     - Why fix this issue and what will be achieved with the fix? This is a core functionality fix, making the tool useful and delivering on the promise of smart content generation.
      - Status:  USER VERIFICATION PENDING
      - Is recurring issue? N
      - Should Test frontend/backend/both after fix? backend
      - Blocked on other issue: None
-  - Issue 3: 
-     - Attempted fixes: The agent modified the shared library  to draw a smaller, more compact, semi-transparent overlay just behind the title and subtitle, instead of the large banner at the bottom of the cover.
-     - Next debug checklist: Ask the user to generate any PDF with a cover (e.g., Checklist or Recipe Book) and confirm the new cover design meets their expectations.
-     - Why fix this issue and what will be achieved with the fix? Implements a user-requested design refinement for a more professional aesthetic across all tools.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
-  - Issue 4: 
-     - Attempted fixes: None this session. The agent noted the  was invalid based on logs but worked around it by creating robust fallback mechanisms.
-     - Next debug checklist: Use the  tool to get a new Emergent LLM Key and update the  file, then restart the server.
-     - Why fix this issue and what will be achieved with the fix? This will enable the AI-powered features (like generating recipe items or checklist ideas on the fly) to work as intended, instead of relying on the static fallback content.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
-  - Issue 5: 
-     - Attempted fixes: (From previous session) The agent modified  to make font size responsive. This was never verified by the user in this session.
-     - Next debug checklist: Ask the user to generate a Journal with the smallest paper size option (e.g., 5.5 x 8.5) to confirm the text scales correctly.
-     - Why fix this issue and what will be achieved with the fix? Ensures professional-looking covers for all KDP paper sizes in the Journal Maker.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
-  - Issue 6: 
-     - Attempted fixes: (From previous session) The  dependency was installed. This was never verified by the user in this session.
-     - Next debug checklist: Ask the user to test the Worksheet Generator with a non-English language to confirm it generates a PDF correctly.
-     - Why fix this issue and what will be achieved with the fix? Critical feature for the Worksheet Generator.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
-  - Issue 7: 
-     - Attempted fixes: (From previous session) The cover design was iterated upon. This was never verified by the user in this session.
-     - Next debug checklist: Ask the user to generate a Coloring Book to verify the latest cover design.
-     - Why fix this issue and what will be achieved with the fix? Finalizes the design of the Coloring Book generator.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
-  - Issue 8: 
-     - Attempted fixes: None this session. This is a known, recurring bug from a previous fork.
-     - Next debug checklist: Examine the code in . Ensure any text passed to 's  function is sanitized to remove emojis.
-     - Why fix this issue and what will be achieved with the fix? Prevents application crashes from common user input.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: None
+  - Issues 3-10 are carried over from the previous session and have not been worked on. Their details can be found in the initial handover summary. Their priority has been lowered to reflect the work done in the current session.
 
 **In progress Task List**:
   - Task 1:  Standardize all PDF tools to the Pro feature set. (P0)
 
  Task Detail:
   - Task 1: 
-     - Where to resume: The Checklist and Recipe Book makers have been upgraded. The next tool in line is likely the **Printables Creator**, which has not yet been upgraded.
+     - Where to resume: The Checklist, Recipe Book, and now How-To Guide makers have been upgraded. The next tool in line is likely the **Printables Creator**.
      - What will be achieved with this?: All digital product tools will have a consistent, advanced feature set (Drafts, Custom Covers, KDP sizes), creating a cohesive product suite.
      - Status: IN PROGRESS
      - Should Test frontend/backend/both after fix?: both
-     - Blocked on something: User verification of the many completed items from this session.
+     - Blocked on something: User verification of the many completed items from this and the previous session.
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **Task 1: Refactor Printables Creator (P1)**: Upgrade this tool to the Pro standard (Drafts, Rich Text, Custom Covers, KDP sizes), similar to the work done on the Checklist and Recipe Book makers.
+    - **Task 1: Refactor Printables Creator (P1)**: Upgrade this tool to the Pro standard (Drafts, Rich Text, Custom Covers, KDP sizes), similar to the work done on the Checklist, Recipe Book, and How-To Guide makers.
 
 **Completed work in this session**
-- **Core Bug Fix**:
-  - Fixed a build error caused by duplicate variable declarations (, ) in the shared library .
-- **Feature: Checklist & Tracker Maker Pro Upgrade**:
-  - Implemented a 4-step wizard UI in .
-  - Added auto-saving drafts functionality and a My Drafts sidebar.
-  - Added a Custom option for users to create their own trackers.
-  - Fixed a bug where custom items were not used in the generated PDF by improving fallback logic in .
-  - Fixed a bug where the cover image was generated but not embedded into the PDF in .
-- **Feature: Recipe Book Maker Pro (Created from Scratch)**:
-  - Created all necessary files:  (frontend) and backend routes  and .
-  - Implemented a 5-step wizard UI with KDP sizes, color schemes, and drafts.
-  - **Custom Recipe Editing**: Implemented a rich UI in Step 3 for users to add/edit/delete their own recipes and categories, or import from pasted text.
-  - **Intelligent Content Fallback**: Replaced generic placeholders with a large database of real recipes in .
-  - **Themed Generation**: Implemented logic to detect cuisine keywords from the book title to generate themed recipes (e.g., Chinese Masala Cuisine generates Indo-Chinese dishes).
-  - **Bug Fix**: Reduced the number of blank Notes pages at the end of the PDF from 5 to 2.
+- **Feature: How-To Guide Creator Pro (Created from Scratch)**:
+  - Created all necessary files:  (frontend) and backend routes in .
+  - Implemented a multi-step wizard UI with KDP sizes, color schemes, and custom cover generation.
+  - **Bug Fix (Routing)**: Fixed a 404 error by renaming the tool's folder from  to  to match the dashboard link configuration.
+  - **Feature (Intelligent Content)**: Replaced generic content generation with a keyword-based theming engine in  to match content to the user's title.
+  - **Bug Fix (PDF Layout)**: Fixed a text overflow issue in  by implementing text wrapping for long chapter titles.
 - **Global Improvements**:
-  - **API Fix**: Created the dynamic route  to fix 404 errors on draft updates/deletions.
-  - **Cover Design**: Refined the PDF cover design in  to use a more subtle, compact overlay behind the title.
+  - **Bug Fix**: Fixed a bug in  where  was not defined during PDF cover generation.
 
 **Earlier issues found/mentioned but not fixed**
    - Issue 1: Coloring book generator crashes when using a theme with an emoji. (Recurring, not addressed).
    - Issue 2: Invalid Gemini API key. (Recurring, not addressed, but robust fallbacks were built as a workaround).
-   - The agent never addressed the three pending verification items from the start of the session (Journal Maker, Worksheet Maker, Coloring Book).
+   - The agent did not address the backlog of user verification items from the previous session (Journal Maker, Worksheet Maker, etc.).
 
 **Known issue recurrence from previous fork**
   - Issue recurrence in previous fork: Coloring book emoji crash.
-  - Recurrence count: 2
+  - Recurrence count: 3
   - Status: NOT STARTED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend**: Next.js, React, TailwindCSS, shadcn/ui. Complex state management with  for multi-step wizards.
-- **Backend**: Next.js API Routes. File-based dynamic routing ().
-- **PDF Generation**:  for drawing PDF elements.
-- **AI & Content Generation**:
-    - Used Gemini for AI text generation, but with an invalid key.
-    - **Robust Fallback Systems**: A key pattern in this session was creating high-quality, static fallback content when the AI API fails.
-    - **Keyword-based Theming**: In the Recipe Book maker, the backend parses the user's input title for keywords to dynamically select a theme and content from a static database, simulating intelligent behavior without a live AI call.
-- **File System**: New directories  and  are used to store generated PDFs.
+- **Frontend**: Next.js, React, TailwindCSS, shadcn/ui. Multi-step wizard UI.
+- **Backend**: Next.js API Routes.
+- **PDF Generation**:  for drawing PDF elements. A key fix involved using a text-wrapping utility for long strings to prevent layout overflow.
+- **Keyword-based Theming**: In the How-To Guide maker, the backend () parses the user's input title for keywords to dynamically select a theme and content from a static database. This simulates intelligent behavior without a live AI call.
+- **File System**: New directory  is used to store generated PDFs. The agent used  to rename the entire  directory to .
 
 **key DB schema**
-  - **drafts**:  (The structure is unchanged, but the  object for  and  is now much more complex, storing state for all wizard steps).
+  - **drafts**: No changes. The  object for  now stores the state for the new wizard.
 
 **changes in tech stack**
   - No changes to the core tech stack.
 
 **All files of reference**
-- : New frontend for the Recipe Book Maker, contains complex UI for custom recipe editing.
-- : New backend logic for the Recipe Book Maker. Contains the large static recipe database and the keyword-based theme detection logic.
-- : Heavily refactored frontend for the Checklist Maker Pro upgrade.
-- : Critical shared library for PDF styling. Was fixed and then modified for a new cover design.
-- : New file that fixes a critical bug with saving/deleting drafts.
+- : The new frontend for the How-To Guide Creator.
+- : Contains the keyword-matching logic and the large static content database for guides.
+- : Contains the PDF generation logic, including the text-wrapping fix.
+- : The config file that contained the  which caused the initial 404 error.
 
 **Areas that need refactoring**:
-- The  for the recipe book has a very large, hardcoded JavaScript object for the recipe database. This could be moved to a separate JSON file for better maintainability.
+- The  for the how-to guide has a very large, hardcoded JavaScript object for the content database. This should be moved to a separate JSON file for better maintainability.
 
 **key api endpoints**
-- : Generates the checklist PDF.
-- : Generates the recipe list (either via AI or fallback).
-- : Generates the final recipe book PDF.
-- : GET all drafts.
-- : PUT, DELETE, or GET a specific draft.
+- : Generates the guide content structure based on title keywords.
+- : Generates the final How-To Guide PDF.
+- : The user-facing URL for the new tool.
 
 **Critical Info for New Agent**
-- **Your first action should be to seek user verification on the large amount of work completed in this session.** Group the requests for efficiency:
-    1.  **Recipe Book**: Ask the user to test the new Recipe Book Maker. Specifically, have them try creating a book with a themed title (e.g., My Vegan Cookbook) to test the smart recipe generation, and check the end of the PDF to confirm there are only 2 blank notes pages.
-    2.  **Cover Design**: Ask the user to generate any PDF with a cover and confirm they are happy with the new, more compact title overlay.
-- **There is a backlog of unverified items from the previous session.** After verifying the current work, you should address these: Journal Maker sizing, Worksheet Maker language support, and Coloring Book design.
-- **The AI API key is invalid.** While the app has robust fallbacks, full functionality requires a valid key. You should plan to refresh this key soon.
-- The known, recurring **emoji crash bug** in the Coloring Book generator is still outstanding and should be prioritized as it causes the application to crash.
+- **Your first action is to confirm the latest fix with the user.** Ask them to generate a guide again and check if the long chapter titles now wrap correctly inside the PDF.
+- **There is a large backlog of unverified items.** After verifying the How-To Guide fixes, you should systematically go through the pending verification list (Recipe Book pages, cover designs, etc.) to clear the backlog and confirm the stability of the application.
+- The **AI API key is still invalid**. While the app has robust fallbacks (as demonstrated by the new content theming engine), full functionality will eventually require a valid key.
+- The recurring **emoji crash bug** in the Coloring Book generator is a high-priority stability issue that still needs to be addressed.
 
 **documents created in this job**
 - No new documents were created.
 
 **Last 10 User Messages and any pending user messages**
-- **Msg 292**: User wants to fix the blank pages at the end of the recipe book. (Fix implemented, awaiting verification).
-- **Msg 283**: User wants AI to generate recipes that match the book's title/theme. (Feature implemented, awaiting verification).
-- **Msg 273**: User reports the generated recipe book uses placeholder content. (Fix implemented, verified by agent, user verification pending).
-- **Msg 243**: User wants a custom recipe book making option. (Feature implemented, verified by agent, user verification pending).
-- **Msg 223**: User wants to create a Recipe Book Maker from scratch with Pro features. (Feature implemented, verified by agent, user verification pending).
-- **Msg 202**: User requests a smaller, blurred overlay on the PDF cover. (Fix implemented, awaiting verification).
-- **Msg 161**: User reports bugs with the upgraded Checklist Maker: custom items not in PDF, and cover image missing. (Fixes implemented, verified by agent, user verification pending).
-- **Msg 29**: User requests a full Pro upgrade for the Checklist Maker. (Feature implemented, verified by agent, user verification pending).
-- **Msg 5**: User reports a build error preventing the Checklist generator from loading. (Fixed).
+- **Msg 115**: User reports long chapter names go outside the margin in the PDF. (Fix implemented, awaiting verification).
+- **Msg 102**: User reports the Guide Maker generated content unrelated to their title (How to start a KDP business). (Fix implemented, awaiting verification).
+- **Msg 71**: User reports guide maker is showing 404. (Fixed by renaming the tool's folder).
+- **Msg 5**: User asks to make the How-To Guide Creator functional. (Task implemented).
 
 **Project Health Check:**
 - **Broken**: Coloring Book generator is partially broken (crashes with emojis).
-- **Mocked**: AI generation is effectively mocked with high-quality static fallbacks due to an invalid API key.
+- **Mocked**: AI text generation is effectively mocked with a high-quality static, themed-content database due to an invalid API key.
 - **Needs Pro Upgrade**:  is the main remaining tool that needs the full Pro feature upgrade.
 
 **3rd Party Integrations**
@@ -233,11 +157,6 @@ During this session, the user's requests evolved:
 - : Located in .
 
 **What agent forgot to execute**
-- The agent never followed up on the three pending verification tasks from the previous session's handover summary:
-    1. Journal Maker pocket-size title fix.
-    2. Worksheet Maker multi-language support.
-    3. Coloring Book final cover design.
-- The agent did not address the known, recurring bug where using an emoji in a custom theme for the Coloring Book causes a crash.
-- The agent did not resolve the invalid  issue, though it did build effective workarounds.
+- The agent correctly prioritized the user's active request to build the How-To Guide Creator. As a result, the backlog of verification items from the previous session (Journal Maker sizing, Worksheet Maker language support, etc.) was not addressed and remains pending.
 
 </analysis>
