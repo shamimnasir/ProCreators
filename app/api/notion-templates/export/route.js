@@ -260,84 +260,155 @@ function generateNotionJSON(template) {
   }
 }
 
-// Generate CSV export (Notion-compatible)
+// Generate CSV export (Notion-compatible) - exports all databases
 function generateCSV(template) {
-  // Get all property names for headers
-  const headers = template.properties.map(p => p.name)
-  
-  // Escape CSV values
   const escapeCSV = (val) => {
     if (val === undefined || val === null) return ''
     let str = String(val)
-    // If contains comma, newline, or quote, wrap in quotes and escape internal quotes
     if (str.includes(',') || str.includes('\n') || str.includes('"')) {
       str = '"' + str.replace(/"/g, '""') + '"'
     }
     return str
   }
   
-  // Create header row
-  let csv = headers.map(h => escapeCSV(h)).join(',') + '\n'
+  let allCSV = ''
   
-  // Add data rows
-  if (template.sampleData && template.sampleData.length > 0) {
-    template.sampleData.forEach(row => {
+  // If we have multiple databases, export the first one (main database)
+  // For more complex exports, we'd need multiple files
+  const databases = template.databases && template.databases.length > 0 
+    ? template.databases 
+    : [{ name: template.title, properties: template.properties, sampleData: template.sampleData }]
+  
+  // Export the primary database
+  const mainDb = databases[0]
+  const headers = (mainDb.properties || []).map(p => p.name)
+  
+  if (headers.length === 0) {
+    return 'Name\nSample Item 1\nSample Item 2\n'
+  }
+  
+  allCSV = headers.map(h => escapeCSV(h)).join(',') + '\n'
+  
+  const sampleData = mainDb.sampleData || []
+  if (sampleData.length > 0) {
+    sampleData.forEach(row => {
       const cells = headers.map(h => {
         const val = row[h]
         if (Array.isArray(val)) return escapeCSV(val.join(', '))
         return escapeCSV(val)
       })
-      csv += cells.join(',') + '\n'
+      allCSV += cells.join(',') + '\n'
     })
   } else {
-    // Add empty template rows if no sample data
-    // This helps users understand the structure
-    csv += headers.map(() => '').join(',') + '\n'
+    allCSV += headers.map(() => '').join(',') + '\n'
   }
   
-  return csv
+  return allCSV
 }
 
-// Generate Markdown export
+// Generate comprehensive Markdown export
 function generateMarkdown(template) {
   let md = `# ${template.emoji || ''} ${template.title}\n\n`
-  md += `${template.description}\n\n`
+  
+  if (template.tagline) {
+    md += `> ${template.tagline}\n\n`
+  }
+  
+  md += `${template.description || ''}\n\n`
   md += `---\n\n`
   
-  md += `## Database Properties\n\n`
-  md += `| Property | Type | Options |\n`
-  md += `|----------|------|---------|\n`
-  
-  template.properties.forEach(prop => {
-    const options = prop.options ? prop.options.join(', ') : '-'
-    md += `| ${prop.icon || ''} ${prop.name} | ${prop.type} | ${options} |\n`
-  })
-  
-  md += `\n## Views\n\n`
-  template.views.forEach(view => {
-    md += `- **${view.name}** (${view.type})\n`
-    if (view.groupBy) md += `  - Grouped by: ${view.groupBy}\n`
-    if (view.dateProperty) md += `  - Date property: ${view.dateProperty}\n`
-  })
-  
-  if (template.sampleData && template.sampleData.length > 0) {
-    md += `\n## Sample Data\n\n`
-    
-    // Create table header
-    const headers = template.properties.slice(0, 5).map(p => p.name)
-    md += `| ${headers.join(' | ')} |\n`
-    md += `| ${headers.map(() => '---').join(' | ')} |\n`
-    
-    // Add rows
-    template.sampleData.slice(0, 5).forEach(row => {
-      const cells = headers.map(h => {
-        const val = row[h]
-        if (val === undefined || val === null) return '-'
-        if (Array.isArray(val)) return val.join(', ')
-        return String(val)
-      })
-      md += `| ${cells.join(' | ')} |\n`
+  // Getting Started Guide
+  if (template.gettingStarted && template.gettingStarted.length > 0) {
+    md += `## Getting Started\n\n`
+    template.gettingStarted.forEach(step => {
+      md += `${step}\n\n`
     })
+    md += `---\n\n`
+  }
+  
+  // Dashboard Sections
+  if (template.dashboardSections && template.dashboardSections.length > 0) {
+    md += `## Dashboard Overview\n\n`
+    md += `Your dashboard includes these key sections:\n\n`
+    template.dashboardSections.forEach(section => {
+      md += `- **${section.title}** - ${section.description}\n`
+    })
+    md += `\n---\n\n`
+  }
+  
+  // Multiple Databases
+  const databases = template.databases && template.databases.length > 0 
+    ? template.databases 
+    : [{ name: 'Main Database', emoji: '📊', properties: template.properties, sampleData: template.sampleData }]
+  
+  md += `## Databases (${databases.length})\n\n`
+  
+  databases.forEach((db, idx) => {
+    md += `### ${db.emoji || '📊'} ${db.name}\n\n`
+    if (db.description) {
+      md += `${db.description}\n\n`
+    }
+    
+    // Properties table
+    if (db.properties && db.properties.length > 0) {
+      md += `#### Properties\n\n`
+      md += `| Property | Type | Options |\n`
+      md += `|----------|------|---------|\n`
+      
+      db.properties.forEach(prop => {
+        const options = prop.options ? prop.options.slice(0, 4).join(', ') + (prop.options.length > 4 ? '...' : '') : '-'
+        md += `| ${prop.icon || ''} ${prop.name} | ${prop.type} | ${options} |\n`
+      })
+      md += '\n'
+    }
+    
+    // Sample Data
+    if (db.sampleData && db.sampleData.length > 0) {
+      md += `#### Sample Data\n\n`
+      const headers = (db.properties || []).slice(0, 4).map(p => p.name)
+      md += `| ${headers.join(' | ')} |\n`
+      md += `| ${headers.map(() => '---').join(' | ')} |\n`
+      
+      db.sampleData.slice(0, 5).forEach(row => {
+        const cells = headers.map(h => {
+          const val = row[h]
+          if (val === undefined || val === null) return '-'
+          if (Array.isArray(val)) return val.slice(0, 2).join(', ')
+          return String(val).substring(0, 30)
+        })
+        md += `| ${cells.join(' | ')} |\n`
+      })
+      md += '\n'
+    }
+    
+    if (idx < databases.length - 1) {
+      md += `---\n\n`
+    }
+  })
+  
+  // Views
+  const allViews = template.allViews || template.views || []
+  if (allViews.length > 0) {
+    md += `\n## Pre-configured Views\n\n`
+    allViews.forEach(view => {
+      md += `- **${view.name}** (${view.type})`
+      if (view.groupBy) md += ` - Grouped by: ${view.groupBy}`
+      if (view.filter) md += ` - Filter: ${view.filter}`
+      md += '\n'
+    })
+  }
+  
+  md += `\n---\n\n`
+  md += `## How to Use This Template\n\n`
+  md += `1. Import this file into Notion using "Import" > "Text & Markdown"\n`
+  md += `2. Create new databases based on the structure above\n`
+  md += `3. Add the properties listed for each database\n`
+  md += `4. Create the suggested views (Board, Calendar, etc.)\n`
+  md += `5. Customize colors and layout to your preference\n\n`
+  md += `*Generated with Notion Template Maker*\n`
+  
+  return md
+}
   }
   
   md += `\n---\n\n`
