@@ -721,93 +721,185 @@ export default function NotionTemplateMakerPage() {
                 <Eye className="h-5 w-5 text-green-500" />
                 Step 3: Preview Your Template
               </CardTitle>
-              <CardDescription>Review and customize before exporting</CardDescription>
+              <CardDescription>Review your comprehensive template before exporting</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Template Preview */}
+              {/* Template Header */}
               <div className="border rounded-lg overflow-hidden">
-                {/* Header */}
                 <div 
                   className="p-6"
                   style={{ backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.bg }}
                 >
                   {includeCover && (
                     <div 
-                      className="h-32 rounded-lg mb-4 bg-gradient-to-r from-primary/20 to-primary/40"
+                      className="h-32 rounded-lg mb-4 bg-gradient-to-r from-primary/20 to-primary/40 flex items-center justify-center"
                       style={{ backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent + '30' }}
-                    />
+                    >
+                      <span className="text-6xl">{includeEmoji ? generatedTemplate.emoji : '📋'}</span>
+                    </div>
                   )}
                   <div className="flex items-center gap-3">
-                    {includeEmoji && <span className="text-4xl">{generatedTemplate.emoji}</span>}
+                    {includeEmoji && !includeCover && <span className="text-4xl">{generatedTemplate.emoji}</span>}
                     <div>
                       <h2 className="text-2xl font-bold" style={{ color: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.primary }}>
                         {generatedTemplate.title}
                       </h2>
-                      <p className="text-muted-foreground">{generatedTemplate.description}</p>
+                      {generatedTemplate.tagline && (
+                        <p className="text-sm font-medium text-primary">{generatedTemplate.tagline}</p>
+                      )}
+                      <p className="text-muted-foreground mt-1">{generatedTemplate.description}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Database Preview */}
-                <div className="p-4 border-t">
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <Database className="h-4 w-4" /> Database Structure
-                  </h3>
-                  
-                  {/* Properties */}
-                  <div className="space-y-2 mb-4">
-                    <Label className="text-sm">Properties ({generatedTemplate.properties?.length || 0})</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTemplate.properties?.map((prop, idx) => (
-                        <Badge key={idx} variant="outline" className="flex items-center gap-1">
-                          <span>{prop.icon}</span>
-                          <span>{prop.name}</span>
-                          <span className="text-xs text-muted-foreground">({prop.type})</span>
-                        </Badge>
-                      ))}
-                    </div>
+                {/* Stats Bar */}
+                <div className="px-6 py-3 bg-muted/50 border-t flex items-center gap-6 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-medium">{generatedTemplate.databases?.length || 1} Databases</span>
                   </div>
-
-                  {/* Views */}
-                  <div className="space-y-2 mb-4">
-                    <Label className="text-sm">Views ({generatedTemplate.views?.length || 0})</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedTemplate.views?.map((view, idx) => (
-                        <Badge key={idx} variant="secondary">
-                          {VIEW_TYPES.find(v => v.id === view.type)?.name || view.type} - {view.name}
-                        </Badge>
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <LayoutGrid className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm font-medium">{generatedTemplate.allViews?.length || generatedTemplate.views?.length || 0} Views</span>
                   </div>
-
-                  {/* Sample Data */}
-                  {contentLevel === 'full' && generatedTemplate.sampleData && (
-                    <div className="space-y-2">
-                      <Label className="text-sm">Sample Data ({generatedTemplate.sampleData.length} items)</Label>
-                      <div className="max-h-48 overflow-auto border rounded-lg">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted">
-                            <tr>
-                              {generatedTemplate.properties?.slice(0, 4).map((prop, idx) => (
-                                <th key={idx} className="p-2 text-left font-medium">{prop.name}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {generatedTemplate.sampleData.slice(0, 5).map((row, idx) => (
-                              <tr key={idx} className="border-t">
-                                {generatedTemplate.properties?.slice(0, 4).map((prop, pIdx) => (
-                                  <td key={pIdx} className="p-2">{row[prop.name] || '-'}</td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                  {generatedTemplate.dashboardSections?.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <LayoutDashboard className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-medium">{generatedTemplate.dashboardSections.length} Dashboard Widgets</span>
+                    </div>
+                  )}
+                  {contentLevel === 'full' && (
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-medium">Sample Data Included</span>
                     </div>
                   )}
                 </div>
               </div>
+
+              {/* Getting Started Guide */}
+              {generatedTemplate.gettingStarted?.length > 0 && (
+                <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2 text-green-800">
+                    <BookMarked className="h-4 w-4" /> Getting Started Guide
+                  </h3>
+                  <div className="space-y-2 text-sm text-green-700">
+                    {generatedTemplate.gettingStarted.slice(0, 4).map((step, idx) => (
+                      <p key={idx}>{step}</p>
+                    ))}
+                    {generatedTemplate.gettingStarted.length > 4 && (
+                      <p className="text-green-600">+ {generatedTemplate.gettingStarted.length - 4} more steps in full template</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Dashboard Sections Preview */}
+              {generatedTemplate.dashboardSections?.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4 text-purple-500" /> Dashboard Widgets
+                  </h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {generatedTemplate.dashboardSections.map((section, idx) => (
+                      <div key={idx} className="p-3 bg-muted rounded-lg">
+                        <div className="font-medium text-sm">{section.title}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{section.description}</div>
+                        <Badge variant="outline" className="mt-2 text-xs">{section.type}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Multiple Databases */}
+              {generatedTemplate.databases?.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <Database className="h-4 w-4 text-blue-500" /> Databases ({generatedTemplate.databases.length})
+                  </h3>
+                  <div className="space-y-4">
+                    {generatedTemplate.databases.map((db, dbIdx) => (
+                      <div key={dbIdx} className="border rounded-lg p-4 bg-card">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xl">{db.emoji || '📊'}</span>
+                          <div>
+                            <h4 className="font-semibold">{db.name}</h4>
+                            {db.description && <p className="text-xs text-muted-foreground">{db.description}</p>}
+                          </div>
+                        </div>
+                        
+                        {/* Properties */}
+                        <div className="mb-3">
+                          <Label className="text-xs mb-2 block">Properties ({db.properties?.length || 0})</Label>
+                          <div className="flex flex-wrap gap-1">
+                            {db.properties?.slice(0, 8).map((prop, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {prop.icon} {prop.name}
+                              </Badge>
+                            ))}
+                            {(db.properties?.length || 0) > 8 && (
+                              <Badge variant="secondary" className="text-xs">+{db.properties.length - 8} more</Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Sample Data Preview */}
+                        {contentLevel === 'full' && db.sampleData?.length > 0 && (
+                          <div>
+                            <Label className="text-xs mb-2 block">Sample Data ({db.sampleData.length} items)</Label>
+                            <div className="overflow-auto max-h-32 border rounded">
+                              <table className="w-full text-xs">
+                                <thead className="bg-muted">
+                                  <tr>
+                                    {db.properties?.slice(0, 3).map((prop, idx) => (
+                                      <th key={idx} className="p-2 text-left">{prop.name}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {db.sampleData.slice(0, 3).map((row, idx) => (
+                                    <tr key={idx} className="border-t">
+                                      {db.properties?.slice(0, 3).map((prop, pIdx) => (
+                                        <td key={pIdx} className="p-2">
+                                          {Array.isArray(row[prop.name]) 
+                                            ? row[prop.name].slice(0, 2).join(', ')
+                                            : String(row[prop.name] || '-').substring(0, 25)}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pre-configured Views */}
+              {(generatedTemplate.allViews?.length > 0 || generatedTemplate.views?.length > 0) && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <LayoutGrid className="h-4 w-4 text-purple-500" /> Pre-configured Views
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(generatedTemplate.allViews || generatedTemplate.views || []).map((view, idx) => (
+                      <Badge key={idx} variant="secondary" className="flex items-center gap-1">
+                        {view.type === 'board' && <Kanban className="h-3 w-3" />}
+                        {view.type === 'calendar' && <Calendar className="h-3 w-3" />}
+                        {view.type === 'table' && <Table className="h-3 w-3" />}
+                        {view.type === 'gallery' && <LayoutGrid className="h-3 w-3" />}
+                        {view.type === 'list' && <List className="h-3 w-3" />}
+                        {view.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Export Options */}
               <div className="space-y-3">
