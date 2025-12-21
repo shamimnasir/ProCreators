@@ -1,0 +1,386 @@
+{
+  "version": "1.0",
+  "type": "notion_template",
+  "template": {
+    "object": "block",
+    "type": "page",
+    "page": {
+      "title": "Project Tracker (ProCreators)",
+      "icon": {
+        "type": "emoji",
+        "emoji": "⚙️"
+      },
+      "cover": {
+        "type": "external",
+        "external": {
+          "url": "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200"
+        }
+      }
+    },
+    "children": [
+      {
+        "object": "block",
+        "type": "heading_1",
+        "heading_1": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Project Tracker (ProCreators)"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Bug tracking, documentation, sprints"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": "block",
+        "type": "divider",
+        "divider": {}
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "📊 Database"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "database": {
+      "object": "database",
+      "title": [
+        {
+          "type": "text",
+          "text": {
+            "content": "Project Tracker (ProCreators)"
+          }
+        }
+      ],
+      "icon": {
+        "type": "emoji",
+        "emoji": "⚙️"
+      },
+      "properties": {
+        "Issue": {
+          "name": "Issue",
+          "type": "title",
+          "title": {}
+        },
+        "Status": {
+          "name": "Status",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Open",
+                "color": "default"
+              },
+              {
+                "name": "In Progress",
+                "color": "default"
+              },
+              {
+                "name": "Code Review",
+                "color": "default"
+              },
+              {
+                "name": "Testing",
+                "color": "default"
+              },
+              {
+                "name": "Closed",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Priority": {
+          "name": "Priority",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Critical",
+                "color": "default"
+              },
+              {
+                "name": "High",
+                "color": "default"
+              },
+              {
+                "name": "Medium",
+                "color": "default"
+              },
+              {
+                "name": "Low",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Type": {
+          "name": "Type",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Bug",
+                "color": "default"
+              },
+              {
+                "name": "Feature",
+                "color": "default"
+              },
+              {
+                "name": "Refactor",
+                "color": "default"
+              },
+              {
+                "name": "Documentation",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Assignee": {
+          "name": "Assignee",
+          "type": "people",
+          "people": {}
+        },
+        "Sprint": {
+          "name": "Sprint",
+          "type": "select",
+          "select": {
+            "options": [
+              {
+                "name": "Current",
+                "color": "default"
+              },
+              {
+                "name": "Next",
+                "color": "default"
+              },
+              {
+                "name": "Backlog",
+                "color": "default"
+              }
+            ]
+          }
+        },
+        "Estimate": {
+          "name": "Estimate",
+          "type": "number",
+          "number": {
+            "format": "number"
+          }
+        },
+        "Labels": {
+          "name": "Labels",
+          "type": "multi_select",
+          "multi_select": {
+            "options": [
+              {
+                "name": "frontend",
+                "color": "default"
+              },
+              {
+                "name": "backend",
+                "color": "default"
+              },
+              {
+                "name": "database",
+                "color": "default"
+              },
+              {
+                "name": "api",
+                "color": "default"
+              },
+              {
+                "name": "security",
+                "color": "default"
+              }
+            ]
+          }
+        }
+      },
+      "views": [
+        {
+          "type": "table",
+          "name": "All Items"
+        },
+        {
+          "type": "board",
+          "name": "Project Tracker (ProCreators) Board",
+          "group_by": "Status"
+        }
+      ]
+    },
+    "sample_data": [
+      {
+        "object": "page",
+        "properties": {
+          "Issue": {
+            "title": [
+              {
+                "text": {
+                  "content": "Memory leak in dashboard"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "In Progress"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Critical"
+            }
+          },
+          "Type": {
+            "select": {
+              "name": "Bug"
+            }
+          },
+          "Estimate": {
+            "number": 4
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Issue": {
+            "title": [
+              {
+                "text": {
+                  "content": "Add dark mode support"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Open"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Medium"
+            }
+          },
+          "Type": {
+            "select": {
+              "name": "Feature"
+            }
+          },
+          "Estimate": {
+            "number": 8
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Issue": {
+            "title": [
+              {
+                "text": {
+                  "content": "Refactor auth module"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Code Review"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "High"
+            }
+          },
+          "Type": {
+            "select": {
+              "name": "Refactor"
+            }
+          },
+          "Estimate": {
+            "number": 13
+          }
+        }
+      },
+      {
+        "object": "page",
+        "properties": {
+          "Issue": {
+            "title": [
+              {
+                "text": {
+                  "content": "Update API docs"
+                }
+              }
+            ]
+          },
+          "Status": {
+            "select": {
+              "name": "Testing"
+            }
+          },
+          "Priority": {
+            "select": {
+              "name": "Low"
+            }
+          },
+          "Type": {
+            "select": {
+              "name": "Documentation"
+            }
+          },
+          "Estimate": {
+            "number": 2
+          }
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "name": "Project Tracker (ProCreators)",
+    "description": "Bug tracking, documentation, sprints",
+    "category": "work",
+    "subcategory": "engineering",
+    "created_at": "2025-12-21T15:17:23.854Z",
+    "properties_count": 8,
+    "views_count": 2,
+    "sample_data_count": 4
+  },
+  "import_instructions": {
+    "step1": "Open Notion and navigate to your workspace",
+    "step2": "Click \"Import\" from the sidebar menu",
+    "step3": "Select this JSON file or paste the content",
+    "step4": "The template will be created as a new page with the database",
+    "note": "You may need to use the Notion API for programmatic import"
+  }
+}
