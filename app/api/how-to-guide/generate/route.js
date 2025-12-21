@@ -368,16 +368,46 @@ export async function POST(request) {
         color: colors.secondary
       })
       
-      // Chapter title
-      const titleFontSize = cleanChapterTitle.length > 40 ? 20 : 24
-      const chTitleWidth = boldFont.widthOfTextAtSize(cleanChapterTitle, titleFontSize)
-      chapterTitlePage.drawText(cleanChapterTitle, {
-        x: Math.max(margin, (width - chTitleWidth) / 2),
-        y: height / 2 + 20,
-        size: titleFontSize,
-        font: boldFont,
-        color: colors.primary
-      })
+      // Chapter title - wrap if too long
+      const maxTitleWidth = width - (margin * 2) - 40 // Leave some padding
+      let titleFontSize = 24
+      
+      // Check if title fits, reduce font size if needed
+      let chTitleWidth = boldFont.widthOfTextAtSize(cleanChapterTitle, titleFontSize)
+      if (chTitleWidth > maxTitleWidth) {
+        titleFontSize = 20
+        chTitleWidth = boldFont.widthOfTextAtSize(cleanChapterTitle, titleFontSize)
+      }
+      if (chTitleWidth > maxTitleWidth) {
+        titleFontSize = 18
+        chTitleWidth = boldFont.widthOfTextAtSize(cleanChapterTitle, titleFontSize)
+      }
+      
+      // If still too long, wrap the title
+      if (chTitleWidth > maxTitleWidth) {
+        const titleLines = wrapText(cleanChapterTitle, boldFont, titleFontSize, maxTitleWidth)
+        let titleY = height / 2 + 20 + ((titleLines.length - 1) * 14) // Center vertically
+        for (const line of titleLines) {
+          const lineWidth = boldFont.widthOfTextAtSize(line, titleFontSize)
+          chapterTitlePage.drawText(line, {
+            x: (width - lineWidth) / 2,
+            y: titleY,
+            size: titleFontSize,
+            font: boldFont,
+            color: colors.primary
+          })
+          titleY -= titleFontSize + 6
+        }
+      } else {
+        // Single line - center it
+        chapterTitlePage.drawText(cleanChapterTitle, {
+          x: (width - chTitleWidth) / 2,
+          y: height / 2 + 20,
+          size: titleFontSize,
+          font: boldFont,
+          color: colors.primary
+        })
+      }
       
       // Decorative line
       chapterTitlePage.drawLine({
