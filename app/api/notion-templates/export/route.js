@@ -466,7 +466,7 @@ async function generatePDF(template, colorTheme) {
     })
     
     cols.forEach((col, i) => {
-      page.drawText(col.name, {
+      page.drawText(stripEmojis(col.name), {
         x: 50 + (i * colWidth),
         y: yPos,
         size: 10,
@@ -484,7 +484,7 @@ async function generatePDF(template, colorTheme) {
         let val = row[col.name]
         if (val === undefined || val === null) val = '-'
         if (Array.isArray(val)) val = val.join(', ')
-        val = String(val).substring(0, 20)
+        val = stripEmojis(String(val).substring(0, 20))
         
         page.drawText(val, {
           x: 50 + (i * colWidth),
