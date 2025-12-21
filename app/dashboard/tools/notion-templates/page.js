@@ -870,7 +870,7 @@ export default function NotionTemplateMakerPage() {
               <Download className="h-5 w-5 text-primary" />
               Step 4: Download Your Template
             </CardTitle>
-            <CardDescription>Your Notion template is ready!</CardDescription>
+            <CardDescription>Your Notion template is ready for import!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center py-8">
@@ -889,44 +889,85 @@ export default function NotionTemplateMakerPage() {
               </div>
             </div>
 
-            {/* Download Buttons */}
-            <div className="grid md:grid-cols-2 gap-4">
-              {result.downloadUrl && (
-                <a href={result.downloadUrl} download className="block">
-                  <Button className="w-full" size="lg">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download {exportFormat.toUpperCase()}
-                  </Button>
-                </a>
-              )}
-              
-              {result.json && (
-                <Button variant="outline" size="lg" onClick={copyToClipboard}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy JSON to Clipboard
+            {/* Download Button */}
+            {result.downloadUrl && (
+              <a href={result.downloadUrl} download className="block">
+                <Button className="w-full" size="lg">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download {exportFormat.toUpperCase()} File
                 </Button>
-              )}
+              </a>
+            )}
+
+            {/* Import Instructions */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-2">How to Import into Notion:</h4>
+              <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                {exportFormat === 'csv' && (
+                  <>
+                    <li>Open Notion and go to your workspace</li>
+                    <li>Click "Import" from the sidebar (or ... menu → Import)</li>
+                    <li>Select "CSV" and upload the downloaded file</li>
+                    <li>Notion will create a new database with your data!</li>
+                  </>
+                )}
+                {exportFormat === 'markdown' && (
+                  <>
+                    <li>Open Notion and go to your workspace</li>
+                    <li>Click "Import" from the sidebar (or ... menu → Import)</li>
+                    <li>Select "Text & Markdown" and upload the .md file</li>
+                    <li>Notion will create a new page with your template structure!</li>
+                  </>
+                )}
+                {exportFormat === 'pdf' && (
+                  <>
+                    <li>This PDF is a preview/showcase of your template</li>
+                    <li>Use it to sell on Gumroad, Etsy, or share with clients</li>
+                    <li>For actual Notion import, use CSV or Markdown format</li>
+                  </>
+                )}
+              </ol>
             </div>
 
-            {/* JSON Preview */}
-            {result.json && (
+            {/* Markdown/CSV Preview */}
+            {result.markdown && (
               <div className="space-y-2">
-                <Label>JSON Preview</Label>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-auto max-h-64">
-                  {JSON.stringify(result.json, null, 2)}
+                <Label>Markdown Preview</Label>
+                <pre className="p-4 bg-muted rounded-lg text-xs overflow-auto max-h-48 whitespace-pre-wrap">
+                  {result.markdown}
+                </pre>
+              </div>
+            )}
+            
+            {result.csv && (
+              <div className="space-y-2">
+                <Label>CSV Preview (first few rows)</Label>
+                <pre className="p-4 bg-muted rounded-lg text-xs overflow-auto max-h-48">
+                  {result.csv.split('\n').slice(0, 6).join('\n')}
                 </pre>
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={() => setStep(3)}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Preview
               </Button>
-              <Button variant="outline" onClick={() => exportTemplate(exportFormat === 'json' ? 'pdf' : 'json')}>
-                <Zap className="mr-2 h-4 w-4" />
-                Export as {exportFormat === 'json' ? 'PDF' : 'JSON'}
-              </Button>
+              {exportFormat !== 'csv' && (
+                <Button variant="outline" onClick={() => exportTemplate('csv')}>
+                  <Table className="mr-2 h-4 w-4" /> Export as CSV
+                </Button>
+              )}
+              {exportFormat !== 'markdown' && (
+                <Button variant="outline" onClick={() => exportTemplate('markdown')}>
+                  <FileText className="mr-2 h-4 w-4" /> Export as Markdown
+                </Button>
+              )}
+              {exportFormat !== 'pdf' && (
+                <Button variant="outline" onClick={() => exportTemplate('pdf')}>
+                  <FileJson className="mr-2 h-4 w-4" /> Export as PDF
+                </Button>
+              )}
               <Button className="flex-1" onClick={startNew}>
                 <Plus className="mr-2 h-4 w-4" /> Create Another Template
               </Button>
