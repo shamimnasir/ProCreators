@@ -1227,8 +1227,8 @@ export default function NotionTemplateMakerPage() {
                 {exportFormat === 'markdown' && (
                   <>
                     <li>Open Notion and go to your workspace</li>
-                    <li>Click "Import" from the sidebar (or ... menu → Import)</li>
-                    <li>Select "Text & Markdown" and upload the .md file</li>
+                    <li>Click &quot;Import&quot; from the sidebar (or ... menu → Import)</li>
+                    <li>Select &quot;Text &amp; Markdown&quot; and upload the .md file</li>
                     <li>Notion will create a new page with your template structure!</li>
                   </>
                 )}
