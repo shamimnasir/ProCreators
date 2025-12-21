@@ -721,60 +721,281 @@ export default function NotionTemplateMakerPage() {
                 <Eye className="h-5 w-5 text-green-500" />
                 Step 3: Preview Your Template
               </CardTitle>
-              <CardDescription>Review your comprehensive template before exporting</CardDescription>
+              <CardDescription>Preview your premium template - ready for Notion or selling on Gumroad/Etsy</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Template Header */}
-              <div className="border rounded-lg overflow-hidden">
+              
+              {/* Premium Template Preview - Like Notion Marketplace */}
+              <div className="border-2 rounded-xl overflow-hidden shadow-lg">
+                {/* Gradient Banner */}
                 <div 
-                  className="p-6"
-                  style={{ backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.bg }}
+                  className="h-36 bg-gradient-to-r flex items-end p-6"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent || '#3b82f6'}, ${COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent || '#3b82f6'}dd)` 
+                  }}
                 >
-                  {includeCover && (
-                    <div 
-                      className="h-32 rounded-lg mb-4 bg-gradient-to-r from-primary/20 to-primary/40 flex items-center justify-center"
-                      style={{ backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent + '30' }}
-                    >
-                      <span className="text-6xl">{includeEmoji ? generatedTemplate.emoji : '📋'}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3">
-                    {includeEmoji && !includeCover && <span className="text-4xl">{generatedTemplate.emoji}</span>}
+                  <div className="flex items-center gap-4 text-white">
+                    <span className="text-5xl bg-white/20 p-3 rounded-xl">{includeEmoji ? generatedTemplate.emoji : '📋'}</span>
                     <div>
-                      <h2 className="text-2xl font-bold" style={{ color: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.primary }}>
-                        {generatedTemplate.title}
-                      </h2>
+                      <h2 className="text-2xl font-bold">{generatedTemplate.title}</h2>
                       {generatedTemplate.tagline && (
-                        <p className="text-sm font-medium text-primary">{generatedTemplate.tagline}</p>
+                        <p className="text-white/90 text-sm">{generatedTemplate.tagline}</p>
                       )}
-                      <p className="text-muted-foreground mt-1">{generatedTemplate.description}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Stats Bar */}
-                <div className="px-6 py-3 bg-muted/50 border-t flex items-center gap-6 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">{generatedTemplate.databases?.length || 1} Databases</span>
+                {/* Main Content Area */}
+                <div className="bg-card">
+                  {/* Database Navigation Tabs */}
+                  {generatedTemplate.databases?.length > 0 && (
+                    <div className="border-b px-4 py-2 flex gap-1 overflow-x-auto bg-muted/30">
+                      {generatedTemplate.databases.map((db, idx) => (
+                        <div 
+                          key={idx} 
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap ${idx === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                        >
+                          <span>{db.emoji || '📊'}</span>
+                          <span>{db.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="grid lg:grid-cols-4 gap-0">
+                    {/* Left Sidebar - Quick Actions */}
+                    <div className="border-r p-4 bg-muted/20">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</h4>
+                      <div className="space-y-1.5">
+                        {generatedTemplate.databases?.slice(0, 8).map((db, idx) => (
+                          <button
+                            key={idx}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left"
+                          >
+                            <Plus className="h-3 w-3 text-muted-foreground" />
+                            <span>New {db.name.replace(/s$/, '').replace(' Database', '').replace(' Pipeline', '').split(' ')[0]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Main Dashboard Area */}
+                    <div className="lg:col-span-3 p-4">
+                      {/* Dashboard Widgets Grid */}
+                      {generatedTemplate.dashboardSections?.length > 0 && (
+                        <div className="grid md:grid-cols-2 gap-4 mb-6">
+                          {generatedTemplate.dashboardSections.slice(0, 4).map((section, idx) => (
+                            <div key={idx} className="border rounded-lg p-4 bg-card">
+                              <h5 className="text-sm font-semibold mb-3">{section.title}</h5>
+                              
+                              {/* Mock Chart Visualizations */}
+                              {section.type === 'chart' && (
+                                <div className="flex items-end gap-2 h-24 px-4">
+                                  {[65, 45, 80, 35, 90, 55].map((h, i) => (
+                                    <div 
+                                      key={i} 
+                                      className="flex-1 rounded-t transition-all hover:opacity-80"
+                                      style={{ 
+                                        height: `${h}%`, 
+                                        backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent || '#3b82f6',
+                                        opacity: 0.7 + (i * 0.05)
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {section.type === 'funnel' && (
+                                <div className="flex flex-col items-center gap-1">
+                                  {['Lead', 'Qualified', 'Proposal', 'Closed'].map((stage, i) => (
+                                    <div 
+                                      key={i}
+                                      className="rounded text-xs text-white text-center py-1 transition-all"
+                                      style={{ 
+                                        width: `${100 - (i * 20)}%`,
+                                        backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent || '#3b82f6',
+                                        opacity: 1 - (i * 0.15)
+                                      }}
+                                    >
+                                      {stage}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {section.type === 'metric' && (
+                                <div className="flex items-center justify-center h-20">
+                                  <div className="text-center">
+                                    <div className="text-3xl font-bold" style={{ color: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent }}>
+                                      {idx === 0 ? '$127K' : idx === 1 ? '68%' : '24'}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">{section.description}</div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {section.type === 'progress' && (
+                                <div className="space-y-2">
+                                  {['Q1 Goals', 'Q2 Goals', 'Team OKRs'].map((item, i) => (
+                                    <div key={i}>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span>{item}</span>
+                                        <span>{70 + (i * 10)}%</span>
+                                      </div>
+                                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                        <div 
+                                          className="h-full rounded-full transition-all"
+                                          style={{ 
+                                            width: `${70 + (i * 10)}%`,
+                                            backgroundColor: COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent
+                                          }}
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {(section.type === 'list' || section.type === 'table') && (
+                                <div className="space-y-2">
+                                  {['Item 1 - In Progress', 'Item 2 - Review', 'Item 3 - Done'].map((item, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                      <span className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-yellow-500' : 'bg-green-500'}`} />
+                                      <span className="text-muted-foreground">{item}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {section.type === 'calendar' && (
+                                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                                    <div key={i} className="text-muted-foreground font-medium">{d}</div>
+                                  ))}
+                                  {Array.from({length: 14}, (_, i) => (
+                                    <div 
+                                      key={i} 
+                                      className={`p-1 rounded ${[2, 5, 9, 12].includes(i) ? 'text-white' : ''}`}
+                                      style={{ backgroundColor: [2, 5, 9, 12].includes(i) ? COLOR_THEMES.find(t => t.id === colorTheme)?.colors.accent : 'transparent' }}
+                                    >
+                                      {i + 1}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {section.type === 'metrics' && (
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                  {[{label: 'Total', value: '156'}, {label: 'Active', value: '42'}, {label: 'Done', value: '114'}].map((m, i) => (
+                                    <div key={i} className="p-2 bg-muted rounded">
+                                      <div className="text-lg font-bold">{m.value}</div>
+                                      <div className="text-xs text-muted-foreground">{m.label}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Active Items Preview */}
+                      {contentLevel === 'full' && generatedTemplate.databases?.[0]?.sampleData?.length > 0 && (
+                        <div className="border rounded-lg overflow-hidden">
+                          <div className="px-4 py-2 bg-muted/50 border-b flex items-center justify-between">
+                            <h5 className="text-sm font-semibold">Active {generatedTemplate.databases[0].name}</h5>
+                            <Badge variant="secondary" className="text-xs">{generatedTemplate.databases[0].sampleData.length} items</Badge>
+                          </div>
+                          <div className="divide-y">
+                            {generatedTemplate.databases[0].sampleData.slice(0, 4).map((item, idx) => {
+                              const titleProp = generatedTemplate.databases[0].properties.find(p => p.type === 'title')
+                              const statusProp = generatedTemplate.databases[0].properties.find(p => p.name === 'Status' || p.name === 'Stage')
+                              const title = titleProp ? item[titleProp.name] : Object.values(item)[0]
+                              const status = statusProp ? item[statusProp.name] : null
+                              
+                              return (
+                                <div key={idx} className="px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                                  <div className="flex items-center gap-3">
+                                    {status && (
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`text-xs ${
+                                          status.includes('Progress') || status.includes('Active') ? 'border-blue-500 text-blue-600 bg-blue-50' :
+                                          status.includes('Done') || status.includes('Won') || status.includes('Completed') ? 'border-green-500 text-green-600 bg-green-50' :
+                                          status.includes('Review') || status.includes('Negotiation') ? 'border-yellow-500 text-yellow-600 bg-yellow-50' :
+                                          'border-gray-300'
+                                        }`}
+                                      >
+                                        {status}
+                                      </Badge>
+                                    )}
+                                    <span className="text-sm font-medium">{String(title).substring(0, 40)}</span>
+                                  </div>
+                                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <LayoutGrid className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm font-medium">{generatedTemplate.allViews?.length || generatedTemplate.views?.length || 0} Views</span>
-                  </div>
+                </div>
+              </div>
+
+              {/* What's Inside Section */}
+              <div className="border rounded-lg p-5 bg-gradient-to-br from-muted/30 to-muted/10">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-yellow-500" /> What's Inside?
+                </h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {generatedTemplate.databases?.map((db, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-card rounded-lg border">
+                      <span className="text-2xl">{db.emoji || '📊'}</span>
+                      <div>
+                        <h4 className="font-semibold text-sm">{db.name}</h4>
+                        <p className="text-xs text-muted-foreground">{db.description || `Manage your ${db.name.toLowerCase()}`}</p>
+                      </div>
+                    </div>
+                  ))}
                   {generatedTemplate.dashboardSections?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <LayoutDashboard className="h-4 w-4 text-green-500" />
-                      <span className="text-sm font-medium">{generatedTemplate.dashboardSections.length} Dashboard Widgets</span>
+                    <div className="flex items-start gap-3 p-3 bg-card rounded-lg border">
+                      <span className="text-2xl">📊</span>
+                      <div>
+                        <h4 className="font-semibold text-sm">Visual Dashboard</h4>
+                        <p className="text-xs text-muted-foreground">{generatedTemplate.dashboardSections.length} widgets with charts & metrics</p>
+                      </div>
+                    </div>
+                  )}
+                  {generatedTemplate.gettingStarted?.length > 0 && (
+                    <div className="flex items-start gap-3 p-3 bg-card rounded-lg border">
+                      <span className="text-2xl">📖</span>
+                      <div>
+                        <h4 className="font-semibold text-sm">Getting Started Guide</h4>
+                        <p className="text-xs text-muted-foreground">{generatedTemplate.gettingStarted.length}-step setup walkthrough</p>
+                      </div>
                     </div>
                   )}
                   {contentLevel === 'full' && (
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-medium">Sample Data Included</span>
+                    <div className="flex items-start gap-3 p-3 bg-card rounded-lg border">
+                      <span className="text-2xl">✨</span>
+                      <div>
+                        <h4 className="font-semibold text-sm">Sample Data</h4>
+                        <p className="text-xs text-muted-foreground">Pre-filled examples to get started fast</p>
+                      </div>
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Categories/Tags */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">Categories:</span>
+                <Badge variant="secondary">{selectedCategory}</Badge>
+                <Badge variant="outline">{getSubcategoryObject()?.name}</Badge>
+                <Badge variant="outline">Productivity</Badge>
+                {generatedTemplate.databases?.length >= 3 && <Badge variant="outline">Multi-Database</Badge>}
+                {contentLevel === 'full' && <Badge variant="outline">Sample Data</Badge>}
               </div>
 
               {/* Getting Started Guide */}
