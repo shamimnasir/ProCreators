@@ -339,8 +339,8 @@ async function generatePDF(template, colorTheme) {
     color: rgb(accentRgb.r, accentRgb.g, accentRgb.b)
   })
   
-  // Title
-  const title = template.title || 'Notion Template'
+  // Title - strip emojis for PDF compatibility
+  const title = stripEmojis(template.title) || 'Notion Template'
   const titleFontSize = Math.min(36, 500 / (title.length * 0.5))
   page.drawText(title, {
     x: 50, y: height - 100,
@@ -349,21 +349,19 @@ async function generatePDF(template, colorTheme) {
     color: rgb(1, 1, 1)
   })
   
-  // Emoji
-  if (template.emoji) {
-    page.drawText('Template', {
-      x: 50, y: height - 130,
-      size: 14,
-      font: font,
-      color: rgb(1, 1, 1, 0.8)
-    })
-  }
+  // Subtitle
+  page.drawText('Notion Template', {
+    x: 50, y: height - 130,
+    size: 14,
+    font: font,
+    color: rgb(1, 1, 1)
+  })
   
-  // Description
-  const desc = template.description || ''
+  // Description - strip emojis
+  const desc = stripEmojis(template.description) || ''
   const descLines = desc.match(/.{1,70}/g) || []
   descLines.slice(0, 3).forEach((line, i) => {
-    page.drawText(line, {
+    page.drawText(stripEmojis(line), {
       x: 50, y: height - 200 - (i * 20),
       size: 12,
       font: font,
@@ -384,7 +382,8 @@ async function generatePDF(template, colorTheme) {
   template.properties.forEach((prop, idx) => {
     if (yPos < 100) return
     
-    const propText = `${prop.icon || '•'} ${prop.name} (${prop.type})`
+    // Use bullet point instead of emoji icon for PDF
+    const propText = `* ${stripEmojis(prop.name)} (${prop.type})`
     page.drawText(propText, {
       x: 70, y: yPos,
       size: 11,
@@ -393,7 +392,7 @@ async function generatePDF(template, colorTheme) {
     })
     
     if (prop.options && prop.options.length > 0) {
-      const optionsText = `   Options: ${prop.options.slice(0, 4).join(', ')}${prop.options.length > 4 ? '...' : ''}`
+      const optionsText = `   Options: ${prop.options.slice(0, 4).map(o => stripEmojis(o)).join(', ')}${prop.options.length > 4 ? '...' : ''}`
       yPos -= 15
       page.drawText(optionsText, {
         x: 90, y: yPos,
@@ -419,7 +418,7 @@ async function generatePDF(template, colorTheme) {
     yPos -= 25
     template.views.forEach(view => {
       if (yPos < 100) return
-      page.drawText(`• ${view.name} (${view.type})`, {
+      page.drawText(`* ${stripEmojis(view.name)} (${view.type})`, {
         x: 70, y: yPos,
         size: 11,
         font: font,
