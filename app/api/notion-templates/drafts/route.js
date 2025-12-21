@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
-import clientPromise from '@/lib/mongodb'
+import { getCollection } from '@/lib/mongodb'
 
 // GET - Fetch all drafts
 export async function GET() {
   try {
-    const client = await clientPromise
-    const db = client.db()
+    const draftsCollection = await getCollection('drafts')
     
-    const drafts = await db.collection('drafts')
+    const drafts = await draftsCollection
       .find({ tool: 'notion-templates' })
       .sort({ updatedAt: -1 })
       .toArray()
@@ -36,12 +35,10 @@ export async function POST(request) {
     const body = await request.json()
     const { id, title, subtitle, step, data } = body
     
-    const client = await clientPromise
-    const db = client.db()
-    
+    const draftsCollection = await getCollection('drafts')
     const draftId = id || uuidv4()
     
-    await db.collection('drafts').updateOne(
+    await draftsCollection.updateOne(
       { id: draftId, tool: 'notion-templates' },
       {
         $set: {
@@ -77,10 +74,8 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Draft ID required' }, { status: 400 })
     }
     
-    const client = await clientPromise
-    const db = client.db()
-    
-    await db.collection('drafts').deleteOne({ id, tool: 'notion-templates' })
+    const draftsCollection = await getCollection('drafts')
+    await draftsCollection.deleteOne({ id, tool: 'notion-templates' })
     
     return NextResponse.json({ success: true })
   } catch (error) {
