@@ -306,106 +306,248 @@ function generateCSV(template) {
   return allCSV
 }
 
-// Generate comprehensive Markdown export
+// Generate comprehensive Markdown Setup Guide
 function generateMarkdown(template) {
-  let md = `# ${template.emoji || ''} ${template.title}\n\n`
+  let md = ''
+  
+  // Header
+  md += `# ${template.emoji || ''} ${template.title}\n\n`
   
   if (template.tagline) {
-    md += `> ${template.tagline}\n\n`
+    md += `> **${template.tagline}**\n\n`
   }
   
   md += `${template.description || ''}\n\n`
+  
+  // Important Notice Box
+  md += `---\n\n`
+  md += `## IMPORTANT: This is a Setup Guide\n\n`
+  md += `This document is a **blueprint** to help you build the complete template in Notion.\n\n`
+  md += `**What this file provides:**\n`
+  md += `- Complete database structures with all properties\n`
+  md += `- Sample data you can copy\n`
+  md += `- Step-by-step setup instructions\n`
+  md += `- View configurations to create\n\n`
+  md += `**What you need to do manually in Notion:**\n`
+  md += `- Create the databases (one for each listed below)\n`
+  md += `- Add the properties with correct types\n`
+  md += `- Create views (Board, Calendar, etc.)\n`
+  md += `- Add a cover image and icon\n`
+  md += `- Arrange the dashboard layout\n\n`
+  md += `*Estimated setup time: 15-30 minutes*\n\n`
   md += `---\n\n`
   
-  // Getting Started Guide
+  // Quick Start Guide
+  md += `## Quick Start Guide\n\n`
+  md += `### Step 1: Create a New Page\n`
+  md += `1. Open Notion and create a new page\n`
+  md += `2. Add an icon: ${template.emoji || '📋'}\n`
+  md += `3. Add a cover image (gradient or photo)\n`
+  md += `4. Title it: "${template.title}"\n\n`
+  
+  // Getting Started content
   if (template.gettingStarted && template.gettingStarted.length > 0) {
-    md += `## Getting Started\n\n`
-    template.gettingStarted.forEach(step => {
+    md += `### Step 2: Understand the System\n\n`
+    template.gettingStarted.forEach((step, idx) => {
       md += `${step}\n\n`
     })
-    md += `---\n\n`
   }
   
-  // Dashboard Sections
-  if (template.dashboardSections && template.dashboardSections.length > 0) {
-    md += `## Dashboard Overview\n\n`
-    md += `Your dashboard includes these key sections:\n\n`
-    template.dashboardSections.forEach(section => {
-      md += `- **${section.title}** - ${section.description}\n`
-    })
-    md += `\n---\n\n`
-  }
+  md += `---\n\n`
   
-  // Multiple Databases
+  // Databases Section - DETAILED
   const databases = template.databases && template.databases.length > 0 
     ? template.databases 
     : [{ name: 'Main Database', emoji: '📊', properties: template.properties, sampleData: template.sampleData }]
   
-  md += `## Databases (${databases.length})\n\n`
+  md += `## Databases to Create (${databases.length})\n\n`
+  md += `Create each database as an **inline database** on your main page.\n\n`
   
   databases.forEach((db, idx) => {
-    md += `### ${db.emoji || '📊'} ${db.name}\n\n`
+    md += `### Database ${idx + 1}: ${db.emoji || '📊'} ${db.name}\n\n`
+    
     if (db.description) {
-      md += `${db.description}\n\n`
+      md += `**Purpose:** ${db.description}\n\n`
     }
     
-    // Properties table
+    // Setup Instructions
+    md += `**How to create:**\n`
+    md += `1. Type \`/database\` and select "Database - Inline"\n`
+    md += `2. Name it "${db.name}"\n`
+    md += `3. Add the properties below\n\n`
+    
+    // Properties table with setup instructions
     if (db.properties && db.properties.length > 0) {
-      md += `#### Properties\n\n`
-      md += `| Property | Type | Options |\n`
-      md += `|----------|------|---------|\n`
+      md += `**Properties to add:**\n\n`
+      md += `| # | Property Name | Type | How to Set Up |\n`
+      md += `|---|--------------|------|---------------|\n`
       
-      db.properties.forEach(prop => {
-        const options = prop.options ? prop.options.slice(0, 4).join(', ') + (prop.options.length > 4 ? '...' : '') : '-'
-        md += `| ${prop.icon || ''} ${prop.name} | ${prop.type} | ${options} |\n`
+      db.properties.forEach((prop, propIdx) => {
+        let setupInstructions = ''
+        switch (prop.type) {
+          case 'title':
+            setupInstructions = 'Already exists as "Name" - rename it'
+            break
+          case 'select':
+            setupInstructions = `Add options: ${(prop.options || []).slice(0, 3).join(', ')}${(prop.options || []).length > 3 ? '...' : ''}`
+            break
+          case 'multi_select':
+            setupInstructions = `Multi-select with: ${(prop.options || []).slice(0, 3).join(', ')}${(prop.options || []).length > 3 ? '...' : ''}`
+            break
+          case 'number':
+            setupInstructions = 'Number format (or currency if money)'
+            break
+          case 'date':
+            setupInstructions = 'Date property'
+            break
+          case 'checkbox':
+            setupInstructions = 'Checkbox'
+            break
+          case 'url':
+            setupInstructions = 'URL property'
+            break
+          case 'email':
+            setupInstructions = 'Email property'
+            break
+          case 'person':
+            setupInstructions = 'Person property'
+            break
+          case 'files':
+            setupInstructions = 'Files & media'
+            break
+          case 'relation':
+            setupInstructions = 'Relation to another database'
+            break
+          case 'formula':
+            setupInstructions = 'Formula (configure after other properties)'
+            break
+          default:
+            setupInstructions = `${prop.type} property`
+        }
+        md += `| ${propIdx + 1} | ${prop.icon || ''} ${prop.name} | ${prop.type} | ${setupInstructions} |\n`
       })
       md += '\n'
+      
+      // Select/Multi-select options detail
+      const selectProps = db.properties.filter(p => p.type === 'select' || p.type === 'multi_select')
+      if (selectProps.length > 0) {
+        md += `**Select/Multi-select Options:**\n\n`
+        selectProps.forEach(prop => {
+          if (prop.options && prop.options.length > 0) {
+            md += `- **${prop.name}**: ${prop.options.join(', ')}\n`
+          }
+        })
+        md += '\n'
+      }
     }
     
     // Sample Data
     if (db.sampleData && db.sampleData.length > 0) {
-      md += `#### Sample Data\n\n`
-      const headers = (db.properties || []).slice(0, 4).map(p => p.name)
+      md += `**Sample Data (copy these entries):**\n\n`
+      const headers = (db.properties || []).slice(0, 5).map(p => p.name)
       md += `| ${headers.join(' | ')} |\n`
       md += `| ${headers.map(() => '---').join(' | ')} |\n`
       
-      db.sampleData.slice(0, 5).forEach(row => {
+      db.sampleData.forEach(row => {
         const cells = headers.map(h => {
           const val = row[h]
           if (val === undefined || val === null) return '-'
           if (Array.isArray(val)) return val.slice(0, 2).join(', ')
-          return String(val).substring(0, 30)
+          return String(val).substring(0, 35)
         })
         md += `| ${cells.join(' | ')} |\n`
       })
       md += '\n'
     }
     
-    if (idx < databases.length - 1) {
-      md += `---\n\n`
-    }
+    md += `---\n\n`
   })
   
-  // Views
+  // Views Section
   const allViews = template.allViews || template.views || []
   if (allViews.length > 0) {
-    md += `\n## Pre-configured Views\n\n`
-    allViews.forEach(view => {
-      md += `- **${view.name}** (${view.type})`
-      if (view.groupBy) md += ` - Grouped by: ${view.groupBy}`
-      if (view.filter) md += ` - Filter: ${view.filter}`
+    md += `## Views to Create\n\n`
+    md += `After creating your databases, add these views for better organization:\n\n`
+    
+    allViews.forEach((view, idx) => {
+      md += `### View ${idx + 1}: ${view.name}\n`
+      md += `- **Type:** ${view.type.charAt(0).toUpperCase() + view.type.slice(1)} view\n`
+      if (view.groupBy) md += `- **Group by:** ${view.groupBy}\n`
+      if (view.filter) md += `- **Filter:** ${view.filter}\n`
+      if (view.database) md += `- **Database:** ${view.database}\n`
+      
+      // How to create this view
+      md += `- **How to create:** Click "+ Add a view" > Select "${view.type}" > Configure grouping/filters\n`
       md += '\n'
     })
+    
+    md += `---\n\n`
   }
   
-  md += `\n---\n\n`
-  md += `## How to Use This Template\n\n`
-  md += `1. Import this file into Notion using "Import" > "Text & Markdown"\n`
-  md += `2. Create new databases based on the structure above\n`
-  md += `3. Add the properties listed for each database\n`
-  md += `4. Create the suggested views (Board, Calendar, etc.)\n`
-  md += `5. Customize colors and layout to your preference\n\n`
-  md += `*Generated with Notion Template Maker*\n`
+  // Dashboard Layout Section
+  if (template.dashboardSections && template.dashboardSections.length > 0) {
+    md += `## Dashboard Layout\n\n`
+    md += `Arrange these sections on your main page for an organized dashboard:\n\n`
+    
+    template.dashboardSections.forEach((section, idx) => {
+      md += `### ${idx + 1}. ${section.title}\n`
+      md += `- **Purpose:** ${section.description}\n`
+      md += `- **Type:** ${section.type}\n`
+      
+      switch (section.type) {
+        case 'chart':
+          md += `- **How to create:** Use a linked database view with chart visualization, or embed a chart widget\n`
+          break
+        case 'metric':
+          md += `- **How to create:** Use a callout block with the number, or a formula rollup\n`
+          break
+        case 'progress':
+          md += `- **How to create:** Use progress bars or a linked database showing completion status\n`
+          break
+        case 'funnel':
+          md += `- **How to create:** Use a Board view grouped by status/stage\n`
+          break
+        case 'list':
+        case 'table':
+          md += `- **How to create:** Add a linked database with filtered view\n`
+          break
+        case 'calendar':
+          md += `- **How to create:** Add a Calendar view of the relevant database\n`
+          break
+        default:
+          md += `- **How to create:** Add appropriate Notion blocks or linked database views\n`
+      }
+      md += '\n'
+    })
+    
+    md += `---\n\n`
+  }
+  
+  // Tips Section
+  md += `## Pro Tips\n\n`
+  md += `**Make it look professional:**\n`
+  md += `- Add a gradient cover image (Unsplash has great free ones)\n`
+  md += `- Use consistent emoji icons for all databases\n`
+  md += `- Create a "Quick Actions" section with buttons using callout blocks\n`
+  md += `- Use dividers and headings to organize sections\n`
+  md += `- Add a toggle for the "Getting Started" guide\n\n`
+  
+  md += `**Improve functionality:**\n`
+  md += `- Set up Relations between databases (e.g., Deals -> Companies)\n`
+  md += `- Create Rollup properties to show related data\n`
+  md += `- Use Formula properties for calculations\n`
+  md += `- Create filtered views for "My Items" or "This Week"\n`
+  md += `- Pin your most-used views\n\n`
+  
+  md += `---\n\n`
+  md += `## Need Help?\n\n`
+  md += `- [Notion Help Center](https://notion.so/help)\n`
+  md += `- [Notion Database Guide](https://notion.so/help/databases)\n`
+  md += `- [Notion Templates Gallery](https://notion.so/templates)\n\n`
+  
+  md += `---\n\n`
+  md += `*Template blueprint generated with Notion Template Maker*\n`
+  md += `*Follow the steps above to recreate this ${databases.length}-database system*\n`
   
   return md
 }
