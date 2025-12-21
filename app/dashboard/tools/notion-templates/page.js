@@ -812,28 +812,19 @@ export default function NotionTemplateMakerPage() {
               {/* Export Options */}
               <div className="space-y-3">
                 <Label className="text-base font-semibold">Export Format</Label>
+                <p className="text-sm text-muted-foreground">Choose a format compatible with Notion's import</p>
                 <div className="grid md:grid-cols-3 gap-4">
                   <button
-                    onClick={() => exportTemplate('json')}
+                    onClick={() => exportTemplate('csv')}
                     disabled={loading}
                     className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all text-left"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <FileJson className="h-5 w-5 text-blue-500" />
-                      <span className="font-semibold">Notion JSON</span>
+                      <Table className="h-5 w-5 text-green-500" />
+                      <span className="font-semibold">CSV Database</span>
+                      <Badge variant="secondary" className="text-xs">Notion Import</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">Import directly into Notion</p>
-                  </button>
-                  <button
-                    onClick={() => exportTemplate('pdf')}
-                    disabled={loading}
-                    className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all text-left"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-5 w-5 text-red-500" />
-                      <span className="font-semibold">PDF Preview</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">For showcasing/selling</p>
+                    <p className="text-sm text-muted-foreground">Import as Notion database with all properties</p>
                   </button>
                   <button
                     onClick={() => exportTemplate('markdown')}
@@ -841,10 +832,22 @@ export default function NotionTemplateMakerPage() {
                     className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all text-left"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Globe className="h-5 w-5 text-green-500" />
+                      <FileText className="h-5 w-5 text-blue-500" />
                       <span className="font-semibold">Markdown</span>
+                      <Badge variant="secondary" className="text-xs">Notion Import</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">Universal format</p>
+                    <p className="text-sm text-muted-foreground">Import as Notion page with formatted content</p>
+                  </button>
+                  <button
+                    onClick={() => exportTemplate('pdf')}
+                    disabled={loading}
+                    className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all text-left"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileJson className="h-5 w-5 text-red-500" />
+                      <span className="font-semibold">PDF Preview</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">For showcasing or selling your template</p>
                   </button>
                 </div>
               </div>
