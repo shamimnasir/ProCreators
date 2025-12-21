@@ -1219,8 +1219,8 @@ export default function NotionTemplateMakerPage() {
                 {exportFormat === 'csv' && (
                   <>
                     <li>Open Notion and go to your workspace</li>
-                    <li>Click "Import" from the sidebar (or ... menu → Import)</li>
-                    <li>Select "CSV" and upload the downloaded file</li>
+                    <li>Click &quot;Import&quot; from the sidebar (or ... menu → Import)</li>
+                    <li>Select &quot;CSV&quot; and upload the downloaded file</li>
                     <li>Notion will create a new database with your data!</li>
                   </>
                 )}
