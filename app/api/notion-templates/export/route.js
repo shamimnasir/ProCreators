@@ -260,13 +260,51 @@ function generateNotionJSON(template) {
   }
 }
 
+// Generate CSV export (Notion-compatible)
+function generateCSV(template) {
+  // Get all property names for headers
+  const headers = template.properties.map(p => p.name)
+  
+  // Escape CSV values
+  const escapeCSV = (val) => {
+    if (val === undefined || val === null) return ''
+    let str = String(val)
+    // If contains comma, newline, or quote, wrap in quotes and escape internal quotes
+    if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+      str = '"' + str.replace(/"/g, '""') + '"'
+    }
+    return str
+  }
+  
+  // Create header row
+  let csv = headers.map(h => escapeCSV(h)).join(',') + '\n'
+  
+  // Add data rows
+  if (template.sampleData && template.sampleData.length > 0) {
+    template.sampleData.forEach(row => {
+      const cells = headers.map(h => {
+        const val = row[h]
+        if (Array.isArray(val)) return escapeCSV(val.join(', '))
+        return escapeCSV(val)
+      })
+      csv += cells.join(',') + '\n'
+    })
+  } else {
+    // Add empty template rows if no sample data
+    // This helps users understand the structure
+    csv += headers.map(() => '').join(',') + '\n'
+  }
+  
+  return csv
+}
+
 // Generate Markdown export
 function generateMarkdown(template) {
   let md = `# ${template.emoji || ''} ${template.title}\n\n`
   md += `${template.description}\n\n`
   md += `---\n\n`
   
-  md += `## 📊 Database Properties\n\n`
+  md += `## Database Properties\n\n`
   md += `| Property | Type | Options |\n`
   md += `|----------|------|---------|\n`
   
@@ -275,7 +313,7 @@ function generateMarkdown(template) {
     md += `| ${prop.icon || ''} ${prop.name} | ${prop.type} | ${options} |\n`
   })
   
-  md += `\n## 👁️ Views\n\n`
+  md += `\n## Views\n\n`
   template.views.forEach(view => {
     md += `- **${view.name}** (${view.type})\n`
     if (view.groupBy) md += `  - Grouped by: ${view.groupBy}\n`
@@ -283,7 +321,7 @@ function generateMarkdown(template) {
   })
   
   if (template.sampleData && template.sampleData.length > 0) {
-    md += `\n## 📝 Sample Data\n\n`
+    md += `\n## Sample Data\n\n`
     
     // Create table header
     const headers = template.properties.slice(0, 5).map(p => p.name)
@@ -304,6 +342,11 @@ function generateMarkdown(template) {
   
   md += `\n---\n\n`
   md += `*Generated with Notion Template Maker*\n`
+  md += `\n## How to Use This Template\n\n`
+  md += `1. Import this file into Notion using "Import" > "Text & Markdown"\n`
+  md += `2. Create a new database and add the properties listed above\n`
+  md += `3. Copy the sample data or add your own items\n`
+  md += `4. Customize views based on your workflow\n`
   
   return md
 }
