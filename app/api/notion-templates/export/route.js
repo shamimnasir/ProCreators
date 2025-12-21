@@ -409,18 +409,6 @@ function generateMarkdown(template) {
   
   return md
 }
-  }
-  
-  md += `\n---\n\n`
-  md += `*Generated with Notion Template Maker*\n`
-  md += `\n## How to Use This Template\n\n`
-  md += `1. Import this file into Notion using "Import" > "Text & Markdown"\n`
-  md += `2. Create a new database and add the properties listed above\n`
-  md += `3. Copy the sample data or add your own items\n`
-  md += `4. Customize views based on your workflow\n`
-  
-  return md
-}
 
 // Generate PDF preview
 async function generatePDF(template, colorTheme) {
