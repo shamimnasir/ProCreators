@@ -1125,7 +1125,7 @@ export default function NotionTemplateMakerPage() {
               {/* Export Options */}
               <div className="space-y-3">
                 <Label className="text-base font-semibold">Export Format</Label>
-                <p className="text-sm text-muted-foreground">Choose a format compatible with Notion's import</p>
+                <p className="text-sm text-muted-foreground">Choose a format compatible with Notion&apos;s import</p>
                 <div className="grid md:grid-cols-3 gap-4">
                   <button
                     onClick={() => exportTemplate('csv')}
