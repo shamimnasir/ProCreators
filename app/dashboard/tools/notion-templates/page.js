@@ -1123,10 +1123,38 @@ export default function NotionTemplateMakerPage() {
               )}
 
               {/* Export Options */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Export Format</Label>
-                <p className="text-sm text-muted-foreground">Choose a format compatible with Notion&apos;s import</p>
+              <div className="space-y-4">
+                {/* Important Notice */}
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <h4 className="font-semibold text-amber-800 flex items-center gap-2 mb-2">
+                    <span className="text-lg">⚠️</span> Important: About Exports
+                  </h4>
+                  <p className="text-sm text-amber-700 mb-2">
+                    The preview above shows what your template <strong>can look like</strong> after setup. 
+                    Notion&apos;s import creates the basic structure - you&apos;ll need to add the visual polish manually.
+                  </p>
+                  <p className="text-xs text-amber-600">
+                    The Markdown export includes a complete setup guide with step-by-step instructions.
+                  </p>
+                </div>
+
+                <Label className="text-base font-semibold">Choose Export Format</Label>
                 <div className="grid md:grid-cols-3 gap-4">
+                  <button
+                    onClick={() => exportTemplate('markdown')}
+                    disabled={loading}
+                    className="p-4 rounded-lg border-2 border-blue-200 bg-blue-50 hover:border-blue-400 transition-all text-left relative"
+                  >
+                    <Badge className="absolute -top-2 -right-2 bg-blue-500">Recommended</Badge>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <span className="font-semibold">Setup Guide</span>
+                    </div>
+                    <p className="text-sm text-blue-700 font-medium mb-1">Complete Blueprint</p>
+                    <p className="text-xs text-blue-600">
+                      Step-by-step instructions to recreate the full template with all {generatedTemplate.databases?.length || 1} databases, views, and dashboard
+                    </p>
+                  </button>
                   <button
                     onClick={() => exportTemplate('csv')}
                     disabled={loading}
@@ -1134,22 +1162,12 @@ export default function NotionTemplateMakerPage() {
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <Table className="h-5 w-5 text-green-500" />
-                      <span className="font-semibold">CSV Database</span>
-                      <Badge variant="secondary" className="text-xs">Notion Import</Badge>
+                      <span className="font-semibold">CSV Data</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">Import as Notion database with all properties</p>
-                  </button>
-                  <button
-                    onClick={() => exportTemplate('markdown')}
-                    disabled={loading}
-                    className="p-4 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all text-left"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-5 w-5 text-blue-500" />
-                      <span className="font-semibold">Markdown</span>
-                      <Badge variant="secondary" className="text-xs">Notion Import</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Import as Notion page with formatted content</p>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Quick Database Import</p>
+                    <p className="text-xs text-muted-foreground">
+                      Imports main database with data directly. Good for quick start but only 1 database.
+                    </p>
                   </button>
                   <button
                     onClick={() => exportTemplate('pdf')}
@@ -1160,7 +1178,10 @@ export default function NotionTemplateMakerPage() {
                       <FileJson className="h-5 w-5 text-red-500" />
                       <span className="font-semibold">PDF Preview</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">For showcasing or selling your template</p>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">For Selling</p>
+                    <p className="text-xs text-muted-foreground">
+                      Visual preview to showcase/sell your template on Gumroad or Etsy
+                    </p>
                   </button>
                 </div>
               </div>
