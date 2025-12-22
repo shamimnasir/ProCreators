@@ -251,6 +251,10 @@ export default function NotionTemplateMakerPage() {
 
   // Start new template
   const startNew = () => {
+    // First, remove localStorage to prevent it from being restored
+    localStorage.removeItem('notion-template-progress')
+    
+    // Reset all state
     setSelectedCategory(null)
     setSelectedSubcategory(null)
     setTemplateName('')
@@ -265,8 +269,13 @@ export default function NotionTemplateMakerPage() {
     setStep(1)
     setCurrentDraftId(null)
     setShowDrafts(false)
-    localStorage.removeItem('notion-template-progress')
-    toast({ title: "Ready for New Template" })
+    
+    // Clear localStorage again after state reset to prevent auto-save from restoring old data
+    setTimeout(() => {
+      localStorage.removeItem('notion-template-progress')
+    }, 100)
+    
+    toast({ title: "Ready for New Template", description: "Starting fresh!" })
   }
 
   // Handle category selection
