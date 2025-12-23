@@ -650,6 +650,44 @@ export default function FlashcardMakerPage() {
             <CardDescription>Configure your flashcard book settings for KDP</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Creation Mode Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Choose Creation Mode</Label>
+              <div className="grid md:grid-cols-2 gap-4">
+                {CREATION_MODES.map((mode) => {
+                  const IconComponent = mode.icon
+                  return (
+                    <button
+                      key={mode.id}
+                      onClick={() => setCreationMode(mode.id)}
+                      className={`p-6 rounded-xl border-2 text-left transition-all hover:scale-105 ${
+                        creationMode === mode.id 
+                          ? 'border-primary bg-gradient-to-br ' + mode.color + ' text-white shadow-lg' 
+                          : 'border-gray-200 hover:border-primary/50 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-lg ${creationMode === mode.id ? 'bg-white/20' : 'bg-primary/10'}`}>
+                          <IconComponent className={`h-6 w-6 ${creationMode === mode.id ? 'text-white' : 'text-primary'}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className={`font-semibold text-lg mb-2 ${creationMode === mode.id ? 'text-white' : 'text-gray-900'}`}>
+                            {mode.name}
+                          </h3>
+                          <p className={`text-sm ${creationMode === mode.id ? 'text-white/90' : 'text-gray-600'}`}>
+                            {mode.description}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Show different content based on creation mode */}
+            {creationMode === 'educational' && (
+              <>
             {/* Basic Info */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
