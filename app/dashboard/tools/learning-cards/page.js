@@ -618,25 +618,28 @@ export default function FlashcardMakerPage() {
 
       {/* Progress Steps */}
       <div className="flex items-center justify-center gap-2">
-        {[1, 2, 3, 4].map((s) => (
+        {(creationMode === 'educational' ? [1, 2, 3, 4] : [1, 4]).map((s, idx) => (
           <div key={s} className="flex items-center">
             <button
-              onClick={() => s < step && setStep(s)}
-              disabled={s > step}
+              onClick={() => s < step && creationMode === 'educational' && setStep(s)}
+              disabled={s > step || creationMode === 'blank-template'}
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
                 step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-              } ${s < step ? 'cursor-pointer hover:scale-110' : s > step ? 'cursor-not-allowed opacity-60' : ''}`}
+              } ${s < step && creationMode === 'educational' ? 'cursor-pointer hover:scale-110' : s > step || creationMode === 'blank-template' ? 'cursor-not-allowed opacity-60' : ''}`}
             >
               {step > s ? <CheckCircle className="h-5 w-5" /> : s}
             </button>
-            {s < 4 && <div className={`w-12 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
+            {idx < (creationMode === 'educational' ? 3 : 1) && <div className={`w-12 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
           </div>
         ))}
       </div>
       <div className="flex justify-center gap-12 text-xs text-muted-foreground">
-        {['Setup', 'Cards', 'Generate', 'Export'].map((label, idx) => (
-          <span key={label} className={step === idx + 1 ? 'text-primary font-medium' : ''}>{label}</span>
-        ))}
+        {(creationMode === 'educational' ? ['Setup', 'Cards', 'Generate', 'Export'] : ['Setup', 'Export']).map((label, idx) => {
+          const stepNum = creationMode === 'educational' ? idx + 1 : (idx === 0 ? 1 : 4)
+          return (
+            <span key={label} className={step === stepNum ? 'text-primary font-medium' : ''}>{label}</span>
+          )
+        })}
       </div>
 
       {/* Step 1: Setup */}
