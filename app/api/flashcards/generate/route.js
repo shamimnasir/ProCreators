@@ -1,8 +1,63 @@
 import { NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { spawn } from 'child_process'
+import path from 'path'
 
-// Initialize Gemini with Emergent LLM key
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+// Helper to call the Python script for text generation
+async function generateWithGemini(prompt, systemMessage = 'You are an expert educator creating flashcard content.') {
+  return new Promise((resolve) => {
+    const scriptPath = path.join(process.cwd(), 'lib', 'gemini-text.py')
+    
+    const inputData = JSON.stringify({
+      prompt,
+      systemMessage
+    })
+    
+    const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath], {
+      env: { ...process.env }
+    })
+    
+    let stdout = ''
+    let stderr = ''
+    
+    pythonProcess.stdin.write(inputData)
+    pythonProcess.stdin.end()
+    
+    pythonProcess.stdout.on('data', (data) => {
+      stdout += data.toString()
+    })
+    
+    pythonProcess.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+    
+    pythonProcess.on('close', (code) => {
+      if (code !== 0) {
+        console.error('AI generation error:', stderr)
+        resolve({ success: false, content: null, error: stderr })
+        return
+      }
+      
+      try {
+        const result = JSON.parse(stdout)
+        resolve(result)
+      } catch (error) {
+        console.error('Error parsing AI response:', error)
+        resolve({ success: false, content: null, error: 'Failed to parse response' })
+      }
+    })
+    
+    pythonProcess.on('error', (error) => {
+      console.error('Error spawning Python process:', error)
+      resolve({ success: false, content: null, error: error.message })
+    })
+    
+    // Timeout after 45 seconds
+    setTimeout(() => {
+      pythonProcess.kill()
+      resolve({ success: false, content: null, error: 'AI generation timed out' })
+    }, 45000)
+  })
+}
 
 // Comprehensive flashcard content database by topic/category (fallback)
 const FLASHCARD_DATABASE = {
