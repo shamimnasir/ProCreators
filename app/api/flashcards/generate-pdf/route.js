@@ -141,7 +141,7 @@ export async function POST(request) {
       y: 50,
       size: 10,
       font: font,
-      color: rgb(1, 1, 1, 0.6)
+      color: rgb(textColorFront.r, textColorFront.g, textColorFront.b, 0.6)
     })
     
     // ============ PAGE 2: Instructions Page ============
@@ -158,7 +158,7 @@ export async function POST(request) {
         x: 50, y: height - 50,
         size: 24,
         font: fontBold,
-        color: rgb(1, 1, 1)
+        color: rgb(textColorFront.r, textColorFront.g, textColorFront.b)
       })
       
       // Instructions
