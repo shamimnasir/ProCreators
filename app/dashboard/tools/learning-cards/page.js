@@ -11,12 +11,58 @@ import {
   Loader2, Download, ArrowLeft, ArrowRight, Sparkles, CheckCircle,
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
   Plus, FlipVertical, Layers, Palette, BookOpen, GraduationCap,
-  Brain, Target, Lightbulb, X, Copy, Eye, RotateCcw, Scissors
+  Brain, Target, Lightbulb, X, Copy, Eye, RotateCcw, Scissors,
+  FileText, AlignLeft, Grid, Minus
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
+
+// Pack Creation Modes
+const CREATION_MODES = [
+  {
+    id: 'educational',
+    name: 'Educational Flashcards',
+    icon: GraduationCap,
+    description: 'Create flashcards with Q&A content using AI or manual input',
+    color: 'from-blue-500 to-indigo-600'
+  },
+  {
+    id: 'blank-template',
+    name: 'Blank/Lined Templates',
+    icon: FileText,
+    description: 'Generate 300-1000+ pages of blank or lined flashcard templates for KDP',
+    color: 'from-emerald-500 to-teal-600'
+  }
+]
+
+// Blank/Lined Template Styles
+const TEMPLATE_STYLES = [
+  { id: 'blank', name: 'Blank', description: 'Completely blank cards', icon: Grid },
+  { id: 'lined', name: 'Lined', description: 'Horizontal lines on both sides', icon: AlignLeft },
+  { id: 'ruled-blank', name: 'Ruled Front / Blank Back', description: 'Lines on front, blank on back', icon: FileText },
+  { id: 'dotted', name: 'Dotted Grid', description: 'Dot grid pattern for flexibility', icon: Grid }
+]
+
+// Card Colors for Templates
+const CARD_COLORS = [
+  { id: 'white', name: 'White', hex: '#ffffff', border: '#e5e7eb' },
+  { id: 'cream', name: 'Cream', hex: '#fef9e7', border: '#fde68a' },
+  { id: 'pink', name: 'Pastel Pink', hex: '#fce7f3', border: '#f9a8d4' },
+  { id: 'blue', name: 'Pastel Blue', hex: '#dbeafe', border: '#93c5fd' },
+  { id: 'green', name: 'Pastel Green', hex: '#dcfce7', border: '#86efac' },
+  { id: 'yellow', name: 'Pastel Yellow', hex: '#fef9c3', border: '#fde047' },
+  { id: 'purple', name: 'Pastel Purple', hex: '#f3e8ff', border: '#d8b4fe' },
+  { id: 'assorted', name: 'Assorted Colors', hex: 'assorted', border: '#94a3b8' }
+]
+
+// Index Card Sizes (for blank templates)
+const INDEX_CARD_SIZES = [
+  { id: '3x5', name: '3" x 5"', width: 3, height: 5, description: 'Standard index card size', popular: true },
+  { id: '4x6', name: '4" x 6"', width: 4, height: 6, description: 'Larger index card size', popular: true },
+  { id: '5x7', name: '5" x 7"', width: 5, height: 7, description: 'Extra large cards', popular: false }
+]
 
 // KDP Compliant Sizes for Flashcard Books
 const KDP_SIZES = [
