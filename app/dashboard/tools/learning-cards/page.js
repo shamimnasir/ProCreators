@@ -492,6 +492,43 @@ export default function FlashcardMakerPage() {
     }
   }
 
+  // Generate Blank Template PDF
+  const generateBlankTemplate = async () => {
+    if (!packTitle.trim() && !customTitle.trim()) {
+      toast({ title: "Enter a title", variant: "destructive" })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/flashcards/generate-blank-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: customTitle || packTitle || 'Blank Flashcard Templates',
+          templateStyle,
+          cardColor: CARD_COLORS.find(c => c.id === cardColor),
+          indexCardSize: INDEX_CARD_SIZES.find(s => s.id === indexCardSize),
+          pageCount,
+          includeTitle,
+          kdpSize,
+          paperOption
+        })
+      })
+
+      const data = await response.json()
+      if (!data.success) throw new Error(data.error)
+
+      setResult(data)
+      setStep(4)
+      toast({ title: "Template Generated!", description: `${pageCount} pages of ${templateStyle} templates ready` })
+    } catch (error) {
+      toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const selectedSize = KDP_SIZES.find(s => s.id === kdpSize)
   const selectedPaper = PAPER_OPTIONS.find(p => p.id === paperOption)
   const selectedTheme = COLOR_THEMES.find(t => t.id === colorTheme)
