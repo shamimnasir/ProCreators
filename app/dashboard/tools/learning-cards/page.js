@@ -800,9 +800,130 @@ export default function FlashcardMakerPage() {
                 ))}
               </div>
             </div>
+              </>
+            )}
 
-            <Button className="w-full" size="lg" onClick={() => setStep(2)} disabled={!packTitle}>
-              Continue to Add Cards <ArrowRight className="ml-2 h-4 w-4" />
+            {/* Blank Template Configuration */}
+            {creationMode === 'blank-template' && (
+              <>
+                {/* Template Title */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Template Title *</Label>
+                    <Input
+                      value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
+                      placeholder="e.g., Blank Index Cards for Study"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Page Count</Label>
+                    <Select value={pageCount.toString()} onValueChange={(v) => setPageCount(parseInt(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">300 pages</SelectItem>
+                        <SelectItem value="500">500 pages</SelectItem>
+                        <SelectItem value="750">750 pages</SelectItem>
+                        <SelectItem value="1000">1000 pages</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Template Style */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Grid className="h-4 w-4" /> Template Style
+                  </Label>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {TEMPLATE_STYLES.map((style) => {
+                      const IconComponent = style.icon
+                      return (
+                        <button
+                          key={style.id}
+                          onClick={() => setTemplateStyle(style.id)}
+                          className={`p-4 rounded-lg border text-left transition-all ${
+                            templateStyle === style.id ? 'border-primary bg-primary/10 ring-1 ring-primary' : 'hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <IconComponent className="h-5 w-5 text-primary" />
+                            <span className="font-semibold">{style.name}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{style.description}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Index Card Size */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Scissors className="h-4 w-4" /> Index Card Size
+                  </Label>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    {INDEX_CARD_SIZES.map((size) => (
+                      <button
+                        key={size.id}
+                        onClick={() => setIndexCardSize(size.id)}
+                        className={`p-4 rounded-lg border text-left transition-all ${
+                          indexCardSize === size.id ? 'border-primary bg-primary/10 ring-1 ring-primary' : 'hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold">{size.name}</span>
+                          {size.popular && <Badge variant="secondary" className="text-xs">Popular</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{size.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Colors */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Palette className="h-4 w-4" /> Card Colors
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    {CARD_COLORS.map((color) => (
+                      <button
+                        key={color.id}
+                        onClick={() => setCardColor(color.id)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+                          cardColor === color.id ? 'border-primary ring-1 ring-primary' : 'hover:border-primary/50'
+                        }`}
+                      >
+                        <div 
+                          className="w-4 h-4 rounded border" 
+                          style={{ 
+                            backgroundColor: color.hex === 'assorted' ? '#f3f4f6' : color.hex,
+                            borderColor: color.border,
+                            backgroundImage: color.hex === 'assorted' ? 'linear-gradient(45deg, #fce7f3 25%, #dbeafe 25%, #dbeafe 50%, #dcfce7 50%, #dcfce7 75%, #fef9c3 75%)' : 'none'
+                          }} 
+                        />
+                        <span className="text-sm">{color.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <Button 
+              className="w-full" 
+              size="lg" 
+              onClick={() => creationMode === 'educational' ? setStep(2) : setStep(4)} 
+              disabled={creationMode === 'educational' ? !packTitle : !customTitle}
+            >
+              {creationMode === 'educational' ? (
+                <>Continue to Add Cards <ArrowRight className="ml-2 h-4 w-4" /></>
+              ) : (
+                <>Generate Template PDF <Download className="ml-2 h-4 w-4" /></>
+              )}
             </Button>
           </CardContent>
         </Card>
