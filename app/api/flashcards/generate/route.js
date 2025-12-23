@@ -324,37 +324,130 @@ function findBestCategory(topic) {
   return 'trivia'
 }
 
+// Generate flashcards using AI
+async function generateFlashcardsWithAI(topic, count, difficulty, category) {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    
+    const difficultyGuide = {
+      easy: 'simple concepts, basic definitions, suitable for beginners',
+      medium: 'intermediate concepts, some complexity, good for learners with basic knowledge',
+      hard: 'advanced concepts, detailed information, suitable for experts or advanced students'
+    }
+    
+    const prompt = `Create ${count} educational flashcards about "${topic}".
+
+Difficulty level: ${difficulty} (${difficultyGuide[difficulty] || difficultyGuide.medium})
+${category ? `Category focus: ${category}` : ''}
+
+Requirements:
+- Each flashcard should have a "front" (question/term) and "back" (answer/definition)
+- Make questions clear and concise
+- Answers should be informative but not too long (max 2-3 sentences)
+- Include a variety of question types (definitions, facts, concepts, applications)
+- For language learning: include translations and usage examples
+- For math: include formulas and step-by-step explanations where appropriate
+- For science/history: include dates, names, and key facts
+
+Return ONLY a valid JSON array of flashcard objects:
+[
+  {"front": "Question or term here", "back": "Answer or definition here"},
+  {"front": "Another question", "back": "Another answer"}
+]
+
+Generate exactly ${count} flashcards. Return ONLY the JSON array, no other text.`
+
+    console.log(`Generating ${count} AI flashcards for topic: ${topic}`)
+    
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    let text = response.text().trim()
+    
+    // Clean up the response
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    
+    // Parse and validate
+    const flashcards = JSON.parse(text)
+    
+    if (!Array.isArray(flashcards) || flashcards.length === 0) {
+      throw new Error('Invalid flashcard array returned')
+    }
+    
+    // Ensure all cards have required fields
+    const validCards = flashcards.filter(card => 
+      card && typeof card.front === 'string' && typeof card.back === 'string' &&
+      card.front.trim() && card.back.trim()
+    ).map(card => ({
+      front: card.front.trim(),
+      back: card.back.trim()
+    }))
+    
+    console.log(`Successfully generated ${validCards.length} flashcards with AI`)
+    return validCards
+    
+  } catch (error) {
+    console.error('AI flashcard generation failed:', error)
+    return null
+  }
+}
+
+// Fallback to database cards
+function getFlashcardsFromDatabase(topic, count, difficulty, category) {
+  const bestCategory = category || findBestCategory(topic)
+  const categoryData = FLASHCARD_DATABASE[bestCategory] || FLASHCARD_DATABASE.trivia
+  const difficultyData = categoryData[difficulty] || categoryData.medium
+  
+  // Shuffle and select cards
+  const shuffled = [...difficultyData].sort(() => Math.random() - 0.5)
+  const selectedCards = shuffled.slice(0, Math.min(count, shuffled.length))
+  
+  // If we need more cards than available, repeat with variations
+  const flashcards = []
+  for (let i = 0; i < count; i++) {
+    const card = selectedCards[i % selectedCards.length]
+    flashcards.push({
+      front: card.front,
+      back: card.back
+    })
+  }
+  
+  return { flashcards, category: bestCategory }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { topic, count = 20, difficulty = 'medium', category } = body
+    const { topic, count = 20, difficulty = 'medium', category, useAI = true } = body
     
     // Find best matching category
     const bestCategory = category || findBestCategory(topic)
     
-    // Get flashcards from database
-    const categoryData = FLASHCARD_DATABASE[bestCategory] || FLASHCARD_DATABASE.trivia
-    const difficultyData = categoryData[difficulty] || categoryData.medium
+    let flashcards
+    let source = 'database'
     
-    // Shuffle and select cards
-    const shuffled = [...difficultyData].sort(() => Math.random() - 0.5)
-    const selectedCards = shuffled.slice(0, Math.min(count, shuffled.length))
+    // Try AI generation first if enabled
+    if (useAI && topic && topic.trim()) {
+      const aiCards = await generateFlashcardsWithAI(topic, count, difficulty, bestCategory)
+      if (aiCards && aiCards.length > 0) {
+        flashcards = aiCards
+        source = 'ai'
+      }
+    }
     
-    // If we need more cards than available, repeat with variations
-    const flashcards = []
-    for (let i = 0; i < count; i++) {
-      const card = selectedCards[i % selectedCards.length]
-      flashcards.push({
-        front: card.front,
-        back: card.back
-      })
+    // Fallback to database
+    if (!flashcards || flashcards.length === 0) {
+      console.log('Falling back to database flashcards')
+      const dbResult = getFlashcardsFromDatabase(topic, count, difficulty, bestCategory)
+      flashcards = dbResult.flashcards
     }
     
     return NextResponse.json({
       success: true,
       flashcards,
       category: bestCategory,
-      difficulty
+      difficulty,
+      source,
+      count: flashcards.length
     })
     
   } catch (error) {
