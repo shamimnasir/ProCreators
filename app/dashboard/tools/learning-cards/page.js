@@ -916,7 +916,13 @@ export default function FlashcardMakerPage() {
             <Button 
               className="w-full" 
               size="lg" 
-              onClick={() => creationMode === 'educational' ? setStep(2) : setStep(4)} 
+              onClick={() => {
+                if (creationMode === 'educational') {
+                  setStep(2)
+                } else {
+                  generateBlankTemplate()
+                }
+              }}
               disabled={creationMode === 'educational' ? !packTitle : !customTitle}
             >
               {creationMode === 'educational' ? (
