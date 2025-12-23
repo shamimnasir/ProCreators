@@ -178,6 +178,17 @@ export default function FlashcardMakerPage() {
   const [includeCutGuides, setIncludeCutGuides] = useState(true)
   const [result, setResult] = useState(null)
 
+  // Creation Mode Selection
+  const [creationMode, setCreationMode] = useState('educational')
+  
+  // Blank Template Settings
+  const [templateStyle, setTemplateStyle] = useState('blank')
+  const [cardColor, setCardColor] = useState('white')
+  const [indexCardSize, setIndexCardSize] = useState('3x5')
+  const [pageCount, setPageCount] = useState(300)
+  const [includeTitle, setIncludeTitle] = useState(true)
+  const [customTitle, setCustomTitle] = useState('')
+
   // Get current template data
   const getCurrentData = () => ({
     packTitle,
