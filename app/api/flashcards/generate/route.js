@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-// Comprehensive flashcard content database by topic/category
+// Initialize Gemini with Emergent LLM key
+const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+
+// Comprehensive flashcard content database by topic/category (fallback)
 const FLASHCARD_DATABASE = {
   // VOCABULARY
   vocabulary: {
