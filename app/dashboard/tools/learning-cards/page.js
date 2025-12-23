@@ -1241,7 +1241,7 @@ export default function FlashcardMakerPage() {
               <h4 className="font-semibold text-blue-800 mb-2">📘 KDP Upload Instructions</h4>
               <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
                 <li>Go to <strong>kdp.amazon.com</strong> and sign in</li>
-                <li>Click "Create" → "Paperback"</li>
+                <li>Click &quot;Create&quot; → &quot;Paperback&quot;</li>
                 <li>Fill in book details (title, description, etc.)</li>
                 <li>Upload this PDF as your interior file</li>
                 <li>Create or upload a cover (use KDP Cover Calculator for dimensions)</li>
