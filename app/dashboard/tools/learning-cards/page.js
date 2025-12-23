@@ -923,9 +923,11 @@ export default function FlashcardMakerPage() {
                   generateBlankTemplate()
                 }
               }}
-              disabled={creationMode === 'educational' ? !packTitle : !customTitle}
+              disabled={loading || (creationMode === 'educational' ? !packTitle : !customTitle)}
             >
-              {creationMode === 'educational' ? (
+              {loading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+              ) : creationMode === 'educational' ? (
                 <>Continue to Add Cards <ArrowRight className="ml-2 h-4 w-4" /></>
               ) : (
                 <>Generate Template PDF <Download className="ml-2 h-4 w-4" /></>
