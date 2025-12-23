@@ -105,7 +105,7 @@ export async function POST(request) {
       y: height / 2 + 50,
       size: titleSize,
       font: fontBold,
-      color: rgb(1, 1, 1)
+      color: rgb(textColorFront.r, textColorFront.g, textColorFront.b)
     })
     
     // Subtitle
@@ -116,7 +116,7 @@ export async function POST(request) {
       y: height / 2,
       size: 18,
       font: font,
-      color: rgb(1, 1, 1, 0.9)
+      color: rgb(textColorFront.r, textColorFront.g, textColorFront.b, 0.9)
     })
     
     // Description
@@ -130,7 +130,7 @@ export async function POST(request) {
           y: height / 2 - 40 - (i * 18),
           size: 12,
           font: font,
-          color: rgb(1, 1, 1, 0.8)
+          color: rgb(textColorFront.r, textColorFront.g, textColorFront.b, 0.8)
         })
       })
     }
