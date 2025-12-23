@@ -157,7 +157,6 @@ const navigation = [
     name: '🏢 Business with AI',
     href: '/dashboard/business-ai',
     icon: TrendingUp,
-    badge: 'New',
     children: [
       { name: '📢 Ad Copy Generator', href: '/dashboard/tools/ad-copy', icon: Target },
       { name: '📅 Social Media Calendar', href: '/dashboard/tools/social-calendar', icon: Calendar },
