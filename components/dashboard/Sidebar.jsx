@@ -57,14 +57,12 @@ const navigation = [
     name: '🎬 AI Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
-    badge: 'Pro',
     children: []
   },
   {
     name: '🎥 Quick Video Studio',
     href: '/dashboard/tools/quick-reels',
     icon: Video,
-    badge: '',
     children: [
       { name: '📖 Mini Stories', href: '/dashboard/tools/quick-reels/mini-stories', icon: BookOpen },
       { name: '💪 Motivational', href: '/dashboard/tools/quick-reels/motivational', icon: Zap },
