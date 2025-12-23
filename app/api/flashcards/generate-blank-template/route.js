@@ -152,9 +152,9 @@ export async function POST(request) {
 
       // Instructions
       const instructions = [
-        '✂️ Cut along the dotted lines to separate cards',
-        '📝 Use for studying, note-taking, or organization',
-        '🎯 Perfect for flashcard-based learning'
+        'Cut along the dotted lines to separate cards',
+        'Use for studying, note-taking, or organization',
+        'Perfect for flashcard-based learning'
       ]
       
       let instructionY = pageSize.height - 300
