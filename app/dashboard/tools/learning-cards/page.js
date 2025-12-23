@@ -1210,14 +1210,29 @@ export default function FlashcardMakerPage() {
               <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-10 w-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2">{packTitle}</h3>
-              <p className="text-muted-foreground mb-4">{packDescription}</p>
+              <h3 className="text-xl font-bold mb-2">
+                {creationMode === 'educational' ? packTitle : (customTitle || packTitle)}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {creationMode === 'educational' ? packDescription : `${pageCount} pages of ${templateStyle} templates`}
+              </p>
               
               <div className="flex flex-wrap justify-center gap-4 mb-6">
-                <Badge variant="secondary">{validCardCount} Flashcards</Badge>
-                <Badge variant="secondary">{selectedSize?.name}</Badge>
-                <Badge variant="secondary">{selectedPaper?.name}</Badge>
-                <Badge variant="secondary">{result.pageCount} Pages</Badge>
+                {creationMode === 'educational' ? (
+                  <>
+                    <Badge variant="secondary">{validCardCount} Flashcards</Badge>
+                    <Badge variant="secondary">{selectedSize?.name}</Badge>
+                    <Badge variant="secondary">{selectedPaper?.name}</Badge>
+                    <Badge variant="secondary">{result.pageCount} Pages</Badge>
+                  </>
+                ) : (
+                  <>
+                    <Badge variant="secondary">{pageCount} Pages</Badge>
+                    <Badge variant="secondary">{INDEX_CARD_SIZES.find(s => s.id === indexCardSize)?.name}</Badge>
+                    <Badge variant="secondary">{TEMPLATE_STYLES.find(s => s.id === templateStyle)?.name}</Badge>
+                    <Badge variant="secondary">{CARD_COLORS.find(c => c.id === cardColor)?.name}</Badge>
+                  </>
+                )}
               </div>
             </div>
 
