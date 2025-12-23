@@ -77,10 +77,11 @@ export async function POST(request) {
     const sizeConfig = KDP_SIZES[kdpSize] || KDP_SIZES['6x9']
     const { width, height, cardsPerPage, cardWidth, cardHeight } = sizeConfig
     
-    // Get colors
+    // Get colors - now with separate text colors for front and back
     const frontColor = hexToRgb(colorTheme?.front || '#1e40af')
     const backColor = hexToRgb(colorTheme?.back || '#3b82f6')
-    const textColor = hexToRgb(colorTheme?.text || '#ffffff')
+    const textColorFront = hexToRgb(colorTheme?.textFront || colorTheme?.text || '#ffffff')
+    const textColorBack = hexToRgb(colorTheme?.textBack || colorTheme?.text || '#ffffff')
     
     const pdfDoc = await PDFDocument.create()
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
