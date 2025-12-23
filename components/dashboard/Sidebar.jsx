@@ -119,7 +119,6 @@ const navigation = [
     name: '🖼️ Image Generation',
     href: '/dashboard/image-generation',
     icon: Camera,
-    badge: 'New',
     children: [
       { name: '📸 AI Product Photos', href: '/dashboard/tools/ai-product-photos', icon: Camera },
       { name: '👤 AI Headshot Generator', href: '/dashboard/tools/ai-headshots', icon: User },
