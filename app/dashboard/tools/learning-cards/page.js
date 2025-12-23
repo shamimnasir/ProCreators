@@ -1063,7 +1063,7 @@ export default function FlashcardMakerPage() {
       )}
 
       {/* Step 3: AI Generation */}
-      {step === 3 && (
+      {step === 3 && creationMode === 'educational' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
