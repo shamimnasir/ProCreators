@@ -985,7 +985,7 @@ export default function FlashcardMakerPage() {
                     className="aspect-[3/2] rounded-xl p-6 flex items-center justify-center cursor-pointer shadow-lg transition-all hover:scale-105"
                     style={{ 
                       backgroundColor: showBack ? selectedTheme?.back : selectedTheme?.front,
-                      color: selectedTheme?.text
+                      color: showBack ? selectedTheme?.textBack : selectedTheme?.textFront
                     }}
                     onClick={() => setShowBack(!showBack)}
                   >
