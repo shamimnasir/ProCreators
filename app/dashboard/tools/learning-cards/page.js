@@ -1074,7 +1074,7 @@ export default function FlashcardMakerPage() {
               Step 3: AI-Powered Content Generation
             </CardTitle>
             <CardDescription>
-              Generate custom flashcards on any topic using AI. Enter your topic and we'll create professional, educational content.
+              Generate custom flashcards on any topic using AI. Enter your topic and we&apos;ll create professional, educational content.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
