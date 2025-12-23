@@ -1141,6 +1141,83 @@ export default function FlashcardMakerPage() {
               )}
             </Button>
 
+            {/* Generated Flashcards Preview & Edit */}
+            {flashcards.filter(c => c.front || c.back).length > 0 && (
+              <div className="space-y-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold">Preview & Edit Your Flashcards</h3>
+                    <Badge variant="secondary">{flashcards.filter(c => c.front && c.back).length} cards</Badge>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setFlashcards([{ front: '', back: '', id: Date.now() }])}>
+                    <Trash2 className="h-3 w-3 mr-1" /> Clear All
+                  </Button>
+                </div>
+                
+                {/* Card Grid with Edit Capability */}
+                <div className="grid gap-3 max-h-[400px] overflow-auto pr-2">
+                  {flashcards.filter(c => c.front || c.back).map((card, idx) => {
+                    const actualIndex = flashcards.findIndex(c => c.id === card.id)
+                    return (
+                      <div key={card.id} className="p-4 bg-white dark:bg-gray-900 rounded-lg border shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">Front (Question/Term)</Label>
+                              <Textarea
+                                value={card.front}
+                                onChange={(e) => updateFlashcard(actualIndex, 'front', e.target.value)}
+                                placeholder="Question or term..."
+                                className="min-h-[60px] text-sm"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">Back (Answer/Definition)</Label>
+                              <Textarea
+                                value={card.back}
+                                onChange={(e) => updateFlashcard(actualIndex, 'back', e.target.value)}
+                                placeholder="Answer or definition..."
+                                className="min-h-[60px] text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              onClick={() => duplicateFlashcard(actualIndex)}
+                              title="Duplicate card"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              onClick={() => removeFlashcard(actualIndex)}
+                              title="Delete card"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Quick Add Card */}
+                <Button variant="outline" className="w-full" onClick={addFlashcard}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Another Card Manually
+                </Button>
+              </div>
+            )}
+
             {/* Current Status */}
             <div className="p-4 bg-muted rounded-lg">
               <div className="flex items-center justify-between mb-2">
