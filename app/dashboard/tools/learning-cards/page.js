@@ -348,6 +348,13 @@ export default function FlashcardMakerPage() {
     setStep(1)
     setCurrentDraftId(null)
     setShowDrafts(false)
+    setCreationMode('educational')
+    setTemplateStyle('blank')
+    setCardColor('white')
+    setIndexCardSize('3x5')
+    setPageCount(300)
+    setIncludeTitle(true)
+    setCustomTitle('')
     setTimeout(() => localStorage.removeItem('flashcard-progress'), 100)
     toast({ title: "Ready for New Pack", description: "Starting fresh!" })
   }
