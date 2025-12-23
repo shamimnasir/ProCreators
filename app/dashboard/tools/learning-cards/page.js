@@ -1095,7 +1095,7 @@ export default function FlashcardMakerPage() {
                   onChange={(e) => setAiTopic(e.target.value)}
                   placeholder="e.g., Spanish vocabulary for beginners, US Presidents, Chemistry formulas, Calculus derivatives..."
                 />
-                <p className="text-xs text-muted-foreground">Be specific for better results. Example: "French phrases for travel" or "World War 2 key events"</p>
+                <p className="text-xs text-muted-foreground">Be specific for better results. Example: &quot;French phrases for travel&quot; or &quot;World War 2 key events&quot;</p>
               </div>
               <div className="space-y-2">
                 <Label>Number of Cards</Label>
