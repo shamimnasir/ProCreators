@@ -249,7 +249,7 @@ export async function POST(request) {
           x: x + 10, y: y + actualCardHeight - 20,
           size: 8,
           font: font,
-          color: rgb(textColor.r, textColor.g, textColor.b, 0.5)
+          color: rgb(textColorFront.r, textColorFront.g, textColorFront.b, 0.5)
         })
         
         // Card content
@@ -267,7 +267,7 @@ export async function POST(request) {
             y: startY - lineIdx * lineHeight,
             size: fontSize,
             font: fontBold,
-            color: rgb(textColor.r, textColor.g, textColor.b)
+            color: rgb(textColorFront.r, textColorFront.g, textColorFront.b)
           })
         })
         
