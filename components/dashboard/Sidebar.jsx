@@ -101,7 +101,6 @@ const navigation = [
     name: '💰 Digital Products',
     href: '/dashboard/digital-products',
     icon: ShoppingBag,
-    badge: 'New',
     children: [
       { name: '📅 Planner Maker', href: '/dashboard/tools/planner-maker', icon: Calendar },
       { name: '📝 Worksheet Generator', href: '/dashboard/tools/worksheet-maker', icon: FileText },
