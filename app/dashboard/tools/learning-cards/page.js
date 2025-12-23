@@ -331,7 +331,8 @@ export default function FlashcardMakerPage() {
           topic: aiTopic,
           count: aiCount,
           difficulty: aiDifficulty,
-          category
+          category,
+          useAI: true
         })
       })
 
@@ -345,7 +346,12 @@ export default function FlashcardMakerPage() {
       }))
       
       setFlashcards([...flashcards.filter(c => c.front || c.back), ...newCards])
-      toast({ title: "Cards Generated!", description: `Added ${newCards.length} flashcards` })
+      
+      const sourceText = data.source === 'ai' ? 'AI-generated' : 'curated'
+      toast({ 
+        title: "Cards Generated!", 
+        description: `Added ${newCards.length} ${sourceText} flashcards on "${aiTopic}"` 
+      })
     } catch (error) {
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
