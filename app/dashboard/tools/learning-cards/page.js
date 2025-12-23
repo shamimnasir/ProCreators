@@ -276,7 +276,7 @@ export default function FlashcardMakerPage() {
       savedAt: new Date().toISOString()
     }
     localStorage.setItem('flashcard-progress', JSON.stringify(saveData))
-  }, [isHydrated, packTitle, packDescription, category, kdpSize, paperOption, colorTheme, flashcards, includeInstructions, includeCutGuides, step, currentDraftId])
+  }, [isHydrated, packTitle, packDescription, category, kdpSize, paperOption, colorTheme, flashcards, includeInstructions, includeCutGuides, step, currentDraftId, creationMode, templateStyle, cardColor, indexCardSize, pageCount, includeTitle, customTitle])
 
   // Save draft to DB
   const saveDraft = async () => {
