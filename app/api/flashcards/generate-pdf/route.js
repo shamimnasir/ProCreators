@@ -440,33 +440,7 @@ export async function POST(request) {
       })
     }
     
-    // ============ PADDING PAGES (if needed for minimum) ============
-    const currentPages = pdfDoc.getPageCount()
-    const minPages = paperOption === 'standard-color' ? 72 : 24
-    
-    while (pdfDoc.getPageCount() < minPages) {
-      page = pdfDoc.addPage([width, height])
-      
-      // Simple notes page
-      page.drawText('Notes', {
-        x: 50, y: height - 60,
-        size: 18,
-        font: fontBold,
-        color: rgb(0.3, 0.3, 0.3)
-      })
-      
-      // Draw lines for notes
-      for (let i = 0; i < 20; i++) {
-        page.drawLine({
-          start: { x: 50, y: height - 100 - (i * 30) },
-          end: { x: width - 50, y: height - 100 - (i * 30) },
-          thickness: 0.5,
-          color: rgb(0.8, 0.8, 0.8)
-        })
-      }
-    }
-    
-    // Save PDF
+    // Save PDF (no more padding pages - user can generate any size)
     const pdfBytes = await pdfDoc.save()
     
     const outputDir = path.join(process.cwd(), 'public', 'flashcards')
