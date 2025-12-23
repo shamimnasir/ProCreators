@@ -87,7 +87,6 @@ const navigation = [
     name: '🚀 Viral Post Creation',
     href: '/dashboard/viral-posts',
     icon: Sparkles,
-    badge: '',
     children: [
       { name: '🧵 Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
       { name: '💬 Quotes', href: '/dashboard/tools/quotes', icon: Quote },
