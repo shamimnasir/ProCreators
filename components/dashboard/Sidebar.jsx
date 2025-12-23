@@ -183,7 +183,6 @@ const navigation = [
     name: '🎬 Media Editing',
     href: '/dashboard/media-editing',
     icon: Edit3,
-    badge: '',
     children: [
       { name: '🖼️ Image Editor', href: '/dashboard/tools/image-editor', icon: ImageIcon },
       { name: '🎬 Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
