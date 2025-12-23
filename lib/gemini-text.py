@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import sys
 import json
+import asyncio
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import uuid
 import os
 
-def generate_text(prompt, system_message="You are a helpful AI assistant specialized in creating engaging content.", session_id=None):
+async def generate_text(prompt, system_message="You are a helpful AI assistant specialized in creating engaging content.", session_id=None):
     try:
         api_key = os.getenv('EMERGENT_LLM_KEY')
         if not api_key:
@@ -24,7 +25,7 @@ def generate_text(prompt, system_message="You are a helpful AI assistant special
         ).with_model("gemini", "gemini-2.0-flash")
         
         user_message = UserMessage(text=prompt)
-        response = chat.send_message(user_message)
+        response = await chat.send_message(user_message)
         
         return {
             "success": True,
@@ -43,10 +44,10 @@ if __name__ == "__main__":
     # Read input from stdin
     input_data = json.loads(sys.stdin.read())
     
-    result = generate_text(
+    result = asyncio.run(generate_text(
         prompt=input_data.get('prompt'),
         system_message=input_data.get('systemMessage', 'You are a helpful AI assistant specialized in creating engaging content.'),
         session_id=input_data.get('sessionId')
-    )
+    ))
     
     print(json.dumps(result))
