@@ -938,7 +938,7 @@ export default function FlashcardMakerPage() {
       )}
 
       {/* Step 2: Add Cards */}
-      {step === 2 && (
+      {step === 2 && creationMode === 'educational' && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
