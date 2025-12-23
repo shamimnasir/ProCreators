@@ -1199,9 +1199,11 @@ export default function FlashcardMakerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Download className="h-5 w-5 text-green-500" />
-              Step 4: Download Your Flashcard Book
+              Step 4: Download Your {creationMode === 'educational' ? 'Flashcard Book' : 'Template Pack'}
             </CardTitle>
-            <CardDescription>Your KDP-compliant flashcard book is ready!</CardDescription>
+            <CardDescription>
+              Your KDP-compliant {creationMode === 'educational' ? 'flashcard book' : 'template pack'} is ready!
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center py-8">
