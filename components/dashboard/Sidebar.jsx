@@ -132,7 +132,6 @@ const navigation = [
     name: '👨‍🎓 Students & Teachers',
     href: '/dashboard/students-teachers',
     icon: GraduationCap,
-    badge: 'New',
     children: [
       { name: '📊 Presentation Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
       { name: '❓ Quiz Generator', href: '/dashboard/tools/quiz-maker', icon: Lightbulb },
