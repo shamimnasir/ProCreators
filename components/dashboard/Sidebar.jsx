@@ -170,7 +170,6 @@ const navigation = [
     name: '🎮 Fun & Recreation',
     href: '/dashboard/fun-recreation',
     icon: GamepadIcon,
-    badge: 'New',
     children: [
       { name: '😂 Meme Generator', href: '/dashboard/tools/meme-generator', icon: Smile },
       { name: '🎭 AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: User },
