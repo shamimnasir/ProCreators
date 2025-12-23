@@ -145,7 +145,6 @@ const navigation = [
     name: '💼 Jobs & Career',
     href: '/dashboard/jobs-career',
     icon: Briefcase,
-    badge: 'New',
     children: [
       { name: '📄 Resume Builder', href: '/dashboard/tools/resume-builder', icon: FileText },
       { name: '✉️ Cover Letter Generator', href: '/dashboard/tools/cover-letter', icon: MessageSquare },
