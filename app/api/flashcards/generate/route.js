@@ -379,11 +379,9 @@ function findBestCategory(topic) {
   return 'trivia'
 }
 
-// Generate flashcards using AI
+// Generate flashcards using AI (via Python emergentintegrations)
 async function generateFlashcardsWithAI(topic, count, difficulty, category) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-    
     const difficultyGuide = {
       easy: 'simple concepts, basic definitions, suitable for beginners',
       medium: 'intermediate concepts, some complexity, good for learners with basic knowledge',
@@ -410,13 +408,18 @@ Return ONLY a valid JSON array of flashcard objects:
   {"front": "Another question", "back": "Another answer"}
 ]
 
-Generate exactly ${count} flashcards. Return ONLY the JSON array, no other text.`
+Generate exactly ${count} flashcards. Return ONLY the JSON array, no other text or markdown formatting.`
 
     console.log(`Generating ${count} AI flashcards for topic: ${topic}`)
     
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    let text = response.text().trim()
+    const result = await generateWithGemini(prompt, 'You are an expert educator creating high-quality flashcard content for learning. Return only valid JSON arrays.')
+    
+    if (!result.success || !result.content) {
+      console.error('AI generation failed:', result.error)
+      return null
+    }
+    
+    let text = result.content.trim()
     
     // Clean up the response
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
