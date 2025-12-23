@@ -1222,16 +1222,14 @@ export default function FlashcardMakerPage() {
             <div className="p-4 bg-muted rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium">Current Pack Status</span>
-                <Badge variant={validCardCount >= 10 ? 'default' : 'secondary'}>
+                <Badge variant={validCardCount >= 1 ? 'default' : 'secondary'}>
                   {validCardCount} valid cards
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                {selectedPaper?.name} requires minimum {selectedPaper?.minPages} pages 
-                ({Math.ceil((selectedPaper?.minPages - 4) * (selectedSize?.cardsPerPage || 4) / 2)} cards).
                 {validCardCount >= Math.ceil((selectedPaper?.minPages - 4) * (selectedSize?.cardsPerPage || 4) / 2) 
-                  ? ' ✅ You meet the requirement!'
-                  : ` Need ${Math.ceil((selectedPaper?.minPages - 4) * (selectedSize?.cardsPerPage || 4) / 2) - validCardCount} more cards.`
+                  ? `✅ Ready for ${selectedPaper?.name} (${selectedPaper?.minPages}+ pages)`
+                  : `ℹ️ ${selectedPaper?.name} typically needs ${selectedPaper?.minPages}+ pages for KDP. You can still generate your PDF now.`
                 }
               </p>
             </div>
