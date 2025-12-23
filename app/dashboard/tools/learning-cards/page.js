@@ -445,7 +445,7 @@ export default function FlashcardMakerPage() {
       return
     }
 
-    // Check minimum page requirement
+    // Check minimum page requirement - show warning but don't block
     const selectedPaper = PAPER_OPTIONS.find(p => p.id === paperOption)
     const selectedSize = KDP_SIZES.find(s => s.id === kdpSize)
     const cardsPerPage = selectedSize?.cardsPerPage || 4
@@ -454,11 +454,11 @@ export default function FlashcardMakerPage() {
     if (totalPages < selectedPaper.minPages) {
       const neededCards = Math.ceil((selectedPaper.minPages - 4) * cardsPerPage / 2)
       toast({ 
-        title: "More cards needed", 
-        description: `${selectedPaper.name} requires ${selectedPaper.minPages} pages minimum. Add at least ${neededCards - validCards.length} more cards.`,
-        variant: "destructive"
+        title: "Note: Below KDP minimum", 
+        description: `${selectedPaper.name} typically requires ${selectedPaper.minPages} pages. Your PDF will have ${totalPages} pages. You may need to add more content for KDP publishing.`,
+        variant: "default",
+        duration: 5000
       })
-      return
     }
 
     setLoading(true)
