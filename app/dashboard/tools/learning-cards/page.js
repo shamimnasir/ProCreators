@@ -123,13 +123,13 @@ const PAPER_OPTIONS = [
 
 // Color Themes
 const COLOR_THEMES = [
-  { id: 'classic', name: 'Classic Blue', front: '#1e40af', back: '#3b82f6', text: '#ffffff' },
-  { id: 'forest', name: 'Forest Green', front: '#166534', back: '#22c55e', text: '#ffffff' },
-  { id: 'sunset', name: 'Sunset Orange', front: '#c2410c', back: '#f97316', text: '#ffffff' },
-  { id: 'royal', name: 'Royal Purple', front: '#6b21a8', back: '#a855f7', text: '#ffffff' },
-  { id: 'rose', name: 'Rose Pink', front: '#be185d', back: '#ec4899', text: '#ffffff' },
-  { id: 'slate', name: 'Slate Gray', front: '#334155', back: '#64748b', text: '#ffffff' },
-  { id: 'minimal', name: 'Minimal B&W', front: '#000000', back: '#ffffff', text: '#000000' }
+  { id: 'classic', name: 'Classic Blue', front: '#1e40af', back: '#3b82f6', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'forest', name: 'Forest Green', front: '#166534', back: '#22c55e', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'sunset', name: 'Sunset Orange', front: '#c2410c', back: '#f97316', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'royal', name: 'Royal Purple', front: '#6b21a8', back: '#a855f7', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'rose', name: 'Rose Pink', front: '#be185d', back: '#ec4899', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'slate', name: 'Slate Gray', front: '#334155', back: '#64748b', textFront: '#ffffff', textBack: '#ffffff' },
+  { id: 'minimal', name: 'Minimal B&W', front: '#1a1a1a', back: '#ffffff', textFront: '#ffffff', textBack: '#1a1a1a' }
 ]
 
 // Flashcard Categories
