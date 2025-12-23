@@ -200,7 +200,14 @@ export default function FlashcardMakerPage() {
     flashcards,
     includeInstructions,
     includeCutGuides,
-    step
+    step,
+    creationMode,
+    templateStyle,
+    cardColor,
+    indexCardSize,
+    pageCount,
+    includeTitle,
+    customTitle
   })
 
   // Load template data
@@ -215,6 +222,13 @@ export default function FlashcardMakerPage() {
     if (data.includeInstructions !== undefined) setIncludeInstructions(data.includeInstructions)
     if (data.includeCutGuides !== undefined) setIncludeCutGuides(data.includeCutGuides)
     if (data.step) setStep(data.step)
+    if (data.creationMode) setCreationMode(data.creationMode)
+    if (data.templateStyle) setTemplateStyle(data.templateStyle)
+    if (data.cardColor) setCardColor(data.cardColor)
+    if (data.indexCardSize) setIndexCardSize(data.indexCardSize)
+    if (data.pageCount) setPageCount(data.pageCount)
+    if (data.includeTitle !== undefined) setIncludeTitle(data.includeTitle)
+    if (data.customTitle) setCustomTitle(data.customTitle)
   }
 
   // Load drafts from DB
