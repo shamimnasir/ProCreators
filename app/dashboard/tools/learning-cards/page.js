@@ -820,6 +820,29 @@ export default function FlashcardMakerPage() {
                 ))}
               </div>
             </div>
+
+            {/* Background Design */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Layers className="h-4 w-4" /> Background Design
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {BACKGROUND_DESIGNS.map((design) => (
+                  <button
+                    key={design.id}
+                    onClick={() => setBackgroundDesign(design.id)}
+                    className={`px-3 py-2 rounded-lg border transition-all ${
+                      backgroundDesign === design.id ? 'border-primary bg-primary/10 ring-1 ring-primary' : 'hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="text-sm">{design.name}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Choose a background pattern for your flashcards. Patterns like Stars, Hearts, and Math Symbols are great for themed decks.
+              </p>
+            </div>
               </>
             )}
 
