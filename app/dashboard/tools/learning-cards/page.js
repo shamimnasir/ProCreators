@@ -132,6 +132,20 @@ const COLOR_THEMES = [
   { id: 'minimal', name: 'Minimal B&W', front: '#1a1a1a', back: '#ffffff', textFront: '#ffffff', textBack: '#1a1a1a' }
 ]
 
+// Background Designs for Educational Cards
+const BACKGROUND_DESIGNS = [
+  { id: 'solid', name: 'Solid Color', description: 'Clean solid background' },
+  { id: 'gradient', name: 'Gradient', description: 'Smooth color gradient' },
+  { id: 'dots', name: 'Dotted Pattern', description: 'Subtle dot pattern' },
+  { id: 'lines', name: 'Line Pattern', description: 'Horizontal line pattern' },
+  { id: 'grid', name: 'Grid Pattern', description: 'Subtle grid pattern' },
+  { id: 'stars', name: 'Stars (Kids)', description: 'Star pattern for children' },
+  { id: 'hearts', name: 'Hearts', description: 'Heart pattern design' },
+  { id: 'nature', name: 'Nature', description: 'Leaf/nature pattern' },
+  { id: 'science', name: 'Science', description: 'Atom/science pattern' },
+  { id: 'math', name: 'Math Symbols', description: 'Math symbol pattern' }
+]
+
 // Flashcard Categories
 const FLASHCARD_CATEGORIES = [
   { id: 'vocabulary', name: 'Vocabulary', icon: '📚', description: 'Word definitions and meanings' },
