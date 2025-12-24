@@ -637,7 +637,7 @@ export async function POST(request) {
       
       await libraryCollection.insertOne({
         id: documentId,
-        oderId: 'default-user',
+        userId: 'default-user',
         type: 'storybook',
         category: 'document',
         title: finalStory.title,
