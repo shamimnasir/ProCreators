@@ -3,6 +3,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fs from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import { getCollection } from '@/lib/db'
 
 // KDP Sizes in points (72 points = 1 inch)
 const KDP_SIZES = {
