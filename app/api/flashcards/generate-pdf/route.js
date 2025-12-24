@@ -450,6 +450,34 @@ export async function POST(request) {
     const filename = `${uuidv4()}.pdf`
     await fs.writeFile(path.join(outputDir, filename), pdfBytes)
     
+    // Save to library
+    try {
+      const libraryCollection = await getCollection('library')
+      const documentId = uuidv4()
+      
+      await libraryCollection.insertOne({
+        id: documentId,
+        userId: 'default-user',
+        type: 'flashcards',
+        category: 'document',
+        title: title || 'Flashcard Pack',
+        description: `${flashcards.length} flashcards - ${category || 'Educational'}`,
+        filePath: `/flashcards/${filename}`,
+        fileSize: pdfBytes.length,
+        metadata: { 
+          cardCount: flashcards.length, 
+          kdpSize, 
+          colorTheme: colorTheme?.name || 'Classic',
+          category 
+        },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      })
+      console.log(`Flashcards saved to library: ${documentId}`)
+    } catch (libError) {
+      console.error('Failed to save to library:', libError)
+    }
+    
     return NextResponse.json({
       success: true,
       downloadUrl: `/flashcards/${filename}`,
