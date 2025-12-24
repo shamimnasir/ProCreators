@@ -202,6 +202,7 @@ export default function FlashcardMakerPage() {
   const [pageCount, setPageCount] = useState(300)
   const [includeTitle, setIncludeTitle] = useState(true)
   const [customTitle, setCustomTitle] = useState('')
+  const [backgroundDesign, setBackgroundDesign] = useState('solid')
 
   // Get current template data
   const getCurrentData = () => ({
@@ -221,7 +222,8 @@ export default function FlashcardMakerPage() {
     indexCardSize,
     pageCount,
     includeTitle,
-    customTitle
+    customTitle,
+    backgroundDesign
   })
 
   // Load template data
