@@ -513,6 +513,9 @@ export async function POST(request) {
           borderWidth: 0.5
         })
         
+        // Draw background pattern
+        drawBackgroundPattern(page, x, y, actualCardWidth, actualCardHeight, backgroundDesign, backColor, textColorBack)
+        
         // "BACK" label
         page.drawText('BACK', {
           x: x + 10, y: y + actualCardHeight - 20,
