@@ -319,6 +319,37 @@ export async function POST(request) {
     // Write PDF file
     await fs.writeFile(filepath, pdfBytes)
 
+    // Save to library
+    try {
+      const libraryCollection = await getCollection('library')
+      const documentId = uuidv4()
+      const cardSizeLabel = typeof indexCardSize === 'object' ? indexCardSize.name : indexCardSize
+      
+      await libraryCollection.insertOne({
+        id: documentId,
+        userId: 'default-user',
+        type: 'blank-flashcards',
+        category: 'document',
+        title: title || 'Blank Flashcard Templates',
+        description: `${totalPages} pages of ${templateStyle} templates - ${cardSizeLabel} cards`,
+        filePath: `/generated/${filename}`,
+        fileSize: pdfBytes.length,
+        metadata: { 
+          pageCount: totalPages, 
+          templateStyle, 
+          cardColor: cardColor?.name || 'White',
+          indexCardSize: cardSizeLabel,
+          cardsPerPage,
+          totalCards: totalPages * cardsPerPage
+        },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      })
+      console.log(`Blank template saved to library: ${documentId}`)
+    } catch (libError) {
+      console.error('Failed to save to library:', libError)
+    }
+
     // Return success response
     return NextResponse.json({
       success: true,
