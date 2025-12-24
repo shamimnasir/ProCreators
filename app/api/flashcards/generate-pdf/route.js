@@ -71,6 +71,7 @@ export async function POST(request) {
       kdpSize,
       paperOption,
       colorTheme,
+      backgroundDesign = 'solid',
       includeInstructions,
       includeCutGuides
     } = body
