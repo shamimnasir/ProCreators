@@ -491,6 +491,7 @@ export default function FlashcardMakerPage() {
           kdpSize,
           paperOption,
           colorTheme: COLOR_THEMES.find(t => t.id === colorTheme),
+          backgroundDesign,
           includeInstructions,
           includeCutGuides
         })
