@@ -60,6 +60,151 @@ function stripEmojis(text) {
     .trim()
 }
 
+// Draw background pattern on card
+function drawBackgroundPattern(page, x, y, cardWidth, cardHeight, design, baseColor, textColor) {
+  const patternColor = rgb(textColor.r, textColor.g, textColor.b, 0.08)
+  const spacing = 30
+  
+  switch (design) {
+    case 'dots':
+      for (let px = x + 15; px < x + cardWidth - 10; px += spacing) {
+        for (let py = y + 15; py < y + cardHeight - 10; py += spacing) {
+          page.drawCircle({ x: px, y: py, size: 2, color: patternColor })
+        }
+      }
+      break
+      
+    case 'lines':
+      for (let py = y + 20; py < y + cardHeight - 10; py += 20) {
+        page.drawLine({
+          start: { x: x + 10, y: py },
+          end: { x: x + cardWidth - 10, y: py },
+          thickness: 0.5,
+          color: patternColor
+        })
+      }
+      break
+      
+    case 'grid':
+      for (let px = x + 20; px < x + cardWidth - 10; px += spacing) {
+        page.drawLine({
+          start: { x: px, y: y + 10 },
+          end: { x: px, y: y + cardHeight - 10 },
+          thickness: 0.3,
+          color: patternColor
+        })
+      }
+      for (let py = y + 20; py < y + cardHeight - 10; py += spacing) {
+        page.drawLine({
+          start: { x: x + 10, y: py },
+          end: { x: x + cardWidth - 10, y: py },
+          thickness: 0.3,
+          color: patternColor
+        })
+      }
+      break
+      
+    case 'stars':
+      // Draw small star shapes
+      for (let px = x + 25; px < x + cardWidth - 20; px += 45) {
+        for (let py = y + 25; py < y + cardHeight - 20; py += 45) {
+          // Simple 4-point star using lines
+          const starSize = 6
+          page.drawLine({ start: { x: px - starSize, y: py }, end: { x: px + starSize, y: py }, thickness: 1, color: patternColor })
+          page.drawLine({ start: { x: px, y: py - starSize }, end: { x: px, y: py + starSize }, thickness: 1, color: patternColor })
+          page.drawLine({ start: { x: px - starSize/1.4, y: py - starSize/1.4 }, end: { x: px + starSize/1.4, y: py + starSize/1.4 }, thickness: 0.7, color: patternColor })
+          page.drawLine({ start: { x: px + starSize/1.4, y: py - starSize/1.4 }, end: { x: px - starSize/1.4, y: py + starSize/1.4 }, thickness: 0.7, color: patternColor })
+        }
+      }
+      break
+      
+    case 'hearts':
+      // Draw heart shapes using circles and triangles approximation
+      for (let px = x + 30; px < x + cardWidth - 25; px += 50) {
+        for (let py = y + 30; py < y + cardHeight - 25; py += 50) {
+          // Simplified heart using two circles
+          page.drawCircle({ x: px - 3, y: py + 2, size: 4, color: patternColor })
+          page.drawCircle({ x: px + 3, y: py + 2, size: 4, color: patternColor })
+          // Triangle bottom part
+          page.drawLine({ start: { x: px - 6, y: py }, end: { x: px, y: py - 8 }, thickness: 1, color: patternColor })
+          page.drawLine({ start: { x: px + 6, y: py }, end: { x: px, y: py - 8 }, thickness: 1, color: patternColor })
+        }
+      }
+      break
+      
+    case 'nature':
+      // Draw simple leaf shapes
+      for (let px = x + 35; px < x + cardWidth - 30; px += 60) {
+        for (let py = y + 35; py < y + cardHeight - 30; py += 55) {
+          // Leaf outline using ellipse approximation with lines
+          page.drawEllipse({ x: px, y: py, xScale: 8, yScale: 12, color: patternColor })
+          page.drawLine({ start: { x: px, y: py - 12 }, end: { x: px, y: py + 12 }, thickness: 0.5, color: patternColor })
+        }
+      }
+      break
+      
+    case 'science':
+      // Draw atom-like shapes
+      for (let px = x + 40; px < x + cardWidth - 35; px += 70) {
+        for (let py = y + 40; py < y + cardHeight - 35; py += 60) {
+          // Center circle (nucleus)
+          page.drawCircle({ x: px, y: py, size: 3, color: patternColor })
+          // Orbit ellipses
+          page.drawEllipse({ x: px, y: py, xScale: 12, yScale: 6, borderColor: patternColor, borderWidth: 0.5 })
+          page.drawEllipse({ x: px, y: py, xScale: 6, yScale: 12, borderColor: patternColor, borderWidth: 0.5 })
+        }
+      }
+      break
+      
+    case 'math':
+      // Draw math symbols (+, -, x, =)
+      const symbols = ['+', '-', 'x', '=']
+      let symbolIdx = 0
+      for (let px = x + 30; px < x + cardWidth - 25; px += 50) {
+        for (let py = y + 30; py < y + cardHeight - 25; py += 45) {
+          const sym = symbols[symbolIdx % symbols.length]
+          const symSize = 6
+          if (sym === '+') {
+            page.drawLine({ start: { x: px - symSize, y: py }, end: { x: px + symSize, y: py }, thickness: 1.5, color: patternColor })
+            page.drawLine({ start: { x: px, y: py - symSize }, end: { x: px, y: py + symSize }, thickness: 1.5, color: patternColor })
+          } else if (sym === '-') {
+            page.drawLine({ start: { x: px - symSize, y: py }, end: { x: px + symSize, y: py }, thickness: 1.5, color: patternColor })
+          } else if (sym === 'x') {
+            page.drawLine({ start: { x: px - symSize, y: py - symSize }, end: { x: px + symSize, y: py + symSize }, thickness: 1.2, color: patternColor })
+            page.drawLine({ start: { x: px + symSize, y: py - symSize }, end: { x: px - symSize, y: py + symSize }, thickness: 1.2, color: patternColor })
+          } else if (sym === '=') {
+            page.drawLine({ start: { x: px - symSize, y: py + 2 }, end: { x: px + symSize, y: py + 2 }, thickness: 1.2, color: patternColor })
+            page.drawLine({ start: { x: px - symSize, y: py - 2 }, end: { x: px + symSize, y: py - 2 }, thickness: 1.2, color: patternColor })
+          }
+          symbolIdx++
+        }
+      }
+      break
+      
+    case 'gradient':
+      // Draw gradient effect using multiple rectangles with decreasing opacity
+      const steps = 5
+      const stepHeight = cardHeight / steps
+      for (let i = 0; i < steps; i++) {
+        const opacity = 0.15 - (i * 0.025)
+        if (opacity > 0) {
+          page.drawRectangle({
+            x: x,
+            y: y + (i * stepHeight),
+            width: cardWidth,
+            height: stepHeight,
+            color: rgb(textColor.r, textColor.g, textColor.b, opacity)
+          })
+        }
+      }
+      break
+      
+    // 'solid' and default - no pattern
+    default:
+      break
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
