@@ -245,6 +245,7 @@ export default function FlashcardMakerPage() {
     if (data.pageCount) setPageCount(data.pageCount)
     if (data.includeTitle !== undefined) setIncludeTitle(data.includeTitle)
     if (data.customTitle) setCustomTitle(data.customTitle)
+    if (data.backgroundDesign) setBackgroundDesign(data.backgroundDesign)
   }
 
   // Load drafts from DB
