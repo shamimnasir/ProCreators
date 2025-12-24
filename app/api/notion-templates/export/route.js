@@ -831,6 +831,33 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'Invalid format' }, { status: 400 })
     }
     
+    // Save to library
+    try {
+      const libraryCollection = await getCollection('library')
+      const documentId = uuidv4()
+      
+      await libraryCollection.insertOne({
+        id: documentId,
+        userId: 'default-user',
+        type: 'notion-template',
+        category: 'document',
+        title: template.name || 'Notion Template',
+        description: `${template.category} template - ${format.toUpperCase()} export`,
+        filePath: result.downloadUrl,
+        fileSize: 0,
+        metadata: { 
+          category: template.category,
+          format,
+          templateType: template.type
+        },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      })
+      console.log(`Notion template saved to library: ${documentId}`)
+    } catch (libError) {
+      console.error('Failed to save to library:', libError)
+    }
+    
     return NextResponse.json(result)
     
   } catch (error) {
