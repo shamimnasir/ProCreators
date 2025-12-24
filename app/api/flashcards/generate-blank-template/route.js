@@ -3,7 +3,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fs from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { getCollection } from '@/lib/db'
+import { getCollection } from '@/lib/mongodb'
 
 // Helper to parse hex color to RGB
 function hexToRgb(hex) {
