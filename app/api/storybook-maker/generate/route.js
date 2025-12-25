@@ -1071,13 +1071,44 @@ export async function POST(request) {
       }
       
       // Generate the PDF
-      const pdfBytes = await generatePDF(finalStory, {
-        paperSize,
-        primaryColor,
-        secondaryColor,
-        authorName,
-        illustrationStyle
-      })
+      // Check if we need HTML-to-PDF for complex scripts (Bengali, Hindi, etc.)
+      const contentSample = `${finalStory.title} ${finalStory.moral || ''} ${finalStory.pages.map(p => p.text).join(' ')}`
+      const needsHtmlPdf = hasNonLatinChars(contentSample)
+      
+      let pdfBytes
+      let renderMethod = 'pdf-lib'
+      
+      if (needsHtmlPdf) {
+        console.log('Detected complex script (Bengali/Hindi), using HTML-to-PDF for proper text rendering...')
+        try {
+          const htmlContent = generateStorybookHTML(finalStory, {
+            primaryColor,
+            secondaryColor,
+            authorName
+          })
+          
+          pdfBytes = await generatePDFFromHTML(htmlContent)
+          renderMethod = 'html-to-pdf'
+          console.log('HTML-to-PDF generation successful')
+        } catch (htmlError) {
+          console.error('HTML-to-PDF failed, falling back to pdf-lib:', htmlError.message)
+          pdfBytes = await generatePDF(finalStory, {
+            paperSize,
+            primaryColor,
+            secondaryColor,
+            authorName,
+            illustrationStyle
+          })
+        }
+      } else {
+        pdfBytes = await generatePDF(finalStory, {
+          paperSize,
+          primaryColor,
+          secondaryColor,
+          authorName,
+          illustrationStyle
+        })
+      }
       
       // Save PDF
       const outputDir = '/app/public/storybooks'
