@@ -18,6 +18,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import DraftsManager from '@/components/shared/DraftsManager'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 
 // Story Genres
 const STORY_GENRES = [
