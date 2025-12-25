@@ -238,7 +238,7 @@ export default function StorybookMakerPage() {
         clearTimeout(autoSaveTimeoutRef.current)
       }
     }
-  }, [story, step]) // Trigger when story or step changes
+  }, [story, step, autoSaveDraft]) // Trigger when story or step changes
 
   // Start new
   const handleStartNew = () => {
