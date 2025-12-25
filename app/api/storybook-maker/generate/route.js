@@ -121,6 +121,7 @@ function generateStorybookHTML(storyData, options) {
     /* Story Pages */
     .story-page {
       background: #fff;
+      padding: 0.4in;
     }
     
     .story-page .illustration {
@@ -168,6 +169,7 @@ function generateStorybookHTML(storyData, options) {
     .back-cover {
       background: linear-gradient(135deg, ${primaryColor}10 0%, ${secondaryColor}08 100%);
       justify-content: center;
+      padding: 0.5in;
       align-items: center;
       text-align: center;
     }
