@@ -198,15 +198,21 @@ function generateStorybookHTML(storyData, options) {
 </head>
 <body>
   <!-- Cover Page -->
-  <div class="page cover-page">
-    <div class="decoration" style="width:80px;height:80px;background:${primaryColor};top:40px;left:40px;"></div>
-    <div class="decoration" style="width:60px;height:60px;background:${secondaryColor};top:60px;right:60px;"></div>
-    <div class="decoration" style="width:50px;height:50px;background:${primaryColor};bottom:80px;left:60px;"></div>
-    <div class="decoration" style="width:70px;height:70px;background:${secondaryColor};bottom:60px;right:50px;"></div>
-    
-    ${storyData.coverImageUrl ? `<img class="cover-image" src="${storyData.coverImageUrl}" alt="Cover">` : ''}
-    <h1 class="title">${escapeHTML(storyData.title)}</h1>
-    ${authorName ? `<p class="author">${escapeHTML(authorName)}</p>` : ''}
+  <div class="page cover-page ${storyData.coverImageUrl ? 'has-image' : 'no-image'}">
+    ${storyData.coverImageUrl ? `
+      <img class="cover-image" src="${storyData.coverImageUrl}" alt="Cover">
+      <div class="cover-overlay">
+        <h1 class="title">${escapeHTML(storyData.title)}</h1>
+        ${authorName ? `<p class="author">${escapeHTML(authorName)}</p>` : ''}
+      </div>
+    ` : `
+      <div class="decoration" style="width:80px;height:80px;background:${primaryColor};top:40px;left:40px;"></div>
+      <div class="decoration" style="width:60px;height:60px;background:${secondaryColor};top:60px;right:60px;"></div>
+      <div class="decoration" style="width:50px;height:50px;background:${primaryColor};bottom:80px;left:60px;"></div>
+      <div class="decoration" style="width:70px;height:70px;background:${secondaryColor};bottom:60px;right:50px;"></div>
+      <h1 class="title">${escapeHTML(storyData.title)}</h1>
+      ${authorName ? `<p class="author">${escapeHTML(authorName)}</p>` : ''}
+    `}
   </div>
   
   <!-- Story Pages -->
