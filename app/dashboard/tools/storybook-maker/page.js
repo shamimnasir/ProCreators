@@ -224,9 +224,6 @@ export default function StorybookMakerPage() {
 
       setStory(data.story)
       
-      // Auto-save after illustrations generation
-      await autoSaveDraft({ story: data.story, step: 3 })
-      
       toast({ title: "Illustrations Generated!", description: `${data.illustratedCount} illustrations created!` })
     } catch (error) {
       toast({ title: "Illustration Failed", description: error.message, variant: "destructive" })
