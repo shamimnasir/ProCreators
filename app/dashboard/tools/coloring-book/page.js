@@ -130,78 +130,7 @@ export default function ColoringBookPage() {
   // Result
   const [result, setResult] = useState(null)
 
-  // Drafts
-  const [drafts, setDrafts] = useState([])
-  const [currentDraftId, setCurrentDraftId] = useState(null)
-
-  // Load drafts on mount
-  useEffect(() => {
-    const loadDrafts = async () => {
-      try {
-        const res = await fetch('/api/drafts?toolType=coloring-book')
-        const data = await res.json()
-        if (data.success && data.drafts) {
-          setDrafts(data.drafts)
-        }
-      } catch (e) {
-        console.log('Failed to load drafts:', e)
-      }
-    }
-    loadDrafts()
-  }, [])
-
-  // Auto-save draft when data changes (debounced)
-  const autoSaveDraft = useCallback(async () => {
-    if (pages.length === 0 && !bookTitle && !customTheme) return
-    
-    const draftData = {
-      id: currentDraftId || undefined,
-      toolType: 'coloring-book',
-      title: bookTitle || `${customTheme || theme} Coloring Book`,
-      data: {
-        theme,
-        customTheme,
-        difficulty,
-        pageCount,
-        bookTitle,
-        authorName,
-        pages,
-        selectedPreset,
-        customPrimaryColor,
-        customSecondaryColor,
-        useCustomColor,
-        generateCoverImage,
-        generatePageImages,
-        step,
-      }
-    }
-    
-    try {
-      const res = await fetch('/api/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(draftData)
-      })
-      const result = await res.json()
-      if (result.success && !currentDraftId) {
-        setCurrentDraftId(result.id)
-      }
-    } catch (e) {
-      console.log('Auto-save failed:', e)
-    }
-  }, [theme, customTheme, difficulty, pageCount, bookTitle, authorName, pages, selectedPreset, customPrimaryColor, customSecondaryColor, useCustomColor, generateCoverImage, generatePageImages, step, currentDraftId])
-
-  // Auto-save every 30 seconds if there are changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (pages.length > 0 || bookTitle || customTheme) {
-        autoSaveDraft()
-      }
-    }, 30000)
-    return () => clearTimeout(timer)
-  }, [pages, bookTitle, customTheme, autoSaveDraft])
-
-  // Get current data for manual save
+  // Get current data for drafts
   const getCurrentData = () => ({
     title: bookTitle || `${customTheme || theme} Coloring Book`,
     theme,
