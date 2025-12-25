@@ -278,18 +278,19 @@ async function generatePDF(storyData, options) {
     if (hasNonAscii(allText)) {
       console.log('Non-ASCII text detected, loading Unicode fonts...')
       
-      // Try to load Noto Sans which has good Unicode coverage
+      // Try to load NotoSansBengali first (has better Bengali support)
+      // Then fallback to other Unicode fonts
       const fontPaths = [
+        '/app/public/fonts/NotoSansBengali-Regular.ttf',  // Bengali first
         '/app/public/fonts/NotoSans-Regular.ttf',
-        '/app/public/fonts/NotoSansBengali-Regular.ttf',
-        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',  // FreeSerif has better Unicode
         '/usr/share/fonts/truetype/unifont/unifont_sample.ttf'
       ]
       
       const fontBoldPaths = [
+        '/app/public/fonts/NotoSansBengali-Bold.ttf',  // Bengali first
         '/app/public/fonts/NotoSans-Bold.ttf',
-        '/app/public/fonts/NotoSansBengali-Bold.ttf',
-        '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf'
+        '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf'
       ]
       
       // Try to load regular font
