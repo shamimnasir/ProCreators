@@ -160,6 +160,44 @@ export default function StorybookMakerPage() {
     setResult(null)
   }
 
+  // Auto-save draft function
+  const autoSaveDraft = async (dataOverrides = {}) => {
+    try {
+      const currentData = getCurrentData()
+      const saveData = { ...currentData, ...dataOverrides }
+      
+      // Only save if we have meaningful content (title or story)
+      if (!saveData.title && !saveData.story) return
+      
+      const response = await fetch('/api/storybook-maker/drafts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: currentDraftId,
+          toolType: 'storybook',
+          title: saveData.title || 'Untitled Storybook',
+          data: saveData
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        if (!currentDraftId && result.id) {
+          setCurrentDraftId(result.id)
+        }
+        // Refresh drafts list
+        const draftsRes = await fetch('/api/storybook-maker/drafts?toolType=storybook')
+        const draftsData = await draftsRes.json()
+        if (draftsData.success && draftsData.drafts) {
+          setDrafts(draftsData.drafts)
+        }
+        console.log('Draft auto-saved successfully')
+      }
+    } catch (e) {
+      console.log('Auto-save failed:', e)
+    }
+  }
+
   // Start new
   const handleStartNew = () => {
     setStep(1)
