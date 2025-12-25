@@ -256,20 +256,8 @@ async function generatePDF(storyData, options) {
   // ===== COVER PAGE =====
   let page = pdfDoc.addPage([size.width, size.height])
   
-  // Cover background gradient effect
-  page.drawRectangle({
-    x: 0, y: 0,
-    width: size.width, height: size.height,
-    color: rgb(0.98, 0.98, 1)
-  })
-  
-  // Decorative elements
-  page.drawCircle({ x: 80, y: size.height - 80, size: 40, color: sColor, opacity: 0.3 })
-  page.drawCircle({ x: size.width - 80, y: size.height - 100, size: 50, color: pColor, opacity: 0.2 })
-  page.drawCircle({ x: 60, y: 100, size: 35, color: sColor, opacity: 0.25 })
-  page.drawCircle({ x: size.width - 60, y: 80, size: 45, color: pColor, opacity: 0.2 })
-  
-  // If cover image exists, embed it
+  // Check if we have a cover image - if yes, make it full page
+  let hasCoverImage = false
   if (storyData.coverImageUrl) {
     try {
       const { imageBytes, format } = await getImageBytes(storyData.coverImageUrl)
@@ -277,54 +265,112 @@ async function generatePDF(storyData, options) {
         ? await pdfDoc.embedPng(imageBytes) 
         : await pdfDoc.embedJpg(imageBytes)
       
+      // Draw cover image to fill the entire page
       const imgDims = embeddedImage.scale(1)
-      const maxWidth = size.width - 80
-      const maxHeight = size.height - 200
-      const scale = Math.min(maxWidth / imgDims.width, maxHeight / imgDims.height)
+      const scaleX = size.width / imgDims.width
+      const scaleY = size.height / imgDims.height
+      // Use larger scale to fill (cover) rather than fit (contain)
+      const scale = Math.max(scaleX, scaleY)
       const scaledWidth = imgDims.width * scale
       const scaledHeight = imgDims.height * scale
       
+      // Center the image (some may be cropped if aspect ratio differs)
+      const x = (size.width - scaledWidth) / 2
+      const y = (size.height - scaledHeight) / 2
+      
       page.drawImage(embeddedImage, {
-        x: (size.width - scaledWidth) / 2,
-        y: size.height / 2 - scaledHeight / 2 + 30,
+        x: x,
+        y: y,
         width: scaledWidth,
         height: scaledHeight
       })
+      
+      hasCoverImage = true
+      console.log('Cover image embedded full-page successfully')
+      
+      // Only add author name at bottom if we have a cover image
+      // (title is already in the AI-generated cover)
+      if (authorName) {
+        // Semi-transparent bar at bottom for author
+        page.drawRectangle({
+          x: 0,
+          y: 0,
+          width: size.width,
+          height: 50,
+          color: rgb(1, 1, 1),
+          opacity: 0.85
+        })
+        
+        // Author name without "By" prefix
+        const authorWidth = font.widthOfTextAtSize(authorName, 14)
+        page.drawText(authorName, {
+          x: (size.width - authorWidth) / 2,
+          y: 18,
+          size: 14,
+          font: font,
+          color: rgb(0.3, 0.3, 0.3)
+        })
+      }
     } catch (e) {
       console.error('Failed to embed cover image:', e.message)
+      hasCoverImage = false
     }
   }
   
-  // Title
-  const title = storyData.title || 'My Storybook'
-  const titleSize = Math.min(32, (size.width - 80) / (title.length * 0.5))
-  const titleWidth = font.widthOfTextAtSize(title, titleSize)
-  page.drawText(title, {
-    x: (size.width - titleWidth) / 2,
-    y: size.height - 80,
-    size: titleSize,
-    font: fontBold,
-    color: pColor
-  })
-  
-  // Author
-  if (authorName) {
-    const authorText = `By ${authorName}`
-    const authorWidth = font.widthOfTextAtSize(authorText, 14)
-    page.drawText(authorText, {
-      x: (size.width - authorWidth) / 2,
-      y: 60,
-      size: 14,
-      font: font,
-      color: rgb(0.4, 0.4, 0.4)
+  // If no cover image, draw a nice text-based cover
+  if (!hasCoverImage) {
+    // Cover background
+    page.drawRectangle({
+      x: 0, y: 0,
+      width: size.width, height: size.height,
+      color: rgb(0.98, 0.98, 1)
     })
+    
+    // Decorative elements
+    page.drawCircle({ x: 80, y: size.height - 80, size: 40, color: sColor, opacity: 0.3 })
+    page.drawCircle({ x: size.width - 80, y: size.height - 100, size: 50, color: pColor, opacity: 0.2 })
+    page.drawCircle({ x: 60, y: 100, size: 35, color: sColor, opacity: 0.25 })
+    page.drawCircle({ x: size.width - 60, y: 80, size: 45, color: pColor, opacity: 0.2 })
+    
+    // Title
+    const title = storyData.title || 'My Storybook'
+    const titleSize = Math.min(28, (size.width - 80) / (title.length * 0.55))
+    const titleWidth = fontBold.widthOfTextAtSize(title, titleSize)
+    page.drawText(title, {
+      x: (size.width - titleWidth) / 2,
+      y: size.height / 2 + 50,
+      size: titleSize,
+      font: fontBold,
+      color: pColor
+    })
+    
+    // Subtitle line
+    page.drawRectangle({
+      x: size.width / 2 - 60,
+      y: size.height / 2 + 30,
+      width: 120,
+      height: 3,
+      color: sColor
+    })
+    
+    // Author (without "By" prefix)
+    if (authorName) {
+      const authorWidth = font.widthOfTextAtSize(authorName, 16)
+      page.drawText(authorName, {
+        x: (size.width - authorWidth) / 2,
+        y: size.height / 2 - 20,
+        size: 16,
+        font: font,
+        color: rgb(0.4, 0.4, 0.4)
+      })
+    }
   }
   
   // ===== STORY PAGES =====
-  const pages = storyData.pages || []
+  const storyPages = storyData.pages || []
   
-  for (let i = 0; i < pages.length; i++) {
-    const storyPage = pages[i]
+  for (let i = 0; i < storyPages.length; i++) {
+    const storyPage = storyPages[i]
     page = pdfDoc.addPage([size.width, size.height])
     
     // Page background
@@ -336,15 +382,16 @@ async function generatePDF(storyData, options) {
     
     // Subtle border
     page.drawRectangle({
-      x: 20, y: 20,
-      width: size.width - 40, height: size.height - 40,
-      borderColor: rgb(0.9, 0.9, 0.9),
+      x: 15, y: 15,
+      width: size.width - 30, height: size.height - 30,
+      borderColor: rgb(0.92, 0.92, 0.92),
       borderWidth: 1
     })
     
-    // Illustration area (top 60% of page)
-    const illustrationHeight = (size.height - 100) * 0.6
-    const illustrationY = size.height - 50 - illustrationHeight
+    // Illustration area (top 55% of page for better text space)
+    const margin = 30
+    const illustrationHeight = (size.height - 100) * 0.55
+    const illustrationY = size.height - margin - illustrationHeight
     
     if (storyPage.imageUrl) {
       try {
@@ -361,8 +408,8 @@ async function generatePDF(storyData, options) {
         }
         
         const imgDims = embeddedImage.scale(1)
-        const maxWidth = size.width - 80
-        const maxHeight = illustrationHeight - 20
+        const maxWidth = size.width - (margin * 2)
+        const maxHeight = illustrationHeight - 10
         const scale = Math.min(maxWidth / imgDims.width, maxHeight / imgDims.height)
         const scaledWidth = imgDims.width * scale
         const scaledHeight = imgDims.height * scale
@@ -377,10 +424,10 @@ async function generatePDF(storyData, options) {
         console.error(`Failed to embed image for page ${i + 1}:`, e.message)
         // Draw placeholder
         page.drawRectangle({
-          x: 40, y: illustrationY,
-          width: size.width - 80, height: illustrationHeight - 20,
-          color: rgb(0.95, 0.95, 0.95),
-          borderColor: rgb(0.85, 0.85, 0.85),
+          x: margin, y: illustrationY,
+          width: size.width - (margin * 2), height: illustrationHeight - 10,
+          color: rgb(0.96, 0.96, 0.96),
+          borderColor: rgb(0.88, 0.88, 0.88),
           borderWidth: 1
         })
         page.drawText('[Illustration]', {
@@ -394,40 +441,48 @@ async function generatePDF(storyData, options) {
     } else {
       // Placeholder for illustration
       page.drawRectangle({
-        x: 40, y: illustrationY,
-        width: size.width - 80, height: illustrationHeight - 20,
+        x: margin, y: illustrationY,
+        width: size.width - (margin * 2), height: illustrationHeight - 10,
         color: rgb(0.97, 0.97, 0.97),
         borderColor: rgb(0.9, 0.9, 0.9),
         borderWidth: 1
       })
     }
     
-    // Text area (bottom 35% of page)
-    const textY = 50
-    const textHeight = illustrationY - textY - 20
-    const textWidth = size.width - 80
-    const textX = 40
+    // Text area (bottom 40% of page)
+    const textMargin = 35
+    const textY = 45
+    const textHeight = illustrationY - textY - 15
+    const textWidth = size.width - (textMargin * 2)
+    const textX = textMargin
     
-    // Story text with word wrapping
+    // Story text with proper word wrapping using actual font metrics
     const storyText = storyPage.text || ''
-    const fontSize = 14
-    const lineHeight = fontSize * 1.5
-    const maxCharsPerLine = Math.floor(textWidth / (fontSize * 0.5))
+    const fontSize = 13
+    const lineHeight = fontSize * 1.6
     
-    // Simple word wrap
-    const words = storyText.split(' ')
-    const lines = []
-    let currentLine = ''
-    
-    for (const word of words) {
-      if ((currentLine + ' ' + word).length <= maxCharsPerLine) {
-        currentLine = currentLine ? currentLine + ' ' + word : word
-      } else {
-        if (currentLine) lines.push(currentLine)
-        currentLine = word
+    // Calculate actual text width for proper wrapping
+    const wrapText = (text, maxWidth, fontSize) => {
+      const words = text.split(' ')
+      const lines = []
+      let currentLine = ''
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize)
+        
+        if (testWidth <= maxWidth) {
+          currentLine = testLine
+        } else {
+          if (currentLine) lines.push(currentLine)
+          currentLine = word
+        }
       }
+      if (currentLine) lines.push(currentLine)
+      return lines
     }
-    if (currentLine) lines.push(currentLine)
+    
+    const lines = wrapText(storyText, textWidth, fontSize)
     
     // Draw text lines
     const startY = textY + textHeight - lineHeight
