@@ -198,6 +198,31 @@ export default function StorybookMakerPage() {
     }
   }
 
+  // Debounced auto-save when story content changes
+  const autoSaveTimeoutRef = useRef(null)
+  
+  useEffect(() => {
+    // Only auto-save if we have a story and are past step 1
+    if (!story || step < 2) return
+    
+    // Clear any existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current)
+    }
+    
+    // Set a new timeout for debounced save (2 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSaveDraft({ story, step })
+    }, 2000)
+    
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current)
+      }
+    }
+  }, [story, step]) // Trigger when story or step changes
+
   // Start new
   const handleStartNew = () => {
     setStep(1)
