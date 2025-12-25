@@ -161,10 +161,27 @@ export default function StorybookMakerPage() {
   }
 
   // Auto-save draft function
-  const autoSaveDraft = async (dataOverrides = {}) => {
+  const autoSaveDraft = useCallback(async (dataOverrides = {}) => {
     try {
-      const currentData = getCurrentData()
-      const saveData = { ...currentData, ...dataOverrides }
+      const saveData = { 
+        title: title || 'Untitled Storybook',
+        genre,
+        customGenre,
+        ageGroup,
+        pageCount,
+        authorName,
+        customPrompt,
+        story,
+        illustrationStyle,
+        generateIllustrations,
+        paperSize,
+        selectedTheme,
+        customPrimaryColor,
+        customSecondaryColor,
+        useCustomColors,
+        step,
+        ...dataOverrides 
+      }
       
       // Only save if we have meaningful content (title or story)
       if (!saveData.title && !saveData.story) return
@@ -196,7 +213,7 @@ export default function StorybookMakerPage() {
     } catch (e) {
       console.log('Auto-save failed:', e)
     }
-  }
+  }, [title, genre, customGenre, ageGroup, pageCount, authorName, customPrompt, story, illustrationStyle, generateIllustrations, paperSize, selectedTheme, customPrimaryColor, customSecondaryColor, useCustomColors, step, currentDraftId])
 
   // Debounced auto-save when story content changes
   const autoSaveTimeoutRef = useRef(null)
