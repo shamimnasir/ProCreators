@@ -278,16 +278,17 @@ async function generatePDF(storyData, options) {
     if (hasNonAscii(allText)) {
       console.log('Non-ASCII text detected, loading Unicode fonts...')
       
-      // FreeSerif has comprehensive Unicode support including Bengali conjuncts
-      // Unifont is a fallback with complete Unicode coverage (bitmap-style)
+      // Lohit-Bengali has excellent Bengali conjunct/ligature support
+      // FreeSerif is a good fallback with comprehensive Unicode support
       const fontPaths = [
-        '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',  // Best for Bengali
-        '/usr/share/fonts/opentype/unifont/unifont.otf',     // Complete Unicode coverage
+        '/usr/share/fonts/truetype/lohit-bengali/Lohit-Bengali.ttf',  // Best for Bengali
+        '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',           // Good Unicode coverage
+        '/usr/share/fonts/opentype/unifont/unifont.otf',              // Complete Unicode
         '/app/public/fonts/NotoSansBengali-Regular.ttf',     
-        '/usr/share/fonts/truetype/unifont/unifont_sample.ttf'
       ]
       
       const fontBoldPaths = [
+        '/usr/share/fonts/truetype/lohit-bengali/Lohit-Bengali.ttf',  // Lohit doesn't have bold
         '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
         '/app/public/fonts/NotoSansBengali-Bold.ttf',
       ]
