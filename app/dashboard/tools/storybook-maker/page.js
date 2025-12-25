@@ -100,26 +100,6 @@ export default function StorybookMakerPage() {
   // Result
   const [result, setResult] = useState(null)
 
-  // Drafts
-  const [drafts, setDrafts] = useState([])
-  const [currentDraftId, setCurrentDraftId] = useState(null)
-
-  // Load drafts on mount
-  useEffect(() => {
-    const loadDrafts = async () => {
-      try {
-        const res = await fetch('/api/storybook-maker/drafts?toolType=storybook')
-        const data = await res.json()
-        if (data.success && data.drafts) {
-          setDrafts(data.drafts)
-        }
-      } catch (e) {
-        console.log('Failed to load drafts:', e)
-      }
-    }
-    loadDrafts()
-  }, [])
-
   // Get current data for drafts
   const getCurrentData = () => ({
     title: title || 'Untitled Storybook',
@@ -161,86 +141,6 @@ export default function StorybookMakerPage() {
     setResult(null)
   }
 
-  // Auto-save draft function
-  const autoSaveDraft = useCallback(async (dataOverrides = {}) => {
-    try {
-      const saveData = { 
-        title: title || 'Untitled Storybook',
-        genre,
-        customGenre,
-        ageGroup,
-        pageCount,
-        authorName,
-        customPrompt,
-        story,
-        illustrationStyle,
-        generateIllustrations,
-        paperSize,
-        selectedTheme,
-        customPrimaryColor,
-        customSecondaryColor,
-        useCustomColors,
-        step,
-        ...dataOverrides 
-      }
-      
-      // Only save if we have meaningful content (title or story)
-      if (!saveData.title && !saveData.story) return
-      
-      const response = await fetch('/api/storybook-maker/drafts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: currentDraftId,
-          toolType: 'storybook',
-          title: saveData.title || 'Untitled Storybook',
-          data: saveData
-        })
-      })
-      
-      const result = await response.json()
-      if (result.success) {
-        if (!currentDraftId && result.id) {
-          setCurrentDraftId(result.id)
-        }
-        // Refresh drafts list
-        const draftsRes = await fetch('/api/storybook-maker/drafts?toolType=storybook')
-        const draftsData = await draftsRes.json()
-        if (draftsData.success && draftsData.drafts) {
-          setDrafts(draftsData.drafts)
-        }
-        console.log('Draft auto-saved successfully')
-      }
-    } catch (e) {
-      console.log('Auto-save failed:', e)
-    }
-  }, [title, genre, customGenre, ageGroup, pageCount, authorName, customPrompt, story, illustrationStyle, generateIllustrations, paperSize, selectedTheme, customPrimaryColor, customSecondaryColor, useCustomColors, step, currentDraftId])
-
-  // Debounced auto-save when story content changes
-  const autoSaveTimeoutRef = useRef(null)
-  
-  useEffect(() => {
-    // Only auto-save if we have a story and are past step 1
-    if (!story || step < 2) return
-    
-    // Clear any existing timeout
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current)
-    }
-    
-    // Set a new timeout for debounced save (2 seconds after last change)
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      autoSaveDraft({ story, step })
-    }, 2000)
-    
-    // Cleanup on unmount
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current)
-      }
-    }
-  }, [story, step, autoSaveDraft]) // Trigger when story or step changes
-
   // Start new
   const handleStartNew = () => {
     setStep(1)
@@ -257,7 +157,6 @@ export default function StorybookMakerPage() {
     setPaperSize('8.5x8.5')
     setSelectedTheme('storybook')
     setUseCustomColors(false)
-    setCurrentDraftId(null)
     setResult(null)
   }
 
