@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { spawn } from 'child_process'
+import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 
 // KDP Paper Sizes for Children's Books
 const PAPER_SIZES = {
@@ -13,6 +14,199 @@ const PAPER_SIZES = {
   '8x10': { width: 576, height: 720, name: '8" x 10"' },
   '8.5x11': { width: 612, height: 792, name: '8.5" x 11" (Letter)' },
   '6x9': { width: 432, height: 648, name: '6" x 9"' }
+}
+
+// Detect if text contains non-Latin characters (Bengali, Hindi, Chinese, etc.)
+function hasNonLatinChars(text) {
+  if (!text) return false
+  return /[\u0900-\u097F\u0980-\u09FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0B80-\u0BFF\u0C00-\u0C7F]/.test(text)
+}
+
+// Generate storybook HTML for complex scripts (Bengali, Hindi, etc.)
+function generateStorybookHTML(storyData, options) {
+  const { primaryColor = '#4f46e5', secondaryColor = '#818cf8', authorName = '' } = options
+  
+  const escapeHTML = (text) => {
+    if (!text) return ''
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+  
+  return `
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    @page { size: 8.5in 8.5in; margin: 0; }
+    
+    body {
+      font-family: 'Noto Sans Bengali', 'Noto Sans', sans-serif;
+      line-height: 1.6;
+      color: #222;
+    }
+    
+    .page {
+      width: 8.5in;
+      height: 8.5in;
+      padding: 0.5in;
+      page-break-after: always;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .page:last-child { page-break-after: auto; }
+    
+    /* Cover Page */
+    .cover-page {
+      background: linear-gradient(135deg, ${primaryColor}15 0%, ${secondaryColor}10 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .cover-page .cover-image {
+      max-width: 90%;
+      max-height: 70%;
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .cover-page .title {
+      font-size: 32px;
+      font-weight: 700;
+      color: ${primaryColor};
+      margin-bottom: 15px;
+      line-height: 1.3;
+    }
+    
+    .cover-page .author {
+      font-size: 16px;
+      color: #555;
+    }
+    
+    /* Story Pages */
+    .story-page {
+      background: #fff;
+    }
+    
+    .story-page .illustration {
+      width: 100%;
+      height: 55%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f9fa;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .story-page .illustration img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .story-page .illustration.no-image {
+      background: linear-gradient(135deg, ${primaryColor}08 0%, ${secondaryColor}05 100%);
+      border: 2px dashed ${primaryColor}30;
+    }
+    
+    .story-page .text {
+      flex: 1;
+      font-size: 18px;
+      line-height: 1.8;
+      color: #333;
+      text-align: justify;
+      padding: 10px 20px;
+    }
+    
+    .story-page .page-number {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #999;
+    }
+    
+    /* Back Cover */
+    .back-cover {
+      background: linear-gradient(135deg, ${primaryColor}10 0%, ${secondaryColor}08 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .back-cover .moral {
+      font-size: 18px;
+      font-style: italic;
+      color: ${primaryColor};
+      max-width: 80%;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    
+    .back-cover .end {
+      font-size: 24px;
+      font-weight: 700;
+      color: ${secondaryColor};
+    }
+    
+    .decoration {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cover Page -->
+  <div class="page cover-page">
+    <div class="decoration" style="width:80px;height:80px;background:${primaryColor};top:40px;left:40px;"></div>
+    <div class="decoration" style="width:60px;height:60px;background:${secondaryColor};top:60px;right:60px;"></div>
+    <div class="decoration" style="width:50px;height:50px;background:${primaryColor};bottom:80px;left:60px;"></div>
+    <div class="decoration" style="width:70px;height:70px;background:${secondaryColor};bottom:60px;right:50px;"></div>
+    
+    ${storyData.coverImageUrl ? `<img class="cover-image" src="${storyData.coverImageUrl}" alt="Cover">` : ''}
+    <h1 class="title">${escapeHTML(storyData.title)}</h1>
+    ${authorName ? `<p class="author">${escapeHTML(authorName)}</p>` : ''}
+  </div>
+  
+  <!-- Story Pages -->
+  ${(storyData.pages || []).map((page, idx) => `
+    <div class="page story-page">
+      <div class="illustration ${page.imageUrl ? '' : 'no-image'}">
+        ${page.imageUrl ? `<img src="${page.imageUrl}" alt="Page ${idx + 1}">` : '<span style="color:#999">📖</span>'}
+      </div>
+      <div class="text">${escapeHTML(page.text)}</div>
+      <div class="page-number">${idx + 1}</div>
+    </div>
+  `).join('')}
+  
+  <!-- Back Cover -->
+  <div class="page back-cover">
+    <div class="decoration" style="width:60px;height:60px;background:${primaryColor};top:60px;left:50px;"></div>
+    <div class="decoration" style="width:45px;height:45px;background:${secondaryColor};top:80px;right:80px;"></div>
+    <div class="decoration" style="width:55px;height:55px;background:${primaryColor};bottom:100px;left:80px;"></div>
+    <div class="decoration" style="width:50px;height:50px;background:${secondaryColor};bottom:70px;right:60px;"></div>
+    
+    ${storyData.moral ? `<p class="moral">"${escapeHTML(storyData.moral)}"</p>` : ''}
+    <p class="end">সমাপ্ত / The End</p>
+  </div>
+</body>
+</html>
+  `
 }
 
 // Age group writing styles
