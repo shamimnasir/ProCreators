@@ -639,7 +639,7 @@ export default function ActivityBookPage() {
               {pages.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Puzzle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No activities yet. Click "Add Activity" to create one.</p>
+                  <p>No activities yet. Click &quot;Add Activity&quot; to create one.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
