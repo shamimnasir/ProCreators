@@ -598,15 +598,16 @@ export default function ColoringBookPage() {
 
           {/* Drafts Panel */}
           <div className="lg:col-span-1">
-            <DraftsManager
+            <AutoSaveDraftsManager
               toolType="coloring-book"
-              drafts={drafts}
-              setDrafts={setDrafts}
-              currentDraftId={currentDraftId}
-              setCurrentDraftId={setCurrentDraftId}
               getCurrentData={getCurrentData}
               loadDraftData={loadDraftData}
               onStartNew={handleStartNew}
+              dependencies={[theme, customTheme, difficulty, pageCount, bookTitle, authorName, pages, selectedPreset, customPrimaryColor, customSecondaryColor, useCustomColor, step]}
+              autoSaveEnabled={true}
+              debounceMs={2000}
+              minStepForAutoSave={1}
+              currentStep={step}
             />
           </div>
         </div>
