@@ -278,30 +278,30 @@ async function generatePDF(storyData, options) {
     if (hasNonAscii(allText)) {
       console.log('Non-ASCII text detected, loading Unicode fonts...')
       
-      // Try to load NotoSansBengali first (has better Bengali support)
-      // Then fallback to other Unicode fonts
+      // FreeSerif has comprehensive Unicode support including Bengali conjuncts
+      // Unifont is a fallback with complete Unicode coverage (bitmap-style)
       const fontPaths = [
-        '/app/public/fonts/NotoSansBengali-Regular.ttf',  // Bengali first
-        '/app/public/fonts/NotoSans-Regular.ttf',
-        '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',  // FreeSerif has better Unicode
+        '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',  // Best for Bengali
+        '/usr/share/fonts/opentype/unifont/unifont.otf',     // Complete Unicode coverage
+        '/app/public/fonts/NotoSansBengali-Regular.ttf',     
         '/usr/share/fonts/truetype/unifont/unifont_sample.ttf'
       ]
       
       const fontBoldPaths = [
-        '/app/public/fonts/NotoSansBengali-Bold.ttf',  // Bengali first
-        '/app/public/fonts/NotoSans-Bold.ttf',
-        '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf'
+        '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+        '/app/public/fonts/NotoSansBengali-Bold.ttf',
       ]
       
       // Try to load regular font
       for (const fontPath of fontPaths) {
         try {
           const fontBytes = await fs.readFile(fontPath)
-          unicodeFont = await pdfDoc.embedFont(fontBytes)
+          unicodeFont = await pdfDoc.embedFont(fontBytes, { subset: false })
           hasUnicodeFont = true
           console.log(`Loaded Unicode font: ${fontPath}`)
           break
         } catch (e) {
+          console.log(`Failed to load ${fontPath}: ${e.message}`)
           // Try next font
         }
       }
@@ -310,7 +310,7 @@ async function generatePDF(storyData, options) {
       for (const fontPath of fontBoldPaths) {
         try {
           const fontBytes = await fs.readFile(fontPath)
-          unicodeFontBold = await pdfDoc.embedFont(fontBytes)
+          unicodeFontBold = await pdfDoc.embedFont(fontBytes, { subset: false })
           console.log(`Loaded Unicode bold font: ${fontPath}`)
           break
         } catch (e) {
