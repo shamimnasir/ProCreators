@@ -252,8 +252,83 @@ async function generatePDF(storyData, options) {
   
   const size = PAPER_SIZES[paperSize] || PAPER_SIZES['8.5x8.5']
   const pdfDoc = await PDFDocument.create()
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  
+  // Load standard fonts as fallback
+  const standardFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const standardFontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  
+  // Load custom Unicode fonts for non-ASCII text support
+  let unicodeFont = standardFont
+  let unicodeFontBold = standardFontBold
+  let hasUnicodeFont = false
+  
+  try {
+    // Check if we have any non-ASCII text in the story
+    const allText = [
+      storyData.title || '',
+      storyData.moral || '',
+      authorName || '',
+      ...(storyData.pages || []).map(p => p.text || '')
+    ].join('')
+    
+    if (hasNonAscii(allText)) {
+      console.log('Non-ASCII text detected, loading Unicode fonts...')
+      
+      // Try to load Noto Sans which has good Unicode coverage
+      const fontPaths = [
+        '/app/public/fonts/NotoSans-Regular.ttf',
+        '/app/public/fonts/NotoSansBengali-Regular.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        '/usr/share/fonts/truetype/unifont/unifont_sample.ttf'
+      ]
+      
+      const fontBoldPaths = [
+        '/app/public/fonts/NotoSans-Bold.ttf',
+        '/app/public/fonts/NotoSansBengali-Bold.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf'
+      ]
+      
+      // Try to load regular font
+      for (const fontPath of fontPaths) {
+        try {
+          const fontBytes = await fs.readFile(fontPath)
+          unicodeFont = await pdfDoc.embedFont(fontBytes)
+          hasUnicodeFont = true
+          console.log(`Loaded Unicode font: ${fontPath}`)
+          break
+        } catch (e) {
+          // Try next font
+        }
+      }
+      
+      // Try to load bold font
+      for (const fontPath of fontBoldPaths) {
+        try {
+          const fontBytes = await fs.readFile(fontPath)
+          unicodeFontBold = await pdfDoc.embedFont(fontBytes)
+          console.log(`Loaded Unicode bold font: ${fontPath}`)
+          break
+        } catch (e) {
+          // Try next font, or fall back to regular
+        }
+      }
+      
+      // If bold not loaded, use regular
+      if (unicodeFontBold === standardFontBold && hasUnicodeFont) {
+        unicodeFontBold = unicodeFont
+      }
+    }
+  } catch (fontError) {
+    console.error('Failed to load Unicode fonts:', fontError.message)
+  }
+  
+  // Select appropriate font based on text content
+  const getFont = (text, bold = false) => {
+    if (hasUnicodeFont && hasNonAscii(text)) {
+      return bold ? unicodeFontBold : unicodeFont
+    }
+    return bold ? standardFontBold : standardFont
+  }
   
   const pColor = hexToRgb(primaryColor)
   const sColor = hexToRgb(secondaryColor)
