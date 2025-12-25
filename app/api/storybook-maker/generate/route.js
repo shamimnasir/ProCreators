@@ -680,6 +680,9 @@ async function generatePDF(storyData, options) {
     const maxMoralWidth = size.width - 100 // 50px margin on each side
     const lineHeight = moralFontSize * 1.6
     
+    // Get appropriate font for moral text
+    const moralFont = getFont(moral, false)
+    
     // Wrap the moral text properly
     const wrapMoralText = (text, maxWidth) => {
       const words = text.split(' ')
@@ -688,7 +691,7 @@ async function generatePDF(storyData, options) {
       
       for (const word of words) {
         const testLine = currentLine ? `${currentLine} ${word}` : word
-        const testWidth = font.widthOfTextAtSize(testLine, moralFontSize)
+        const testWidth = moralFont.widthOfTextAtSize(testLine, moralFontSize)
         
         if (testWidth <= maxWidth) {
           currentLine = testLine
@@ -707,12 +710,12 @@ async function generatePDF(storyData, options) {
     
     // Draw each line of the moral centered
     moralLines.forEach((line, idx) => {
-      const lineWidth = font.widthOfTextAtSize(line, moralFontSize)
+      const lineWidth = moralFont.widthOfTextAtSize(line, moralFontSize)
       page.drawText(line, {
         x: (size.width - lineWidth) / 2,
         y: moralStartY - (idx * lineHeight),
         size: moralFontSize,
-        font: font,
+        font: moralFont,
         color: pColor
       })
     })
@@ -721,13 +724,13 @@ async function generatePDF(storyData, options) {
   // "The End" text with decorative styling
   const endText = 'The End'
   const endFontSize = 22
-  const endWidth = fontBold.widthOfTextAtSize(endText, endFontSize)
+  const endWidth = standardFontBold.widthOfTextAtSize(endText, endFontSize)
   
   page.drawText(endText, {
     x: (size.width - endWidth) / 2,
     y: size.height / 2 - 40,
     size: endFontSize,
-    font: fontBold,
+    font: standardFontBold,
     color: sColor
   })
   
