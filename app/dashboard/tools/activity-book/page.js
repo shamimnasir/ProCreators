@@ -489,22 +489,48 @@ export default function ActivityBookPage() {
                 {/* Activity Selection */}
                 <div className="space-y-3">
                   <Label className="text-base font-medium">Select Activities to Include</Label>
-                  <p className="text-sm text-muted-foreground">Choose specific activities or leave empty for all</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click to select/deselect. Selected activities will be distributed across pages.
+                    {selectedActivities.length === 0 && <span className="text-blue-600 ml-1">(All activities selected by default)</span>}
+                    {selectedActivities.length > 0 && selectedActivities.length < 3 && (
+                      <span className="text-amber-600 ml-1">(Select at least 3 for variety)</span>
+                    )}
+                  </p>
+                  <div className="flex gap-2 mb-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedActivities(availableActivities.map(a => a.id))}
+                    >
+                      Select All
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSelectedActivities([])}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {availableActivities.map((activity) => (
-                      <button
-                        key={activity.id}
-                        onClick={() => toggleActivity(activity.id)}
-                        className={`p-2 rounded-lg border text-left transition-all flex items-center gap-2 ${
-                          selectedActivities.includes(activity.id) 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <span className="text-lg">{activity.icon}</span>
-                        <span className="text-sm font-medium">{activity.name}</span>
-                      </button>
-                    ))}
+                    {availableActivities.map((activity) => {
+                      const isSelected = selectedActivities.length === 0 || selectedActivities.includes(activity.id)
+                      return (
+                        <button
+                          key={activity.id}
+                          onClick={() => toggleActivity(activity.id)}
+                          className={`p-2 rounded-lg border text-left transition-all flex items-center gap-2 ${
+                            isSelected
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50 opacity-60'
+                          }`}
+                        >
+                          <span className="text-lg">{activity.icon}</span>
+                          <span className="text-sm font-medium">{activity.name}</span>
+                          {isSelected && <CheckCircle className="h-4 w-4 text-primary ml-auto" />}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
