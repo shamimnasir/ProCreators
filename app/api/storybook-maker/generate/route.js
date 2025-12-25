@@ -56,42 +56,66 @@ function generateStorybookHTML(storyData, options) {
     .page {
       width: 8.5in;
       height: 8.5in;
-      padding: 0.5in;
+      padding: 0;
       page-break-after: always;
       position: relative;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
     
     .page:last-child { page-break-after: auto; }
     
     /* Cover Page */
     .cover-page {
+      padding: 0;
+      position: relative;
+    }
+    
+    .cover-page.has-image {
+      background: #000;
+    }
+    
+    .cover-page.no-image {
       background: linear-gradient(135deg, ${primaryColor}15 0%, ${secondaryColor}10 100%);
       justify-content: center;
       align-items: center;
       text-align: center;
+      padding: 0.5in;
     }
     
     .cover-page .cover-image {
-      max-width: 90%;
-      max-height: 70%;
-      object-fit: contain;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    
+    .cover-page .cover-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 30px;
+      background: linear-gradient(transparent, rgba(255,255,255,0.95));
+      text-align: center;
     }
     
     .cover-page .title {
       font-size: 32px;
       font-weight: 700;
       color: ${primaryColor};
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       line-height: 1.3;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
     }
     
     .cover-page .author {
       font-size: 16px;
-      color: #555;
+      color: #444;
     }
     
     /* Story Pages */
