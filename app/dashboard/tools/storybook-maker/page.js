@@ -332,6 +332,14 @@ export default function StorybookMakerPage() {
       setResult(data)
       if (data.story) setStory(data.story)
       setStep(5)
+      
+      // Auto-save after PDF generation (final state)
+      await autoSaveDraft({ 
+        story: data.story || story, 
+        step: 5,
+        result: { downloadUrl: data.downloadUrl, pageCount: data.pageCount }
+      })
+      
       toast({ title: "Storybook Ready!", description: `${data.pageCount} page illustrated storybook created!` })
     } catch (error) {
       toast({ title: "PDF Generation Failed", description: error.message, variant: "destructive" })
