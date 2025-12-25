@@ -203,6 +203,11 @@ async function generateIllustration(prompt, style) {
   })
 }
 
+// Helper: Check if text contains non-ASCII characters
+function hasNonAscii(text) {
+  return /[^\x00-\x7F]/.test(text)
+}
+
 // Helper: Get image bytes from URL or base64
 async function getImageBytes(imageUrl) {
   if (!imageUrl) throw new Error('No image URL provided')
