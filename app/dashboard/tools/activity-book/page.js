@@ -238,11 +238,17 @@ export default function ActivityBookPage() {
 
   // Toggle activity selection
   const toggleActivity = (activityId) => {
-    setSelectedActivities(prev => 
-      prev.includes(activityId)
-        ? prev.filter(id => id !== activityId)
-        : [...prev, activityId]
-    )
+    setSelectedActivities(prev => {
+      // If nothing selected (all selected by default), clicking one means "select all except this"
+      if (prev.length === 0) {
+        return availableActivities.filter(a => a.id !== activityId).map(a => a.id)
+      }
+      // Otherwise toggle as normal
+      if (prev.includes(activityId)) {
+        return prev.filter(id => id !== activityId)
+      }
+      return [...prev, activityId]
+    })
   }
 
   // Generate activity pages with AI
