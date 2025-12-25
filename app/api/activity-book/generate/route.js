@@ -1060,7 +1060,6 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
   switch (content.type) {
     case 'word-search':
       if (content.grid && content.words) {
-        // Draw grid
         const gridSize = content.gridSize || 10
         const cellSize = Math.min(width - 40, height - 100) / gridSize
         const gridStartX = centerX - (gridSize * cellSize) / 2
@@ -1087,66 +1086,142 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
           }
         }
         
-        // Word list
         const words = content.words || []
         const wordListY = y + 30
-        page.drawText('Find these words:', {
-          x: x + 10,
-          y: wordListY,
-          size: 10,
-          font: boldFont,
-          color: pColor
-        })
+        page.drawText('Find these words:', { x: x + 10, y: wordListY, size: 10, font: boldFont, color: pColor })
         words.forEach((word, idx) => {
           page.drawText(word, {
             x: x + 10 + (idx % 4) * 70,
             y: wordListY - 15 - Math.floor(idx / 4) * 15,
-            size: 9,
-            font,
-            color: rgb(0.3, 0.3, 0.3)
+            size: 9, font, color: rgb(0.3, 0.3, 0.3)
           })
         })
       }
       break
       
+    case 'crossword':
+      // Draw crossword grid
+      const cwGridSize = content.gridSize || 10
+      const cwCellSize = Math.min(width - 80, height - 150) / cwGridSize
+      const cwStartX = centerX - (cwGridSize * cwCellSize) / 2
+      const cwStartY = centerY + (cwGridSize * cwCellSize) / 2 + 20
+      
+      // Draw empty grid
+      for (let row = 0; row < cwGridSize; row++) {
+        for (let col = 0; col < cwGridSize; col++) {
+          page.drawRectangle({
+            x: cwStartX + col * cwCellSize,
+            y: cwStartY - (row + 1) * cwCellSize,
+            width: cwCellSize, height: cwCellSize,
+            borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1
+          })
+        }
+      }
+      
+      // Draw clues
+      const clues = content.clues || { across: [], down: [] }
+      let clueY = y + 60
+      page.drawText('ACROSS:', { x: x + 10, y: clueY, size: 9, font: boldFont, color: pColor })
+      clueY -= 12
+      ;(clues.across || []).slice(0, 4).forEach((clue) => {
+        page.drawText(`${clue.number}. ${stripEmojis(clue.clue)}`, { x: x + 10, y: clueY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        clueY -= 12
+      })
+      clueY -= 5
+      page.drawText('DOWN:', { x: x + 10, y: clueY, size: 9, font: boldFont, color: pColor })
+      clueY -= 12
+      ;(clues.down || []).slice(0, 4).forEach((clue) => {
+        page.drawText(`${clue.number}. ${stripEmojis(clue.clue)}`, { x: x + 10, y: clueY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        clueY -= 12
+      })
+      break
+      
+    case 'sudoku':
+      const sudokuSize = content.size || 9
+      const sudokuCellSize = Math.min(width - 60, height - 60) / sudokuSize
+      const sudokuStartX = centerX - (sudokuSize * sudokuCellSize) / 2
+      const sudokuStartY = centerY + (sudokuSize * sudokuCellSize) / 2
+      const boxSize = sudokuSize === 9 ? 3 : (sudokuSize === 6 ? 3 : 2)
+      
+      for (let row = 0; row < sudokuSize; row++) {
+        for (let col = 0; col < sudokuSize; col++) {
+          const cellVal = content.grid?.[row]?.[col] || 0
+          const isBoxBorder = (row % boxSize === 0) || (col % boxSize === 0)
+          
+          page.drawRectangle({
+            x: sudokuStartX + col * sudokuCellSize,
+            y: sudokuStartY - (row + 1) * sudokuCellSize,
+            width: sudokuCellSize, height: sudokuCellSize,
+            borderColor: isBoxBorder ? rgb(0.2, 0.2, 0.2) : rgb(0.7, 0.7, 0.7),
+            borderWidth: isBoxBorder ? 2 : 0.5
+          })
+          
+          if (cellVal > 0) {
+            page.drawText(String(cellVal), {
+              x: sudokuStartX + col * sudokuCellSize + sudokuCellSize / 3,
+              y: sudokuStartY - (row + 1) * sudokuCellSize + sudokuCellSize / 3,
+              size: sudokuCellSize * 0.5, font: boldFont, color: rgb(0.2, 0.2, 0.2)
+            })
+          }
+        }
+      }
+      break
+      
     case 'maze':
-      // Draw maze placeholder
-      page.drawRectangle({
-        x: x + 20,
-        y: y + 40,
-        width: width - 40,
-        height: height - 60,
-        borderColor: rgb(0.7, 0.7, 0.7),
-        borderWidth: 2
-      })
-      page.drawText('START', {
-        x: x + 30,
-        y: y + height - 30,
-        size: 10,
-        font: boldFont,
-        color: rgb(0.2, 0.7, 0.2)
-      })
-      page.drawText('FINISH', {
-        x: x + width - 60,
-        y: y + 50,
-        size: 10,
-        font: boldFont,
-        color: rgb(0.7, 0.2, 0.2)
-      })
-      // Draw some maze lines (simplified representation)
-      for (let i = 0; i < 8; i++) {
-        const lineY = y + 60 + i * (height - 80) / 8
-        page.drawLine({
-          start: { x: x + 30 + Math.random() * 50, y: lineY },
-          end: { x: x + width - 30 - Math.random() * 50, y: lineY },
-          thickness: 2,
-          color: rgb(0.4, 0.4, 0.4)
-        })
+    case 'maze-complex':
+      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 60, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
+      page.drawText('START', { x: x + 30, y: y + height - 30, size: 10, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
+      page.drawText('FINISH', { x: x + width - 60, y: y + 50, size: 10, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
+      // Draw maze lines
+      for (let i = 0; i < 10; i++) {
+        const lineY = y + 60 + i * (height - 80) / 10
+        const startOffset = 30 + Math.random() * 80
+        const endOffset = 30 + Math.random() * 80
+        page.drawLine({ start: { x: x + startOffset, y: lineY }, end: { x: x + width - endOffset, y: lineY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+        // Vertical connectors
+        if (i > 0 && Math.random() > 0.5) {
+          const vx = x + 50 + Math.random() * (width - 100)
+          const prevY = y + 60 + (i - 1) * (height - 80) / 10
+          page.drawLine({ start: { x: vx, y: prevY }, end: { x: vx, y: lineY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+        }
+      }
+      break
+      
+    case 'spot-difference':
+      // Draw two boxes side by side
+      const boxW = (width - 30) / 2
+      page.drawRectangle({ x: x + 5, y: y + 40, width: boxW, height: height - 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      page.drawRectangle({ x: x + boxW + 15, y: y + 40, width: boxW, height: height - 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      page.drawText('Picture A', { x: x + boxW / 2 - 20, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      page.drawText('Picture B', { x: x + boxW + boxW / 2 + 5, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      // Draw some shapes in both boxes
+      for (let i = 0; i < 5; i++) {
+        const shapeY = y + 80 + i * 80
+        page.drawCircle({ x: x + 60, y: shapeY, size: 15, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
+        page.drawCircle({ x: x + boxW + 70, y: shapeY, size: 15 + (i % 2 === 0 ? 3 : 0), borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
+      }
+      page.drawText(`Find ${content.differences || 10} differences!`, { x: centerX - 50, y: y + 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      break
+      
+    case 'connect-dots':
+      // Draw dots in a pattern
+      const dotCount = content.dots || 30
+      const dotsPerRow = Math.ceil(Math.sqrt(dotCount))
+      const dotSpacingX = (width - 60) / dotsPerRow
+      const dotSpacingY = (height - 80) / dotsPerRow
+      
+      for (let i = 0; i < Math.min(dotCount, 50); i++) {
+        const row = Math.floor(i / dotsPerRow)
+        const col = i % dotsPerRow
+        const dotX = x + 40 + col * dotSpacingX + (Math.random() - 0.5) * 20
+        const dotY = y + height - 50 - row * dotSpacingY + (Math.random() - 0.5) * 20
+        
+        page.drawCircle({ x: dotX, y: dotY, size: 4, color: rgb(0.3, 0.3, 0.3) })
+        page.drawText(String(i + 1), { x: dotX + 5, y: dotY + 2, size: 7, font, color: rgb(0.4, 0.4, 0.4) })
       }
       break
       
     case 'tic-tac-toe':
-      // Draw multiple tic-tac-toe grids
       const tttGrids = content.grids || 6
       const tttSize = 80
       const gridsPerRow = 3
@@ -1155,7 +1230,6 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
         const gx = x + 40 + (g % gridsPerRow) * (tttSize + 40)
         const gy = y + height - 60 - Math.floor(g / gridsPerRow) * (tttSize + 40)
         
-        // Draw grid
         page.drawLine({ start: { x: gx + tttSize / 3, y: gy }, end: { x: gx + tttSize / 3, y: gy - tttSize }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
         page.drawLine({ start: { x: gx + 2 * tttSize / 3, y: gy }, end: { x: gx + 2 * tttSize / 3, y: gy - tttSize }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
         page.drawLine({ start: { x: gx, y: gy - tttSize / 3 }, end: { x: gx + tttSize, y: gy - tttSize / 3 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
@@ -1174,13 +1248,104 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
         const py = y + height - 50 - row * 40
         
         const problemText = `${idx + 1}. ${prob.a} ${prob.op} ${prob.b} = ____`
-        page.drawText(problemText, {
-          x: px,
-          y: py,
-          size: 14,
-          font,
-          color: rgb(0.2, 0.2, 0.2)
-        })
+        page.drawText(problemText, { x: px, y: py, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
+      })
+      break
+      
+    case 'spelling':
+      const spellingWords = content.words || []
+      const scrambledWords = content.scrambled || []
+      let spellingY = y + height - 50
+      
+      page.drawText('Unscramble these words:', { x: x + 20, y: spellingY, size: 11, font: boldFont, color: pColor })
+      spellingY -= 25
+      
+      scrambledWords.forEach((word, idx) => {
+        if (spellingY > y + 60) {
+          page.drawText(`${idx + 1}. ${word}  =  ________________`, { x: x + 30, y: spellingY, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
+          spellingY -= 30
+        }
+      })
+      break
+      
+    case 'tracing':
+      const items = content.items || ['A', 'B', 'C', 'D', 'E']
+      const tracingCols = 5
+      const tracingCellW = (width - 40) / tracingCols
+      const tracingCellH = (height - 60) / Math.ceil(items.length / tracingCols)
+      
+      items.forEach((item, idx) => {
+        const col = idx % tracingCols
+        const row = Math.floor(idx / tracingCols)
+        const cellX = x + 20 + col * tracingCellW
+        const cellY = y + height - 40 - row * tracingCellH
+        
+        // Draw dotted letter/number
+        page.drawRectangle({ x: cellX + 5, y: cellY - tracingCellH + 5, width: tracingCellW - 10, height: tracingCellH - 10, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
+        page.drawText(item, { x: cellX + tracingCellW / 3, y: cellY - tracingCellH / 2 - 10, size: 28, font, color: rgb(0.85, 0.85, 0.85) })
+      })
+      break
+      
+    case 'matching':
+      const pairs = content.pairs || []
+      const matchingY = y + height - 50
+      const leftCol = x + 30
+      const rightCol = x + width - 80
+      
+      pairs.forEach((pair, idx) => {
+        const itemY = matchingY - idx * 50
+        if (itemY > y + 60) {
+          page.drawText(stripEmojis(pair[0] || ''), { x: leftCol, y: itemY, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawCircle({ x: leftCol + 60, y: itemY + 4, size: 5, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+          page.drawText(stripEmojis(pair[1] || ''), { x: rightCol, y: itemY - (idx % 3) * 15, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawCircle({ x: rightCol - 10, y: itemY - (idx % 3) * 15 + 4, size: 5, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+        }
+      })
+      page.drawText('Draw lines to match!', { x: centerX - 50, y: y + 25, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      break
+      
+    case 'counting':
+      const countItems = content.items || []
+      let countY = y + height - 60
+      
+      countItems.forEach((item, idx) => {
+        if (countY > y + 80) {
+          page.drawText(`${idx + 1}. Count: ${stripEmojis(item)}`, { x: x + 30, y: countY, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawText('Answer: ____', { x: x + width - 100, y: countY, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+          countY -= 40
+        }
+      })
+      break
+      
+    case 'patterns':
+      const patterns = content.patterns || []
+      let patternY = y + height - 60
+      
+      patterns.forEach((p, idx) => {
+        if (patternY > y + 80) {
+          const seq = (p.sequence || []).map(s => stripEmojis(String(s))).join('  ')
+          page.drawText(`${idx + 1}. ${seq}`, { x: x + 30, y: patternY, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawText('What comes next? ____', { x: x + 30, y: patternY - 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+          patternY -= 60
+        }
+      })
+      break
+      
+    case 'trivia':
+      const triviaQuestions = content.questions || []
+      let triviaY = y + height - 50
+      
+      triviaQuestions.forEach((q, idx) => {
+        if (triviaY > y + 100) {
+          page.drawText(`${idx + 1}. ${stripEmojis(q.q || '')}`, { x: x + 20, y: triviaY, size: 11, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          triviaY -= 18
+          ;(q.options || []).forEach((opt, optIdx) => {
+            const letter = String.fromCharCode(65 + optIdx) // A, B, C...
+            page.drawText(`   ${letter}) ${stripEmojis(opt)}`, { x: x + 30, y: triviaY, size: 10, font, color: rgb(0.4, 0.4, 0.4) })
+            triviaY -= 15
+          })
+          triviaY -= 15
+        }
       })
       break
       
@@ -1190,92 +1355,224 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
       riddles.forEach((r, idx) => {
         if (riddleY > y + 80) {
-          page.drawText(`${idx + 1}. ${stripEmojis(r.riddle)}`, {
-            x: x + 20,
-            y: riddleY,
-            size: 11,
-            font,
-            color: rgb(0.2, 0.2, 0.2)
-          })
-          page.drawText('Answer: _________________________', {
-            x: x + 30,
-            y: riddleY - 20,
-            size: 10,
-            font,
-            color: rgb(0.5, 0.5, 0.5)
-          })
+          page.drawText(`${idx + 1}. ${stripEmojis(r.riddle || '')}`, { x: x + 20, y: riddleY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawText('Answer: _________________________', { x: x + 30, y: riddleY - 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
           riddleY -= 60
         }
       })
       break
       
     case 'would-you-rather':
-      const questions = content.questions || []
-      let qY = y + height - 50
+      const wyrQuestions = content.questions || []
+      let wyrY = y + height - 50
       
-      questions.forEach((q, idx) => {
-        if (qY > y + 60) {
-          page.drawText(`${idx + 1}. ${stripEmojis(q)}`, {
-            x: x + 20,
-            y: qY,
-            size: 11,
-            font,
-            color: rgb(0.2, 0.2, 0.2)
-          })
-          page.drawText('My choice: ____________________', {
-            x: x + 30,
-            y: qY - 20,
-            size: 10,
-            font,
-            color: rgb(0.5, 0.5, 0.5)
-          })
-          page.drawText('Because: ____________________', {
-            x: x + 30,
-            y: qY - 35,
-            size: 10,
-            font,
-            color: rgb(0.5, 0.5, 0.5)
-          })
-          qY -= 80
+      wyrQuestions.forEach((q, idx) => {
+        if (wyrY > y + 60) {
+          page.drawText(`${idx + 1}. ${stripEmojis(q)}`, { x: x + 20, y: wyrY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
+          page.drawText('My choice: ____________________', { x: x + 30, y: wyrY - 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+          page.drawText('Because: ____________________', { x: x + 30, y: wyrY - 35, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+          wyrY -= 80
         }
       })
       break
       
-    case 'drawing-prompts':
-      // Large drawing box
-      page.drawRectangle({
-        x: x + 20,
-        y: y + 40,
-        width: width - 40,
-        height: height - 80,
-        borderColor: rgb(0.7, 0.7, 0.7),
-        borderWidth: 2
+    case 'hangman':
+      const hangmanWords = content.words || []
+      let hangmanY = y + height - 60
+      
+      page.drawText('Guess the letters to complete each word!', { x: x + 20, y: hangmanY, size: 11, font: boldFont, color: pColor })
+      hangmanY -= 30
+      
+      hangmanWords.forEach((word, idx) => {
+        if (hangmanY > y + 100) {
+          // Draw blanks for each letter
+          const blanks = '_ '.repeat(word.length).trim()
+          page.drawText(`${idx + 1}. ${blanks}`, { x: x + 30, y: hangmanY, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
+          // Draw small hangman scaffold
+          const scaffoldX = x + width - 80
+          page.drawLine({ start: { x: scaffoldX, y: hangmanY - 5 }, end: { x: scaffoldX, y: hangmanY + 25 }, thickness: 1, color: rgb(0.5, 0.5, 0.5) })
+          page.drawLine({ start: { x: scaffoldX, y: hangmanY + 25 }, end: { x: scaffoldX + 20, y: hangmanY + 25 }, thickness: 1, color: rgb(0.5, 0.5, 0.5) })
+          hangmanY -= 50
+        }
       })
-      page.drawText('Draw here!', {
-        x: centerX - 35,
-        y: centerY,
-        size: 14,
-        font,
-        color: rgb(0.8, 0.8, 0.8)
+      break
+      
+    case 'bingo':
+      // Draw 2 bingo cards
+      const bingoSize = 5
+      const bingoCellSize = Math.min((width - 60) / 2 / bingoSize, (height - 80) / bingoSize)
+      
+      for (let card = 0; card < 2; card++) {
+        const cardX = x + 20 + card * (width / 2)
+        const cardY = y + height - 30
+        
+        page.drawText(`Card ${card + 1}`, { x: cardX + 30, y: cardY, size: 10, font: boldFont, color: pColor })
+        
+        // Draw BINGO header
+        const bingoLetters = ['B', 'I', 'N', 'G', 'O']
+        bingoLetters.forEach((letter, idx) => {
+          page.drawText(letter, {
+            x: cardX + idx * bingoCellSize + bingoCellSize / 3,
+            y: cardY - 20,
+            size: 12, font: boldFont, color: pColor
+          })
+        })
+        
+        // Draw grid
+        for (let row = 0; row < bingoSize; row++) {
+          for (let col = 0; col < bingoSize; col++) {
+            page.drawRectangle({
+              x: cardX + col * bingoCellSize,
+              y: cardY - 35 - (row + 1) * bingoCellSize,
+              width: bingoCellSize, height: bingoCellSize,
+              borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1
+            })
+            // Free space in center
+            if (row === 2 && col === 2) {
+              page.drawText('FREE', { x: cardX + col * bingoCellSize + 3, y: cardY - 35 - (row + 1) * bingoCellSize + bingoCellSize / 3, size: 7, font, color: rgb(0.5, 0.5, 0.5) })
+            }
+          }
+        }
+      }
+      break
+      
+    case 'travel-games':
+      const games = content.games || []
+      let travelY = y + height - 50
+      
+      games.forEach((game, idx) => {
+        if (travelY > y + 100) {
+          page.drawText(`${idx + 1}. ${stripEmojis(game)}`, { x: x + 20, y: travelY, size: 12, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          // Draw checkbox
+          page.drawRectangle({ x: x + width - 50, y: travelY - 5, width: 15, height: 15, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+          travelY -= 40
+        }
+      })
+      page.drawText('Check off each game as you play!', { x: x + 20, y: y + 30, size: 9, font, color: rgb(0.5, 0.5, 0.5) })
+      break
+      
+    case 'color-by-number':
+      // Draw a simple color by number outline
+      page.drawRectangle({ x: x + 20, y: y + 60, width: width - 40, height: height - 100, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
+      
+      // Draw numbered sections
+      const colors = content.colors || { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange' }
+      let colorKeyY = y + 40
+      page.drawText('Color Key:', { x: x + 20, y: colorKeyY, size: 9, font: boldFont, color: pColor })
+      Object.entries(colors).forEach(([num, color], idx) => {
+        page.drawText(`${num} = ${color}`, { x: x + 20 + idx * 70, y: colorKeyY - 12, size: 8, font, color: rgb(0.4, 0.4, 0.4) })
+      })
+      
+      // Draw some shapes with numbers
+      page.drawCircle({ x: centerX - 60, y: centerY + 40, size: 40, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawText('1', { x: centerX - 63, y: centerY + 36, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
+      page.drawCircle({ x: centerX + 60, y: centerY + 40, size: 40, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawText('2', { x: centerX + 57, y: centerY + 36, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
+      page.drawRectangle({ x: centerX - 50, y: centerY - 80, width: 100, height: 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawText('3', { x: centerX - 5, y: centerY - 55, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
+      break
+      
+    case 'doodle-complete':
+    case 'drawing-prompts':
+      const prompts = content.prompts || ['Draw something creative!']
+      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 80, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
+      page.drawText(stripEmojis(prompts[0] || 'Draw here!'), { x: centerX - 60, y: centerY, size: 12, font, color: rgb(0.7, 0.7, 0.7) })
+      break
+      
+    case 'connect-color':
+      // Similar to connect-dots but with coloring instructions
+      const ccDots = content.dots || 20
+      const ccDotsPerRow = Math.ceil(Math.sqrt(ccDots))
+      const ccSpacingX = (width - 60) / ccDotsPerRow
+      const ccSpacingY = (height - 100) / ccDotsPerRow
+      
+      for (let i = 0; i < Math.min(ccDots, 30); i++) {
+        const row = Math.floor(i / ccDotsPerRow)
+        const col = i % ccDotsPerRow
+        const dotX = x + 40 + col * ccSpacingX
+        const dotY = y + height - 60 - row * ccSpacingY
+        
+        page.drawCircle({ x: dotX, y: dotY, size: 4, color: rgb(0.3, 0.3, 0.3) })
+        page.drawText(String(i + 1), { x: dotX + 5, y: dotY + 2, size: 7, font, color: rgb(0.4, 0.4, 0.4) })
+      }
+      page.drawText('Connect the dots, then color the picture!', { x: centerX - 80, y: y + 25, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      break
+      
+    case 'logic-puzzle':
+      const puzzle = content.puzzle || { clues: [], items: [] }
+      let logicY = y + height - 50
+      
+      page.drawText('Use the clues to solve the puzzle:', { x: x + 20, y: logicY, size: 11, font: boldFont, color: pColor })
+      logicY -= 25
+      
+      ;(puzzle.clues || []).forEach((clue, idx) => {
+        if (logicY > y + 150) {
+          page.drawText(`${idx + 1}. ${stripEmojis(clue)}`, { x: x + 30, y: logicY, size: 10, font, color: rgb(0.3, 0.3, 0.3) })
+          logicY -= 20
+        }
+      })
+      
+      logicY -= 20
+      page.drawText('Items:', { x: x + 20, y: logicY, size: 10, font: boldFont, color: pColor })
+      logicY -= 15
+      ;(puzzle.items || []).forEach((item, idx) => {
+        page.drawText(`${idx + 1}. ${stripEmojis(item)}: ____`, { x: x + 30, y: logicY - idx * 20, size: 10, font, color: rgb(0.3, 0.3, 0.3) })
+      })
+      break
+      
+    case 'memory':
+      // Draw memory card grid
+      const memPairs = content.pairs || 8
+      const memCols = 4
+      const memRows = Math.ceil(memPairs * 2 / memCols)
+      const memCardW = (width - 60) / memCols
+      const memCardH = Math.min(memCardW * 1.3, (height - 80) / memRows)
+      
+      page.drawText('Cut out and play memory match!', { x: x + 20, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      
+      for (let i = 0; i < memPairs * 2; i++) {
+        const col = i % memCols
+        const row = Math.floor(i / memCols)
+        const cardX = x + 30 + col * memCardW
+        const cardY = y + height - 50 - (row + 1) * memCardH
+        
+        page.drawRectangle({ x: cardX, y: cardY, width: memCardW - 10, height: memCardH - 10, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
+        page.drawText('?', { x: cardX + memCardW / 2 - 8, y: cardY + memCardH / 2 - 12, size: 20, font: boldFont, color: rgb(0.7, 0.7, 0.7) })
+      }
+      break
+      
+    case 'sequences':
+      const sequences = content.sequences || []
+      let seqY = y + height - 50
+      
+      sequences.forEach((s, idx) => {
+        if (seqY > y + 80) {
+          const pattern = (s.pattern || []).join(', ')
+          page.drawText(`${idx + 1}. ${pattern}`, { x: x + 30, y: seqY, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
+          seqY -= 35
+        }
+      })
+      break
+      
+    case 'visual-puzzles':
+      const puzzles = content.puzzles || []
+      let vpY = y + height - 50
+      
+      puzzles.forEach((p, idx) => {
+        if (vpY > y + 120) {
+          page.drawText(`${idx + 1}. ${stripEmojis(p)}`, { x: x + 20, y: vpY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
+          // Draw a box for the puzzle
+          page.drawRectangle({ x: x + 30, y: vpY - 70, width: width - 60, height: 50, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 1 })
+          vpY -= 100
+        }
       })
       break
       
     default:
-      // Generic activity placeholder
-      page.drawRectangle({
-        x: x + 20,
-        y: y + 40,
-        width: width - 40,
-        height: height - 80,
-        borderColor: rgb(0.85, 0.85, 0.85),
-        borderWidth: 1
-      })
-      page.drawText('Complete this activity!', {
-        x: centerX - 60,
-        y: centerY,
-        size: 12,
-        font,
-        color: rgb(0.7, 0.7, 0.7)
-      })
+      // Generic activity with actual content attempt
+      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 80, borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 1 })
+      const activityTitle = pageData.title || 'Activity'
+      page.drawText(`Complete: ${stripEmojis(activityTitle)}`, { x: centerX - 80, y: centerY + 20, size: 12, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+      page.drawText('Use this space for the activity!', { x: centerX - 70, y: centerY - 10, size: 10, font, color: rgb(0.7, 0.7, 0.7) })
   }
 }
