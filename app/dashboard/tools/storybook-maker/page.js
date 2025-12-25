@@ -193,9 +193,6 @@ export default function StorybookMakerPage() {
       setStory(data.story)
       setStep(2)
       
-      // Auto-save after story generation
-      await autoSaveDraft({ story: data.story, step: 2 })
-      
       toast({ title: "Story Generated!", description: `Created ${data.story?.pages?.length || pageCount} pages. Edit them below!` })
     } catch (error) {
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
