@@ -512,32 +512,144 @@ async function generatePDF(storyData, options) {
   // ===== BACK COVER =====
   page = pdfDoc.addPage([size.width, size.height])
   
+  // Soft gradient background
   page.drawRectangle({
     x: 0, y: 0,
     width: size.width, height: size.height,
-    color: rgb(0.98, 0.98, 1)
+    color: rgb(0.98, 0.97, 1)
   })
   
-  // Summary/moral
-  if (storyData.moral) {
-    const moralText = `"${storyData.moral}"`
-    const moralWidth = font.widthOfTextAtSize(moralText, 16)
-    page.drawText(moralText, {
-      x: Math.max(40, (size.width - moralWidth) / 2),
-      y: size.height / 2,
-      size: 16,
-      font: font,
-      color: pColor
+  // Add decorative theme-based elements
+  const drawBackCoverDecorations = (page, size, pColor, sColor) => {
+    // Corner decorations - soft circles
+    const decorOpacity = 0.15
+    
+    // Top left cluster
+    page.drawCircle({ x: 60, y: size.height - 60, size: 35, color: pColor, opacity: decorOpacity })
+    page.drawCircle({ x: 90, y: size.height - 90, size: 20, color: sColor, opacity: decorOpacity + 0.05 })
+    page.drawCircle({ x: 40, y: size.height - 100, size: 15, color: pColor, opacity: decorOpacity + 0.1 })
+    
+    // Top right cluster
+    page.drawCircle({ x: size.width - 60, y: size.height - 70, size: 30, color: sColor, opacity: decorOpacity })
+    page.drawCircle({ x: size.width - 100, y: size.height - 50, size: 18, color: pColor, opacity: decorOpacity + 0.05 })
+    page.drawCircle({ x: size.width - 80, y: size.height - 110, size: 12, color: sColor, opacity: decorOpacity + 0.1 })
+    
+    // Bottom left cluster
+    page.drawCircle({ x: 70, y: 80, size: 28, color: sColor, opacity: decorOpacity })
+    page.drawCircle({ x: 40, y: 50, size: 20, color: pColor, opacity: decorOpacity + 0.05 })
+    page.drawCircle({ x: 100, y: 45, size: 14, color: sColor, opacity: decorOpacity + 0.1 })
+    
+    // Bottom right cluster
+    page.drawCircle({ x: size.width - 65, y: 70, size: 32, color: pColor, opacity: decorOpacity })
+    page.drawCircle({ x: size.width - 40, y: 100, size: 18, color: sColor, opacity: decorOpacity + 0.05 })
+    page.drawCircle({ x: size.width - 95, y: 50, size: 15, color: pColor, opacity: decorOpacity + 0.1 })
+    
+    // Center decorative elements - stars pattern
+    const starPositions = [
+      { x: size.width * 0.2, y: size.height * 0.3 },
+      { x: size.width * 0.8, y: size.height * 0.35 },
+      { x: size.width * 0.15, y: size.height * 0.65 },
+      { x: size.width * 0.85, y: size.height * 0.7 },
+      { x: size.width * 0.25, y: size.height * 0.8 },
+      { x: size.width * 0.75, y: size.height * 0.2 },
+    ]
+    
+    starPositions.forEach((pos, i) => {
+      const starSize = 4 + (i % 3) * 2
+      page.drawCircle({ 
+        x: pos.x, 
+        y: pos.y, 
+        size: starSize, 
+        color: i % 2 === 0 ? pColor : sColor, 
+        opacity: 0.2 + (i % 3) * 0.05 
+      })
+    })
+    
+    // Decorative lines
+    page.drawRectangle({
+      x: size.width / 2 - 80,
+      y: size.height / 2 + 60,
+      width: 160,
+      height: 2,
+      color: sColor,
+      opacity: 0.3
+    })
+    
+    page.drawRectangle({
+      x: size.width / 2 - 60,
+      y: size.height / 2 - 80,
+      width: 120,
+      height: 2,
+      color: sColor,
+      opacity: 0.3
     })
   }
   
-  page.drawText('The End', {
-    x: size.width / 2 - 30,
-    y: size.height / 2 - 50,
-    size: 18,
+  drawBackCoverDecorations(page, size, pColor, sColor)
+  
+  // Moral/quote with proper text wrapping within margins
+  if (storyData.moral) {
+    const moral = storyData.moral
+    const moralFontSize = 14
+    const maxMoralWidth = size.width - 100 // 50px margin on each side
+    const lineHeight = moralFontSize * 1.6
+    
+    // Wrap the moral text properly
+    const wrapMoralText = (text, maxWidth) => {
+      const words = text.split(' ')
+      const lines = []
+      let currentLine = ''
+      
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word
+        const testWidth = font.widthOfTextAtSize(testLine, moralFontSize)
+        
+        if (testWidth <= maxWidth) {
+          currentLine = testLine
+        } else {
+          if (currentLine) lines.push(currentLine)
+          currentLine = word
+        }
+      }
+      if (currentLine) lines.push(currentLine)
+      return lines
+    }
+    
+    const moralLines = wrapMoralText(`"${moral}"`, maxMoralWidth)
+    const totalMoralHeight = moralLines.length * lineHeight
+    const moralStartY = size.height / 2 + totalMoralHeight / 2 + 20
+    
+    // Draw each line of the moral centered
+    moralLines.forEach((line, idx) => {
+      const lineWidth = font.widthOfTextAtSize(line, moralFontSize)
+      page.drawText(line, {
+        x: (size.width - lineWidth) / 2,
+        y: moralStartY - (idx * lineHeight),
+        size: moralFontSize,
+        font: font,
+        color: pColor
+      })
+    })
+  }
+  
+  // "The End" text with decorative styling
+  const endText = 'The End'
+  const endFontSize = 22
+  const endWidth = fontBold.widthOfTextAtSize(endText, endFontSize)
+  
+  page.drawText(endText, {
+    x: (size.width - endWidth) / 2,
+    y: size.height / 2 - 40,
+    size: endFontSize,
     font: fontBold,
     color: sColor
   })
+  
+  // Small decorative flourish under "The End"
+  const flourishY = size.height / 2 - 60
+  page.drawCircle({ x: size.width / 2 - 25, y: flourishY, size: 3, color: pColor, opacity: 0.5 })
+  page.drawCircle({ x: size.width / 2, y: flourishY - 5, size: 4, color: sColor, opacity: 0.6 })
+  page.drawCircle({ x: size.width / 2 + 25, y: flourishY, size: 3, color: pColor, opacity: 0.5 })
   
   return pdfDoc.save()
 }
