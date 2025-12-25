@@ -517,7 +517,7 @@ async function generatePDF(storyData, options) {
           x: size.width / 2 - 40,
           y: illustrationY + illustrationHeight / 2,
           size: 14,
-          font: font,
+          font: standardFont,
           color: rgb(0.7, 0.7, 0.7)
         })
       }
@@ -544,15 +544,18 @@ async function generatePDF(storyData, options) {
     const fontSize = 13
     const lineHeight = fontSize * 1.6
     
+    // Get appropriate font for this text
+    const textFont = getFont(storyText, false)
+    
     // Calculate actual text width for proper wrapping
-    const wrapText = (text, maxWidth, fontSize) => {
+    const wrapText = (text, maxWidth, fontSize, fontToUse) => {
       const words = text.split(' ')
       const lines = []
       let currentLine = ''
       
       for (const word of words) {
         const testLine = currentLine ? `${currentLine} ${word}` : word
-        const testWidth = font.widthOfTextAtSize(testLine, fontSize)
+        const testWidth = fontToUse.widthOfTextAtSize(testLine, fontSize)
         
         if (testWidth <= maxWidth) {
           currentLine = testLine
@@ -565,7 +568,7 @@ async function generatePDF(storyData, options) {
       return lines
     }
     
-    const lines = wrapText(storyText, textWidth, fontSize)
+    const lines = wrapText(storyText, textWidth, fontSize, textFont)
     
     // Draw text lines
     const startY = textY + textHeight - lineHeight
@@ -575,19 +578,19 @@ async function generatePDF(storyData, options) {
           x: textX,
           y: startY - (lineIdx * lineHeight),
           size: fontSize,
-          font: font,
+          font: textFont,
           color: rgb(0.15, 0.15, 0.15)
         })
       }
     })
     
-    // Page number
+    // Page number (always use standard font for numbers)
     const pageNum = `${i + 1}`
     page.drawText(pageNum, {
       x: size.width / 2 - 5,
       y: 25,
       size: 10,
-      font: font,
+      font: standardFont,
       color: rgb(0.6, 0.6, 0.6)
     })
   }
