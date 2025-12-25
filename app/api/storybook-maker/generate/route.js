@@ -254,6 +254,9 @@ async function generatePDF(storyData, options) {
   const size = PAPER_SIZES[paperSize] || PAPER_SIZES['8.5x8.5']
   const pdfDoc = await PDFDocument.create()
   
+  // Register fontkit for Unicode font support
+  pdfDoc.registerFontkit(fontkit)
+  
   // Load standard fonts as fallback
   const standardFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const standardFontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
