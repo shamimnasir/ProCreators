@@ -1140,7 +1140,8 @@ export async function POST(request) {
           illustrationStyle,
           paperSize,
           authorName,
-          moral: finalStory.moral
+          moral: finalStory.moral,
+          renderMethod
         },
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
