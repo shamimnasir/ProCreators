@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
-import DraftsManager from '@/components/shared/DraftsManager'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 
 // KDP Coloring Book Paper Sizes
 const PAPER_SIZES = [
