@@ -13,7 +13,7 @@ import {
   BookOpen, Download, Sparkles, Loader2, DollarSign, Image,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, Save, Palette, ImagePlus,
-  FileText, Wand2, BookMarked, Baby, GraduationCap, Users
+  FileText, Wand2, BookMarked, Baby, GraduationCap, Users, Upload
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
