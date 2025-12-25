@@ -415,13 +415,14 @@ async function generatePDF(storyData, options) {
     
     // Title
     const title = storyData.title || 'My Storybook'
+    const titleFont = getFont(title, true)
     const titleSize = Math.min(28, (size.width - 80) / (title.length * 0.55))
-    const titleWidth = fontBold.widthOfTextAtSize(title, titleSize)
+    const titleWidth = titleFont.widthOfTextAtSize(title, titleSize)
     page.drawText(title, {
       x: (size.width - titleWidth) / 2,
       y: size.height / 2 + 50,
       size: titleSize,
-      font: fontBold,
+      font: titleFont,
       color: pColor
     })
     
@@ -436,12 +437,13 @@ async function generatePDF(storyData, options) {
     
     // Author (without "By" prefix)
     if (authorName) {
-      const authorWidth = font.widthOfTextAtSize(authorName, 16)
+      const authorFont = getFont(authorName, false)
+      const authorWidth = authorFont.widthOfTextAtSize(authorName, 16)
       page.drawText(authorName, {
         x: (size.width - authorWidth) / 2,
         y: size.height / 2 - 20,
         size: 16,
-        font: font,
+        font: authorFont,
         color: rgb(0.4, 0.4, 0.4)
       })
     }
