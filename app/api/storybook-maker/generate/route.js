@@ -382,12 +382,13 @@ async function generatePDF(storyData, options) {
         })
         
         // Author name without "By" prefix
-        const authorWidth = font.widthOfTextAtSize(authorName, 14)
+        const authorFont = getFont(authorName, false)
+        const authorWidth = authorFont.widthOfTextAtSize(authorName, 14)
         page.drawText(authorName, {
           x: (size.width - authorWidth) / 2,
           y: 18,
           size: 14,
-          font: font,
+          font: authorFont,
           color: rgb(0.3, 0.3, 0.3)
         })
       }
