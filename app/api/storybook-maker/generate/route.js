@@ -296,15 +296,12 @@ async function generatePDF(storyData, options) {
       // Try to load regular font
       for (const fontPath of fontPaths) {
         try {
-          console.log(`Trying to load font: ${fontPath}`)
           const fontBytes = await fs.readFile(fontPath)
-          console.log(`Read font file, size: ${fontBytes.length} bytes`)
           unicodeFont = await pdfDoc.embedFont(fontBytes)
           hasUnicodeFont = true
-          console.log(`Successfully loaded Unicode font: ${fontPath}`)
+          console.log(`Loaded Unicode font: ${fontPath}`)
           break
         } catch (e) {
-          console.log(`Failed to load ${fontPath}: ${e.message}`)
           // Try next font
         }
       }
