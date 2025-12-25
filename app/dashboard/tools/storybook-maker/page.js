@@ -602,17 +602,73 @@ export default function StorybookMakerPage() {
                               />
                             </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label>Preview</Label>
+                          <div className="space-y-3">
+                            <Label>Page Illustration</Label>
                             {page.imageUrl ? (
-                              <img src={page.imageUrl} alt={`Page ${idx + 1}`} className="w-full rounded-lg border" />
+                              <div className="relative group">
+                                <img src={page.imageUrl} alt={`Page ${idx + 1}`} className="w-full rounded-lg border" />
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm" 
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => updatePage(idx, 'imageUrl', null)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             ) : (
-                              <div className="aspect-square bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                                <div className="text-center">
-                                  <Image className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                  <p className="text-sm">No illustration yet</p>
+                              <div className="aspect-square bg-muted rounded-lg flex items-center justify-center text-muted-foreground border-2 border-dashed">
+                                <div className="text-center p-4">
+                                  <Image className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                                  <p className="text-sm mb-3">No illustration yet</p>
+                                  <label className="cursor-pointer">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0]
+                                        if (file) {
+                                          const reader = new FileReader()
+                                          reader.onloadend = () => {
+                                            updatePage(idx, 'imageUrl', reader.result)
+                                            toast({ title: "Image Uploaded", description: `Custom image added to page ${idx + 1}` })
+                                          }
+                                          reader.readAsDataURL(file)
+                                        }
+                                      }}
+                                    />
+                                    <div className="inline-flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium">
+                                      <Upload className="h-4 w-4" />
+                                      Upload Custom Image
+                                    </div>
+                                  </label>
                                 </div>
                               </div>
+                            )}
+                            {page.imageUrl && (
+                              <label className="cursor-pointer block">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                      const reader = new FileReader()
+                                      reader.onloadend = () => {
+                                        updatePage(idx, 'imageUrl', reader.result)
+                                        toast({ title: "Image Replaced", description: `Custom image updated for page ${idx + 1}` })
+                                      }
+                                      reader.readAsDataURL(file)
+                                    }
+                                  }}
+                                />
+                                <div className="inline-flex items-center gap-2 px-3 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors text-sm">
+                                  <Upload className="h-4 w-4" />
+                                  Replace with Custom Image
+                                </div>
+                              </label>
                             )}
                           </div>
                         </div>
