@@ -513,14 +513,18 @@ export default function ActivityBookPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => setSelectedActivities([])}
+                      onClick={() => setSelectedActivities(['__none__'])}
                     >
                       Clear All
                     </Button>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {availableActivities.map((activity) => {
-                      const isSelected = selectedActivities.length === 0 || selectedActivities.includes(activity.id)
+                      // When array contains '__none__', nothing is selected
+                      // When array is empty, all are selected by default
+                      const isSelected = selectedActivities.length === 0 
+                        ? true 
+                        : (selectedActivities[0] !== '__none__' && selectedActivities.includes(activity.id))
                       return (
                         <button
                           key={activity.id}
