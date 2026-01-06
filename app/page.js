@@ -176,9 +176,9 @@ export default function Home() {
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Set light mode as default for homepage (users can toggle to dark if needed)
+  // Set dark mode for homepage (landing page)
   React.useEffect(() => {
-    setTheme('light')
+    setTheme('dark')
   }, [setTheme])
 
   return (
