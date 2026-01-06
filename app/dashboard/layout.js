@@ -3,15 +3,32 @@
 import { Sidebar } from '@/components/dashboard/Sidebar'
 import { TopBar } from '@/components/dashboard/TopBar'
 import { useTheme } from 'next-themes'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function DashboardLayout({ children }) {
-  const { setTheme } = useTheme()
+  const { setTheme, theme } = useTheme()
+  const initialLoadRef = useRef(true)
   
-  // Force light mode for dashboard - users can still toggle to dark mode using TopBar button
+  // Force light mode only on initial dashboard load, then allow user to toggle
   useEffect(() => {
-    setTheme('light')
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false
+      // Only set to light if coming from outside dashboard (e.g., from dark homepage)
+      const storedTheme = localStorage.getItem('pubtools-dashboard-theme')
+      if (!storedTheme) {
+        setTheme('light')
+      } else {
+        setTheme(storedTheme)
+      }
+    }
   }, [setTheme])
+  
+  // Save user's theme preference for dashboard
+  useEffect(() => {
+    if (!initialLoadRef.current && theme) {
+      localStorage.setItem('pubtools-dashboard-theme', theme)
+    }
+  }, [theme])
   
   return (
     <div className="flex h-screen overflow-hidden bg-background">
