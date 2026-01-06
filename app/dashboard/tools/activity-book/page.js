@@ -243,9 +243,15 @@ export default function ActivityBookPage() {
       if (prev.length === 0) {
         return availableActivities.filter(a => a.id !== activityId).map(a => a.id)
       }
+      // If "cleared" state (contains __none__), clicking one selects just that one
+      if (prev[0] === '__none__') {
+        return [activityId]
+      }
       // Otherwise toggle as normal
       if (prev.includes(activityId)) {
-        return prev.filter(id => id !== activityId)
+        const filtered = prev.filter(id => id !== activityId)
+        // If last item is being removed, go to cleared state
+        return filtered.length === 0 ? ['__none__'] : filtered
       }
       return [...prev, activityId]
     })
