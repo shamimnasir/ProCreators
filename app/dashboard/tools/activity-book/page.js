@@ -504,7 +504,8 @@ export default function ActivityBookPage() {
                   <p className="text-sm text-muted-foreground">
                     Click to select/deselect. Selected activities will be distributed across pages.
                     {selectedActivities.length === 0 && <span className="text-blue-600 ml-1">(All activities selected by default)</span>}
-                    {selectedActivities.length > 0 && selectedActivities.length < 3 && (
+                    {selectedActivities[0] === '__none__' && <span className="text-amber-600 ml-1">(No activities selected - please select at least one)</span>}
+                    {selectedActivities.length > 0 && selectedActivities[0] !== '__none__' && selectedActivities.length < 3 && (
                       <span className="text-amber-600 ml-1">(Select at least 3 for variety)</span>
                     )}
                   </p>
