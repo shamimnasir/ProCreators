@@ -264,6 +264,12 @@ export default function ActivityBookPage() {
       return
     }
 
+    // Check if no activities selected (cleared state)
+    if (selectedActivities[0] === '__none__') {
+      toast({ title: "No Activities Selected", description: "Please select at least one activity type", variant: "destructive" })
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch('/api/activity-book/generate', {
