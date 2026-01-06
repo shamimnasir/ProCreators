@@ -17,16 +17,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Force light mode on initial load by clearing any stored dark preference */}
+        {/* Force light mode on initial load - clear any dark mode class immediately */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  // Always start with light mode
+                  // Remove dark class immediately
                   document.documentElement.classList.remove('dark');
                   document.documentElement.style.colorScheme = 'light';
-                  localStorage.setItem('pubtools-theme', 'light');
+                  // Clear any stored theme preference to force light mode
+                  localStorage.removeItem('pubtools-theme');
+                  localStorage.removeItem('theme');
                 } catch (e) {}
               })();
             `,
@@ -36,7 +38,8 @@ export default function RootLayout({ children }) {
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider 
           attribute="class" 
-          defaultTheme="light" 
+          defaultTheme="light"
+          forcedTheme={undefined}
           enableSystem={false}
           storageKey="pubtools-theme"
           disableTransitionOnChange
