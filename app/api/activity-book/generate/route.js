@@ -739,9 +739,31 @@ async function generateActivityPDF(body) {
         ? await pdfDoc.embedPng(imageBytes) 
         : await pdfDoc.embedJpg(imageBytes)
       
+      // Calculate image dimensions to maintain aspect ratio (cover/fill strategy)
+      const imgWidth = embeddedImage.width
+      const imgHeight = embeddedImage.height
+      const imgAspect = imgWidth / imgHeight
+      const pageAspect = pageWidth / pageHeight
+      
+      let drawWidth, drawHeight, drawX, drawY
+      
+      if (imgAspect > pageAspect) {
+        // Image is wider - fit by height and crop sides
+        drawHeight = pageHeight
+        drawWidth = pageHeight * imgAspect
+        drawX = (pageWidth - drawWidth) / 2
+        drawY = 0
+      } else {
+        // Image is taller - fit by width and crop top/bottom
+        drawWidth = pageWidth
+        drawHeight = pageWidth / imgAspect
+        drawX = 0
+        drawY = (pageHeight - drawHeight) / 2
+      }
+      
       page.drawImage(embeddedImage, {
-        x: 0, y: 0,
-        width: pageWidth, height: pageHeight
+        x: drawX, y: drawY,
+        width: drawWidth, height: drawHeight
       })
       
       // Title bar at bottom
