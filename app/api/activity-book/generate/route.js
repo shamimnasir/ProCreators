@@ -600,11 +600,19 @@ async function generateActivityPages(body) {
   } = body
   
   const themeToUse = customTheme || theme
-  const activities = selectedActivities && selectedActivities.length > 0 
-    ? selectedActivities 
-    : Object.keys(ACTIVITY_GENERATORS)
+  
+  // Filter out special markers like '__none__' and ensure we have valid activities
+  let activities = selectedActivities && selectedActivities.length > 0 
+    ? selectedActivities.filter(a => a !== '__none__' && ACTIVITY_GENERATORS[a])
+    : []
+  
+  // If no valid activities after filtering, fall back to all generators
+  if (activities.length === 0) {
+    activities = Object.keys(ACTIVITY_GENERATORS)
+  }
   
   console.log(`Generating ${pageCount} activity pages for ${themeToUse} theme, age group: ${ageGroup}`)
+  console.log(`Using activities: ${activities.join(', ')}`)
   
   const pages = []
   
