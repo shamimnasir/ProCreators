@@ -1210,19 +1210,26 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'spot-difference':
-      // Draw two boxes side by side
+      // Draw two boxes side by side with proper spacing for labels
       const boxW = (width - 30) / 2
-      page.drawRectangle({ x: x + 5, y: y + 40, width: boxW, height: height - 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
-      page.drawRectangle({ x: x + boxW + 15, y: y + 40, width: boxW, height: height - 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
-      page.drawText('Picture A', { x: x + boxW / 2 - 20, y: y + height - 25, size: 10, font: boldFont, color: pColor })
-      page.drawText('Picture B', { x: x + boxW + boxW / 2 + 5, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      const boxTopY = y + height - 50 // Leave space for labels above boxes
+      const boxHeight = height - 80 // Reduced height to accommodate label
+      
+      // Draw boxes lower to make room for labels
+      page.drawRectangle({ x: x + 5, y: y + 30, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      page.drawRectangle({ x: x + boxW + 15, y: y + 30, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      
+      // Labels positioned above the boxes with adequate spacing
+      page.drawText('Picture A', { x: x + boxW / 2 - 25, y: y + 30 + boxHeight + 10, size: 11, font: boldFont, color: pColor })
+      page.drawText('Picture B', { x: x + boxW + 15 + boxW / 2 - 25, y: y + 30 + boxHeight + 10, size: 11, font: boldFont, color: pColor })
+      
       // Draw some shapes in both boxes
       for (let i = 0; i < 5; i++) {
-        const shapeY = y + 80 + i * 80
+        const shapeY = y + 60 + i * ((boxHeight - 40) / 5)
         page.drawCircle({ x: x + 60, y: shapeY, size: 15, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
         page.drawCircle({ x: x + boxW + 70, y: shapeY, size: 15 + (i % 2 === 0 ? 3 : 0), borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
       }
-      page.drawText(`Find ${content.differences || 10} differences!`, { x: centerX - 50, y: y + 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      page.drawText(`Find ${content.differences || 10} differences!`, { x: centerX - 50, y: y + 12, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
       break
       
     case 'connect-dots':
