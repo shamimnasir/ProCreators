@@ -490,6 +490,7 @@ export default function ActivityBookPage() {
                           onClick={() => {
                             setActivityType(type.id)
                             setSelectedActivities([])
+                            setPages([]) // Clear pages when activity type changes
                           }}
                           className={`p-3 rounded-lg border text-left transition-all ${
                             activityType === type.id ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
