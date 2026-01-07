@@ -200,7 +200,29 @@ export default function ActivityBookPage() {
     if (data.customTheme !== undefined) setCustomTheme(data.customTheme)
     if (data.ageGroup) setAgeGroup(data.ageGroup)
     if (data.pageCount) setPageCount(data.pageCount)
-    if (data.pages) setPages(data.pages)
+    
+    // Only load pages if they match the activity type's available activities
+    if (data.pages && data.activityType) {
+      const validActivitiesForType = ACTIVITIES_BY_TYPE[data.activityType] || ACTIVITIES_BY_TYPE.mixed
+      const validActivityIds = validActivitiesForType.map(a => a.id)
+      
+      // Check if the pages have matching activity types
+      const pagesMatchType = data.pages.every(p => 
+        validActivityIds.includes(p.activityType) || 
+        validActivityIds.includes(p.content?.type)
+      )
+      
+      if (pagesMatchType) {
+        setPages(data.pages)
+      } else {
+        // Pages don't match the activity type, clear them
+        console.log('Draft pages do not match activity type, clearing pages')
+        setPages([])
+      }
+    } else if (data.pages) {
+      setPages(data.pages)
+    }
+    
     if (data.paperSize) setPaperSize(data.paperSize)
     if (data.selectedPreset) setSelectedPreset(data.selectedPreset)
     if (data.customPrimaryColor) setCustomPrimaryColor(data.customPrimaryColor)
