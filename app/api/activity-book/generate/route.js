@@ -817,6 +817,8 @@ async function generateActivityPDF(body) {
   // ===== ACTIVITY PAGES =====
   for (let i = 0; i < pages.length; i++) {
     const pageData = pages[i]
+    console.log(`Drawing page ${i + 1}: title="${pageData.title}", activityType="${pageData.activityType}", contentType="${pageData.content?.type}"`)
+    
     page = pdfDoc.addPage([pageWidth, pageHeight])
     
     // White background
