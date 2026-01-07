@@ -1239,19 +1239,40 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'maze':
     case 'maze-complex':
-      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 60, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
-      page.drawText('START', { x: x + 30, y: y + height - 30, size: 10, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
-      page.drawText('FINISH', { x: x + width - 60, y: y + 50, size: 10, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
-      // Draw maze lines
+      // Create maze area with proper margins for START/FINISH labels
+      const mazeMargin = 30
+      const mazeHeight = height - 70 // Leave room for labels
+      const mazeWidth = width - mazeMargin * 2
+      const mazeY = y + 40
+      
+      page.drawRectangle({ 
+        x: x + mazeMargin, 
+        y: mazeY, 
+        width: mazeWidth, 
+        height: mazeHeight, 
+        borderColor: rgb(0.7, 0.7, 0.7), 
+        borderWidth: 2 
+      })
+      
+      // Position labels inside the maze bounds
+      page.drawText('START', { x: x + mazeMargin + 10, y: mazeY + mazeHeight - 20, size: 10, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
+      page.drawText('FINISH', { x: x + mazeMargin + mazeWidth - 50, y: mazeY + 10, size: 10, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
+      
+      // Draw maze lines inside the boundary
       for (let i = 0; i < 10; i++) {
-        const lineY = y + 60 + i * (height - 80) / 10
-        const startOffset = 30 + Math.random() * 80
-        const endOffset = 30 + Math.random() * 80
-        page.drawLine({ start: { x: x + startOffset, y: lineY }, end: { x: x + width - endOffset, y: lineY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+        const lineY = mazeY + 30 + i * (mazeHeight - 60) / 10
+        const startOffset = 20 + Math.random() * 60
+        const endOffset = 20 + Math.random() * 60
+        page.drawLine({ 
+          start: { x: x + mazeMargin + startOffset, y: lineY }, 
+          end: { x: x + mazeMargin + mazeWidth - endOffset, y: lineY }, 
+          thickness: 2, 
+          color: rgb(0.3, 0.3, 0.3) 
+        })
         // Vertical connectors
         if (i > 0 && Math.random() > 0.5) {
-          const vx = x + 50 + Math.random() * (width - 100)
-          const prevY = y + 60 + (i - 1) * (height - 80) / 10
+          const vx = x + mazeMargin + 40 + Math.random() * (mazeWidth - 80)
+          const prevY = mazeY + 30 + (i - 1) * (mazeHeight - 60) / 10
           page.drawLine({ start: { x: vx, y: prevY }, end: { x: vx, y: lineY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
         }
       }
