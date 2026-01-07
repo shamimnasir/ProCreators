@@ -1154,9 +1154,15 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
     case 'crossword':
       // Draw crossword grid
       const cwGridSize = content.gridSize || 10
-      const cwCellSize = Math.min(width - 80, height - 150) / cwGridSize
+      const clues = content.clues || { across: [], down: [] }
+      
+      // Reserve space for clues at bottom
+      const clueAreaHeight = 100
+      const availableGridHeight = height - clueAreaHeight - 20
+      
+      const cwCellSize = Math.min(width - 40, availableGridHeight) / cwGridSize
       const cwStartX = centerX - (cwGridSize * cwCellSize) / 2
-      const cwStartY = centerY + (cwGridSize * cwCellSize) / 2 + 20
+      const cwStartY = y + height - 10 // Start from top of content area
       
       // Draw empty grid
       for (let row = 0; row < cwGridSize; row++) {
@@ -1170,21 +1176,33 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
         }
       }
       
-      // Draw clues
-      const clues = content.clues || { across: [], down: [] }
-      let clueY = y + 60
-      page.drawText('ACROSS:', { x: x + 10, y: clueY, size: 9, font: boldFont, color: pColor })
-      clueY -= 12
-      ;(clues.across || []).slice(0, 4).forEach((clue) => {
-        page.drawText(`${clue.number}. ${stripEmojis(clue.clue)}`, { x: x + 10, y: clueY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
-        clueY -= 12
+      // Position clues below grid
+      const gridBottom = cwStartY - (cwGridSize * cwCellSize)
+      let clueY = gridBottom - 15
+      
+      // Draw clues in two columns (Across on left, Down on right)
+      const clueColWidth = (width - 40) / 2
+      
+      // ACROSS clues on left
+      page.drawText('ACROSS:', { x: x + 15, y: clueY, size: 9, font: boldFont, color: pColor })
+      let acrossY = clueY - 14
+      ;(clues.across || []).slice(0, 5).forEach((clue) => {
+        if (acrossY >= y + 10) {
+          const clueText = `${clue.number}. ${stripEmojis(clue.clue)}`.substring(0, 35)
+          page.drawText(clueText, { x: x + 15, y: acrossY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+          acrossY -= 12
+        }
       })
-      clueY -= 5
-      page.drawText('DOWN:', { x: x + 10, y: clueY, size: 9, font: boldFont, color: pColor })
-      clueY -= 12
-      ;(clues.down || []).slice(0, 4).forEach((clue) => {
-        page.drawText(`${clue.number}. ${stripEmojis(clue.clue)}`, { x: x + 10, y: clueY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
-        clueY -= 12
+      
+      // DOWN clues on right
+      page.drawText('DOWN:', { x: x + clueColWidth + 15, y: clueY, size: 9, font: boldFont, color: pColor })
+      let downY = clueY - 14
+      ;(clues.down || []).slice(0, 5).forEach((clue) => {
+        if (downY >= y + 10) {
+          const clueText = `${clue.number}. ${stripEmojis(clue.clue)}`.substring(0, 35)
+          page.drawText(clueText, { x: x + clueColWidth + 15, y: downY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+          downY -= 12
+        }
       })
       break
       
