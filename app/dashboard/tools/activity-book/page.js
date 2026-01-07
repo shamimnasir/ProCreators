@@ -491,6 +491,7 @@ export default function ActivityBookPage() {
                             setActivityType(type.id)
                             setSelectedActivities([])
                             setPages([]) // Clear pages when activity type changes
+                            if (step > 1) setStep(1) // Go back to step 1 if we were further along
                           }}
                           className={`p-3 rounded-lg border text-left transition-all ${
                             activityType === type.id ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
