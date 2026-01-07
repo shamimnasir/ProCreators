@@ -1083,10 +1083,25 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
     case 'word-search':
       if (content.grid && content.words) {
         const gridSize = content.gridSize || 10
-        const cellSize = Math.min(width - 40, height - 100) / gridSize
-        const gridStartX = centerX - (gridSize * cellSize) / 2
-        const gridStartY = centerY + (gridSize * cellSize) / 2
+        const words = content.words || []
         
+        // Calculate word list area height needed
+        const wordsPerRow = 4
+        const wordRows = Math.ceil(words.length / wordsPerRow)
+        const wordListHeight = 20 + wordRows * 15 + 10 // header + rows + padding
+        
+        // Calculate available height for grid
+        const availableHeightForGrid = height - wordListHeight - 20 // 20 for top padding
+        const availableWidthForGrid = width - 40
+        
+        const cellSize = Math.min(availableWidthForGrid, availableHeightForGrid) / gridSize
+        const gridStartX = centerX - (gridSize * cellSize) / 2
+        
+        // Position grid in upper portion of content area
+        const gridTopY = y + height - 10 // Top of grid with padding
+        const gridStartY = gridTopY
+        
+        // Draw the word search grid
         for (let row = 0; row < gridSize; row++) {
           for (let col = 0; col < gridSize; col++) {
             const letter = content.grid[row]?.[col] || 'X'
@@ -1108,15 +1123,30 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
           }
         }
         
-        const words = content.words || []
-        const wordListY = y + 30
-        page.drawText('Find these words:', { x: x + 10, y: wordListY, size: 10, font: boldFont, color: pColor })
+        // Position word list below the grid with proper spacing
+        const gridBottom = gridStartY - (gridSize * cellSize)
+        const wordListY = gridBottom - 15 // Space below grid
+        
+        page.drawText('Find these words:', { x: x + 20, y: wordListY, size: 11, font: boldFont, color: pColor })
+        
+        // Draw words in columns, ensuring they stay within bounds
+        const wordStartY = wordListY - 18
+        const columnWidth = (width - 40) / wordsPerRow
+        
         words.forEach((word, idx) => {
-          page.drawText(word, {
-            x: x + 10 + (idx % 4) * 70,
-            y: wordListY - 15 - Math.floor(idx / 4) * 15,
-            size: 9, font, color: rgb(0.3, 0.3, 0.3)
-          })
+          const col = idx % wordsPerRow
+          const row = Math.floor(idx / wordsPerRow)
+          const wordX = x + 20 + col * columnWidth
+          const wordY = wordStartY - row * 15
+          
+          // Only draw if within content area bounds
+          if (wordY >= y + 15) {
+            page.drawText(word, {
+              x: wordX,
+              y: wordY,
+              size: 10, font, color: rgb(0.3, 0.3, 0.3)
+            })
+          }
         })
       }
       break
