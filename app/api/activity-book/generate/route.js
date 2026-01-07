@@ -601,6 +601,8 @@ async function generateActivityPages(body) {
   
   const themeToUse = customTheme || theme
   
+  console.log(`Received selectedActivities: ${JSON.stringify(selectedActivities)}`)
+  
   // Filter out special markers like '__none__' and ensure we have valid activities
   let activities = selectedActivities && selectedActivities.length > 0 
     ? selectedActivities.filter(a => a !== '__none__' && ACTIVITY_GENERATORS[a])
@@ -608,6 +610,7 @@ async function generateActivityPages(body) {
   
   // If no valid activities after filtering, fall back to all generators
   if (activities.length === 0) {
+    console.log('No valid activities found, falling back to all generators')
     activities = Object.keys(ACTIVITY_GENERATORS)
   }
   
