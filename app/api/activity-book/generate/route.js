@@ -1745,24 +1745,59 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'memory':
-      // Draw memory card grid
-      const memPairs = content.pairs || 8
+      // Draw memory card grid with actual items
+      const memItems = content.items || ['Star', 'Heart', 'Moon', 'Sun', 'Flower', 'Tree', 'Cloud', 'Fish']
+      const memPairs = content.pairs || memItems.length
       const memCols = 4
       const memRows = Math.ceil(memPairs * 2 / memCols)
       const memCardW = (width - 60) / memCols
-      const memCardH = Math.min(memCardW * 1.3, (height - 80) / memRows)
+      const memCardH = Math.min(memCardW * 1.3, (height - 100) / memRows)
       
-      page.drawText('Cut out and play memory match!', { x: x + 20, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      page.drawText('Memory Match Cards - Cut out and find the matching pairs!', { x: x + 20, y: y + height - 20, size: 10, font: boldFont, color: pColor })
       
-      for (let i = 0; i < memPairs * 2; i++) {
+      // Create pairs of cards (each item appears twice)
+      const allCards = []
+      for (let i = 0; i < Math.min(memPairs, memItems.length); i++) {
+        allCards.push(memItems[i])
+        allCards.push(memItems[i])
+      }
+      
+      // Shuffle the cards
+      for (let i = allCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[allCards[i], allCards[j]] = [allCards[j], allCards[i]]
+      }
+      
+      for (let i = 0; i < allCards.length; i++) {
         const col = i % memCols
         const row = Math.floor(i / memCols)
         const cardX = x + 30 + col * memCardW
         const cardY = y + height - 50 - (row + 1) * memCardH
         
-        page.drawRectangle({ x: cardX, y: cardY, width: memCardW - 10, height: memCardH - 10, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
-        page.drawText('?', { x: cardX + memCardW / 2 - 8, y: cardY + memCardH / 2 - 12, size: 20, font: boldFont, color: rgb(0.7, 0.7, 0.7) })
+        // Draw card border
+        page.drawRectangle({ 
+          x: cardX, 
+          y: cardY, 
+          width: memCardW - 10, 
+          height: memCardH - 10, 
+          borderColor: rgb(0.3, 0.3, 0.3), 
+          borderWidth: 1.5 
+        })
+        
+        // Draw item name on card
+        const itemText = allCards[i] || '?'
+        const textWidth = itemText.length * 5
+        page.drawText(itemText, { 
+          x: cardX + (memCardW - 10) / 2 - textWidth / 2, 
+          y: cardY + (memCardH - 10) / 2 - 5, 
+          size: 10, 
+          font: boldFont, 
+          color: pColor 
+        })
       }
+      
+      // Add legend at bottom
+      page.drawText(`Find ${memPairs} matching pairs!`, { x: centerX - 50, y: y + 15, size: 9, font, color: rgb(0.5, 0.5, 0.5) })
       break
       
     case 'sequences':
