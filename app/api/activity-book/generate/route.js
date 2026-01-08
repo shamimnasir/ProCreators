@@ -461,100 +461,292 @@ function generateConnectColor(theme, difficulty, ageGroup) {
   }
 }
 
-function generateLogicPuzzle(theme, difficulty, ageGroup) {
-  // Different logic puzzles based on theme and randomization
-  const puzzleVariants = {
-    food: [
-      { clues: ['Pizza is not the first meal', 'Salad comes before dessert', 'Soup is the first course'], items: ['Soup', 'Salad', 'Pizza', 'Dessert'] },
-      { clues: ['The apple is red', 'The banana is not next to the orange', 'The grape is last'], items: ['Apple', 'Banana', 'Orange', 'Grape'] },
-      { clues: ['Breakfast comes first', 'Dinner is after lunch', 'Snack is between lunch and dinner'], items: ['Breakfast', 'Lunch', 'Snack', 'Dinner'] }
+// ========== THEME-SPECIFIC CONTENT POOLS ==========
+const THEMED_CONTENT = {
+  sports: {
+    riddles: [
+      { riddle: "I have laces but I'm not a shoe for walking. Athletes wear me to run fast. What am I?", answer: 'Running shoes/Cleats' },
+      { riddle: "I'm round and bouncy, you throw me through a hoop. What am I?", answer: 'Basketball' },
+      { riddle: "I have 18 holes but I'm not Swiss cheese. What am I?", answer: 'Golf course' },
+      { riddle: "You hit me with a bat but I don't get hurt. What am I?", answer: 'Baseball' },
+      { riddle: "I'm kicked around but never cry. I go in a net to score. What am I?", answer: 'Soccer ball' },
+      { riddle: "I have strings but make no music. You swing me to hit a ball. What am I?", answer: 'Tennis racket' },
+      { riddle: "I'm frozen and flat, players skate on me. What am I?", answer: 'Ice rink' },
+      { riddle: "I have a net but catch no fish. Shuttlecocks fly over me. What am I?", answer: 'Badminton net' },
+      { riddle: "Athletes pass me but I never move on my own. I help relay teams win. What am I?", answer: 'Baton' },
+      { riddle: "I'm thrown far but always come back to be thrown again. What am I?", answer: 'Discus/Javelin' }
     ],
-    animals: [
+    logicPuzzles: [
+      { clues: ['Soccer is not first', 'Basketball comes before Tennis', 'Swimming is last'], items: ['Soccer', 'Basketball', 'Tennis', 'Swimming'] },
+      { clues: ['The gold medal is first', 'Bronze is after silver', 'Silver is not last'], items: ['Gold', 'Silver', 'Bronze', 'Ribbon'] },
+      { clues: ['The goalkeeper is not the captain', 'The striker scores the most', 'The defender is before midfielder'], items: ['Goalkeeper', 'Defender', 'Midfielder', 'Striker'] }
+    ],
+    memoryItems: ['Soccer', 'Basketball', 'Tennis', 'Baseball', 'Football', 'Hockey', 'Golf', 'Swimming', 'Running', 'Boxing'],
+    wordSearchWords: ['SOCCER', 'GOAL', 'TEAM', 'SCORE', 'BALL', 'WIN', 'COACH', 'GAME', 'RACE', 'SPORT'],
+    mazeTheme: { start: 'ATHLETE', end: 'TROPHY', instruction: 'Help the athlete reach the trophy!' },
+    visualContext: 'sports equipment'
+  },
+  food: {
+    riddles: [
+      { riddle: "I'm yellow and curved, monkeys love me. What am I?", answer: 'Banana' },
+      { riddle: "I make you cry but I'm not sad. You cut me in the kitchen. What am I?", answer: 'Onion' },
+      { riddle: "I'm red and round, keep doctors away. What am I?", answer: 'Apple' },
+      { riddle: "I'm white and come from cows. You pour me on cereal. What am I?", answer: 'Milk' },
+      { riddle: "I have eyes but cannot see. I grow underground. What am I?", answer: 'Potato' },
+      { riddle: "I'm long and orange, rabbits love to eat me. What am I?", answer: 'Carrot' },
+      { riddle: "I'm round with cheese and toppings. I come in slices. What am I?", answer: 'Pizza' },
+      { riddle: "I crack open but I'm not broken. You eat me for breakfast. What am I?", answer: 'Egg' },
+      { riddle: "I'm cold and sweet, you eat me in summer with a cone. What am I?", answer: 'Ice cream' },
+      { riddle: "I'm bread with filling in the middle. Great for lunch! What am I?", answer: 'Sandwich' }
+    ],
+    logicPuzzles: [
+      { clues: ['Pizza is not first', 'Salad comes before dessert', 'Soup is the first course'], items: ['Soup', 'Salad', 'Pizza', 'Dessert'] },
+      { clues: ['Breakfast is first', 'Dinner is after lunch', 'Snack is between lunch and dinner'], items: ['Breakfast', 'Lunch', 'Snack', 'Dinner'] },
+      { clues: ['The apple is red', 'The banana is not next to the orange', 'The grape is last'], items: ['Apple', 'Banana', 'Orange', 'Grape'] }
+    ],
+    memoryItems: ['Pizza', 'Apple', 'Cake', 'Burger', 'Ice Cream', 'Cookie', 'Banana', 'Carrot', 'Donut', 'Sandwich'],
+    wordSearchWords: ['PIZZA', 'APPLE', 'CAKE', 'BREAD', 'FRUIT', 'COOK', 'EAT', 'YUMMY', 'SWEET', 'LUNCH'],
+    mazeTheme: { start: 'CHEF', end: 'CAKE', instruction: 'Help the chef reach the cake!' },
+    visualContext: 'food items'
+  },
+  animals: {
+    riddles: [
+      { riddle: "I'm the king of the jungle but I don't wear a crown. What am I?", answer: 'Lion' },
+      { riddle: "I have a long neck and eat leaves from tall trees. What am I?", answer: 'Giraffe' },
+      { riddle: "I'm black and white and love bamboo. What am I?", answer: 'Panda' },
+      { riddle: "I have eight legs and spin webs. What am I?", answer: 'Spider' },
+      { riddle: "I'm slow and carry my house on my back. What am I?", answer: 'Snail/Turtle' },
+      { riddle: "I hop and have a pouch for my baby. What am I?", answer: 'Kangaroo' },
+      { riddle: "I bark and wag my tail when happy. What am I?", answer: 'Dog' },
+      { riddle: "I have stripes and look like a horse. What am I?", answer: 'Zebra' },
+      { riddle: "I'm pink and love mud baths. What am I?", answer: 'Pig' },
+      { riddle: "I have a trunk but never pack for vacation. What am I?", answer: 'Elephant' }
+    ],
+    logicPuzzles: [
       { clues: ['The lion is not first', 'The elephant is after the zebra', 'The giraffe is last'], items: ['Zebra', 'Lion', 'Elephant', 'Giraffe'] },
-      { clues: ['The fish swims before the dolphin', 'The whale is the biggest', 'The shark is not last'], items: ['Fish', 'Dolphin', 'Shark', 'Whale'] }
+      { clues: ['The cat is smaller than the dog', 'The horse is the biggest', 'The rabbit is not last'], items: ['Cat', 'Rabbit', 'Dog', 'Horse'] },
+      { clues: ['The bird can fly', 'The fish is in water', 'The snake is not first'], items: ['Bird', 'Fish', 'Snake', 'Frog'] }
     ],
-    default: [
+    memoryItems: ['Lion', 'Elephant', 'Giraffe', 'Zebra', 'Monkey', 'Tiger', 'Bear', 'Panda', 'Kangaroo', 'Penguin'],
+    wordSearchWords: ['LION', 'TIGER', 'BEAR', 'BIRD', 'FISH', 'DOG', 'CAT', 'ZEBRA', 'PANDA', 'FROG'],
+    mazeTheme: { start: 'MOUSE', end: 'CHEESE', instruction: 'Help the mouse find the cheese!' },
+    visualContext: 'animals'
+  },
+  ocean: {
+    riddles: [
+      { riddle: "I'm the biggest animal in the sea but I'm not a fish. What am I?", answer: 'Whale' },
+      { riddle: "I have eight arms and squirt ink. What am I?", answer: 'Octopus' },
+      { riddle: "I look like a star but live in the ocean. What am I?", answer: 'Starfish' },
+      { riddle: "I have claws and walk sideways on the beach. What am I?", answer: 'Crab' },
+      { riddle: "I'm smart and jump through hoops. I'm not a fish but live in water. What am I?", answer: 'Dolphin' },
+      { riddle: "I have a shell and live on the beach. What am I?", answer: 'Seashell/Clam' },
+      { riddle: "I'm a fish with sharp teeth that scares swimmers. What am I?", answer: 'Shark' },
+      { riddle: "I move slowly and have a shell like a rock. What am I?", answer: 'Sea turtle' },
+      { riddle: "I'm colorful and live in coral reefs. What am I?", answer: 'Tropical fish' },
+      { riddle: "I sting but I'm not a bee. I float in the ocean. What am I?", answer: 'Jellyfish' }
+    ],
+    logicPuzzles: [
+      { clues: ['The whale is the biggest', 'The shrimp is smaller than the crab', 'The dolphin is not last'], items: ['Shrimp', 'Crab', 'Dolphin', 'Whale'] },
+      { clues: ['The starfish is on the sand', 'The shark swims fastest', 'The turtle is slow'], items: ['Starfish', 'Turtle', 'Fish', 'Shark'] },
+      { clues: ['Coral is not moving', 'The octopus has 8 arms', 'The jellyfish stings'], items: ['Coral', 'Jellyfish', 'Octopus', 'Clam'] }
+    ],
+    memoryItems: ['Whale', 'Dolphin', 'Shark', 'Octopus', 'Crab', 'Starfish', 'Turtle', 'Jellyfish', 'Seahorse', 'Clam'],
+    wordSearchWords: ['WHALE', 'SHARK', 'FISH', 'OCEAN', 'WAVE', 'CORAL', 'CRAB', 'SHELL', 'SWIM', 'DEEP'],
+    mazeTheme: { start: 'DIVER', end: 'TREASURE', instruction: 'Help the diver find the treasure!' },
+    visualContext: 'sea creatures'
+  },
+  space: {
+    riddles: [
+      { riddle: "I light up the night sky but I'm not the sun. What am I?", answer: 'Moon' },
+      { riddle: "I'm a big ball of fire that gives Earth light. What am I?", answer: 'Sun' },
+      { riddle: "I have rings but I'm not jewelry. I'm a planet. What am I?", answer: 'Saturn' },
+      { riddle: "I travel through space and have a tail of ice. What am I?", answer: 'Comet' },
+      { riddle: "I'm the red planet that might have had water. What am I?", answer: 'Mars' },
+      { riddle: "Astronauts ride in me to go to space. What am I?", answer: 'Rocket' },
+      { riddle: "I'm a group of stars that make a picture in the sky. What am I?", answer: 'Constellation' },
+      { riddle: "I orbit Earth and help with communication. What am I?", answer: 'Satellite' },
+      { riddle: "I'm where astronauts live in space. What am I?", answer: 'Space station' },
+      { riddle: "I'm a hole in space that nothing can escape. What am I?", answer: 'Black hole' }
+    ],
+    logicPuzzles: [
+      { clues: ['Mercury is closest to the Sun', 'Earth is after Venus', 'Mars is the red planet'], items: ['Mercury', 'Venus', 'Earth', 'Mars'] },
+      { clues: ['The rocket launches first', 'Landing is last', 'Orbit is before re-entry'], items: ['Launch', 'Orbit', 'Re-entry', 'Landing'] },
+      { clues: ['The sun is biggest', 'Earth is bigger than Moon', 'The star is far away'], items: ['Moon', 'Earth', 'Star', 'Sun'] }
+    ],
+    memoryItems: ['Rocket', 'Moon', 'Star', 'Planet', 'Sun', 'Comet', 'Satellite', 'Astronaut', 'Alien', 'UFO'],
+    wordSearchWords: ['STAR', 'MOON', 'SUN', 'MARS', 'ORBIT', 'SPACE', 'ROCKET', 'PLANET', 'COMET', 'ALIEN'],
+    mazeTheme: { start: 'ROCKET', end: 'MOON', instruction: 'Help the rocket reach the moon!' },
+    visualContext: 'space objects'
+  },
+  nature: {
+    riddles: [
+      { riddle: "I have leaves but I'm not a book. Birds live in me. What am I?", answer: 'Tree' },
+      { riddle: "I'm colorful and attract bees. I smell nice. What am I?", answer: 'Flower' },
+      { riddle: "I fall from clouds but I'm not a bird. What am I?", answer: 'Rain' },
+      { riddle: "I'm white and fluffy in the sky. What am I?", answer: 'Cloud' },
+      { riddle: "I have colors after the rain. What am I?", answer: 'Rainbow' },
+      { riddle: "I'm tall and made of rock. Climbers scale me. What am I?", answer: 'Mountain' },
+      { riddle: "I flow to the sea but never stop. What am I?", answer: 'River' },
+      { riddle: "I'm hot and bright, I rise each morning. What am I?", answer: 'Sun' },
+      { riddle: "I fall from trees in autumn. What am I?", answer: 'Leaf' },
+      { riddle: "I'm cold and white, I fall in winter. What am I?", answer: 'Snow' }
+    ],
+    logicPuzzles: [
+      { clues: ['Spring comes before summer', 'Winter is coldest', 'Fall is after summer'], items: ['Spring', 'Summer', 'Fall', 'Winter'] },
+      { clues: ['The seed is planted first', 'The flower blooms last', 'The stem grows before leaves'], items: ['Seed', 'Stem', 'Leaves', 'Flower'] },
+      { clues: ['Rain falls from clouds', 'Rivers flow to ocean', 'Sun makes clouds'], items: ['Sun', 'Cloud', 'Rain', 'River'] }
+    ],
+    memoryItems: ['Tree', 'Flower', 'Sun', 'Cloud', 'Rain', 'Mountain', 'River', 'Leaf', 'Rainbow', 'Butterfly'],
+    wordSearchWords: ['TREE', 'FLOWER', 'RAIN', 'SUN', 'CLOUD', 'RIVER', 'LEAF', 'BIRD', 'GRASS', 'SKY'],
+    mazeTheme: { start: 'SEED', end: 'FLOWER', instruction: 'Help the seed grow into a flower!' },
+    visualContext: 'nature items'
+  },
+  vehicles: {
+    riddles: [
+      { riddle: "I have four wheels and take you places. What am I?", answer: 'Car' },
+      { riddle: "I fly in the sky with wings but I'm not a bird. What am I?", answer: 'Airplane' },
+      { riddle: "I ride on tracks and say choo-choo. What am I?", answer: 'Train' },
+      { riddle: "I float on water and have a captain. What am I?", answer: 'Boat/Ship' },
+      { riddle: "I have two wheels and you pedal me. What am I?", answer: 'Bicycle' },
+      { riddle: "I'm big and yellow, I take kids to school. What am I?", answer: 'School bus' },
+      { riddle: "I have blades on top and can hover. What am I?", answer: 'Helicopter' },
+      { riddle: "I'm red and have a siren. I fight fires. What am I?", answer: 'Fire truck' },
+      { riddle: "I go underground in the city. What am I?", answer: 'Subway/Metro' },
+      { riddle: "I'm very fast and race on tracks. What am I?", answer: 'Race car' }
+    ],
+    logicPuzzles: [
+      { clues: ['The car has four wheels', 'The bike is before the bus', 'The train is longest'], items: ['Bike', 'Car', 'Bus', 'Train'] },
+      { clues: ['The plane flies highest', 'The boat is on water', 'The helicopter hovers'], items: ['Boat', 'Car', 'Helicopter', 'Plane'] },
+      { clues: ['The ambulance is fastest', 'The truck carries cargo', 'The taxi is yellow'], items: ['Taxi', 'Truck', 'Bus', 'Ambulance'] }
+    ],
+    memoryItems: ['Car', 'Bus', 'Plane', 'Train', 'Boat', 'Bike', 'Truck', 'Helicopter', 'Rocket', 'Submarine'],
+    wordSearchWords: ['CAR', 'BUS', 'TRAIN', 'PLANE', 'BOAT', 'BIKE', 'TRUCK', 'TAXI', 'DRIVE', 'WHEEL'],
+    mazeTheme: { start: 'START', end: 'FINISH', instruction: 'Help the race car reach the finish line!' },
+    visualContext: 'vehicles'
+  },
+  dinosaurs: {
+    riddles: [
+      { riddle: "I'm the king of dinosaurs with tiny arms. What am I?", answer: 'T-Rex' },
+      { riddle: "I have three horns on my head. What am I?", answer: 'Triceratops' },
+      { riddle: "I have a long neck to reach tall trees. What am I?", answer: 'Brachiosaurus' },
+      { riddle: "I have plates on my back and spikes on my tail. What am I?", answer: 'Stegosaurus' },
+      { riddle: "I fly in the sky but I'm not a bird. I lived with dinosaurs. What am I?", answer: 'Pterodactyl' },
+      { riddle: "I'm fast and hunt in packs. What am I?", answer: 'Velociraptor' },
+      { riddle: "I have a hard head for head-butting. What am I?", answer: 'Pachycephalosaurus' },
+      { riddle: "I swim in the ocean and have flippers. What am I?", answer: 'Plesiosaur' },
+      { riddle: "I'm covered in armor like a tank. What am I?", answer: 'Ankylosaurus' },
+      { riddle: "Scientists dig up my bones. What am I?", answer: 'Fossil' }
+    ],
+    logicPuzzles: [
+      { clues: ['T-Rex is the biggest carnivore', 'Triceratops has horns', 'Pterodactyl can fly'], items: ['Pterodactyl', 'Velociraptor', 'Triceratops', 'T-Rex'] },
+      { clues: ['The egg comes first', 'The adult is last', 'The baby hatches from egg'], items: ['Egg', 'Baby', 'Young', 'Adult'] },
+      { clues: ['Herbivores eat plants', 'Carnivores eat meat', 'T-Rex is not herbivore'], items: ['Plants', 'Herbivore', 'Carnivore', 'T-Rex'] }
+    ],
+    memoryItems: ['T-Rex', 'Triceratops', 'Stegosaurus', 'Pterodactyl', 'Velociraptor', 'Brachiosaurus', 'Fossil', 'Egg', 'Bone', 'Footprint'],
+    wordSearchWords: ['TREX', 'DINO', 'FOSSIL', 'BONE', 'ROAR', 'CLAW', 'TAIL', 'HORN', 'GIANT', 'EGG'],
+    mazeTheme: { start: 'EXPLORER', end: 'FOSSIL', instruction: 'Help the explorer find the dinosaur fossil!' },
+    visualContext: 'dinosaurs'
+  },
+  default: {
+    riddles: [
+      { riddle: "I have hands but can't clap. What am I?", answer: 'A clock' },
+      { riddle: "What has ears but cannot hear?", answer: 'Corn' },
+      { riddle: "What gets wetter the more it dries?", answer: 'A towel' },
+      { riddle: "What has a head and a tail but no body?", answer: 'A coin' },
+      { riddle: "What can you catch but not throw?", answer: 'A cold' }
+    ],
+    logicPuzzles: [
       { clues: ['Red is not first', 'Blue comes before green', 'Yellow is last'], items: ['Red', 'Blue', 'Green', 'Yellow'] },
-      { clues: ['Circle is before square', 'Triangle is not last', 'Star is after triangle'], items: ['Circle', 'Square', 'Triangle', 'Star'] },
-      { clues: ['A comes first', 'C is not next to B', 'D is last'], items: ['A', 'B', 'C', 'D'] }
-    ]
+      { clues: ['Circle is before square', 'Triangle is not last', 'Star is after triangle'], items: ['Circle', 'Square', 'Triangle', 'Star'] }
+    ],
+    memoryItems: ['Star', 'Heart', 'Circle', 'Square', 'Triangle', 'Diamond', 'Moon', 'Sun', 'Flower', 'Tree'],
+    wordSearchWords: ['FUN', 'PLAY', 'GAME', 'LEARN', 'THINK', 'DRAW', 'COLOR', 'READ', 'WRITE', 'COUNT'],
+    mazeTheme: { start: 'START', end: 'FINISH', instruction: 'Find the way through the maze!' },
+    visualContext: 'shapes and objects'
+  }
+}
+
+// Helper to get themed content
+function getThemedContent(theme) {
+  // Map common theme names to our content keys
+  const themeMap = {
+    'sports': 'sports',
+    'food': 'food', 
+    'animals': 'animals',
+    'ocean': 'ocean',
+    'sea': 'ocean',
+    'space': 'space',
+    'nature': 'nature',
+    'vehicles': 'vehicles',
+    'transportation': 'vehicles',
+    'dinosaurs': 'dinosaurs',
+    'dino': 'dinosaurs'
   }
   
-  const variants = puzzleVariants[theme] || puzzleVariants.default
-  const puzzle = variants[Math.floor(Math.random() * variants.length)]
+  const normalizedTheme = theme?.toLowerCase() || ''
+  
+  // Try to find a matching theme
+  for (const [key, value] of Object.entries(themeMap)) {
+    if (normalizedTheme.includes(key)) {
+      return THEMED_CONTENT[value]
+    }
+  }
+  
+  return THEMED_CONTENT.default
+}
+
+function generateLogicPuzzle(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  const puzzles = themedContent.logicPuzzles
+  const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)]
   
   return {
     type: 'logic-puzzle',
     puzzle,
+    theme,
     instructions: 'Use the clues to figure out the correct order!'
   }
 }
 
 function generateRiddles(theme, difficulty, ageGroup) {
-  // Large pool of riddles to randomize
-  const allRiddles = [
-    { riddle: "I have hands but can't clap. What am I?", answer: 'A clock' },
-    { riddle: "What has ears but cannot hear?", answer: 'Corn' },
-    { riddle: "What gets wetter the more it dries?", answer: 'A towel' },
-    { riddle: "What has a head and a tail but no body?", answer: 'A coin' },
-    { riddle: "What can you catch but not throw?", answer: 'A cold' },
-    { riddle: "What goes up but never comes down?", answer: 'Your age' },
-    { riddle: "What has keys but no locks?", answer: 'A piano' },
-    { riddle: "What has words but never speaks?", answer: 'A book' },
-    { riddle: "What has a neck but no head?", answer: 'A bottle' },
-    { riddle: "What can travel around the world while staying in a corner?", answer: 'A stamp' },
-    { riddle: "What has many teeth but cannot bite?", answer: 'A comb' },
-    { riddle: "What is always in front of you but can't be seen?", answer: 'The future' },
-    { riddle: "What can fill a room but takes up no space?", answer: 'Light' },
-    { riddle: "What has legs but doesn't walk?", answer: 'A table' },
-    { riddle: "What is full of holes but still holds water?", answer: 'A sponge' },
-    { riddle: "What goes through cities and fields but never moves?", answer: 'A road' },
-    { riddle: "What belongs to you but others use it more?", answer: 'Your name' },
-    { riddle: "What breaks but never falls, and falls but never breaks?", answer: 'Day and night' }
-  ]
+  const themedContent = getThemedContent(theme)
+  const allRiddles = themedContent.riddles
   
-  // Shuffle and pick 3-5 riddles based on difficulty
-  const shuffled = allRiddles.sort(() => Math.random() - 0.5)
+  // Shuffle and pick riddles based on difficulty
+  const shuffled = [...allRiddles].sort(() => Math.random() - 0.5)
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
-  const selectedRiddles = shuffled.slice(0, count)
+  const selectedRiddles = shuffled.slice(0, Math.min(count, shuffled.length))
   
   return {
     type: 'riddles',
     riddles: selectedRiddles,
-    instructions: 'Can you solve these brain-teasing riddles?'
+    theme,
+    instructions: `Can you solve these ${theme || 'brain-teasing'} riddles?`
   }
 }
 
 function generateComplexMaze(theme, difficulty, ageGroup) {
-  // Generate unique maze parameters
+  const themedContent = getThemedContent(theme)
+  const mazeTheme = themedContent.mazeTheme
   const mazeId = Math.floor(Math.random() * 1000)
   const sizes = { easy: 15, medium: 25, hard: 35 }
   
   return {
     type: 'maze-complex',
     size: sizes[difficulty] || 25,
-    mazeId, // Unique ID for this maze
+    mazeId,
     multiPath: difficulty === 'hard',
-    seed: Date.now() + Math.random(), // Unique seed for maze generation
-    instructions: difficulty === 'hard' 
-      ? 'Find the one true path through this challenging maze!' 
-      : 'Help find the way through the maze!'
+    seed: Date.now() + Math.random(),
+    startLabel: mazeTheme.start,
+    endLabel: mazeTheme.end,
+    theme,
+    instructions: mazeTheme.instruction
   }
 }
 
 function generateMemoryGame(theme, difficulty, ageGroup) {
-  // Theme-specific items for memory cards
-  const themeItems = {
-    food: ['Pizza', 'Apple', 'Cake', 'Burger', 'Ice Cream', 'Cookie', 'Banana', 'Carrot', 'Donut', 'Sandwich'],
-    animals: ['Cat', 'Dog', 'Lion', 'Bird', 'Fish', 'Bear', 'Elephant', 'Tiger', 'Rabbit', 'Horse'],
-    nature: ['Tree', 'Flower', 'Sun', 'Cloud', 'Rain', 'Mountain', 'River', 'Leaf', 'Star', 'Moon'],
-    ocean: ['Fish', 'Whale', 'Crab', 'Shell', 'Wave', 'Shark', 'Dolphin', 'Octopus', 'Coral', 'Starfish'],
-    space: ['Star', 'Moon', 'Rocket', 'Planet', 'Sun', 'Comet', 'Alien', 'Satellite', 'Astronaut', 'UFO'],
-    vehicles: ['Car', 'Bus', 'Plane', 'Train', 'Boat', 'Bike', 'Truck', 'Helicopter', 'Rocket', 'Submarine'],
-    default: ['Star', 'Heart', 'Circle', 'Square', 'Triangle', 'Diamond', 'Moon', 'Sun', 'Flower', 'Tree']
-  }
-  
-  const items = themeItems[theme] || themeItems.default
+  const themedContent = getThemedContent(theme)
+  const items = [...themedContent.memoryItems]
   const pairCount = difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8
   
   // Shuffle and select items
@@ -563,34 +755,25 @@ function generateMemoryGame(theme, difficulty, ageGroup) {
   return {
     type: 'memory',
     pairs: pairCount,
-    items: shuffledItems, // Actual items to display on cards
+    items: shuffledItems,
     theme,
-    instructions: 'Cut out these cards and play memory match! Match the pairs!'
+    instructions: `Match the ${theme || ''} pairs! Cut out and play memory match!`
   }
 }
 
 function generateSequences(theme, difficulty, ageGroup) {
-  // Generate varied number sequences
+  const themedContent = getThemedContent(theme)
+  
+  // Generate varied number sequences with themed context
   const sequenceGenerators = [
-    // Add by 2
-    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+2, s+4, s+6, '?'], answer: s+8 } },
-    // Add by 3
-    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+3, s+6, s+9, '?'], answer: s+12 } },
-    // Add by 5
-    () => { const s = Math.floor(Math.random() * 3) * 5; return { pattern: [s, s+5, s+10, s+15, '?'], answer: s+20 } },
-    // Multiply by 2
-    () => { const s = Math.floor(Math.random() * 3) + 1; return { pattern: [s, s*2, s*4, s*8, '?'], answer: s*16 } },
-    // Add increasing (1, 2, 3...)
-    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+1, s+3, s+6, '?'], answer: s+10 } },
-    // Odd numbers
-    () => { const s = Math.floor(Math.random() * 3) * 2 + 1; return { pattern: [s, s+2, s+4, s+6, '?'], answer: s+8 } },
-    // Fibonacci-like
-    () => { return { pattern: [1, 1, 2, 3, '?'], answer: 5 } },
-    // Square numbers
-    () => { return { pattern: [1, 4, 9, 16, '?'], answer: 25 } }
+    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+2, s+4, s+6, '?'], answer: s+8, hint: 'Add 2' } },
+    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+3, s+6, s+9, '?'], answer: s+12, hint: 'Add 3' } },
+    () => { const s = Math.floor(Math.random() * 3) * 5; return { pattern: [s, s+5, s+10, s+15, '?'], answer: s+20, hint: 'Add 5' } },
+    () => { const s = Math.floor(Math.random() * 3) + 1; return { pattern: [s, s*2, s*4, s*8, '?'], answer: s*16, hint: 'Multiply by 2' } },
+    () => { return { pattern: [1, 1, 2, 3, '?'], answer: 5, hint: 'Fibonacci' } },
+    () => { return { pattern: [1, 4, 9, 16, '?'], answer: 25, hint: 'Square numbers' } }
   ]
   
-  // Generate unique sequences
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
   const sequences = []
   const usedGenerators = new Set()
@@ -606,24 +789,25 @@ function generateSequences(theme, difficulty, ageGroup) {
   return {
     type: 'sequences',
     sequences,
-    instructions: 'Find the pattern and fill in the missing number!'
+    theme,
+    instructions: `Find the pattern and fill in the missing number!`
   }
 }
 
 function generateVisualPuzzles(theme, difficulty, ageGroup) {
-  // Varied visual puzzle prompts
+  const themedContent = getThemedContent(theme)
+  
   const puzzleTypes = [
-    'Which shape doesn\'t belong in the group?',
+    `Which ${themedContent.visualContext} doesn't belong?`,
     'How many triangles can you count?',
     'What comes next in the pattern?',
-    'Find the matching pair',
+    `Find the matching ${themedContent.visualContext}`,
     'Which is the mirror image?',
     'Complete the pattern',
     'Find the odd one out',
-    'Which shadow matches the object?'
+    'Which shadow matches?'
   ]
   
-  // Shuffle and select puzzles
   const shuffled = puzzleTypes.sort(() => Math.random() - 0.5)
   const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
   
@@ -631,8 +815,9 @@ function generateVisualPuzzles(theme, difficulty, ageGroup) {
     type: 'visual-puzzles',
     puzzles: shuffled.slice(0, count),
     puzzleCount: count,
-    seed: Date.now() + Math.random() * 10000, // Unique seed for each generation
-    instructions: 'Look carefully to solve these visual puzzles!'
+    seed: Date.now() + Math.random() * 10000,
+    theme,
+    instructions: `Look carefully to solve these ${theme || ''} visual puzzles!`
   }
 }
 
