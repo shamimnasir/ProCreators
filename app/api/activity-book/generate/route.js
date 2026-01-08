@@ -1885,13 +1885,204 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
     case 'visual-puzzles':
       const puzzles = content.puzzles || []
       let vpY = y + height - 50
+      const vpSeed = content.seed || Date.now()
+      
+      // Helper function for seeded random
+      const vpSeededRandom = (seed) => {
+        const x = Math.sin(seed) * 10000
+        return x - Math.floor(x)
+      }
       
       puzzles.forEach((p, idx) => {
-        if (vpY > y + 120) {
+        if (vpY > y + 130) {
           page.drawText(`${idx + 1}. ${stripEmojis(p)}`, { x: x + 20, y: vpY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
-          // Draw a box for the puzzle
-          page.drawRectangle({ x: x + 30, y: vpY - 70, width: width - 60, height: 50, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 1 })
-          vpY -= 100
+          
+          // Draw actual visual content based on puzzle type
+          const boxY = vpY - 75
+          const boxHeight = 55
+          const boxWidth = width - 60
+          
+          // Draw container box
+          page.drawRectangle({ x: x + 30, y: boxY, width: boxWidth, height: boxHeight, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
+          
+          if (p.includes('shape') || p.includes('belong') || p.includes('odd')) {
+            // Draw 5 shapes, one is different
+            const shapeSize = 18
+            const spacing = boxWidth / 6
+            const shapeY = boxY + boxHeight / 2
+            const oddIndex = Math.floor(vpSeededRandom(vpSeed + idx * 100) * 5)
+            
+            for (let s = 0; s < 5; s++) {
+              const shapeX = x + 50 + s * spacing
+              if (s === oddIndex) {
+                // Draw a different shape (triangle)
+                page.drawLine({ start: { x: shapeX, y: shapeY - shapeSize / 2 }, end: { x: shapeX + shapeSize / 2, y: shapeY + shapeSize / 2 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: shapeX + shapeSize / 2, y: shapeY + shapeSize / 2 }, end: { x: shapeX - shapeSize / 2, y: shapeY + shapeSize / 2 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: shapeX - shapeSize / 2, y: shapeY + shapeSize / 2 }, end: { x: shapeX, y: shapeY - shapeSize / 2 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              } else {
+                // Draw circles
+                page.drawCircle({ x: shapeX, y: shapeY, size: shapeSize / 2, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+              }
+            }
+          } else if (p.includes('triangle') || p.includes('count')) {
+            // Draw overlapping triangles to count
+            const triSize = 40
+            const triCenterX = x + 30 + boxWidth / 2
+            const triY = boxY + 8
+            
+            // Main triangle
+            page.drawLine({ start: { x: triCenterX, y: triY + triSize }, end: { x: triCenterX + triSize / 2, y: triY }, thickness: 2, color: rgb(0.2, 0.2, 0.2) })
+            page.drawLine({ start: { x: triCenterX + triSize / 2, y: triY }, end: { x: triCenterX - triSize / 2, y: triY }, thickness: 2, color: rgb(0.2, 0.2, 0.2) })
+            page.drawLine({ start: { x: triCenterX - triSize / 2, y: triY }, end: { x: triCenterX, y: triY + triSize }, thickness: 2, color: rgb(0.2, 0.2, 0.2) })
+            // Inner lines creating more triangles
+            page.drawLine({ start: { x: triCenterX - triSize / 4, y: triY + triSize / 2 }, end: { x: triCenterX + triSize / 4, y: triY + triSize / 2 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+            page.drawLine({ start: { x: triCenterX, y: triY }, end: { x: triCenterX, y: triY + triSize / 2 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+            page.drawLine({ start: { x: triCenterX - triSize / 4, y: triY + triSize / 2 }, end: { x: triCenterX, y: triY + triSize }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+            page.drawLine({ start: { x: triCenterX + triSize / 4, y: triY + triSize / 2 }, end: { x: triCenterX, y: triY + triSize }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+            
+            page.drawText('How many? ____', { x: triCenterX + triSize, y: triY + triSize / 2, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+          } else if (p.includes('pattern') || p.includes('next')) {
+            // Draw a pattern sequence
+            const patternY = boxY + boxHeight / 2
+            const shapeSize = 15
+            const spacing = boxWidth / 7
+            
+            // Draw alternating pattern: circle, square, circle, square, ?
+            for (let s = 0; s < 5; s++) {
+              const px = x + 50 + s * spacing
+              if (s === 4) {
+                // Question mark for missing piece
+                page.drawRectangle({ x: px - shapeSize / 2, y: patternY - shapeSize / 2, width: shapeSize, height: shapeSize, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1, opacity: 0.5 })
+                page.drawText('?', { x: px - 4, y: patternY - 6, size: 14, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+              } else if (s % 2 === 0) {
+                // Circles
+                page.drawCircle({ x: px, y: patternY, size: shapeSize / 2, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+              } else {
+                // Squares
+                page.drawRectangle({ x: px - shapeSize / 2, y: patternY - shapeSize / 2, width: shapeSize, height: shapeSize, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+              }
+            }
+          } else if (p.includes('mirror')) {
+            // Draw shape and mirror options
+            const mirrorY = boxY + boxHeight / 2
+            const mirrorSize = 20
+            
+            // Original shape (L-shape)
+            page.drawLine({ start: { x: x + 60, y: mirrorY + mirrorSize }, end: { x: x + 60, y: mirrorY - mirrorSize }, thickness: 3, color: rgb(0.2, 0.2, 0.2) })
+            page.drawLine({ start: { x: x + 60, y: mirrorY - mirrorSize }, end: { x: x + 80, y: mirrorY - mirrorSize }, thickness: 3, color: rgb(0.2, 0.2, 0.2) })
+            
+            page.drawText('=', { x: x + 95, y: mirrorY - 5, size: 16, font: boldFont, color: rgb(0.3, 0.3, 0.3) })
+            
+            // Options A, B, C
+            const options = ['A', 'B', 'C']
+            for (let o = 0; o < 3; o++) {
+              const optX = x + 120 + o * 70
+              page.drawText(options[o] + ')', { x: optX, y: mirrorY + 15, size: 9, font: boldFont, color: rgb(0.4, 0.4, 0.4) })
+              
+              // Draw slightly different L shapes
+              if (o === 0) {
+                // Correct mirror
+                page.drawLine({ start: { x: optX + 20, y: mirrorY + mirrorSize - 10 }, end: { x: optX + 20, y: mirrorY - mirrorSize - 10 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: optX + 20, y: mirrorY - mirrorSize - 10 }, end: { x: optX, y: mirrorY - mirrorSize - 10 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              } else if (o === 1) {
+                // Rotated
+                page.drawLine({ start: { x: optX, y: mirrorY - 5 }, end: { x: optX + 25, y: mirrorY - 5 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: optX + 25, y: mirrorY - 5 }, end: { x: optX + 25, y: mirrorY - 20 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              } else {
+                // Different
+                page.drawLine({ start: { x: optX + 10, y: mirrorY + 10 }, end: { x: optX + 10, y: mirrorY - 15 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: optX + 10, y: mirrorY - 15 }, end: { x: optX + 25, y: mirrorY - 15 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              }
+            }
+          } else if (p.includes('matching') || p.includes('pair')) {
+            // Draw pairs to match
+            const pairY = boxY + boxHeight / 2
+            const shapeSize = 14
+            
+            // Left side shapes
+            const leftShapes = [
+              { type: 'circle', label: '1' },
+              { type: 'square', label: '2' },
+              { type: 'triangle', label: '3' }
+            ]
+            
+            for (let i = 0; i < 3; i++) {
+              const ly = pairY + 15 - i * 18
+              page.drawText(leftShapes[i].label + '.', { x: x + 40, y: ly - 4, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+              
+              if (leftShapes[i].type === 'circle') {
+                page.drawCircle({ x: x + 65, y: ly, size: shapeSize / 2, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+              } else if (leftShapes[i].type === 'square') {
+                page.drawRectangle({ x: x + 55, y: ly - shapeSize / 2, width: shapeSize, height: shapeSize, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+              } else {
+                page.drawLine({ start: { x: x + 65, y: ly + shapeSize / 2 }, end: { x: x + 72, y: ly - shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: x + 72, y: ly - shapeSize / 2 }, end: { x: x + 58, y: ly - shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: x + 58, y: ly - shapeSize / 2 }, end: { x: x + 65, y: ly + shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+              }
+            }
+            
+            // Draw connecting area
+            page.drawText('Match!', { x: centerX - 20, y: pairY, size: 10, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+            
+            // Right side (shuffled) with letters
+            const rightLabels = ['A', 'B', 'C']
+            const rightTypes = ['triangle', 'circle', 'square'] // Shuffled order
+            
+            for (let i = 0; i < 3; i++) {
+              const ry = pairY + 15 - i * 18
+              const rx = x + boxWidth - 40
+              
+              page.drawText(rightLabels[i] + '.', { x: rx - 20, y: ry - 4, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+              
+              if (rightTypes[i] === 'circle') {
+                page.drawCircle({ x: rx, y: ry, size: shapeSize / 2, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+              } else if (rightTypes[i] === 'square') {
+                page.drawRectangle({ x: rx - shapeSize / 2, y: ry - shapeSize / 2, width: shapeSize, height: shapeSize, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+              } else {
+                page.drawLine({ start: { x: rx, y: ry + shapeSize / 2 }, end: { x: rx + 7, y: ry - shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: rx + 7, y: ry - shapeSize / 2 }, end: { x: rx - 7, y: ry - shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+                page.drawLine({ start: { x: rx - 7, y: ry - shapeSize / 2 }, end: { x: rx, y: ry + shapeSize / 2 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+              }
+            }
+          } else if (p.includes('shadow')) {
+            // Draw object and shadow options
+            const shadowY = boxY + boxHeight / 2
+            
+            // Original object (simple house shape)
+            page.drawRectangle({ x: x + 50, y: shadowY - 15, width: 25, height: 20, borderColor: rgb(0.2, 0.2, 0.2), borderWidth: 2 })
+            page.drawLine({ start: { x: x + 50, y: shadowY + 5 }, end: { x: x + 62.5, y: shadowY + 20 }, thickness: 2, color: rgb(0.2, 0.2, 0.2) })
+            page.drawLine({ start: { x: x + 62.5, y: shadowY + 20 }, end: { x: x + 75, y: shadowY + 5 }, thickness: 2, color: rgb(0.2, 0.2, 0.2) })
+            
+            page.drawText('Which shadow?', { x: x + 100, y: shadowY + 10, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+            
+            // Shadow options (filled black shapes)
+            const shadowOpts = ['A', 'B', 'C']
+            for (let s = 0; s < 3; s++) {
+              const sx = x + 150 + s * 60
+              page.drawText(shadowOpts[s], { x: sx + 8, y: shadowY + 18, size: 9, font: boldFont, color: rgb(0.4, 0.4, 0.4) })
+              
+              // Draw filled shadow shape
+              page.drawRectangle({ x: sx, y: shadowY - 10, width: 20, height: 15, color: rgb(0.2, 0.2, 0.2) })
+              if (s === 0) {
+                // Correct shadow
+                page.drawLine({ start: { x: sx, y: shadowY + 5 }, end: { x: sx + 10, y: shadowY + 15 }, thickness: 8, color: rgb(0.2, 0.2, 0.2) })
+                page.drawLine({ start: { x: sx + 10, y: shadowY + 15 }, end: { x: sx + 20, y: shadowY + 5 }, thickness: 8, color: rgb(0.2, 0.2, 0.2) })
+              }
+            }
+          } else {
+            // Default: draw a simple visual puzzle with shapes
+            const defY = boxY + boxHeight / 2
+            for (let d = 0; d < 4; d++) {
+              const dx = x + 60 + d * (boxWidth / 5)
+              if (d === 3) {
+                page.drawText('?', { x: dx, y: defY - 8, size: 18, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+              } else {
+                page.drawCircle({ x: dx, y: defY, size: 12 + d * 3, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+              }
+            }
+          }
+          
+          vpY -= 105
         }
       })
       break
