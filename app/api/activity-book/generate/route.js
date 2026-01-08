@@ -158,37 +158,100 @@ function generateWordSearch(theme, difficulty, ageGroup) {
   const sizes = { easy: 8, medium: 12, hard: 15 }
   const gridSize = sizes[difficulty] || 10
   
-  // Theme-based words
-  const themeWords = {
-    animals: ['CAT', 'DOG', 'LION', 'TIGER', 'BEAR', 'FISH', 'BIRD', 'FROG', 'SNAKE', 'HORSE'],
-    nature: ['TREE', 'FLOWER', 'RIVER', 'MOUNTAIN', 'FOREST', 'OCEAN', 'SUN', 'CLOUD', 'RAIN', 'LEAF'],
-    space: ['STAR', 'MOON', 'PLANET', 'ROCKET', 'COMET', 'SUN', 'EARTH', 'MARS', 'ORBIT', 'ALIEN'],
-    ocean: ['FISH', 'WHALE', 'SHARK', 'CORAL', 'WAVE', 'SHELL', 'CRAB', 'SEAL', 'DOLPHIN', 'OCTOPUS'],
-    dinosaurs: ['TREX', 'RAPTOR', 'FOSSIL', 'BONE', 'CLAW', 'TEETH', 'SCALE', 'TAIL', 'HORN', 'EGG'],
-    vehicles: ['CAR', 'TRUCK', 'PLANE', 'TRAIN', 'BOAT', 'BUS', 'BIKE', 'TAXI', 'SHIP', 'VAN'],
-    food: ['PIZZA', 'APPLE', 'BREAD', 'MILK', 'EGGS', 'RICE', 'SOUP', 'CAKE', 'PIE', 'FRUIT']
-  }
+  // Use themed content
+  const themedContent = getThemedContent(theme)
+  const words = [...themedContent.wordSearchWords].slice(0, difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8)
   
-  const words = (themeWords[theme] || themeWords.animals).slice(0, difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8)
-  
-  // Generate simple grid (placeholder - in real implementation, would place words)
+  // Generate grid with actual word placement
   const grid = Array(gridSize).fill(null).map(() => 
     Array(gridSize).fill(null).map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
   )
+  
+  // Place words in the grid (horizontal and vertical)
+  words.forEach((word, idx) => {
+    const isHorizontal = idx % 2 === 0
+    const maxStart = gridSize - word.length
+    
+    if (maxStart >= 0) {
+      const startRow = Math.floor(Math.random() * (isHorizontal ? gridSize : maxStart + 1))
+      const startCol = Math.floor(Math.random() * (isHorizontal ? maxStart + 1 : gridSize))
+      
+      for (let i = 0; i < word.length; i++) {
+        if (isHorizontal) {
+          grid[startRow][startCol + i] = word[i]
+        } else {
+          grid[startRow + i][startCol] = word[i]
+        }
+      }
+    }
+  })
   
   return {
     type: 'word-search',
     grid,
     words,
     gridSize,
-    instructions: `Find and circle these ${words.length} hidden words in the grid!`
+    theme,
+    instructions: `Find and circle these ${words.length} ${theme || ''} words in the grid!`
   }
 }
 
 function generateCrossword(theme, difficulty, ageGroup) {
-  return {
-    type: 'crossword',
-    clues: {
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific crossword clues
+  const themedClues = {
+    sports: {
+      across: [
+        { number: 1, clue: 'You kick this ball into a net', answer: 'SOCCER', row: 0, col: 0 },
+        { number: 3, clue: 'Person who leads the team', answer: 'COACH', row: 2, col: 1 }
+      ],
+      down: [
+        { number: 1, clue: 'You try to make this in basketball', answer: 'SCORE', row: 0, col: 0 },
+        { number: 2, clue: 'What you want to do - not lose', answer: 'WIN', row: 0, col: 3 }
+      ]
+    },
+    animals: {
+      across: [
+        { number: 1, clue: 'King of the jungle', answer: 'LION', row: 0, col: 0 },
+        { number: 3, clue: 'Man\'s best friend', answer: 'DOG', row: 2, col: 1 }
+      ],
+      down: [
+        { number: 1, clue: 'Has spots and a long neck', answer: 'GIRAFFE', row: 0, col: 0 },
+        { number: 2, clue: 'Swims in water', answer: 'FISH', row: 0, col: 3 }
+      ]
+    },
+    ocean: {
+      across: [
+        { number: 1, clue: 'Biggest animal in the ocean', answer: 'WHALE', row: 0, col: 0 },
+        { number: 3, clue: 'Has eight arms', answer: 'OCTOPUS', row: 2, col: 1 }
+      ],
+      down: [
+        { number: 1, clue: 'Has fins and sharp teeth', answer: 'SHARK', row: 0, col: 0 },
+        { number: 2, clue: 'Walks sideways', answer: 'CRAB', row: 0, col: 3 }
+      ]
+    },
+    space: {
+      across: [
+        { number: 1, clue: 'Takes astronauts to space', answer: 'ROCKET', row: 0, col: 0 },
+        { number: 3, clue: 'Bright objects in night sky', answer: 'STARS', row: 2, col: 1 }
+      ],
+      down: [
+        { number: 1, clue: 'The red planet', answer: 'MARS', row: 0, col: 0 },
+        { number: 2, clue: 'Orbits Earth at night', answer: 'MOON', row: 0, col: 3 }
+      ]
+    },
+    food: {
+      across: [
+        { number: 1, clue: 'Round with cheese and toppings', answer: 'PIZZA', row: 0, col: 0 },
+        { number: 3, clue: 'Sweet treat after dinner', answer: 'CAKE', row: 2, col: 1 }
+      ],
+      down: [
+        { number: 1, clue: 'Red fruit that keeps doctors away', answer: 'APPLE', row: 0, col: 0 },
+        { number: 2, clue: 'Yellow and curved', answer: 'BANANA', row: 0, col: 3 }
+      ]
+    },
+    default: {
       across: [
         { number: 1, clue: 'A large animal with a mane', answer: 'LION', row: 0, col: 0 },
         { number: 3, clue: 'Man\'s best friend', answer: 'DOG', row: 2, col: 1 }
@@ -197,9 +260,24 @@ function generateCrossword(theme, difficulty, ageGroup) {
         { number: 1, clue: 'Has spots and a long neck', answer: 'GIRAFFE', row: 0, col: 0 },
         { number: 2, clue: 'Lives in the ocean', answer: 'FISH', row: 0, col: 3 }
       ]
-    },
+    }
+  }
+  
+  // Find matching theme clues
+  let clues = themedClues.default
+  for (const [key, value] of Object.entries(themedClues)) {
+    if (theme?.toLowerCase().includes(key)) {
+      clues = value
+      break
+    }
+  }
+  
+  return {
+    type: 'crossword',
+    clues,
     gridSize: difficulty === 'easy' ? 8 : difficulty === 'hard' ? 15 : 12,
-    instructions: 'Fill in the crossword puzzle using the clues below!'
+    theme,
+    instructions: `Fill in the ${theme || ''} crossword puzzle using the clues below!`
   }
 }
 
