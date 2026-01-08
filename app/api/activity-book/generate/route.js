@@ -1371,12 +1371,19 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       const mazeWidth = width - mazeMargin * 2
       const mazeY = y + 40
       
+      // Use seed for reproducible but unique maze
+      const mazeSeed = content.seed || Date.now()
+      const seededRandom = (seed) => {
+        const x = Math.sin(seed) * 10000
+        return x - Math.floor(x)
+      }
+      
       page.drawRectangle({ 
         x: x + mazeMargin, 
         y: mazeY, 
         width: mazeWidth, 
         height: mazeHeight, 
-        borderColor: rgb(0.7, 0.7, 0.7), 
+        borderColor: rgb(0.4, 0.4, 0.4), 
         borderWidth: 2 
       })
       
@@ -1384,22 +1391,84 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       page.drawText('START', { x: x + mazeMargin + 10, y: mazeY + mazeHeight - 20, size: 10, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
       page.drawText('FINISH', { x: x + mazeMargin + mazeWidth - 50, y: mazeY + 10, size: 10, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
       
-      // Draw maze lines inside the boundary
-      for (let i = 0; i < 10; i++) {
-        const lineY = mazeY + 30 + i * (mazeHeight - 60) / 10
-        const startOffset = 20 + Math.random() * 60
-        const endOffset = 20 + Math.random() * 60
-        page.drawLine({ 
-          start: { x: x + mazeMargin + startOffset, y: lineY }, 
-          end: { x: x + mazeMargin + mazeWidth - endOffset, y: lineY }, 
-          thickness: 2, 
-          color: rgb(0.3, 0.3, 0.3) 
-        })
-        // Vertical connectors
-        if (i > 0 && Math.random() > 0.5) {
-          const vx = x + mazeMargin + 40 + Math.random() * (mazeWidth - 80)
-          const prevY = mazeY + 30 + (i - 1) * (mazeHeight - 60) / 10
-          page.drawLine({ start: { x: vx, y: prevY }, end: { x: vx, y: lineY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+      // Draw more complex maze structure
+      const mazeLines = content.type === 'maze-complex' ? 14 : 10
+      const lineSpacing = (mazeHeight - 60) / mazeLines
+      
+      // Generate horizontal lines with gaps
+      for (let i = 0; i < mazeLines; i++) {
+        const lineY = mazeY + 30 + i * lineSpacing
+        const numSegments = 2 + Math.floor(seededRandom(mazeSeed + i * 100) * 3) // 2-4 segments
+        const segmentWidth = (mazeWidth - 40) / numSegments
+        
+        for (let s = 0; s < numSegments; s++) {
+          // Create gaps in some segments
+          if (seededRandom(mazeSeed + i * 100 + s) > 0.3) {
+            const segStartX = x + mazeMargin + 20 + s * segmentWidth
+            const gapPos = seededRandom(mazeSeed + i * 200 + s) * segmentWidth * 0.6
+            const gapWidth = 25 + seededRandom(mazeSeed + i * 300 + s) * 20
+            
+            // Line before gap
+            if (gapPos > 10) {
+              page.drawLine({ 
+                start: { x: segStartX, y: lineY }, 
+                end: { x: segStartX + gapPos, y: lineY }, 
+                thickness: 2, 
+                color: rgb(0.3, 0.3, 0.3) 
+              })
+            }
+            // Line after gap
+            if (gapPos + gapWidth < segmentWidth - 10) {
+              page.drawLine({ 
+                start: { x: segStartX + gapPos + gapWidth, y: lineY }, 
+                end: { x: segStartX + segmentWidth - 5, y: lineY }, 
+                thickness: 2, 
+                color: rgb(0.3, 0.3, 0.3) 
+              })
+            }
+          }
+        }
+        
+        // Vertical connectors with randomized positions
+        if (i > 0) {
+          const numVerticals = 2 + Math.floor(seededRandom(mazeSeed + i * 500) * 3)
+          for (let v = 0; v < numVerticals; v++) {
+            if (seededRandom(mazeSeed + i * 600 + v) > 0.4) {
+              const vx = x + mazeMargin + 30 + seededRandom(mazeSeed + i * 700 + v) * (mazeWidth - 60)
+              const prevLineY = mazeY + 30 + (i - 1) * lineSpacing
+              page.drawLine({ 
+                start: { x: vx, y: prevLineY }, 
+                end: { x: vx, y: lineY }, 
+                thickness: 2, 
+                color: rgb(0.3, 0.3, 0.3) 
+              })
+            }
+          }
+        }
+      }
+      
+      // Add some dead ends
+      for (let d = 0; d < 5; d++) {
+        const deadEndX = x + mazeMargin + 40 + seededRandom(mazeSeed + d * 900) * (mazeWidth - 80)
+        const deadEndY = mazeY + 50 + seededRandom(mazeSeed + d * 1000) * (mazeHeight - 100)
+        const length = 20 + seededRandom(mazeSeed + d * 1100) * 30
+        
+        if (seededRandom(mazeSeed + d * 1200) > 0.5) {
+          // Horizontal dead end
+          page.drawLine({ 
+            start: { x: deadEndX, y: deadEndY }, 
+            end: { x: deadEndX + length, y: deadEndY }, 
+            thickness: 2, 
+            color: rgb(0.3, 0.3, 0.3) 
+          })
+        } else {
+          // Vertical dead end
+          page.drawLine({ 
+            start: { x: deadEndX, y: deadEndY }, 
+            end: { x: deadEndX, y: deadEndY + length }, 
+            thickness: 2, 
+            color: rgb(0.3, 0.3, 0.3) 
+          })
         }
       }
       break
