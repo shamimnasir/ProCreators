@@ -614,10 +614,8 @@ function generateVisualPuzzles(theme, difficulty, ageGroup) {
   // Varied visual puzzle prompts
   const puzzleTypes = [
     'Which shape doesn\'t belong in the group?',
-    'Find the hidden object in the picture',
-    'Spot the difference between these images',
-    'What comes next in the pattern?',
     'How many triangles can you count?',
+    'What comes next in the pattern?',
     'Find the matching pair',
     'Which is the mirror image?',
     'Complete the pattern',
@@ -633,6 +631,7 @@ function generateVisualPuzzles(theme, difficulty, ageGroup) {
     type: 'visual-puzzles',
     puzzles: shuffled.slice(0, count),
     puzzleCount: count,
+    seed: Date.now() + Math.random() * 10000, // Unique seed for each generation
     instructions: 'Look carefully to solve these visual puzzles!'
   }
 }
