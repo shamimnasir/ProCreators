@@ -1555,6 +1555,10 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       const mazeWidth = width - mazeMargin * 2
       const mazeY = y + 40
       
+      // Use themed labels if available
+      const startLabel = content.startLabel || 'START'
+      const endLabel = content.endLabel || 'FINISH'
+      
       // Use seed for reproducible but unique maze
       const mazeSeed = content.seed || Date.now()
       const seededRandom = (seed) => {
@@ -1571,9 +1575,9 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
         borderWidth: 2 
       })
       
-      // Position labels inside the maze bounds
-      page.drawText('START', { x: x + mazeMargin + 10, y: mazeY + mazeHeight - 20, size: 10, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
-      page.drawText('FINISH', { x: x + mazeMargin + mazeWidth - 50, y: mazeY + 10, size: 10, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
+      // Position labels inside the maze bounds with themed text
+      page.drawText(startLabel, { x: x + mazeMargin + 10, y: mazeY + mazeHeight - 20, size: 9, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
+      page.drawText(endLabel, { x: x + mazeMargin + mazeWidth - 55, y: mazeY + 10, size: 9, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
       
       // Draw more complex maze structure
       const mazeLines = content.type === 'maze-complex' ? 14 : 10
