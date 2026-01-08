@@ -1300,27 +1300,185 @@ async function generateActivityPDF(body) {
     })
     
     let answerY = pageHeight - 100
-    for (let i = 0; i < Math.min(pages.length, 20); i++) {
+    const leftMargin = 50
+    const columnWidth = (pageWidth - 100) / 2
+    let currentColumn = 0
+    let columnStartY = answerY
+    
+    for (let i = 0; i < pages.length; i++) {
       const pageData = pages[i]
-      if (pageData.content && pageData.content.answer) {
-        page.drawText(`Page ${i + 1}: ${pageData.title}`, {
-          x: 50,
-          y: answerY,
-          size: 10,
-          font: boldFont,
-          color: rgb(0.3, 0.3, 0.3)
+      const content = pageData.content || {}
+      const pageNum = i + 2 // Page 1 is cover
+      
+      // Check if we need a new page
+      if (answerY < 100) {
+        if (currentColumn === 0) {
+          // Move to second column
+          currentColumn = 1
+          answerY = columnStartY
+        } else {
+          // Add new page
+          page = pdfDoc.addPage([pageWidth, pageHeight])
+          page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: rgb(0.98, 0.98, 0.98) })
+          page.drawText('ANSWER KEY (continued)', { x: pageWidth / 2 - 80, y: pageHeight - 60, size: 20, font: boldFont, color: pColor })
+          answerY = pageHeight - 100
+          columnStartY = answerY
+          currentColumn = 0
+        }
+      }
+      
+      const colX = leftMargin + currentColumn * columnWidth
+      
+      // Draw answers based on activity type
+      if (content.type === 'riddles' && content.riddles) {
+        page.drawText(`Page ${pageNum}: Riddles`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.riddles.forEach((r, idx) => {
+          if (answerY > 80) {
+            const answerText = `${idx + 1}. ${r.answer || 'N/A'}`
+            page.drawText(answerText.substring(0, 40), { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 12
+          }
         })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'word-search' && content.words) {
+        page.drawText(`Page ${pageNum}: Word Search`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        const wordsText = content.words.join(', ')
+        // Split long word list into multiple lines
+        const maxChars = 45
+        for (let c = 0; c < wordsText.length && answerY > 80; c += maxChars) {
+          page.drawText(wordsText.substring(c, c + maxChars), { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+          answerY -= 11
+        }
+        answerY -= 8
+      }
+      
+      else if (content.type === 'sequences' && content.sequences) {
+        page.drawText(`Page ${pageNum}: Number Sequences`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.sequences.forEach((s, idx) => {
+          if (answerY > 80) {
+            page.drawText(`${idx + 1}. Answer: ${s.answer}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 12
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'logic-puzzle' && content.puzzle) {
+        page.drawText(`Page ${pageNum}: Logic Puzzle`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        const items = content.puzzle.items || []
+        page.drawText(`Order: ${items.join(' → ')}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
         answerY -= 20
+      }
+      
+      else if (content.type === 'crossword' && content.clues) {
+        page.drawText(`Page ${pageNum}: Crossword`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        const across = content.clues.across || []
+        const down = content.clues.down || []
+        across.forEach(clue => {
+          if (answerY > 80) {
+            page.drawText(`${clue.number} Across: ${clue.answer}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        down.forEach(clue => {
+          if (answerY > 80) {
+            page.drawText(`${clue.number} Down: ${clue.answer}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'math' && content.problems) {
+        page.drawText(`Page ${pageNum}: Math Problems`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.problems.forEach((p, idx) => {
+          if (answerY > 80) {
+            page.drawText(`${idx + 1}. ${p.problem} = ${p.answer}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'trivia' && content.questions) {
+        page.drawText(`Page ${pageNum}: Trivia`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.questions.forEach((q, idx) => {
+          if (answerY > 80) {
+            page.drawText(`${idx + 1}. ${q.answer || q.correct || 'N/A'}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'sudoku') {
+        page.drawText(`Page ${pageNum}: Sudoku - Solution available separately`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+        answerY -= 18
+      }
+      
+      else if (content.type === 'spot-difference') {
+        page.drawText(`Page ${pageNum}: Spot the Differences`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        page.drawText('1. Window shape (square vs round)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('2. Chimney (present vs missing)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('3. Sun size (larger vs smaller)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('4. Tree height (taller vs shorter)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('5. Flowers (3 vs 2)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('6. Bird (present vs missing)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('7. Clouds (1 vs 2)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 11
+        page.drawText('8. Fence posts (4 vs 3)', { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 18
+      }
+      
+      else if (content.type === 'maze' || content.type === 'maze-complex') {
+        page.drawText(`Page ${pageNum}: Maze - Find path from ${content.startLabel || 'START'} to ${content.endLabel || 'FINISH'}`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+        answerY -= 18
+      }
+      
+      else if (content.type === 'memory') {
+        page.drawText(`Page ${pageNum}: Memory Match`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        const items = content.items || []
+        page.drawText(`Pairs: ${items.join(', ')}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        answerY -= 18
+      }
+      
+      else if (content.type === 'visual-puzzles') {
+        page.drawText(`Page ${pageNum}: Visual Puzzles - Answers vary`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+        answerY -= 18
+      }
+      
+      else if (content.type === 'connect-dots' || content.type === 'drawing-prompts' || content.type === 'coloring') {
+        // Skip creative activities
       }
     }
     
-    page.drawText('Answers vary for creative activities!', {
-      x: 50,
-      y: answerY - 20,
-      size: 10,
-      font,
-      color: rgb(0.5, 0.5, 0.5)
-    })
+    // Footer note
+    if (answerY > 60) {
+      page.drawText('Note: Creative activities like coloring, drawing, and connect-the-dots have no fixed answers.', {
+        x: leftMargin,
+        y: 40,
+        size: 8,
+        font,
+        color: rgb(0.5, 0.5, 0.5)
+      })
+    }
   }
   
   // Save PDF
