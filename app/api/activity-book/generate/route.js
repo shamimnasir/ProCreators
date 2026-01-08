@@ -1740,26 +1740,137 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'spot-difference':
-      // Draw two boxes side by side with proper spacing for labels
+      // Draw two boxes side by side with actual pictures
       const boxW = (width - 30) / 2
-      const boxTopY = y + height - 50 // Leave space for labels above boxes
-      const boxHeight = height - 80 // Reduced height to accommodate label
+      const boxHeight = height - 80
+      const boxAX = x + 5
+      const boxBX = x + boxW + 15
+      const boxBaseY = y + 30
       
-      // Draw boxes lower to make room for labels
-      page.drawRectangle({ x: x + 5, y: y + 30, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
-      page.drawRectangle({ x: x + boxW + 15, y: y + 30, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      // Draw boxes
+      page.drawRectangle({ x: boxAX, y: boxBaseY, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      page.drawRectangle({ x: boxBX, y: boxBaseY, width: boxW, height: boxHeight, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
       
-      // Labels positioned above the boxes with adequate spacing
-      page.drawText('Picture A', { x: x + boxW / 2 - 25, y: y + 30 + boxHeight + 10, size: 11, font: boldFont, color: pColor })
-      page.drawText('Picture B', { x: x + boxW + 15 + boxW / 2 - 25, y: y + 30 + boxHeight + 10, size: 11, font: boldFont, color: pColor })
+      // Labels
+      page.drawText('Picture A', { x: boxAX + boxW / 2 - 25, y: boxBaseY + boxHeight + 10, size: 11, font: boldFont, color: pColor })
+      page.drawText('Picture B', { x: boxBX + boxW / 2 - 25, y: boxBaseY + boxHeight + 10, size: 11, font: boldFont, color: pColor })
       
-      // Draw some shapes in both boxes
-      for (let i = 0; i < 5; i++) {
-        const shapeY = y + 60 + i * ((boxHeight - 40) / 5)
-        page.drawCircle({ x: x + 60, y: shapeY, size: 15, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
-        page.drawCircle({ x: x + boxW + 70, y: shapeY, size: 15 + (i % 2 === 0 ? 3 : 0), borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1 })
+      // Draw a house scene in both boxes with differences
+      const houseY = boxBaseY + 60
+      const houseW = 80
+      const houseH = 60
+      const houseAX = boxAX + 30
+      const houseBX = boxBX + 30
+      
+      // House A - base
+      page.drawRectangle({ x: houseAX, y: houseY, width: houseW, height: houseH, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      // House A - roof (triangle)
+      page.drawLine({ start: { x: houseAX, y: houseY + houseH }, end: { x: houseAX + houseW / 2, y: houseY + houseH + 40 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+      page.drawLine({ start: { x: houseAX + houseW / 2, y: houseY + houseH + 40 }, end: { x: houseAX + houseW, y: houseY + houseH }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+      // House A - door
+      page.drawRectangle({ x: houseAX + 30, y: houseY, width: 20, height: 35, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House A - window (left) - DIFFERENCE 1: Square window
+      page.drawRectangle({ x: houseAX + 10, y: houseY + 35, width: 15, height: 15, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House A - window (right)
+      page.drawRectangle({ x: houseAX + 55, y: houseY + 35, width: 15, height: 15, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House A - chimney - DIFFERENCE 2: Has chimney
+      page.drawRectangle({ x: houseAX + 60, y: houseY + houseH + 15, width: 12, height: 25, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      
+      // House A - sun - DIFFERENCE 3: Larger sun
+      page.drawCircle({ x: houseAX + houseW + 35, y: houseY + houseH + 50, size: 18, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      // Sun rays
+      for (let r = 0; r < 8; r++) {
+        const angle = (r * Math.PI * 2) / 8
+        const sx = houseAX + houseW + 35 + Math.cos(angle) * 22
+        const sy = houseY + houseH + 50 + Math.sin(angle) * 22
+        const ex = houseAX + houseW + 35 + Math.cos(angle) * 28
+        const ey = houseY + houseH + 50 + Math.sin(angle) * 28
+        page.drawLine({ start: { x: sx, y: sy }, end: { x: ex, y: ey }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
       }
-      page.drawText(`Find ${content.differences || 10} differences!`, { x: centerX - 50, y: y + 12, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // House A - tree - DIFFERENCE 4: Taller tree
+      page.drawRectangle({ x: houseAX + houseW + 20, y: houseY, width: 10, height: 45, color: rgb(0.4, 0.3, 0.2) })
+      page.drawCircle({ x: houseAX + houseW + 25, y: houseY + 55, size: 22, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      
+      // House A - flowers - DIFFERENCE 5: 3 flowers
+      for (let f = 0; f < 3; f++) {
+        const fx = houseAX + 10 + f * 25
+        page.drawLine({ start: { x: fx, y: houseY }, end: { x: fx, y: houseY - 15 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+        page.drawCircle({ x: fx, y: houseY - 18, size: 5, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      }
+      
+      // House A - bird - DIFFERENCE 6: Bird present
+      page.drawLine({ start: { x: houseAX + 20, y: houseY + houseH + 60 }, end: { x: houseAX + 25, y: houseY + houseH + 65 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+      page.drawLine({ start: { x: houseAX + 25, y: houseY + houseH + 65 }, end: { x: houseAX + 30, y: houseY + houseH + 60 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+      
+      // House A - cloud - DIFFERENCE 7: One cloud
+      page.drawCircle({ x: houseAX + 5, y: houseY + houseH + 70, size: 10, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseAX + 15, y: houseY + houseH + 73, size: 12, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseAX + 27, y: houseY + houseH + 70, size: 10, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      
+      // House A - fence posts - DIFFERENCE 8: 4 posts
+      for (let fp = 0; fp < 4; fp++) {
+        page.drawRectangle({ x: houseAX + houseW + 50 + fp * 12, y: houseY, width: 4, height: 25, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      }
+      page.drawLine({ start: { x: houseAX + houseW + 50, y: houseY + 18 }, end: { x: houseAX + houseW + 90, y: houseY + 18 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+      
+      // ===== PICTURE B - WITH DIFFERENCES =====
+      
+      // House B - base (same)
+      page.drawRectangle({ x: houseBX, y: houseY, width: houseW, height: houseH, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      // House B - roof (same)
+      page.drawLine({ start: { x: houseBX, y: houseY + houseH }, end: { x: houseBX + houseW / 2, y: houseY + houseH + 40 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+      page.drawLine({ start: { x: houseBX + houseW / 2, y: houseY + houseH + 40 }, end: { x: houseBX + houseW, y: houseY + houseH }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+      // House B - door (same)
+      page.drawRectangle({ x: houseBX + 30, y: houseY, width: 20, height: 35, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House B - window (left) - DIFFERENCE 1: Round window
+      page.drawCircle({ x: houseBX + 17, y: houseY + 42, size: 8, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House B - window (right) (same)
+      page.drawRectangle({ x: houseBX + 55, y: houseY + 35, width: 15, height: 15, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      // House B - NO chimney - DIFFERENCE 2
+      
+      // House B - sun - DIFFERENCE 3: Smaller sun
+      page.drawCircle({ x: houseBX + houseW + 35, y: houseY + houseH + 50, size: 12, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      // Sun rays (fewer)
+      for (let r = 0; r < 6; r++) {
+        const angle = (r * Math.PI * 2) / 6
+        const sx = houseBX + houseW + 35 + Math.cos(angle) * 15
+        const sy = houseY + houseH + 50 + Math.sin(angle) * 15
+        const ex = houseBX + houseW + 35 + Math.cos(angle) * 20
+        const ey = houseY + houseH + 50 + Math.sin(angle) * 20
+        page.drawLine({ start: { x: sx, y: sy }, end: { x: ex, y: ey }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+      }
+      
+      // House B - tree - DIFFERENCE 4: Shorter tree
+      page.drawRectangle({ x: houseBX + houseW + 20, y: houseY, width: 10, height: 30, color: rgb(0.4, 0.3, 0.2) })
+      page.drawCircle({ x: houseBX + houseW + 25, y: houseY + 40, size: 18, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+      
+      // House B - flowers - DIFFERENCE 5: 2 flowers
+      for (let f = 0; f < 2; f++) {
+        const fx = houseBX + 10 + f * 25
+        page.drawLine({ start: { x: fx, y: houseY }, end: { x: fx, y: houseY - 15 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+        page.drawCircle({ x: fx, y: houseY - 18, size: 5, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      }
+      
+      // House B - NO bird - DIFFERENCE 6
+      
+      // House B - clouds - DIFFERENCE 7: Two clouds
+      page.drawCircle({ x: houseBX + 5, y: houseY + houseH + 70, size: 10, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseBX + 15, y: houseY + houseH + 73, size: 12, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseBX + 27, y: houseY + houseH + 70, size: 10, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      // Second cloud
+      page.drawCircle({ x: houseBX + 50, y: houseY + houseH + 65, size: 8, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseBX + 58, y: houseY + houseH + 68, size: 10, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawCircle({ x: houseBX + 68, y: houseY + houseH + 65, size: 8, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      
+      // House B - fence posts - DIFFERENCE 8: 3 posts
+      for (let fp = 0; fp < 3; fp++) {
+        page.drawRectangle({ x: houseBX + houseW + 50 + fp * 12, y: houseY, width: 4, height: 25, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1 })
+      }
+      page.drawLine({ start: { x: houseBX + houseW + 50, y: houseY + 18 }, end: { x: houseBX + houseW + 78, y: houseY + 18 }, thickness: 1, color: rgb(0.3, 0.3, 0.3) })
+      
+      // Instruction
+      page.drawText(`Can you find all ${content.differences || 8} differences?`, { x: centerX - 70, y: y + 12, size: 10, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
       break
       
     case 'connect-dots':
