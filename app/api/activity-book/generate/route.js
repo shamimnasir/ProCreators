@@ -462,64 +462,177 @@ function generateConnectColor(theme, difficulty, ageGroup) {
 }
 
 function generateLogicPuzzle(theme, difficulty, ageGroup) {
+  // Different logic puzzles based on theme and randomization
+  const puzzleVariants = {
+    food: [
+      { clues: ['Pizza is not the first meal', 'Salad comes before dessert', 'Soup is the first course'], items: ['Soup', 'Salad', 'Pizza', 'Dessert'] },
+      { clues: ['The apple is red', 'The banana is not next to the orange', 'The grape is last'], items: ['Apple', 'Banana', 'Orange', 'Grape'] },
+      { clues: ['Breakfast comes first', 'Dinner is after lunch', 'Snack is between lunch and dinner'], items: ['Breakfast', 'Lunch', 'Snack', 'Dinner'] }
+    ],
+    animals: [
+      { clues: ['The lion is not first', 'The elephant is after the zebra', 'The giraffe is last'], items: ['Zebra', 'Lion', 'Elephant', 'Giraffe'] },
+      { clues: ['The fish swims before the dolphin', 'The whale is the biggest', 'The shark is not last'], items: ['Fish', 'Dolphin', 'Shark', 'Whale'] }
+    ],
+    default: [
+      { clues: ['Red is not first', 'Blue comes before green', 'Yellow is last'], items: ['Red', 'Blue', 'Green', 'Yellow'] },
+      { clues: ['Circle is before square', 'Triangle is not last', 'Star is after triangle'], items: ['Circle', 'Square', 'Triangle', 'Star'] },
+      { clues: ['A comes first', 'C is not next to B', 'D is last'], items: ['A', 'B', 'C', 'D'] }
+    ]
+  }
+  
+  const variants = puzzleVariants[theme] || puzzleVariants.default
+  const puzzle = variants[Math.floor(Math.random() * variants.length)]
+  
   return {
     type: 'logic-puzzle',
-    puzzle: {
-      clues: ['The red car is not first', 'The blue car is before the green car'],
-      items: ['Red Car', 'Blue Car', 'Green Car']
-    },
+    puzzle,
     instructions: 'Use the clues to figure out the correct order!'
   }
 }
 
 function generateRiddles(theme, difficulty, ageGroup) {
-  const riddles = [
+  // Large pool of riddles to randomize
+  const allRiddles = [
     { riddle: "I have hands but can't clap. What am I?", answer: 'A clock' },
     { riddle: "What has ears but cannot hear?", answer: 'Corn' },
-    { riddle: "What gets wetter the more it dries?", answer: 'A towel' }
+    { riddle: "What gets wetter the more it dries?", answer: 'A towel' },
+    { riddle: "What has a head and a tail but no body?", answer: 'A coin' },
+    { riddle: "What can you catch but not throw?", answer: 'A cold' },
+    { riddle: "What goes up but never comes down?", answer: 'Your age' },
+    { riddle: "What has keys but no locks?", answer: 'A piano' },
+    { riddle: "What has words but never speaks?", answer: 'A book' },
+    { riddle: "What has a neck but no head?", answer: 'A bottle' },
+    { riddle: "What can travel around the world while staying in a corner?", answer: 'A stamp' },
+    { riddle: "What has many teeth but cannot bite?", answer: 'A comb' },
+    { riddle: "What is always in front of you but can't be seen?", answer: 'The future' },
+    { riddle: "What can fill a room but takes up no space?", answer: 'Light' },
+    { riddle: "What has legs but doesn't walk?", answer: 'A table' },
+    { riddle: "What is full of holes but still holds water?", answer: 'A sponge' },
+    { riddle: "What goes through cities and fields but never moves?", answer: 'A road' },
+    { riddle: "What belongs to you but others use it more?", answer: 'Your name' },
+    { riddle: "What breaks but never falls, and falls but never breaks?", answer: 'Day and night' }
   ]
+  
+  // Shuffle and pick 3-5 riddles based on difficulty
+  const shuffled = allRiddles.sort(() => Math.random() - 0.5)
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+  const selectedRiddles = shuffled.slice(0, count)
   
   return {
     type: 'riddles',
-    riddles,
+    riddles: selectedRiddles,
     instructions: 'Can you solve these brain-teasing riddles?'
   }
 }
 
 function generateComplexMaze(theme, difficulty, ageGroup) {
+  // Generate unique maze parameters
+  const mazeId = Math.floor(Math.random() * 1000)
+  const sizes = { easy: 15, medium: 25, hard: 35 }
+  
   return {
     type: 'maze-complex',
-    size: 30,
-    multiPath: true,
-    instructions: 'Find the one true path through this challenging maze!'
+    size: sizes[difficulty] || 25,
+    mazeId, // Unique ID for this maze
+    multiPath: difficulty === 'hard',
+    seed: Date.now() + Math.random(), // Unique seed for maze generation
+    instructions: difficulty === 'hard' 
+      ? 'Find the one true path through this challenging maze!' 
+      : 'Help find the way through the maze!'
   }
 }
 
 function generateMemoryGame(theme, difficulty, ageGroup) {
+  // Theme-specific items for memory cards
+  const themeItems = {
+    food: ['Pizza', 'Apple', 'Cake', 'Burger', 'Ice Cream', 'Cookie', 'Banana', 'Carrot', 'Donut', 'Sandwich'],
+    animals: ['Cat', 'Dog', 'Lion', 'Bird', 'Fish', 'Bear', 'Elephant', 'Tiger', 'Rabbit', 'Horse'],
+    nature: ['Tree', 'Flower', 'Sun', 'Cloud', 'Rain', 'Mountain', 'River', 'Leaf', 'Star', 'Moon'],
+    ocean: ['Fish', 'Whale', 'Crab', 'Shell', 'Wave', 'Shark', 'Dolphin', 'Octopus', 'Coral', 'Starfish'],
+    space: ['Star', 'Moon', 'Rocket', 'Planet', 'Sun', 'Comet', 'Alien', 'Satellite', 'Astronaut', 'UFO'],
+    vehicles: ['Car', 'Bus', 'Plane', 'Train', 'Boat', 'Bike', 'Truck', 'Helicopter', 'Rocket', 'Submarine'],
+    default: ['Star', 'Heart', 'Circle', 'Square', 'Triangle', 'Diamond', 'Moon', 'Sun', 'Flower', 'Tree']
+  }
+  
+  const items = themeItems[theme] || themeItems.default
+  const pairCount = difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8
+  
+  // Shuffle and select items
+  const shuffledItems = items.sort(() => Math.random() - 0.5).slice(0, pairCount)
+  
   return {
     type: 'memory',
-    pairs: 8,
+    pairs: pairCount,
+    items: shuffledItems, // Actual items to display on cards
     theme,
-    instructions: 'Cut out these cards and play memory match!'
+    instructions: 'Cut out these cards and play memory match! Match the pairs!'
   }
 }
 
 function generateSequences(theme, difficulty, ageGroup) {
+  // Generate varied number sequences
+  const sequenceGenerators = [
+    // Add by 2
+    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+2, s+4, s+6, '?'], answer: s+8 } },
+    // Add by 3
+    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+3, s+6, s+9, '?'], answer: s+12 } },
+    // Add by 5
+    () => { const s = Math.floor(Math.random() * 3) * 5; return { pattern: [s, s+5, s+10, s+15, '?'], answer: s+20 } },
+    // Multiply by 2
+    () => { const s = Math.floor(Math.random() * 3) + 1; return { pattern: [s, s*2, s*4, s*8, '?'], answer: s*16 } },
+    // Add increasing (1, 2, 3...)
+    () => { const s = Math.floor(Math.random() * 5) + 1; return { pattern: [s, s+1, s+3, s+6, '?'], answer: s+10 } },
+    // Odd numbers
+    () => { const s = Math.floor(Math.random() * 3) * 2 + 1; return { pattern: [s, s+2, s+4, s+6, '?'], answer: s+8 } },
+    // Fibonacci-like
+    () => { return { pattern: [1, 1, 2, 3, '?'], answer: 5 } },
+    // Square numbers
+    () => { return { pattern: [1, 4, 9, 16, '?'], answer: 25 } }
+  ]
+  
+  // Generate unique sequences
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+  const sequences = []
+  const usedGenerators = new Set()
+  
+  while (sequences.length < count && usedGenerators.size < sequenceGenerators.length) {
+    const idx = Math.floor(Math.random() * sequenceGenerators.length)
+    if (!usedGenerators.has(idx)) {
+      usedGenerators.add(idx)
+      sequences.push(sequenceGenerators[idx]())
+    }
+  }
+  
   return {
     type: 'sequences',
-    sequences: [
-      { pattern: [2, 4, 6, 8, '?'], answer: 10 },
-      { pattern: [1, 3, 5, 7, '?'], answer: 9 },
-      { pattern: [5, 10, 15, 20, '?'], answer: 25 }
-    ],
+    sequences,
     instructions: 'Find the pattern and fill in the missing number!'
   }
 }
 
 function generateVisualPuzzles(theme, difficulty, ageGroup) {
+  // Varied visual puzzle prompts
+  const puzzleTypes = [
+    'Which shape doesn\'t belong in the group?',
+    'Find the hidden object in the picture',
+    'Spot the difference between these images',
+    'What comes next in the pattern?',
+    'How many triangles can you count?',
+    'Find the matching pair',
+    'Which is the mirror image?',
+    'Complete the pattern',
+    'Find the odd one out',
+    'Which shadow matches the object?'
+  ]
+  
+  // Shuffle and select puzzles
+  const shuffled = puzzleTypes.sort(() => Math.random() - 0.5)
+  const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
+  
   return {
     type: 'visual-puzzles',
-    puzzles: ['Which shape doesn\'t belong?', 'Find the hidden object'],
+    puzzles: shuffled.slice(0, count),
+    puzzleCount: count,
     instructions: 'Look carefully to solve these visual puzzles!'
   }
 }
