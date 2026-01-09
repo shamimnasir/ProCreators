@@ -3569,23 +3569,61 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'logic-puzzle':
       const puzzle = content.puzzle || { clues: [], items: [] }
-      let logicY = y + height - 50
+      let logicY = y + height - 40
       
-      page.drawText('Use the clues to solve the puzzle:', { x: x + 20, y: logicY, size: 11, font: boldFont, color: pColor })
+      page.drawText('Logic Puzzle - Use the clues to solve!', { x: x + 20, y: logicY, size: 11, font: boldFont, color: pColor })
       logicY -= 25
       
-      ;(puzzle.clues || []).forEach((clue, idx) => {
-        if (logicY > y + 150) {
-          page.drawText(`${idx + 1}. ${stripEmojis(clue)}`, { x: x + 30, y: logicY, size: 10, font, color: rgb(0.3, 0.3, 0.3) })
-          logicY -= 20
+      // Draw clues
+      ;(puzzle.clues || []).slice(0, 4).forEach((clue, idx) => {
+        if (logicY > y + 180) {
+          const clueText = stripEmojis(clue).substring(0, 60)
+          page.drawText(`${idx + 1}. ${clueText}`, { x: x + 25, y: logicY, size: 9, font, color: rgb(0.3, 0.3, 0.3) })
+          logicY -= 18
         }
       })
       
-      logicY -= 20
-      page.drawText('Items:', { x: x + 20, y: logicY, size: 10, font: boldFont, color: pColor })
-      logicY -= 15
-      ;(puzzle.items || []).forEach((item, idx) => {
-        page.drawText(`${idx + 1}. ${stripEmojis(item)}: ____`, { x: x + 30, y: logicY - idx * 20, size: 10, font, color: rgb(0.3, 0.3, 0.3) })
+      // Draw logic grid for solving
+      const gridItems = (puzzle.items || ['Item A', 'Item B', 'Item C']).slice(0, 4)
+      const categories = ['Option 1', 'Option 2', 'Option 3', 'Option 4'].slice(0, gridItems.length)
+      const lgCellSize = Math.min(35, (width - 120) / (gridItems.length + 1))
+      const lgStartX = x + 100
+      const lgStartY = logicY - 20
+      
+      // Draw column headers (categories)
+      categories.forEach((cat, idx) => {
+        const headerX = lgStartX + idx * lgCellSize + 5
+        page.drawText(cat.substring(0, 6), { x: headerX, y: lgStartY, size: 7, font, color: rgb(0.3, 0.3, 0.3) })
+      })
+      
+      // Draw row headers (items) and grid
+      gridItems.forEach((item, rowIdx) => {
+        const rowY = lgStartY - 15 - (rowIdx + 1) * lgCellSize
+        
+        // Row header (item name)
+        const itemText = stripEmojis(item).substring(0, 12)
+        page.drawText(itemText, { x: x + 25, y: rowY + lgCellSize / 3, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        
+        // Draw cells
+        categories.forEach((cat, colIdx) => {
+          page.drawRectangle({
+            x: lgStartX + colIdx * lgCellSize,
+            y: rowY,
+            width: lgCellSize,
+            height: lgCellSize,
+            borderColor: rgb(0.4, 0.4, 0.4),
+            borderWidth: 1
+          })
+        })
+      })
+      
+      // Add answer section at bottom
+      page.drawText('Answers:', { x: x + 20, y: y + 50, size: 10, font: boldFont, color: pColor })
+      gridItems.forEach((item, idx) => {
+        const ansY = y + 35 - idx * 15
+        if (ansY > y + 5) {
+          page.drawText(`${stripEmojis(item).substring(0, 10)}: _____________`, { x: x + 25, y: ansY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
+        }
       })
       break
       
