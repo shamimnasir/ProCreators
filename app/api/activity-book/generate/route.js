@@ -1333,7 +1333,113 @@ function getThemedContent(theme) {
     }
   }
   
-  return THEMED_CONTENT.default
+  // For custom themes, return default but mark it for AI generation
+  return { ...THEMED_CONTENT.default, customTheme: theme, needsAIGeneration: true }
+}
+
+// Cache for AI-generated content to avoid regenerating for same theme
+const aiContentCache = new Map()
+
+// Generate AI-powered content for custom themes
+async function generateAIThemedContent(theme) {
+  // Check cache first
+  if (aiContentCache.has(theme?.toLowerCase())) {
+    return aiContentCache.get(theme.toLowerCase())
+  }
+  
+  console.log(`Generating AI content for custom theme: ${theme}`)
+  
+  try {
+    const prompt = `Generate activity book content for the theme "${theme}". Return ONLY a valid JSON object with this exact structure, no markdown or extra text:
+{
+  "riddles": [
+    {"riddle": "A riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Another riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Third riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Fourth riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Fifth riddle about ${theme}", "answer": "The answer"}
+  ],
+  "triviaQuestions": [
+    {"q": "Question about ${theme}?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]},
+    {"q": "Another question?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]},
+    {"q": "Third question?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]}
+  ],
+  "wordSearchWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8"],
+  "memoryItems": ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8"],
+  "mazeStart": "START_LABEL",
+  "mazeEnd": "END_LABEL",
+  "mazeInstruction": "Help find the way through the ${theme} maze!",
+  "wouldYouRather": [
+    "Would you rather question 1 about ${theme}?",
+    "Would you rather question 2 about ${theme}?",
+    "Would you rather question 3 about ${theme}?"
+  ],
+  "hangmanWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
+  "drawingPrompts": [
+    "Draw prompt 1 about ${theme}",
+    "Draw prompt 2 about ${theme}",
+    "Draw prompt 3 about ${theme}"
+  ],
+  "matchingPairs": [
+    ["Left1", "Right1"],
+    ["Left2", "Right2"],
+    ["Left3", "Right3"],
+    ["Left4", "Right4"]
+  ],
+  "spellingWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
+  "tracingWords": ["WORD1", "WORD2", "WORD3", "WORD4"]
+}
+
+Make all content appropriate for children, educational, fun, and specifically related to "${theme}".`
+
+    const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
+    
+    if (result) {
+      // Clean up the result - remove markdown code blocks if present
+      let cleanResult = result.trim()
+      if (cleanResult.startsWith('```json')) {
+        cleanResult = cleanResult.replace(/^```json\n?/, '').replace(/\n?```$/, '')
+      } else if (cleanResult.startsWith('```')) {
+        cleanResult = cleanResult.replace(/^```\n?/, '').replace(/\n?```$/, '')
+      }
+      
+      const aiContent = JSON.parse(cleanResult)
+      
+      // Build themed content structure
+      const generatedContent = {
+        riddles: aiContent.riddles || THEMED_CONTENT.default.riddles,
+        triviaQuestions: aiContent.triviaQuestions || [],
+        logicPuzzles: THEMED_CONTENT.default.logicPuzzles, // Keep default logic puzzles
+        memoryItems: aiContent.memoryItems || THEMED_CONTENT.default.memoryItems,
+        wordSearchWords: (aiContent.wordSearchWords || THEMED_CONTENT.default.wordSearchWords).map(w => w.toUpperCase().replace(/[^A-Z]/g, '')),
+        mazeTheme: {
+          start: aiContent.mazeStart || 'START',
+          end: aiContent.mazeEnd || 'FINISH',
+          instruction: aiContent.mazeInstruction || `Find your way through the ${theme} maze!`
+        },
+        wouldYouRather: aiContent.wouldYouRather || [],
+        hangmanWords: (aiContent.hangmanWords || []).map(w => w.toUpperCase()),
+        drawingPrompts: aiContent.drawingPrompts || [],
+        matchingPairs: aiContent.matchingPairs || [],
+        spellingWords: (aiContent.spellingWords || []).map(w => w.toUpperCase()),
+        tracingWords: aiContent.tracingWords || [],
+        visualContext: theme,
+        customTheme: theme,
+        isAIGenerated: true
+      }
+      
+      // Cache the result
+      aiContentCache.set(theme.toLowerCase(), generatedContent)
+      console.log(`AI content generated and cached for theme: ${theme}`)
+      
+      return generatedContent
+    }
+  } catch (error) {
+    console.error(`Error generating AI content for theme ${theme}:`, error)
+  }
+  
+  // Fallback to default with theme name
+  return { ...THEMED_CONTENT.default, customTheme: theme, visualContext: theme }
 }
 
 function generateLogicPuzzle(theme, difficulty, ageGroup) {
