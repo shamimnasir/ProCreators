@@ -759,7 +759,26 @@ function generateWouldYouRather(theme, difficulty, ageGroup) {
   }
 }
 
-function generateTrivia(theme, difficulty, ageGroup) {
+async function generateTrivia(theme, difficulty, ageGroup) {
+  // Check for AI-generated content first
+  let aiContent = null
+  const themedContentCheck = getThemedContent(theme)
+  if (themedContentCheck.needsAIGeneration && theme) {
+    aiContent = await generateAIThemedContent(theme)
+  }
+  
+  // If AI content has trivia questions, use those
+  if (aiContent && aiContent.triviaQuestions && aiContent.triviaQuestions.length > 0) {
+    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+    const questions = [...aiContent.triviaQuestions].sort(() => Math.random() - 0.5).slice(0, count)
+    return {
+      type: 'trivia',
+      questions: questions.map(q => ({ ...q, correct: q.a })),
+      theme,
+      instructions: `Test your ${theme || ''} knowledge! Circle the correct answer.`
+    }
+  }
+  
   const themedTrivia = {
     sports: [
       { q: 'How many players are on a soccer team?', a: '11', options: ['9', '11', '13'] },
