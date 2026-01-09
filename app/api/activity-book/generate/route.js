@@ -668,6 +668,16 @@ function generatePatternActivity(theme, difficulty, ageGroup) {
 
 async function generateWouldYouRather(theme, difficulty, ageGroup) {
   const themedQuestions = {
+    water: [
+      'Would you rather swim like a fish or surf the biggest waves?',
+      'Would you rather go kayaking down rapids or sailing across the ocean?',
+      'Would you rather water ski or wakeboard?',
+      'Would you rather dive in a deep pool or splash in water fountains?',
+      'Would you rather be a lifeguard or a swimming coach?',
+      'Would you rather explore underwater caves or swim with dolphins?',
+      'Would you rather have a pool party or a beach day?',
+      'Would you rather do cannonballs or belly flops?'
+    ],
     sports: [
       'Would you rather be a famous soccer player or a famous basketball player?',
       'Would you rather win an Olympic gold medal or a World Cup trophy?',
@@ -759,12 +769,20 @@ async function generateWouldYouRather(theme, difficulty, ageGroup) {
     }
   }
   
-  // Find matching theme from predefined
+  // Find matching theme from predefined - prioritize specific themes first
   let questions = themedQuestions.animals
   const normalizedTheme = theme?.toLowerCase() || ''
-  for (const [key, value] of Object.entries(themedQuestions)) {
-    if (normalizedTheme.includes(key)) {
-      questions = value
+  
+  // Priority order for matching - water/ocean should come before sports
+  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
+  
+  for (const priority of priorityOrder) {
+    if (normalizedTheme.includes(priority)) {
+      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
+        questions = themedQuestions.water
+      } else if (themedQuestions[priority]) {
+        questions = themedQuestions[priority]
+      }
       break
     }
   }
