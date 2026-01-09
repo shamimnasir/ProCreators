@@ -282,9 +282,23 @@ function generateCrossword(theme, difficulty, ageGroup) {
 }
 
 function generateSudoku(theme, difficulty, ageGroup) {
-  // For kids, use smaller grids or picture sudoku
+  // For kids, use smaller grids with themed items instead of numbers
   const isKids = ['toddler', 'preschool', 'early'].includes(ageGroup)
   const size = isKids ? 4 : (difficulty === 'easy' ? 6 : 9)
+  
+  // Theme-specific symbols for kids sudoku
+  const themedSymbols = {
+    sports: ['Ball', 'Goal', 'Star', 'Cup'],
+    food: ['Apple', 'Cake', 'Pizza', 'Cookie'],
+    animals: ['Cat', 'Dog', 'Bird', 'Fish'],
+    ocean: ['Fish', 'Crab', 'Star', 'Shell'],
+    space: ['Star', 'Moon', 'Sun', 'Rocket'],
+    dinosaurs: ['Dino', 'Egg', 'Bone', 'Leaf'],
+    vehicles: ['Car', 'Bus', 'Boat', 'Plane'],
+    nature: ['Flower', 'Tree', 'Sun', 'Cloud']
+  }
+  
+  const symbols = isKids ? (themedSymbols[theme?.toLowerCase()] || ['A', 'B', 'C', 'D']) : null
   
   // Generate a valid sudoku grid (simplified)
   const grid = Array(size).fill(null).map(() => Array(size).fill(0))
@@ -293,9 +307,10 @@ function generateSudoku(theme, difficulty, ageGroup) {
     type: 'sudoku',
     grid,
     size,
-    theme: isKids ? theme : 'numbers',
+    symbols,
+    theme,
     instructions: isKids 
-      ? `Fill in each row and column with different ${theme} pictures!`
+      ? `Fill in each row and column with different ${theme || ''} items: ${symbols?.join(', ')}!`
       : `Fill in the grid so each row, column, and box contains the numbers 1-${size}.`
   }
 }
