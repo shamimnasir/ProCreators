@@ -911,17 +911,6 @@ async function generateHangman(theme, difficulty, ageGroup) {
     instructions: `Guess the ${theme || ''} words before the hangman is complete!`
   }
 }
-  
-  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
-  const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
-  
-  return {
-    type: 'hangman',
-    words: selectedWords,
-    theme,
-    instructions: `Guess the ${theme || ''} words before the hangman is complete!`
-  }
-}
 
 async function generateBingo(theme, difficulty, ageGroup) {
   let themedContent = getThemedContent(theme)
@@ -934,7 +923,7 @@ async function generateBingo(theme, difficulty, ageGroup) {
   return {
     type: 'bingo',
     cards: difficulty === 'easy' ? 2 : difficulty === 'hard' ? 6 : 4,
-    items: themedContent.memoryItems || ['Star', 'Heart', 'Moon', 'Sun'],
+    items: themedContent.bingoItems || themedContent.memoryItems || ['Star', 'Heart', 'Moon', 'Sun'],
     theme,
     instructions: `Play ${theme || ''} Bingo with friends and family!`
   }
