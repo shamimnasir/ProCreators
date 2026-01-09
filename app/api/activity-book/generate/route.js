@@ -834,35 +834,148 @@ function generateTravelGames(theme, difficulty, ageGroup) {
 }
 
 function generateColorByNumber(theme, difficulty, ageGroup) {
+  // Theme-specific color schemes
+  const themeColors = {
+    sports: { 1: 'Green (Field)', 2: 'White (Ball)', 3: 'Red (Jersey)', 4: 'Blue (Sky)', 5: 'Brown (Bat)', 6: 'Yellow (Trophy)' },
+    food: { 1: 'Red (Tomato)', 2: 'Yellow (Cheese)', 3: 'Green (Lettuce)', 4: 'Brown (Bread)', 5: 'Orange (Carrot)', 6: 'Pink (Strawberry)' },
+    animals: { 1: 'Brown (Fur)', 2: 'Green (Grass)', 3: 'Blue (Water)', 4: 'Yellow (Sun)', 5: 'Gray (Elephant)', 6: 'Orange (Tiger)' },
+    ocean: { 1: 'Blue (Water)', 2: 'Green (Seaweed)', 3: 'Orange (Fish)', 4: 'Yellow (Sand)', 5: 'Purple (Coral)', 6: 'Gray (Dolphin)' },
+    space: { 1: 'Black (Space)', 2: 'Yellow (Stars)', 3: 'Red (Mars)', 4: 'Blue (Earth)', 5: 'White (Moon)', 6: 'Orange (Sun)' },
+    dinosaurs: { 1: 'Green (Scales)', 2: 'Brown (Ground)', 3: 'Blue (Sky)', 4: 'Red (Lava)', 5: 'Yellow (Eyes)', 6: 'Gray (Rocks)' },
+    vehicles: { 1: 'Red (Car)', 2: 'Blue (Plane)', 3: 'Yellow (Bus)', 4: 'Gray (Road)', 5: 'White (Boat)', 6: 'Black (Tires)' },
+    nature: { 1: 'Green (Leaves)', 2: 'Brown (Trunk)', 3: 'Blue (Sky)', 4: 'Yellow (Sun)', 5: 'Pink (Flowers)', 6: 'White (Clouds)' }
+  }
+  
+  const colors = themeColors[theme?.toLowerCase()] || { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange', 6: 'Purple' }
+  
   return {
     type: 'color-by-number',
-    colors: { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange' },
+    colors,
     theme,
-    instructions: 'Color each numbered section with the matching color!'
+    instructions: `Color each numbered section with the matching ${theme || ''} color!`
   }
 }
 
 function generateDoodleComplete(theme, difficulty, ageGroup) {
+  // Theme-specific doodle prompts
+  const themedPrompts = {
+    sports: ['Complete the soccer ball', 'Add details to the trophy', 'Finish the athlete', 'Draw the missing equipment'],
+    food: ['Complete the pizza', 'Add toppings to the burger', 'Finish the ice cream cone', 'Draw the missing fruit'],
+    animals: ['Complete the lion\'s mane', 'Add spots to the giraffe', 'Finish the butterfly wings', 'Draw the cat\'s face'],
+    ocean: ['Complete the fish scales', 'Add tentacles to the octopus', 'Finish the whale', 'Draw the coral reef'],
+    space: ['Complete the rocket ship', 'Add craters to the moon', 'Finish the alien', 'Draw the planet rings'],
+    dinosaurs: ['Complete the T-Rex teeth', 'Add plates to the Stegosaurus', 'Finish the dinosaur egg', 'Draw the footprints'],
+    vehicles: ['Complete the race car', 'Add wheels to the bus', 'Finish the airplane wings', 'Draw the boat sails'],
+    nature: ['Complete the flower petals', 'Add leaves to the tree', 'Finish the rainbow', 'Draw the butterfly pattern']
+  }
+  
+  const prompts = themedPrompts[theme?.toLowerCase()] || ['Complete the picture', 'Add details', 'Finish the drawing']
+  const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
+  const selectedPrompts = [...prompts].sort(() => Math.random() - 0.5).slice(0, count)
+  
   return {
     type: 'doodle-complete',
-    prompts: ['Complete the face', 'Add details to the house', 'Finish the animal'],
-    instructions: 'Use your imagination to complete each doodle!'
+    prompts: selectedPrompts,
+    theme,
+    instructions: `Use your imagination to complete each ${theme || ''} doodle!`
   }
 }
 
 function generateDrawingPrompts(theme, difficulty, ageGroup) {
+  // Theme-specific drawing prompts
+  const themedPrompts = {
+    sports: [
+      'Draw your favorite sports player',
+      'Draw a trophy you would like to win',
+      'Draw yourself playing a sport',
+      'Draw a stadium full of fans',
+      'Draw the winning goal moment'
+    ],
+    food: [
+      'Draw your favorite meal',
+      'Draw a magical kitchen',
+      'Draw the biggest cake ever',
+      'Draw a fruit character',
+      'Draw a food you\'d invent'
+    ],
+    animals: [
+      'Draw your dream pet',
+      'Draw animals having a party',
+      'Draw a magical creature',
+      'Draw animals at the zoo',
+      'Draw an underwater animal scene'
+    ],
+    ocean: [
+      'Draw an underwater city',
+      'Draw a friendly sea monster',
+      'Draw a treasure chest',
+      'Draw a coral reef scene',
+      'Draw life in a submarine'
+    ],
+    space: [
+      'Draw an alien friend',
+      'Draw your own planet',
+      'Draw a space station',
+      'Draw astronauts on the moon',
+      'Draw a spaceship of the future'
+    ],
+    dinosaurs: [
+      'Draw your favorite dinosaur',
+      'Draw dinosaurs in your backyard',
+      'Draw a dinosaur family',
+      'Draw a fossil discovery',
+      'Draw a dinosaur hatchling'
+    ],
+    vehicles: [
+      'Draw your dream car',
+      'Draw a flying vehicle',
+      'Draw a vehicle of the future',
+      'Draw a busy highway scene',
+      'Draw a vehicle adventure'
+    ],
+    nature: [
+      'Draw a magical forest',
+      'Draw the perfect treehouse',
+      'Draw a beautiful garden',
+      'Draw animals in nature',
+      'Draw a rainbow scene'
+    ]
+  }
+  
+  const prompts = themedPrompts[theme?.toLowerCase()] || ['Draw your favorite thing', 'Draw a happy scene', 'Draw your dream']
+  const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
+  const selectedPrompts = [...prompts].sort(() => Math.random() - 0.5).slice(0, count)
+  
   return {
     type: 'drawing-prompts',
-    prompts: [
-      'Draw your favorite animal',
-      'Draw a house you would like to live in',
-      'Draw what you want to be when you grow up'
-    ],
-    instructions: 'Draw what the prompt asks in the box below!'
+    prompts: selectedPrompts,
+    theme,
+    instructions: `Draw what the ${theme || ''} prompt asks in the box below!`
   }
 }
 
 function generateConnectColor(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific connect and color descriptions
+  const themeDescriptions = {
+    sports: 'Connect the dots to reveal sports equipment, then color it in!',
+    food: 'Connect the dots to reveal yummy food, then color it in!',
+    animals: 'Connect the dots to reveal an animal friend, then color it in!',
+    ocean: 'Connect the dots to reveal sea creatures, then color it in!',
+    space: 'Connect the dots to reveal space objects, then color it in!',
+    dinosaurs: 'Connect the dots to reveal a dinosaur, then color it in!',
+    vehicles: 'Connect the dots to reveal a vehicle, then color it in!',
+    nature: 'Connect the dots to reveal nature, then color it in!'
+  }
+  
+  return {
+    type: 'connect-color',
+    dots: difficulty === 'easy' ? 15 : difficulty === 'hard' ? 40 : 25,
+    theme,
+    instructions: themeDescriptions[theme?.toLowerCase()] || 'Connect the dots and then color the picture!'
+  }
+}
   return {
     type: 'connect-color',
     dots: 30,
