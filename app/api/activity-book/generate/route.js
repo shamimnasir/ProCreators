@@ -738,7 +738,26 @@ function generateWouldYouRather(theme, difficulty, ageGroup) {
     ]
   }
   
-  // Find matching theme
+  // Check for AI-generated content first
+  let aiContent = null
+  const themedContentCheck = getThemedContent(theme)
+  if (themedContentCheck.needsAIGeneration && theme) {
+    aiContent = await generateAIThemedContent(theme)
+  }
+  
+  // If AI content has would you rather questions, use those
+  if (aiContent && aiContent.wouldYouRather && aiContent.wouldYouRather.length > 0) {
+    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+    const questions = [...aiContent.wouldYouRather].sort(() => Math.random() - 0.5).slice(0, count)
+    return {
+      type: 'would-you-rather',
+      questions,
+      theme,
+      instructions: `Circle your ${theme || ''} choice and explain why!`
+    }
+  }
+  
+  // Find matching theme from predefined
   let questions = themedQuestions.animals
   const normalizedTheme = theme?.toLowerCase() || ''
   for (const [key, value] of Object.entries(themedQuestions)) {
