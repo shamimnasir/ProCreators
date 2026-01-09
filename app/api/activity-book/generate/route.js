@@ -3101,20 +3101,45 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'matching':
       const pairs = content.pairs || []
-      const matchingY = y + height - 50
-      const leftCol = x + 30
-      const rightCol = x + width - 80
+      let matchY = y + height - 40
       
-      pairs.forEach((pair, idx) => {
-        const itemY = matchingY - idx * 50
-        if (itemY > y + 60) {
-          page.drawText(stripEmojis(pair[0] || ''), { x: leftCol, y: itemY, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
-          page.drawCircle({ x: leftCol + 60, y: itemY + 4, size: 5, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
-          page.drawText(stripEmojis(pair[1] || ''), { x: rightCol, y: itemY - (idx % 3) * 15, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
-          page.drawCircle({ x: rightCol - 10, y: itemY - (idx % 3) * 15 + 4, size: 5, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+      page.drawText('Draw a line to connect each pair!', { x: x + 20, y: matchY, size: 11, font: boldFont, color: pColor })
+      matchY -= 25
+      
+      // Shuffle the right column for the puzzle
+      const leftItems = pairs.map(p => p[0])
+      const rightItems = pairs.map(p => p[1]).sort(() => Math.random() - 0.5)
+      
+      const leftColX = x + 40
+      const rightColX = x + width - 120
+      const connectLeftX = leftColX + 90
+      const connectRightX = rightColX - 15
+      const itemSpacing = Math.min(45, (height - 100) / pairs.length)
+      
+      leftItems.forEach((item, idx) => {
+        const itemY = matchY - idx * itemSpacing
+        if (itemY > y + 50) {
+          // Left item in box
+          page.drawRectangle({ x: leftColX - 5, y: itemY - 12, width: 85, height: 22, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+          page.drawText(stripEmojis(item || '').substring(0, 12), { x: leftColX, y: itemY - 5, size: 10, font, color: rgb(0.2, 0.2, 0.2) })
+          // Connection dot on left
+          page.drawCircle({ x: connectLeftX, y: itemY - 2, size: 5, color: rgb(0.3, 0.3, 0.3) })
+          
+          // Right item in box (shuffled)
+          const rightItem = rightItems[idx]
+          page.drawRectangle({ x: rightColX - 5, y: itemY - 12, width: 85, height: 22, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
+          page.drawText(stripEmojis(rightItem || '').substring(0, 12), { x: rightColX, y: itemY - 5, size: 10, font, color: rgb(0.2, 0.2, 0.2) })
+          // Connection dot on right
+          page.drawCircle({ x: connectRightX, y: itemY - 2, size: 5, color: rgb(0.3, 0.3, 0.3) })
         }
       })
-      page.drawText('Draw lines to match!', { x: centerX - 50, y: y + 25, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Draw some example lines (dotted) in the middle as a guide
+      page.drawLine({ 
+        start: { x: connectLeftX + 20, y: matchY + 10 }, 
+        end: { x: connectRightX - 20, y: matchY + 10 }, 
+        thickness: 0.5, color: rgb(0.8, 0.8, 0.8) 
+      })
       break
       
     case 'counting':
