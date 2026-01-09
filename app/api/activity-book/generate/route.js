@@ -3183,13 +3183,63 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'patterns':
       const patterns = content.patterns || []
-      let patternY = y + height - 60
+      let patternY = y + height - 50
+      
+      page.drawText('What comes next in each pattern?', { x: x + 20, y: patternY, size: 11, font: boldFont, color: pColor })
+      patternY -= 35
       
       patterns.forEach((p, idx) => {
         if (patternY > y + 80) {
-          const seq = (p.sequence || []).map(s => stripEmojis(String(s))).join('  ')
-          page.drawText(`${idx + 1}. ${seq}`, { x: x + 30, y: patternY, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
-          page.drawText('What comes next? ____', { x: x + 30, y: patternY - 20, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+          // Draw visual pattern using shapes
+          const patternSeq = p.sequence || ['A', 'B', 'A', 'B', 'A']
+          const boxX = x + 30
+          const boxWidth = width - 100
+          const cellWidth = 40
+          
+          page.drawText(`${idx + 1}.`, { x: boxX, y: patternY, size: 12, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          
+          // Draw pattern elements as shapes
+          const shapeMap = {
+            'A': 'circle', '1': 'circle', 'circle': 'circle',
+            'B': 'square', '2': 'square', 'square': 'square',
+            'C': 'triangle', '3': 'triangle', 'triangle': 'triangle',
+            'D': 'star', '4': 'star', 'star': 'star'
+          }
+          
+          patternSeq.forEach((item, i) => {
+            const cellX = boxX + 25 + i * cellWidth
+            const cellY = patternY - 5
+            const shapeType = shapeMap[item] || 'circle'
+            
+            // Draw box around each element
+            page.drawRectangle({ x: cellX - 15, y: cellY - 25, width: 30, height: 30, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
+            
+            if (shapeType === 'circle') {
+              page.drawCircle({ x: cellX, y: cellY - 10, size: 10, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+            } else if (shapeType === 'square') {
+              page.drawRectangle({ x: cellX - 9, y: cellY - 19, width: 18, height: 18, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+            } else if (shapeType === 'triangle') {
+              page.drawLine({ start: { x: cellX, y: cellY }, end: { x: cellX - 10, y: cellY - 18 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              page.drawLine({ start: { x: cellX - 10, y: cellY - 18 }, end: { x: cellX + 10, y: cellY - 18 }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+              page.drawLine({ start: { x: cellX + 10, y: cellY - 18 }, end: { x: cellX, y: cellY }, thickness: 2, color: rgb(0.3, 0.3, 0.3) })
+            } else { // star
+              for (let r = 0; r < 5; r++) {
+                const angle1 = (r * 2 * Math.PI / 5) - Math.PI / 2
+                const angle2 = ((r + 2) * 2 * Math.PI / 5) - Math.PI / 2
+                page.drawLine({
+                  start: { x: cellX + Math.cos(angle1) * 10, y: cellY - 10 + Math.sin(angle1) * 10 },
+                  end: { x: cellX + Math.cos(angle2) * 10, y: cellY - 10 + Math.sin(angle2) * 10 },
+                  thickness: 1.5, color: rgb(0.3, 0.3, 0.3)
+                })
+              }
+            }
+          })
+          
+          // Draw empty box for answer with question mark
+          const answerX = boxX + 25 + patternSeq.length * cellWidth
+          page.drawRectangle({ x: answerX - 15, y: patternY - 30, width: 30, height: 30, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 2 })
+          page.drawText('?', { x: answerX - 5, y: patternY - 22, size: 16, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+          
           patternY -= 60
         }
       })
