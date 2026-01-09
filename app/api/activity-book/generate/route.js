@@ -1726,6 +1726,8 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
         matchingPairs: aiContent.matchingPairs || [],
         spellingWords: (aiContent.spellingWords || []).map(w => w.toUpperCase()),
         tracingWords: aiContent.tracingWords || [],
+        travelGames: aiContent.travelGames || [],
+        bingoItems: aiContent.bingoItems || [],
         visualContext: theme,
         customTheme: theme,
         isAIGenerated: true
