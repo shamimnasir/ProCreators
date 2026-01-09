@@ -857,56 +857,60 @@ function generateTicTacToe(theme, difficulty, ageGroup) {
 }
 
 async function generateHangman(theme, difficulty, ageGroup) {
+  // Check for AI-generated content first for custom themes
+  const themedContentCheck = getThemedContent(theme)
+  
+  if (themedContentCheck.needsAIGeneration && theme) {
+    const aiContent = await generateAIThemedContent(theme)
+    if (aiContent && aiContent.hangmanWords && aiContent.hangmanWords.length > 0) {
+      const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
+      const words = [...aiContent.hangmanWords].sort(() => Math.random() - 0.5).slice(0, count)
+      return {
+        type: 'hangman',
+        words,
+        theme,
+        instructions: `Guess the ${theme || ''} words before the hangman is complete!`
+      }
+    }
+  }
+  
+  // Pre-defined themed words for common themes only
   const themedWords = {
-    water: ['SWIMMING', 'SURFING', 'KAYAKING', 'WATERSKI', 'SNORKEL', 'DIVING', 'LIFEGUARD', 'POOLSIDE', 'SPLASHING', 'FLOATING'],
-    sports: ['BASKETBALL', 'SOCCER', 'TENNIS', 'SWIMMING', 'BASEBALL', 'HOCKEY', 'FOOTBALL', 'VOLLEYBALL'],
-    food: ['SPAGHETTI', 'HAMBURGER', 'CHOCOLATE', 'SANDWICH', 'PANCAKES', 'CUPCAKE', 'POPCORN', 'SMOOTHIE'],
+    water: ['SWIMMING', 'SURFING', 'KAYAKING', 'WATERSKI', 'SNORKEL', 'DIVING', 'LIFEGUARD', 'POOLSIDE'],
     animals: ['ELEPHANT', 'PENGUIN', 'DOLPHIN', 'BUTTERFLY', 'KANGAROO', 'GIRAFFE', 'CROCODILE', 'FLAMINGO'],
     ocean: ['JELLYFISH', 'STARFISH', 'SEAHORSE', 'OCTOPUS', 'SEAWEED', 'DOLPHIN', 'MERMAID', 'TREASURE'],
     space: ['ASTEROID', 'SATELLITE', 'GALAXY', 'NEBULA', 'ASTRONAUT', 'SPACESHIP', 'UNIVERSE', 'TELESCOPE'],
-    dinosaurs: ['DINOSAUR', 'TRICERATOPS', 'PTERODACTYL', 'RAPTOR', 'FOSSIL', 'PREHISTORIC', 'JURASSIC', 'SKELETON'],
-    vehicles: ['HELICOPTER', 'SUBMARINE', 'MOTORCYCLE', 'AMBULANCE', 'EXCAVATOR', 'TRACTOR', 'LIMOUSINE', 'SAILBOAT'],
-    nature: ['BUTTERFLY', 'WATERFALL', 'MOUNTAIN', 'RAINBOW', 'SUNFLOWER', 'HURRICANE', 'TORNADO', 'GLACIER'],
-    math: ['ADDITION', 'SUBTRACT', 'MULTIPLY', 'DIVISION', 'FRACTION', 'GEOMETRY', 'EQUATION', 'TRIANGLE'],
-    school: ['HOMEWORK', 'CLASSROOM', 'TEXTBOOK', 'NOTEBOOK', 'BACKPACK', 'PRINCIPAL', 'CAFETERIA', 'ALPHABET']
+    dinosaurs: ['DINOSAUR', 'TRICERATOPS', 'PTERODACTYL', 'RAPTOR', 'FOSSIL', 'PREHISTORIC', 'JURASSIC', 'SKELETON']
   }
   
-  // Check for AI-generated content first
-  let aiContent = null
-  const themedContentCheck = getThemedContent(theme)
-  if (themedContentCheck.needsAIGeneration && theme) {
-    aiContent = await generateAIThemedContent(theme)
-  }
-  
-  // If AI content has hangman words, use those
-  if (aiContent && aiContent.hangmanWords && aiContent.hangmanWords.length > 0) {
-    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
-    const words = [...aiContent.hangmanWords].sort(() => Math.random() - 0.5).slice(0, count)
-    return {
-      type: 'hangman',
-      words,
-      theme,
-      instructions: `Guess the ${theme || ''} words before the hangman is complete!`
-    }
-  }
-  
-  // Find matching theme from predefined - prioritize specific themes first
-  let words = themedWords.animals
+  // Find matching pre-defined theme
+  let words = null
   const normalizedTheme = theme?.toLowerCase() || ''
   
-  // Priority order for matching - water/ocean should come before sports
-  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
-  
-  for (const priority of priorityOrder) {
-    if (normalizedTheme.includes(priority)) {
-      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
-        words = themedWords.water
-      } else if (themedWords[priority]) {
-        words = themedWords[priority]
-      }
+  for (const [key, value] of Object.entries(themedWords)) {
+    if (normalizedTheme.includes(key)) {
+      words = value
       break
     }
   }
+  
+  // If no pre-defined match, create generic themed words
+  if (!words) {
+    // Generate generic words based on theme name
+    const themeWord = theme?.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 10) || 'ACTIVITY'
+    words = [themeWord, 'LEARNING', 'DISCOVER', 'EXPLORE', 'ADVENTURE', 'EXCITING']
+  }
+  
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
+  const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
+  
+  return {
+    type: 'hangman',
+    words: selectedWords,
+    theme,
+    instructions: `Guess the ${theme || ''} words before the hangman is complete!`
+  }
+}
   
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
   const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
