@@ -1581,65 +1581,89 @@ async function generateAIThemedContent(theme) {
   console.log(`Generating AI content for custom theme: ${theme}`)
   
   try {
-    const prompt = `Generate activity book content for the theme "${theme}". Return ONLY a valid JSON object with this exact structure, no markdown or extra text:
+    const prompt = `Generate comprehensive activity book content for the theme "${theme}". Return ONLY a valid JSON object with this exact structure, no markdown or extra text:
 {
   "riddles": [
-    {"riddle": "A riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "A clever riddle specifically about ${theme}", "answer": "The answer"},
     {"riddle": "Another riddle about ${theme}", "answer": "The answer"},
     {"riddle": "Third riddle about ${theme}", "answer": "The answer"},
     {"riddle": "Fourth riddle about ${theme}", "answer": "The answer"},
-    {"riddle": "Fifth riddle about ${theme}", "answer": "The answer"}
+    {"riddle": "Fifth riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Sixth riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Seventh riddle about ${theme}", "answer": "The answer"},
+    {"riddle": "Eighth riddle about ${theme}", "answer": "The answer"}
   ],
   "triviaQuestions": [
-    {"q": "Question about ${theme}?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]},
-    {"q": "Another question?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]},
-    {"q": "Third question?", "a": "Answer", "options": ["Wrong1", "Answer", "Wrong2"]}
+    {"q": "Interesting trivia question about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]},
+    {"q": "Another trivia about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]},
+    {"q": "Third trivia about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]},
+    {"q": "Fourth trivia about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]},
+    {"q": "Fifth trivia about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]},
+    {"q": "Sixth trivia about ${theme}?", "a": "Correct Answer", "options": ["Wrong1", "Correct Answer", "Wrong2"]}
   ],
-  "wordSearchWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8"],
-  "memoryItems": ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8"],
-  "mazeStart": "START_LABEL",
-  "mazeEnd": "END_LABEL",
-  "mazeInstruction": "Help find the way through the ${theme} maze!",
   "wouldYouRather": [
-    "Would you rather question 1 about ${theme}?",
-    "Would you rather question 2 about ${theme}?",
-    "Would you rather question 3 about ${theme}?"
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?",
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?",
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?",
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?",
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?",
+    "Would you rather [option A about ${theme}] or [option B about ${theme}]?"
   ],
-  "hangmanWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
-  "drawingPrompts": [
-    "Draw a ${theme} character or creature",
-    "Draw a magical ${theme} scene",
-    "Draw yourself in a ${theme} adventure",
-    "Draw your dream ${theme} world",
-    "Draw a ${theme} creature with special powers"
-  ],
-  "doodlePrompts": [
-    "Complete the ${theme} character's outfit",
-    "Add magical details to this ${theme} creature",
-    "Finish drawing the ${theme} castle or building",
-    "Add wings, scales, or other features to this ${theme} being"
-  ],
-  "colorByNumberColors": {
-    "1": "Purple (Magic)",
-    "2": "Blue (Sky/Water)",
-    "3": "Gold (Treasure)",
-    "4": "Green (Forest)",
-    "5": "Silver (Armor)",
-    "6": "Pink (Sparkles)"
-  },
-  "colorByNumberPicture": "A ${theme} themed picture",
-  "connectColorPictures": ["unicorn", "dragon", "castle", "wizard hat", "magic wand"],
+  "hangmanWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8"],
+  "wordSearchWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8", "WORD9", "WORD10"],
+  "memoryItems": ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8"],
   "matchingPairs": [
     ["Left1", "Right1"],
     ["Left2", "Right2"],
     ["Left3", "Right3"],
-    ["Left4", "Right4"]
+    ["Left4", "Right4"],
+    ["Left5", "Right5"],
+    ["Left6", "Right6"]
   ],
+  "mazeStart": "START_LABEL_related_to_${theme}",
+  "mazeEnd": "END_LABEL_related_to_${theme}",
+  "mazeInstruction": "Fun instruction for ${theme} themed maze!",
+  "drawingPrompts": [
+    "Draw a ${theme} scene",
+    "Draw your favorite ${theme} character",
+    "Draw yourself in a ${theme} adventure",
+    "Draw a magical ${theme} world",
+    "Draw a ${theme} creature or object"
+  ],
+  "doodlePrompts": [
+    "Complete this ${theme} character",
+    "Add details to this ${theme} scene",
+    "Finish drawing this ${theme} object",
+    "Add magical elements to this ${theme} picture"
+  ],
+  "colorByNumberColors": {
+    "1": "Color1 (${theme} related)",
+    "2": "Color2 (${theme} related)",
+    "3": "Color3 (${theme} related)",
+    "4": "Color4 (${theme} related)",
+    "5": "Color5 (${theme} related)",
+    "6": "Color6 (${theme} related)"
+  },
+  "colorByNumberPicture": "A ${theme} themed picture description",
+  "connectColorPictures": ["object1", "object2", "object3", "object4", "object5"],
   "spellingWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
-  "tracingWords": ["WORD1", "WORD2", "WORD3", "WORD4"]
+  "tracingWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
+  "travelGames": [
+    "I Spy something related to ${theme}",
+    "Name 5 things about ${theme}",
+    "Tell a story about ${theme}",
+    "Play ${theme} word association",
+    "Count things related to ${theme}"
+  ],
+  "bingoItems": ["Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8", "Item9", "Item10", "Item11", "Item12"]
 }
 
-Make all content appropriate for children, educational, fun, and specifically related to "${theme}". For drawing prompts and doodle prompts, make them creative and imaginative. For color-by-number, suggest colors that match the ${theme} theme.`
+IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educational, age-appropriate for children. 
+- Riddles should be clever and themed to ${theme}
+- Trivia should have real facts about ${theme}
+- Would You Rather should have fun ${theme}-related choices
+- Words should be related to ${theme}
+- All content should help children learn about ${theme}`
 
     const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
     
