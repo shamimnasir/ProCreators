@@ -1786,7 +1786,8 @@ async function generateActivityPages(body) {
       
       if (generator) {
         const difficulty = i < pageCount / 3 ? 'easy' : i < (pageCount * 2) / 3 ? 'medium' : 'hard'
-        const content = generator(themeToUse, difficulty, ageGroup)
+        // Use await since some generators are async (AI-powered)
+        const content = await generator(themeToUse, difficulty, ageGroup)
         
         pages.push({
           title: getActivityTitle(activityId, themeToUse, i + 1),
