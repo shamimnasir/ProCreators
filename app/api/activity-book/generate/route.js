@@ -1189,7 +1189,7 @@ async function generateDrawingPrompts(theme, difficulty, ageGroup) {
   }
 }
 
-function generateConnectColor(theme, difficulty, ageGroup) {
+async function generateConnectColor(theme, difficulty, ageGroup) {
   const themedContent = getThemedContent(theme)
   
   // Theme-specific connect and color descriptions
@@ -1204,11 +1204,32 @@ function generateConnectColor(theme, difficulty, ageGroup) {
     nature: 'Connect the dots to reveal nature, then color it in!'
   }
   
+  let description = themeDescriptions[theme?.toLowerCase()]
+  let pictureHint = ''
+  
+  // Generate AI content for custom themes
+  if (!description && theme) {
+    if (themedContent.needsAIGeneration) {
+      const aiContent = await generateAIThemedContent(theme)
+      if (aiContent.connectColorPictures && aiContent.connectColorPictures.length > 0) {
+        const randomPicture = aiContent.connectColorPictures[Math.floor(Math.random() * aiContent.connectColorPictures.length)]
+        pictureHint = randomPicture
+        description = `Connect the dots to reveal a ${randomPicture}, then color it in!`
+      }
+    }
+  }
+  
+  // Fallback with theme context
+  if (!description) {
+    description = `Connect the dots to reveal a magical ${theme} picture, then color it in!`
+  }
+  
   return {
     type: 'connect-color',
     dots: difficulty === 'easy' ? 15 : difficulty === 'hard' ? 40 : 25,
+    pictureHint,
     theme,
-    instructions: themeDescriptions[theme?.toLowerCase()] || 'Connect the dots and then color the picture!'
+    instructions: description
   }
 }
 
