@@ -1511,9 +1511,15 @@ async function generateRiddles(theme, difficulty, ageGroup) {
   }
 }
 
-function generateComplexMaze(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
-  const mazeTheme = themedContent.mazeTheme
+async function generateComplexMaze(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
+  const mazeTheme = themedContent.mazeTheme || { start: 'START', end: 'FINISH', instruction: `Navigate the ${theme} maze!` }
   const mazeId = Math.floor(Math.random() * 1000)
   const sizes = { easy: 15, medium: 25, hard: 35 }
   
@@ -1530,8 +1536,14 @@ function generateComplexMaze(theme, difficulty, ageGroup) {
   }
 }
 
-function generateMemoryGame(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
+async function generateMemoryGame(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
   const items = [...themedContent.memoryItems]
   const pairCount = difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8
   
