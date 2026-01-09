@@ -1194,6 +1194,52 @@ const THEMED_CONTENT = {
     wordSearchWords: ['FUN', 'PLAY', 'GAME', 'LEARN', 'THINK', 'DRAW', 'COLOR', 'READ', 'WRITE', 'COUNT'],
     mazeTheme: { start: 'START', end: 'FINISH', instruction: 'Find the way through the maze!' },
     visualContext: 'shapes and objects'
+  },
+  math: {
+    riddles: [
+      { riddle: "I am an odd number. Take away a letter and I become even. What am I?", answer: 'Seven (remove S = Even)' },
+      { riddle: "If two's company and three's a crowd, what are four and five?", answer: 'Nine (4+5=9)' },
+      { riddle: "What has a face and two hands but no arms or legs?", answer: 'A clock' },
+      { riddle: "I add five to nine and get two. How is this possible?", answer: '2 PM (9AM + 5 hours)' },
+      { riddle: "What three positive numbers give the same answer when multiplied and added together?", answer: '1, 2, 3 (1×2×3=6, 1+2+3=6)' },
+      { riddle: "If there are 3 apples and you take away 2, how many do you have?", answer: '2 (you took 2)' },
+      { riddle: "A farmer has 17 sheep. All but 9 run away. How many are left?", answer: '9' },
+      { riddle: "What is half of 2 plus 2?", answer: '3 (half of 2 is 1, plus 2 = 3)' },
+      { riddle: "How many times can you subtract 5 from 25?", answer: 'Once (then it becomes 20)' },
+      { riddle: "If a dozen eggs costs 12 cents, how many eggs can you get for a cent?", answer: '12 eggs (a dozen)' }
+    ],
+    logicPuzzles: [
+      { clues: ['1 is less than 2', '3 comes after 2', '4 is the largest'], items: ['1', '2', '3', '4'] },
+      { clues: ['Addition comes before subtraction', 'Division is last', 'Multiplication is after subtraction'], items: ['Addition', 'Subtraction', 'Multiplication', 'Division'] },
+      { clues: ['Triangle has 3 sides', 'Square has more than triangle', 'Pentagon has the most'], items: ['Triangle', 'Square', 'Rectangle', 'Pentagon'] }
+    ],
+    memoryItems: ['Plus', 'Minus', 'Times', 'Divide', 'Equals', 'One', 'Two', 'Three', 'Four', 'Five'],
+    wordSearchWords: ['ADD', 'SUM', 'PLUS', 'MINUS', 'TIMES', 'EQUAL', 'NUMBER', 'COUNT', 'MATH', 'TEN'],
+    mazeTheme: { start: '1', end: '100', instruction: 'Help count from 1 to 100 through the maze!' },
+    visualContext: 'numbers and shapes'
+  },
+  school: {
+    riddles: [
+      { riddle: "I have a spine but no bones. I have pages but I'm not a website. What am I?", answer: 'A book' },
+      { riddle: "I am full of keys but cannot open any door. What am I?", answer: 'A keyboard' },
+      { riddle: "I get sharper the more I'm used. What am I?", answer: 'Your brain/mind' },
+      { riddle: "You can write on me, erase me, and I hang on a wall. What am I?", answer: 'A whiteboard/chalkboard' },
+      { riddle: "I have 26 brothers and we make words together. What am I?", answer: 'A letter of the alphabet' },
+      { riddle: "The more you take away from me, the bigger I get. What am I?", answer: 'A hole' },
+      { riddle: "I'm tall when I'm young and short when I'm old. What am I?", answer: 'A pencil/candle' },
+      { riddle: "What has words but never speaks?", answer: 'A book' },
+      { riddle: "What can you hold without touching it?", answer: 'A conversation' },
+      { riddle: "I go in hard and come out soft. What am I?", answer: 'Gum/knowledge' }
+    ],
+    logicPuzzles: [
+      { clues: ['Math is before Science', 'English is after lunch', 'Art is last'], items: ['Math', 'Science', 'English', 'Art'] },
+      { clues: ['Kindergarten is first', 'High school is after middle school', 'College is last'], items: ['Kindergarten', 'Elementary', 'Middle School', 'High School'] },
+      { clues: ['Reading comes before writing', 'Counting is after writing', 'Drawing is last'], items: ['Reading', 'Writing', 'Counting', 'Drawing'] }
+    ],
+    memoryItems: ['Book', 'Pencil', 'Ruler', 'Eraser', 'Paper', 'Crayon', 'Scissors', 'Glue', 'Backpack', 'Notebook'],
+    wordSearchWords: ['BOOK', 'READ', 'WRITE', 'LEARN', 'STUDY', 'CLASS', 'TEST', 'GRADE', 'SCHOOL', 'TEACH'],
+    mazeTheme: { start: 'HOME', end: 'SCHOOL', instruction: 'Help the student get to school!' },
+    visualContext: 'school supplies'
   }
 }
 
@@ -1211,7 +1257,15 @@ function getThemedContent(theme) {
     'vehicles': 'vehicles',
     'transportation': 'vehicles',
     'dinosaurs': 'dinosaurs',
-    'dino': 'dinosaurs'
+    'dino': 'dinosaurs',
+    'math': 'math',
+    'mathematics': 'math',
+    'numbers': 'math',
+    'counting': 'math',
+    'school': 'school',
+    'education': 'school',
+    'learning': 'school',
+    'classroom': 'school'
   }
   
   const normalizedTheme = theme?.toLowerCase() || ''
