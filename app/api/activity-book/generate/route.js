@@ -991,13 +991,6 @@ function generateConnectColor(theme, difficulty, ageGroup) {
     instructions: themeDescriptions[theme?.toLowerCase()] || 'Connect the dots and then color the picture!'
   }
 }
-  return {
-    type: 'connect-color',
-    dots: 30,
-    theme,
-    instructions: 'Connect the dots and then color the picture!'
-  }
-}
 
 // ========== THEME-SPECIFIC CONTENT POOLS ==========
 const THEMED_CONTENT = {
