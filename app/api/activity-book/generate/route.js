@@ -43,6 +43,8 @@ async function runLLM(prompt, systemPrompt = '') {
   return new Promise((resolve) => {
     const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
     
+    console.log('runLLM called, EMERGENT_LLM_KEY present:', !!process.env.EMERGENT_LLM_KEY)
+    
     const inputData = JSON.stringify({
       prompt,
       system_prompt: systemPrompt || 'You are a creative activity book creator. Generate engaging, age-appropriate content.'
