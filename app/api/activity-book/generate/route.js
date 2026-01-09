@@ -941,6 +941,7 @@ function generateTicTacToe(theme, difficulty, ageGroup) {
 
 async function generateHangman(theme, difficulty, ageGroup) {
   const themedWords = {
+    water: ['SWIMMING', 'SURFING', 'KAYAKING', 'WATERSKI', 'SNORKEL', 'DIVING', 'LIFEGUARD', 'POOLSIDE', 'SPLASHING', 'FLOATING'],
     sports: ['BASKETBALL', 'SOCCER', 'TENNIS', 'SWIMMING', 'BASEBALL', 'HOCKEY', 'FOOTBALL', 'VOLLEYBALL'],
     food: ['SPAGHETTI', 'HAMBURGER', 'CHOCOLATE', 'SANDWICH', 'PANCAKES', 'CUPCAKE', 'POPCORN', 'SMOOTHIE'],
     animals: ['ELEPHANT', 'PENGUIN', 'DOLPHIN', 'BUTTERFLY', 'KANGAROO', 'GIRAFFE', 'CROCODILE', 'FLAMINGO'],
@@ -972,12 +973,20 @@ async function generateHangman(theme, difficulty, ageGroup) {
     }
   }
   
-  // Find matching theme from predefined
+  // Find matching theme from predefined - prioritize specific themes first
   let words = themedWords.animals
   const normalizedTheme = theme?.toLowerCase() || ''
-  for (const [key, value] of Object.entries(themedWords)) {
-    if (normalizedTheme.includes(key)) {
-      words = value
+  
+  // Priority order for matching - water/ocean should come before sports
+  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
+  
+  for (const priority of priorityOrder) {
+    if (normalizedTheme.includes(priority)) {
+      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
+        words = themedWords.water
+      } else if (themedWords[priority]) {
+        words = themedWords[priority]
+      }
       break
     }
   }
