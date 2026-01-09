@@ -3052,16 +3052,35 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'math':
       const problems = content.problems || []
-      const problemsPerCol = Math.ceil(problems.length / 2)
+      const mathColWidth = (width - 60) / 2
+      const mathRowHeight = 50
       
-      problems.forEach((prob, idx) => {
-        const col = Math.floor(idx / problemsPerCol)
-        const row = idx % problemsPerCol
-        const px = x + 50 + col * (width / 2)
-        const py = y + height - 50 - row * 40
+      page.drawText('Solve each problem:', { x: x + 20, y: y + height - 30, size: 11, font: boldFont, color: pColor })
+      
+      problems.slice(0, 12).forEach((prob, idx) => {
+        const col = idx % 2
+        const row = Math.floor(idx / 2)
+        const px = x + 40 + col * mathColWidth
+        const py = y + height - 60 - row * mathRowHeight
         
-        const problemText = `${idx + 1}. ${prob.a} ${prob.op} ${prob.b} = ____`
-        page.drawText(problemText, { x: px, y: py, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
+        if (py > y + 50) {
+          // Draw problem box
+          page.drawRectangle({ x: px - 10, y: py - 25, width: mathColWidth - 30, height: 40, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
+          
+          // Problem number
+          page.drawText(`${idx + 1}.`, { x: px, y: py - 5, size: 12, font: boldFont, color: rgb(0.4, 0.4, 0.4) })
+          
+          // Problem
+          const problemText = `${prob.a} ${prob.op} ${prob.b} =`
+          page.drawText(problemText, { x: px + 25, y: py - 5, size: 16, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          
+          // Answer line
+          page.drawLine({ 
+            start: { x: px + 100, y: py - 15 }, 
+            end: { x: px + 140, y: py - 15 }, 
+            thickness: 2, color: rgb(0.4, 0.4, 0.4) 
+          })
+        }
       })
       break
       
