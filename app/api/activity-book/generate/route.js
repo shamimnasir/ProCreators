@@ -3373,22 +3373,61 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'connect-color':
-      // Similar to connect-dots but with coloring instructions
+      // Draw dots that form an actual picture (star shape)
       const ccDots = content.dots || 20
-      const ccDotsPerRow = Math.ceil(Math.sqrt(ccDots))
-      const ccSpacingX = (width - 60) / ccDotsPerRow
-      const ccSpacingY = (height - 100) / ccDotsPerRow
+      const pictureHint = content.pictureHint || 'picture'
       
-      for (let i = 0; i < Math.min(ccDots, 30); i++) {
-        const row = Math.floor(i / ccDotsPerRow)
-        const col = i % ccDotsPerRow
-        const dotX = x + 40 + col * ccSpacingX
-        const dotY = y + height - 60 - row * ccSpacingY
-        
-        page.drawCircle({ x: dotX, y: dotY, size: 4, color: rgb(0.3, 0.3, 0.3) })
-        page.drawText(String(i + 1), { x: dotX + 5, y: dotY + 2, size: 7, font, color: rgb(0.4, 0.4, 0.4) })
+      // Draw instruction
+      page.drawText(`Connect dots 1 to ${Math.min(ccDots, 30)} in order, then color your ${stripEmojis(pictureHint)}!`, { 
+        x: centerX - 150, y: y + height - 40, size: 10, font, color: rgb(0.4, 0.4, 0.4) 
+      })
+      
+      // Create a star shape with dots
+      const starCenterX = centerX
+      const starCenterY = centerY
+      const outerRadius = Math.min(width, height) / 3
+      const innerRadius = outerRadius * 0.4
+      const numPoints = 5
+      const totalDots = numPoints * 2
+      
+      const starDots = []
+      for (let i = 0; i < totalDots; i++) {
+        const angle = (i * Math.PI / numPoints) - Math.PI / 2
+        const radius = i % 2 === 0 ? outerRadius : innerRadius
+        starDots.push({
+          x: starCenterX + Math.cos(angle) * radius,
+          y: starCenterY + Math.sin(angle) * radius
+        })
       }
-      page.drawText('Connect the dots, then color the picture!', { x: centerX - 80, y: y + 25, size: 10, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Draw the dots with numbers
+      starDots.forEach((dot, i) => {
+        page.drawCircle({ x: dot.x, y: dot.y, size: 5, color: rgb(0.2, 0.2, 0.2) })
+        page.drawText(String(i + 1), { x: dot.x + 7, y: dot.y + 2, size: 9, font: boldFont, color: rgb(0.3, 0.3, 0.3) })
+      })
+      
+      // Add additional dots for a more complex shape (eyes and smile inside)
+      // Eyes
+      page.drawCircle({ x: starCenterX - 25, y: starCenterY + 20, size: 4, color: rgb(0.2, 0.2, 0.2) })
+      page.drawText(String(totalDots + 1), { x: starCenterX - 20, y: starCenterY + 22, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+      
+      page.drawCircle({ x: starCenterX + 25, y: starCenterY + 20, size: 4, color: rgb(0.2, 0.2, 0.2) })
+      page.drawText(String(totalDots + 2), { x: starCenterX + 30, y: starCenterY + 22, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+      
+      // Smile curve dots
+      page.drawCircle({ x: starCenterX - 20, y: starCenterY - 5, size: 3, color: rgb(0.2, 0.2, 0.2) })
+      page.drawText(String(totalDots + 3), { x: starCenterX - 15, y: starCenterY - 3, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+      
+      page.drawCircle({ x: starCenterX, y: starCenterY - 15, size: 3, color: rgb(0.2, 0.2, 0.2) })
+      page.drawText(String(totalDots + 4), { x: starCenterX + 5, y: starCenterY - 13, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+      
+      page.drawCircle({ x: starCenterX + 20, y: starCenterY - 5, size: 3, color: rgb(0.2, 0.2, 0.2) })
+      page.drawText(String(totalDots + 5), { x: starCenterX + 25, y: starCenterY - 3, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+      
+      // Helper text
+      page.drawText('Hint: Connect 1-10 for the star outline, then add the face details!', { 
+        x: centerX - 140, y: y + 50, size: 9, font, color: rgb(0.5, 0.5, 0.5) 
+      })
       break
       
     case 'logic-puzzle':
