@@ -900,7 +900,7 @@ function generateTicTacToe(theme, difficulty, ageGroup) {
   }
 }
 
-function generateHangman(theme, difficulty, ageGroup) {
+async function generateHangman(theme, difficulty, ageGroup) {
   const themedWords = {
     sports: ['BASKETBALL', 'SOCCER', 'TENNIS', 'SWIMMING', 'BASEBALL', 'HOCKEY', 'FOOTBALL', 'VOLLEYBALL'],
     food: ['SPAGHETTI', 'HAMBURGER', 'CHOCOLATE', 'SANDWICH', 'PANCAKES', 'CUPCAKE', 'POPCORN', 'SMOOTHIE'],
@@ -914,7 +914,6 @@ function generateHangman(theme, difficulty, ageGroup) {
     school: ['HOMEWORK', 'CLASSROOM', 'TEXTBOOK', 'NOTEBOOK', 'BACKPACK', 'PRINCIPAL', 'CAFETERIA', 'ALPHABET']
   }
   
-  // Find matching theme
   // Check for AI-generated content first
   let aiContent = null
   const themedContentCheck = getThemedContent(theme)
