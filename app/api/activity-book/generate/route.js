@@ -767,39 +767,31 @@ async function generateWouldYouRather(theme, difficulty, ageGroup) {
 }
 
 async function generateTrivia(theme, difficulty, ageGroup) {
-  // Check for AI-generated content first
-  let aiContent = null
+  // Check for AI-generated content first for custom themes
   const themedContentCheck = getThemedContent(theme)
-  if (themedContentCheck.needsAIGeneration && theme) {
-    aiContent = await generateAIThemedContent(theme)
-  }
   
-  // If AI content has trivia questions, use those
-  if (aiContent && aiContent.triviaQuestions && aiContent.triviaQuestions.length > 0) {
-    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
-    const questions = [...aiContent.triviaQuestions].sort(() => Math.random() - 0.5).slice(0, count)
-    return {
-      type: 'trivia',
-      questions: questions.map(q => ({ ...q, correct: q.a })),
-      theme,
-      instructions: `Test your ${theme || ''} knowledge! Circle the correct answer.`
+  if (themedContentCheck.needsAIGeneration && theme) {
+    const aiContent = await generateAIThemedContent(theme)
+    if (aiContent && aiContent.triviaQuestions && aiContent.triviaQuestions.length > 0) {
+      const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+      const questions = [...aiContent.triviaQuestions].sort(() => Math.random() - 0.5).slice(0, count)
+      return {
+        type: 'trivia',
+        questions: questions.map(q => ({ ...q, correct: q.a })),
+        theme,
+        instructions: `Test your ${theme || ''} knowledge! Circle the correct answer.`
+      }
     }
   }
   
+  // Pre-defined trivia for common themes only
   const themedTrivia = {
-    sports: [
-      { q: 'How many players are on a soccer team?', a: '11', options: ['9', '11', '13'] },
-      { q: 'What sport uses a racket and shuttlecock?', a: 'Badminton', options: ['Tennis', 'Badminton', 'Squash'] },
-      { q: 'In basketball, how many points is a free throw?', a: '1', options: ['1', '2', '3'] },
-      { q: 'What is the fastest sport on grass?', a: 'Polo', options: ['Soccer', 'Polo', 'Cricket'] },
-      { q: 'How many holes are on a golf course?', a: '18', options: ['9', '18', '21'] }
-    ],
-    food: [
-      { q: 'What country is pizza originally from?', a: 'Italy', options: ['USA', 'Italy', 'France'] },
-      { q: 'What vitamin do carrots have lots of?', a: 'Vitamin A', options: ['Vitamin A', 'Vitamin C', 'Vitamin D'] },
-      { q: 'What is the main ingredient in bread?', a: 'Flour', options: ['Rice', 'Flour', 'Sugar'] },
-      { q: 'Which fruit has its seeds on the outside?', a: 'Strawberry', options: ['Apple', 'Strawberry', 'Orange'] },
-      { q: 'What do bees make?', a: 'Honey', options: ['Sugar', 'Honey', 'Syrup'] }
+    water: [
+      { q: 'What is the largest body of water on Earth?', a: 'Pacific Ocean', options: ['Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean'] },
+      { q: 'What sport uses a kayak?', a: 'Kayaking', options: ['Surfing', 'Kayaking', 'Water Polo'] },
+      { q: 'What do you call a person who saves swimmers?', a: 'Lifeguard', options: ['Firefighter', 'Lifeguard', 'Coach'] },
+      { q: 'What water sport uses a board and wave?', a: 'Surfing', options: ['Surfing', 'Diving', 'Sailing'] },
+      { q: 'What is the fastest swimming stroke?', a: 'Freestyle', options: ['Breaststroke', 'Freestyle', 'Butterfly'] }
     ],
     animals: [
       { q: 'What is the largest animal?', a: 'Blue Whale', options: ['Elephant', 'Blue Whale', 'Giraffe'] },
@@ -807,13 +799,6 @@ async function generateTrivia(theme, difficulty, ageGroup) {
       { q: 'What is a baby kangaroo called?', a: 'Joey', options: ['Cub', 'Joey', 'Pup'] },
       { q: 'Which bird cannot fly?', a: 'Penguin', options: ['Penguin', 'Eagle', 'Parrot'] },
       { q: 'What is the fastest land animal?', a: 'Cheetah', options: ['Lion', 'Cheetah', 'Horse'] }
-    ],
-    ocean: [
-      { q: 'What is the largest ocean animal?', a: 'Blue Whale', options: ['Shark', 'Blue Whale', 'Octopus'] },
-      { q: 'How many arms does an octopus have?', a: '8', options: ['6', '8', '10'] },
-      { q: 'What sea creature has a shell?', a: 'Turtle', options: ['Dolphin', 'Turtle', 'Shark'] },
-      { q: 'What is a group of dolphins called?', a: 'Pod', options: ['School', 'Pod', 'Herd'] },
-      { q: 'Which is the largest ocean?', a: 'Pacific', options: ['Atlantic', 'Pacific', 'Indian'] }
     ],
     space: [
       { q: 'What planet is known as the Red Planet?', a: 'Mars', options: ['Venus', 'Mars', 'Jupiter'] },
@@ -828,63 +813,27 @@ async function generateTrivia(theme, difficulty, ageGroup) {
       { q: 'What do we call scientists who study dinosaurs?', a: 'Paleontologists', options: ['Biologists', 'Paleontologists', 'Geologists'] },
       { q: 'How many horns did Triceratops have?', a: '3', options: ['2', '3', '4'] },
       { q: 'Were dinosaurs reptiles or mammals?', a: 'Reptiles', options: ['Mammals', 'Reptiles', 'Birds'] }
-    ],
-    vehicles: [
-      { q: 'How many wheels does a bicycle have?', a: '2', options: ['2', '3', '4'] },
-      { q: 'What vehicle travels on tracks?', a: 'Train', options: ['Car', 'Train', 'Boat'] },
-      { q: 'What vehicle can go underwater?', a: 'Submarine', options: ['Airplane', 'Submarine', 'Helicopter'] },
-      { q: 'What is the fastest production car?', a: 'Bugatti', options: ['Ferrari', 'Bugatti', 'Lamborghini'] },
-      { q: 'What powers most electric cars?', a: 'Battery', options: ['Gasoline', 'Battery', 'Steam'] }
-    ],
-    nature: [
-      { q: 'What is the tallest type of tree?', a: 'Redwood', options: ['Oak', 'Redwood', 'Pine'] },
-      { q: 'How many colors are in a rainbow?', a: '7', options: ['5', '7', '9'] },
-      { q: 'What do plants need to make food?', a: 'Sunlight', options: ['Darkness', 'Sunlight', 'Salt'] },
-      { q: 'What is the longest river?', a: 'Nile', options: ['Amazon', 'Nile', 'Mississippi'] },
-      { q: 'What season do leaves fall?', a: 'Autumn', options: ['Spring', 'Autumn', 'Winter'] }
-    ],
-    math: [
-      { q: 'What is 7 + 8?', a: '15', options: ['14', '15', '16'] },
-      { q: 'How many sides does a hexagon have?', a: '6', options: ['5', '6', '8'] },
-      { q: 'What is 12 × 12?', a: '144', options: ['124', '144', '156'] },
-      { q: 'What is the square root of 64?', a: '8', options: ['6', '8', '10'] },
-      { q: 'How many degrees in a right angle?', a: '90', options: ['45', '90', '180'] }
-    ],
-    school: [
-      { q: 'How many letters are in the alphabet?', a: '26', options: ['24', '26', '28'] },
-      { q: 'What is the capital of the United States?', a: 'Washington D.C.', options: ['New York', 'Washington D.C.', 'Los Angeles'] },
-      { q: 'How many continents are there?', a: '7', options: ['5', '6', '7'] },
-      { q: 'What is H2O commonly known as?', a: 'Water', options: ['Oxygen', 'Water', 'Hydrogen'] },
-      { q: 'What do you call a shape with 4 equal sides?', a: 'Square', options: ['Rectangle', 'Square', 'Triangle'] }
-    ],
-    water: [
-      { q: 'What is the largest body of water on Earth?', a: 'Pacific Ocean', options: ['Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean'] },
-      { q: 'What sport uses a kayak?', a: 'Kayaking', options: ['Surfing', 'Kayaking', 'Water Polo'] },
-      { q: 'How many laps is an Olympic swimming pool race?', a: 'Depends on distance', options: ['1', '4', 'Depends on distance'] },
-      { q: 'What do you call a person who saves swimmers?', a: 'Lifeguard', options: ['Firefighter', 'Lifeguard', 'Coach'] },
-      { q: 'What water sport uses a board and wave?', a: 'Surfing', options: ['Surfing', 'Diving', 'Sailing'] },
-      { q: 'What percent of Earth is covered by water?', a: '71%', options: ['50%', '71%', '90%'] },
-      { q: 'What is the fastest swimming stroke?', a: 'Freestyle', options: ['Breaststroke', 'Freestyle', 'Butterfly'] },
-      { q: 'What do scuba divers breathe underwater?', a: 'Compressed air', options: ['Pure oxygen', 'Compressed air', 'Helium'] }
     ]
   }
   
-  // Find matching theme - prioritize specific themes first
-  let questions = themedTrivia.animals
+  // Find matching pre-defined theme
+  let questions = null
   const normalizedTheme = theme?.toLowerCase() || ''
   
-  // Priority order for matching - water/ocean should come before sports
-  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
-  
-  for (const priority of priorityOrder) {
-    if (normalizedTheme.includes(priority)) {
-      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
-        questions = themedTrivia.water
-      } else if (themedTrivia[priority]) {
-        questions = themedTrivia[priority]
-      }
+  for (const [key, value] of Object.entries(themedTrivia)) {
+    if (normalizedTheme.includes(key)) {
+      questions = value
       break
     }
+  }
+  
+  // If no pre-defined match, create generic but themed questions
+  if (!questions) {
+    questions = [
+      { q: `What is interesting about ${theme}?`, a: 'Many things!', options: ['Nothing', 'Many things!', 'Only one thing'] },
+      { q: `Is ${theme} fun to learn about?`, a: 'Yes!', options: ['No', 'Yes!', 'Maybe'] },
+      { q: `Can you discover more about ${theme}?`, a: 'Always!', options: ['Never', 'Sometimes', 'Always!'] }
+    ]
   }
   
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
