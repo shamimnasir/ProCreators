@@ -2726,7 +2726,7 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
     case 'maze-complex':
       // Create maze area with proper margins for START/FINISH labels
       const mazeMargin = 30
-      const mazeHeight = height - 70 // Leave room for labels
+      const mazeHeight = height - 70
       const mazeWidth = width - mazeMargin * 2
       const mazeY = y + 40
       
@@ -2734,106 +2734,165 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       const startLabel = content.startLabel || 'START'
       const endLabel = content.endLabel || 'FINISH'
       
-      // Use seed for reproducible but unique maze
-      const mazeSeed = content.seed || Date.now()
-      const seededRandom = (seed) => {
-        const x = Math.sin(seed) * 10000
-        return x - Math.floor(x)
-      }
-      
+      // Draw outer border
       page.drawRectangle({ 
         x: x + mazeMargin, 
         y: mazeY, 
         width: mazeWidth, 
         height: mazeHeight, 
-        borderColor: rgb(0.4, 0.4, 0.4), 
-        borderWidth: 2 
+        borderColor: rgb(0.2, 0.2, 0.2), 
+        borderWidth: 3 
       })
       
-      // Position labels inside the maze bounds with themed text
+      // Position labels
       page.drawText(startLabel, { x: x + mazeMargin + 10, y: mazeY + mazeHeight - 20, size: 9, font: boldFont, color: rgb(0.2, 0.7, 0.2) })
       page.drawText(endLabel, { x: x + mazeMargin + mazeWidth - 55, y: mazeY + 10, size: 9, font: boldFont, color: rgb(0.7, 0.2, 0.2) })
       
-      // Draw more complex maze structure
-      const mazeLines = content.type === 'maze-complex' ? 14 : 10
-      const lineSpacing = (mazeHeight - 60) / mazeLines
+      // Grid-based maze generation
+      const isComplex = content.type === 'maze-complex'
+      const gridCols = isComplex ? 12 : 8
+      const gridRows = isComplex ? 10 : 7
+      const cellWidth = (mazeWidth - 20) / gridCols
+      const cellHeight = (mazeHeight - 40) / gridRows
+      const mazeStartX = x + mazeMargin + 10
+      const mazeStartY = mazeY + 20
       
-      // Generate horizontal lines with gaps
-      for (let i = 0; i < mazeLines; i++) {
-        const lineY = mazeY + 30 + i * lineSpacing
-        const numSegments = 2 + Math.floor(seededRandom(mazeSeed + i * 100) * 3) // 2-4 segments
-        const segmentWidth = (mazeWidth - 40) / numSegments
-        
-        for (let s = 0; s < numSegments; s++) {
-          // Create gaps in some segments
-          if (seededRandom(mazeSeed + i * 100 + s) > 0.3) {
-            const segStartX = x + mazeMargin + 20 + s * segmentWidth
-            const gapPos = seededRandom(mazeSeed + i * 200 + s) * segmentWidth * 0.6
-            const gapWidth = 25 + seededRandom(mazeSeed + i * 300 + s) * 20
-            
-            // Line before gap
-            if (gapPos > 10) {
-              page.drawLine({ 
-                start: { x: segStartX, y: lineY }, 
-                end: { x: segStartX + gapPos, y: lineY }, 
-                thickness: 2, 
-                color: rgb(0.3, 0.3, 0.3) 
-              })
-            }
-            // Line after gap
-            if (gapPos + gapWidth < segmentWidth - 10) {
-              page.drawLine({ 
-                start: { x: segStartX + gapPos + gapWidth, y: lineY }, 
-                end: { x: segStartX + segmentWidth - 5, y: lineY }, 
-                thickness: 2, 
-                color: rgb(0.3, 0.3, 0.3) 
-              })
-            }
-          }
-        }
-        
-        // Vertical connectors with randomized positions
-        if (i > 0) {
-          const numVerticals = 2 + Math.floor(seededRandom(mazeSeed + i * 500) * 3)
-          for (let v = 0; v < numVerticals; v++) {
-            if (seededRandom(mazeSeed + i * 600 + v) > 0.4) {
-              const vx = x + mazeMargin + 30 + seededRandom(mazeSeed + i * 700 + v) * (mazeWidth - 60)
-              const prevLineY = mazeY + 30 + (i - 1) * lineSpacing
-              page.drawLine({ 
-                start: { x: vx, y: prevLineY }, 
-                end: { x: vx, y: lineY }, 
-                thickness: 2, 
-                color: rgb(0.3, 0.3, 0.3) 
-              })
-            }
-          }
+      // Use seed for reproducible maze
+      const mazeSeed = content.seed || Date.now()
+      const seededRandom = (seed) => {
+        const val = Math.sin(seed) * 10000
+        return val - Math.floor(val)
+      }
+      
+      // Generate maze using simple recursive backtracking concept (simplified)
+      // Create grid of cells, each cell can have walls on right and bottom
+      const walls = []
+      
+      // Initialize all walls as present
+      for (let row = 0; row < gridRows; row++) {
+        walls[row] = []
+        for (let col = 0; col < gridCols; col++) {
+          walls[row][col] = { right: true, bottom: true }
         }
       }
       
-      // Add some dead ends
-      for (let d = 0; d < 5; d++) {
-        const deadEndX = x + mazeMargin + 40 + seededRandom(mazeSeed + d * 900) * (mazeWidth - 80)
-        const deadEndY = mazeY + 50 + seededRandom(mazeSeed + d * 1000) * (mazeHeight - 100)
-        const length = 20 + seededRandom(mazeSeed + d * 1100) * 30
+      // Create a path through the maze by removing some walls
+      // Simple path: zigzag from start to end
+      let currentRow = 0
+      let currentCol = 0
+      let pathSeed = mazeSeed
+      
+      while (currentRow < gridRows - 1 || currentCol < gridCols - 1) {
+        const canGoRight = currentCol < gridCols - 1
+        const canGoDown = currentRow < gridRows - 1
         
-        if (seededRandom(mazeSeed + d * 1200) > 0.5) {
-          // Horizontal dead end
-          page.drawLine({ 
-            start: { x: deadEndX, y: deadEndY }, 
-            end: { x: deadEndX + length, y: deadEndY }, 
-            thickness: 2, 
-            color: rgb(0.3, 0.3, 0.3) 
-          })
+        if (canGoRight && canGoDown) {
+          // Choose direction based on seed
+          if (seededRandom(pathSeed++) > 0.5) {
+            walls[currentRow][currentCol].right = false
+            currentCol++
+          } else {
+            walls[currentRow][currentCol].bottom = false
+            currentRow++
+          }
+        } else if (canGoRight) {
+          walls[currentRow][currentCol].right = false
+          currentCol++
+        } else if (canGoDown) {
+          walls[currentRow][currentCol].bottom = false
+          currentRow++
         } else {
-          // Vertical dead end
-          page.drawLine({ 
-            start: { x: deadEndX, y: deadEndY }, 
-            end: { x: deadEndX, y: deadEndY + length }, 
-            thickness: 2, 
-            color: rgb(0.3, 0.3, 0.3) 
-          })
+          break
         }
       }
+      
+      // Add additional openings for alternative paths and complexity
+      for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridCols; col++) {
+          // Randomly remove some walls to create alternative paths
+          if (seededRandom(mazeSeed + row * 100 + col) > 0.7 && col < gridCols - 1) {
+            walls[row][col].right = false
+          }
+          if (seededRandom(mazeSeed + row * 200 + col + 50) > 0.7 && row < gridRows - 1) {
+            walls[row][col].bottom = false
+          }
+        }
+      }
+      
+      // Draw the maze walls
+      const wallColor = rgb(0.2, 0.2, 0.2)
+      const wallThickness = 2
+      
+      // Draw horizontal walls (bottom of cells)
+      for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridCols; col++) {
+          if (walls[row][col].bottom && row < gridRows - 1) {
+            const wx = mazeStartX + col * cellWidth
+            const wy = mazeStartY + (row + 1) * cellHeight
+            page.drawLine({
+              start: { x: wx, y: wy },
+              end: { x: wx + cellWidth, y: wy },
+              thickness: wallThickness,
+              color: wallColor
+            })
+          }
+        }
+      }
+      
+      // Draw vertical walls (right of cells)
+      for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridCols; col++) {
+          if (walls[row][col].right && col < gridCols - 1) {
+            const wx = mazeStartX + (col + 1) * cellWidth
+            const wy = mazeStartY + row * cellHeight
+            page.drawLine({
+              start: { x: wx, y: wy },
+              end: { x: wx, y: wy + cellHeight },
+              thickness: wallThickness,
+              color: wallColor
+            })
+          }
+        }
+      }
+      
+      // Draw entry and exit openings (gaps in outer border)
+      // Entry at top-left
+      page.drawRectangle({
+        x: mazeStartX,
+        y: mazeY + mazeHeight - 3,
+        width: cellWidth - 10,
+        height: 6,
+        color: rgb(1, 1, 1)
+      })
+      
+      // Exit at bottom-right  
+      page.drawRectangle({
+        x: mazeStartX + (gridCols - 1) * cellWidth + 10,
+        y: mazeY - 3,
+        width: cellWidth - 10,
+        height: 6,
+        color: rgb(1, 1, 1)
+      })
+      
+      // Draw start arrow
+      page.drawLine({
+        start: { x: mazeStartX + 5, y: mazeY + mazeHeight + 5 },
+        end: { x: mazeStartX + 5, y: mazeY + mazeHeight - 10 },
+        thickness: 2,
+        color: rgb(0.2, 0.7, 0.2)
+      })
+      page.drawLine({
+        start: { x: mazeStartX + 5, y: mazeY + mazeHeight - 10 },
+        end: { x: mazeStartX, y: mazeY + mazeHeight - 5 },
+        thickness: 2,
+        color: rgb(0.2, 0.7, 0.2)
+      })
+      page.drawLine({
+        start: { x: mazeStartX + 5, y: mazeY + mazeHeight - 10 },
+        end: { x: mazeStartX + 10, y: mazeY + mazeHeight - 5 },
+        thickness: 2,
+        color: rgb(0.2, 0.7, 0.2)
+      })
       break
       
     case 'spot-difference':
