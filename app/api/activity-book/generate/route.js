@@ -1561,10 +1561,28 @@ async function generateAIThemedContent(theme) {
   ],
   "hangmanWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6"],
   "drawingPrompts": [
-    "Draw prompt 1 about ${theme}",
-    "Draw prompt 2 about ${theme}",
-    "Draw prompt 3 about ${theme}"
+    "Draw a ${theme} character or creature",
+    "Draw a magical ${theme} scene",
+    "Draw yourself in a ${theme} adventure",
+    "Draw your dream ${theme} world",
+    "Draw a ${theme} creature with special powers"
   ],
+  "doodlePrompts": [
+    "Complete the ${theme} character's outfit",
+    "Add magical details to this ${theme} creature",
+    "Finish drawing the ${theme} castle or building",
+    "Add wings, scales, or other features to this ${theme} being"
+  ],
+  "colorByNumberColors": {
+    "1": "Purple (Magic)",
+    "2": "Blue (Sky/Water)",
+    "3": "Gold (Treasure)",
+    "4": "Green (Forest)",
+    "5": "Silver (Armor)",
+    "6": "Pink (Sparkles)"
+  },
+  "colorByNumberPicture": "A ${theme} themed picture",
+  "connectColorPictures": ["unicorn", "dragon", "castle", "wizard hat", "magic wand"],
   "matchingPairs": [
     ["Left1", "Right1"],
     ["Left2", "Right2"],
@@ -1575,7 +1593,7 @@ async function generateAIThemedContent(theme) {
   "tracingWords": ["WORD1", "WORD2", "WORD3", "WORD4"]
 }
 
-Make all content appropriate for children, educational, fun, and specifically related to "${theme}".`
+Make all content appropriate for children, educational, fun, and specifically related to "${theme}". For drawing prompts and doodle prompts, make them creative and imaginative. For color-by-number, suggest colors that match the ${theme} theme.`
 
     const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
     
