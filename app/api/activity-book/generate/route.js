@@ -766,10 +766,32 @@ function generateTrivia(theme, difficulty, ageGroup) {
       { q: 'What do plants need to make food?', a: 'Sunlight', options: ['Darkness', 'Sunlight', 'Salt'] },
       { q: 'What is the longest river?', a: 'Nile', options: ['Amazon', 'Nile', 'Mississippi'] },
       { q: 'What season do leaves fall?', a: 'Autumn', options: ['Spring', 'Autumn', 'Winter'] }
+    ],
+    math: [
+      { q: 'What is 7 + 8?', a: '15', options: ['14', '15', '16'] },
+      { q: 'How many sides does a hexagon have?', a: '6', options: ['5', '6', '8'] },
+      { q: 'What is 12 × 12?', a: '144', options: ['124', '144', '156'] },
+      { q: 'What is the square root of 64?', a: '8', options: ['6', '8', '10'] },
+      { q: 'How many degrees in a right angle?', a: '90', options: ['45', '90', '180'] }
+    ],
+    school: [
+      { q: 'How many letters are in the alphabet?', a: '26', options: ['24', '26', '28'] },
+      { q: 'What is the capital of the United States?', a: 'Washington D.C.', options: ['New York', 'Washington D.C.', 'Los Angeles'] },
+      { q: 'How many continents are there?', a: '7', options: ['5', '6', '7'] },
+      { q: 'What is H2O commonly known as?', a: 'Water', options: ['Oxygen', 'Water', 'Hydrogen'] },
+      { q: 'What do you call a shape with 4 equal sides?', a: 'Square', options: ['Rectangle', 'Square', 'Triangle'] }
     ]
   }
   
-  const questions = themedTrivia[theme?.toLowerCase()] || themedTrivia.animals
+  // Find matching theme
+  let questions = themedTrivia.animals
+  const normalizedTheme = theme?.toLowerCase() || ''
+  for (const [key, value] of Object.entries(themedTrivia)) {
+    if (normalizedTheme.includes(key)) {
+      questions = value
+      break
+    }
+  }
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
   const selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, count)
   
