@@ -1093,7 +1093,7 @@ async function generateDoodleComplete(theme, difficulty, ageGroup) {
   }
 }
 
-function generateDrawingPrompts(theme, difficulty, ageGroup) {
+async function generateDrawingPrompts(theme, difficulty, ageGroup) {
   // Theme-specific drawing prompts
   const themedPrompts = {
     sports: [
@@ -1154,7 +1154,30 @@ function generateDrawingPrompts(theme, difficulty, ageGroup) {
     ]
   }
   
-  const prompts = themedPrompts[theme?.toLowerCase()] || ['Draw your favorite thing', 'Draw a happy scene', 'Draw your dream']
+  let prompts = themedPrompts[theme?.toLowerCase()]
+  
+  // Generate AI prompts for custom themes
+  if (!prompts && theme) {
+    const themedContent = getThemedContent(theme)
+    if (themedContent.needsAIGeneration) {
+      const aiContent = await generateAIThemedContent(theme)
+      if (aiContent.drawingPrompts && aiContent.drawingPrompts.length > 0) {
+        prompts = aiContent.drawingPrompts
+      }
+    }
+  }
+  
+  // Fallback with theme context
+  if (!prompts || prompts.length === 0) {
+    prompts = [
+      `Draw your favorite ${theme} character`,
+      `Draw a magical ${theme} scene`,
+      `Draw yourself in a ${theme} adventure`,
+      `Draw a ${theme} creature or object`,
+      `Draw your dream ${theme} world`
+    ]
+  }
+  
   const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
   const selectedPrompts = [...prompts].sort(() => Math.random() - 0.5).slice(0, count)
   
