@@ -154,12 +154,18 @@ async function generateCoverImage(theme, customTheme, primaryColor, customCoverP
 }
 
 // Activity Generator Functions
-function generateWordSearch(theme, difficulty, ageGroup) {
+async function generateWordSearch(theme, difficulty, ageGroup) {
   const sizes = { easy: 8, medium: 12, hard: 15 }
   const gridSize = sizes[difficulty] || 10
   
   // Use themed content
-  const themedContent = getThemedContent(theme)
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
   const words = [...themedContent.wordSearchWords].slice(0, difficulty === 'easy' ? 6 : difficulty === 'hard' ? 10 : 8)
   
   // Generate grid with actual word placement
