@@ -1483,14 +1483,18 @@ Make all content appropriate for children, educational, fun, and specifically re
 
     const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
     
-    if (result) {
+    console.log('LLM Result:', JSON.stringify(result).substring(0, 500))
+    
+    if (result && result.success && result.content) {
       // Clean up the result - remove markdown code blocks if present
-      let cleanResult = result.trim()
+      let cleanResult = result.content.trim()
       if (cleanResult.startsWith('```json')) {
         cleanResult = cleanResult.replace(/^```json\n?/, '').replace(/\n?```$/, '')
       } else if (cleanResult.startsWith('```')) {
         cleanResult = cleanResult.replace(/^```\n?/, '').replace(/\n?```$/, '')
       }
+      
+      console.log('Cleaned AI response:', cleanResult.substring(0, 300))
       
       const aiContent = JSON.parse(cleanResult)
       
