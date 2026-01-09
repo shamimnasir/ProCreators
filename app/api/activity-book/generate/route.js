@@ -694,10 +694,33 @@ function generateWouldYouRather(theme, difficulty, ageGroup) {
       'Would you rather be able to grow any plant instantly or never need sleep?',
       'Would you rather climb the tallest mountain or swim in every ocean?',
       'Would you rather see a rainbow every day or never feel cold?'
+    ],
+    math: [
+      'Would you rather be super fast at mental math or never make a calculation mistake?',
+      'Would you rather have unlimited math homework or no recess for a week?',
+      'Would you rather count to a million or solve 100 hard math problems?',
+      'Would you rather only communicate using numbers or only use addition?',
+      'Would you rather be a famous mathematician or a famous scientist?'
+    ],
+    school: [
+      'Would you rather have no homework forever or have an extra hour of recess every day?',
+      'Would you rather be the smartest kid in class or the most popular?',
+      'Would you rather have a robot teacher or teach the class yourself for a day?',
+      'Would you rather have school in a treehouse or on a boat?',
+      'Would you rather have all A grades or be captain of every sports team?'
     ]
   }
   
-  const questions = themedQuestions[theme?.toLowerCase()] || themedQuestions.animals
+  // Find matching theme
+  let questions = themedQuestions.animals
+  const normalizedTheme = theme?.toLowerCase() || ''
+  for (const [key, value] of Object.entries(themedQuestions)) {
+    if (normalizedTheme.includes(key)) {
+      questions = value
+      break
+    }
+  }
+  
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
   const selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, count)
   
