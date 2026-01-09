@@ -3119,23 +3119,64 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
     case 'counting':
       const countItems = content.items || []
-      let countY = y + height - 60
+      let countY = y + height - 50
+      
+      page.drawText('Count the shapes and write the number:', { x: x + 20, y: countY, size: 11, font: boldFont, color: pColor })
+      countY -= 30
       
       countItems.forEach((item, idx) => {
         if (countY > y + 80) {
-          // Handle both old format (string) and new format (object with item and count)
-          let displayText = ''
+          let itemCount = 0
+          let itemName = ''
+          
           if (typeof item === 'object' && item.item) {
-            // New format: draw the item name repeated
-            displayText = `${item.item} `.repeat(item.count || 1).trim()
+            itemCount = item.count || 3
+            itemName = item.item
           } else {
-            // Old format: just display the string (strip emojis)
-            displayText = stripEmojis(String(item)) || 'Item'
+            itemCount = 3 + Math.floor(Math.random() * 5)
+            itemName = stripEmojis(String(item)) || 'shapes'
           }
           
-          page.drawText(`${idx + 1}. Count: ${displayText}`, { x: x + 30, y: countY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
-          page.drawText('Answer: ____', { x: x + width - 100, y: countY, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
-          countY -= 40
+          // Draw shapes to count
+          const shapeBoxX = x + 30
+          const shapeBoxWidth = width - 150
+          const shapeBoxHeight = 35
+          
+          page.drawRectangle({ x: shapeBoxX, y: countY - shapeBoxHeight, width: shapeBoxWidth, height: shapeBoxHeight, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
+          
+          // Draw actual shapes (stars, circles, squares, triangles)
+          const shapeTypes = ['circle', 'square', 'triangle', 'star']
+          const shapeType = shapeTypes[idx % shapeTypes.length]
+          const spacing = Math.min(30, shapeBoxWidth / (itemCount + 1))
+          
+          for (let s = 0; s < itemCount; s++) {
+            const sx = shapeBoxX + 20 + s * spacing
+            const sy = countY - shapeBoxHeight / 2
+            
+            if (shapeType === 'circle') {
+              page.drawCircle({ x: sx, y: sy, size: 10, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+            } else if (shapeType === 'square') {
+              page.drawRectangle({ x: sx - 8, y: sy - 8, width: 16, height: 16, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 1.5 })
+            } else if (shapeType === 'triangle') {
+              page.drawLine({ start: { x: sx, y: sy + 8 }, end: { x: sx - 8, y: sy - 8 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+              page.drawLine({ start: { x: sx - 8, y: sy - 8 }, end: { x: sx + 8, y: sy - 8 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+              page.drawLine({ start: { x: sx + 8, y: sy - 8 }, end: { x: sx, y: sy + 8 }, thickness: 1.5, color: rgb(0.3, 0.3, 0.3) })
+            } else { // star
+              for (let r = 0; r < 5; r++) {
+                const angle1 = (r * 2 * Math.PI / 5) - Math.PI / 2
+                const angle2 = ((r + 2) * 2 * Math.PI / 5) - Math.PI / 2
+                page.drawLine({
+                  start: { x: sx + Math.cos(angle1) * 10, y: sy + Math.sin(angle1) * 10 },
+                  end: { x: sx + Math.cos(angle2) * 10, y: sy + Math.sin(angle2) * 10 },
+                  thickness: 1.5, color: rgb(0.3, 0.3, 0.3)
+                })
+              }
+            }
+          }
+          
+          page.drawText(`${idx + 1}. How many ${shapeType}s?`, { x: shapeBoxX + shapeBoxWidth + 10, y: countY - 15, size: 10, font, color: rgb(0.3, 0.3, 0.3) })
+          page.drawText('____', { x: shapeBoxX + shapeBoxWidth + 10, y: countY - 30, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+          countY -= 55
         }
       })
       break
