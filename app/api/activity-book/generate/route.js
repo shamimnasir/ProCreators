@@ -2971,21 +2971,67 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'connect-dots':
-      // Draw dots in a pattern
-      const dotCount = content.dots || 30
-      const dotsPerRow = Math.ceil(Math.sqrt(dotCount))
-      const dotSpacingX = (width - 60) / dotsPerRow
-      const dotSpacingY = (height - 80) / dotsPerRow
+      // Draw dots that form an actual picture (butterfly shape)
+      const cdDotCount = content.dots || 30
       
-      for (let i = 0; i < Math.min(dotCount, 50); i++) {
-        const row = Math.floor(i / dotsPerRow)
-        const col = i % dotsPerRow
-        const dotX = x + 40 + col * dotSpacingX + (Math.random() - 0.5) * 20
-        const dotY = y + height - 50 - row * dotSpacingY + (Math.random() - 0.5) * 20
-        
-        page.drawCircle({ x: dotX, y: dotY, size: 4, color: rgb(0.3, 0.3, 0.3) })
-        page.drawText(String(i + 1), { x: dotX + 5, y: dotY + 2, size: 7, font, color: rgb(0.4, 0.4, 0.4) })
+      page.drawText('Connect the dots in order to reveal the picture!', { x: centerX - 120, y: y + height - 25, size: 10, font: boldFont, color: pColor })
+      
+      // Create a butterfly shape with numbered dots
+      const bfCenterX = centerX
+      const bfCenterY = centerY
+      const bfWingRadius = Math.min(width, height) / 4
+      
+      const butterflyDots = []
+      
+      // Left wing (top) - 8 dots
+      for (let i = 0; i < 8; i++) {
+        const angle = Math.PI / 2 + (i * Math.PI / 8)
+        const r = bfWingRadius * (0.8 + Math.sin(i * 0.5) * 0.3)
+        butterflyDots.push({
+          x: bfCenterX - 30 + Math.cos(angle) * r * 0.8,
+          y: bfCenterY + Math.sin(angle) * r
+        })
       }
+      
+      // Left wing (bottom) - 8 dots
+      for (let i = 0; i < 8; i++) {
+        const angle = Math.PI / 2 - (i * Math.PI / 8)
+        const r = bfWingRadius * (0.6 + Math.sin(i * 0.5) * 0.2)
+        butterflyDots.push({
+          x: bfCenterX - 30 + Math.cos(angle) * r * 0.8,
+          y: bfCenterY + Math.sin(angle) * r - 20
+        })
+      }
+      
+      // Body (6 dots down the center)
+      for (let i = 0; i < 6; i++) {
+        butterflyDots.push({
+          x: bfCenterX,
+          y: bfCenterY + 60 - i * 25
+        })
+      }
+      
+      // Right wing (top) - 8 dots  
+      for (let i = 7; i >= 0; i--) {
+        const angle = Math.PI / 2 + (i * Math.PI / 8)
+        const r = bfWingRadius * (0.8 + Math.sin(i * 0.5) * 0.3)
+        butterflyDots.push({
+          x: bfCenterX + 30 - Math.cos(angle) * r * 0.8,
+          y: bfCenterY + Math.sin(angle) * r
+        })
+      }
+      
+      // Draw all dots with numbers
+      butterflyDots.slice(0, Math.min(cdDotCount, 30)).forEach((dot, i) => {
+        page.drawCircle({ x: dot.x, y: dot.y, size: 4, color: rgb(0.2, 0.2, 0.2) })
+        page.drawText(String(i + 1), { x: dot.x + 6, y: dot.y + 2, size: 8, font, color: rgb(0.4, 0.4, 0.4) })
+      })
+      
+      // Add antennae hint
+      page.drawCircle({ x: bfCenterX - 15, y: bfCenterY + 80, size: 3, color: rgb(0.2, 0.2, 0.2) })
+      page.drawCircle({ x: bfCenterX + 15, y: bfCenterY + 80, size: 3, color: rgb(0.2, 0.2, 0.2) })
+      
+      page.drawText('Hint: It has wings!', { x: centerX - 40, y: y + 30, size: 9, font, color: rgb(0.6, 0.6, 0.6) })
       break
       
     case 'tic-tac-toe':
