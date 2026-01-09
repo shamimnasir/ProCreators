@@ -1442,8 +1442,14 @@ Make all content appropriate for children, educational, fun, and specifically re
   return { ...THEMED_CONTENT.default, customTheme: theme, visualContext: theme }
 }
 
-function generateLogicPuzzle(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
+async function generateLogicPuzzle(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
   const puzzles = themedContent.logicPuzzles
   const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)]
   
@@ -1455,8 +1461,14 @@ function generateLogicPuzzle(theme, difficulty, ageGroup) {
   }
 }
 
-function generateRiddles(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
+async function generateRiddles(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
   const allRiddles = themedContent.riddles
   
   // Shuffle and pick riddles based on difficulty
