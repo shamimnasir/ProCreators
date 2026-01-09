@@ -915,6 +915,26 @@ function generateHangman(theme, difficulty, ageGroup) {
   }
   
   // Find matching theme
+  // Check for AI-generated content first
+  let aiContent = null
+  const themedContentCheck = getThemedContent(theme)
+  if (themedContentCheck.needsAIGeneration && theme) {
+    aiContent = await generateAIThemedContent(theme)
+  }
+  
+  // If AI content has hangman words, use those
+  if (aiContent && aiContent.hangmanWords && aiContent.hangmanWords.length > 0) {
+    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
+    const words = [...aiContent.hangmanWords].sort(() => Math.random() - 0.5).slice(0, count)
+    return {
+      type: 'hangman',
+      words,
+      theme,
+      instructions: `Guess the ${theme || ''} words before the hangman is complete!`
+    }
+  }
+  
+  // Find matching theme from predefined
   let words = themedWords.animals
   const normalizedTheme = theme?.toLowerCase() || ''
   for (const [key, value] of Object.entries(themedWords)) {
@@ -935,8 +955,13 @@ function generateHangman(theme, difficulty, ageGroup) {
   }
 }
 
-function generateBingo(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
+async function generateBingo(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
   
   return {
     type: 'bingo',
