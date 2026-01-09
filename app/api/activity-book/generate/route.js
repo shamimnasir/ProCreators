@@ -664,7 +664,7 @@ function generatePatternActivity(theme, difficulty, ageGroup) {
   }
 }
 
-function generateWouldYouRather(theme, difficulty, ageGroup) {
+async function generateWouldYouRather(theme, difficulty, ageGroup) {
   const themedQuestions = {
     sports: [
       'Would you rather be a famous soccer player or a famous basketball player?',
