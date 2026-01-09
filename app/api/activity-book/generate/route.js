@@ -588,75 +588,213 @@ function generatePatternActivity(theme, difficulty, ageGroup) {
 }
 
 function generateWouldYouRather(theme, difficulty, ageGroup) {
-  const questions = {
-    animals: [
-      'Would you rather have a pet dragon or a pet unicorn?',
-      'Would you rather swim like a dolphin or fly like an eagle?',
-      'Would you rather be able to talk to animals or speak every human language?'
+  const themedQuestions = {
+    sports: [
+      'Would you rather be a famous soccer player or a famous basketball player?',
+      'Would you rather win an Olympic gold medal or a World Cup trophy?',
+      'Would you rather be the fastest runner or the strongest weightlifter?',
+      'Would you rather play on a team or compete in individual sports?',
+      'Would you rather be a coach or a referee?'
     ],
     food: [
       'Would you rather only eat pizza or only eat ice cream for a week?',
-      'Would you rather have a chocolate fountain or a pizza vending machine at home?'
+      'Would you rather have a chocolate fountain or a pizza vending machine at home?',
+      'Would you rather eat only sweet foods or only salty foods?',
+      'Would you rather be a chef or a food taster?',
+      'Would you rather have unlimited candy or unlimited fruit?'
     ],
-    travel: [
+    animals: [
+      'Would you rather have a pet dragon or a pet unicorn?',
+      'Would you rather swim like a dolphin or fly like an eagle?',
+      'Would you rather be able to talk to animals or speak every human language?',
+      'Would you rather be as strong as a gorilla or as fast as a cheetah?',
+      'Would you rather have a lion or an elephant as your best friend?'
+    ],
+    ocean: [
+      'Would you rather be a dolphin or a shark?',
+      'Would you rather explore a coral reef or a deep sea trench?',
+      'Would you rather have gills to breathe underwater or echolocation like a whale?',
+      'Would you rather ride a whale or swim with a school of fish?',
+      'Would you rather find buried treasure or discover a new sea creature?'
+    ],
+    space: [
       'Would you rather visit outer space or the bottom of the ocean?',
-      'Would you rather travel by magic carpet or teleportation?'
+      'Would you rather live on Mars or the Moon?',
+      'Would you rather be an astronaut or an alien explorer?',
+      'Would you rather discover a new planet or a new star?',
+      'Would you rather travel at the speed of light or teleport anywhere instantly?'
+    ],
+    dinosaurs: [
+      'Would you rather ride a T-Rex or a Pterodactyl?',
+      'Would you rather be a paleontologist or a time traveler to the dinosaur age?',
+      'Would you rather have a pet baby dinosaur or find a real dinosaur egg?',
+      'Would you rather be as big as a Brachiosaurus or as fast as a Velociraptor?',
+      'Would you rather discover a new dinosaur species or bring one back to life?'
+    ],
+    vehicles: [
+      'Would you rather fly a plane or captain a ship?',
+      'Would you rather have a flying car or a submarine car?',
+      'Would you rather drive the fastest race car or the biggest truck?',
+      'Would you rather travel by helicopter or by hot air balloon?',
+      'Would you rather build rockets or design trains?'
+    ],
+    nature: [
+      'Would you rather live in a treehouse or in a cave?',
+      'Would you rather control the weather or talk to plants?',
+      'Would you rather be able to grow any plant instantly or never need sleep?',
+      'Would you rather climb the tallest mountain or swim in every ocean?',
+      'Would you rather see a rainbow every day or never feel cold?'
     ]
   }
   
+  const questions = themedQuestions[theme?.toLowerCase()] || themedQuestions.animals
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+  const selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, count)
+  
   return {
     type: 'would-you-rather',
-    questions: questions[theme] || questions.animals,
-    instructions: 'Circle your choice and explain why!'
+    questions: selectedQuestions,
+    theme,
+    instructions: `Circle your ${theme || ''} choice and explain why!`
   }
 }
 
 function generateTrivia(theme, difficulty, ageGroup) {
+  const themedTrivia = {
+    sports: [
+      { q: 'How many players are on a soccer team?', a: '11', options: ['9', '11', '13'] },
+      { q: 'What sport uses a racket and shuttlecock?', a: 'Badminton', options: ['Tennis', 'Badminton', 'Squash'] },
+      { q: 'In basketball, how many points is a free throw?', a: '1', options: ['1', '2', '3'] },
+      { q: 'What is the fastest sport on grass?', a: 'Polo', options: ['Soccer', 'Polo', 'Cricket'] },
+      { q: 'How many holes are on a golf course?', a: '18', options: ['9', '18', '21'] }
+    ],
+    food: [
+      { q: 'What country is pizza originally from?', a: 'Italy', options: ['USA', 'Italy', 'France'] },
+      { q: 'What vitamin do carrots have lots of?', a: 'Vitamin A', options: ['Vitamin A', 'Vitamin C', 'Vitamin D'] },
+      { q: 'What is the main ingredient in bread?', a: 'Flour', options: ['Rice', 'Flour', 'Sugar'] },
+      { q: 'Which fruit has its seeds on the outside?', a: 'Strawberry', options: ['Apple', 'Strawberry', 'Orange'] },
+      { q: 'What do bees make?', a: 'Honey', options: ['Sugar', 'Honey', 'Syrup'] }
+    ],
+    animals: [
+      { q: 'What is the largest animal?', a: 'Blue Whale', options: ['Elephant', 'Blue Whale', 'Giraffe'] },
+      { q: 'How many legs does a spider have?', a: '8', options: ['6', '8', '10'] },
+      { q: 'What is a baby kangaroo called?', a: 'Joey', options: ['Cub', 'Joey', 'Pup'] },
+      { q: 'Which bird cannot fly?', a: 'Penguin', options: ['Penguin', 'Eagle', 'Parrot'] },
+      { q: 'What is the fastest land animal?', a: 'Cheetah', options: ['Lion', 'Cheetah', 'Horse'] }
+    ],
+    ocean: [
+      { q: 'What is the largest ocean animal?', a: 'Blue Whale', options: ['Shark', 'Blue Whale', 'Octopus'] },
+      { q: 'How many arms does an octopus have?', a: '8', options: ['6', '8', '10'] },
+      { q: 'What sea creature has a shell?', a: 'Turtle', options: ['Dolphin', 'Turtle', 'Shark'] },
+      { q: 'What is a group of dolphins called?', a: 'Pod', options: ['School', 'Pod', 'Herd'] },
+      { q: 'Which is the largest ocean?', a: 'Pacific', options: ['Atlantic', 'Pacific', 'Indian'] }
+    ],
+    space: [
+      { q: 'What planet is known as the Red Planet?', a: 'Mars', options: ['Venus', 'Mars', 'Jupiter'] },
+      { q: 'How many planets are in our solar system?', a: '8', options: ['7', '8', '9'] },
+      { q: 'What is the closest star to Earth?', a: 'The Sun', options: ['The Sun', 'North Star', 'Sirius'] },
+      { q: 'Which planet has the most moons?', a: 'Saturn', options: ['Jupiter', 'Saturn', 'Neptune'] },
+      { q: 'What do astronauts wear in space?', a: 'Space suit', options: ['Wetsuit', 'Space suit', 'Jumpsuit'] }
+    ],
+    dinosaurs: [
+      { q: 'What does T-Rex stand for?', a: 'Tyrant Lizard King', options: ['Tall Rex', 'Tyrant Lizard King', 'Terrible Rex'] },
+      { q: 'Which dinosaur could fly?', a: 'Pterodactyl', options: ['T-Rex', 'Pterodactyl', 'Triceratops'] },
+      { q: 'What do we call scientists who study dinosaurs?', a: 'Paleontologists', options: ['Biologists', 'Paleontologists', 'Geologists'] },
+      { q: 'How many horns did Triceratops have?', a: '3', options: ['2', '3', '4'] },
+      { q: 'Were dinosaurs reptiles or mammals?', a: 'Reptiles', options: ['Mammals', 'Reptiles', 'Birds'] }
+    ],
+    vehicles: [
+      { q: 'How many wheels does a bicycle have?', a: '2', options: ['2', '3', '4'] },
+      { q: 'What vehicle travels on tracks?', a: 'Train', options: ['Car', 'Train', 'Boat'] },
+      { q: 'What vehicle can go underwater?', a: 'Submarine', options: ['Airplane', 'Submarine', 'Helicopter'] },
+      { q: 'What is the fastest production car?', a: 'Bugatti', options: ['Ferrari', 'Bugatti', 'Lamborghini'] },
+      { q: 'What powers most electric cars?', a: 'Battery', options: ['Gasoline', 'Battery', 'Steam'] }
+    ],
+    nature: [
+      { q: 'What is the tallest type of tree?', a: 'Redwood', options: ['Oak', 'Redwood', 'Pine'] },
+      { q: 'How many colors are in a rainbow?', a: '7', options: ['5', '7', '9'] },
+      { q: 'What do plants need to make food?', a: 'Sunlight', options: ['Darkness', 'Sunlight', 'Salt'] },
+      { q: 'What is the longest river?', a: 'Nile', options: ['Amazon', 'Nile', 'Mississippi'] },
+      { q: 'What season do leaves fall?', a: 'Autumn', options: ['Spring', 'Autumn', 'Winter'] }
+    ]
+  }
+  
+  const questions = themedTrivia[theme?.toLowerCase()] || themedTrivia.animals
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+  const selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, count)
+  
   return {
     type: 'trivia',
-    questions: [
-      { q: 'What is the largest animal?', a: 'Blue Whale', options: ['Elephant', 'Blue Whale', 'Giraffe'] },
-      { q: 'How many legs does a spider have?', a: '8', options: ['6', '8', '10'] }
-    ],
-    instructions: 'Circle the correct answer for each question!'
+    questions: selectedQuestions.map(q => ({ ...q, correct: q.a })),
+    theme,
+    instructions: `Test your ${theme || ''} knowledge! Circle the correct answer.`
   }
 }
 
 function generateTicTacToe(theme, difficulty, ageGroup) {
   return {
     type: 'tic-tac-toe',
-    grids: 6,
+    grids: difficulty === 'easy' ? 4 : difficulty === 'hard' ? 8 : 6,
+    theme,
     instructions: 'Play Tic-Tac-Toe with a friend! Take turns placing X and O.'
   }
 }
 
 function generateHangman(theme, difficulty, ageGroup) {
-  const words = {
-    animals: ['ELEPHANT', 'PENGUIN', 'DOLPHIN', 'BUTTERFLY'],
-    space: ['ASTEROID', 'SATELLITE', 'GALAXY', 'NEBULA']
+  const themedWords = {
+    sports: ['BASKETBALL', 'SOCCER', 'TENNIS', 'SWIMMING', 'BASEBALL', 'HOCKEY', 'FOOTBALL', 'VOLLEYBALL'],
+    food: ['SPAGHETTI', 'HAMBURGER', 'CHOCOLATE', 'SANDWICH', 'PANCAKES', 'CUPCAKE', 'POPCORN', 'SMOOTHIE'],
+    animals: ['ELEPHANT', 'PENGUIN', 'DOLPHIN', 'BUTTERFLY', 'KANGAROO', 'GIRAFFE', 'CROCODILE', 'FLAMINGO'],
+    ocean: ['JELLYFISH', 'STARFISH', 'SEAHORSE', 'OCTOPUS', 'SEAWEED', 'DOLPHIN', 'MERMAID', 'TREASURE'],
+    space: ['ASTEROID', 'SATELLITE', 'GALAXY', 'NEBULA', 'ASTRONAUT', 'SPACESHIP', 'UNIVERSE', 'TELESCOPE'],
+    dinosaurs: ['DINOSAUR', 'TRICERATOPS', 'PTERODACTYL', 'RAPTOR', 'FOSSIL', 'PREHISTORIC', 'JURASSIC', 'SKELETON'],
+    vehicles: ['HELICOPTER', 'SUBMARINE', 'MOTORCYCLE', 'AMBULANCE', 'EXCAVATOR', 'TRACTOR', 'LIMOUSINE', 'SAILBOAT'],
+    nature: ['BUTTERFLY', 'WATERFALL', 'MOUNTAIN', 'RAINBOW', 'SUNFLOWER', 'HURRICANE', 'TORNADO', 'GLACIER']
   }
+  
+  const words = themedWords[theme?.toLowerCase()] || themedWords.animals
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
+  const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
   
   return {
     type: 'hangman',
-    words: words[theme] || words.animals,
-    instructions: 'Guess the letters to complete each word before the hangman is drawn!'
+    words: selectedWords,
+    theme,
+    instructions: `Guess the ${theme || ''} words before the hangman is complete!`
   }
 }
 
 function generateBingo(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
   return {
     type: 'bingo',
-    cards: 4,
+    cards: difficulty === 'easy' ? 2 : difficulty === 'hard' ? 6 : 4,
+    items: themedContent.memoryItems || ['Star', 'Heart', 'Moon', 'Sun'],
     theme,
-    instructions: 'Use these bingo cards to play with friends and family!'
+    instructions: `Play ${theme || ''} Bingo with friends and family!`
   }
 }
 
 function generateTravelGames(theme, difficulty, ageGroup) {
+  const themedGames = {
+    sports: ['Sports I Spy', 'Jersey Number Hunt', 'Stadium Scavenger Hunt', 'Team Logo Bingo'],
+    food: ['Food I Spy', 'Restaurant Sign Hunt', 'Snack Scavenger Hunt', 'Menu Bingo'],
+    animals: ['Animal I Spy', 'Farm Animal Hunt', 'Wildlife Scavenger Hunt', 'Animal Bingo'],
+    ocean: ['Beach I Spy', 'Shell Collecting', 'Ocean Scavenger Hunt', 'Sea Life Bingo'],
+    space: ['Star Gazing List', 'Constellation Hunt', 'Night Sky Scavenger Hunt', 'Planet Bingo'],
+    dinosaurs: ['Fossil Hunt Game', 'Dino Name Race', 'Museum Scavenger Hunt', 'Dinosaur Bingo'],
+    vehicles: ['Vehicle I Spy', 'License Plate Hunt', 'Road Trip Scavenger Hunt', 'Car Bingo'],
+    nature: ['Nature I Spy', 'Tree Identification', 'Outdoor Scavenger Hunt', 'Bird Bingo']
+  }
+  
+  const games = themedGames[theme?.toLowerCase()] || themedGames.animals
+  
   return {
     type: 'travel-games',
-    games: ['I Spy checklist', 'License Plate Game', 'Road Trip Scavenger Hunt'],
-    instructions: 'Fun games to play on your next trip!'
+    games,
+    theme,
+    instructions: `Fun ${theme || ''} games to play on your next trip!`
   }
 }
 
