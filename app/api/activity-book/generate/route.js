@@ -1490,15 +1490,37 @@ Make all content appropriate for children, educational, fun, and specifically re
     if (result && result.success && result.content) {
       // Clean up the result - remove markdown code blocks if present
       let cleanResult = result.content.trim()
+      
+      // Remove markdown code blocks
       if (cleanResult.startsWith('```json')) {
         cleanResult = cleanResult.replace(/^```json\n?/, '').replace(/\n?```$/, '')
       } else if (cleanResult.startsWith('```')) {
         cleanResult = cleanResult.replace(/^```\n?/, '').replace(/\n?```$/, '')
       }
       
+      // Extract JSON object - find the first { and last } to handle extra text
+      const firstBrace = cleanResult.indexOf('{')
+      const lastBrace = cleanResult.lastIndexOf('}')
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        cleanResult = cleanResult.substring(firstBrace, lastBrace + 1)
+      }
+      
       console.log('Cleaned AI response:', cleanResult.substring(0, 300))
       
-      const aiContent = JSON.parse(cleanResult)
+      // Try to parse JSON, with fallback
+      let aiContent
+      try {
+        aiContent = JSON.parse(cleanResult)
+      } catch (parseError) {
+        console.error('JSON parse error, trying to fix:', parseError.message)
+        // Try to fix common JSON issues
+        cleanResult = cleanResult
+          .replace(/,\s*}/g, '}')  // Remove trailing commas before }
+          .replace(/,\s*]/g, ']')  // Remove trailing commas before ]
+          .replace(/'/g, '"')      // Replace single quotes with double quotes
+        aiContent = JSON.parse(cleanResult)
+      }
       
       // Build themed content structure
       const generatedContent = {
