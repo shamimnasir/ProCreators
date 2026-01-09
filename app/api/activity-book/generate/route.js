@@ -301,6 +301,9 @@ function generateSudoku(theme, difficulty, ageGroup) {
 }
 
 function generateMaze(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  const mazeTheme = themedContent.mazeTheme || { start: 'START', end: 'FINISH', instruction: 'Find your way through the maze!' }
+  
   const sizes = { easy: 8, medium: 15, hard: 25 }
   const size = sizes[difficulty] || 12
   
@@ -309,30 +312,62 @@ function generateMaze(theme, difficulty, ageGroup) {
     size,
     start: { x: 0, y: 0 },
     end: { x: size - 1, y: size - 1 },
+    startLabel: mazeTheme.start,
+    endLabel: mazeTheme.end,
     theme,
-    instructions: `Help the ${theme === 'animals' ? 'lost animal' : 'explorer'} find their way through the maze!`
+    seed: Date.now() + Math.random(),
+    instructions: mazeTheme.instruction
   }
 }
 
 function generateSpotDifference(theme, difficulty, ageGroup) {
-  const differences = difficulty === 'easy' ? 5 : difficulty === 'hard' ? 15 : 10
+  const differences = difficulty === 'easy' ? 5 : difficulty === 'hard' ? 15 : 8
+  
+  // Theme-specific scene descriptions
+  const themeScenes = {
+    sports: 'stadium scene',
+    food: 'kitchen scene',
+    animals: 'zoo scene',
+    ocean: 'underwater scene',
+    space: 'space scene',
+    dinosaurs: 'prehistoric scene',
+    vehicles: 'parking lot scene',
+    nature: 'forest scene'
+  }
   
   return {
     type: 'spot-difference',
     differences,
+    scene: themeScenes[theme?.toLowerCase()] || 'picture',
     theme,
-    instructions: `Can you spot all ${differences} differences between these two pictures?`
+    instructions: `Can you spot all ${differences} differences between these two ${themeScenes[theme?.toLowerCase()] || 'picture'}s?`
   }
 }
 
 function generateConnectDots(theme, difficulty, ageGroup) {
   const dots = difficulty === 'easy' ? 20 : difficulty === 'hard' ? 100 : 50
   
+  // Theme-specific reveal hints
+  const themeReveals = {
+    sports: ['a soccer ball', 'a trophy', 'a basketball', 'a tennis racket'],
+    food: ['a cupcake', 'a pizza slice', 'an apple', 'an ice cream cone'],
+    animals: ['a friendly dog', 'a cute cat', 'a wise owl', 'a happy dolphin'],
+    ocean: ['a starfish', 'a whale', 'a seahorse', 'an octopus'],
+    space: ['a rocket ship', 'a planet', 'a star', 'an alien spaceship'],
+    dinosaurs: ['a T-Rex', 'a dinosaur egg', 'a Triceratops', 'a Pterodactyl'],
+    vehicles: ['a race car', 'an airplane', 'a rocket', 'a sailboat'],
+    nature: ['a butterfly', 'a flower', 'a rainbow', 'a tree']
+  }
+  
+  const reveals = themeReveals[theme?.toLowerCase()] || ['a surprise picture']
+  const reveal = reveals[Math.floor(Math.random() * reveals.length)]
+  
   return {
     type: 'connect-dots',
     dots,
+    reveal,
     theme,
-    instructions: `Connect the dots from 1 to ${dots} to reveal a surprise ${theme} picture!`
+    instructions: `Connect the dots from 1 to ${dots} to reveal ${reveal}!`
   }
 }
 
