@@ -3649,11 +3649,35 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       const sequences = content.sequences || []
       let seqY = y + height - 50
       
+      page.drawText('Complete each number sequence:', { x: x + 20, y: seqY, size: 11, font: boldFont, color: pColor })
+      seqY -= 35
+      
       sequences.forEach((s, idx) => {
         if (seqY > y + 80) {
-          const pattern = (s.pattern || []).join(', ')
-          page.drawText(`${idx + 1}. ${pattern}`, { x: x + 30, y: seqY, size: 14, font, color: rgb(0.2, 0.2, 0.2) })
-          seqY -= 35
+          const pattern = s.pattern || [2, 4, 6, 8]
+          const cellWidth = 45
+          
+          page.drawText(`${idx + 1}.`, { x: x + 30, y: seqY, size: 12, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          
+          // Draw sequence boxes with numbers
+          pattern.forEach((num, i) => {
+            const cellX = x + 60 + i * cellWidth
+            page.drawRectangle({ x: cellX, y: seqY - 25, width: 35, height: 30, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+            page.drawText(String(num), { x: cellX + 10, y: seqY - 17, size: 14, font: boldFont, color: rgb(0.2, 0.2, 0.2) })
+          })
+          
+          // Draw arrow pointing to empty boxes
+          const arrowX = x + 60 + pattern.length * cellWidth
+          page.drawText('→', { x: arrowX - 5, y: seqY - 15, size: 16, font: boldFont, color: rgb(0.5, 0.5, 0.5) })
+          
+          // Draw empty answer boxes
+          for (let a = 0; a < 2; a++) {
+            const answerX = arrowX + 15 + a * cellWidth
+            page.drawRectangle({ x: answerX, y: seqY - 25, width: 35, height: 30, borderColor: rgb(0.3, 0.3, 0.3), borderWidth: 2 })
+            page.drawText('?', { x: answerX + 12, y: seqY - 17, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
+          }
+          
+          seqY -= 55
         }
       })
       break
