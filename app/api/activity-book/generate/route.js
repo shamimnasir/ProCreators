@@ -1046,7 +1046,7 @@ async function generateColorByNumber(theme, difficulty, ageGroup) {
   }
 }
 
-function generateDoodleComplete(theme, difficulty, ageGroup) {
+async function generateDoodleComplete(theme, difficulty, ageGroup) {
   // Theme-specific doodle prompts
   const themedPrompts = {
     sports: ['Complete the soccer ball', 'Add details to the trophy', 'Finish the athlete', 'Draw the missing equipment'],
@@ -1059,7 +1059,29 @@ function generateDoodleComplete(theme, difficulty, ageGroup) {
     nature: ['Complete the flower petals', 'Add leaves to the tree', 'Finish the rainbow', 'Draw the butterfly pattern']
   }
   
-  const prompts = themedPrompts[theme?.toLowerCase()] || ['Complete the picture', 'Add details', 'Finish the drawing']
+  let prompts = themedPrompts[theme?.toLowerCase()]
+  
+  // Generate AI prompts for custom themes
+  if (!prompts && theme) {
+    const themedContent = getThemedContent(theme)
+    if (themedContent.needsAIGeneration) {
+      const aiContent = await generateAIThemedContent(theme)
+      if (aiContent.doodlePrompts && aiContent.doodlePrompts.length > 0) {
+        prompts = aiContent.doodlePrompts
+      }
+    }
+  }
+  
+  // Fallback with theme context
+  if (!prompts || prompts.length === 0) {
+    prompts = [
+      `Complete the ${theme} character`,
+      `Add magical details to this ${theme} scene`,
+      `Finish the ${theme} creature`,
+      `Draw the missing ${theme} elements`
+    ]
+  }
+  
   const count = difficulty === 'easy' ? 2 : difficulty === 'hard' ? 4 : 3
   const selectedPrompts = [...prompts].sort(() => Math.random() - 0.5).slice(0, count)
   
