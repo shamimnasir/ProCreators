@@ -503,33 +503,33 @@ function generateMatchingActivity(theme, difficulty, ageGroup) {
 function generateCountingActivity(theme, difficulty, ageGroup) {
   const themedContent = getThemedContent(theme)
   
-  // Theme-specific counting items
-  const themeIcons = {
-    sports: ['⚽', '🏀', '🎾', '⚾', '🏈', '🏐'],
-    food: ['🍎', '🍕', '🍪', '🍰', '🍌', '🍊'],
-    animals: ['🐱', '🐕', '🐦', '🐟', '🦁', '🐘'],
-    ocean: ['🐋', '🦈', '🐬', '🦀', '🐙', '🐚'],
-    space: ['⭐', '🌙', '🚀', '🪐', '☀️', '🛸'],
-    dinosaurs: ['🦖', '🦕', '🥚', '🦴', '🌋', '🌿'],
-    vehicles: ['🚗', '🚌', '✈️', '🚂', '🚢', '🚁'],
-    nature: ['🌸', '🌳', '☀️', '🌈', '🦋', '🍂']
+  // Theme-specific counting items (text-based for PDF compatibility)
+  const themeItems = {
+    sports: ['Ball', 'Goal', 'Medal', 'Trophy', 'Player', 'Team'],
+    food: ['Apple', 'Pizza', 'Cookie', 'Cake', 'Banana', 'Orange'],
+    animals: ['Cat', 'Dog', 'Bird', 'Fish', 'Lion', 'Elephant'],
+    ocean: ['Whale', 'Shark', 'Dolphin', 'Crab', 'Octopus', 'Shell'],
+    space: ['Star', 'Moon', 'Rocket', 'Planet', 'Sun', 'Comet'],
+    dinosaurs: ['Dino', 'Egg', 'Bone', 'Fossil', 'Footprint', 'Fern'],
+    vehicles: ['Car', 'Bus', 'Plane', 'Train', 'Boat', 'Bike'],
+    nature: ['Flower', 'Tree', 'Sun', 'Cloud', 'Butterfly', 'Leaf']
   }
   
-  const icons = themeIcons[theme?.toLowerCase()] || themeIcons.animals
+  const items = themeItems[theme?.toLowerCase()] || themeItems.animals
   const count = difficulty === 'easy' ? 4 : difficulty === 'hard' ? 8 : 6
-  const items = []
+  const countingItems = []
   const answers = []
   
   for (let i = 0; i < count; i++) {
-    const icon = icons[Math.floor(Math.random() * icons.length)]
+    const item = items[Math.floor(Math.random() * items.length)]
     const num = Math.floor(Math.random() * 8) + 1
-    items.push(icon.repeat(num))
+    countingItems.push({ item, count: num })
     answers.push(num)
   }
   
   return {
     type: 'counting',
-    items,
+    items: countingItems,
     answers,
     theme,
     instructions: `Count the ${theme || ''} items and write the number!`
@@ -539,16 +539,16 @@ function generateCountingActivity(theme, difficulty, ageGroup) {
 function generatePatternActivity(theme, difficulty, ageGroup) {
   const themedContent = getThemedContent(theme)
   
-  // Theme-specific pattern items
+  // Theme-specific pattern items (text-based for PDF compatibility)
   const themePatternItems = {
-    sports: ['⚽', '🏀', '🎾', '⚾', '🏈'],
-    food: ['🍎', '🍌', '🍊', '🍇', '🍓'],
-    animals: ['🐱', '🐕', '🐦', '🐟', '🐸'],
-    ocean: ['🐋', '🦈', '🐬', '🦀', '🐙'],
-    space: ['⭐', '🌙', '🚀', '🪐', '☀️'],
-    dinosaurs: ['🦖', '🦕', '🥚', '🦴', '🌿'],
-    vehicles: ['🚗', '🚌', '✈️', '🚂', '🚢'],
-    nature: ['🌸', '🌳', '☀️', '🌧️', '🦋']
+    sports: ['Ball', 'Goal', 'Medal', 'Star', 'Trophy'],
+    food: ['Apple', 'Banana', 'Orange', 'Grape', 'Cherry'],
+    animals: ['Cat', 'Dog', 'Bird', 'Fish', 'Frog'],
+    ocean: ['Whale', 'Shark', 'Dolphin', 'Crab', 'Fish'],
+    space: ['Star', 'Moon', 'Rocket', 'Planet', 'Sun'],
+    dinosaurs: ['Dino', 'Egg', 'Bone', 'Leaf', 'Rock'],
+    vehicles: ['Car', 'Bus', 'Plane', 'Train', 'Boat'],
+    nature: ['Flower', 'Tree', 'Sun', 'Cloud', 'Leaf']
   }
   
   const items = themePatternItems[theme?.toLowerCase()] || themePatternItems.animals
