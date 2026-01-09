@@ -1492,38 +1492,40 @@ async function generateActivityPages(body) {
 
 // Get creative activity title
 function getActivityTitle(activityId, theme, pageNum) {
+  const cleanTheme = theme ? theme.charAt(0).toUpperCase() + theme.slice(1).toLowerCase() : ''
+  
   const titles = {
-    'word-search': `${theme} Word Search #${Math.ceil(pageNum / 3)}`,
-    'crossword': `${theme} Crossword Puzzle`,
-    'sudoku': `Number Fun Sudoku`,
-    'maze': `${theme} Adventure Maze`,
-    'spot-difference': `Spot the Differences`,
-    'connect-dots': `Connect the Dots Surprise`,
-    'math': `Math Challenge`,
-    'spelling': `Spelling Fun`,
-    'tracing': `Letter & Number Tracing`,
-    'matching': `Match It Up!`,
-    'counting': `Counting Activity`,
-    'patterns': `Pattern Detective`,
-    'would-you-rather': `Would You Rather?`,
-    'trivia': `${theme} Trivia Time`,
+    'word-search': `${cleanTheme} Word Search #${Math.ceil(pageNum / 3)}`,
+    'crossword': `${cleanTheme} Crossword Puzzle`,
+    'sudoku': `${cleanTheme} Sudoku Challenge`,
+    'maze': `${cleanTheme} Adventure Maze`,
+    'spot-difference': `${cleanTheme} Spot the Differences`,
+    'connect-dots': `${cleanTheme} Connect the Dots`,
+    'math': `${cleanTheme} Math Challenge`,
+    'spelling': `${cleanTheme} Spelling Fun`,
+    'tracing': `${cleanTheme} Word Tracing`,
+    'matching': `${cleanTheme} Match It Up!`,
+    'counting': `${cleanTheme} Counting Activity`,
+    'patterns': `${cleanTheme} Pattern Detective`,
+    'would-you-rather': `${cleanTheme} Would You Rather?`,
+    'trivia': `${cleanTheme} Trivia Time`,
     'tic-tac-toe': `Tic-Tac-Toe Games`,
-    'hangman': `Guess the Word`,
-    'bingo': `${theme} Bingo`,
-    'travel-games': `Travel Fun Games`,
-    'color-by-number': `Color By Number`,
-    'doodle-complete': `Complete the Doodle`,
-    'drawing-prompts': `Draw It!`,
-    'connect-color': `Connect & Color`,
-    'logic-puzzle': `Logic Challenge`,
-    'riddles': `Riddle Me This!`,
-    'maze-complex': `Super Maze Challenge`,
-    'memory': `Memory Match Cards`,
-    'sequences': `Number Sequences`,
-    'visual-puzzles': `Visual Brain Teasers`
+    'hangman': `${cleanTheme} Guess the Word`,
+    'bingo': `${cleanTheme} Bingo`,
+    'travel-games': `${cleanTheme} Travel Fun`,
+    'color-by-number': `${cleanTheme} Color By Number`,
+    'doodle-complete': `${cleanTheme} Complete the Doodle`,
+    'drawing-prompts': `${cleanTheme} Draw It!`,
+    'connect-color': `${cleanTheme} Connect & Color`,
+    'logic-puzzle': `${cleanTheme} Logic Challenge`,
+    'riddles': `${cleanTheme} Riddle Me This!`,
+    'maze-complex': `${cleanTheme} Super Maze`,
+    'memory': `${cleanTheme} Memory Match`,
+    'sequences': `${cleanTheme} Number Sequences`,
+    'visual-puzzles': `${cleanTheme} Visual Puzzles`
   }
   
-  return titles[activityId] || `Activity ${pageNum}`
+  return titles[activityId] || `${cleanTheme} Activity ${pageNum}`
 }
 
 // Generate PDF
