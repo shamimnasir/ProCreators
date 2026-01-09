@@ -888,18 +888,37 @@ async function generateTrivia(theme, difficulty, ageGroup) {
       { q: 'How many continents are there?', a: '7', options: ['5', '6', '7'] },
       { q: 'What is H2O commonly known as?', a: 'Water', options: ['Oxygen', 'Water', 'Hydrogen'] },
       { q: 'What do you call a shape with 4 equal sides?', a: 'Square', options: ['Rectangle', 'Square', 'Triangle'] }
+    ],
+    water: [
+      { q: 'What is the largest body of water on Earth?', a: 'Pacific Ocean', options: ['Atlantic Ocean', 'Pacific Ocean', 'Indian Ocean'] },
+      { q: 'What sport uses a kayak?', a: 'Kayaking', options: ['Surfing', 'Kayaking', 'Water Polo'] },
+      { q: 'How many laps is an Olympic swimming pool race?', a: 'Depends on distance', options: ['1', '4', 'Depends on distance'] },
+      { q: 'What do you call a person who saves swimmers?', a: 'Lifeguard', options: ['Firefighter', 'Lifeguard', 'Coach'] },
+      { q: 'What water sport uses a board and wave?', a: 'Surfing', options: ['Surfing', 'Diving', 'Sailing'] },
+      { q: 'What percent of Earth is covered by water?', a: '71%', options: ['50%', '71%', '90%'] },
+      { q: 'What is the fastest swimming stroke?', a: 'Freestyle', options: ['Breaststroke', 'Freestyle', 'Butterfly'] },
+      { q: 'What do scuba divers breathe underwater?', a: 'Compressed air', options: ['Pure oxygen', 'Compressed air', 'Helium'] }
     ]
   }
   
-  // Find matching theme
+  // Find matching theme - prioritize specific themes first
   let questions = themedTrivia.animals
   const normalizedTheme = theme?.toLowerCase() || ''
-  for (const [key, value] of Object.entries(themedTrivia)) {
-    if (normalizedTheme.includes(key)) {
-      questions = value
+  
+  // Priority order for matching - water/ocean should come before sports
+  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
+  
+  for (const priority of priorityOrder) {
+    if (normalizedTheme.includes(priority)) {
+      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
+        questions = themedTrivia.water
+      } else if (themedTrivia[priority]) {
+        questions = themedTrivia[priority]
+      }
       break
     }
   }
+  
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
   const selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, count)
   
