@@ -3229,24 +3229,83 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'color-by-number':
-      // Draw a simple color by number outline
-      page.drawRectangle({ x: x + 20, y: y + 60, width: width - 40, height: height - 100, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
+      // Draw a meaningful color by number picture based on theme
+      const colors = content.colors || { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange', 6: 'Purple' }
+      const pictureDesc = content.pictureDescription || `${content.theme || 'Fun'} picture`
       
-      // Draw numbered sections
-      const colors = content.colors || { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange' }
-      let colorKeyY = y + 40
-      page.drawText('Color Key:', { x: x + 20, y: colorKeyY, size: 9, font: boldFont, color: pColor })
-      Object.entries(colors).forEach(([num, color], idx) => {
-        page.drawText(`${num} = ${color}`, { x: x + 20 + idx * 70, y: colorKeyY - 12, size: 8, font, color: rgb(0.4, 0.4, 0.4) })
+      // Draw color key at the top
+      let colorKeyY = y + height - 20
+      page.drawText('Color Key:', { x: x + 20, y: colorKeyY, size: 10, font: boldFont, color: pColor })
+      let keyX = x + 90
+      Object.entries(colors).forEach(([num, colorName], idx) => {
+        if (keyX < x + width - 100) {
+          page.drawText(`${num}=${stripEmojis(String(colorName).split('(')[0].trim())}`, { 
+            x: keyX, y: colorKeyY, size: 8, font, color: rgb(0.3, 0.3, 0.3) 
+          })
+          keyX += 75
+        }
       })
       
-      // Draw some shapes with numbers
-      page.drawCircle({ x: centerX - 60, y: centerY + 40, size: 40, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
-      page.drawText('1', { x: centerX - 63, y: centerY + 36, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
-      page.drawCircle({ x: centerX + 60, y: centerY + 40, size: 40, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
-      page.drawText('2', { x: centerX + 57, y: centerY + 36, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
-      page.drawRectangle({ x: centerX - 50, y: centerY - 80, width: 100, height: 60, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 1 })
-      page.drawText('3', { x: centerX - 5, y: centerY - 55, size: 14, font, color: rgb(0.6, 0.6, 0.6) })
+      // Draw a themed picture to color - more complex shapes
+      const picCenterX = centerX
+      const picCenterY = centerY - 20
+      
+      // Draw a castle/house shape for Fantasy/generic themes
+      // Main building
+      page.drawRectangle({ x: picCenterX - 80, y: picCenterY - 100, width: 160, height: 120, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('1', { x: picCenterX - 5, y: picCenterY - 50, size: 16, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Tower left
+      page.drawRectangle({ x: picCenterX - 110, y: picCenterY - 100, width: 40, height: 150, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('2', { x: picCenterX - 95, y: picCenterY - 20, size: 14, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Tower right
+      page.drawRectangle({ x: picCenterX + 70, y: picCenterY - 100, width: 40, height: 150, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('2', { x: picCenterX + 85, y: picCenterY - 20, size: 14, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Roof/top triangle (using lines)
+      page.drawLine({ start: { x: picCenterX - 110, y: picCenterY + 50 }, end: { x: picCenterX - 90, y: picCenterY + 90 }, thickness: 1.5, color: rgb(0.4, 0.4, 0.4) })
+      page.drawLine({ start: { x: picCenterX - 90, y: picCenterY + 90 }, end: { x: picCenterX - 70, y: picCenterY + 50 }, thickness: 1.5, color: rgb(0.4, 0.4, 0.4) })
+      page.drawText('3', { x: picCenterX - 95, y: picCenterY + 60, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      page.drawLine({ start: { x: picCenterX + 70, y: picCenterY + 50 }, end: { x: picCenterX + 90, y: picCenterY + 90 }, thickness: 1.5, color: rgb(0.4, 0.4, 0.4) })
+      page.drawLine({ start: { x: picCenterX + 90, y: picCenterY + 90 }, end: { x: picCenterX + 110, y: picCenterY + 50 }, thickness: 1.5, color: rgb(0.4, 0.4, 0.4) })
+      page.drawText('3', { x: picCenterX + 85, y: picCenterY + 60, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Door
+      page.drawRectangle({ x: picCenterX - 25, y: picCenterY - 100, width: 50, height: 70, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('4', { x: picCenterX - 5, y: picCenterY - 75, size: 14, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Windows
+      page.drawRectangle({ x: picCenterX - 65, y: picCenterY - 20, width: 30, height: 30, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('5', { x: picCenterX - 55, y: picCenterY - 12, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      page.drawRectangle({ x: picCenterX + 35, y: picCenterY - 20, width: 30, height: 30, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('5', { x: picCenterX + 45, y: picCenterY - 12, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Sun
+      page.drawCircle({ x: picCenterX + 140, y: picCenterY + 80, size: 30, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawText('6', { x: picCenterX + 135, y: picCenterY + 75, size: 14, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Sun rays
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4
+        const startR = 35
+        const endR = 50
+        page.drawLine({
+          start: { x: picCenterX + 140 + Math.cos(angle) * startR, y: picCenterY + 80 + Math.sin(angle) * startR },
+          end: { x: picCenterX + 140 + Math.cos(angle) * endR, y: picCenterY + 80 + Math.sin(angle) * endR },
+          thickness: 1.5, color: rgb(0.4, 0.4, 0.4)
+        })
+      }
+      
+      // Ground line
+      page.drawLine({ start: { x: x + 40, y: picCenterY - 100 }, end: { x: x + width - 40, y: picCenterY - 100 }, thickness: 1.5, color: rgb(0.4, 0.4, 0.4) })
+      
+      // Clouds
+      page.drawCircle({ x: picCenterX - 120, y: picCenterY + 60, size: 20, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawCircle({ x: picCenterX - 100, y: picCenterY + 70, size: 25, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
+      page.drawCircle({ x: picCenterX - 80, y: picCenterY + 60, size: 20, borderColor: rgb(0.4, 0.4, 0.4), borderWidth: 1.5 })
       break
       
     case 'doodle-complete':
