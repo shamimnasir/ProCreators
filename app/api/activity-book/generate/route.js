@@ -844,10 +844,21 @@ function generateHangman(theme, difficulty, ageGroup) {
     space: ['ASTEROID', 'SATELLITE', 'GALAXY', 'NEBULA', 'ASTRONAUT', 'SPACESHIP', 'UNIVERSE', 'TELESCOPE'],
     dinosaurs: ['DINOSAUR', 'TRICERATOPS', 'PTERODACTYL', 'RAPTOR', 'FOSSIL', 'PREHISTORIC', 'JURASSIC', 'SKELETON'],
     vehicles: ['HELICOPTER', 'SUBMARINE', 'MOTORCYCLE', 'AMBULANCE', 'EXCAVATOR', 'TRACTOR', 'LIMOUSINE', 'SAILBOAT'],
-    nature: ['BUTTERFLY', 'WATERFALL', 'MOUNTAIN', 'RAINBOW', 'SUNFLOWER', 'HURRICANE', 'TORNADO', 'GLACIER']
+    nature: ['BUTTERFLY', 'WATERFALL', 'MOUNTAIN', 'RAINBOW', 'SUNFLOWER', 'HURRICANE', 'TORNADO', 'GLACIER'],
+    math: ['ADDITION', 'SUBTRACT', 'MULTIPLY', 'DIVISION', 'FRACTION', 'GEOMETRY', 'EQUATION', 'TRIANGLE'],
+    school: ['HOMEWORK', 'CLASSROOM', 'TEXTBOOK', 'NOTEBOOK', 'BACKPACK', 'PRINCIPAL', 'CAFETERIA', 'ALPHABET']
   }
   
-  const words = themedWords[theme?.toLowerCase()] || themedWords.animals
+  // Find matching theme
+  let words = themedWords.animals
+  const normalizedTheme = theme?.toLowerCase() || ''
+  for (const [key, value] of Object.entries(themedWords)) {
+    if (normalizedTheme.includes(key)) {
+      words = value
+      break
+    }
+  }
+  
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
   const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
   
