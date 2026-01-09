@@ -995,7 +995,7 @@ function generateTravelGames(theme, difficulty, ageGroup) {
   }
 }
 
-function generateColorByNumber(theme, difficulty, ageGroup) {
+async function generateColorByNumber(theme, difficulty, ageGroup) {
   // Theme-specific color schemes
   const themeColors = {
     sports: { 1: 'Green (Field)', 2: 'White (Ball)', 3: 'Red (Jersey)', 4: 'Blue (Sky)', 5: 'Brown (Bat)', 6: 'Yellow (Trophy)' },
@@ -1008,13 +1008,41 @@ function generateColorByNumber(theme, difficulty, ageGroup) {
     nature: { 1: 'Green (Leaves)', 2: 'Brown (Trunk)', 3: 'Blue (Sky)', 4: 'Yellow (Sun)', 5: 'Pink (Flowers)', 6: 'White (Clouds)' }
   }
   
-  const colors = themeColors[theme?.toLowerCase()] || { 1: 'Red', 2: 'Blue', 3: 'Green', 4: 'Yellow', 5: 'Orange', 6: 'Purple' }
+  let colors = themeColors[theme?.toLowerCase()]
+  let pictureDescription = ''
+  
+  // Generate theme-specific colors and picture for custom themes
+  if (!colors && theme) {
+    const themedContent = getThemedContent(theme)
+    if (themedContent.needsAIGeneration) {
+      const aiContent = await generateAIThemedContent(theme)
+      if (aiContent.colorByNumberColors) {
+        colors = aiContent.colorByNumberColors
+      }
+      if (aiContent.colorByNumberPicture) {
+        pictureDescription = aiContent.colorByNumberPicture
+      }
+    }
+  }
+  
+  // Fallback colors with theme context
+  if (!colors) {
+    colors = { 
+      1: `Red (${theme} element)`, 
+      2: `Blue (${theme} sky/water)`, 
+      3: `Green (${theme} nature)`, 
+      4: `Yellow (${theme} highlight)`, 
+      5: `Orange (${theme} accent)`, 
+      6: `Purple (${theme} magic/special)` 
+    }
+  }
   
   return {
     type: 'color-by-number',
     colors,
+    pictureDescription: pictureDescription || `A ${theme} themed picture`,
     theme,
-    instructions: `Color each numbered section with the matching ${theme || ''} color!`
+    instructions: `Color each numbered section to reveal a ${theme || 'fun'} picture!`
   }
 }
 
