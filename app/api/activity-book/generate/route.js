@@ -3082,20 +3082,55 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'tracing':
-      const items = content.items || ['A', 'B', 'C', 'D', 'E']
-      const tracingCols = 5
-      const tracingCellW = (width - 40) / tracingCols
-      const tracingCellH = (height - 60) / Math.ceil(items.length / tracingCols)
+      const tracingItems = content.items || ['A', 'B', 'C', 'D', 'E']
+      const tracingCols = Math.min(5, tracingItems.length)
+      const tracingRows = Math.ceil(tracingItems.length / tracingCols)
+      const tracingCellW = Math.min(90, (width - 60) / tracingCols)
+      const tracingCellH = Math.min(90, (height - 80) / tracingRows)
       
-      items.forEach((item, idx) => {
+      page.drawText('Trace each letter or number:', { x: x + 20, y: y + height - 30, size: 11, font: boldFont, color: pColor })
+      
+      tracingItems.slice(0, 10).forEach((item, idx) => {
         const col = idx % tracingCols
         const row = Math.floor(idx / tracingCols)
-        const cellX = x + 20 + col * tracingCellW
-        const cellY = y + height - 40 - row * tracingCellH
+        const cellX = x + 30 + col * tracingCellW
+        const cellY = y + height - 60 - row * tracingCellH
         
-        // Draw dotted letter/number
-        page.drawRectangle({ x: cellX + 5, y: cellY - tracingCellH + 5, width: tracingCellW - 10, height: tracingCellH - 10, borderColor: rgb(0.8, 0.8, 0.8), borderWidth: 1 })
-        page.drawText(item, { x: cellX + tracingCellW / 3, y: cellY - tracingCellH / 2 - 10, size: 28, font, color: rgb(0.85, 0.85, 0.85) })
+        // Draw cell border
+        page.drawRectangle({ 
+          x: cellX, 
+          y: cellY - tracingCellH + 10, 
+          width: tracingCellW - 15, 
+          height: tracingCellH - 15, 
+          borderColor: rgb(0.7, 0.7, 0.7), 
+          borderWidth: 1.5 
+        })
+        
+        // Draw baseline for writing
+        page.drawLine({ 
+          start: { x: cellX + 5, y: cellY - tracingCellH + 20 }, 
+          end: { x: cellX + tracingCellW - 25, y: cellY - tracingCellH + 20 }, 
+          thickness: 1, color: rgb(0.8, 0.8, 0.8) 
+        })
+        
+        // Draw dotted/light letter for tracing
+        const displayItem = stripEmojis(String(item)).charAt(0).toUpperCase()
+        page.drawText(displayItem, { 
+          x: cellX + (tracingCellW - 30) / 2, 
+          y: cellY - tracingCellH / 2 - 5, 
+          size: Math.min(36, tracingCellH * 0.5), 
+          font: boldFont, 
+          color: rgb(0.85, 0.85, 0.85) 
+        })
+        
+        // Draw small guide letter in corner
+        page.drawText(displayItem, { 
+          x: cellX + 5, 
+          y: cellY - 5, 
+          size: 10, 
+          font, 
+          color: rgb(0.5, 0.5, 0.5) 
+        })
       })
       break
       
