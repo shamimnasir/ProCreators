@@ -1419,68 +1419,76 @@ export async function POST(request) {
 
 // Generate activity page content
 async function generateActivityPages(body) {
-  const {
-    activityType,
-    selectedActivities,
-    theme,
-    customTheme,
-    ageGroup,
-    pageCount,
-    bookTitle
-  } = body
-  
-  const themeToUse = customTheme || theme
-  
-  console.log(`Received selectedActivities: ${JSON.stringify(selectedActivities)}`)
-  
-  // Filter out special markers like '__none__' and ensure we have valid activities
-  let activities = selectedActivities && selectedActivities.length > 0 
-    ? selectedActivities.filter(a => a !== '__none__' && ACTIVITY_GENERATORS[a])
-    : []
-  
-  // If no valid activities after filtering, fall back to all generators
-  if (activities.length === 0) {
-    console.log('No valid activities found, falling back to all generators')
-    activities = Object.keys(ACTIVITY_GENERATORS)
-  }
-  
-  console.log(`Generating ${pageCount} activity pages for ${themeToUse} theme, age group: ${ageGroup}`)
-  console.log(`Using activities: ${activities.join(', ')}`)
-  
-  const pages = []
-  
-  // Distribute activities across pages
-  for (let i = 0; i < pageCount; i++) {
-    const activityId = activities[i % activities.length]
-    const generator = ACTIVITY_GENERATORS[activityId]
+  try {
+    const {
+      activityType,
+      selectedActivities,
+      theme,
+      customTheme,
+      ageGroup,
+      pageCount,
+      bookTitle
+    } = body
     
-    if (generator) {
-      const difficulty = i < pageCount / 3 ? 'easy' : i < (pageCount * 2) / 3 ? 'medium' : 'hard'
-      const content = generator(themeToUse, difficulty, ageGroup)
-      
-      pages.push({
-        title: getActivityTitle(activityId, themeToUse, i + 1),
-        activityType: activityId,
-        description: content.instructions || 'Complete this fun activity!',
-        difficulty,
-        content
-      })
-    } else {
-      pages.push({
-        title: `Activity ${i + 1}`,
-        activityType: 'puzzle',
-        description: 'Complete this fun activity!',
-        difficulty: 'medium',
-        content: { type: 'custom' }
-      })
+    const themeToUse = customTheme || theme
+    
+    console.log(`Received selectedActivities: ${JSON.stringify(selectedActivities)}`)
+    
+    // Filter out special markers like '__none__' and ensure we have valid activities
+    let activities = selectedActivities && selectedActivities.length > 0 
+      ? selectedActivities.filter(a => a !== '__none__' && ACTIVITY_GENERATORS[a])
+      : []
+    
+    // If no valid activities after filtering, fall back to all generators
+    if (activities.length === 0) {
+      console.log('No valid activities found, falling back to all generators')
+      activities = Object.keys(ACTIVITY_GENERATORS)
     }
+    
+    console.log(`Generating ${pageCount} activity pages for ${themeToUse} theme, age group: ${ageGroup}`)
+    console.log(`Using activities: ${activities.join(', ')}`)
+    
+    const pages = []
+    
+    // Distribute activities across pages
+    for (let i = 0; i < pageCount; i++) {
+      const activityId = activities[i % activities.length]
+      const generator = ACTIVITY_GENERATORS[activityId]
+      
+      if (generator) {
+        const difficulty = i < pageCount / 3 ? 'easy' : i < (pageCount * 2) / 3 ? 'medium' : 'hard'
+        const content = generator(themeToUse, difficulty, ageGroup)
+        
+        pages.push({
+          title: getActivityTitle(activityId, themeToUse, i + 1),
+          activityType: activityId,
+          description: content.instructions || 'Complete this fun activity!',
+          difficulty,
+          content
+        })
+      } else {
+        pages.push({
+          title: `Activity ${i + 1}`,
+          activityType: 'puzzle',
+          description: 'Complete this fun activity!',
+          difficulty: 'medium',
+          content: { type: 'custom' }
+        })
+      }
+    }
+    
+    return NextResponse.json({
+      success: true,
+      pages,
+      pageCount: pages.length
+    })
+  } catch (error) {
+    console.error('Error generating activity pages:', error)
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to generate activity pages'
+    }, { status: 500 })
   }
-  
-  return NextResponse.json({
-    success: true,
-    pages,
-    pageCount: pages.length
-  })
 }
 
 // Get creative activity title
