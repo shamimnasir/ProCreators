@@ -2436,7 +2436,17 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       
       countItems.forEach((item, idx) => {
         if (countY > y + 80) {
-          page.drawText(`${idx + 1}. Count: ${stripEmojis(item)}`, { x: x + 30, y: countY, size: 12, font, color: rgb(0.2, 0.2, 0.2) })
+          // Handle both old format (string) and new format (object with item and count)
+          let displayText = ''
+          if (typeof item === 'object' && item.item) {
+            // New format: draw the item name repeated
+            displayText = `${item.item} `.repeat(item.count || 1).trim()
+          } else {
+            // Old format: just display the string (strip emojis)
+            displayText = stripEmojis(String(item)) || 'Item'
+          }
+          
+          page.drawText(`${idx + 1}. Count: ${displayText}`, { x: x + 30, y: countY, size: 11, font, color: rgb(0.2, 0.2, 0.2) })
           page.drawText('Answer: ____', { x: x + width - 100, y: countY, size: 12, font, color: rgb(0.5, 0.5, 0.5) })
           countY -= 40
         }
