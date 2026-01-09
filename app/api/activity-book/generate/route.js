@@ -3309,10 +3309,67 @@ async function drawActivityContent(page, pageData, x, y, width, height, font, bo
       break
       
     case 'doodle-complete':
+      // Draw a starting sketch for kids to complete
+      const doodlePrompts = content.prompts || ['Complete this drawing!']
+      const doodlePrompt = stripEmojis(doodlePrompts[0] || 'Complete the drawing!')
+      
+      // Draw the drawing area
+      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 100, borderColor: rgb(0.6, 0.6, 0.6), borderWidth: 2 })
+      
+      // Draw the prompt at the bottom
+      page.drawText(doodlePrompt, { x: centerX - Math.min(doodlePrompt.length * 3.5, 150), y: y + 50, size: 11, font, color: rgb(0.5, 0.5, 0.5) })
+      
+      // Draw a partial sketch to complete - a character outline
+      const sketchCenterX = centerX
+      const sketchCenterY = centerY + 20
+      
+      // Draw a partial face/head for the character (kids complete the rest)
+      // Head circle (partial - dashed effect)
+      page.drawCircle({ x: sketchCenterX, y: sketchCenterY + 50, size: 50, borderColor: rgb(0.35, 0.35, 0.35), borderWidth: 2 })
+      
+      // Eyes (simple circles)
+      page.drawCircle({ x: sketchCenterX - 20, y: sketchCenterY + 55, size: 8, borderColor: rgb(0.35, 0.35, 0.35), borderWidth: 1.5 })
+      page.drawCircle({ x: sketchCenterX + 20, y: sketchCenterY + 55, size: 8, borderColor: rgb(0.35, 0.35, 0.35), borderWidth: 1.5 })
+      
+      // Partial body (just shoulders/top)
+      page.drawLine({ start: { x: sketchCenterX - 50, y: sketchCenterY }, end: { x: sketchCenterX - 30, y: sketchCenterY - 10 }, thickness: 2, color: rgb(0.35, 0.35, 0.35) })
+      page.drawLine({ start: { x: sketchCenterX + 50, y: sketchCenterY }, end: { x: sketchCenterX + 30, y: sketchCenterY - 10 }, thickness: 2, color: rgb(0.35, 0.35, 0.35) })
+      
+      // Partial arms (just start of arms - kids complete)
+      page.drawLine({ start: { x: sketchCenterX - 50, y: sketchCenterY }, end: { x: sketchCenterX - 70, y: sketchCenterY - 30 }, thickness: 2, color: rgb(0.35, 0.35, 0.35) })
+      page.drawLine({ start: { x: sketchCenterX + 50, y: sketchCenterY }, end: { x: sketchCenterX + 70, y: sketchCenterY - 30 }, thickness: 2, color: rgb(0.35, 0.35, 0.35) })
+      
+      // Hint text
+      page.drawText('Add: mouth, hair, body, legs, and details!', { x: sketchCenterX - 120, y: sketchCenterY - 70, size: 9, font, color: rgb(0.6, 0.6, 0.6) })
+      break
+      
     case 'drawing-prompts':
-      const prompts = content.prompts || ['Draw something creative!']
-      page.drawRectangle({ x: x + 20, y: y + 40, width: width - 40, height: height - 80, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 2 })
-      page.drawText(stripEmojis(prompts[0] || 'Draw here!'), { x: centerX - 60, y: centerY, size: 12, font, color: rgb(0.7, 0.7, 0.7) })
+      // Drawing prompt with nice empty box
+      const drawPrompts = content.prompts || ['Draw something creative!']
+      const drawPrompt = stripEmojis(drawPrompts[0] || 'Draw here!')
+      
+      // Draw a decorative border for the drawing area
+      page.drawRectangle({ x: x + 25, y: y + 60, width: width - 50, height: height - 100, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 2 })
+      
+      // Inner decorative line
+      page.drawRectangle({ x: x + 30, y: y + 65, width: width - 60, height: height - 110, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 1 })
+      
+      // Draw the prompt prominently at the top of the box
+      const promptWords = drawPrompt.split(' ')
+      let promptLine1 = ''
+      let promptLine2 = ''
+      promptWords.forEach(word => {
+        if (promptLine1.length < 40) promptLine1 += word + ' '
+        else promptLine2 += word + ' '
+      })
+      
+      page.drawText(promptLine1.trim(), { x: centerX - Math.min(promptLine1.length * 4, 180), y: y + height - 60, size: 13, font: boldFont, color: rgb(0.3, 0.3, 0.3) })
+      if (promptLine2) {
+        page.drawText(promptLine2.trim(), { x: centerX - Math.min(promptLine2.length * 4, 180), y: y + height - 78, size: 13, font: boldFont, color: rgb(0.3, 0.3, 0.3) })
+      }
+      
+      // Add encouraging text at bottom
+      page.drawText('Use your imagination!', { x: centerX - 60, y: y + 70, size: 10, font, color: rgb(0.6, 0.6, 0.6) })
       break
       
     case 'connect-color':
