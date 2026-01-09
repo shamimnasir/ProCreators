@@ -287,10 +287,17 @@ function generateCrossword(theme, difficulty, ageGroup) {
   }
 }
 
-function generateSudoku(theme, difficulty, ageGroup) {
+async function generateSudoku(theme, difficulty, ageGroup) {
   // For kids, use smaller grids with themed items instead of numbers
   const isKids = ['toddler', 'preschool', 'early'].includes(ageGroup)
   const size = isKids ? 4 : (difficulty === 'easy' ? 6 : 9)
+  
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme && isKids) {
+    themedContent = await generateAIThemedContent(theme)
+  }
   
   // Theme-specific symbols for kids sudoku
   const themedSymbols = {
@@ -304,7 +311,15 @@ function generateSudoku(theme, difficulty, ageGroup) {
     nature: ['Flower', 'Tree', 'Sun', 'Cloud']
   }
   
-  const symbols = isKids ? (themedSymbols[theme?.toLowerCase()] || ['A', 'B', 'C', 'D']) : null
+  // For custom themes, use AI-generated memory items as symbols
+  let symbols = null
+  if (isKids) {
+    if (themedContent.isAIGenerated && themedContent.memoryItems) {
+      symbols = themedContent.memoryItems.slice(0, 4)
+    } else {
+      symbols = themedSymbols[theme?.toLowerCase()] || ['A', 'B', 'C', 'D']
+    }
+  }
   
   // Generate a valid sudoku grid (simplified)
   const grid = Array(size).fill(null).map(() => Array(size).fill(0))
@@ -321,9 +336,15 @@ function generateSudoku(theme, difficulty, ageGroup) {
   }
 }
 
-function generateMaze(theme, difficulty, ageGroup) {
-  const themedContent = getThemedContent(theme)
-  const mazeTheme = themedContent.mazeTheme || { start: 'START', end: 'FINISH', instruction: 'Find your way through the maze!' }
+async function generateMaze(theme, difficulty, ageGroup) {
+  let themedContent = getThemedContent(theme)
+  
+  // Generate AI content for custom themes
+  if (themedContent.needsAIGeneration && theme) {
+    themedContent = await generateAIThemedContent(theme)
+  }
+  
+  const mazeTheme = themedContent.mazeTheme || { start: 'START', end: 'FINISH', instruction: `Find your way through the ${theme} maze!` }
   
   const sizes = { easy: 8, medium: 15, hard: 25 }
   const size = sizes[difficulty] || 12
