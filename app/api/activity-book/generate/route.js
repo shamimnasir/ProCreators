@@ -337,6 +337,8 @@ function generateConnectDots(theme, difficulty, ageGroup) {
 }
 
 function generateMathProblems(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
   const operations = {
     toddler: ['+'],
     preschool: ['+', '-'],
@@ -355,6 +357,20 @@ function generateMathProblems(theme, difficulty, ageGroup) {
     adults: 1000
   }
   
+  // Theme-specific word problems context
+  const wordProblemContexts = {
+    sports: ['goals scored', 'points earned', 'players on team', 'laps run', 'medals won'],
+    food: ['apples picked', 'cookies baked', 'pizzas ordered', 'cupcakes made', 'oranges bought'],
+    animals: ['cats in shelter', 'dogs at park', 'fish in tank', 'birds in tree', 'rabbits in garden'],
+    ocean: ['fish caught', 'shells collected', 'dolphins spotted', 'waves counted', 'crabs on beach'],
+    space: ['stars counted', 'planets visited', 'rockets launched', 'asteroids seen', 'moons orbited'],
+    dinosaurs: ['fossils found', 'bones discovered', 'footprints counted', 'eggs in nest', 'dinosaurs spotted'],
+    vehicles: ['cars in lot', 'buses on road', 'planes at airport', 'trains passed', 'bikes parked'],
+    nature: ['flowers planted', 'trees in forest', 'butterflies seen', 'leaves collected', 'birds spotted']
+  }
+  
+  const contexts = wordProblemContexts[theme?.toLowerCase()] || wordProblemContexts.sports || ['items counted']
+  
   const problems = []
   const ops = operations[ageGroup] || operations.kids
   const max = maxNum[ageGroup] || maxNum.kids
@@ -364,67 +380,210 @@ function generateMathProblems(theme, difficulty, ageGroup) {
     const op = ops[Math.floor(Math.random() * ops.length)]
     const a = Math.floor(Math.random() * max) + 1
     const b = Math.floor(Math.random() * (max / 2)) + 1
-    problems.push({ a, op, b, answer: eval(`${a} ${op === '×' ? '*' : op === '÷' ? '/' : op} ${b}`) })
+    const context = contexts[Math.floor(Math.random() * contexts.length)]
+    let answer
+    
+    switch(op) {
+      case '+': answer = a + b; break
+      case '-': answer = Math.max(a, b) - Math.min(a, b); break
+      case '×': answer = a * b; break
+      case '÷': answer = Math.floor(a / b) || 1; break
+      default: answer = a + b
+    }
+    
+    problems.push({ 
+      a: op === '-' ? Math.max(a, b) : a, 
+      op, 
+      b: op === '-' ? Math.min(a, b) : b, 
+      answer,
+      context,
+      problem: `${op === '-' ? Math.max(a, b) : a} ${op} ${op === '-' ? Math.min(a, b) : b}`
+    })
   }
   
   return {
     type: 'math',
     problems,
     theme,
-    instructions: 'Solve these math problems!'
+    instructions: `Solve these ${theme || ''} math problems!`
   }
 }
 
 function generateSpellingActivity(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific spelling words
+  const themeWords = {
+    sports: ['SOCCER', 'TENNIS', 'HOCKEY', 'BASKET', 'TROPHY', 'PLAYER', 'COACH', 'SCORE'],
+    food: ['APPLE', 'BANANA', 'ORANGE', 'PIZZA', 'COOKIE', 'BURGER', 'SALAD', 'BREAD'],
+    animals: ['TIGER', 'ELEPHANT', 'GIRAFFE', 'MONKEY', 'RABBIT', 'TURTLE', 'PARROT', 'ZEBRA'],
+    ocean: ['WHALE', 'SHARK', 'DOLPHIN', 'CORAL', 'SHELL', 'CRAB', 'TURTLE', 'WAVE'],
+    space: ['PLANET', 'ROCKET', 'STAR', 'MOON', 'ORBIT', 'COMET', 'SATURN', 'MARS'],
+    dinosaurs: ['FOSSIL', 'RAPTOR', 'TREX', 'BONE', 'SCALE', 'TEETH', 'CLAW', 'TAIL'],
+    vehicles: ['TRUCK', 'PLANE', 'TRAIN', 'BOAT', 'BIKE', 'TAXI', 'SUBWAY', 'ROCKET'],
+    nature: ['FLOWER', 'RIVER', 'FOREST', 'MOUNTAIN', 'CLOUD', 'RAINBOW', 'TREE', 'LEAF']
+  }
+  
+  const words = themeWords[theme?.toLowerCase()] || themeWords.animals
+  const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, difficulty === 'easy' ? 4 : difficulty === 'hard' ? 8 : 6)
+  
+  // Scramble words
+  const scrambled = selectedWords.map(word => {
+    const arr = word.split('')
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr.join('')
+  })
+  
   return {
     type: 'spelling',
-    words: ['APPLE', 'BANANA', 'ORANGE', 'GRAPE', 'MANGO'],
-    scrambled: ['LEPPA', 'NANABA', 'GERNAO', 'PRAGE', 'GMANO'],
-    instructions: 'Unscramble these words!'
+    words: selectedWords,
+    scrambled,
+    theme,
+    instructions: `Unscramble these ${theme || ''} words!`
   }
 }
 
 function generateTracingActivity(theme, difficulty, ageGroup) {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-  const numbers = '0123456789'.split('')
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific words to trace
+  const themeTracingWords = {
+    sports: ['BALL', 'GOAL', 'WIN', 'TEAM', 'RUN', 'KICK', 'JUMP', 'PLAY'],
+    food: ['EAT', 'YUM', 'COOK', 'BITE', 'MEAL', 'FOOD', 'BAKE', 'MIX'],
+    animals: ['CAT', 'DOG', 'BIRD', 'FISH', 'BEAR', 'LION', 'FROG', 'BEE'],
+    ocean: ['SEA', 'FISH', 'WAVE', 'CRAB', 'SWIM', 'DEEP', 'BLUE', 'SAND'],
+    space: ['SUN', 'MOON', 'STAR', 'MARS', 'UFO', 'ORBIT', 'SKY', 'DARK'],
+    dinosaurs: ['DINO', 'ROAR', 'BONE', 'TAIL', 'CLAW', 'HORN', 'EGG', 'BIG'],
+    vehicles: ['CAR', 'BUS', 'VAN', 'JET', 'BOAT', 'BIKE', 'TAXI', 'ROAD'],
+    nature: ['SUN', 'TREE', 'LEAF', 'BUD', 'RAIN', 'WIND', 'SEED', 'GROW']
+  }
+  
+  const words = themeTracingWords[theme?.toLowerCase()] || themeTracingWords.animals
+  const count = ageGroup === 'toddler' ? 4 : ageGroup === 'preschool' ? 5 : 6
+  const selectedWords = [...words].sort(() => Math.random() - 0.5).slice(0, count)
   
   return {
     type: 'tracing',
-    items: ageGroup === 'toddler' ? letters.slice(0, 5) : letters.slice(0, 10),
-    instructions: 'Trace each letter carefully!'
+    items: selectedWords,
+    theme,
+    instructions: `Trace these ${theme || ''} words carefully!`
   }
 }
 
 function generateMatchingActivity(theme, difficulty, ageGroup) {
-  const pairs = {
-    animals: [['Cat', '🐱'], ['Dog', '🐕'], ['Bird', '🐦'], ['Fish', '🐟']],
-    food: [['Apple', '🍎'], ['Pizza', '🍕'], ['Ice Cream', '🍦'], ['Cake', '🎂']]
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific matching pairs
+  const themePairs = {
+    sports: [['Soccer', 'Ball'], ['Tennis', 'Racket'], ['Hockey', 'Puck'], ['Baseball', 'Bat'], ['Golf', 'Club'], ['Swimming', 'Pool']],
+    food: [['Apple', 'Red'], ['Banana', 'Yellow'], ['Pizza', 'Cheese'], ['Ice Cream', 'Cold'], ['Cake', 'Sweet'], ['Bread', 'Bakery']],
+    animals: [['Cat', 'Meow'], ['Dog', 'Bark'], ['Bird', 'Fly'], ['Fish', 'Swim'], ['Lion', 'Roar'], ['Snake', 'Hiss']],
+    ocean: [['Whale', 'Biggest'], ['Shark', 'Teeth'], ['Dolphin', 'Smart'], ['Crab', 'Claws'], ['Octopus', 'Arms'], ['Turtle', 'Shell']],
+    space: [['Sun', 'Hot'], ['Moon', 'Night'], ['Star', 'Twinkle'], ['Rocket', 'Launch'], ['Planet', 'Orbit'], ['Comet', 'Tail']],
+    dinosaurs: [['T-Rex', 'Teeth'], ['Triceratops', 'Horns'], ['Pterodactyl', 'Fly'], ['Stegosaurus', 'Plates'], ['Brachiosaurus', 'Tall'], ['Raptor', 'Fast']],
+    vehicles: [['Car', 'Road'], ['Plane', 'Sky'], ['Boat', 'Water'], ['Train', 'Tracks'], ['Bike', 'Pedal'], ['Helicopter', 'Hover']],
+    nature: [['Flower', 'Bloom'], ['Tree', 'Tall'], ['Rain', 'Wet'], ['Sun', 'Shine'], ['Leaf', 'Green'], ['Cloud', 'Fluffy']]
   }
+  
+  const pairs = themePairs[theme?.toLowerCase()] || themePairs.animals
+  const count = difficulty === 'easy' ? 4 : difficulty === 'hard' ? 6 : 5
+  const selectedPairs = [...pairs].sort(() => Math.random() - 0.5).slice(0, count)
   
   return {
     type: 'matching',
-    pairs: pairs[theme] || pairs.animals,
-    instructions: 'Draw lines to match each word with its picture!'
+    pairs: selectedPairs,
+    theme,
+    instructions: `Match each ${theme || ''} word with its pair!`
   }
 }
 
 function generateCountingActivity(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific counting items
+  const themeIcons = {
+    sports: ['⚽', '🏀', '🎾', '⚾', '🏈', '🏐'],
+    food: ['🍎', '🍕', '🍪', '🍰', '🍌', '🍊'],
+    animals: ['🐱', '🐕', '🐦', '🐟', '🦁', '🐘'],
+    ocean: ['🐋', '🦈', '🐬', '🦀', '🐙', '🐚'],
+    space: ['⭐', '🌙', '🚀', '🪐', '☀️', '🛸'],
+    dinosaurs: ['🦖', '🦕', '🥚', '🦴', '🌋', '🌿'],
+    vehicles: ['🚗', '🚌', '✈️', '🚂', '🚢', '🚁'],
+    nature: ['🌸', '🌳', '☀️', '🌈', '🦋', '🍂']
+  }
+  
+  const icons = themeIcons[theme?.toLowerCase()] || themeIcons.animals
+  const count = difficulty === 'easy' ? 4 : difficulty === 'hard' ? 8 : 6
+  const items = []
+  const answers = []
+  
+  for (let i = 0; i < count; i++) {
+    const icon = icons[Math.floor(Math.random() * icons.length)]
+    const num = Math.floor(Math.random() * 8) + 1
+    items.push(icon.repeat(num))
+    answers.push(num)
+  }
+  
   return {
     type: 'counting',
-    items: ['🌟', '🌟🌟🌟', '🌟🌟', '🌟🌟🌟🌟🌟', '🌟🌟🌟🌟'],
-    answers: [1, 3, 2, 5, 4],
-    instructions: 'Count the items and write the number!'
+    items,
+    answers,
+    theme,
+    instructions: `Count the ${theme || ''} items and write the number!`
   }
 }
 
 function generatePatternActivity(theme, difficulty, ageGroup) {
+  const themedContent = getThemedContent(theme)
+  
+  // Theme-specific pattern items
+  const themePatternItems = {
+    sports: ['⚽', '🏀', '🎾', '⚾', '🏈'],
+    food: ['🍎', '🍌', '🍊', '🍇', '🍓'],
+    animals: ['🐱', '🐕', '🐦', '🐟', '🐸'],
+    ocean: ['🐋', '🦈', '🐬', '🦀', '🐙'],
+    space: ['⭐', '🌙', '🚀', '🪐', '☀️'],
+    dinosaurs: ['🦖', '🦕', '🥚', '🦴', '🌿'],
+    vehicles: ['🚗', '🚌', '✈️', '🚂', '🚢'],
+    nature: ['🌸', '🌳', '☀️', '🌧️', '🦋']
+  }
+  
+  const items = themePatternItems[theme?.toLowerCase()] || themePatternItems.animals
+  const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4
+  const patterns = []
+  
+  for (let i = 0; i < count; i++) {
+    // Select 2-3 items for the pattern
+    const patternItems = [...items].sort(() => Math.random() - 0.5).slice(0, 2 + (i % 2))
+    const patternType = i % 3 // 0: ABAB, 1: AABB, 2: ABC
+    let sequence = []
+    let answer = ''
+    
+    if (patternType === 0) {
+      // ABAB pattern
+      sequence = [patternItems[0], patternItems[1], patternItems[0], patternItems[1], '?']
+      answer = patternItems[0]
+    } else if (patternType === 1) {
+      // AABB pattern
+      sequence = [patternItems[0], patternItems[0], patternItems[1], patternItems[1], patternItems[0], '?']
+      answer = patternItems[0]
+    } else {
+      // ABC pattern
+      sequence = [patternItems[0], patternItems[1], patternItems[0], patternItems[1], patternItems[0], '?']
+      answer = patternItems[1]
+    }
+    
+    patterns.push({ sequence, answer })
+  }
+  
   return {
     type: 'patterns',
-    patterns: [
-      { sequence: ['🔴', '🔵', '🔴', '🔵', '?'], answer: '🔴' },
-      { sequence: ['⭐', '⭐', '🌙', '⭐', '⭐', '?'], answer: '🌙' }
-    ],
-    instructions: 'What comes next in each pattern?'
+    patterns,
+    theme,
+    instructions: `What comes next in each ${theme || ''} pattern?`
   }
 }
 
