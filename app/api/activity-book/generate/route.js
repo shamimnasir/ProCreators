@@ -667,6 +667,24 @@ function generatePatternActivity(theme, difficulty, ageGroup) {
 }
 
 async function generateWouldYouRather(theme, difficulty, ageGroup) {
+  // Check for AI-generated content first for custom themes
+  const themedContentCheck = getThemedContent(theme)
+  
+  if (themedContentCheck.needsAIGeneration && theme) {
+    const aiContent = await generateAIThemedContent(theme)
+    if (aiContent && aiContent.wouldYouRather && aiContent.wouldYouRather.length > 0) {
+      const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
+      const questions = [...aiContent.wouldYouRather].sort(() => Math.random() - 0.5).slice(0, count)
+      return {
+        type: 'would-you-rather',
+        questions,
+        theme,
+        instructions: `Circle your ${theme || ''} choice and explain why!`
+      }
+    }
+  }
+  
+  // Pre-defined themed questions for common themes only
   const themedQuestions = {
     water: [
       'Would you rather swim like a fish or surf the biggest waves?',
@@ -684,13 +702,6 @@ async function generateWouldYouRather(theme, difficulty, ageGroup) {
       'Would you rather be the fastest runner or the strongest weightlifter?',
       'Would you rather play on a team or compete in individual sports?',
       'Would you rather be a coach or a referee?'
-    ],
-    food: [
-      'Would you rather only eat pizza or only eat ice cream for a week?',
-      'Would you rather have a chocolate fountain or a pizza vending machine at home?',
-      'Would you rather eat only sweet foods or only salty foods?',
-      'Would you rather be a chef or a food taster?',
-      'Would you rather have unlimited candy or unlimited fruit?'
     ],
     animals: [
       'Would you rather have a pet dragon or a pet unicorn?',
@@ -719,72 +730,29 @@ async function generateWouldYouRather(theme, difficulty, ageGroup) {
       'Would you rather have a pet baby dinosaur or find a real dinosaur egg?',
       'Would you rather be as big as a Brachiosaurus or as fast as a Velociraptor?',
       'Would you rather discover a new dinosaur species or bring one back to life?'
-    ],
-    vehicles: [
-      'Would you rather fly a plane or captain a ship?',
-      'Would you rather have a flying car or a submarine car?',
-      'Would you rather drive the fastest race car or the biggest truck?',
-      'Would you rather travel by helicopter or by hot air balloon?',
-      'Would you rather build rockets or design trains?'
-    ],
-    nature: [
-      'Would you rather live in a treehouse or in a cave?',
-      'Would you rather control the weather or talk to plants?',
-      'Would you rather be able to grow any plant instantly or never need sleep?',
-      'Would you rather climb the tallest mountain or swim in every ocean?',
-      'Would you rather see a rainbow every day or never feel cold?'
-    ],
-    math: [
-      'Would you rather be super fast at mental math or never make a calculation mistake?',
-      'Would you rather have unlimited math homework or no recess for a week?',
-      'Would you rather count to a million or solve 100 hard math problems?',
-      'Would you rather only communicate using numbers or only use addition?',
-      'Would you rather be a famous mathematician or a famous scientist?'
-    ],
-    school: [
-      'Would you rather have no homework forever or have an extra hour of recess every day?',
-      'Would you rather be the smartest kid in class or the most popular?',
-      'Would you rather have a robot teacher or teach the class yourself for a day?',
-      'Would you rather have school in a treehouse or on a boat?',
-      'Would you rather have all A grades or be captain of every sports team?'
     ]
   }
   
-  // Check for AI-generated content first
-  let aiContent = null
-  const themedContentCheck = getThemedContent(theme)
-  if (themedContentCheck.needsAIGeneration && theme) {
-    aiContent = await generateAIThemedContent(theme)
-  }
-  
-  // If AI content has would you rather questions, use those
-  if (aiContent && aiContent.wouldYouRather && aiContent.wouldYouRather.length > 0) {
-    const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
-    const questions = [...aiContent.wouldYouRather].sort(() => Math.random() - 0.5).slice(0, count)
-    return {
-      type: 'would-you-rather',
-      questions,
-      theme,
-      instructions: `Circle your ${theme || ''} choice and explain why!`
-    }
-  }
-  
-  // Find matching theme from predefined - prioritize specific themes first
-  let questions = themedQuestions.animals
+  // Find matching pre-defined theme
+  let questions = null
   const normalizedTheme = theme?.toLowerCase() || ''
   
-  // Priority order for matching - water/ocean should come before sports
-  const priorityOrder = ['water', 'ocean', 'river', 'swim', 'pool', 'beach', 'dinosaurs', 'space', 'vehicles', 'nature', 'food', 'animals', 'math', 'school', 'sports']
-  
-  for (const priority of priorityOrder) {
-    if (normalizedTheme.includes(priority)) {
-      if (priority === 'river' || priority === 'swim' || priority === 'pool' || priority === 'beach') {
-        questions = themedQuestions.water
-      } else if (themedQuestions[priority]) {
-        questions = themedQuestions[priority]
-      }
+  for (const [key, value] of Object.entries(themedQuestions)) {
+    if (normalizedTheme.includes(key)) {
+      questions = value
       break
     }
+  }
+  
+  // If no pre-defined match, use generic but themed questions
+  if (!questions) {
+    questions = [
+      `Would you rather learn everything about ${theme} or be an expert at something else?`,
+      `Would you rather spend a day exploring ${theme} or a day learning a new skill?`,
+      `Would you rather have a ${theme} superpower or be invisible?`,
+      `Would you rather teach others about ${theme} or discover something new about it?`,
+      `Would you rather have unlimited ${theme} adventures or unlimited money?`
+    ]
   }
   
   const count = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 5 : 4
