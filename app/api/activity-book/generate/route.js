@@ -2451,25 +2451,78 @@ async function generateActivityPDF(body) {
       }
       
       else if (content.type === 'maze' || content.type === 'maze-complex') {
-        page.drawText(`Page ${pageNum}: Maze - Find path from ${content.startLabel || 'START'} to ${content.endLabel || 'FINISH'}`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
-        answerY -= 18
+        // Skip mazes - visual solution not practical in text format
       }
       
       else if (content.type === 'memory') {
         page.drawText(`Page ${pageNum}: Memory Match`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
         answerY -= 14
         const items = content.items || []
-        page.drawText(`Pairs: ${items.join(', ')}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+        page.drawText(`Pairs to find: ${items.slice(0, 6).join(', ')}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
         answerY -= 18
       }
       
       else if (content.type === 'visual-puzzles') {
-        page.drawText(`Page ${pageNum}: Visual Puzzles - Answers vary`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
-        answerY -= 18
+        // Skip visual puzzles - answers are visual
       }
       
-      else if (content.type === 'connect-dots' || content.type === 'drawing-prompts' || content.type === 'coloring') {
-        // Skip creative activities
+      else if (content.type === 'hangman' && content.words) {
+        page.drawText(`Page ${pageNum}: Hangman Words`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.words.forEach((word, idx) => {
+          if (answerY > 80) {
+            page.drawText(`${idx + 1}. ${word}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'matching' && content.pairs) {
+        page.drawText(`Page ${pageNum}: Matching Pairs`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.pairs.forEach((pair, idx) => {
+          if (answerY > 80) {
+            page.drawText(`${idx + 1}. ${pair[0]} → ${pair[1]}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'patterns' && content.patterns) {
+        page.drawText(`Page ${pageNum}: Pattern Answers`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.patterns.forEach((p, idx) => {
+          if (answerY > 80 && p.answer) {
+            page.drawText(`${idx + 1}. Next: ${p.answer}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      else if (content.type === 'counting' && content.items) {
+        page.drawText(`Page ${pageNum}: Counting Answers`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        content.items.forEach((item, idx) => {
+          if (answerY > 80) {
+            const count = item.count || 'varies'
+            page.drawText(`${idx + 1}. Count: ${count}`, { x: colX + 10, y: answerY, size: 8, font, color: rgb(0.3, 0.3, 0.3) })
+            answerY -= 11
+          }
+        })
+        answerY -= 8
+      }
+      
+      // Skip creative/coloring activities with no answers
+      else if (content.type === 'connect-dots' || content.type === 'drawing-prompts' || 
+               content.type === 'coloring' || content.type === 'doodle-complete' ||
+               content.type === 'color-by-number' || content.type === 'connect-color' ||
+               content.type === 'tracing' || content.type === 'would-you-rather' ||
+               content.type === 'bingo' || content.type === 'tic-tac-toe' ||
+               content.type === 'travel-games' || content.type === 'spelling') {
+        // Skip - these are creative/game activities with no fixed answers
       }
     }
     
