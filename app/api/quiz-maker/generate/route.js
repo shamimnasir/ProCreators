@@ -1,13 +1,67 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { spawn } from 'child_process'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+// Helper function to call LLM via Python script
+async function runLLM(prompt, systemPrompt = "You are a quiz and test creator. Generate engaging, educational content.") {
+  return new Promise((resolve) => {
+    try {
+      const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
+      
+      const inputData = JSON.stringify({
+        prompt,
+        system_prompt: systemPrompt
+      })
+      
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, inputData], {
+        env: { ...process.env }
+      })
+      
+      let stdout = ''
+      let stderr = ''
+      
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString()
+      })
+      
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString()
+      })
+      
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error('LLM script error:', stderr)
+          resolve({ success: false, content: null, error: stderr })
+          return
+        }
+        
+        try {
+          const result = JSON.parse(stdout)
+          resolve(result)
+        } catch (error) {
+          resolve({ success: false, content: null, error: 'Failed to parse LLM response' })
+        }
+      })
+      
+      pythonProcess.on('error', (error) => {
+        resolve({ success: false, content: null, error: error.message })
+      })
+      
+      // Timeout after 60 seconds
+      setTimeout(() => {
+        pythonProcess.kill()
+        resolve({ success: false, content: null, error: 'LLM request timed out' })
+      }, 60000)
+      
+    } catch (error) {
+      resolve({ success: false, content: null, error: error.message })
+    }
+  })
+}
 
 // Quiz Types
 const QUIZ_TYPES = {
