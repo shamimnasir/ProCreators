@@ -185,7 +185,6 @@ async function generateCoverImage(topic, quizType, customPrompt) {
 // Generate quiz content with AI
 async function generateQuizContent(topic, quizType, gradeLevel, questionCount, questionTypes, customPrompt, difficulty) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const topicInfo = QUIZ_TOPICS[topic] || { name: topic }
     
     // Build question type instruction
