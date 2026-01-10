@@ -323,18 +323,83 @@ async function generateSudoku(theme, difficulty, ageGroup) {
     }
   }
   
-  // Generate a valid sudoku grid (simplified)
-  const grid = Array(size).fill(null).map(() => Array(size).fill(0))
+  // Generate a valid sudoku solution
+  const solution = generateValidSudokuSolution(size)
+  
+  // Create puzzle by removing cells based on difficulty
+  const cellsToRemove = difficulty === 'easy' ? Math.floor(size * size * 0.4) : 
+                        difficulty === 'hard' ? Math.floor(size * size * 0.65) : 
+                        Math.floor(size * size * 0.5)
+  
+  const grid = solution.map(row => [...row])
+  let removed = 0
+  const positions = []
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      positions.push([r, c])
+    }
+  }
+  // Shuffle positions
+  positions.sort(() => Math.random() - 0.5)
+  
+  for (const [r, c] of positions) {
+    if (removed >= cellsToRemove) break
+    grid[r][c] = 0
+    removed++
+  }
   
   return {
     type: 'sudoku',
     grid,
+    solution,
     size,
     symbols,
     theme,
     instructions: isKids 
       ? `Fill in each row and column with different ${theme || ''} items: ${symbols?.join(', ')}!`
       : `Fill in the grid so each row, column, and box contains the numbers 1-${size}.`
+  }
+}
+
+// Helper function to generate a valid Sudoku solution
+function generateValidSudokuSolution(size) {
+  const grid = Array(size).fill(null).map(() => Array(size).fill(0))
+  
+  // Simple valid solution generator
+  if (size === 4) {
+    // 4x4 valid solution (for kids)
+    const base = [
+      [1, 2, 3, 4],
+      [3, 4, 1, 2],
+      [2, 1, 4, 3],
+      [4, 3, 2, 1]
+    ]
+    return base
+  } else if (size === 6) {
+    // 6x6 valid solution
+    const base = [
+      [1, 2, 3, 4, 5, 6],
+      [4, 5, 6, 1, 2, 3],
+      [2, 3, 1, 5, 6, 4],
+      [5, 6, 4, 2, 3, 1],
+      [3, 1, 2, 6, 4, 5],
+      [6, 4, 5, 3, 1, 2]
+    ]
+    return base
+  } else {
+    // 9x9 valid solution
+    const base = [
+      [5, 3, 4, 6, 7, 8, 9, 1, 2],
+      [6, 7, 2, 1, 9, 5, 3, 4, 8],
+      [1, 9, 8, 3, 4, 2, 5, 6, 7],
+      [8, 5, 9, 7, 6, 1, 4, 2, 3],
+      [4, 2, 6, 8, 5, 3, 7, 9, 1],
+      [7, 1, 3, 9, 2, 4, 8, 5, 6],
+      [9, 6, 1, 5, 3, 7, 2, 8, 4],
+      [2, 8, 7, 4, 1, 9, 6, 3, 5],
+      [3, 4, 5, 2, 8, 6, 1, 7, 9]
+    ]
+    return base
   }
 }
 
