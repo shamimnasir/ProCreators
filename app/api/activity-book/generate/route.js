@@ -2406,9 +2406,27 @@ async function generateActivityPDF(body) {
         answerY -= 8
       }
       
-      else if (content.type === 'sudoku') {
-        page.drawText(`Page ${pageNum}: Sudoku - Solution available separately`, { x: colX, y: answerY, size: 9, font, color: rgb(0.4, 0.4, 0.4) })
-        answerY -= 18
+      else if (content.type === 'sudoku' && content.solution) {
+        page.drawText(`Page ${pageNum}: Sudoku Solution`, { x: colX, y: answerY, size: 10, font: boldFont, color: pColor })
+        answerY -= 14
+        // Display the solution grid in a compact format
+        const sol = content.solution
+        if (sol && sol.length > 0) {
+          const displaySymbols = content.symbols
+          for (let r = 0; r < Math.min(sol.length, 9); r++) {
+            if (answerY > 80) {
+              const rowValues = sol[r].map(v => {
+                if (displaySymbols && v > 0 && v <= displaySymbols.length) {
+                  return displaySymbols[v - 1].substring(0, 3)
+                }
+                return String(v)
+              })
+              page.drawText(`Row ${r + 1}: ${rowValues.join(' ')}`, { x: colX + 10, y: answerY, size: 7, font, color: rgb(0.3, 0.3, 0.3) })
+              answerY -= 10
+            }
+          }
+        }
+        answerY -= 8
       }
       
       else if (content.type === 'spot-difference') {
