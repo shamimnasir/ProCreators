@@ -322,9 +322,15 @@ Format as JSON:
 IMPORTANT: Return ONLY valid JSON. Questions should be accurate, engaging, and educational.`
     }
 
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    let text = response.text().trim()
+    // Call LLM using Python script
+    const llmResult = await runLLM(prompt, "You are a professional quiz creator. Generate accurate, engaging, and educational content. Return ONLY valid JSON.")
+    
+    if (!llmResult.success || !llmResult.content) {
+      console.error('LLM call failed:', llmResult.error)
+      throw new Error(llmResult.error || 'Failed to generate quiz content')
+    }
+    
+    let text = llmResult.content.trim()
     
     // Clean up response
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
