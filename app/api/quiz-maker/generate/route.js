@@ -566,77 +566,79 @@ export async function POST(request) {
       if (hasNonAscii(allText)) {
         console.log('Non-ASCII text detected, loading Unicode fonts...')
         
-        // Font paths - try multiple options for best compatibility
-        const fontPaths = [
-          '/app/public/fonts/NotoSans-Regular.ttf',           // General Unicode (better coverage)
-          '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali
-          '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Good Unicode coverage
-        ]
-        
-        const fontBoldPaths = [
-          '/app/public/fonts/NotoSans-Bold.ttf',
-          '/app/public/fonts/NotoSansBengali-Bold.ttf',
-          '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
-        ]
-        
-        const fontItalicPaths = [
-          '/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf',
-          '/app/public/fonts/NotoSans-Regular.ttf', // Fallback to regular if no italic
-        ]
-        
-        // Try to load regular Unicode font
-        for (const fontPath of fontPaths) {
-          try {
-            const fontBytes = await fs.readFile(fontPath)
-            // Use subset: true for better performance and compatibility
-            regularFont = await pdfDoc.embedFont(fontBytes, { subset: true })
-            hasUnicodeFont = true
-            console.log(`Loaded Unicode font: ${fontPath}`)
-            break
-          } catch (e) {
-            console.log(`Font not available or failed to load: ${fontPath} - ${e.message}`)
-          }
-        }
-        
-        // Try to load bold Unicode font
-        if (hasUnicodeFont) {
-          for (const fontPath of fontBoldPaths) {
+        try {
+          // Font paths - try multiple options for best compatibility
+          const fontPaths = [
+            '/app/public/fonts/NotoSans-Regular.ttf',           // General Unicode (better coverage)
+            '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali
+            '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Good Unicode coverage
+          ]
+          
+          const fontBoldPaths = [
+            '/app/public/fonts/NotoSans-Bold.ttf',
+            '/app/public/fonts/NotoSansBengali-Bold.ttf',
+            '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+          ]
+          
+          const fontItalicPaths = [
+            '/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf',
+            '/app/public/fonts/NotoSans-Regular.ttf', // Fallback to regular if no italic
+          ]
+          
+          // Try to load regular Unicode font
+          for (const fontPath of fontPaths) {
             try {
               const fontBytes = await fs.readFile(fontPath)
-              boldFont = await pdfDoc.embedFont(fontBytes, { subset: true })
-              console.log(`Loaded Unicode bold font: ${fontPath}`)
+              // Use subset: true for better performance and compatibility
+              regularFont = await pdfDoc.embedFont(fontBytes, { subset: true })
+              hasUnicodeFont = true
+              console.log(`Loaded Unicode font: ${fontPath}`)
               break
             } catch (e) {
-              // Continue to next
+              console.log(`Font not available or failed to load: ${fontPath} - ${e.message}`)
             }
           }
-        }
-        
-        // Try to load italic Unicode font
-        if (hasUnicodeFont) {
-          for (const fontPath of fontItalicPaths) {
-            try {
-              const fontBytes = await fs.readFile(fontPath)
-              italicFont = await pdfDoc.embedFont(fontBytes, { subset: true })
-              console.log(`Loaded Unicode italic font: ${fontPath}`)
-              break
-            } catch (e) {
-              // Continue to next
+          
+          // Try to load bold Unicode font
+          if (hasUnicodeFont) {
+            for (const fontPath of fontBoldPaths) {
+              try {
+                const fontBytes = await fs.readFile(fontPath)
+                boldFont = await pdfDoc.embedFont(fontBytes, { subset: true })
+                console.log(`Loaded Unicode bold font: ${fontPath}`)
+                break
+              } catch (e) {
+                // Continue to next
+              }
             }
           }
+          
+          // Try to load italic Unicode font
+          if (hasUnicodeFont) {
+            for (const fontPath of fontItalicPaths) {
+              try {
+                const fontBytes = await fs.readFile(fontPath)
+                italicFont = await pdfDoc.embedFont(fontBytes, { subset: true })
+                console.log(`Loaded Unicode italic font: ${fontPath}`)
+                break
+              } catch (e) {
+                // Continue to next
+              }
+            }
+          }
+          
+          // If bold/italic not loaded but regular is, use regular as fallback
+          if (hasUnicodeFont) {
+            if (boldFont === standardBold) boldFont = regularFont
+            if (italicFont === standardItalic) italicFont = regularFont
+          }
+        } catch (fontError) {
+          console.error('Failed to load Unicode fonts, using standard fonts:', fontError.message)
+          hasUnicodeFont = false
+          regularFont = standardRegular
+          boldFont = standardBold
+          italicFont = standardItalic
         }
-        
-        // If bold/italic not loaded but regular is, use regular as fallback
-        if (hasUnicodeFont) {
-          if (boldFont === standardBold) boldFont = regularFont
-          if (italicFont === standardItalic) italicFont = regularFont
-        }
-      } catch (fontError) {
-        console.error('Failed to load Unicode fonts, using standard fonts:', fontError.message)
-        hasUnicodeFont = false
-        regularFont = standardRegular
-        boldFont = standardBold
-        italicFont = standardItalic
       }
       
       // Helper to get appropriate font based on text content
