@@ -380,19 +380,27 @@ function sanitizeText(text) {
     .replace(/[\u00A0]/g, ' ')                     // Non-breaking space
     .replace(/[\u2022\u2023\u25E6\u2043]/g, '*')  // Bullet points
     .replace(/[\u2019]/g, "'")                     // Right single quote
-    .replace(/[^\x00-\x7F]/g, '')                  // Remove ALL non-ASCII characters
     .trim()
 }
 
-// Helper to safely draw text with font fallback
-function safeDrawText(page, text, options) {
+// Sanitize text for standard fonts only (removes non-ASCII)
+function sanitizeForStandardFont(text) {
+  if (!text) return ''
+  return sanitizeText(text).replace(/[^\x00-\x7F]/g, '').trim()
+}
+
+// Helper to safely draw text - handles both Unicode and standard fonts
+function safeDrawText(page, text, options, useUnicode = false) {
+  if (!text) return
   try {
-    const safeText = sanitizeText(text)
-    if (safeText) {
-      page.drawText(safeText, options)
+    // For Unicode fonts, only do basic cleanup (keep non-ASCII)
+    // For standard fonts, remove all non-ASCII characters
+    const processedText = useUnicode ? sanitizeText(text) : sanitizeForStandardFont(text)
+    if (processedText) {
+      page.drawText(processedText, options)
     }
   } catch (e) {
-    // If still fails, try with only basic ASCII
+    // Fallback: try with ASCII only
     try {
       const fallbackText = text.replace(/[^\x20-\x7E]/g, '').trim()
       if (fallbackText) {
@@ -404,12 +412,13 @@ function safeDrawText(page, text, options) {
   }
 }
 
-// Word wrap helper - sanitizes text first
-function wrapText(text, font, fontSize, maxWidth) {
-  const safeText = sanitizeText(text)
-  if (!safeText) return []
+// Word wrap helper - works with both Unicode and standard fonts
+function wrapText(text, font, fontSize, maxWidth, useUnicode = false) {
+  if (!text) return []
+  const processedText = useUnicode ? sanitizeText(text) : sanitizeForStandardFont(text)
+  if (!processedText) return []
   
-  const words = safeText.split(' ').filter(w => w.length > 0)
+  const words = processedText.split(' ').filter(w => w.length > 0)
   const lines = []
   let currentLine = ''
   
