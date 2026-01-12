@@ -1223,7 +1223,7 @@ export async function POST(request) {
           // Explanation (if available) - show up to 3 lines
           if (q.explanation) {
             y -= 4
-            const expLines = wrapText(q.explanation, italicFont, 9, contentWidth - 50)
+            const expLines = wrapText(q.explanation, italicFont, 9, contentWidth - 50, hasUnicodeFont)
             const linesToShow = expLines.slice(0, 3)
             linesToShow.forEach((line, idx) => {
               safeDrawText(page, line, {
@@ -1232,7 +1232,7 @@ export async function POST(request) {
                 size: 9,
                 font: italicFont,
                 color: rgb(0.5, 0.5, 0.5)
-              })
+              }, hasUnicodeFont)
             })
             y -= linesToShow.length * 12
           }
