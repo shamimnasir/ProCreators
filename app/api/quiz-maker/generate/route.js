@@ -1184,7 +1184,7 @@ export async function POST(request) {
               size: 12,
               font: boldFont,
               color: rgb(0.5, 0.5, 0.5)
-            })
+            }, hasUnicodeFont)
             y -= 20
           }
           
@@ -1204,11 +1204,11 @@ export async function POST(request) {
             size: 11,
             font: boldFont,
             color: rgb(1, 1, 1)
-          })
+          }, hasUnicodeFont)
           
           // Answer text - wrap if too long
           const answerText = q.answer || 'See explanation'
-          const answerLines = wrapText(answerText, regularFont, 11, contentWidth - 50)
+          const answerLines = wrapText(answerText, regularFont, 11, contentWidth - 50, hasUnicodeFont)
           answerLines.forEach((line, idx) => {
             safeDrawText(page, line, {
               x: margin + 38,
@@ -1216,7 +1216,7 @@ export async function POST(request) {
               size: 11,
               font: regularFont,
               color: rgb(0.15, 0.15, 0.15)
-            })
+            }, hasUnicodeFont)
           })
           y -= Math.max(answerLines.length * 14, 14)
           
