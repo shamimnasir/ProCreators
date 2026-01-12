@@ -1105,11 +1105,11 @@ export async function POST(request) {
           size: 12,
           font: boldFont,
           color: rgb(secondary.r, secondary.g, secondary.b)
-        })
+        }, hasUnicodeFont)
         
         y -= 20
         
-        const bonusLines = wrapText(content.bonusQuestion.question, regularFont, 11, width - margin * 2 - 30)
+        const bonusLines = wrapText(content.bonusQuestion.question, regularFont, 11, width - margin * 2 - 30, hasUnicodeFont)
         bonusLines.forEach((line, idx) => {
           safeDrawText(page, line, {
             x: margin + 10,
@@ -1117,7 +1117,7 @@ export async function POST(request) {
             size: 11,
             font: regularFont,
             color: rgb(0.2, 0.2, 0.2)
-          })
+          }, hasUnicodeFont)
         })
       }
       
