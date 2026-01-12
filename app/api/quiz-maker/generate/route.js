@@ -783,28 +783,28 @@ export async function POST(request) {
       // Author
       if (authorName) {
         const authorText = `By ${authorName}`
-        const safeAuthorText = sanitizeText(authorText)
-        const authorWidth = safeAuthorText ? regularFont.widthOfTextAtSize(safeAuthorText, 14) : 0
+        const processedAuthorText = hasUnicodeFont ? sanitizeText(authorText) : sanitizeForStandardFont(authorText)
+        const authorWidth = processedAuthorText ? regularFont.widthOfTextAtSize(processedAuthorText, 14) : 0
         safeDrawText(page, authorText, {
           x: (width - authorWidth) / 2,
           y: margin + 60,
           size: 14,
           font: italicFont,
           color: rgb(1, 1, 1, 0.8)
-        })
+        }, hasUnicodeFont)
       }
       
       // Year
       const yearText = new Date().getFullYear().toString()
-      const safeYearText = sanitizeText(yearText)
-      const yearWidth = safeYearText ? regularFont.widthOfTextAtSize(safeYearText, 12) : 0
+      const processedYearText = hasUnicodeFont ? sanitizeText(yearText) : sanitizeForStandardFont(yearText)
+      const yearWidth = processedYearText ? regularFont.widthOfTextAtSize(processedYearText, 12) : 0
       safeDrawText(page, yearText, {
         x: (width - yearWidth) / 2,
         y: margin + 30,
         size: 12,
         font: regularFont,
         color: rgb(1, 1, 1, 0.7)
-      })
+      }, hasUnicodeFont)
       
       // === INSTRUCTIONS PAGE ===
       page = pdfDoc.addPage([width, height])
