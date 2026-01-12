@@ -999,105 +999,140 @@ export async function POST(request) {
         
         y = height - 110
         
-        safeDrawText(page, finalTitle, {
-          x: margin,
-          y: y,
-          size: 14,
-          font: boldFont,
-          color: rgb(0.3, 0.3, 0.3)
+        // Quiz title
+        const titleLines = wrapText(finalTitle, boldFont, 14, width - margin * 2)
+        titleLines.forEach((line, idx) => {
+          safeDrawText(page, line, {
+            x: margin,
+            y: y - idx * 18,
+            size: 14,
+            font: boldFont,
+            color: rgb(0.3, 0.3, 0.3)
+          })
         })
+        y -= titleLines.length * 18 + 20
         
-        y -= 30
+        // Draw a line separator
+        page.drawLine({
+          start: { x: margin, y: y },
+          end: { x: width - margin, y: y },
+          thickness: 1,
+          color: rgb(0.8, 0.8, 0.8)
+        })
+        y -= 20
         
-        // Two-column layout for answers
-        const colWidth = (width - margin * 2 - 20) / 2
-        let col = 0
-        let colY = y
+        // Single column layout for better readability
+        const contentWidth = width - margin * 2
         
         for (let i = 0; i < questions.length; i++) {
           const q = questions[i]
-          const x = margin + col * (colWidth + 20)
           
-          if (colY < margin + 100) {
-            if (col === 0) {
-              col = 1
-              colY = y
-            } else {
-              page = pdfDoc.addPage([width, height])
-              col = 0
-              y = height - margin - 30
-              colY = y
-            }
+          // Check if we need a new page
+          const estimatedHeight = q.explanation ? 60 : 30
+          if (y < margin + estimatedHeight) {
+            page = pdfDoc.addPage([width, height])
+            y = height - margin - 30
+            
+            // Mini header on continuation page
+            safeDrawText(page, 'ANSWER KEY (continued)', {
+              x: margin,
+              y: y + 10,
+              size: 12,
+              font: boldFont,
+              color: rgb(0.5, 0.5, 0.5)
+            })
+            y -= 20
           }
           
-          // Question number and answer
-          safeDrawText(page, `${i + 1}.`, {
-            x: x,
-            y: colY,
+          // Question number badge
+          page.drawRectangle({
+            x: margin,
+            y: y - 12,
+            width: 28,
+            height: 20,
+            color: rgb(0.6, 0.1, 0.1),
+            borderRadius: 3
+          })
+          
+          safeDrawText(page, `${i + 1}`, {
+            x: margin + (i + 1 > 9 ? 6 : 10),
+            y: y - 6,
             size: 11,
             font: boldFont,
-            color: rgb(0.1, 0.1, 0.1)
+            color: rgb(1, 1, 1)
           })
           
+          // Answer text - wrap if too long
           const answerText = q.answer || 'See explanation'
-          safeDrawText(page, answerText.substring(0, 50), {
-            x: x + 25,
-            y: colY,
-            size: 11,
-            font: regularFont,
-            color: rgb(0.2, 0.2, 0.2)
+          const answerLines = wrapText(answerText, regularFont, 11, contentWidth - 50)
+          answerLines.forEach((line, idx) => {
+            safeDrawText(page, line, {
+              x: margin + 38,
+              y: y - idx * 14,
+              size: 11,
+              font: regularFont,
+              color: rgb(0.15, 0.15, 0.15)
+            })
           })
+          y -= Math.max(answerLines.length * 14, 14)
           
-          colY -= 18
-          
-          // Explanation (if available)
+          // Explanation (if available) - show up to 3 lines
           if (q.explanation) {
-            const expLines = wrapText(q.explanation, italicFont, 9, colWidth - 30)
-            expLines.slice(0, 2).forEach((line, idx) => {
+            y -= 4
+            const expLines = wrapText(q.explanation, italicFont, 9, contentWidth - 50)
+            const linesToShow = expLines.slice(0, 3)
+            linesToShow.forEach((line, idx) => {
               safeDrawText(page, line, {
-                x: x + 25,
-                y: colY - idx * 12,
+                x: margin + 38,
+                y: y - idx * 12,
                 size: 9,
                 font: italicFont,
                 color: rgb(0.5, 0.5, 0.5)
               })
             })
-            colY -= expLines.slice(0, 2).length * 12 + 8
+            y -= linesToShow.length * 12
           }
           
-          colY -= 5
-          
-          // Switch columns
-          if (col === 0 && colY < margin + 100) {
-            col = 1
-            colY = y
-          } else if (col === 1 && colY < margin + 100) {
-            col = 0
-          }
+          y -= 15 // Space between answers
         }
         
         // Bonus answer
         if (content.bonusQuestion && content.bonusQuestion.answer) {
-          if (colY < margin + 60) {
+          // Check if we need a new page for bonus
+          if (y < margin + 80) {
             page = pdfDoc.addPage([width, height])
-            colY = height - margin - 30
+            y = height - margin - 30
           }
           
-          colY -= 20
+          y -= 20
           
-          safeDrawText(page, 'BONUS:', {
+          // Bonus box
+          page.drawRectangle({
             x: margin,
-            y: colY,
+            y: y - 50,
+            width: contentWidth,
+            height: 70,
+            color: rgb(1, 0.95, 0.85),
+            borderColor: rgb(0.8, 0.5, 0),
+            borderWidth: 1
+          })
+          
+          safeDrawText(page, 'BONUS ANSWER:', {
+            x: margin + 10,
+            y: y - 5,
             size: 11,
             font: boldFont,
             color: rgb(0.6, 0.3, 0)
           })
           
-          safeDrawText(page, content.bonusQuestion.answer, {
-            x: margin + 50,
-            y: colY,
-            size: 11,
-            font: regularFont,
+          // Wrap bonus answer
+          const bonusAnswerLines = wrapText(content.bonusQuestion.answer, regularFont, 11, contentWidth - 30)
+          bonusAnswerLines.slice(0, 2).forEach((line, idx) => {
+            safeDrawText(page, line, {
+              x: margin + 10,
+              y: y - 22 - idx * 14,
+              size: 11,
+              font: regularFont,
             color: rgb(0.6, 0.3, 0)
           })
         }
