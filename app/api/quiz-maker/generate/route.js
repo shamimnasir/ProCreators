@@ -13,6 +13,30 @@ function hasNonAscii(text) {
   return /[^\x00-\x7F]/.test(text)
 }
 
+// Check if text contains Bengali script (Unicode range: U+0980 to U+09FF)
+function hasBengali(text) {
+  if (!text) return false
+  return /[\u0980-\u09FF]/.test(text)
+}
+
+// Check if text contains Devanagari script (Hindi, Sanskrit, etc.) (Unicode range: U+0900 to U+097F)
+function hasDevanagari(text) {
+  if (!text) return false
+  return /[\u0900-\u097F]/.test(text)
+}
+
+// Check if text contains Arabic script (Unicode range: U+0600 to U+06FF)
+function hasArabic(text) {
+  if (!text) return false
+  return /[\u0600-\u06FF]/.test(text)
+}
+
+// Check if text contains CJK characters (Chinese, Japanese, Korean)
+function hasCJK(text) {
+  if (!text) return false
+  return /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text)
+}
+
 // Helper function to call LLM via Python script
 async function runLLM(prompt, systemPrompt = "You are a quiz and test creator. Generate engaging, educational content.") {
   return new Promise((resolve) => {
