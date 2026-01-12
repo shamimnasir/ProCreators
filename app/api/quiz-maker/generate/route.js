@@ -1133,7 +1133,8 @@ export async function POST(request) {
               y: y - 22 - idx * 14,
               size: 11,
               font: regularFont,
-            color: rgb(0.6, 0.3, 0)
+              color: rgb(0.4, 0.25, 0)
+            })
           })
         }
       }
