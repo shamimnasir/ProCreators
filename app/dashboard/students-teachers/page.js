@@ -39,11 +39,12 @@ const EDUCATION_CATEGORIES = [
       {
         id: 'lesson-planner',
         name: 'Lesson Plan Generator',
-        description: 'Structured lesson plans with objectives',
+        description: 'AI-powered lesson plans with objectives, activities & assessments',
         icon: '📋',
         href: '/dashboard/tools/lesson-planner',
         useCase: 'Teachers, trainers',
-        badge: 'For Teachers'
+        badge: 'For Teachers',
+        isBuilt: true
       }
     ]
   },
@@ -61,7 +62,28 @@ const EDUCATION_CATEGORIES = [
         icon: '🎴',
         href: '/dashboard/tools/learning-cards',
         useCase: 'Exam prep, memorization',
-        badge: 'Popular'
+        badge: 'Popular',
+        isBuilt: true
+      },
+      {
+        id: 'storybook-maker',
+        name: 'Storybook Creator',
+        description: 'Create illustrated educational stories',
+        icon: '📖',
+        href: '/dashboard/tools/storybook-maker',
+        useCase: 'K-12, language learning',
+        badge: 'Creative',
+        isBuilt: true
+      },
+      {
+        id: 'ebook-maker',
+        name: 'eBook Creator',
+        description: 'Create comprehensive educational eBooks',
+        icon: '📕',
+        href: '/dashboard/tools/ebook-maker',
+        useCase: 'Course materials, guides',
+        badge: '',
+        isBuilt: true
       },
       {
         id: 'study-notes',
@@ -70,16 +92,7 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/study-notes',
         useCase: 'Note-taking, revision',
-        badge: ''
-      },
-      {
-        id: 'research-summarizer',
-        name: 'Research Summarizer',
-        description: 'Summarize papers and articles',
-        icon: '🔬',
-        href: '/dashboard/tools/research-summarizer',
-        useCase: 'Research projects',
-        badge: 'For Researchers'
+        badge: 'Coming Soon'
       }
     ]
   },
@@ -92,12 +105,33 @@ const EDUCATION_CATEGORIES = [
     tools: [
       {
         id: 'quiz-maker',
-        name: 'Quiz Generator',
-        description: 'Auto-generate quizzes from any content',
+        name: 'Quiz & Test Creator',
+        description: 'Auto-generate quizzes with PDF export in any language',
         icon: '❓',
         href: '/dashboard/tools/quiz-maker',
         useCase: 'Testing, self-assessment',
-        badge: 'Smart'
+        badge: 'Smart',
+        isBuilt: true
+      },
+      {
+        id: 'worksheet-maker',
+        name: 'Worksheet Generator',
+        description: 'Create printable educational worksheets',
+        icon: '📄',
+        href: '/dashboard/tools/worksheet-maker',
+        useCase: 'Practice, homework',
+        badge: 'Popular',
+        isBuilt: true
+      },
+      {
+        id: 'activity-book',
+        name: 'Activity Book Creator',
+        description: 'Design fun learning activity books',
+        icon: '🎨',
+        href: '/dashboard/tools/activity-book',
+        useCase: 'K-12, homeschool',
+        badge: '',
+        isBuilt: true
       },
       {
         id: 'exam-prep',
@@ -106,7 +140,7 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/exam-prep',
         useCase: 'Board exams, certifications',
-        badge: ''
+        badge: 'Coming Soon'
       }
     ]
   },
@@ -124,7 +158,7 @@ const EDUCATION_CATEGORIES = [
         icon: '✍️',
         href: '/dashboard/tools/essay-helper',
         useCase: 'Academic writing',
-        badge: ''
+        badge: 'Coming Soon'
       },
       {
         id: 'citation-generator',
@@ -133,7 +167,7 @@ const EDUCATION_CATEGORIES = [
         icon: '📚',
         href: '/dashboard/tools/citation-generator',
         useCase: 'Research papers',
-        badge: 'Useful'
+        badge: 'Coming Soon'
       },
       {
         id: 'grammar-checker',
@@ -142,7 +176,46 @@ const EDUCATION_CATEGORIES = [
         icon: '✅',
         href: '/dashboard/tools/grammar-checker',
         useCase: 'All writing',
-        badge: ''
+        badge: 'Coming Soon'
+      }
+    ]
+  },
+  {
+    id: 'planning',
+    name: 'Planning & Organization',
+    description: 'Tools for planning and organization',
+    icon: '📅',
+    color: 'from-cyan-500 to-blue-500',
+    tools: [
+      {
+        id: 'planner-maker',
+        name: 'Study Planner',
+        description: 'Create customized study planners',
+        icon: '📅',
+        href: '/dashboard/tools/planner-maker',
+        useCase: 'Time management, schedules',
+        badge: '',
+        isBuilt: true
+      },
+      {
+        id: 'checklist-maker',
+        name: 'Checklist Creator',
+        description: 'Build task and study checklists',
+        icon: '✅',
+        href: '/dashboard/tools/checklist-maker',
+        useCase: 'Task tracking, goals',
+        badge: '',
+        isBuilt: true
+      },
+      {
+        id: 'journal-maker',
+        name: 'Learning Journal',
+        description: 'Create reflection and learning journals',
+        icon: '📓',
+        href: '/dashboard/tools/journal-maker',
+        useCase: 'Reflection, growth tracking',
+        badge: '',
+        isBuilt: true
       }
     ]
   }
