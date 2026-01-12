@@ -581,6 +581,21 @@ export async function POST(request) {
         try {
           const finalTitle = customTitle || content.title || 'Quiz'
           
+          // Generate cover image if requested
+          let coverImageUrl = null
+          if (generateCover) {
+            try {
+              console.log('Generating cover image for HTML-to-PDF quiz...')
+              const coverResult = await generateCoverImage(topic || customTopic, quizType, customCoverPrompt)
+              if (coverResult.success && coverResult.imageUrl) {
+                coverImageUrl = coverResult.imageUrl
+                console.log('Cover image generated successfully:', coverImageUrl)
+              }
+            } catch (e) {
+              console.log('Cover image generation failed:', e.message)
+            }
+          }
+          
           // Generate HTML content
           const htmlContent = generateQuizHTML(content, {
             title: finalTitle,
@@ -589,7 +604,8 @@ export async function POST(request) {
             secondaryColor,
             gradeLevel,
             includeAnswerKey,
-            paperSize
+            paperSize,
+            coverImageUrl
           })
           
           // Generate PDF from HTML using Puppeteer
