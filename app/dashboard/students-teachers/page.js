@@ -388,19 +388,34 @@ export default function StudentsTeachersPage() {
 }
 
 function ToolCard({ tool, categoryColor, expanded = false }) {
+  const isComingSoon = tool.badge === 'Coming Soon'
+  
+  const CardWrapper = isComingSoon ? 'div' : Link
+  const cardProps = isComingSoon ? {} : { href: tool.href }
+  
   return (
-    <Link href={tool.href}>
-      <Card className="group h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-2 hover:border-primary/50">
+    <CardWrapper {...cardProps}>
+      <Card className={`group h-full transition-all border-2 ${
+        isComingSoon 
+          ? 'opacity-60 cursor-not-allowed bg-muted/30' 
+          : 'hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:border-primary/50'
+      }`}>
         <CardHeader className={expanded ? "pb-2" : "pb-1"}>
           <div className="flex items-start justify-between">
             <div className="text-3xl mb-2">{tool.icon}</div>
             {tool.badge && (
-              <Badge className={`bg-gradient-to-r ${categoryColor} text-white text-[10px]`}>
+              <Badge className={`${
+                tool.badge === 'Coming Soon' 
+                  ? 'bg-gray-400 text-white' 
+                  : `bg-gradient-to-r ${categoryColor} text-white`
+              } text-[10px]`}>
                 {tool.badge}
               </Badge>
             )}
           </div>
-          <CardTitle className={`group-hover:text-primary transition-colors ${expanded ? "text-lg" : "text-base"}`}>
+          <CardTitle className={`transition-colors ${expanded ? "text-lg" : "text-base"} ${
+            isComingSoon ? '' : 'group-hover:text-primary'
+          }`}>
             {tool.name}
           </CardTitle>
           <CardDescription className={expanded ? "" : "text-xs line-clamp-2"}>
@@ -419,12 +434,14 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
             {!expanded && tool.useCase && (
               <span className="text-xs text-muted-foreground">{tool.useCase}</span>
             )}
-            <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1 ml-auto">
-              Open <ArrowRight className="h-3 w-3" />
-            </span>
+            {!isComingSoon && (
+              <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1 ml-auto">
+                Open <ArrowRight className="h-3 w-3" />
+              </span>
+            )}
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </CardWrapper>
   )
 }
