@@ -727,17 +727,17 @@ export async function POST(request) {
       
       // Description
       if (content.description) {
-        const descLines = wrapText(content.description, regularFont, 14, width - margin * 2 - 60)
+        const descLines = wrapText(content.description, regularFont, 14, width - margin * 2 - 60, hasUnicodeFont)
         descLines.forEach((line, idx) => {
-          const safeLine = sanitizeText(line)
-          const lineWidth = safeLine ? regularFont.widthOfTextAtSize(safeLine, 14) : 0
+          const processedLine = hasUnicodeFont ? sanitizeText(line) : sanitizeForStandardFont(line)
+          const lineWidth = processedLine ? regularFont.widthOfTextAtSize(processedLine, 14) : 0
           safeDrawText(page, line, {
             x: (width - lineWidth) / 2,
             y: y - idx * 20,
             size: 14,
             font: regularFont,
             color: rgb(1, 1, 1, 0.9)
-          })
+          }, hasUnicodeFont)
         })
         y -= descLines.length * 20 + 40
       }
