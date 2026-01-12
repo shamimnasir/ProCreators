@@ -362,31 +362,47 @@ IMPORTANT: Return ONLY valid JSON. Questions should be accurate, engaging, and e
   }
 }
 
+// Sanitize text to remove characters not supported by standard PDF fonts
+function sanitizeText(text) {
+  if (!text) return ''
+  return text
+    .replace(/[\u2018\u2019\u0060\u00B4]/g, "'")  // Smart quotes and accents to apostrophe
+    .replace(/[\u201C\u201D\u00AB\u00BB]/g, '"')  // Smart double quotes
+    .replace(/[\u2013\u2014\u2015]/g, '-')        // Various dashes
+    .replace(/[\u2026]/g, '...')                   // Ellipsis
+    .replace(/[\u00A0]/g, ' ')                     // Non-breaking space
+    .replace(/[\u2022\u2023\u25E6\u2043]/g, '*')  // Bullet points
+    .replace(/[\u2019]/g, "'")                     // Right single quote
+    .replace(/[^\x00-\x7F]/g, '')                  // Remove ALL non-ASCII characters
+    .trim()
+}
+
 // Helper to safely draw text with font fallback
 function safeDrawText(page, text, options) {
   try {
-    // Replace unsupported characters
-    const safeText = text
-      .replace(/[\u2018\u2019]/g, "'") // Smart quotes
-      .replace(/[\u201C\u201D]/g, '"') // Smart double quotes
-      .replace(/[\u2013\u2014]/g, '-') // Dashes
-      .replace(/[\u2026]/g, '...') // Ellipsis
-      .replace(/[^\x00-\x7F]/g, '') // Remove other non-ASCII
-    page.drawText(safeText, options)
+    const safeText = sanitizeText(text)
+    if (safeText) {
+      page.drawText(safeText, options)
+    }
   } catch (e) {
-    // If still fails, draw with asterisks for problematic chars
-    const fallbackText = text.replace(/[^\x00-\x7F]/g, '*')
+    // If still fails, try with only basic ASCII
     try {
-      page.drawText(fallbackText, options)
+      const fallbackText = text.replace(/[^\x20-\x7E]/g, '').trim()
+      if (fallbackText) {
+        page.drawText(fallbackText, options)
+      }
     } catch (e2) {
-      console.error('Failed to draw text:', e2)
+      console.error('Failed to draw text:', e2.message)
     }
   }
 }
 
-// Word wrap helper
+// Word wrap helper - sanitizes text first
 function wrapText(text, font, fontSize, maxWidth) {
-  const words = text.split(' ')
+  const safeText = sanitizeText(text)
+  if (!safeText) return []
+  
+  const words = safeText.split(' ').filter(w => w.length > 0)
   const lines = []
   let currentLine = ''
   
