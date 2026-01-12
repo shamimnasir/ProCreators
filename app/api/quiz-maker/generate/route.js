@@ -737,8 +737,7 @@ export async function POST(request) {
       y = height - margin - 150
       
       titleLines.forEach((line, idx) => {
-        const processedLine = hasUnicodeFont ? sanitizeText(line) : sanitizeForStandardFont(line)
-        const titleWidth = processedLine ? boldFont.widthOfTextAtSize(processedLine, 32) : 0
+        const titleWidth = safeGetTextWidth(line, boldFont, 32, hasUnicodeFont)
         safeDrawText(page, line, {
           x: (width - titleWidth) / 2,
           y: y - idx * 40,
@@ -754,8 +753,7 @@ export async function POST(request) {
       if (content.description) {
         const descLines = wrapText(content.description, regularFont, 14, width - margin * 2 - 60, hasUnicodeFont)
         descLines.forEach((line, idx) => {
-          const processedLine = hasUnicodeFont ? sanitizeText(line) : sanitizeForStandardFont(line)
-          const lineWidth = processedLine ? regularFont.widthOfTextAtSize(processedLine, 14) : 0
+          const lineWidth = safeGetTextWidth(line, regularFont, 14, hasUnicodeFont)
           safeDrawText(page, line, {
             x: (width - lineWidth) / 2,
             y: y - idx * 20,
@@ -782,8 +780,7 @@ export async function POST(request) {
       })
       
       const infoText = `${content.questions?.length || questionCount} Questions`
-      const processedInfoText = hasUnicodeFont ? sanitizeText(infoText) : sanitizeForStandardFont(infoText)
-      const infoWidth = processedInfoText ? regularFont.widthOfTextAtSize(processedInfoText, 16) : 0
+      const infoWidth = safeGetTextWidth(infoText, regularFont, 16, hasUnicodeFont)
       safeDrawText(page, infoText, {
         x: (width - infoWidth) / 2,
         y: infoY,
@@ -794,8 +791,7 @@ export async function POST(request) {
       
       if (gradeLevel) {
         const gradeText = gradeLevel
-        const processedGradeText = hasUnicodeFont ? sanitizeText(gradeText) : sanitizeForStandardFont(gradeText)
-        const gradeWidth = processedGradeText ? regularFont.widthOfTextAtSize(processedGradeText, 14) : 0
+        const gradeWidth = safeGetTextWidth(gradeText, regularFont, 14, hasUnicodeFont)
         safeDrawText(page, gradeText, {
           x: (width - gradeWidth) / 2,
           y: infoY - 25,
@@ -808,8 +804,7 @@ export async function POST(request) {
       // Author
       if (authorName) {
         const authorText = `By ${authorName}`
-        const processedAuthorText = hasUnicodeFont ? sanitizeText(authorText) : sanitizeForStandardFont(authorText)
-        const authorWidth = processedAuthorText ? regularFont.widthOfTextAtSize(processedAuthorText, 14) : 0
+        const authorWidth = safeGetTextWidth(authorText, italicFont, 14, hasUnicodeFont)
         safeDrawText(page, authorText, {
           x: (width - authorWidth) / 2,
           y: margin + 60,
@@ -821,8 +816,7 @@ export async function POST(request) {
       
       // Year
       const yearText = new Date().getFullYear().toString()
-      const processedYearText = hasUnicodeFont ? sanitizeText(yearText) : sanitizeForStandardFont(yearText)
-      const yearWidth = processedYearText ? regularFont.widthOfTextAtSize(processedYearText, 12) : 0
+      const yearWidth = safeGetTextWidth(yearText, regularFont, 12, hasUnicodeFont)
       safeDrawText(page, yearText, {
         x: (width - yearWidth) / 2,
         y: margin + 30,
