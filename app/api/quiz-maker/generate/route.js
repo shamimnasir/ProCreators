@@ -674,7 +674,8 @@ export async function POST(request) {
       
       // Year
       const yearText = new Date().getFullYear().toString()
-      const yearWidth = regularFont.widthOfTextAtSize(yearText, 12)
+      const safeYearText = sanitizeText(yearText)
+      const yearWidth = safeYearText ? regularFont.widthOfTextAtSize(safeYearText, 12) : 0
       safeDrawText(page, yearText, {
         x: (width - yearWidth) / 2,
         y: margin + 30,
