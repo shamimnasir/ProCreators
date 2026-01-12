@@ -1099,105 +1099,15 @@ export async function POST(request) {
       
       // Note: Complex scripts (Bengali, Hindi, Arabic, CJK) are handled via HTML-to-PDF above
       // This pdf-lib path is primarily for ASCII/Latin content
-              '/app/public/fonts/NotoSansBengali-Regular.ttf',         // Bengali specific fallback
-            ]
-            fontBoldPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
-              '/app/public/fonts/NotoSansBengali-Bold.ttf',
-            ]
-            console.log('Using Bengali font priority (FreeSerif first)')
-          } else if (isCJK) {
-            // CJK text - use FreeSerif which has CJK support
-            fontPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
-            ]
-            fontBoldPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
-            ]
-            console.log('Using CJK-compatible font priority')
-          } else {
-            // General Unicode - try FreeSerif first (widest coverage)
-            fontPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Wide Unicode coverage
-              '/app/public/fonts/NotoSans-Regular.ttf',
-            ]
-            fontBoldPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
-              '/app/public/fonts/NotoSans-Bold.ttf',
-            ]
-            console.log('Using general Unicode font priority')
-          }
-          
-          const fontItalicPaths = [
-            '/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf',
-          ]
-          
-          // Try to load regular Unicode font
-          // Use subset: false to embed full font for complete character coverage
-          for (const fontPath of fontPaths) {
-            try {
-              const fontBytes = await fs.readFile(fontPath)
-              regularFont = await pdfDoc.embedFont(fontBytes, { subset: false })
-              hasUnicodeFont = true
-              console.log(`Loaded Unicode font (full): ${fontPath}`)
-              break
-            } catch (e) {
-              console.log(`Font not available or failed to load: ${fontPath} - ${e.message}`)
-            }
-          }
-          
-          // Try to load bold Unicode font
-          if (hasUnicodeFont) {
-            for (const fontPath of fontBoldPaths) {
-              try {
-                const fontBytes = await fs.readFile(fontPath)
-                boldFont = await pdfDoc.embedFont(fontBytes, { subset: false })
-                console.log(`Loaded Unicode bold font (full): ${fontPath}`)
-                break
-              } catch (e) {
-                // Continue to next
-              }
-            }
-          }
-          
-          // Try to load italic Unicode font
-          if (hasUnicodeFont) {
-            for (const fontPath of fontItalicPaths) {
-              try {
-                const fontBytes = await fs.readFile(fontPath)
-                italicFont = await pdfDoc.embedFont(fontBytes, { subset: false })
-                console.log(`Loaded Unicode italic font (full): ${fontPath}`)
-                break
-              } catch (e) {
-                // Continue to next
-              }
-            }
-          }
-          
-          // If bold/italic not loaded but regular is, use regular as fallback
-          if (hasUnicodeFont) {
-            if (boldFont === standardBold) boldFont = regularFont
-            if (italicFont === standardItalic) italicFont = regularFont
-          }
-        } catch (fontError) {
-          console.error('Failed to load Unicode fonts, using standard fonts:', fontError.message)
-          hasUnicodeFont = false
-          regularFont = standardRegular
-          boldFont = standardBold
-          italicFont = standardItalic
-        }
-      }
       
       // Helper to get appropriate font based on text content
       const getFont = (text, type = 'regular') => {
-        if (hasUnicodeFont && hasNonAscii(text)) {
-          switch(type) {
-            case 'bold': return boldFont
-            case 'italic': return italicFont
-            default: return regularFont
-          }
-        }
         switch(type) {
+          case 'bold': return boldFont
+          case 'italic': return italicFont
+          default: return regularFont
+        }
+      }
           case 'bold': return standardBold
           case 'italic': return standardItalic
           default: return standardRegular
