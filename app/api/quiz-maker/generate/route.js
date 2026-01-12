@@ -1097,27 +1097,8 @@ export async function POST(request) {
       let italicFont = standardItalic
       let hasUnicodeFont = false
       
-      if (hasNonAscii(allText)) {
-        console.log('Non-ASCII text detected, loading Unicode fonts...')
-        
-        // Detect script type to choose appropriate font
-        const isBengali = hasBengali(allText)
-        const isDevanagari = hasDevanagari(allText)
-        const isArabic = hasArabic(allText)
-        const isCJK = hasCJK(allText)
-        
-        console.log(`Script detection - Bengali: ${isBengali}, Devanagari: ${isDevanagari}, Arabic: ${isArabic}, CJK: ${isCJK}`)
-        
-        try {
-          // Font paths - order based on detected script
-          let fontPaths = []
-          let fontBoldPaths = []
-          
-          if (isBengali) {
-            // Bengali text detected - use FreeSerif first (better conjunct support)
-            // then NotoSansBengali as fallback
-            fontPaths = [
-              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',      // Best conjunct/ligature support
+      // Note: Complex scripts (Bengali, Hindi, Arabic, CJK) are handled via HTML-to-PDF above
+      // This pdf-lib path is primarily for ASCII/Latin content
               '/app/public/fonts/NotoSansBengali-Regular.ttf',         // Bengali specific fallback
             ]
             fontBoldPaths = [
