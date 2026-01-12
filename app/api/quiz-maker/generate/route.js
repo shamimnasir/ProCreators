@@ -757,27 +757,27 @@ export async function POST(request) {
       })
       
       const infoText = `${content.questions?.length || questionCount} Questions`
-      const safeInfoText = sanitizeText(infoText)
-      const infoWidth = safeInfoText ? regularFont.widthOfTextAtSize(safeInfoText, 16) : 0
+      const processedInfoText = hasUnicodeFont ? sanitizeText(infoText) : sanitizeForStandardFont(infoText)
+      const infoWidth = processedInfoText ? regularFont.widthOfTextAtSize(processedInfoText, 16) : 0
       safeDrawText(page, infoText, {
         x: (width - infoWidth) / 2,
         y: infoY,
         size: 16,
         font: regularFont,
         color: rgb(1, 1, 1)
-      })
+      }, hasUnicodeFont)
       
       if (gradeLevel) {
         const gradeText = gradeLevel
-        const safeGradeText = sanitizeText(gradeText)
-        const gradeWidth = safeGradeText ? regularFont.widthOfTextAtSize(safeGradeText, 14) : 0
+        const processedGradeText = hasUnicodeFont ? sanitizeText(gradeText) : sanitizeForStandardFont(gradeText)
+        const gradeWidth = processedGradeText ? regularFont.widthOfTextAtSize(processedGradeText, 14) : 0
         safeDrawText(page, gradeText, {
           x: (width - gradeWidth) / 2,
           y: infoY - 25,
           size: 14,
           font: regularFont,
           color: rgb(1, 1, 1, 0.8)
-        })
+        }, hasUnicodeFont)
       }
       
       // Author
