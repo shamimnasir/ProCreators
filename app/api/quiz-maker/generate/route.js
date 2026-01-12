@@ -691,11 +691,6 @@ export async function POST(request) {
           default: return regularFont
         }
       }
-          case 'bold': return standardBold
-          case 'italic': return standardItalic
-          default: return standardRegular
-        }
-      }
       
       // Paper sizes
       const sizes = {
