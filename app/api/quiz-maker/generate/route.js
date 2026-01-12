@@ -661,7 +661,8 @@ export async function POST(request) {
       // Author
       if (authorName) {
         const authorText = `By ${authorName}`
-        const authorWidth = regularFont.widthOfTextAtSize(authorText, 14)
+        const safeAuthorText = sanitizeText(authorText)
+        const authorWidth = safeAuthorText ? regularFont.widthOfTextAtSize(safeAuthorText, 14) : 0
         safeDrawText(page, authorText, {
           x: (width - authorWidth) / 2,
           y: margin + 60,
