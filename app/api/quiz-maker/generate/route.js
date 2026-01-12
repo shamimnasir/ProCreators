@@ -1340,7 +1340,7 @@ export async function POST(request) {
       }
       
       // Save PDF
-      const pdfBytes = await pdfDoc.save()
+      pdfBytes = await pdfDoc.save()
       
       // Save file
       const outputDir = '/app/public/quizzes'
