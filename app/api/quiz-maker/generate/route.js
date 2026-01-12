@@ -887,7 +887,7 @@ export async function POST(request) {
         size: 20,
         font: boldFont,
         color: rgb(1, 1, 1)
-      })
+      }, hasUnicodeFont)
       
       y = height - 110
       
@@ -913,7 +913,7 @@ export async function POST(request) {
             size: 14,
             font: boldFont,
             color: rgb(1, 1, 1)
-          })
+          }, hasUnicodeFont)
           
           y = height - 90
         }
