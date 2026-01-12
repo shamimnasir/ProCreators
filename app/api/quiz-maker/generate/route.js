@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { spawn } from 'child_process'
+
+// Check if text contains non-ASCII characters (Bengali, Hindi, Arabic, Chinese, etc.)
+function hasNonAscii(text) {
+  if (!text) return false
+  return /[^\x00-\x7F]/.test(text)
+}
 
 // Helper function to call LLM via Python script
 async function runLLM(prompt, systemPrompt = "You are a quiz and test creator. Generate engaging, educational content.") {
