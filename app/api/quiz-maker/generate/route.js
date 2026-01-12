@@ -604,16 +604,17 @@ export async function POST(request) {
           let fontBoldPaths = []
           
           if (isBengali) {
-            // Bengali text detected - use Bengali fonts first
+            // Bengali text detected - use FreeSerif first (better conjunct support)
+            // then NotoSansBengali as fallback
             fontPaths = [
-              '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali specific
-              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Fallback with wide coverage
+              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',      // Best conjunct/ligature support
+              '/app/public/fonts/NotoSansBengali-Regular.ttf',         // Bengali specific fallback
             ]
             fontBoldPaths = [
-              '/app/public/fonts/NotoSansBengali-Bold.ttf',
               '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+              '/app/public/fonts/NotoSansBengali-Bold.ttf',
             ]
-            console.log('Using Bengali font priority')
+            console.log('Using Bengali font priority (FreeSerif first)')
           } else if (isCJK) {
             // CJK text - use FreeSerif which has CJK support
             fontPaths = [
@@ -624,7 +625,7 @@ export async function POST(request) {
             ]
             console.log('Using CJK-compatible font priority')
           } else {
-            // General Unicode - try NotoSans first, then FreeSerif
+            // General Unicode - try FreeSerif first (widest coverage)
             fontPaths = [
               '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Wide Unicode coverage
               '/app/public/fonts/NotoSans-Regular.ttf',
@@ -641,13 +642,13 @@ export async function POST(request) {
           ]
           
           // Try to load regular Unicode font
+          // Use subset: false to embed full font for complete character coverage
           for (const fontPath of fontPaths) {
             try {
               const fontBytes = await fs.readFile(fontPath)
-              // Use subset: true for better performance and compatibility
-              regularFont = await pdfDoc.embedFont(fontBytes, { subset: true })
+              regularFont = await pdfDoc.embedFont(fontBytes, { subset: false })
               hasUnicodeFont = true
-              console.log(`Loaded Unicode font: ${fontPath}`)
+              console.log(`Loaded Unicode font (full): ${fontPath}`)
               break
             } catch (e) {
               console.log(`Font not available or failed to load: ${fontPath} - ${e.message}`)
@@ -659,8 +660,8 @@ export async function POST(request) {
             for (const fontPath of fontBoldPaths) {
               try {
                 const fontBytes = await fs.readFile(fontPath)
-                boldFont = await pdfDoc.embedFont(fontBytes, { subset: true })
-                console.log(`Loaded Unicode bold font: ${fontPath}`)
+                boldFont = await pdfDoc.embedFont(fontBytes, { subset: false })
+                console.log(`Loaded Unicode bold font (full): ${fontPath}`)
                 break
               } catch (e) {
                 // Continue to next
@@ -673,8 +674,8 @@ export async function POST(request) {
             for (const fontPath of fontItalicPaths) {
               try {
                 const fontBytes = await fs.readFile(fontPath)
-                italicFont = await pdfDoc.embedFont(fontBytes, { subset: true })
-                console.log(`Loaded Unicode italic font: ${fontPath}`)
+                italicFont = await pdfDoc.embedFont(fontBytes, { subset: false })
+                console.log(`Loaded Unicode italic font (full): ${fontPath}`)
                 break
               } catch (e) {
                 // Continue to next
