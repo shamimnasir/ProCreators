@@ -934,11 +934,11 @@ export async function POST(request) {
           size: 12,
           font: boldFont,
           color: rgb(1, 1, 1)
-        })
+        }, hasUnicodeFont)
         
         // Question text
         const questionText = q.question || `Question ${i + 1}`
-        const qLines = wrapText(questionText, regularFont, 12, width - margin * 2 - 50)
+        const qLines = wrapText(questionText, regularFont, 12, width - margin * 2 - 50, hasUnicodeFont)
         qLines.forEach((line, idx) => {
           safeDrawText(page, line, {
             x: margin + 40,
@@ -946,7 +946,7 @@ export async function POST(request) {
             size: 12,
             font: regularFont,
             color: rgb(0.1, 0.1, 0.1)
-          })
+          }, hasUnicodeFont)
         })
         
         y -= qLines.length * 16 + 10
