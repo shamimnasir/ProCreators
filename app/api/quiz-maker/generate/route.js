@@ -590,7 +590,8 @@ export async function POST(request) {
       y = height - margin - 150
       
       titleLines.forEach((line, idx) => {
-        const titleWidth = boldFont.widthOfTextAtSize(line, 32)
+        const safeLine = sanitizeText(line)
+        const titleWidth = safeLine ? boldFont.widthOfTextAtSize(safeLine, 32) : 0
         safeDrawText(page, line, {
           x: (width - titleWidth) / 2,
           y: y - idx * 40,
