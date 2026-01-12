@@ -1041,7 +1041,7 @@ export async function POST(request) {
             size: 10,
             font: boldFont,
             color: rgb(0.4, 0.4, 0.4)
-          })
+          }, hasUnicodeFont)
           
           safeDrawText(page, 'Column B', {
             x: rightCol,
@@ -1049,7 +1049,7 @@ export async function POST(request) {
             size: 10,
             font: boldFont,
             color: rgb(0.4, 0.4, 0.4)
-          })
+          }, hasUnicodeFont)
           
           y -= 20
           
@@ -1063,7 +1063,7 @@ export async function POST(request) {
               size: 11,
               font: regularFont,
               color: rgb(0.2, 0.2, 0.2)
-            })
+            }, hasUnicodeFont)
             
             safeDrawText(page, `${String.fromCharCode(65 + pIdx)}. ${shuffledRight[pIdx]?.right || pair.right}`, {
               x: rightCol,
@@ -1071,7 +1071,7 @@ export async function POST(request) {
               size: 11,
               font: regularFont,
               color: rgb(0.2, 0.2, 0.2)
-            })
+            }, hasUnicodeFont)
             
             y -= 20
           })
