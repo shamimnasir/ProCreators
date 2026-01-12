@@ -1139,12 +1139,12 @@ export async function POST(request) {
           size: 24,
           font: boldFont,
           color: rgb(1, 1, 1)
-        })
+        }, hasUnicodeFont)
         
         y = height - 110
         
         // Quiz title
-        const titleLines = wrapText(finalTitle, boldFont, 14, width - margin * 2)
+        const titleLines = wrapText(finalTitle, boldFont, 14, width - margin * 2, hasUnicodeFont)
         titleLines.forEach((line, idx) => {
           safeDrawText(page, line, {
             x: margin,
@@ -1152,7 +1152,7 @@ export async function POST(request) {
             size: 14,
             font: boldFont,
             color: rgb(0.3, 0.3, 0.3)
-          })
+          }, hasUnicodeFont)
         })
         y -= titleLines.length * 18 + 20
         
