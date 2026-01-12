@@ -823,13 +823,13 @@ export async function POST(request) {
         size: 24,
         font: boldFont,
         color: rgb(1, 1, 1)
-      })
+      }, hasUnicodeFont)
       
       y = height - 120
       
       // Instructions content
       const instructions = content.instructions || 'Read each question carefully and select the best answer.'
-      const instrLines = wrapText(instructions, regularFont, 12, width - margin * 2)
+      const instrLines = wrapText(instructions, regularFont, 12, width - margin * 2, hasUnicodeFont)
       instrLines.forEach((line, idx) => {
         safeDrawText(page, line, {
           x: margin,
@@ -837,7 +837,7 @@ export async function POST(request) {
           size: 12,
           font: regularFont,
           color: rgb(0.2, 0.2, 0.2)
-        })
+        }, hasUnicodeFont)
       })
       
       y -= instrLines.length * 18 + 40
@@ -849,7 +849,7 @@ export async function POST(request) {
         size: 12,
         font: regularFont,
         color: rgb(0.3, 0.3, 0.3)
-      })
+      }, hasUnicodeFont)
       
       safeDrawText(page, 'Date: _________________', {
         x: width - margin - 180,
@@ -857,7 +857,7 @@ export async function POST(request) {
         size: 12,
         font: regularFont,
         color: rgb(0.3, 0.3, 0.3)
-      })
+      }, hasUnicodeFont)
       
       y -= 40
       
@@ -867,7 +867,7 @@ export async function POST(request) {
         size: 12,
         font: regularFont,
         color: rgb(0.3, 0.3, 0.3)
-      })
+      }, hasUnicodeFont)
       
       // === QUESTIONS PAGES ===
       const questions = content.questions || []
