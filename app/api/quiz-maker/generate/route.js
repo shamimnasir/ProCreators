@@ -383,6 +383,20 @@ function sanitizeText(text) {
     .trim()
 }
 
+// Safe function to get text width - handles font errors gracefully
+function safeGetTextWidth(text, font, fontSize, useUnicode = false) {
+  if (!text || !font) return 0
+  try {
+    const processedText = useUnicode ? sanitizeText(text) : sanitizeForStandardFont(text)
+    if (!processedText) return 0
+    return font.widthOfTextAtSize(processedText, fontSize)
+  } catch (e) {
+    // If font can't measure the text, return an estimate based on character count
+    const safeText = text.replace(/[^\x20-\x7E]/g, '').trim()
+    return safeText.length * fontSize * 0.5 // Rough estimate
+  }
+}
+
 // Sanitize text for standard fonts only (removes non-ASCII)
 function sanitizeForStandardFont(text) {
   if (!text) return ''
