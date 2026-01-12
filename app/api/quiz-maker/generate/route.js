@@ -647,7 +647,8 @@ export async function POST(request) {
       
       if (gradeLevel) {
         const gradeText = gradeLevel
-        const gradeWidth = regularFont.widthOfTextAtSize(gradeText, 14)
+        const safeGradeText = sanitizeText(gradeText)
+        const gradeWidth = safeGradeText ? regularFont.widthOfTextAtSize(safeGradeText, 14) : 0
         safeDrawText(page, gradeText, {
           x: (width - gradeWidth) / 2,
           y: infoY - 25,
