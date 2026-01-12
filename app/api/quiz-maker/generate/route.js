@@ -7,6 +7,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { spawn } from 'child_process'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
+import { generateQuizHTML } from '@/lib/quiz-html-generator'
 
 // Check if text contains non-ASCII characters (Bengali, Hindi, Arabic, Chinese, etc.)
 function hasNonAscii(text) {
