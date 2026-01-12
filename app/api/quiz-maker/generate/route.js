@@ -972,6 +972,100 @@ export async function POST(request) {
         )
       }
       
+      // Check if content contains complex scripts (Bengali, Hindi, Arabic, etc.)
+      const allText = [
+        customTitle || '',
+        content?.title || '',
+        content?.description || '',
+        content?.instructions || '',
+        authorName || '',
+        customTopic || '',
+        topic || '',
+        ...(content?.questions || []).map(q => `${q.question || ''} ${q.answer || ''} ${q.explanation || ''} ${(q.options || []).join(' ')}`),
+        content?.bonusQuestion?.question || '',
+        content?.bonusQuestion?.answer || ''
+      ].join(' ')
+      
+      const needsHtmlPdf = hasBengali(allText) || hasDevanagari(allText) || hasArabic(allText) || hasCJK(allText)
+      
+      let pdfBytes
+      let renderMethod = 'pdf-lib'
+      
+      // Use HTML-to-PDF for complex scripts (better text rendering)
+      if (needsHtmlPdf) {
+        console.log('Detected complex script (Bengali/Hindi/Arabic/CJK), using HTML-to-PDF for proper text rendering...')
+        
+        try {
+          const finalTitle = customTitle || content.title || 'Quiz'
+          
+          // Generate HTML content
+          const htmlContent = generateQuizHTML(content, {
+            title: finalTitle,
+            authorName,
+            primaryColor,
+            secondaryColor,
+            gradeLevel,
+            includeAnswerKey,
+            paperSize
+          })
+          
+          // Generate PDF from HTML using Puppeteer
+          pdfBytes = await generatePDFFromHTML(htmlContent)
+          renderMethod = 'html-to-pdf'
+          console.log('HTML-to-PDF generation successful for quiz')
+          
+          // Save PDF
+          const outputDir = '/app/public/quizzes'
+          await fs.mkdir(outputDir, { recursive: true })
+          
+          const fileName = `${randomUUID()}.pdf`
+          const filePath = path.join(outputDir, fileName)
+          await fs.writeFile(filePath, pdfBytes)
+          
+          // Save to library
+          const libraryCollection = await getCollection('library')
+          const documentId = randomUUID()
+          
+          await libraryCollection.insertOne({
+            id: documentId,
+            userId: 'default-user',
+            type: 'quiz',
+            category: 'document',
+            title: finalTitle,
+            description: content.description || `${quizType} quiz about ${topic || customTopic}`,
+            filePath: `/quizzes/${fileName}`,
+            fileSize: pdfBytes.length,
+            metadata: { 
+              topic, 
+              quizType, 
+              gradeLevel, 
+              questionCount: content.questions?.length || questionCount,
+              difficulty,
+              renderMethod
+            },
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          })
+          
+          return NextResponse.json({
+            success: true,
+            title: finalTitle,
+            downloadUrl: `/quizzes/${fileName}`,
+            pageCount: content.questions?.length > 10 ? 5 : 4,
+            questionCount: content.questions?.length || 0,
+            libraryId: documentId,
+            renderMethod
+          })
+          
+        } catch (htmlError) {
+          console.error('HTML-to-PDF failed, falling back to pdf-lib:', htmlError.message)
+          // Continue with pdf-lib fallback below
+        }
+      }
+      
+      // Standard pdf-lib generation (for ASCII content or as fallback)
+      console.log('Using pdf-lib for PDF generation')
+      
       // Generate cover image if requested
       let coverImageUrl = null
       if (generateCover) {
@@ -1002,20 +1096,6 @@ export async function POST(request) {
       let boldFont = standardBold
       let italicFont = standardItalic
       let hasUnicodeFont = false
-      
-      // Check if we need Unicode fonts (non-ASCII text detected)
-      const allText = [
-        customTitle || '',
-        content?.title || '',
-        content?.description || '',
-        content?.instructions || '',
-        authorName || '',
-        customTopic || '',
-        topic || '',
-        ...(content?.questions || []).map(q => `${q.question || ''} ${q.answer || ''} ${q.explanation || ''} ${(q.options || []).join(' ')}`),
-        content?.bonusQuestion?.question || '',
-        content?.bonusQuestion?.answer || ''
-      ].join(' ')
       
       if (hasNonAscii(allText)) {
         console.log('Non-ASCII text detected, loading Unicode fonts...')
