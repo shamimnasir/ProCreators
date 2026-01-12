@@ -970,7 +970,7 @@ export async function POST(request) {
               size: 11,
               font: regularFont,
               color: rgb(0.2, 0.2, 0.2)
-            })
+            }, hasUnicodeFont)
             
             y -= 22
           })
@@ -989,7 +989,7 @@ export async function POST(request) {
             size: 11,
             font: regularFont,
             color: rgb(0.2, 0.2, 0.2)
-          })
+          }, hasUnicodeFont)
           y -= 22
           
           // False option
@@ -1006,7 +1006,7 @@ export async function POST(request) {
             size: 11,
             font: regularFont,
             color: rgb(0.2, 0.2, 0.2)
-          })
+          }, hasUnicodeFont)
           y -= 22
         } else if (q.type === 'fill-blank' || q.type === 'short-answer') {
           // Answer line
