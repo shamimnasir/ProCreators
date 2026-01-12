@@ -708,19 +708,19 @@ export async function POST(request) {
       
       // Title
       const finalTitle = customTitle || content.title || 'Quiz'
-      const titleLines = wrapText(finalTitle, boldFont, 32, width - margin * 2 - 40)
+      const titleLines = wrapText(finalTitle, boldFont, 32, width - margin * 2 - 40, hasUnicodeFont)
       y = height - margin - 150
       
       titleLines.forEach((line, idx) => {
-        const safeLine = sanitizeText(line)
-        const titleWidth = safeLine ? boldFont.widthOfTextAtSize(safeLine, 32) : 0
+        const processedLine = hasUnicodeFont ? sanitizeText(line) : sanitizeForStandardFont(line)
+        const titleWidth = processedLine ? boldFont.widthOfTextAtSize(processedLine, 32) : 0
         safeDrawText(page, line, {
           x: (width - titleWidth) / 2,
           y: y - idx * 40,
           size: 32,
           font: boldFont,
           color: rgb(1, 1, 1)
-        })
+        }, hasUnicodeFont)
       })
       
       y -= titleLines.length * 40 + 30
