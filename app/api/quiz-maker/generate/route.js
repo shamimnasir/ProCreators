@@ -607,7 +607,8 @@ export async function POST(request) {
       if (content.description) {
         const descLines = wrapText(content.description, regularFont, 14, width - margin * 2 - 60)
         descLines.forEach((line, idx) => {
-          const lineWidth = regularFont.widthOfTextAtSize(line, 14)
+          const safeLine = sanitizeText(line)
+          const lineWidth = safeLine ? regularFont.widthOfTextAtSize(safeLine, 14) : 0
           safeDrawText(page, line, {
             x: (width - lineWidth) / 2,
             y: y - idx * 20,
