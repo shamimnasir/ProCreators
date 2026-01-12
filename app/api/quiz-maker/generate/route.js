@@ -590,23 +590,54 @@ export async function POST(request) {
       if (hasNonAscii(allText)) {
         console.log('Non-ASCII text detected, loading Unicode fonts...')
         
+        // Detect script type to choose appropriate font
+        const isBengali = hasBengali(allText)
+        const isDevanagari = hasDevanagari(allText)
+        const isArabic = hasArabic(allText)
+        const isCJK = hasCJK(allText)
+        
+        console.log(`Script detection - Bengali: ${isBengali}, Devanagari: ${isDevanagari}, Arabic: ${isArabic}, CJK: ${isCJK}`)
+        
         try {
-          // Font paths - try multiple options for best compatibility
-          const fontPaths = [
-            '/app/public/fonts/NotoSans-Regular.ttf',           // General Unicode (better coverage)
-            '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali
-            '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Good Unicode coverage
-          ]
+          // Font paths - order based on detected script
+          let fontPaths = []
+          let fontBoldPaths = []
           
-          const fontBoldPaths = [
-            '/app/public/fonts/NotoSans-Bold.ttf',
-            '/app/public/fonts/NotoSansBengali-Bold.ttf',
-            '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
-          ]
+          if (isBengali) {
+            // Bengali text detected - use Bengali fonts first
+            fontPaths = [
+              '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali specific
+              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Fallback with wide coverage
+            ]
+            fontBoldPaths = [
+              '/app/public/fonts/NotoSansBengali-Bold.ttf',
+              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+            ]
+            console.log('Using Bengali font priority')
+          } else if (isCJK) {
+            // CJK text - use FreeSerif which has CJK support
+            fontPaths = [
+              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+            ]
+            fontBoldPaths = [
+              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+            ]
+            console.log('Using CJK-compatible font priority')
+          } else {
+            // General Unicode - try NotoSans first, then FreeSerif
+            fontPaths = [
+              '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Wide Unicode coverage
+              '/app/public/fonts/NotoSans-Regular.ttf',
+            ]
+            fontBoldPaths = [
+              '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+              '/app/public/fonts/NotoSans-Bold.ttf',
+            ]
+            console.log('Using general Unicode font priority')
+          }
           
           const fontItalicPaths = [
             '/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf',
-            '/app/public/fonts/NotoSans-Regular.ttf', // Fallback to regular if no italic
           ]
           
           // Try to load regular Unicode font
