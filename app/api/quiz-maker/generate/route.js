@@ -511,9 +511,115 @@ export async function POST(request) {
       
       // Create PDF
       const pdfDoc = await PDFDocument.create()
-      const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
-      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-      const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+      
+      // Register fontkit for Unicode font support
+      pdfDoc.registerFontkit(fontkit)
+      
+      // Load standard fonts as fallback
+      const standardRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+      const standardBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+      const standardItalic = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+      
+      // Initialize with standard fonts
+      let regularFont = standardRegular
+      let boldFont = standardBold
+      let italicFont = standardItalic
+      let hasUnicodeFont = false
+      
+      // Check if we need Unicode fonts (non-ASCII text detected)
+      const allText = [
+        customTitle || '',
+        content?.title || '',
+        content?.description || '',
+        content?.instructions || '',
+        authorName || '',
+        customTopic || '',
+        topic || '',
+        ...(content?.questions || []).map(q => `${q.question || ''} ${q.answer || ''} ${q.explanation || ''} ${(q.options || []).join(' ')}`),
+        content?.bonusQuestion?.question || '',
+        content?.bonusQuestion?.answer || ''
+      ].join(' ')
+      
+      if (hasNonAscii(allText)) {
+        console.log('Non-ASCII text detected, loading Unicode fonts...')
+        
+        // Font paths - try multiple options for best compatibility
+        const fontPaths = [
+          '/app/public/fonts/NotoSansBengali-Regular.ttf',    // Bengali
+          '/app/public/fonts/NotoSans-Regular.ttf',           // General Unicode
+          '/usr/share/fonts/truetype/freefont/FreeSerif.ttf', // Good Unicode coverage
+        ]
+        
+        const fontBoldPaths = [
+          '/app/public/fonts/NotoSansBengali-Bold.ttf',
+          '/app/public/fonts/NotoSans-Bold.ttf',
+          '/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf',
+        ]
+        
+        const fontItalicPaths = [
+          '/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf',
+          '/app/public/fonts/NotoSans-Regular.ttf', // Fallback to regular if no italic
+        ]
+        
+        // Try to load regular Unicode font
+        for (const fontPath of fontPaths) {
+          try {
+            const fontBytes = await fs.readFile(fontPath)
+            regularFont = await pdfDoc.embedFont(fontBytes, { subset: false })
+            hasUnicodeFont = true
+            console.log(`Loaded Unicode font: ${fontPath}`)
+            break
+          } catch (e) {
+            console.log(`Font not available: ${fontPath}`)
+          }
+        }
+        
+        // Try to load bold Unicode font
+        for (const fontPath of fontBoldPaths) {
+          try {
+            const fontBytes = await fs.readFile(fontPath)
+            boldFont = await pdfDoc.embedFont(fontBytes, { subset: false })
+            console.log(`Loaded Unicode bold font: ${fontPath}`)
+            break
+          } catch (e) {
+            // Continue to next
+          }
+        }
+        
+        // Try to load italic Unicode font
+        for (const fontPath of fontItalicPaths) {
+          try {
+            const fontBytes = await fs.readFile(fontPath)
+            italicFont = await pdfDoc.embedFont(fontBytes, { subset: false })
+            console.log(`Loaded Unicode italic font: ${fontPath}`)
+            break
+          } catch (e) {
+            // Continue to next
+          }
+        }
+        
+        // If bold/italic not loaded but regular is, use regular as fallback
+        if (hasUnicodeFont) {
+          if (boldFont === standardBold) boldFont = regularFont
+          if (italicFont === standardItalic) italicFont = regularFont
+        }
+      }
+      
+      // Helper to get appropriate font based on text content
+      const getFont = (text, type = 'regular') => {
+        if (hasUnicodeFont && hasNonAscii(text)) {
+          switch(type) {
+            case 'bold': return boldFont
+            case 'italic': return italicFont
+            default: return regularFont
+          }
+        }
+        switch(type) {
+          case 'bold': return standardBold
+          case 'italic': return standardItalic
+          default: return standardRegular
+        }
+      }
       
       // Paper sizes
       const sizes = {
