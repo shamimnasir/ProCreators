@@ -635,7 +635,8 @@ export async function POST(request) {
       })
       
       const infoText = `${content.questions?.length || questionCount} Questions`
-      const infoWidth = regularFont.widthOfTextAtSize(infoText, 16)
+      const safeInfoText = sanitizeText(infoText)
+      const infoWidth = safeInfoText ? regularFont.widthOfTextAtSize(safeInfoText, 16) : 0
       safeDrawText(page, infoText, {
         x: (width - infoWidth) / 2,
         y: infoY,
