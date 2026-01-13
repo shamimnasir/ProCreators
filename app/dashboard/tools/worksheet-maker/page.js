@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 
 // Import shared components
-import DraftsManager from '@/components/shared/DraftsManager'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 
 const SUBJECTS = [
   { id: 'math', name: 'Mathematics', icon: '🔢' },
