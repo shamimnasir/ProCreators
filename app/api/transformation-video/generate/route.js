@@ -200,31 +200,82 @@ async function compileTransformationVideo({
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     
-    // Step 1: Download all video clips
-    console.log(`[${jobId}] Step 1: Downloading ${videos.length} video clips...`)
+    // Step 1: Download all images and convert to video clips with Ken Burns effect
+    console.log(`[${jobId}] Step 1: Processing ${videos.length} images into video clips...`)
     const videoFiles = []
     
     for (let i = 0; i < videos.length; i++) {
       const video = videos[i]
       if (!video || !video.url) continue
       
+      const imagePath = join(tempDir, `image-${i}.jpg`)
       const videoPath = join(tempDir, `clip-${i}.mp4`)
       
       try {
+        // Download the image
         const response = await fetch(video.url)
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         
-        const fileStream = createWriteStream(videoPath)
+        const fileStream = createWriteStream(imagePath)
         await pipeline(Readable.fromWeb(response.body), fileStream)
-        videoFiles.push(videoPath)
-        console.log(`[${jobId}] ✅ Downloaded clip ${i + 1}/${videos.length}`)
+        console.log(`[${jobId}] ✅ Downloaded image ${i + 1}/${videos.length}`)
+        
+        // Convert image to video with Ken Burns effect (zoom/pan)
+        const clipDuration = video.duration || 5
+        const zoomEffect = i % 2 === 0 ? 'zoompan=z=\\'min(zoom+0.0015,1.3)\\':d=150:x=\\'iw/2-(iw/zoom/2)\\':y=\\'ih/2-(ih/zoom/2)\\':s=1080x1920' 
+                                       : 'zoompan=z=\\'if(lte(zoom,1.0),1.3,max(1.0,zoom-0.0015))\\':d=150:x=\\'iw/2-(iw/zoom/2)\\':y=\\'ih/2-(ih/zoom/2)\\':s=1080x1920'
+        
+        await new Promise((resolve, reject) => {
+          ffmpeg(imagePath)
+            .loop(clipDuration)
+            .inputOptions(['-framerate', '30'])
+            .outputOptions([
+              '-vf', `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,${zoomEffect}`,
+              '-t', String(clipDuration),
+              '-c:v', 'libx264',
+              '-preset', 'fast',
+              '-crf', '23',
+              '-pix_fmt', 'yuv420p',
+              '-r', '30'
+            ])
+            .output(videoPath)
+            .on('end', () => {
+              videoFiles.push(videoPath)
+              console.log(`[${jobId}] ✅ Created clip ${i + 1}/${videos.length} (${clipDuration}s)`)
+              resolve()
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] Clip ${i + 1} failed:`, err.message)
+              // Fallback: create simple video without Ken Burns
+              ffmpeg(imagePath)
+                .loop(clipDuration)
+                .outputOptions([
+                  '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
+                  '-t', String(clipDuration),
+                  '-c:v', 'libx264',
+                  '-preset', 'fast',
+                  '-crf', '23',
+                  '-pix_fmt', 'yuv420p',
+                  '-r', '30'
+                ])
+                .output(videoPath)
+                .on('end', () => {
+                  videoFiles.push(videoPath)
+                  console.log(`[${jobId}] ✅ Created clip ${i + 1} (fallback)`)
+                  resolve()
+                })
+                .on('error', reject)
+                .run()
+            })
+            .run()
+        })
       } catch (error) {
-        console.error(`[${jobId}] Failed to download clip ${i}:`, error.message)
+        console.error(`[${jobId}] Failed to process image ${i}:`, error.message)
       }
     }
     
     if (videoFiles.length === 0) {
-      throw new Error('No video clips could be downloaded')
+      throw new Error('No video clips could be created from images')
     }
     
     // Step 2: Generate or process voice audio
