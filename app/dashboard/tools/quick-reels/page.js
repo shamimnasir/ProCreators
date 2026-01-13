@@ -28,7 +28,7 @@ const NICHE_CATEGORIES = [
     icon: '📖',
     description: 'Captivating narratives and tales',
     color: 'from-purple-500 to-pink-500',
-    niches: ['mini-stories', 'horror', 'kids-stories']
+    niches: ['mini-stories', 'horror', 'kids-stories', 'transformation']
   },
   {
     id: 'educational',
