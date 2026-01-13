@@ -461,6 +461,51 @@ export default function TransformationVideoPage() {
     setProgress(0)
   }
 
+  // AutoSave helper functions
+  const getCurrentData = useCallback(() => ({
+    title: topic || selectedTheme?.name || 'Untitled Transformation',
+    topic,
+    selectedTheme,
+    language,
+    imageSource,
+    scenes,
+    sceneCount,
+    videoDuration: videoDuration[0],
+    format,
+    voiceOption,
+    ttsLanguage,
+    selectedVoice,
+    captionStyle,
+    currentStep
+  }), [topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, currentStep])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.topic) setTopic(data.topic)
+    if (data.selectedTheme) setSelectedTheme(data.selectedTheme)
+    if (data.language) setLanguage(data.language)
+    if (data.imageSource) setImageSource(data.imageSource)
+    if (data.scenes) setScenes(data.scenes)
+    if (data.sceneCount) setSceneCount(data.sceneCount)
+    if (data.videoDuration) setVideoDuration([data.videoDuration])
+    if (data.format) setFormat(data.format)
+    if (data.voiceOption) setVoiceOption(data.voiceOption)
+    if (data.ttsLanguage) setTtsLanguage(data.ttsLanguage)
+    if (data.selectedVoice) setSelectedVoice(data.selectedVoice)
+    if (data.captionStyle) setCaptionStyle(data.captionStyle)
+    if (data.currentStep) setCurrentStep(data.currentStep)
+  }, [])
+
+  const handleStartNew = useCallback(() => {
+    resetAll()
+    setVoiceOption('tts')
+    setCaptionStyle('bold-outline')
+    setLanguage('en')
+    setTtsLanguage('en')
+    setSceneCount(4)
+    setVideoDuration([25])
+    setFormat('portrait')
+  }, [])
+
   return (
     <div className="space-y-6 pb-10">
       {/* Hero Header */}
