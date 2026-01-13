@@ -386,10 +386,39 @@ export default function TransformationVideoPage() {
         setVideoResult(data)
         setCurrentStep(3)
         
-        toast({ 
-          title: '🎬 Transformation Video Created!', 
-          description: `${Math.round(data.duration || videoDuration[0])}s cinematic video ready`
+        // Auto-save to user library
+        const libraryResult = await saveToLibrary({
+          type: 'transformation-video',
+          category: 'video',
+          title: topic ? `Transformation: ${topic.substring(0, 50)}...` : `${selectedTheme?.name || 'AI'} Transformation Video`,
+          description: topic?.substring(0, 200) || '',
+          videoUrl: data.videoUrl,
+          filePath: data.videoUrl,
+          fileSize: data.fileSize || null,
+          metadata: {
+            duration: data.duration || videoDuration[0],
+            format,
+            theme: selectedTheme?.id || 'custom',
+            themeName: selectedTheme?.name || 'Custom',
+            clipCount: data.clipCount || scenes.length || uploadedImages.length,
+            imageSource,
+            voiceOption,
+            captionStyle
+          }
         })
+        
+        const actualDuration = Math.round(data.duration || videoDuration[0])
+        if (libraryResult.success) {
+          toast({ 
+            title: '🎬 Transformation Video Created & Saved!', 
+            description: `${actualDuration}s cinematic video saved to your library`
+          })
+        } else {
+          toast({ 
+            title: '🎬 Transformation Video Created!', 
+            description: `${actualDuration}s cinematic video ready`
+          })
+        }
       } else {
         throw new Error(data.error || 'Failed to generate video')
       }
