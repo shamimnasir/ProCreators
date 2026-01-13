@@ -343,15 +343,16 @@ export default function JournalMakerPage() {
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Left sidebar - Drafts */}
         <div className="lg:col-span-1">
-          <DraftsManager
+          <AutoSaveDraftsManager
             toolType="journal"
-            drafts={drafts}
-            setDrafts={setDrafts}
-            currentDraftId={currentDraftId}
-            setCurrentDraftId={setCurrentDraftId}
             getCurrentData={getCurrentData}
             loadDraftData={loadDraftData}
             onStartNew={handleStartNew}
+            dependencies={[journalTitle, journalDescription, category, paperSize, totalPages, sections, step]}
+            autoSaveEnabled={true}
+            debounceMs={2000}
+            minStepForAutoSave={1}
+            currentStep={step}
           />
         </div>
 
