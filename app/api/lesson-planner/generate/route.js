@@ -322,11 +322,7 @@ function generateLessonPlanHTML(lessonPlan, config) {
   `
 }
 
-// Generate PDF using Puppeteer
-async function generatePDFFromHTML(html, outputPath) {
-  const { generatePDFFromHTML: puppeteerGenerate } = await import('@/lib/html-pdf-generator')
-  return puppeteerGenerate(html, outputPath)
-}
+// PDF generation is handled inline using @/lib/html-pdf-generator
 
 export async function POST(request) {
   try {
