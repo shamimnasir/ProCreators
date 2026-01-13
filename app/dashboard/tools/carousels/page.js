@@ -798,6 +798,24 @@ export default function CarouselsToolPage() {
             )}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Sidebar - Drafts Manager */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-4">
+            <AutoSaveDraftsManager
+              toolType="carousels"
+              getCurrentData={getCurrentData}
+              loadDraftData={loadDraftData}
+              onStartNew={handleStartNew}
+              dependencies={[prompt, language, platform, generationMode, manualSlides, carouselSlides]}
+              autoSaveEnabled={true}
+              debounceMs={2000}
+              minStepForAutoSave={1}
+              currentStep={1}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
