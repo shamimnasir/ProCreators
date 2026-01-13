@@ -496,7 +496,9 @@ async function compileTransformationVideo({
     // Cleanup
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
-    } catch (e) {}
+    } catch (e) {
+      // Ignore cleanup errors
+    }
     
     console.log(`[${jobId}] 🎉 Compilation complete!`)
     
@@ -511,7 +513,9 @@ async function compileTransformationVideo({
   } catch (error) {
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
-    } catch (e) {}
+    } catch (e) {
+      // Ignore cleanup errors
+    }
     
     throw error
   }
