@@ -65,15 +65,15 @@ export async function POST(request) {
     
     // Call LLM using the existing Python script
     const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
-    const envVars = {
-      ...process.env,
-      PATH: `/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
-      EMERGENT_LLM_KEY: process.env.EMERGENT_LLM_KEY
-    }
+    
+    const inputData = JSON.stringify({
+      prompt,
+      system_prompt: 'You are an expert cinematic video director. Generate detailed scene descriptions in valid JSON format only.'
+    })
     
     const result = await new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python3', [scriptPath, prompt], {
-        env: envVars,
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, inputData], {
+        env: { ...process.env },
         cwd: process.cwd()
       })
       
