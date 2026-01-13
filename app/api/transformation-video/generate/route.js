@@ -332,61 +332,75 @@ async function compileTransformationVideo({
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     
-    // Step 1: Download all images and convert to video clips with Ken Burns effect
-    console.log(`[${jobId}] Step 1: Processing ${videos.length} images into video clips...`)
+    // Step 1: Process video clips - either download AI videos or convert images
+    console.log(`[${jobId}] Step 1: Processing ${videos.length} clips...`)
     const videoFiles = []
     
     for (let i = 0; i < videos.length; i++) {
       const video = videos[i]
       if (!video || !video.url) continue
       
-      const imagePath = join(tempDir, `image-${i}.jpg`)
       const videoPath = join(tempDir, `clip-${i}.mp4`)
       
       try {
-        // Download the image
-        const response = await fetch(video.url)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        
-        const fileStream = createWriteStream(imagePath)
-        await pipeline(Readable.fromWeb(response.body), fileStream)
-        console.log(`[${jobId}] ✅ Downloaded image ${i + 1}/${videos.length}`)
-        
-        // Convert image to video with simple scaling (Ken Burns is complex with FFmpeg escaping)
-        const clipDuration = video.duration || 5
-        
-        await new Promise((resolve, reject) => {
-          ffmpeg(imagePath)
-            .loop(clipDuration)
-            .inputOptions(['-framerate', '30'])
-            .outputOptions([
-              '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
-              '-t', String(clipDuration),
-              '-c:v', 'libx264',
-              '-preset', 'fast',
-              '-crf', '23',
-              '-pix_fmt', 'yuv420p',
-              '-r', '30'
-            ])
-            .output(videoPath)
-            .on('end', () => {
-              videoFiles.push(videoPath)
-              console.log(`[${jobId}] ✅ Created clip ${i + 1}/${videos.length} (${clipDuration}s)`)
-              resolve()
-            })
-            .on('error', (err) => {
-              console.error(`[${jobId}] Clip ${i + 1} failed:`, err.message)
-              reject(err)
-            })
-            .run()
-        })
+        if (video.type === 'ai-video') {
+          // Download AI-generated video
+          console.log(`[${jobId}] Downloading AI video ${i + 1}/${videos.length}...`)
+          const response = await fetch(video.url)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          
+          const fileStream = createWriteStream(videoPath)
+          await pipeline(Readable.fromWeb(response.body), fileStream)
+          videoFiles.push(videoPath)
+          console.log(`[${jobId}] ✅ Downloaded AI video ${i + 1}/${videos.length}`)
+        } else {
+          // Image fallback - convert to video with FFmpeg
+          console.log(`[${jobId}] Converting image ${i + 1}/${videos.length} to video...`)
+          const imagePath = join(tempDir, `image-${i}.jpg`)
+          
+          // Download the image
+          const response = await fetch(video.url)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          
+          const fileStream = createWriteStream(imagePath)
+          await pipeline(Readable.fromWeb(response.body), fileStream)
+          
+          // Convert image to video
+          const clipDuration = video.duration || 5
+          
+          await new Promise((resolve, reject) => {
+            ffmpeg(imagePath)
+              .loop(clipDuration)
+              .inputOptions(['-framerate', '30'])
+              .outputOptions([
+                '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
+                '-t', String(clipDuration),
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-pix_fmt', 'yuv420p',
+                '-r', '30'
+              ])
+              .output(videoPath)
+              .on('end', () => {
+                videoFiles.push(videoPath)
+                console.log(`[${jobId}] ✅ Created video from image ${i + 1}/${videos.length}`)
+                resolve()
+              })
+              .on('error', (err) => {
+                console.error(`[${jobId}] FFmpeg error for clip ${i + 1}:`, err.message)
+                reject(err)
+              })
+              .run()
+          })
+        }
       } catch (error) {
-        console.error(`[${jobId}] Failed to process image ${i}:`, error.message)
+        console.error(`[${jobId}] Failed to process clip ${i}:`, error.message)
       }
     }
     
     if (videoFiles.length === 0) {
-      throw new Error('No video clips could be created from images')
+      throw new Error('No video clips could be processed')
     }
     
     // Step 2: Generate or process voice audio
