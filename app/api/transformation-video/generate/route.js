@@ -162,17 +162,149 @@ async function generateImageWithAI(prompt, jobId, index) {
 
 // ==================== VIDEO GENERATION ====================
 async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Creating video ${index + 1} from image...`)
+  console.log(`[${jobId}] Generating AI video ${index + 1} from image: ${prompt.substring(0, 50)}...`)
   
-  // For now, we'll use the image directly and compile via FFmpeg
-  // This creates a video from static images with subtle zoom/pan effects
-  // which is more reliable than external AI video generation
-  return {
-    url: imageUrl,
-    prompt: prompt,
-    duration: duration,
-    type: 'image-to-video-ffmpeg',
-    index: index
+  const replicateKey = process.env.REPLICATE_API_TOKEN
+  
+  if (!replicateKey) {
+    console.log(`[${jobId}] No Replicate key, returning image for FFmpeg processing`)
+    return {
+      url: imageUrl,
+      prompt: prompt,
+      duration: duration,
+      type: 'image-fallback',
+      index: index
+    }
+  }
+  
+  try {
+    // Use Stable Video Diffusion for image-to-video (best quality)
+    console.log(`[${jobId}] Using Stable Video Diffusion for image-to-video...`)
+    
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${replicateKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        version: '3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
+        input: {
+          input_image: imageUrl,
+          motion_bucket_id: 127, // Higher = more motion
+          fps: 7,
+          cond_aug: 0.02
+        }
+      })
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[${jobId}] SVD failed to start:`, response.status, errorText)
+      throw new Error(`Replicate API error: ${response.status}`)
+    }
+    
+    let prediction = await response.json()
+    console.log(`[${jobId}] Video ${index + 1} prediction ID: ${prediction.id}`)
+    
+    // Poll until complete (max 3 minutes)
+    let attempts = 0
+    while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 90) {
+      await new Promise(r => setTimeout(r, 2000))
+      attempts++
+      
+      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { 'Authorization': `Bearer ${replicateKey}` }
+      })
+      prediction = await statusResponse.json()
+      
+      if (attempts % 15 === 0) {
+        console.log(`[${jobId}] Video ${index + 1} status: ${prediction.status} (${attempts * 2}s)`)
+      }
+    }
+    
+    if (prediction.status === 'succeeded' && prediction.output) {
+      const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
+      console.log(`[${jobId}] ✅ AI Video ${index + 1} generated successfully`)
+      return {
+        url: videoUrl,
+        prompt: prompt,
+        duration: duration,
+        type: 'ai-video',
+        model: 'stable-video-diffusion',
+        index: index
+      }
+    } else {
+      throw new Error(`Video generation failed: ${prediction.status}`)
+    }
+  } catch (error) {
+    console.error(`[${jobId}] AI video generation failed for clip ${index + 1}:`, error.message)
+    
+    // Fallback: Try text-to-video with ZeroScope
+    try {
+      console.log(`[${jobId}] Trying ZeroScope text-to-video fallback...`)
+      
+      const response = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${replicateKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          version: '9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351',
+          input: {
+            prompt: `${prompt}, cinematic lighting, high quality, smooth motion, ultra realistic, 4k quality`,
+            num_frames: 36,
+            fps: 8,
+            width: 576,
+            height: 1024
+          }
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`ZeroScope API error: ${response.status}`)
+      }
+      
+      let prediction = await response.json()
+      console.log(`[${jobId}] ZeroScope prediction ID: ${prediction.id}`)
+      
+      let attempts = 0
+      while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 90) {
+        await new Promise(r => setTimeout(r, 2000))
+        attempts++
+        
+        const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+          headers: { 'Authorization': `Bearer ${replicateKey}` }
+        })
+        prediction = await statusResponse.json()
+      }
+      
+      if (prediction.status === 'succeeded' && prediction.output) {
+        const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
+        console.log(`[${jobId}] ✅ ZeroScope video ${index + 1} generated`)
+        return {
+          url: videoUrl,
+          prompt: prompt,
+          duration: duration,
+          type: 'ai-video',
+          model: 'zeroscope',
+          index: index
+        }
+      }
+    } catch (fallbackError) {
+      console.error(`[${jobId}] ZeroScope fallback also failed:`, fallbackError.message)
+    }
+    
+    // Final fallback: return image for FFmpeg processing
+    console.log(`[${jobId}] All AI video models failed, using image fallback`)
+    return {
+      url: imageUrl,
+      prompt: prompt,
+      duration: duration,
+      type: 'image-fallback',
+      index: index
+    }
   }
 }
 
