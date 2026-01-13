@@ -452,8 +452,12 @@ Make each section detailed with specific activities, time allocations, and pract
       const filename = `lesson-plan-${uuidv4()}.pdf`
       const outputPath = path.join(outputDir, filename)
 
-      // Generate PDF
-      await generatePDFFromHTML(html, outputPath)
+      // Generate PDF using Puppeteer
+      const { generatePDFFromHTML: puppeteerGenerate } = await import('@/lib/html-pdf-generator')
+      const pdfBuffer = await puppeteerGenerate(html)
+      
+      // Save the PDF file
+      await fs.writeFile(outputPath, pdfBuffer)
 
       const pdfUrl = `/generated/lesson-plans/${filename}`
 
