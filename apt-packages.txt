@@ -2,3 +2,4 @@
 # This file specifies system dependencies that need to be installed
 
 ffmpeg
+chromium

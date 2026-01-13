@@ -1,6 +1,6 @@
 #!/bin/bash
 # Automated dependency setup script for Story Video Reels
-# This script ensures ffmpeg and Next.js are up-to-date
+# This script ensures ffmpeg, chromium and Next.js are up-to-date
 
 set -e  # Exit on error
 
@@ -14,6 +14,16 @@ if ! command -v ffmpeg &> /dev/null; then
     echo "✅ ffmpeg installed successfully (version $(ffmpeg -version | head -n 1 | awk '{print $3}'))"
 else
     echo "✅ ffmpeg already installed (version $(ffmpeg -version | head -n 1 | awk '{print $3}'))"
+fi
+
+# Check if chromium is installed (required for PDF generation)
+if ! command -v chromium &> /dev/null; then
+    echo "📦 chromium not found. Installing..."
+    apt-get update -qq > /dev/null 2>&1
+    apt-get install -y chromium > /dev/null 2>&1
+    echo "✅ chromium installed successfully"
+else
+    echo "✅ chromium already installed"
 fi
 
 # Check if ffprobe is available
