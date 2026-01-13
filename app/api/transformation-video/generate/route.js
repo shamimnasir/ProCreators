@@ -220,17 +220,15 @@ async function compileTransformationVideo({
         await pipeline(Readable.fromWeb(response.body), fileStream)
         console.log(`[${jobId}] ✅ Downloaded image ${i + 1}/${videos.length}`)
         
-        // Convert image to video with Ken Burns effect (zoom/pan)
+        // Convert image to video with simple scaling (Ken Burns is complex with FFmpeg escaping)
         const clipDuration = video.duration || 5
-        const zoomEffect = i % 2 === 0 ? 'zoompan=z=\\'min(zoom+0.0015,1.3)\\':d=150:x=\\'iw/2-(iw/zoom/2)\\':y=\\'ih/2-(ih/zoom/2)\\':s=1080x1920' 
-                                       : 'zoompan=z=\\'if(lte(zoom,1.0),1.3,max(1.0,zoom-0.0015))\\':d=150:x=\\'iw/2-(iw/zoom/2)\\':y=\\'ih/2-(ih/zoom/2)\\':s=1080x1920'
         
         await new Promise((resolve, reject) => {
           ffmpeg(imagePath)
             .loop(clipDuration)
             .inputOptions(['-framerate', '30'])
             .outputOptions([
-              '-vf', `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,${zoomEffect}`,
+              '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
               '-t', String(clipDuration),
               '-c:v', 'libx264',
               '-preset', 'fast',
@@ -246,26 +244,7 @@ async function compileTransformationVideo({
             })
             .on('error', (err) => {
               console.error(`[${jobId}] Clip ${i + 1} failed:`, err.message)
-              // Fallback: create simple video without Ken Burns
-              ffmpeg(imagePath)
-                .loop(clipDuration)
-                .outputOptions([
-                  '-vf', 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920',
-                  '-t', String(clipDuration),
-                  '-c:v', 'libx264',
-                  '-preset', 'fast',
-                  '-crf', '23',
-                  '-pix_fmt', 'yuv420p',
-                  '-r', '30'
-                ])
-                .output(videoPath)
-                .on('end', () => {
-                  videoFiles.push(videoPath)
-                  console.log(`[${jobId}] ✅ Created clip ${i + 1} (fallback)`)
-                  resolve()
-                })
-                .on('error', reject)
-                .run()
+              reject(err)
             })
             .run()
         })
