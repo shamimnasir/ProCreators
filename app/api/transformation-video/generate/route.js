@@ -120,34 +120,27 @@ async function generateImageWithAI(prompt, jobId, index) {
   console.log(`[${jobId}] Generating image ${index + 1}: ${prompt.substring(0, 50)}...`)
   
   try {
-    // Use Fal.ai for image generation (flux-pro or similar)
-    const result = await fal.subscribe('fal-ai/flux-pro/v1.1', {
-      input: {
-        prompt: `${prompt}, ultra realistic, cinematic lighting, 8k quality, detailed, photorealistic`,
-        image_size: 'portrait_16_9',
-        num_images: 1,
-        safety_tolerance: '5'
-      },
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === 'IN_PROGRESS') {
-          console.log(`[${jobId}] Image ${index + 1} progress...`)
-        }
-      }
-    })
+    // Use Gemini nano-banana for image generation (same as other tools)
+    const { generateImage } = await import('@/lib/gemini-image')
     
-    if (result.data?.images?.[0]?.url) {
+    const result = await generateImage(
+      `${prompt}, ultra realistic, cinematic lighting, 8k quality, detailed, photorealistic`,
+      'models/nano-banana-pro-preview'
+    )
+    
+    if (result.success && result.imageUrl) {
       console.log(`[${jobId}] ✅ Image ${index + 1} generated`)
-      return result.data.images[0].url
+      return result.imageUrl
     }
     
-    throw new Error('No image URL in response')
+    throw new Error(result.error || 'No image URL in response')
   } catch (error) {
     console.error(`[${jobId}] Image generation failed:`, error.message)
     
-    // Fallback to a placeholder or retry with different model
+    // Fallback: try Fal.ai if Gemini fails
     try {
-      const fallbackResult = await fal.subscribe('fal-ai/flux/schnell', {
+      console.log(`[${jobId}] Trying Fal.ai fallback...`)
+      const result = await fal.subscribe('fal-ai/flux/schnell', {
         input: {
           prompt: `${prompt}, cinematic, high quality`,
           image_size: 'portrait_16_9',
@@ -155,12 +148,12 @@ async function generateImageWithAI(prompt, jobId, index) {
         }
       })
       
-      if (fallbackResult.data?.images?.[0]?.url) {
-        console.log(`[${jobId}] ✅ Image ${index + 1} generated (fallback)`)
-        return fallbackResult.data.images[0].url
+      if (result.data?.images?.[0]?.url) {
+        console.log(`[${jobId}] ✅ Image ${index + 1} generated (Fal.ai fallback)`)
+        return result.data.images[0].url
       }
     } catch (fallbackError) {
-      console.error(`[${jobId}] Fallback also failed:`, fallbackError.message)
+      console.error(`[${jobId}] Fal.ai fallback also failed:`, fallbackError.message)
     }
     
     return null
