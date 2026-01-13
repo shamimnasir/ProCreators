@@ -291,15 +291,25 @@ export default function QuickVideoStudioPage() {
 
 // Niche Card Component
 function NicheCard({ niche, categoryColor, expanded = false }) {
+  // Use custom page if defined, otherwise use default quick-reels page
+  const href = niche.customPage || `/dashboard/tools/quick-reels/${niche.slug}`
+  
   return (
-    <Link href={`/dashboard/tools/quick-reels/${niche.slug}`}>
+    <Link href={href}>
       <Card className={`group h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-2 hover:border-primary/50 ${niche.cardBg}`}>
         <CardHeader className={expanded ? "pb-2" : "pb-1"}>
           <div className="flex items-start justify-between">
             <div className={`text-3xl mb-2 group-hover:scale-110 transition-transform`}>{niche.icon}</div>
-            <Badge className={`bg-gradient-to-r ${categoryColor} text-white text-[10px]`}>
-              AI
-            </Badge>
+            <div className="flex gap-1">
+              {niche.isNew && (
+                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px]">
+                  ✨ New
+                </Badge>
+              )}
+              <Badge className={`bg-gradient-to-r ${categoryColor} text-white text-[10px]`}>
+                AI
+              </Badge>
+            </div>
           </div>
           <CardTitle className={`group-hover:text-primary transition-colors ${expanded ? "text-lg" : "text-base"}`}>
             {niche.name}
