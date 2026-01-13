@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -24,6 +24,7 @@ import {
   SUPPORTED_TTS_LANGUAGES,
   groupVoicesForUI 
 } from '@/config/voice-config'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 
 // Transformation Themes
 const TRANSFORMATION_THEMES = [
