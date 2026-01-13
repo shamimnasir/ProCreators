@@ -1085,6 +1085,25 @@ export default function TransformationVideoPage() {
           </Card>
         </div>
       )}
+        </div>
+
+        {/* Sidebar - AutoSave Drafts Manager */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-4">
+            <AutoSaveDraftsManager
+              toolType="transformation-video"
+              getCurrentData={getCurrentData}
+              loadDraftData={loadDraftData}
+              onStartNew={handleStartNew}
+              dependencies={[topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, currentStep]}
+              autoSaveEnabled={true}
+              debounceMs={2000}
+              minStepForAutoSave={1}
+              currentStep={currentStep}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
