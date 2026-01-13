@@ -1,0 +1,1011 @@
+'use client'
+
+import React, { useState, useRef, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Slider } from '@/components/ui/slider'
+import { useToast } from '@/hooks/use-toast'
+import { 
+  Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
+  Play, Wand2, Clock, Zap, Film, ArrowLeft, ArrowRight,
+  Type, Music, Mic, ChevronRight, Info, X, Library, Trash2,
+  RefreshCw, Eye, Plus, GripVertical, ImagePlus
+} from 'lucide-react'
+import { saveToLibrary } from '@/lib/library-utils'
+import { 
+  SUPPORTED_TTS_LANGUAGES,
+  groupVoicesForUI 
+} from '@/config/voice-config'
+
+// Transformation Themes
+const TRANSFORMATION_THEMES = [
+  {
+    id: 'historical-evolution',
+    name: 'Historical Evolution',
+    icon: '🏛️',
+    description: 'Cities, monuments, landmarks through time',
+    color: 'from-amber-500 to-orange-600',
+    examplePrompt: 'Show the evolution of the Pyramids of Giza from ancient construction to modern day tourist attraction'
+  },
+  {
+    id: 'renovation',
+    name: 'Before/After Renovation',
+    icon: '🏠',
+    description: 'Old buildings to modern spaces',
+    color: 'from-blue-500 to-cyan-600',
+    examplePrompt: 'Transform an abandoned Victorian house into a beautiful modern home'
+  },
+  {
+    id: 'nature-transformation',
+    name: 'Nature Transformation',
+    icon: '🌿',
+    description: 'Seasons, growth, restoration',
+    color: 'from-green-500 to-emerald-600',
+    examplePrompt: 'Show a barren desert transforming into a lush green oasis over time'
+  },
+  {
+    id: 'urban-development',
+    name: 'Urban Development',
+    icon: '🌆',
+    description: 'Villages to modern cities',
+    color: 'from-purple-500 to-pink-600',
+    examplePrompt: 'Transform a small fishing village into a bustling modern metropolis'
+  },
+  {
+    id: 'restoration',
+    name: 'Art & Object Restoration',
+    icon: '🎨',
+    description: 'Damaged to restored beauty',
+    color: 'from-rose-500 to-red-600',
+    examplePrompt: 'Show the restoration of a damaged Renaissance painting to its original glory'
+  },
+  {
+    id: 'time-lapse',
+    name: 'Time-Lapse Stories',
+    icon: '⏰',
+    description: 'Day to night, seasons changing',
+    color: 'from-indigo-500 to-violet-600',
+    examplePrompt: 'A year in the life of a cherry blossom tree through all four seasons'
+  },
+  {
+    id: 'custom',
+    name: 'Custom Transformation',
+    icon: '✨',
+    description: 'Create your own unique transformation',
+    color: 'from-gray-500 to-slate-600',
+    examplePrompt: 'Describe any transformation you can imagine...'
+  }
+]
+
+// Caption style options
+const CAPTION_STYLES = [
+  { value: 'none', label: '🚫 No Captions' },
+  { value: 'bold-outline', label: '✨ Bold Outline (Default)' },
+  { value: 'karaoke', label: '🎤 Karaoke (Word by Word)' },
+  { value: 'neon-glow', label: '💜 Neon Glow' },
+  { value: 'minimal-clean', label: '🤍 Minimal Clean' },
+  { value: 'cinematic', label: '🎬 Cinematic (Bottom)' }
+]
+
+export default function TransformationVideoPage() {
+  const { toast } = useToast()
+  
+  // Step management
+  const [currentStep, setCurrentStep] = useState(1) // 1: Theme, 2: Scenes, 3: Generate
+  
+  // Theme & Topic
+  const [selectedTheme, setSelectedTheme] = useState(null)
+  const [topic, setTopic] = useState('')
+  const [language, setLanguage] = useState('en')
+  
+  // Image source
+  const [imageSource, setImageSource] = useState('ai') // 'ai' or 'upload'
+  const [uploadedImages, setUploadedImages] = useState([]) // Array of {file, preview, description}
+  
+  // AI-generated scenes
+  const [scenes, setScenes] = useState([])
+  const [generatingScenes, setGeneratingScenes] = useState(false)
+  
+  // Video settings
+  const [sceneCount, setSceneCount] = useState(4)
+  const [videoDuration, setVideoDuration] = useState([25]) // Target 15-35 seconds
+  const [format, setFormat] = useState('portrait')
+  
+  // Voice settings
+  const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'none'
+  const [ttsLanguage, setTtsLanguage] = useState('en')
+  const [availableVoices, setAvailableVoices] = useState([])
+  const [voicesByVariant, setVoicesByVariant] = useState({})
+  const [selectedVoice, setSelectedVoice] = useState('')
+  const [loadingVoices, setLoadingVoices] = useState(false)
+  const [voiceFile, setVoiceFile] = useState(null)
+  const [captionStyle, setCaptionStyle] = useState('bold-outline')
+  
+  // Recording
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const recordingIntervalRef = useRef(null)
+  const voiceFileInputRef = useRef(null)
+  const imageInputRef = useRef(null)
+  
+  // Generation state
+  const [generating, setGenerating] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [progressMessage, setProgressMessage] = useState('')
+  
+  // Output
+  const [videoResult, setVideoResult] = useState(null)
+
+  // Load voices when TTS language changes
+  useEffect(() => {
+    if (voiceOption === 'tts') {
+      loadVoices()
+    }
+  }, [ttsLanguage, voiceOption])
+
+  const loadVoices = async () => {
+    setLoadingVoices(true)
+    try {
+      const response = await fetch(`/api/story-reels/list-voices?language=${ttsLanguage}`)
+      const data = await response.json()
+      if (data.success && data.voices) {
+        setAvailableVoices(data.voices)
+        const grouped = groupVoicesForUI(data.voices)
+        setVoicesByVariant(grouped)
+        
+        const categories = Object.keys(grouped)
+        if (categories.length > 0 && !selectedVoice) {
+          const preferredCategory = categories.find(c => c === 'Premium HD') || categories[0]
+          if (grouped[preferredCategory]?.length > 0) {
+            setSelectedVoice(grouped[preferredCategory][0].name)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load voices:', error)
+    } finally {
+      setLoadingVoices(false)
+    }
+  }
+
+  // Voice recording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mp3' })
+        setVoiceFile(audioBlob)
+        stream.getTracks().forEach(track => track.stop())
+      }
+      
+      mediaRecorder.start()
+      setIsRecording(true)
+      setRecordingTime(0)
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+      
+      toast({ title: 'Recording Started', description: 'Speak your narration' })
+    } catch (error) {
+      toast({ title: 'Recording Failed', description: error.message, variant: 'destructive' })
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      clearInterval(recordingIntervalRef.current)
+      toast({ title: 'Recording Saved', description: `${recordingTime}s of audio recorded` })
+    }
+  }
+
+  const handleVoiceFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (!file.type.startsWith('audio/')) {
+        toast({ title: 'Invalid File', description: 'Please upload an audio file', variant: 'destructive' })
+        return
+      }
+      setVoiceFile(file)
+      toast({ title: 'Audio Uploaded', description: file.name })
+    }
+  }
+
+  // Image upload handling
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files)
+    const validFiles = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024)
+    
+    if (validFiles.length === 0) {
+      toast({ title: 'Invalid Files', description: 'Please upload valid images (max 10MB each)', variant: 'destructive' })
+      return
+    }
+    
+    const newImages = validFiles.map((file, idx) => ({
+      id: `img-${Date.now()}-${idx}`,
+      file,
+      preview: URL.createObjectURL(file),
+      description: '',
+      order: uploadedImages.length + idx
+    }))
+    
+    setUploadedImages(prev => [...prev, ...newImages].slice(0, 6))
+    toast({ title: 'Images Added', description: `${newImages.length} images uploaded` })
+  }
+
+  const removeImage = (id) => {
+    setUploadedImages(prev => prev.filter(img => img.id !== id))
+  }
+
+  const updateImageDescription = (id, description) => {
+    setUploadedImages(prev => prev.map(img => 
+      img.id === id ? { ...img, description } : img
+    ))
+  }
+
+  // Generate scenes with AI
+  const generateScenes = async () => {
+    if (!topic.trim()) {
+      toast({ title: 'Topic Required', description: 'Please enter a transformation topic', variant: 'destructive' })
+      return
+    }
+    
+    setGeneratingScenes(true)
+    try {
+      const response = await fetch('/api/transformation-video/generate-scenes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          theme: selectedTheme?.id || 'custom',
+          sceneCount,
+          language
+        })
+      })
+      
+      const data = await response.json()
+      if (data.success && data.scenes) {
+        setScenes(data.scenes)
+        setCurrentStep(2)
+        toast({ title: 'Scenes Generated!', description: `${data.scenes.length} transformation scenes created` })
+      } else {
+        throw new Error(data.error || 'Failed to generate scenes')
+      }
+    } catch (error) {
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setGeneratingScenes(false)
+    }
+  }
+
+  // Update scene prompt
+  const updateScenePrompt = (index, field, value) => {
+    setScenes(prev => prev.map((scene, i) => 
+      i === index ? { ...scene, [field]: value } : scene
+    ))
+  }
+
+  // Generate final video
+  const generateVideo = async () => {
+    // Validation
+    if (imageSource === 'upload' && uploadedImages.length < 2) {
+      toast({ title: 'More Images Needed', description: 'Please upload at least 2 images for transformation', variant: 'destructive' })
+      return
+    }
+    
+    if (imageSource === 'ai' && scenes.length === 0) {
+      toast({ title: 'Scenes Required', description: 'Please generate scenes first', variant: 'destructive' })
+      return
+    }
+    
+    setGenerating(true)
+    setProgress(0)
+    setProgressMessage('🚀 Starting transformation video creation...')
+    setVideoResult(null)
+    
+    try {
+      const formData = new FormData()
+      formData.append('topic', topic)
+      formData.append('theme', selectedTheme?.id || 'custom')
+      formData.append('language', language)
+      formData.append('imageSource', imageSource)
+      formData.append('targetDuration', videoDuration[0])
+      formData.append('format', format)
+      formData.append('voiceOption', voiceOption)
+      formData.append('ttsLanguage', ttsLanguage)
+      formData.append('selectedVoice', selectedVoice || '')
+      formData.append('captionStyle', captionStyle)
+      
+      if (imageSource === 'ai') {
+        formData.append('scenes', JSON.stringify(scenes))
+      } else {
+        // Upload images
+        uploadedImages.forEach((img, idx) => {
+          formData.append(`image_${idx}`, img.file)
+          formData.append(`image_${idx}_description`, img.description || '')
+        })
+        formData.append('imageCount', uploadedImages.length)
+      }
+      
+      if (voiceOption === 'upload' && voiceFile) {
+        formData.append('voiceFile', voiceFile)
+      }
+      
+      // Progress simulation
+      const progressSteps = [
+        { at: 5, msg: imageSource === 'ai' ? '🎨 Generating transformation images...' : '📸 Processing uploaded images...' },
+        { at: 25, msg: '🎬 Creating video clips for each scene...' },
+        { at: 50, msg: '✨ Applying cinematic transitions...' },
+        { at: 70, msg: voiceOption !== 'none' ? '🎙️ Adding voiceover...' : '🔧 Processing video...' },
+        { at: 85, msg: captionStyle !== 'none' ? '📝 Adding captions...' : '💾 Finalizing...' },
+        { at: 95, msg: '💾 Saving to library...' }
+      ]
+      
+      let currentProgress = 0
+      const progressInterval = setInterval(() => {
+        currentProgress += 0.5
+        if (currentProgress < 95) {
+          setProgress(Math.min(currentProgress, 95))
+          const currentStep = progressSteps.filter(s => currentProgress >= s.at).pop()
+          if (currentStep) {
+            setProgressMessage(currentStep.msg)
+          }
+        }
+      }, 1000)
+      
+      const response = await fetch('/api/transformation-video/generate', {
+        method: 'POST',
+        body: formData
+      })
+      
+      clearInterval(progressInterval)
+      const data = await response.json()
+      
+      if (data.success) {
+        setProgress(100)
+        setProgressMessage('✅ Complete!')
+        setVideoResult(data)
+        setCurrentStep(3)
+        
+        toast({ 
+          title: '🎬 Transformation Video Created!', 
+          description: `${Math.round(data.duration || videoDuration[0])}s cinematic video ready`
+        })
+      } else {
+        throw new Error(data.error || 'Failed to generate video')
+      }
+    } catch (error) {
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  // Download video
+  const handleDownload = async () => {
+    if (!videoResult?.videoUrl) return
+    try {
+      const response = await fetch(videoResult.videoUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `transformation-${selectedTheme?.id || 'custom'}-${Date.now()}.mp4`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      toast({ title: 'Download Started' })
+    } catch (error) {
+      toast({ title: 'Download Failed', description: error.message, variant: 'destructive' })
+    }
+  }
+
+  // Reset to start
+  const resetAll = () => {
+    setCurrentStep(1)
+    setSelectedTheme(null)
+    setTopic('')
+    setScenes([])
+    setUploadedImages([])
+    setVideoResult(null)
+    setProgress(0)
+  }
+
+  return (
+    <div className="space-y-6 pb-10">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-8 text-white">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
+              <RefreshCw className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">AI Transformation Video</h1>
+              <p className="text-white/80">Create stunning before/after & evolution videos</p>
+            </div>
+            <Badge className="ml-auto bg-white/20 text-white border-0">✨ New</Badge>
+          </div>
+          
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center gap-2 mt-6">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
+                  currentStep >= step 
+                    ? 'bg-white text-purple-600' 
+                    : 'bg-white/20 text-white/60'
+                }`}>
+                  {step === 1 ? '🎯' : step === 2 ? '🎨' : '🎬'}
+                </div>
+                {step < 3 && (
+                  <div className={`w-16 h-1 mx-2 rounded ${
+                    currentStep > step ? 'bg-white' : 'bg-white/20'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-center gap-12 mt-2 text-sm text-white/80">
+            <span>Theme & Topic</span>
+            <span>Scenes</span>
+            <span>Generate</span>
+          </div>
+        </div>
+        
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
+      </div>
+
+      {/* Step 1: Theme Selection & Topic */}
+      {currentStep === 1 && (
+        <div className="space-y-6">
+          {/* Theme Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-2xl">🎯</span>
+                Choose Transformation Theme
+              </CardTitle>
+              <CardDescription>Select a theme or create your own custom transformation</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {TRANSFORMATION_THEMES.map((theme) => (
+                  <div
+                    key={theme.id}
+                    onClick={() => {
+                      setSelectedTheme(theme)
+                      if (theme.id !== 'custom' && !topic) {
+                        setTopic(theme.examplePrompt)
+                      }
+                    }}
+                    className={`relative cursor-pointer rounded-xl p-4 transition-all hover:scale-105 ${
+                      selectedTheme?.id === theme.id
+                        ? 'ring-2 ring-primary shadow-lg'
+                        : 'hover:shadow-md'
+                    } bg-gradient-to-br ${theme.color} text-white`}
+                  >
+                    <span className="text-3xl">{theme.icon}</span>
+                    <h3 className="font-bold mt-2">{theme.name}</h3>
+                    <p className="text-xs text-white/80 mt-1">{theme.description}</p>
+                    {selectedTheme?.id === theme.id && (
+                      <div className="absolute top-2 right-2 bg-white text-green-600 rounded-full p-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Topic Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Describe Your Transformation</CardTitle>
+              <CardDescription>Be specific about what transforms and how</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Textarea
+                placeholder="Example: Show the evolution of the Holy Kaaba & Mecca from its earliest known stage to the modern era. Include ancient builders, early pilgrimage, classical Islamic era, and modern Mecca..."
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-sm">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">🇺🇸 English</SelectItem>
+                      <SelectItem value="bn">🇧🇩 বাংলা</SelectItem>
+                      <SelectItem value="hi">🇮🇳 हिंदी</SelectItem>
+                      <SelectItem value="es">🇪🇸 Español</SelectItem>
+                      <SelectItem value="ar">🇸🇦 العربية</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm">Number of Scenes</Label>
+                  <Select value={String(sceneCount)} onValueChange={(v) => setSceneCount(parseInt(v))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 Scenes</SelectItem>
+                      <SelectItem value="4">4 Scenes</SelectItem>
+                      <SelectItem value="5">5 Scenes</SelectItem>
+                      <SelectItem value="6">6 Scenes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm">Target Duration</Label>
+                  <div className="pt-2">
+                    <Slider
+                      value={videoDuration}
+                      onValueChange={setVideoDuration}
+                      min={15}
+                      max={35}
+                      step={5}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">{videoDuration[0]} seconds</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label className="text-sm">Format</Label>
+                  <Select value={format} onValueChange={setFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="portrait">📱 Portrait (9:16)</SelectItem>
+                      <SelectItem value="landscape">🖥️ Landscape (16:9)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Image Source Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Image Source</CardTitle>
+              <CardDescription>Choose how to create transformation images</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup value={imageSource} onValueChange={setImageSource} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    imageSource === 'ai' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => setImageSource('ai')}
+                >
+                  <RadioGroupItem value="ai" id="ai-images" className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="h-5 w-5 text-purple-500" />
+                      <Label htmlFor="ai-images" className="font-semibold cursor-pointer">AI Generated Images</Label>
+                      <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      AI will generate all transformation stages based on your topic
+                    </p>
+                  </div>
+                </div>
+                
+                <div
+                  className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    imageSource === 'upload' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => setImageSource('upload')}
+                >
+                  <RadioGroupItem value="upload" id="upload-images" className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Upload className="h-5 w-5 text-blue-500" />
+                      <Label htmlFor="upload-images" className="font-semibold cursor-pointer">Upload Your Images</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Upload 3-6 images showing the transformation stages
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
+              
+              {/* Image Upload Section */}
+              {imageSource === 'upload' && (
+                <div className="mt-6 space-y-4">
+                  <div
+                    className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                    <ImagePlus className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                    <p className="font-medium">Click to upload transformation images</p>
+                    <p className="text-sm text-muted-foreground">Upload 3-6 images in order (before → middle stages → after)</p>
+                  </div>
+                  
+                  {uploadedImages.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                      {uploadedImages.map((img, idx) => (
+                        <div key={img.id} className="relative group">
+                          <div className="aspect-square rounded-lg overflow-hidden border-2 border-muted">
+                            <img src={img.preview} alt={`Stage ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-bold">
+                            #{idx + 1}
+                          </div>
+                          <button
+                            onClick={() => removeImage(img.id)}
+                            className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          <Input
+                            placeholder="Describe this stage..."
+                            value={img.description}
+                            onChange={(e) => updateImageDescription(img.id, e.target.value)}
+                            className="mt-2 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Voice Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mic className="h-5 w-5" />
+                Voice & Captions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <RadioGroup value={voiceOption} onValueChange={setVoiceOption} className="grid grid-cols-3 gap-2">
+                <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                  voiceOption === 'tts' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                }`} onClick={() => setVoiceOption('tts')}>
+                  <RadioGroupItem value="tts" id="tts" />
+                  <Label htmlFor="tts" className="cursor-pointer text-sm">🎙️ AI Voice</Label>
+                </div>
+                <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                  voiceOption === 'upload' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                }`} onClick={() => setVoiceOption('upload')}>
+                  <RadioGroupItem value="upload" id="voice-upload" />
+                  <Label htmlFor="voice-upload" className="cursor-pointer text-sm">🎤 Record/Upload</Label>
+                </div>
+                <div className={`flex items-center space-x-2 border rounded-lg p-3 cursor-pointer transition-all ${
+                  voiceOption === 'none' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                }`} onClick={() => setVoiceOption('none')}>
+                  <RadioGroupItem value="none" id="no-voice" />
+                  <Label htmlFor="no-voice" className="cursor-pointer text-sm">🔇 No Voice</Label>
+                </div>
+              </RadioGroup>
+
+              {voiceOption === 'tts' && (
+                <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted/50">
+                  <div>
+                    <Label className="text-sm">Language</Label>
+                    <Select value={ttsLanguage} onValueChange={setTtsLanguage}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_TTS_LANGUAGES.map(lang => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.flag} {lang.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-sm">Voice {loadingVoices && <Loader2 className="inline h-3 w-3 animate-spin ml-1" />}</Label>
+                    <Select value={selectedVoice} onValueChange={setSelectedVoice} disabled={loadingVoices}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select voice" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {Object.entries(voicesByVariant).map(([category, voices]) => (
+                          <div key={category}>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted sticky top-0">
+                              {category}
+                            </div>
+                            {voices.map(voice => (
+                              <SelectItem key={voice.name} value={voice.name}>
+                                <span>{voice.genderIcon} {voice.friendlyName}</span>
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {voiceOption === 'upload' && (
+                <div className="space-y-3 p-4 rounded-lg bg-muted/50">
+                  <div className="flex gap-2">
+                    <Button
+                      variant={isRecording ? 'destructive' : 'outline'}
+                      onClick={isRecording ? stopRecording : startRecording}
+                      className="flex-1"
+                    >
+                      {isRecording ? <>🔴 Stop ({recordingTime}s)</> : <>🎤 Record</>}
+                    </Button>
+                    <Button variant="outline" onClick={() => voiceFileInputRef.current?.click()} className="flex-1">
+                      <Upload className="h-4 w-4 mr-2" /> Upload
+                    </Button>
+                    <input
+                      type="file"
+                      ref={voiceFileInputRef}
+                      className="hidden"
+                      accept="audio/*"
+                      onChange={handleVoiceFileUpload}
+                    />
+                  </div>
+                  {voiceFile && (
+                    <div className="flex items-center gap-2 p-2 rounded bg-green-100 dark:bg-green-900/30 text-sm">
+                      <span>✅</span>
+                      <span>{voiceFile.name || 'Recording ready'}</span>
+                      <Button variant="ghost" size="sm" className="ml-auto h-6" onClick={() => setVoiceFile(null)}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <Label className="text-sm">Caption Style</Label>
+                <Select value={captionStyle} onValueChange={setCaptionStyle}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CAPTION_STYLES.map(style => (
+                      <SelectItem key={style.value} value={style.value}>{style.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Next Step Button */}
+          <div className="flex justify-end gap-4">
+            <Button
+              size="lg"
+              onClick={imageSource === 'ai' ? generateScenes : () => setCurrentStep(2)}
+              disabled={!topic.trim() || generatingScenes || (imageSource === 'upload' && uploadedImages.length < 2)}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+            >
+              {generatingScenes ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Scenes...</>
+              ) : imageSource === 'ai' ? (
+                <><Wand2 className="mr-2 h-5 w-5" /> Generate Scenes with AI</>
+              ) : (
+                <><ArrowRight className="mr-2 h-5 w-5" /> Continue to Generate</>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: Scene Review & Edit */}
+      {currentStep === 2 && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-2xl">🎨</span>
+                    {imageSource === 'ai' ? 'Review & Edit Scenes' : 'Your Transformation Images'}
+                  </CardTitle>
+                  <CardDescription>
+                    {imageSource === 'ai' 
+                      ? 'Edit the AI-generated scene prompts before generating videos'
+                      : 'Review your uploaded images in transformation order'
+                    }
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {imageSource === 'ai' ? (
+                <div className="space-y-4">
+                  {scenes.map((scene, idx) => (
+                    <div key={idx} className="p-4 rounded-lg border bg-muted/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{scene.title || `Scene ${idx + 1}`}</h4>
+                          <p className="text-xs text-muted-foreground">{scene.transition || 'Hard Cut'}</p>
+                        </div>
+                      </div>
+                      <Textarea
+                        value={scene.visualPrompt}
+                        onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
+                        rows={3}
+                        className="text-sm"
+                        placeholder="Describe the visual for this scene..."
+                      />
+                      {scene.narration && (
+                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
+                          <span className="font-medium">🎙️ Narration:</span> {scene.narration}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {uploadedImages.map((img, idx) => (
+                    <div key={img.id} className="relative">
+                      <div className="aspect-square rounded-lg overflow-hidden border-2 border-muted">
+                        <img src={img.preview} alt={`Stage ${idx + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded font-bold">
+                        #{idx + 1}
+                      </div>
+                      <p className="text-xs text-center mt-1 text-muted-foreground truncate">
+                        {img.description || `Stage ${idx + 1}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Generate Video Button */}
+          <div className="flex justify-between gap-4">
+            <Button variant="outline" onClick={() => setCurrentStep(1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Settings
+            </Button>
+            <Button
+              size="lg"
+              onClick={generateVideo}
+              disabled={generating}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+            >
+              {generating ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Creating Video...</>
+              ) : (
+                <><Film className="mr-2 h-5 w-5" /> Generate Transformation Video</>
+              )}
+            </Button>
+          </div>
+
+          {/* Progress */}
+          {generating && (
+            <Card>
+              <CardContent className="py-6">
+                <div className="space-y-3">
+                  <Progress value={progress} className="h-3" />
+                  <p className="text-center text-sm text-muted-foreground">{progressMessage}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Step 3: Video Result */}
+      {currentStep === 3 && videoResult && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-2xl">🎬</span>
+                    Your Transformation Video
+                  </CardTitle>
+                  <CardDescription>Your cinematic transformation video is ready!</CardDescription>
+                </div>
+                <Button variant="outline" onClick={resetAll}>
+                  <Plus className="mr-2 h-4 w-4" /> Create New
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`relative rounded-xl overflow-hidden bg-black mx-auto ${
+                format === 'portrait' ? 'max-w-sm aspect-[9/16]' : 'max-w-3xl aspect-video'
+              }`}>
+                <video
+                  src={videoResult.videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              
+              <div className="flex justify-center gap-4 mt-6">
+                <Button onClick={handleDownload} size="lg">
+                  <Download className="mr-2 h-5 w-5" /> Download Video
+                </Button>
+                <Button variant="outline" size="lg" onClick={resetAll}>
+                  <RefreshCw className="mr-2 h-5 w-5" /> Create Another
+                </Button>
+              </div>
+              
+              {/* Video Info */}
+              <div className="mt-6 p-4 rounded-lg bg-muted/50 flex items-center justify-center gap-6 text-sm">
+                <div className="text-center">
+                  <p className="font-bold">{Math.round(videoResult.duration || videoDuration[0])}s</p>
+                  <p className="text-muted-foreground">Duration</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold">{videoResult.clipCount || scenes.length || uploadedImages.length}</p>
+                  <p className="text-muted-foreground">Scenes</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold">{format === 'portrait' ? '9:16' : '16:9'}</p>
+                  <p className="text-muted-foreground">Format</p>
+                </div>
+                <div className="flex items-center gap-1 text-green-600">
+                  <Library className="h-4 w-4" />
+                  <span>Auto-saved to Library</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  )
+}
