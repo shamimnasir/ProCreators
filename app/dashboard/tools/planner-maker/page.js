@@ -19,7 +19,7 @@ import Link from 'next/link'
 
 // Import shared components
 import RichTextEditor from '@/components/shared/RichTextEditor'
-import DraftsManager from '@/components/shared/DraftsManager'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import CoverImagePrompt from '@/components/shared/CoverImagePrompt'
 import PaperSizeSelector from '@/components/shared/PaperSizeSelector'
 
