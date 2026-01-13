@@ -376,6 +376,51 @@ export default function CarouselsToolPage() {
     setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)
   }
 
+  // AutoSave helper functions
+  const getCurrentData = useCallback(() => ({
+    title: prompt ? `Carousel: ${prompt.substring(0, 50)}` : 'Untitled Carousel',
+    prompt,
+    language,
+    platform,
+    generationMode,
+    manualSlides,
+    carouselSlides,
+    uploadedLogo,
+    logoSize,
+    logoPosition
+  }), [prompt, language, platform, generationMode, manualSlides, carouselSlides, uploadedLogo, logoSize, logoPosition])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.prompt) setPrompt(data.prompt)
+    if (data.language) setLanguage(data.language)
+    if (data.platform) setPlatform(data.platform)
+    if (data.generationMode) setGenerationMode(data.generationMode)
+    if (data.manualSlides) setManualSlides(data.manualSlides)
+    if (data.carouselSlides) setCarouselSlides(data.carouselSlides)
+    if (data.uploadedLogo) setUploadedLogo(data.uploadedLogo)
+    if (data.logoSize) setLogoSize(data.logoSize)
+    if (data.logoPosition) setLogoPosition(data.logoPosition)
+  }, [])
+
+  const handleStartNew = useCallback(() => {
+    setPrompt('')
+    setLanguage('english')
+    setPlatform('instagram-square')
+    setGenerationMode('auto')
+    setManualSlides([
+      { slideNumber: 1, text: '' },
+      { slideNumber: 2, text: '' },
+      { slideNumber: 3, text: '' },
+      { slideNumber: 4, text: '' },
+      { slideNumber: 5, text: '' }
+    ])
+    setCarouselSlides([])
+    setUploadedLogo(null)
+    setLogoSize(80)
+    setLogoPosition('top-right')
+    setCurrentSlide(0)
+  }, [])
+
   return (
     <div className="space-y-6">
       <div>
@@ -385,7 +430,9 @@ export default function CarouselsToolPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Content - 2 columns */}
+        <div className="lg:col-span-2 grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Input</CardTitle>
