@@ -441,15 +441,16 @@ export default function WorksheetMakerPage() {
 
           {/* Drafts Panel */}
           <div className="lg:col-span-1">
-            <DraftsManager
+            <AutoSaveDraftsManager
               toolType="worksheet"
-              drafts={drafts}
-              setDrafts={setDrafts}
-              currentDraftId={currentDraftId}
-              setCurrentDraftId={setCurrentDraftId}
               getCurrentData={getCurrentData}
               loadDraftData={loadDraftData}
               onStartNew={handleStartNew}
+              dependencies={[title, subject, gradeLevel, totalQuestions, selectedTypes, worksheetQuestions, customTopic, step]}
+              autoSaveEnabled={true}
+              debounceMs={2000}
+              minStepForAutoSave={1}
+              currentStep={step}
             />
           </div>
         </div>
