@@ -553,11 +553,15 @@ export default function TransformationVideoPage() {
         <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Step 1: Theme Selection & Topic */}
-      {currentStep === 1 && (
-        <div className="space-y-6">
-          {/* Theme Selection */}
-          <Card>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Content - 3 columns */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Step 1: Theme Selection & Topic */}
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              {/* Theme Selection */}
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="text-2xl">🎯</span>
