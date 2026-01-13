@@ -5,40 +5,51 @@ import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
 // Helper to run LLM
-async function runLLM(prompt, systemPrompt = '') {
+async function runLLM(prompt, systemPrompt = 'You are an expert curriculum designer and experienced teacher.') {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
-    const process_llm = spawn('python3', [scriptPath], {
-      env: { ...process.env }
-    })
+    try {
+      const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
+      
+      const inputData = JSON.stringify({
+        prompt,
+        system_prompt: systemPrompt
+      })
+      
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, inputData], {
+        env: { ...process.env }
+      })
 
-    let stdout = ''
-    let stderr = ''
+      let stdout = ''
+      let stderr = ''
 
-    const input = JSON.stringify({ prompt, system_prompt: systemPrompt })
-    process_llm.stdin.write(input)
-    process_llm.stdin.end()
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString()
+      })
 
-    process_llm.stdout.on('data', (data) => {
-      stdout += data.toString()
-    })
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString()
+      })
 
-    process_llm.stderr.on('data', (data) => {
-      stderr += data.toString()
-    })
-
-    process_llm.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(`LLM process failed: ${stderr}`))
-      } else {
-        try {
-          const result = JSON.parse(stdout)
-          resolve(result.response || result)
-        } catch {
-          resolve(stdout.trim())
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error('LLM stderr:', stderr)
+          reject(new Error(`LLM process failed: ${stderr}`))
+        } else {
+          try {
+            const result = JSON.parse(stdout)
+            resolve(result.response || result.content || result)
+          } catch {
+            resolve(stdout.trim())
+          }
         }
-      }
-    })
+      })
+      
+      pythonProcess.on('error', (err) => {
+        reject(new Error(`Failed to start LLM process: ${err.message}`))
+      })
+    } catch (error) {
+      reject(error)
+    }
   })
 }
 
