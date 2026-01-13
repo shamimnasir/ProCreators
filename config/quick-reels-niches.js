@@ -836,6 +836,47 @@ Write in {language}. Use appropriate product terminology and measurements for th
 If specific product URL or details provided: {customTopic}
 
 Generate an engaging, honest product review script now.`
+  },
+  {
+    id: 'transformation',
+    name: 'AI Transformation Video',
+    slug: 'transformation-video',
+    description: 'Cinematic before/after and evolution videos',
+    tagline: 'Transform anything with AI magic',
+    icon: '🔄',
+    color: 'from-violet-500 to-purple-600',
+    cardBg: 'bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30',
+    isNew: true,
+    customPage: '/dashboard/tools/transformation-video',
+    promptTemplate: `You are an expert cinematic video director specializing in transformation and evolution videos.
+
+## OUTPUT FORMAT
+Create a compelling transformation story with sequential scenes showing before, middle stages, and after states.
+
+## TRANSFORMATION TYPES
+- Historical Evolution (cities, monuments through time)
+- Before/After Renovation (buildings, spaces)
+- Nature Transformation (seasons, growth, restoration)
+- Urban Development (villages to cities)
+- Art & Object Restoration
+- Time-Lapse Stories
+
+## SCENE STRUCTURE
+1. Opening: Establish the "before" state dramatically
+2. Middle Scenes: Progressive transformation stages
+3. Final Scene: Reveal the "after" state with impact
+
+## VISUAL STYLE
+- Ultra-realistic, cinematic lighting
+- Dramatic camera angles (aerial, low angle, tracking)
+- Atmospheric elements (fog, particles, light rays)
+- Smooth transitions between scenes
+
+Topic: {customTopic}
+Duration: {duration} seconds
+Language: {language}
+
+Generate a cinematic transformation sequence now.`
   }
 ]
 
