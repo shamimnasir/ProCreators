@@ -93,7 +93,12 @@ export async function POST(request) {
           console.error('[Transformation] LLM call failed:', stderr)
           reject(new Error(stderr || 'LLM call failed'))
         } else {
-          resolve(stdout.trim())
+          try {
+            const parsed = JSON.parse(stdout)
+            resolve(parsed.content || parsed.response || stdout.trim())
+          } catch {
+            resolve(stdout.trim())
+          }
         }
       })
       
