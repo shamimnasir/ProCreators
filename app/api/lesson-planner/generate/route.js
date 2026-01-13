@@ -65,8 +65,17 @@ function generateLessonPlanHTML(lessonPlan, config) {
 
   const formatContent = (content) => {
     if (!content) return ''
+    
+    // Handle arrays
+    if (Array.isArray(content)) {
+      return content.map(item => `<li>${String(item)}</li>`).join('')
+    }
+    
+    // Ensure content is a string
+    const contentStr = String(content)
+    
     // Convert bullet points and numbered lists
-    return content
+    return contentStr
       .split('\n')
       .map(line => {
         const trimmed = line.trim()
