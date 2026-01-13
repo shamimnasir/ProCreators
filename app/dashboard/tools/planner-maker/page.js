@@ -250,15 +250,16 @@ export default function PlannerMakerPage() {
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Left sidebar - Drafts */}
         <div className="lg:col-span-1">
-          <DraftsManager
+          <AutoSaveDraftsManager
             toolType="planner"
-            drafts={drafts}
-            setDrafts={setDrafts}
-            currentDraftId={currentDraftId}
-            setCurrentDraftId={setCurrentDraftId}
             getCurrentData={getCurrentData}
             loadDraftData={loadDraftData}
             onStartNew={handleStartNew}
+            dependencies={[plannerName, plannerType, paperSize, totalPages, sectionsConfig, startDate, mode]}
+            autoSaveEnabled={true}
+            debounceMs={2000}
+            minStepForAutoSave={1}
+            currentStep={1}
           />
         </div>
 
