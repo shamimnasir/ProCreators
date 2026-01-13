@@ -162,54 +162,17 @@ async function generateImageWithAI(prompt, jobId, index) {
 
 // ==================== VIDEO GENERATION ====================
 async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Generating video ${index + 1} from image...`)
+  console.log(`[${jobId}] Creating video ${index + 1} from image...`)
   
-  try {
-    // Use Fal.ai image-to-video
-    const result = await fal.subscribe('fal-ai/kling-video/v2.5-turbo/pro/image-to-video', {
-      input: {
-        prompt: `${prompt}, smooth cinematic motion, professional quality, transformation sequence`,
-        image_url: imageUrl,
-        duration: String(Math.min(duration, 5)),
-        aspect_ratio: '9:16'
-      },
-      logs: true,
-      onQueueUpdate: (update) => {
-        if (update.status === 'IN_PROGRESS') {
-          console.log(`[${jobId}] Video ${index + 1} progress...`)
-        }
-      }
-    })
-    
-    if (result.data?.video?.url) {
-      console.log(`[${jobId}] ✅ Video ${index + 1} generated`)
-      return { url: result.data.video.url, model: 'kling-2.5-turbo' }
-    }
-    
-    throw new Error('No video URL in response')
-  } catch (error) {
-    console.error(`[${jobId}] Video generation failed:`, error.message)
-    
-    // Try text-to-video as fallback
-    try {
-      console.log(`[${jobId}] Trying text-to-video fallback...`)
-      const fallbackResult = await fal.subscribe('fal-ai/pixverse/v5.5/text-to-video', {
-        input: {
-          prompt: `${prompt}, cinematic transformation, smooth motion`,
-          aspect_ratio: '9:16',
-          duration: '5s'
-        }
-      })
-      
-      if (fallbackResult.data?.video?.url) {
-        console.log(`[${jobId}] ✅ Video ${index + 1} generated (fallback)`)
-        return { url: fallbackResult.data.video.url, model: 'pixverse' }
-      }
-    } catch (fallbackError) {
-      console.error(`[${jobId}] Fallback also failed:`, fallbackError.message)
-    }
-    
-    return null
+  // For now, we'll use the image directly and compile via FFmpeg
+  // This creates a video from static images with subtle zoom/pan effects
+  // which is more reliable than external AI video generation
+  return {
+    url: imageUrl,
+    prompt: prompt,
+    duration: duration,
+    type: 'image-to-video-ffmpeg',
+    index: index
   }
 }
 
