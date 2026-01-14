@@ -121,7 +121,7 @@ export default function TransformationVideoPage() {
   const [format, setFormat] = useState('portrait')
   
   // Auto-adjust video duration when scene count changes
-  // Each scene is 5 seconds of Kling AI video (maximizing value per API call)
+  // Each scene is 5 seconds of AI video (maximizing value per API call)
   useEffect(() => {
     const calculatedDuration = sceneCount * 5 // 5 seconds per scene (full API value)
     setVideoDuration([calculatedDuration])
