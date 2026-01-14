@@ -118,8 +118,15 @@ export default function TransformationVideoPage() {
   
   // Video settings - Default to 8 scenes for more realistic progressive transformation
   const [sceneCount, setSceneCount] = useState(8)
-  const [videoDuration, setVideoDuration] = useState([25]) // Target 15-35 seconds
+  const [videoDuration, setVideoDuration] = useState([24]) // Auto-calculated: scenes × 3 seconds each
   const [format, setFormat] = useState('portrait')
+  
+  // Auto-adjust video duration when scene count changes
+  // Each scene is ~3 seconds of Kling AI video
+  useEffect(() => {
+    const calculatedDuration = sceneCount * 3 // 3 seconds per scene
+    setVideoDuration([calculatedDuration])
+  }, [sceneCount])
   
   // Voice settings - Default to 'none' for pure visual transformation videos
   const [voiceOption, setVoiceOption] = useState('none') // 'tts', 'upload', 'none'
