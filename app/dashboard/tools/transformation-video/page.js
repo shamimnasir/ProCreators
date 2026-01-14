@@ -1136,7 +1136,7 @@ export default function TransformationVideoPage() {
             </CardHeader>
             <CardContent>
               <div className={`relative rounded-xl overflow-hidden bg-black mx-auto ${
-                format === 'portrait' ? 'max-w-sm aspect-[9/16]' : 'max-w-3xl aspect-video'
+                format === 'portrait' ? 'max-w-sm aspect-[9/16]' : format === 'square' ? 'max-w-lg aspect-square' : 'max-w-3xl aspect-video'
               }`}>
                 <video
                   src={videoResult.videoUrl}
