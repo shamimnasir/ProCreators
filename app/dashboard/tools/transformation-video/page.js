@@ -316,6 +316,50 @@ export default function TransformationVideoPage() {
     ))
   }
 
+  // Handle uploading a custom image for a scene
+  const handleSceneImageUpload = async (index, event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Invalid File', description: 'Please upload an image file', variant: 'destructive' })
+      return
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File Too Large', description: 'Please upload an image under 10MB', variant: 'destructive' })
+      return
+    }
+    
+    try {
+      // Convert to base64 data URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const imageUrl = e.target.result
+        setScenes(prev => prev.map((scene, i) => 
+          i === index ? { ...scene, imageUrl } : scene
+        ))
+        toast({ title: 'Image Added!', description: `Scene ${index + 1} image uploaded successfully` })
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' })
+    }
+    
+    // Reset input
+    event.target.value = ''
+  }
+
+  // Remove image from a scene
+  const removeSceneImage = (index) => {
+    setScenes(prev => prev.map((scene, i) => 
+      i === index ? { ...scene, imageUrl: null } : scene
+    ))
+    toast({ title: 'Image Removed', description: `Scene ${index + 1} image removed` })
+  }
+
   // Generate final video
   const generateVideo = async () => {
     // Validation
