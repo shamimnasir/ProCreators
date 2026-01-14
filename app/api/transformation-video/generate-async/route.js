@@ -51,9 +51,9 @@ async function generateImageWithAI(prompt, jobId, index) {
   }
 }
 
-// Generate AI video from image using Replicate
+// Generate AI video from image using Replicate - Kling v2.1 (high quality, realistic motion)
 async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Generating AI video ${index + 1}...`)
+  console.log(`[${jobId}] Generating AI video ${index + 1} with Kling v2.1...`)
   
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
@@ -62,37 +62,42 @@ async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
   }
   
   try {
-    // Use Stable Video Diffusion for image-to-video
-    console.log(`[${jobId}] Using Stable Video Diffusion...`)
+    // Use Kling v2.1 for high-quality image-to-video generation
+    // This model produces realistic motion and natural movement
+    console.log(`[${jobId}] Using Kling v2.1 (standard 720p mode)...`)
     
-    const response = await fetch('https://api.replicate.com/v1/predictions', {
+    // Create a motion-focused prompt from the visual prompt
+    const motionPrompt = `${prompt}, natural movement, smooth motion, cinematic, photorealistic, seamless transformation`
+    
+    const response = await fetch('https://api.replicate.com/v1/models/kwaivgi/kling-v2.1/predictions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${replicateKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        version: '3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438',
         input: {
-          input_image: imageUrl,
-          motion_bucket_id: 127,
-          fps: 7,
-          cond_aug: 0.02
+          mode: 'standard', // 720p, faster and more cost-effective
+          duration: 5, // 5 seconds per clip
+          prompt: motionPrompt,
+          start_image: imageUrl,
+          negative_prompt: 'static, frozen, blurry, low quality, distorted, glitchy, jerky motion'
         }
       })
     })
     
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Replicate API error: ${response.status} - ${errorText}`)
+      throw new Error(`Replicate/Kling API error: ${response.status} - ${errorText}`)
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Video ${index + 1} prediction ID: ${prediction.id}`)
+    console.log(`[${jobId}] Kling video ${index + 1} prediction ID: ${prediction.id}`)
     
-    // Poll until complete (max 5 minutes per video)
+    // Poll until complete (Kling typically takes 2-3 minutes)
     let attempts = 0
-    while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 150) {
+    const maxAttempts = 180 // 6 minutes max per video
+    while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
       await new Promise(r => setTimeout(r, 2000))
       attempts++
       
@@ -102,22 +107,24 @@ async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
       prediction = await statusResponse.json()
       
       if (attempts % 15 === 0) {
-        console.log(`[${jobId}] Video ${index + 1} status: ${prediction.status} (${attempts * 2}s)`)
+        const elapsed = attempts * 2
+        console.log(`[${jobId}] Kling video ${index + 1} status: ${prediction.status} (${elapsed}s)`)
         await updateJobStatus(jobId, {
-          message: `Generating video ${index + 1}... (${Math.floor(attempts * 2 / 60)}m ${(attempts * 2) % 60}s)`
+          message: `🎬 Generating realistic AI video ${index + 1}... (${Math.floor(elapsed / 60)}m ${elapsed % 60}s)`
         })
       }
     }
     
     if (prediction.status === 'succeeded' && prediction.output) {
-      const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
-      console.log(`[${jobId}] ✅ AI Video ${index + 1} generated`)
+      // Kling returns the video URL directly (not in an array)
+      const videoUrl = typeof prediction.output === 'string' ? prediction.output : prediction.output.url || prediction.output
+      console.log(`[${jobId}] ✅ Kling AI Video ${index + 1} generated successfully`)
       return videoUrl
     } else {
-      throw new Error(`Video generation failed: ${prediction.status} - ${prediction.error || 'Unknown error'}`)
+      throw new Error(`Kling video generation failed: ${prediction.status} - ${prediction.error || 'Unknown error'}`)
     }
   } catch (error) {
-    console.error(`[${jobId}] AI video generation failed:`, error.message)
+    console.error(`[${jobId}] Kling AI video generation failed:`, error.message)
     throw error
   }
 }
