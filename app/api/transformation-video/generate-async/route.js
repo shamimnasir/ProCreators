@@ -1,59 +1,76 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir, readFile } from 'fs/promises'
-import { existsSync, createWriteStream } from 'fs'
-import { join } from 'path'
 import { randomUUID } from 'crypto'
+import { writeFile, readFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
+import { join } from 'path'
 import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
-import { getCollection } from '@/lib/mongodb'
 
-// Set ffmpeg path
-ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
-ffmpeg.setFfprobePath('/usr/bin/ffprobe')
-
-export const maxDuration = 60 // Only need 60s to start the job
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
-// Update job status in DB
-async function updateJobStatus(jobId, updates) {
-  try {
-    const jobsCollection = await getCollection('transformation-jobs')
-    await jobsCollection.updateOne(
-      { jobId },
-      { $set: { ...updates, updatedAt: new Date() } }
-    )
-  } catch (error) {
-    console.error(`[${jobId}] Failed to update job status:`, error.message)
-  }
+// MongoDB connection
+async function getCollection(name) {
+  const { MongoClient } = await import('mongodb')
+  const client = new MongoClient(process.env.MONGO_URL)
+  await client.connect()
+  return client.db().collection(name)
 }
 
-// Generate image with Gemini
+// Update job status
+async function updateJobStatus(jobId, updates) {
+  const collection = await getCollection('transformation-jobs')
+  await collection.updateOne(
+    { jobId },
+    { $set: { ...updates, updatedAt: new Date() } }
+  )
+}
+
+// Generate image using Gemini nano-banana
 async function generateImageWithAI(prompt, jobId, index) {
-  console.log(`[${jobId}] Generating image ${index + 1}: ${prompt.substring(0, 50)}...`)
+  console.log(`[${jobId}] Generating image ${index + 1}...`)
+  
+  const apiKey = process.env.GOOGLE_API_KEY
+  if (!apiKey) {
+    throw new Error('Google API key not configured')
+  }
   
   try {
-    const { generateImage } = await import('@/lib/gemini-image')
-    
-    const result = await generateImage(
-      `${prompt}, ultra realistic, cinematic lighting, 8k quality, detailed, photorealistic`,
-      'models/nano-banana-pro-preview'
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: `Generate a photorealistic image: ${prompt}` }]
+          }],
+          generationConfig: { responseModalities: ['image', 'text'] }
+        })
+      }
     )
     
-    if (result.success && result.imageUrl) {
-      console.log(`[${jobId}] ✅ Image ${index + 1} generated`)
-      return result.imageUrl
+    if (!response.ok) {
+      throw new Error(`Image generation failed: ${response.status}`)
     }
     
-    throw new Error(result.error || 'No image URL in response')
+    const data = await response.json()
+    const imagePart = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
+    
+    if (imagePart?.inlineData?.data) {
+      return `data:image/png;base64,${imagePart.inlineData.data}`
+    }
+    
+    throw new Error('No image in response')
   } catch (error) {
-    console.error(`[${jobId}] Image generation failed:`, error.message)
-    return null
+    console.error(`[${jobId}] Image generation error:`, error.message)
+    throw error
   }
 }
 
-// Generate AI video from image using Replicate - Kling v2.1 (high quality, realistic motion)
+// Generate AI video from image using Replicate
 async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Generating AI video ${index + 1} with Kling v2.1...`)
+  console.log(`[${jobId}] Generating AI video ${index + 1}...`)
   
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
@@ -62,12 +79,9 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
   }
   
   try {
-    // Use Kling v2.1 for high-quality image-to-video generation
-    // This model produces realistic motion and natural movement
-    console.log(`[${jobId}] Using Kling v2.1 (standard 720p mode)...`)
+    console.log(`[${jobId}] Using high-quality AI video model...`)
     
-    // Create a motion-focused prompt combining visual and motion descriptions
-    // Focus on construction/transformation motion for realistic building videos
+    // Create a motion-focused prompt
     const fullMotionPrompt = motionPrompt 
       ? `${motionPrompt}. Progressive construction, workers moving, realistic building activity, smooth cinematic motion, time-lapse feel.`
       : `${visualPrompt}, natural movement, workers actively building, construction in progress, smooth cinematic motion, photorealistic, seamless transformation, time-lapse construction feel`
@@ -80,8 +94,8 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
       },
       body: JSON.stringify({
         input: {
-          mode: 'standard', // 720p, faster and more cost-effective
-          duration: 5, // 5 seconds per clip
+          mode: 'standard',
+          duration: 5,
           prompt: fullMotionPrompt,
           start_image: imageUrl,
           negative_prompt: 'static, frozen, blurry, low quality, distorted, glitchy, jerky motion, cartoon, anime, drawing, painting, illustration, unrealistic'
@@ -91,68 +105,64 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
     
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Replicate/Kling API error: ${response.status} - ${errorText}`)
+      throw new Error(`Video API error: ${response.status} - ${errorText}`)
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Kling video ${index + 1} prediction ID: ${prediction.id}`)
+    console.log(`[${jobId}] Video ${index + 1} prediction ID: ${prediction.id}`)
     
-    // Poll until complete (Kling typically takes 2-3 minutes)
-    let attempts = 0
-    const maxAttempts = 180 // 6 minutes max per video
-    while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
-      await new Promise(r => setTimeout(r, 2000))
-      attempts++
+    // Poll until complete
+    const maxWaitTime = 300000 // 5 minutes max
+    const startTime = Date.now()
+    
+    while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
+      if (Date.now() - startTime > maxWaitTime) {
+        throw new Error('Video generation timed out')
+      }
       
-      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      
+      const pollResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
         headers: { 'Authorization': `Bearer ${replicateKey}` }
       })
-      prediction = await statusResponse.json()
+      prediction = await pollResponse.json()
       
-      if (attempts % 15 === 0) {
-        const elapsed = attempts * 2
-        console.log(`[${jobId}] Kling video ${index + 1} status: ${prediction.status} (${elapsed}s)`)
-        await updateJobStatus(jobId, {
-          message: `🎬 Generating realistic AI video ${index + 1}... (${Math.floor(elapsed / 60)}m ${elapsed % 60}s)`
-        })
-      }
+      const elapsed = Math.round((Date.now() - startTime) / 1000)
+      console.log(`[${jobId}] Video ${index + 1} status: ${prediction.status} (${elapsed}s)`)
     }
     
-    if (prediction.status === 'succeeded' && prediction.output) {
-      // Kling returns the video URL directly (not in an array)
-      const videoUrl = typeof prediction.output === 'string' ? prediction.output : prediction.output.url || prediction.output
-      console.log(`[${jobId}] ✅ Kling AI Video ${index + 1} generated successfully`)
+    if (prediction.status === 'succeeded') {
+      const videoUrl = prediction.output
+      console.log(`[${jobId}] ✅ AI Video ${index + 1} generated successfully`)
       return videoUrl
-    } else {
-      throw new Error(`Kling video generation failed: ${prediction.status} - ${prediction.error || 'Unknown error'}`)
     }
+    
+    throw new Error(`Video generation failed: ${prediction.status} - ${prediction.error || 'Unknown error'}`)
   } catch (error) {
-    console.error(`[${jobId}] Kling AI video generation failed:`, error.message)
+    console.error(`[${jobId}] AI video generation failed:`, error.message)
     throw error
   }
 }
 
-// ASS Caption generation
-function generateASSCaptions(script, duration, captionStyle, targetHeight, targetWidth) {
-  const height = parseInt(targetHeight) || 1920
-  const width = parseInt(targetWidth) || 1080
+// Generate ASS captions
+function generateASSCaptions(text, duration, style, height, width) {
+  const words = text.split(/\s+/).filter(Boolean)
+  if (words.length === 0) return ''
   
-  const words = script.trim().split(/\s+/).filter(w => w.length > 0)
-  const totalChars = script.replace(/\s+/g, '').length
+  const totalChars = words.join('').length
   const charsPerSecond = totalChars / duration
   
-  const baseFontSize = height >= 1920 ? 64 : height >= 1440 ? 56 : 48
-  let fontSize = baseFontSize
-  let marginV = height >= 1920 ? 120 : 90
+  let fontName = 'Arial'
+  let fontSize = Math.round(height * 0.05)
   let primaryColor = '&H00FFFFFF'
   let outlineColor = '&H00000000'
   let outline = 4
   let shadow = 2
-  let bold = -1
-  let fontName = 'Siyam Rupali'
+  let bold = 1
+  let marginV = 40
   let alignment = 2
   
-  switch (captionStyle) {
+  switch (style) {
     case 'karaoke': primaryColor = '&H0000FFFF'; outline = 5; break
     case 'neon-glow': outlineColor = '&H00FF00FF'; outline = 10; shadow = 15; break
     case 'minimal-clean': outline = 2; shadow = 1; bold = 0; break
@@ -176,7 +186,7 @@ Style: Default,${fontName},${fontSize},${primaryColor},&H000000FF,${outlineColor
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `
 
-  const wordsPerCaption = captionStyle === 'karaoke' ? 1 : 3
+  const wordsPerCaption = style === 'karaoke' ? 1 : 3
   let currentTime = 0
   
   for (let i = 0; i < words.length; i += wordsPerCaption) {
@@ -225,11 +235,11 @@ async function processTransformationJob(jobId, params) {
     await updateJobStatus(jobId, { status: 'generating-images', progress: 5, message: '🎨 Checking for existing images...' })
     
     const imageUrls = []
-    const updatedScenes = [...scenes] // Track scenes with their image URLs
+    const updatedScenes = [...scenes]
     
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i]
-      let imageUrl = scene.imageUrl // Check if image already exists in draft
+      let imageUrl = scene.imageUrl
       
       if (imageUrl) {
         console.log(`[${jobId}] Scene ${i + 1} already has image, skipping generation`)
@@ -239,14 +249,12 @@ async function processTransformationJob(jobId, params) {
           message: `✅ Using cached image ${i + 1}/${scenes.length}`
         })
       } else {
-        // Generate new image
         await updateJobStatus(jobId, { 
           message: `🎨 Generating image ${i + 1}/${scenes.length}...`
         })
         imageUrl = await generateImageWithAI(scene.visualPrompt, jobId, i)
         if (imageUrl) {
           imageUrls.push({ url: imageUrl, prompt: scene.visualPrompt, scene })
-          // Update scene with image URL for draft saving
           updatedScenes[i] = { ...scene, imageUrl }
         }
         await updateJobStatus(jobId, { 
@@ -256,7 +264,6 @@ async function processTransformationJob(jobId, params) {
       }
     }
     
-    // Save updated scenes with image URLs to job for frontend to retrieve
     await updateJobStatus(jobId, { 
       updatedScenes,
       message: `🎨 All ${imageUrls.length} images ready`
@@ -266,37 +273,53 @@ async function processTransformationJob(jobId, params) {
       throw new Error('Failed to generate enough images')
     }
     
-    // Step 2: Generate AI videos from images using Kling v2.1
-    await updateJobStatus(jobId, { status: 'generating-videos', progress: 25, message: '🎬 Creating realistic AI videos with Kling v2.1 (this takes 2-3 min per clip)...' })
+    // Step 2: Generate AI videos from images IN PARALLEL for speed
+    await updateJobStatus(jobId, { status: 'generating-videos', progress: 25, message: '🎬 Creating AI videos (processing in parallel for speed)...' })
     
+    // Process videos in parallel batches for faster generation
+    const PARALLEL_BATCH_SIZE = 3 // Process 3 videos at a time
     const videoUrls = []
-    for (let i = 0; i < imageUrls.length; i++) {
-      try {
-        // Pass both visualPrompt and motionPrompt for better AI video generation
-        const videoUrl = await generateAIVideo(
-          imageUrls[i].url, 
-          imageUrls[i].prompt, 
-          imageUrls[i].scene?.motionPrompt || '', // Use motionPrompt if available
+    
+    for (let batchStart = 0; batchStart < imageUrls.length; batchStart += PARALLEL_BATCH_SIZE) {
+      const batchEnd = Math.min(batchStart + PARALLEL_BATCH_SIZE, imageUrls.length)
+      const batch = imageUrls.slice(batchStart, batchEnd)
+      
+      await updateJobStatus(jobId, { 
+        message: `🎬 Generating videos ${batchStart + 1}-${batchEnd} of ${imageUrls.length} (parallel batch)...`
+      })
+      
+      // Process batch in parallel
+      const batchPromises = batch.map((img, idx) => {
+        const globalIdx = batchStart + idx
+        return generateAIVideo(
+          img.url, 
+          img.prompt, 
+          img.scene?.motionPrompt || '',
           jobId, 
-          i, 
+          globalIdx, 
           5
-        )
-        videoUrls.push({ url: videoUrl, type: 'ai-video' })
-        await updateJobStatus(jobId, { 
-          progress: 25 + Math.floor((i + 1) / imageUrls.length * 45),
-          message: `🎬 Generated Kling AI video ${i + 1}/${imageUrls.length} ✅`
-        })
-      } catch (videoError) {
-        console.error(`[${jobId}] Kling video ${i + 1} failed, using animated image fallback:`, videoError.message)
-        videoUrls.push({ url: imageUrls[i].url, type: 'image-fallback' })
-        await updateJobStatus(jobId, { 
-          message: `⚠️ Video ${i + 1} fell back to animated image (API issue)`
-        })
-      }
+        ).then(videoUrl => ({ url: videoUrl, type: 'ai-video', index: globalIdx }))
+         .catch(error => {
+           console.error(`[${jobId}] Video ${globalIdx + 1} failed:`, error.message)
+           return { url: img.url, type: 'image-fallback', index: globalIdx }
+         })
+      })
+      
+      const batchResults = await Promise.all(batchPromises)
+      
+      // Sort by index and add to videoUrls
+      batchResults.sort((a, b) => a.index - b.index)
+      videoUrls.push(...batchResults)
+      
+      const successCount = batchResults.filter(r => r.type === 'ai-video').length
+      await updateJobStatus(jobId, { 
+        progress: 25 + Math.floor((batchEnd / imageUrls.length) * 45),
+        message: `🎬 Completed batch: ${successCount}/${batch.length} AI videos ✅`
+      })
     }
     
-    // Step 3: Compile final video
-    await updateJobStatus(jobId, { status: 'compiling', progress: 70, message: '✨ Compiling final video...' })
+    // Step 3: Compile final video with transitions
+    await updateJobStatus(jobId, { status: 'compiling', progress: 70, message: '✨ Compiling final video with transitions...' })
     
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
@@ -308,46 +331,37 @@ async function processTransformationJob(jobId, params) {
       const videoPath = join(tempDir, `clip-${i}.mp4`)
       
       if (video.type === 'ai-video') {
-        // Download AI video
-        const response = await fetch(video.url)
-        if (response.ok) {
-          const fileStream = createWriteStream(videoPath)
-          await pipeline(Readable.fromWeb(response.body), fileStream)
-          videoFiles.push(videoPath)
+        try {
+          const videoResponse = await fetch(video.url)
+          if (videoResponse.ok) {
+            const videoBuffer = Buffer.from(await videoResponse.arrayBuffer())
+            await writeFile(videoPath, videoBuffer)
+            videoFiles.push(videoPath)
+          }
+        } catch (downloadError) {
+          console.error(`[${jobId}] Failed to download video ${i + 1}:`, downloadError.message)
         }
       } else {
-        // Convert image to video with FFmpeg
-        const imagePath = join(tempDir, `image-${i}.jpg`)
-        const response = await fetch(video.url)
-        if (response.ok) {
-          const fileStream = createWriteStream(imagePath)
-          await pipeline(Readable.fromWeb(response.body), fileStream)
-          
-          await new Promise((resolve, reject) => {
-            ffmpeg(imagePath)
-              .loop(5)
-              .inputOptions(['-framerate', '30'])
-              .outputOptions([
-                '-vf', `scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=increase,crop=${dimensions.width}:${dimensions.height}`,
-                '-t', '5',
-                '-c:v', 'libx264',
-                '-preset', 'fast',
-                '-crf', '23',
-                '-pix_fmt', 'yuv420p',
-                '-r', '30'
-              ])
-              .output(videoPath)
-              .on('end', () => { videoFiles.push(videoPath); resolve() })
-              .on('error', reject)
-              .run()
-          })
-        }
+        // Create video from image with Ken Burns effect for fallback
+        const imageData = video.url.split(',')[1]
+        const imagePath = join(tempDir, `image-${i}.png`)
+        await writeFile(imagePath, Buffer.from(imageData, 'base64'))
+        
+        await new Promise((resolve, reject) => {
+          ffmpeg(imagePath)
+            .loop(5)
+            .outputOptions([
+              '-vf', `scale=${dimensions.width * 1.2}:${dimensions.height * 1.2},zoompan=z='min(zoom+0.001,1.2)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=150:s=${dimensions.width}x${dimensions.height}:fps=30`,
+              '-t', '5',
+              '-c:v', 'libx264',
+              '-pix_fmt', 'yuv420p'
+            ])
+            .output(videoPath)
+            .on('end', () => { videoFiles.push(videoPath); resolve() })
+            .on('error', reject)
+            .run()
+        })
       }
-      
-      await updateJobStatus(jobId, { 
-        progress: 70 + Math.floor((i + 1) / videoUrls.length * 10),
-        message: `✨ Processing clip ${i + 1}/${videoUrls.length}`
-      })
     }
     
     // Normalize clips
@@ -377,28 +391,70 @@ async function processTransformationJob(jobId, params) {
       })
     }
     
-    // Concatenate clips
-    await updateJobStatus(jobId, { progress: 85, message: '🎞️ Concatenating clips...' })
+    // Create video with smooth transitions (crossfade/flash effect)
+    await updateJobStatus(jobId, { progress: 85, message: '🎞️ Adding smooth transitions between clips...' })
     
-    const clipListPath = join(tempDir, 'clips.txt')
-    await writeFile(clipListPath, normalizedFiles.map(f => `file '${f}'`).join('\n'))
-    
+    const transitionDuration = 0.5 // 0.5 second transition
     const concatVideoPath = join(tempDir, 'concat.mp4')
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(clipListPath)
-        .inputOptions(['-f', 'concat', '-safe', '0'])
-        .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p'])
-        .output(concatVideoPath)
-        .on('end', resolve)
-        .on('error', reject)
-        .run()
-    })
+    
+    if (normalizedFiles.length >= 2) {
+      // Build complex filter for crossfade transitions
+      let filterComplex = []
+      let currentStream = '[0:v]'
+      
+      // Add fade-in to first clip
+      filterComplex.push(`[0:v]fade=t=in:st=0:d=0.3[v0]`)
+      currentStream = '[v0]'
+      
+      for (let i = 1; i < normalizedFiles.length; i++) {
+        const offset = (i * clipDuration) - (transitionDuration * i)
+        
+        // Add xfade (crossfade) transition between clips
+        // Using 'fade' transition which creates a smooth flash-like effect
+        filterComplex.push(`${currentStream}[${i}:v]xfade=transition=fade:duration=${transitionDuration}:offset=${offset.toFixed(2)}[v${i}]`)
+        currentStream = `[v${i}]`
+      }
+      
+      // Add fade-out to last clip
+      const totalDuration = (normalizedFiles.length * clipDuration) - (transitionDuration * (normalizedFiles.length - 1))
+      filterComplex.push(`${currentStream}fade=t=out:st=${(totalDuration - 0.3).toFixed(2)}:d=0.3[vout]`)
+      
+      await new Promise((resolve, reject) => {
+        const cmd = ffmpeg()
+        
+        // Add all input files
+        normalizedFiles.forEach(file => cmd.input(file))
+        
+        cmd.complexFilter(filterComplex.join(';'), 'vout')
+          .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p'])
+          .output(concatVideoPath)
+          .on('end', resolve)
+          .on('error', (err) => {
+            console.error(`[${jobId}] Transition filter failed, using simple concat:`, err.message)
+            // Fallback to simple concatenation
+            const clipListPath = join(tempDir, 'clips.txt')
+            require('fs').writeFileSync(clipListPath, normalizedFiles.map(f => `file '${f}'`).join('\n'))
+            
+            ffmpeg()
+              .input(clipListPath)
+              .inputOptions(['-f', 'concat', '-safe', '0'])
+              .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p'])
+              .output(concatVideoPath)
+              .on('end', resolve)
+              .on('error', reject)
+              .run()
+          })
+          .run()
+      })
+    } else {
+      // Single clip, just copy
+      require('fs').copyFileSync(normalizedFiles[0], concatVideoPath)
+    }
     
     // Generate TTS if needed
     let narrationText = scenes.map(s => s.narration || '').filter(Boolean).join(' ')
     let audioPath = join(tempDir, 'voice.mp3')
-    let hasAudio = false
+    let hasVoiceAudio = false
     
     if (voiceOption === 'tts' && narrationText.trim()) {
       await updateJobStatus(jobId, { progress: 88, message: '🎙️ Generating voiceover...' })
@@ -430,67 +486,82 @@ async function processTransformationJob(jobId, params) {
         })
         
         await writeFile(audioPath, response.audioContent, 'binary')
-        hasAudio = true
+        hasVoiceAudio = true
       } catch (ttsError) {
         console.error(`[${jobId}] TTS failed:`, ttsError.message)
       }
     }
     
-    // Merge audio
-    const videoWithAudioPath = join(tempDir, 'with-audio.mp4')
-    if (hasAudio) {
+    // Handle audio: voice, music, or both
+    const finalVideoPath = join(tempDir, 'final.mp4')
+    let currentVideoPath = concatVideoPath
+    
+    // Step 1: Add voiceover if available
+    if (hasVoiceAudio) {
       await updateJobStatus(jobId, { progress: 90, message: '🔊 Adding voiceover...' })
+      const videoWithVoicePath = join(tempDir, 'with-voice.mp4')
+      
       await new Promise((resolve, reject) => {
         ffmpeg()
-          .input(concatVideoPath)
+          .input(currentVideoPath)
           .input(audioPath)
           .outputOptions(['-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'])
-          .output(videoWithAudioPath)
+          .output(videoWithVoicePath)
           .on('end', resolve)
           .on('error', reject)
           .run()
       })
-    } else {
-      require('fs').copyFileSync(concatVideoPath, videoWithAudioPath)
+      currentVideoPath = videoWithVoicePath
     }
     
-    // Add background music if provided
-    const videoWithMusicPath = join(tempDir, 'with-music.mp4')
-    let hasBackgroundMusic = false
-    
+    // Step 2: Add background music if provided
     if (backgroundMusic && backgroundMusic.url) {
-      await updateJobStatus(jobId, { progress: 91, message: '🎵 Adding background music...' })
+      await updateJobStatus(jobId, { progress: 92, message: '🎵 Adding background music...' })
+      
       try {
         console.log(`[${jobId}] Downloading background music: ${backgroundMusic.name}`)
         
-        // Download music file
         const musicPath = join(tempDir, 'music.mp3')
         const musicResponse = await fetch(backgroundMusic.url)
+        
         if (musicResponse.ok) {
           const musicBuffer = Buffer.from(await musicResponse.arrayBuffer())
           await writeFile(musicPath, musicBuffer)
+          console.log(`[${jobId}] Music downloaded: ${musicBuffer.length} bytes`)
           
-          // Mix background music with existing audio (voiceover or just video)
+          const videoWithMusicPath = join(tempDir, 'with-music.mp4')
+          
           await new Promise((resolve, reject) => {
             const cmd = ffmpeg()
-              .input(videoWithAudioPath)
+              .input(currentVideoPath)
               .input(musicPath)
             
-            if (hasAudio) {
-              // Mix voiceover (louder) with background music (softer)
+            if (hasVoiceAudio) {
+              // Mix voice (louder) with background music (softer)
               cmd.complexFilter([
                 '[0:a]volume=1.0[voice]',
-                '[1:a]volume=0.25,aloop=loop=-1:size=2e+09[music]',
-                '[voice][music]amix=inputs=2:duration=first:dropout_transition=3[aout]'
+                '[1:a]volume=0.3,aloop=loop=-1:size=2e+09[music]',
+                '[voice][music]amix=inputs=2:duration=first:dropout_transition=2[aout]'
               ])
               .outputOptions(['-c:v', 'copy', '-map', '0:v:0', '-map', '[aout]', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest'])
             } else {
-              // Just background music (no voiceover)
-              cmd.outputOptions(['-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'])
+              // Just background music - video has no audio track yet
+              cmd.outputOptions([
+                '-c:v', 'copy',
+                '-c:a', 'aac', 
+                '-b:a', '192k',
+                '-map', '0:v:0',
+                '-map', '1:a:0',
+                '-shortest',
+                '-movflags', '+faststart'
+              ])
             }
             
             cmd.output(videoWithMusicPath)
-              .on('end', resolve)
+              .on('end', () => {
+                console.log(`[${jobId}] ✅ Background music added successfully`)
+                resolve()
+              })
               .on('error', (err) => {
                 console.error(`[${jobId}] Music merge error:`, err.message)
                 reject(err)
@@ -498,8 +569,9 @@ async function processTransformationJob(jobId, params) {
               .run()
           })
           
-          hasBackgroundMusic = true
-          console.log(`[${jobId}] Background music added successfully`)
+          currentVideoPath = videoWithMusicPath
+        } else {
+          console.error(`[${jobId}] Failed to download music: ${musicResponse.status}`)
         }
       } catch (musicError) {
         console.error(`[${jobId}] Background music failed:`, musicError.message)
@@ -507,15 +579,11 @@ async function processTransformationJob(jobId, params) {
       }
     }
     
-    // Use video with music if available, otherwise use video with audio/no audio
-    const videoBeforeCaptions = hasBackgroundMusic ? videoWithMusicPath : videoWithAudioPath
-    
-    // Add captions
-    const finalVideoPath = join(tempDir, 'final.mp4')
-    const shouldAddCaptions = captionStyle && captionStyle !== 'none' && hasAudio && narrationText
+    // Step 3: Add captions if needed
+    const shouldAddCaptions = captionStyle && captionStyle !== 'none' && hasVoiceAudio && narrationText
     
     if (shouldAddCaptions) {
-      await updateJobStatus(jobId, { progress: 93, message: '📝 Adding captions...' })
+      await updateJobStatus(jobId, { progress: 95, message: '📝 Adding captions...' })
       try {
         const captionContent = generateASSCaptions(narrationText, targetDuration, captionStyle, dimensions.height, dimensions.width)
         const captionsPath = join(tempDir, 'captions.ass')
@@ -524,22 +592,22 @@ async function processTransformationJob(jobId, params) {
         const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
         
         await new Promise((resolve, reject) => {
-          ffmpeg(videoBeforeCaptions)
+          ffmpeg(currentVideoPath)
             .outputOptions(['-vf', `ass='${escapedPath}':fontsdir=/app/fonts`, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'copy', '-movflags', '+faststart'])
             .output(finalVideoPath)
             .on('end', resolve)
-            .on('error', () => { require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath); resolve() })
+            .on('error', () => { require('fs').copyFileSync(currentVideoPath, finalVideoPath); resolve() })
             .run()
         })
       } catch (captionError) {
-        require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath)
+        require('fs').copyFileSync(currentVideoPath, finalVideoPath)
       }
     } else {
-      require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath)
+      require('fs').copyFileSync(currentVideoPath, finalVideoPath)
     }
     
     // Save to public folder
-    await updateJobStatus(jobId, { progress: 96, message: '💾 Saving video...' })
+    await updateJobStatus(jobId, { progress: 97, message: '💾 Saving video...' })
     
     const videoBuffer = await readFile(finalVideoPath)
     const publicDir = '/app/public/transformation-videos'
@@ -553,7 +621,7 @@ async function processTransformationJob(jobId, params) {
     const videoUrl = `/transformation-videos/${jobId}.mp4`
     
     // Save to library
-    await updateJobStatus(jobId, { progress: 98, message: '📚 Saving to library...' })
+    await updateJobStatus(jobId, { progress: 99, message: '📚 Saving to library...' })
     
     try {
       const libraryCollection = await getCollection('library')
@@ -562,10 +630,7 @@ async function processTransformationJob(jobId, params) {
       
       await libraryCollection.insertOne({
         id: randomUUID(),
-        userId: 'default-user',
-        content: topic || '',
-        videoUrl,
-        filePath: videoUrl,
+        url: videoUrl,
         fileSize: videoBuffer.length,
         type: 'transformation-video',
         category: 'video',
@@ -696,8 +761,8 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       jobId,
-      message: 'Video generation started with Kling v2.1 AI. Poll /api/transformation-video/status?jobId=' + jobId + ' for updates.',
-      estimatedTime: `${Math.ceil(scenes.length * 3)} minutes (using Kling v2.1 for realistic AI videos)`
+      message: 'Video generation started. Poll /api/transformation-video/status?jobId=' + jobId + ' for updates.',
+      estimatedTime: `${Math.ceil(scenes.length * 2)} minutes (processing ${scenes.length} scenes in parallel)`
     })
     
   } catch (error) {
