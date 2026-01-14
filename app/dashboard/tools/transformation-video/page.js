@@ -984,8 +984,8 @@ export default function TransformationVideoPage() {
                             {idx + 1}
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-semibold">{scene.title || `Scene ${idx + 1}`}</h4>
-                            <p className="text-xs text-muted-foreground">{scene.transition || 'Hard Cut'}</p>
+                            <h4 className="font-semibold">{scene.title || `Construction Stage ${idx + 1}`}</h4>
+                            <p className="text-xs text-muted-foreground">5 seconds • Kling AI Motion</p>
                           </div>
                           {scene.imageUrl && (
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -1005,18 +1005,30 @@ export default function TransformationVideoPage() {
                           </div>
                         )}
                         
-                        <Textarea
-                          value={scene.visualPrompt || ''}
-                          onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
-                          rows={2}
-                          className="text-sm"
-                          placeholder="Describe the visual for this scene..."
-                        />
-                        {scene.narration && (
-                          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
-                            <span className="font-medium">🎙️ Narration:</span> {scene.narration}
+                        <div className="space-y-2">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Visual Description (for image generation)</Label>
+                            <Textarea
+                              value={scene.visualPrompt || ''}
+                              onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
+                              rows={2}
+                              className="text-sm mt-1"
+                              placeholder="Describe the visual for this scene..."
+                            />
                           </div>
-                        )}
+                          
+                          {/* Motion Prompt for video generation */}
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Motion Description (for AI video - workers, activity)</Label>
+                            <Textarea
+                              value={scene.motionPrompt || ''}
+                              onChange={(e) => updateScenePrompt(idx, 'motionPrompt', e.target.value)}
+                              rows={2}
+                              className="text-sm mt-1"
+                              placeholder="Describe the movement: workers walking, cranes operating, materials being lifted..."
+                            />
+                          </div>
+                        </div>
                       </div>
                     ))}
                     
