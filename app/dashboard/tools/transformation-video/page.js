@@ -1247,7 +1247,7 @@ export default function TransformationVideoPage() {
               getCurrentData={getCurrentData}
               loadDraftData={loadDraftData}
               onStartNew={handleStartNew}
-              dependencies={[topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, currentStep]}
+              dependencies={[topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, backgroundMusic, currentStep]}
               autoSaveEnabled={true}
               debounceMs={2000}
               minStepForAutoSave={1}
