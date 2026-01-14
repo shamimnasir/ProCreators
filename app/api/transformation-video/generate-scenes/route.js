@@ -168,32 +168,56 @@ export async function POST(request) {
   }
 }
 
-// Fallback scene generator
+// Fallback scene generator for Progressive Construction videos
 function generateFallbackScenes(topic, sceneCount, language) {
   const count = parseInt(sceneCount) || 4
   const scenes = []
   
-  const transitions = ['Hard Cut', 'Timelapse Morph', 'Match Cut', 'Dissolve', 'Zoom Transition']
-  const durations = [4, 5, 6, 5, 6, 4]
+  // Construction stages with realistic progression
+  const stages = [
+    {
+      title: 'Site Preparation',
+      suffix: 'empty land being surveyed, workers marking ground with stakes, small teams arriving with basic tools and equipment, surveyors with measuring instruments',
+      motion: 'workers walking across the terrain, surveyors moving equipment, dust rising from ground disturbance'
+    },
+    {
+      title: 'Foundation Work',
+      suffix: 'foundation being laid, workers digging and placing stones/concrete, scaffolding being erected, building materials stacked around site, teams of laborers at work',
+      motion: 'workers lifting and placing materials, people walking between supply areas and construction zone, shadows moving across the site'
+    },
+    {
+      title: 'Structure Rising',
+      suffix: 'walls and frame rising up, scaffolding covering the structure, workers on multiple levels, cranes or pulleys lifting materials, progressive construction visible',
+      motion: 'construction equipment operating, workers climbing scaffolding, materials being hoisted upward, activity across the entire site'
+    },
+    {
+      title: 'Detailed Construction',
+      suffix: 'detailed features being added, more refined work, artisans and craftsmen at work, structure becoming recognizable, surrounding infrastructure developing',
+      motion: 'skilled workers adding details, people moving around the nearly complete structure, finishing touches being applied'
+    },
+    {
+      title: 'Final Completion',
+      suffix: 'completed magnificent structure, workers doing final touches, visitors and pilgrims arriving, fully operational and populated, surrounding city/area developed',
+      motion: 'people walking around completed structure, final construction elements being placed, celebratory atmosphere, normal activity resuming'
+    },
+    {
+      title: 'Modern Day Glory',
+      suffix: 'modern fully developed state, massive crowds or modern infrastructure, nighttime illumination, aerial view showing full scale and surrounding development',
+      motion: 'thousands of people moving like waves, modern vehicles, city lights twinkling, dramatic time-lapse effect'
+    }
+  ]
   
   for (let i = 0; i < count; i++) {
+    const stageIndex = Math.floor(i / count * stages.length)
+    const stage = stages[Math.min(stageIndex, stages.length - 1)]
     const isFirst = i === 0
     const isLast = i === count - 1
     
     scenes.push({
-      title: isFirst ? 'The Beginning' : isLast ? 'The Transformation Complete' : `Stage ${i + 1}`,
-      visualPrompt: isFirst 
-        ? `Opening shot of ${topic}. Establish the original state. Cinematic wide shot, dramatic lighting, atmospheric fog, early morning golden hour light.`
-        : isLast
-        ? `Final reveal of transformed ${topic}. Triumphant wide shot, brilliant lighting, modern and magnificent, aerial view pulling back to reveal full scale.`
-        : `${topic} in transition stage ${i}. Show progressive change, medium shot with dramatic lighting, time passing effect, atmospheric particles.`,
-      narration: isFirst 
-        ? (language === 'bn' ? 'এখানেই সব শুরু হয়েছিল...' : language === 'hi' ? 'यहीं से सब शुरू हुआ...' : 'This is where it all began...')
-        : isLast
-        ? (language === 'bn' ? 'এবং এখন, রূপান্তর সম্পূর্ণ।' : language === 'hi' ? 'और अब, परिवर्तन पूर्ण है।' : 'And now, the transformation is complete.')
-        : (language === 'bn' ? 'সময়ের সাথে পরিবর্তন আসে...' : language === 'hi' ? 'समय के साथ बदलाव आता है...' : 'Change comes with time...'),
-      transition: transitions[i % transitions.length],
-      duration: durations[i % durations.length]
+      title: stage.title,
+      visualPrompt: `Aerial bird's-eye view of ${topic}. ${isFirst ? 'Beginning stage:' : isLast ? 'Final completed stage:' : `Construction stage ${i + 1}:`} ${stage.suffix}. Ultra-realistic, cinematic golden hour lighting, photorealistic 8K quality, drone perspective looking down at the construction site, atmospheric dust particles in air, dramatic shadows.`,
+      motionPrompt: `${stage.motion}, natural environmental movement like wind effects and shifting light`,
+      duration: 5
     })
   }
   
