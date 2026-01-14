@@ -2783,10 +2783,15 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     throw new Error('Replicate API key not configured. Please add REPLICATE_API_TOKEN to environment variables.')
   }
   
-  // Get format dimensions
-  const dimensions = format === 'portrait' 
-    ? { width: 576, height: 1024 }
-    : { width: 1024, height: 576 }
+  // Get format dimensions - supports portrait (9:16), landscape (16:9), square (1:1)
+  let dimensions
+  if (format === 'portrait') {
+    dimensions = { width: 576, height: 1024 }
+  } else if (format === 'square') {
+    dimensions = { width: 768, height: 768 }
+  } else {
+    dimensions = { width: 1024, height: 576 }
+  }
   
   let videoUrl
   
