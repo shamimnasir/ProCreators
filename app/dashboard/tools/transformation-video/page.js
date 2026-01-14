@@ -1186,13 +1186,30 @@ export default function TransformationVideoPage() {
               {imageSource === 'ai' ? (
                 scenes.length > 0 ? (
                   <div className="space-y-4">
+                    {/* Image generation progress bar */}
+                    {generatingImages && (
+                      <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                          <span className="font-medium">Generating preview images...</span>
+                          <span className="ml-auto text-sm text-muted-foreground">{imageGenerationProgress}%</span>
+                        </div>
+                        <Progress value={imageGenerationProgress} className="h-2" />
+                      </div>
+                    )}
+                    
                     {scenes.map((scene, idx) => (
                       <div key={idx} className="p-4 rounded-lg border bg-muted/30">
                         <div className="flex items-start gap-4">
                           {/* Scene Image - Left side with better proportions */}
                           <div className="flex-shrink-0 w-48">
                             <div className="relative rounded-lg overflow-hidden border-2 border-muted bg-black/5 aspect-[9/16]">
-                              {scene.imageUrl ? (
+                              {scene.generating ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4 bg-gradient-to-b from-violet-500/10 to-purple-500/10">
+                                  <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+                                  <span className="text-xs text-center">Generating...</span>
+                                </div>
+                              ) : scene.imageUrl ? (
                                 <>
                                   <img 
                                     src={scene.imageUrl} 
@@ -1200,13 +1217,13 @@ export default function TransformationVideoPage() {
                                     className="w-full h-full object-cover"
                                   />
                                   <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
-                                    <span>✅</span> Cached
+                                    <span>✅</span> Ready
                                   </div>
                                 </>
                               ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4">
                                   <ImageIcon className="h-10 w-10 mb-2 opacity-50" />
-                                  <span className="text-xs text-center">Will be generated</span>
+                                  <span className="text-xs text-center">Click to generate</span>
                                 </div>
                               )}
                               
@@ -1216,36 +1233,74 @@ export default function TransformationVideoPage() {
                               </div>
                             </div>
                             
-                            {/* Upload/Replace button */}
-                            <div className="mt-2">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                id={`scene-image-${idx}`}
-                                onChange={(e) => handleSceneImageUpload(idx, e)}
-                              />
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full text-xs"
-                                onClick={() => document.getElementById(`scene-image-${idx}`).click()}
-                              >
-                                {scene.imageUrl ? (
-                                  <><RefreshCw className="h-3 w-3 mr-1" /> Replace Image</>
-                                ) : (
-                                  <><Upload className="h-3 w-3 mr-1" /> Upload Image</>
-                                )}
-                              </Button>
-                              {scene.imageUrl && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full text-xs mt-1 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                  onClick={() => removeSceneImage(idx)}
-                                >
-                                  <X className="h-3 w-3 mr-1" /> Remove
-                                </Button>
+                            {/* Action buttons */}
+                            <div className="mt-2 space-y-1">
+                              {scene.imageUrl ? (
+                                <>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    id={`scene-image-${idx}`}
+                                    onChange={(e) => handleSceneImageUpload(idx, e)}
+                                  />
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full text-xs"
+                                    onClick={() => document.getElementById(`scene-image-${idx}`).click()}
+                                  >
+                                    <Upload className="h-3 w-3 mr-1" /> Replace
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full text-xs"
+                                    onClick={() => regenerateSceneImage(idx)}
+                                    disabled={scene.generating}
+                                  >
+                                    <RefreshCw className="h-3 w-3 mr-1" /> Regenerate
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => removeSceneImage(idx)}
+                                  >
+                                    <X className="h-3 w-3 mr-1" /> Remove
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="w-full text-xs"
+                                    onClick={() => regenerateSceneImage(idx)}
+                                    disabled={scene.generating || generatingImages}
+                                  >
+                                    {scene.generating ? (
+                                      <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Generating...</>
+                                    ) : (
+                                      <><Wand2 className="h-3 w-3 mr-1" /> Generate Image</>
+                                    )}
+                                  </Button>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    id={`scene-image-${idx}`}
+                                    onChange={(e) => handleSceneImageUpload(idx, e)}
+                                  />
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full text-xs"
+                                    onClick={() => document.getElementById(`scene-image-${idx}`).click()}
+                                  >
+                                    <Upload className="h-3 w-3 mr-1" /> Upload Custom
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </div>
@@ -1282,6 +1337,18 @@ export default function TransformationVideoPage() {
                         </div>
                       </div>
                     ))}
+                    
+                    {/* Generate all missing images button */}
+                    {scenes.some(s => !s.imageUrl) && !generatingImages && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => generateSceneImages(scenes)}
+                      >
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Generate All Missing Images ({scenes.filter(s => !s.imageUrl).length} remaining)
+                      </Button>
+                    )}
                     
                     {/* Show summary of cached images */}
                     {scenes.some(s => s.imageUrl) && (
