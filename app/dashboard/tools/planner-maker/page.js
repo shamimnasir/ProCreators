@@ -255,7 +255,7 @@ export default function PlannerMakerPage() {
             getCurrentData={getCurrentData}
             loadDraftData={loadDraftData}
             onStartNew={handleStartNew}
-            dependencies={[plannerName, plannerType, paperSize, totalPages, sectionsConfig, startDate, mode]}
+            dependencies={[plannerType, colorScheme, coverStyle, paperSize, pageCount, customTitle, authorName, year, mode]}
             autoSaveEnabled={true}
             debounceMs={2000}
             minStepForAutoSave={1}
