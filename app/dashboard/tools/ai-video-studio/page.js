@@ -838,8 +838,8 @@ export default function AIVideoStudioPage() {
           {duration}s
         </Badge>
         <Badge variant="outline" className="gap-1">
-          {format === 'portrait' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-          {format === 'portrait' ? '9:16' : '16:9'}
+          {format === 'portrait' ? <Smartphone className="h-3 w-3" /> : format === 'square' ? <span className="text-xs">⬜</span> : <Monitor className="h-3 w-3" />}
+          {format === 'portrait' ? '9:16' : format === 'square' ? '1:1' : '16:9'}
         </Badge>
       </div>
 
