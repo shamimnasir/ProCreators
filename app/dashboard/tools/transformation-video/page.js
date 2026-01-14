@@ -500,7 +500,21 @@ export default function TransformationVideoPage() {
     if (data.ttsLanguage !== undefined) setTtsLanguage(data.ttsLanguage)
     if (data.selectedVoice !== undefined) setSelectedVoice(data.selectedVoice)
     if (data.captionStyle !== undefined) setCaptionStyle(data.captionStyle)
-    if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
+    
+    // Determine the correct step to show based on loaded data
+    // If we have scenes, show step 2 (scene review) instead of step 3 (which requires videoResult)
+    // This ensures users can resume from where they left off
+    if (data.scenes && Array.isArray(data.scenes) && data.scenes.length > 0) {
+      // We have scenes, go to step 2 so user can review and generate
+      setCurrentStep(2)
+    } else if (data.topic && data.selectedTheme) {
+      // We have topic but no scenes yet, stay on step 1
+      setCurrentStep(1)
+    } else if (data.currentStep !== undefined && data.currentStep <= 2) {
+      setCurrentStep(data.currentStep)
+    } else {
+      setCurrentStep(1)
+    }
   }, [])
 
   const handleStartNew = useCallback(() => {
