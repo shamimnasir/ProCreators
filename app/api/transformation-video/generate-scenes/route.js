@@ -201,54 +201,92 @@ export async function POST(request) {
 
 // Fallback scene generator for Progressive Construction videos
 function generateFallbackScenes(topic, sceneCount, language) {
-  const count = parseInt(sceneCount) || 4
+  const count = parseInt(sceneCount) || 8
   const scenes = []
   
-  // Construction stages with realistic progression
+  // Extended construction stages for 8-10+ scenes - more detailed progression
   const stages = [
     {
-      title: 'Site Preparation',
-      suffix: 'empty land being surveyed, workers marking ground with stakes, small teams arriving with basic tools and equipment, surveyors with measuring instruments',
-      motion: 'workers walking across the terrain, surveyors moving equipment, dust rising from ground disturbance'
+      title: 'Site Survey & Planning',
+      suffix: 'empty land being surveyed, engineers with blueprints and surveying equipment, ground markers being placed, small camp being set up in the distance',
+      motion: 'surveyors walking with equipment, flags being planted, workers pointing and planning, dust blowing across empty ground'
+    },
+    {
+      title: 'Ground Breaking',
+      suffix: 'excavation beginning, workers digging first trenches with picks and shovels, wheelbarrows carrying dirt away, foundation outline visible in the earth',
+      motion: 'workers swinging tools, dirt being thrown, wheelbarrows rolling, supervisors watching and directing'
     },
     {
       title: 'Foundation Work',
-      suffix: 'foundation being laid, workers digging and placing stones/concrete, scaffolding being erected, building materials stacked around site, teams of laborers at work',
-      motion: 'workers lifting and placing materials, people walking between supply areas and construction zone, shadows moving across the site'
+      suffix: 'deep foundation trenches visible, workers laying first stones or pouring concrete, reinforcement materials being positioned, foundation taking shape',
+      motion: 'workers placing stones carefully, concrete being poured, people walking along trenches, materials being lowered down'
     },
     {
-      title: 'Structure Rising',
-      suffix: 'walls and frame rising up, scaffolding covering the structure, workers on multiple levels, cranes or pulleys lifting materials, progressive construction visible',
-      motion: 'construction equipment operating, workers climbing scaffolding, materials being hoisted upward, activity across the entire site'
+      title: 'Base Structure Rising',
+      suffix: 'first walls and columns rising from foundation, basic scaffolding being erected around the structure, building materials stacked nearby, work crews busy',
+      motion: 'scaffolding being assembled, workers climbing ladders, blocks being lifted and placed, shadows lengthening'
     },
     {
-      title: 'Detailed Construction',
-      suffix: 'detailed features being added, more refined work, artisans and craftsmen at work, structure becoming recognizable, surrounding infrastructure developing',
-      motion: 'skilled workers adding details, people moving around the nearly complete structure, finishing touches being applied'
+      title: 'Walls Taking Shape',
+      suffix: 'walls reaching waist height, multiple work crews on different sections, scaffolding surrounding the structure, clear outline of the building visible',
+      motion: 'masons laying bricks/stones, mortar being applied, workers moving materials along scaffolding, dust particles in sunlight'
     },
     {
-      title: 'Final Completion',
-      suffix: 'completed magnificent structure, workers doing final touches, visitors and pilgrims arriving, fully operational and populated, surrounding city/area developed',
-      motion: 'people walking around completed structure, final construction elements being placed, celebratory atmosphere, normal activity resuming'
+      title: 'Main Structure Rising',
+      suffix: 'structure now at significant height, extensive scaffolding network, workers on multiple levels, cranes or pulleys lifting heavy materials, recognizable form emerging',
+      motion: 'crane arms rotating, heavy loads being hoisted, workers on high scaffolds, construction activity across all levels'
     },
     {
-      title: 'Modern Day Glory',
-      suffix: 'modern fully developed state, massive crowds or modern infrastructure, nighttime illumination, aerial view showing full scale and surrounding development',
-      motion: 'thousands of people moving like waves, modern vehicles, city lights twinkling, dramatic time-lapse effect'
+      title: 'Reaching Full Height',
+      suffix: 'structure approaching final height, top sections being built, workers at great heights, detailed features starting to appear, surrounding infrastructure developing',
+      motion: 'workers placing final height materials, people looking up at progress, scaffolding crews adjusting supports, birds flying around structure'
+    },
+    {
+      title: 'Exterior Finishing',
+      suffix: 'exterior surfaces being finished, decorative elements being added, some scaffolding being removed, structure clearly recognizable, artisans adding details',
+      motion: 'skilled craftsmen working on details, scaffolding sections being lowered, finishing materials being applied, cleanup crews working'
+    },
+    {
+      title: 'Final Touches',
+      suffix: 'nearly complete structure with workers doing final details, most scaffolding removed, landscaping beginning around the site, first visitors appearing',
+      motion: 'final detail work, gardeners planting, visitors walking and admiring, ceremonial preparations'
+    },
+    {
+      title: 'Grand Completion',
+      suffix: 'magnificent completed structure in full glory, crowds gathering, maintenance workers present, fully operational, stunning aerial view of the finished masterpiece',
+      motion: 'crowds moving like waves, celebration activity, normal operations beginning, dramatic lighting effects'
+    },
+    {
+      title: 'Modern Era Splendor',
+      suffix: 'modern day view with full surrounding development, thousands of visitors, modern infrastructure, nighttime illumination showing the structure in its full contemporary glory',
+      motion: 'massive crowds flowing, modern vehicles moving, city lights twinkling, time-lapse of day to night'
     }
   ]
   
+  // Distribute stages evenly across requested scene count
   for (let i = 0; i < count; i++) {
-    const stageIndex = Math.floor(i / count * stages.length)
-    const stage = stages[Math.min(stageIndex, stages.length - 1)]
+    // Map scene index to stage index proportionally
+    const stageIndex = Math.min(
+      Math.floor((i / count) * stages.length),
+      stages.length - 1
+    )
+    const stage = stages[stageIndex]
     const isFirst = i === 0
     const isLast = i === count - 1
+    const sceneNum = i + 1
+    
+    // Create a unique description for each scene
+    const progressPercent = Math.round((i / (count - 1)) * 100)
     
     scenes.push({
-      title: stage.title,
-      visualPrompt: `Aerial bird's-eye view of ${topic}. ${isFirst ? 'Beginning stage:' : isLast ? 'Final completed stage:' : `Construction stage ${i + 1}:`} ${stage.suffix}. Ultra-realistic, cinematic golden hour lighting, photorealistic 8K quality, drone perspective looking down at the construction site, atmospheric dust particles in air, dramatic shadows.`,
-      motionPrompt: `${stage.motion}, natural environmental movement like wind effects and shifting light`,
-      duration: 5
+      title: isLast ? 'Magnificent Completion' : isFirst ? 'The Beginning' : stage.title,
+      visualPrompt: `Aerial bird's-eye view of ${topic}. ${
+        isFirst ? 'Day 1 - Site preparation beginning:' : 
+        isLast ? 'Final completed masterpiece:' : 
+        `Construction progress ${progressPercent}% - ${stage.title}:`
+      } ${stage.suffix}. Ultra-realistic, cinematic golden hour lighting, photorealistic 8K quality, drone perspective looking down at the construction site, 50+ workers visible as small figures, atmospheric dust particles in warm sunlight, dramatic long shadows, epic scale.`,
+      motionPrompt: `${stage.motion}, natural environmental movement, dust particles floating in golden light, shadows slowly shifting across the scene, birds flying overhead`,
+      duration: 3
     })
   }
   
