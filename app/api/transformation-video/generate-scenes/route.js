@@ -26,7 +26,7 @@ Return a JSON array with exactly {sceneCount} scene objects. Each scene MUST hav
   "title": "Stage title (e.g., 'Foundation Work', 'Frame Construction', 'Final Completion')",
   "visualPrompt": "EXTREMELY DETAILED visual description showing ACTIVE CONSTRUCTION IN PROGRESS. Include specific details about: workers in period-appropriate clothing performing tasks, construction equipment/tools being used, materials (stone, wood, bricks, steel, concrete), scaffolding/supports, weather/lighting, aerial bird's-eye view angle. Make it look like a realistic construction time-lapse moment.",
   "motionPrompt": "Describe the MOVEMENT in this scene: workers moving, cranes operating, materials being lifted, people walking, dust/particles moving, shadows shifting. This will be used to generate realistic video motion.",
-  "duration": 3
+  "duration": 5
 }
 
 ## CRITICAL CONSTRUCTION SCENE REQUIREMENTS
