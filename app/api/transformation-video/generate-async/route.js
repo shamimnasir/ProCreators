@@ -574,6 +574,18 @@ export async function POST(request) {
     const selectedVoice = formData.get('selectedVoice') || ''
     const captionStyle = formData.get('captionStyle') || 'bold-outline'
     
+    // Parse background music if provided
+    let backgroundMusic = null
+    const backgroundMusicJson = formData.get('backgroundMusic')
+    if (backgroundMusicJson) {
+      try {
+        backgroundMusic = JSON.parse(backgroundMusicJson)
+        console.log(`[${jobId}] Background music selected: ${backgroundMusic.name}`)
+      } catch (e) {
+        console.log(`[${jobId}] Could not parse background music`)
+      }
+    }
+    
     // Support portrait (9:16), landscape (16:9), and square (1:1)
     let dimensions
     if (format === 'portrait') {
