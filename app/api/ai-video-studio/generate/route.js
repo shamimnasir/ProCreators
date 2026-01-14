@@ -1483,10 +1483,15 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   
   const baseUrl = PROVIDERS.shotstack.baseUrl
   
-  // Get format dimensions
-  const dimensions = format === 'portrait' 
-    ? { width: 1080, height: 1920 }
-    : { width: 1920, height: 1080 }
+  // Get format dimensions - supports portrait (9:16), landscape (16:9), square (1:1)
+  let dimensions
+  if (format === 'portrait') {
+    dimensions = { width: 1080, height: 1920 }
+  } else if (format === 'square') {
+    dimensions = { width: 1080, height: 1080 }
+  } else {
+    dimensions = { width: 1920, height: 1080 }
+  }
   
   // Build the edit JSON based on mode and video source
   let editJson
