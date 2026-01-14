@@ -298,7 +298,10 @@ export default function TransformationVideoPage() {
       if (data.success && data.scenes) {
         setScenes(data.scenes)
         setCurrentStep(2)
-        toast({ title: 'Scenes Generated!', description: `${data.scenes.length} transformation scenes created` })
+        toast({ title: 'Scenes Generated!', description: `${data.scenes.length} scenes created. Now generating preview images...` })
+        
+        // Auto-generate images for all scenes
+        generateSceneImages(data.scenes)
       } else {
         throw new Error(data.error || 'Failed to generate scenes')
       }
@@ -306,6 +309,98 @@ export default function TransformationVideoPage() {
       toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
     } finally {
       setGeneratingScenes(false)
+    }
+  }
+
+  // Auto-generate images for scenes
+  const [generatingImages, setGeneratingImages] = useState(false)
+  const [imageGenerationProgress, setImageGenerationProgress] = useState(0)
+  
+  const generateSceneImages = async (scenesToProcess) => {
+    const scenesWithoutImages = scenesToProcess.filter(s => !s.imageUrl)
+    if (scenesWithoutImages.length === 0) return
+    
+    setGeneratingImages(true)
+    setImageGenerationProgress(0)
+    
+    try {
+      // Generate images one by one to show progress
+      for (let i = 0; i < scenesToProcess.length; i++) {
+        if (scenesToProcess[i].imageUrl) {
+          // Already has image, skip
+          setImageGenerationProgress(Math.round(((i + 1) / scenesToProcess.length) * 100))
+          continue
+        }
+        
+        try {
+          const response = await fetch('/api/generate/image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: scenesToProcess[i].visualPrompt,
+              style: 'photorealistic'
+            })
+          })
+          
+          const data = await response.json()
+          
+          if (data.success && data.imageUrl) {
+            // Update the scene with the generated image
+            setScenes(prev => prev.map((scene, idx) => 
+              idx === i ? { ...scene, imageUrl: data.imageUrl } : scene
+            ))
+          }
+        } catch (imgError) {
+          console.error(`Failed to generate image for scene ${i + 1}:`, imgError)
+        }
+        
+        setImageGenerationProgress(Math.round(((i + 1) / scenesToProcess.length) * 100))
+      }
+      
+      toast({ title: 'Images Generated!', description: 'All scene preview images are ready' })
+    } catch (error) {
+      console.error('Image generation error:', error)
+      toast({ title: 'Some Images Failed', description: 'You can manually upload images for any missing scenes', variant: 'destructive' })
+    } finally {
+      setGeneratingImages(false)
+      setImageGenerationProgress(0)
+    }
+  }
+
+  // Regenerate a single scene image
+  const regenerateSceneImage = async (index) => {
+    const scene = scenes[index]
+    if (!scene?.visualPrompt) return
+    
+    setScenes(prev => prev.map((s, i) => 
+      i === index ? { ...s, imageUrl: null, generating: true } : s
+    ))
+    
+    try {
+      const response = await fetch('/api/generate/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: scene.visualPrompt,
+          style: 'photorealistic'
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success && data.imageUrl) {
+        setScenes(prev => prev.map((s, i) => 
+          i === index ? { ...s, imageUrl: data.imageUrl, generating: false } : s
+        ))
+        toast({ title: 'Image Regenerated!', description: `Scene ${index + 1} image updated` })
+      } else {
+        throw new Error(data.error || 'Failed to generate image')
+      }
+    } catch (error) {
+      setScenes(prev => prev.map((s, i) => 
+        i === index ? { ...s, generating: false } : s
+      ))
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
     }
   }
 
