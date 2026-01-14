@@ -508,19 +508,43 @@ async function processTransformationJob(jobId, params) {
     }
     
     // Step 2: Add background music if provided
-    if (backgroundMusic && backgroundMusic.url) {
+    if (backgroundMusic && (backgroundMusic.url || backgroundMusic.path)) {
       await updateJobStatus(jobId, { progress: 92, message: '🎵 Adding background music...' })
       
       try {
+        // Support both 'url' and 'path' properties for backward compatibility
+        const musicUrl = backgroundMusic.url || backgroundMusic.path
         console.log(`[${jobId}] Downloading background music: ${backgroundMusic.name}`)
+        console.log(`[${jobId}] Music URL: ${musicUrl}`)
         
         const musicPath = join(tempDir, 'music.mp3')
-        const musicResponse = await fetch(backgroundMusic.url)
         
-        if (musicResponse.ok) {
-          const musicBuffer = Buffer.from(await musicResponse.arrayBuffer())
+        // Check if it's a local path or URL
+        let musicBuffer
+        if (musicUrl.startsWith('/')) {
+          // Local file path - read directly
+          const localPath = join('/app/public', musicUrl)
+          console.log(`[${jobId}] Reading local music file: ${localPath}`)
+          if (existsSync(localPath)) {
+            musicBuffer = await readFile(localPath)
+            console.log(`[${jobId}] Local music file read: ${musicBuffer.length} bytes`)
+          } else {
+            throw new Error(`Local music file not found: ${localPath}`)
+          }
+        } else {
+          // Remote URL - fetch it
+          const musicResponse = await fetch(musicUrl)
+          if (musicResponse.ok) {
+            musicBuffer = Buffer.from(await musicResponse.arrayBuffer())
+            console.log(`[${jobId}] Remote music downloaded: ${musicBuffer.length} bytes`)
+          } else {
+            throw new Error(`Failed to download music: ${musicResponse.status}`)
+          }
+        }
+        
+        if (musicBuffer && musicBuffer.length > 0) {
           await writeFile(musicPath, musicBuffer)
-          console.log(`[${jobId}] Music downloaded: ${musicBuffer.length} bytes`)
+          console.log(`[${jobId}] Music saved to: ${musicPath}`)
           
           const videoWithMusicPath = join(tempDir, 'with-music.mp4')
           
@@ -531,6 +555,7 @@ async function processTransformationJob(jobId, params) {
             
             if (hasVoiceAudio) {
               // Mix voice (louder) with background music (softer)
+              console.log(`[${jobId}] Mixing voice + music...`)
               cmd.complexFilter([
                 '[0:a]volume=1.0[voice]',
                 '[1:a]volume=0.3,aloop=loop=-1:size=2e+09[music]',
@@ -539,6 +564,7 @@ async function processTransformationJob(jobId, params) {
               .outputOptions(['-c:v', 'copy', '-map', '0:v:0', '-map', '[aout]', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest'])
             } else {
               // Just background music - video has no audio track yet
+              console.log(`[${jobId}] Adding music only (no voice)...`)
               cmd.outputOptions([
                 '-c:v', 'copy',
                 '-c:a', 'aac', 
@@ -563,8 +589,6 @@ async function processTransformationJob(jobId, params) {
           })
           
           currentVideoPath = videoWithMusicPath
-        } else {
-          console.error(`[${jobId}] Failed to download music: ${musicResponse.status}`)
         }
       } catch (musicError) {
         console.error(`[${jobId}] Background music failed:`, musicError.message)
