@@ -29,6 +29,7 @@ export async function GET(request) {
       error: job.error || null,
       duration: job.duration || null,
       clipCount: job.clipCount || null,
+      updatedScenes: job.updatedScenes || null, // Scenes with image URLs
       createdAt: job.createdAt,
       updatedAt: job.updatedAt
     })
