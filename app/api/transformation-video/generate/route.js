@@ -161,8 +161,21 @@ async function generateImageWithAI(prompt, jobId, index) {
 }
 
 // ==================== VIDEO GENERATION ====================
-async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Generating AI video ${index + 1} from image: ${prompt.substring(0, 50)}...`)
+async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration = 5, useAiVideo = false) {
+  console.log(`[${jobId}] Processing video ${index + 1} from image...`)
+  
+  // For faster generation and better reliability, use FFmpeg by default
+  // AI video generation can take 2-3 minutes per clip which causes timeouts
+  if (!useAiVideo) {
+    console.log(`[${jobId}] Using FFmpeg for fast video generation`)
+    return {
+      url: imageUrl,
+      prompt: prompt,
+      duration: duration,
+      type: 'image-ffmpeg',
+      index: index
+    }
+  }
   
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
@@ -172,7 +185,7 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
       url: imageUrl,
       prompt: prompt,
       duration: duration,
-      type: 'image-fallback',
+      type: 'image-ffmpeg',
       index: index
     }
   }
