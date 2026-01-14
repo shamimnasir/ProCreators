@@ -1167,7 +1167,7 @@ export default function TransformationVideoPage() {
                   <p className="text-muted-foreground">Scenes</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold">{format === 'portrait' ? '9:16' : '16:9'}</p>
+                  <p className="font-bold">{format === 'portrait' ? '9:16' : format === 'square' ? '1:1' : '16:9'}</p>
                   <p className="text-muted-foreground">Format</p>
                 </div>
                 <div className="flex items-center gap-1 text-green-600">
