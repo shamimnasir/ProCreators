@@ -356,6 +356,11 @@ export default function TransformationVideoPage() {
         formData.append('voiceFile', voiceFile)
       }
       
+      // Add background music if selected
+      if (backgroundMusic) {
+        formData.append('backgroundMusic', JSON.stringify(backgroundMusic))
+      }
+      
       // Start async job
       const startResponse = await fetch('/api/transformation-video/generate-async', {
         method: 'POST',
