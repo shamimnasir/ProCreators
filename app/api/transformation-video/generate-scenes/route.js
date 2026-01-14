@@ -90,13 +90,6 @@ Scene 8: "Modern massive complex with millions of pilgrims, aerial view of illum
 NOW generate exactly {sceneCount} scenes for: "{topic}"
 Return ONLY the JSON array with all required fields. No other text.`
 
-Scene 3 (Construction Progress):
-- visualPrompt: "Aerial view of partially built pyramid, approximately 30% complete. Massive stone blocks being hauled up wooden ramps by teams of 50+ workers pulling ropes. Scaffolding and wooden support structures around the base. Workers on different levels positioning stones. Camps and workshops surrounding the construction site. Desert sun creating sharp shadows. Thousands of workers like ants on the structure. Ultra-realistic architectural construction scene."
-- motionPrompt: "Teams of workers slowly pulling stone blocks up ramps, workers on scaffolding positioning stones, people moving between camps and construction site, dust swirling around active work areas."
-
-NOW generate exactly {sceneCount} scenes for: "{topic}"
-Return ONLY the JSON array with all required fields. No other text.`
-
 export async function POST(request) {
   try {
     const { topic, theme, sceneCount } = await request.json()
