@@ -67,20 +67,19 @@ Return ONLY the JSON array with all required fields. No other text.`
 
 export async function POST(request) {
   try {
-    const { topic, theme, sceneCount, language } = await request.json()
+    const { topic, theme, sceneCount } = await request.json()
     
     if (!topic) {
       return NextResponse.json({ success: false, error: 'Topic is required' }, { status: 400 })
     }
     
-    console.log(`[Transformation] Generating ${sceneCount} scenes for: ${topic.substring(0, 50)}...`)
+    console.log(`[Transformation] Generating ${sceneCount} progressive construction scenes for: ${topic.substring(0, 50)}...`)
     
-    // Build the prompt
+    // Build the prompt for progressive construction transformation
     const prompt = SCENE_GENERATION_PROMPT
       .replace(/{topic}/g, topic)
       .replace(/{theme}/g, theme || 'custom')
       .replace(/{sceneCount}/g, sceneCount || 4)
-      .replace(/{language}/g, language === 'bn' ? 'Bengali' : language === 'hi' ? 'Hindi' : language === 'es' ? 'Spanish' : language === 'ar' ? 'Arabic' : 'English')
     
     // Call LLM using the existing Python script
     const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
