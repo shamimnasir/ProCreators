@@ -1072,9 +1072,16 @@ export default function TransformationVideoPage() {
           {generating && (
             <Card>
               <CardContent className="py-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  <div className="text-center mb-2">
+                    <Badge variant="secondary" className="mb-2">Powered by Kling v2.1 AI</Badge>
+                    <p className="text-xs text-muted-foreground">Generating realistic AI motion videos</p>
+                  </div>
                   <Progress value={progress} className="h-3" />
                   <p className="text-center text-sm text-muted-foreground">{progressMessage}</p>
+                  <p className="text-center text-xs text-muted-foreground">
+                    ⏱️ Each video clip takes ~2-3 minutes to generate with realistic motion
+                  </p>
                 </div>
               </CardContent>
             </Card>
