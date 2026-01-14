@@ -1170,7 +1170,7 @@ export default function TransformationVideoPage() {
               <CardContent className="py-6">
                 <div className="space-y-4">
                   <div className="text-center mb-4">
-                    <Badge variant="secondary" className="mb-2 px-3 py-1">🎬 Powered by Kling v2.1 AI</Badge>
+                    <Badge variant="secondary" className="mb-2 px-3 py-1">🎬 AI Video Generation</Badge>
                     <p className="text-sm font-medium mt-2">Creating Realistic AI Motion Videos</p>
                   </div>
                   
