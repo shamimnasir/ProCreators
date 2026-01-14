@@ -272,11 +272,14 @@ async function processTransformationJob(jobId, params) {
         videoUrls.push({ url: videoUrl, type: 'ai-video' })
         await updateJobStatus(jobId, { 
           progress: 25 + Math.floor((i + 1) / imageUrls.length * 45),
-          message: `🎬 Generated video ${i + 1}/${imageUrls.length}`
+          message: `🎬 Generated Kling AI video ${i + 1}/${imageUrls.length} ✅`
         })
       } catch (videoError) {
-        console.error(`[${jobId}] Video ${i + 1} failed, using image fallback`)
+        console.error(`[${jobId}] Kling video ${i + 1} failed, using animated image fallback:`, videoError.message)
         videoUrls.push({ url: imageUrls[i].url, type: 'image-fallback' })
+        await updateJobStatus(jobId, { 
+          message: `⚠️ Video ${i + 1} fell back to animated image (API issue)`
+        })
       }
     }
     
