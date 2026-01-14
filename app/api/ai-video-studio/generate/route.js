@@ -1042,9 +1042,15 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   console.log(`[${jobId}] Generating ${scenes.length} AI scenes...`)
   
   // Get format dimensions for AI generation
-  const dimensions = format === 'portrait' 
-    ? { width: 576, height: 1024 }
-    : { width: 1024, height: 576 }
+  // Support portrait (9:16), landscape (16:9), and square (1:1)
+  let dimensions
+  if (format === 'portrait') {
+    dimensions = { width: 576, height: 1024 }
+  } else if (format === 'square') {
+    dimensions = { width: 768, height: 768 }
+  } else {
+    dimensions = { width: 1024, height: 576 }
+  }
   
   // Generate scenes in parallel (up to 2 at a time to avoid rate limits)
   for (let i = 0; i < scenes.length; i++) {
