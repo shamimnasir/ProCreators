@@ -693,16 +693,20 @@ export default function TransformationVideoPage() {
                 </div>
                 
                 <div>
-                  <Label className="text-sm">Target Duration</Label>
-                  <div className="pt-2">
-                    <Slider
-                      value={videoDuration}
-                      onValueChange={setVideoDuration}
-                      min={15}
-                      max={35}
-                      step={5}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">{videoDuration[0]} seconds</p>
+                  <Label className="text-sm flex items-center gap-2">
+                    Video Duration
+                    <Badge variant="secondary" className="text-xs font-normal">Auto-calculated</Badge>
+                  </Label>
+                  <div className="pt-2 p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-primary">{videoDuration[0]}s</span>
+                      <span className="text-xs text-muted-foreground">
+                        {sceneCount} scenes × 3s each
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Duration is automatically calculated based on the number of scenes. Each Kling AI video clip is 3 seconds.
+                    </p>
                   </div>
                 </div>
                 
