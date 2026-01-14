@@ -439,7 +439,7 @@ async function processTransformationJob(jobId, params) {
     // Merge audio
     const videoWithAudioPath = join(tempDir, 'with-audio.mp4')
     if (hasAudio) {
-      await updateJobStatus(jobId, { progress: 90, message: '🔊 Adding audio...' })
+      await updateJobStatus(jobId, { progress: 90, message: '🔊 Adding voiceover...' })
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(concatVideoPath)
@@ -453,6 +453,62 @@ async function processTransformationJob(jobId, params) {
     } else {
       require('fs').copyFileSync(concatVideoPath, videoWithAudioPath)
     }
+    
+    // Add background music if provided
+    const videoWithMusicPath = join(tempDir, 'with-music.mp4')
+    let hasBackgroundMusic = false
+    
+    if (backgroundMusic && backgroundMusic.url) {
+      await updateJobStatus(jobId, { progress: 91, message: '🎵 Adding background music...' })
+      try {
+        console.log(`[${jobId}] Downloading background music: ${backgroundMusic.name}`)
+        
+        // Download music file
+        const musicPath = join(tempDir, 'music.mp3')
+        const musicResponse = await fetch(backgroundMusic.url)
+        if (musicResponse.ok) {
+          const musicBuffer = Buffer.from(await musicResponse.arrayBuffer())
+          await writeFile(musicPath, musicBuffer)
+          
+          // Mix background music with existing audio (voiceover or just video)
+          await new Promise((resolve, reject) => {
+            const cmd = ffmpeg()
+              .input(videoWithAudioPath)
+              .input(musicPath)
+            
+            if (hasAudio) {
+              // Mix voiceover (louder) with background music (softer)
+              cmd.complexFilter([
+                '[0:a]volume=1.0[voice]',
+                '[1:a]volume=0.25,aloop=loop=-1:size=2e+09[music]',
+                '[voice][music]amix=inputs=2:duration=first:dropout_transition=3[aout]'
+              ])
+              .outputOptions(['-c:v', 'copy', '-map', '0:v:0', '-map', '[aout]', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest'])
+            } else {
+              // Just background music (no voiceover)
+              cmd.outputOptions(['-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'])
+            }
+            
+            cmd.output(videoWithMusicPath)
+              .on('end', resolve)
+              .on('error', (err) => {
+                console.error(`[${jobId}] Music merge error:`, err.message)
+                reject(err)
+              })
+              .run()
+          })
+          
+          hasBackgroundMusic = true
+          console.log(`[${jobId}] Background music added successfully`)
+        }
+      } catch (musicError) {
+        console.error(`[${jobId}] Background music failed:`, musicError.message)
+        // Continue without music
+      }
+    }
+    
+    // Use video with music if available, otherwise use video with audio/no audio
+    const videoBeforeCaptions = hasBackgroundMusic ? videoWithMusicPath : videoWithAudioPath
     
     // Add captions
     const finalVideoPath = join(tempDir, 'final.mp4')
@@ -468,18 +524,18 @@ async function processTransformationJob(jobId, params) {
         const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
         
         await new Promise((resolve, reject) => {
-          ffmpeg(videoWithAudioPath)
+          ffmpeg(videoBeforeCaptions)
             .outputOptions(['-vf', `ass='${escapedPath}':fontsdir=/app/fonts`, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'copy', '-movflags', '+faststart'])
             .output(finalVideoPath)
             .on('end', resolve)
-            .on('error', () => { require('fs').copyFileSync(videoWithAudioPath, finalVideoPath); resolve() })
+            .on('error', () => { require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath); resolve() })
             .run()
         })
       } catch (captionError) {
-        require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
+        require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath)
       }
     } else {
-      require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
+      require('fs').copyFileSync(videoBeforeCaptions, finalVideoPath)
     }
     
     // Save to public folder
