@@ -755,8 +755,8 @@ export default function AIVideoStudioPage() {
                     {template.defaultSettings.duration}s
                   </span>
                   <span className="flex items-center gap-1">
-                    {template.defaultSettings.format === 'portrait' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-                    {template.defaultSettings.format === 'portrait' ? '9:16' : '16:9'}
+                    {template.defaultSettings.format === 'portrait' ? <Smartphone className="h-3 w-3" /> : template.defaultSettings.format === 'square' ? <span className="text-xs">⬜</span> : <Monitor className="h-3 w-3" />}
+                    {template.defaultSettings.format === 'portrait' ? '9:16' : template.defaultSettings.format === 'square' ? '1:1' : '16:9'}
                   </span>
                 </div>
               </CardContent>
