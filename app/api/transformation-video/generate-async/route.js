@@ -210,21 +210,46 @@ async function processTransformationJob(jobId, params) {
     
     await mkdir(tempDir, { recursive: true })
     
-    // Step 1: Generate images
-    await updateJobStatus(jobId, { status: 'generating-images', progress: 5, message: '🎨 Generating transformation images...' })
+    // Step 1: Generate images (or use existing ones from draft)
+    await updateJobStatus(jobId, { status: 'generating-images', progress: 5, message: '🎨 Checking for existing images...' })
     
     const imageUrls = []
+    const updatedScenes = [...scenes] // Track scenes with their image URLs
+    
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i]
-      const imageUrl = await generateImageWithAI(scene.visualPrompt, jobId, i)
+      let imageUrl = scene.imageUrl // Check if image already exists in draft
+      
       if (imageUrl) {
+        console.log(`[${jobId}] Scene ${i + 1} already has image, skipping generation`)
         imageUrls.push({ url: imageUrl, prompt: scene.visualPrompt, scene })
+        await updateJobStatus(jobId, { 
+          progress: 5 + Math.floor((i + 1) / scenes.length * 20),
+          message: `✅ Using cached image ${i + 1}/${scenes.length}`
+        })
+      } else {
+        // Generate new image
+        await updateJobStatus(jobId, { 
+          message: `🎨 Generating image ${i + 1}/${scenes.length}...`
+        })
+        imageUrl = await generateImageWithAI(scene.visualPrompt, jobId, i)
+        if (imageUrl) {
+          imageUrls.push({ url: imageUrl, prompt: scene.visualPrompt, scene })
+          // Update scene with image URL for draft saving
+          updatedScenes[i] = { ...scene, imageUrl }
+        }
+        await updateJobStatus(jobId, { 
+          progress: 5 + Math.floor((i + 1) / scenes.length * 20),
+          message: `🎨 Generated image ${i + 1}/${scenes.length}`
+        })
       }
-      await updateJobStatus(jobId, { 
-        progress: 5 + Math.floor((i + 1) / scenes.length * 20),
-        message: `🎨 Generated image ${i + 1}/${scenes.length}`
-      })
     }
+    
+    // Save updated scenes with image URLs to job for frontend to retrieve
+    await updateJobStatus(jobId, { 
+      updatedScenes,
+      message: `🎨 All ${imageUrls.length} images ready`
+    })
     
     if (imageUrls.length < 2) {
       throw new Error('Failed to generate enough images')
