@@ -940,33 +940,44 @@ export default function TransformationVideoPage() {
             </CardHeader>
             <CardContent>
               {imageSource === 'ai' ? (
-                <div className="space-y-4">
-                  {scenes.map((scene, idx) => (
-                    <div key={idx} className="p-4 rounded-lg border bg-muted/30">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
-                          {idx + 1}
+                scenes.length > 0 ? (
+                  <div className="space-y-4">
+                    {scenes.map((scene, idx) => (
+                      <div key={idx} className="p-4 rounded-lg border bg-muted/30">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
+                            {idx + 1}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{scene.title || `Scene ${idx + 1}`}</h4>
+                            <p className="text-xs text-muted-foreground">{scene.transition || 'Hard Cut'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-semibold">{scene.title || `Scene ${idx + 1}`}</h4>
-                          <p className="text-xs text-muted-foreground">{scene.transition || 'Hard Cut'}</p>
-                        </div>
+                        <Textarea
+                          value={scene.visualPrompt || ''}
+                          onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
+                          rows={3}
+                          className="text-sm"
+                          placeholder="Describe the visual for this scene..."
+                        />
+                        {scene.narration && (
+                          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
+                            <span className="font-medium">🎙️ Narration:</span> {scene.narration}
+                          </div>
+                        )}
                       </div>
-                      <Textarea
-                        value={scene.visualPrompt}
-                        onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
-                        rows={3}
-                        className="text-sm"
-                        placeholder="Describe the visual for this scene..."
-                      />
-                      {scene.narration && (
-                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
-                          <span className="font-medium">🎙️ Narration:</span> {scene.narration}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Wand2 className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="font-semibold text-lg mb-2">No Scenes Generated Yet</h3>
+                    <p className="text-muted-foreground mb-4">Go back to Step 1 and click "Generate Scenes with AI" to create transformation scenes.</p>
+                    <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Back to Step 1
+                    </Button>
+                  </div>
+                )
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                   {uploadedImages.map((img, idx) => (
