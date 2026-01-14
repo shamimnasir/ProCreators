@@ -631,7 +631,8 @@ export async function POST(request) {
       ttsLanguage,
       selectedVoice,
       captionStyle,
-      topic
+      topic,
+      backgroundMusic
     }).catch(err => console.error(`[${jobId}] Background job error:`, err))
     
     // Return immediately with job ID
