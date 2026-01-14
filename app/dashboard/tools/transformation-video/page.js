@@ -627,12 +627,12 @@ export default function TransformationVideoPage() {
           {/* Topic Input */}
           <Card>
             <CardHeader>
-              <CardTitle>Describe Your Transformation</CardTitle>
-              <CardDescription>Be specific about what transforms and how</CardDescription>
+              <CardTitle>Describe Your Construction/Transformation</CardTitle>
+              <CardDescription>Describe what you want to see being built - from ground up to completion</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Example: Show the evolution of the Holy Kaaba & Mecca from its earliest known stage to the modern era. Include ancient builders, early pilgrimage, classical Islamic era, and modern Mecca..."
+                placeholder="Example: Show the construction of the Holy Kaaba and Mecca from ancient times to modern day. Start with the empty desert and early builders laying the first stones. Show workers constructing the initial structure, then the city growing around it through different eras. End with the magnificent modern Masjid al-Haram surrounded by the developed city of Mecca with millions of pilgrims..."
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 rows={4}
