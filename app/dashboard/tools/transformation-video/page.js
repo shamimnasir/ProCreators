@@ -969,15 +969,32 @@ export default function TransformationVideoPage() {
                           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
                             {idx + 1}
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <h4 className="font-semibold">{scene.title || `Scene ${idx + 1}`}</h4>
                             <p className="text-xs text-muted-foreground">{scene.transition || 'Hard Cut'}</p>
                           </div>
+                          {scene.imageUrl && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              ✅ Image Cached
+                            </Badge>
+                          )}
                         </div>
+                        
+                        {/* Show cached image preview if available */}
+                        {scene.imageUrl && (
+                          <div className="mb-3 rounded-lg overflow-hidden border bg-black/5">
+                            <img 
+                              src={scene.imageUrl} 
+                              alt={`Scene ${idx + 1} preview`}
+                              className="w-full h-32 object-cover"
+                            />
+                          </div>
+                        )}
+                        
                         <Textarea
                           value={scene.visualPrompt || ''}
                           onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
-                          rows={3}
+                          rows={2}
                           className="text-sm"
                           placeholder="Describe the visual for this scene..."
                         />
@@ -988,6 +1005,19 @@ export default function TransformationVideoPage() {
                         )}
                       </div>
                     ))}
+                    
+                    {/* Show summary of cached images */}
+                    {scenes.some(s => s.imageUrl) && (
+                      <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+                        <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+                          <span>✅</span>
+                          <span>
+                            {scenes.filter(s => s.imageUrl).length} of {scenes.length} images cached - 
+                            these won't need to be regenerated!
+                          </span>
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
