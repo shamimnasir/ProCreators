@@ -320,7 +320,7 @@ export default function TransformationVideoPage() {
     
     setGenerating(true)
     setProgress(0)
-    setProgressMessage('🚀 Starting transformation video creation...')
+    setProgressMessage('🚀 Starting AI video generation...')
     setVideoResult(null)
     
     try {
@@ -351,83 +351,81 @@ export default function TransformationVideoPage() {
         formData.append('voiceFile', voiceFile)
       }
       
-      // Progress simulation
-      const progressSteps = [
-        { at: 5, msg: imageSource === 'ai' ? '🎨 Generating transformation images...' : '📸 Processing uploaded images...' },
-        { at: 25, msg: '🎬 Creating video clips for each scene...' },
-        { at: 50, msg: '✨ Applying cinematic transitions...' },
-        { at: 70, msg: voiceOption !== 'none' ? '🎙️ Adding voiceover...' : '🔧 Processing video...' },
-        { at: 85, msg: captionStyle !== 'none' ? '📝 Adding captions...' : '💾 Finalizing...' },
-        { at: 95, msg: '💾 Saving to library...' }
-      ]
-      
-      let currentProgress = 0
-      const progressInterval = setInterval(() => {
-        currentProgress += 0.5
-        if (currentProgress < 95) {
-          setProgress(Math.min(currentProgress, 95))
-          const currentStep = progressSteps.filter(s => currentProgress >= s.at).pop()
-          if (currentStep) {
-            setProgressMessage(currentStep.msg)
-          }
-        }
-      }, 1000)
-      
-      const response = await fetch('/api/transformation-video/generate', {
+      // Start async job
+      const startResponse = await fetch('/api/transformation-video/generate-async', {
         method: 'POST',
         body: formData
       })
       
-      clearInterval(progressInterval)
+      if (!startResponse.ok) {
+        const errorData = await startResponse.json()
+        throw new Error(errorData.error || 'Failed to start video generation')
+      }
       
-      // Check if response is OK
-      if (!response.ok) {
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || `Server error: ${response.status}`)
-        } else {
-          // Server returned HTML or text (timeout, gateway error)
-          throw new Error('Video generation timed out. Please try with fewer scenes or shorter duration.')
+      const { jobId, estimatedTime } = await startResponse.json()
+      console.log(`Job started: ${jobId}, estimated time: ${estimatedTime}`)
+      
+      setProgressMessage(`🎬 AI video generation started (est. ${estimatedTime})...`)
+      
+      // Poll for status
+      let pollCount = 0
+      const maxPolls = 600 // 10 minutes max (1 poll per second)
+      
+      while (pollCount < maxPolls) {
+        await new Promise(resolve => setTimeout(resolve, 2000)) // Poll every 2 seconds
+        pollCount++
+        
+        try {
+          const statusResponse = await fetch(`/api/transformation-video/status?jobId=${jobId}`)
+          const status = await statusResponse.json()
+          
+          if (status.error && statusResponse.status === 404) {
+            throw new Error('Job not found')
+          }
+          
+          setProgress(status.progress || 0)
+          setProgressMessage(status.message || 'Processing...')
+          
+          if (status.status === 'complete') {
+            setProgress(100)
+            setProgressMessage('✅ AI Video Complete!')
+            setVideoResult({
+              videoUrl: status.videoUrl,
+              duration: status.duration,
+              clipCount: status.clipCount
+            })
+            setCurrentStep(3)
+            
+            toast({ 
+              title: '🎬 AI Transformation Video Created!', 
+              description: `${Math.round(status.duration || videoDuration[0])}s cinematic AI video ready`
+            })
+            break
+          }
+          
+          if (status.status === 'failed') {
+            throw new Error(status.error || 'Video generation failed')
+          }
+          
+        } catch (pollError) {
+          if (pollError.message === 'Job not found') {
+            throw pollError
+          }
+          console.warn('Poll error:', pollError.message)
+          // Continue polling on network errors
         }
       }
       
-      const data = await response.json()
+      if (pollCount >= maxPolls) {
+        throw new Error('Video generation timed out. Please try again.')
+      }
       
-      if (data.success) {
-        setProgress(100)
-        setProgressMessage('✅ Complete!')
-        setVideoResult(data)
-        setCurrentStep(3)
-        
-        // Auto-save to user library
-        const libraryResult = await saveToLibrary({
-          type: 'transformation-video',
-          category: 'video',
-          title: topic ? `Transformation: ${topic.substring(0, 50)}...` : `${selectedTheme?.name || 'AI'} Transformation Video`,
-          description: topic?.substring(0, 200) || '',
-          videoUrl: data.videoUrl,
-          filePath: data.videoUrl,
-          fileSize: data.fileSize || null,
-          metadata: {
-            duration: data.duration || videoDuration[0],
-            format,
-            theme: selectedTheme?.id || 'custom',
-            themeName: selectedTheme?.name || 'Custom',
-            clipCount: data.clipCount || scenes.length || uploadedImages.length,
-            imageSource,
-            voiceOption,
-            captionStyle
-          }
-        })
-        
-        const actualDuration = Math.round(data.duration || videoDuration[0])
-        if (libraryResult.success) {
-          toast({ 
-            title: '🎬 Transformation Video Created & Saved!', 
-            description: `${actualDuration}s cinematic video saved to your library`
-          })
-        } else {
+    } catch (error) {
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setGenerating(false)
+    }
+  }
           toast({ 
             title: '🎬 Transformation Video Created!', 
             description: `${actualDuration}s cinematic video ready`
