@@ -215,7 +215,8 @@ async function processTransformationJob(jobId, params) {
       ttsLanguage,
       selectedVoice,
       captionStyle,
-      topic
+      topic,
+      backgroundMusic
     } = params
     
     await mkdir(tempDir, { recursive: true })
