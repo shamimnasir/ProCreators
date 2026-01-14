@@ -1253,12 +1253,13 @@ export default function TransformationVideoPage() {
       {/* Music Picker Modal */}
       {showMusicPicker && (
         <MusicPicker
-          isOpen={showMusicPicker}
+          open={showMusicPicker}
           onClose={() => setShowMusicPicker(false)}
-          onSelect={(music) => {
+          onSelectMusic={(music) => {
             setBackgroundMusic(music)
             setShowMusicPicker(false)
           }}
+          videoDuration={videoDuration[0]}
         />
       )}
     </div>
