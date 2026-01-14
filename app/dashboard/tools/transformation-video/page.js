@@ -663,10 +663,11 @@ export default function TransformationVideoPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="3">3 Scenes</SelectItem>
-                      <SelectItem value="4">4 Scenes</SelectItem>
-                      <SelectItem value="5">5 Scenes</SelectItem>
+                      <SelectItem value="4">4 Scenes (Quick)</SelectItem>
                       <SelectItem value="6">6 Scenes</SelectItem>
+                      <SelectItem value="8">8 Scenes (Recommended)</SelectItem>
+                      <SelectItem value="10">10 Scenes (Detailed)</SelectItem>
+                      <SelectItem value="12">12 Scenes (Ultra-Detailed)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
