@@ -1055,7 +1055,7 @@ export default function TransformationVideoPage() {
                           </div>
                           <div className="flex-1">
                             <h4 className="font-semibold">{scene.title || `Construction Stage ${idx + 1}`}</h4>
-                            <p className="text-xs text-muted-foreground">5 seconds • Kling AI Motion</p>
+                            <p className="text-xs text-muted-foreground">5 seconds • AI Motion</p>
                           </div>
                           {scene.imageUrl && (
                             <Badge variant="secondary" className="bg-green-100 text-green-700">
