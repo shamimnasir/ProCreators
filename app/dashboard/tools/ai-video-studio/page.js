@@ -1271,7 +1271,7 @@ export default function AIVideoStudioPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className={`relative rounded-lg overflow-hidden bg-black ${
-                  format === 'portrait' ? 'aspect-[9/16]' : 'aspect-video'
+                  format === 'portrait' ? 'aspect-[9/16]' : format === 'square' ? 'aspect-square' : 'aspect-video'
                 }`}>
                   <video
                     src={videoResult.videoUrl}
