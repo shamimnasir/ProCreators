@@ -131,6 +131,10 @@ export default function TransformationVideoPage() {
   const [voiceFile, setVoiceFile] = useState(null)
   const [captionStyle, setCaptionStyle] = useState('none') // Default to no captions for pure visual transformation
   
+  // Background music
+  const [backgroundMusic, setBackgroundMusic] = useState(null)
+  const [showMusicPicker, setShowMusicPicker] = useState(false)
+  
   // Recording
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
