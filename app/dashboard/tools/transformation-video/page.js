@@ -1212,7 +1212,7 @@ export default function TransformationVideoPage() {
                   <div className="text-center p-3 rounded bg-muted/30 border border-dashed">
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium">⏱️ Why does it take time?</span><br/>
-                      Kling AI creates realistic motion by analyzing each scene and generating fluid movement frame-by-frame. 
+                      AI creates realistic motion by analyzing each scene and generating fluid movement frame-by-frame. 
                       More scenes = smoother transformation = better quality!
                     </p>
                   </div>
