@@ -926,6 +926,51 @@ export default function TransformationVideoPage() {
             </CardContent>
           </Card>
 
+          {/* Background Music - NEW */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Music className="h-5 w-5" />
+                Background Music
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {backgroundMusic ? (
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Music className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{backgroundMusic.name}</p>
+                    <p className="text-xs text-muted-foreground">Selected track</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setBackgroundMusic(null)}
+                    title="Remove music"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center p-6 border-2 border-dashed rounded-lg">
+                  <Music className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
+                  <p className="text-sm font-medium mb-1">No Music Selected</p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Add epic background music to enhance your transformation video
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowMusicPicker(true)}
+                  >
+                    🎵 Browse Music Library
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Next Step Button */}
           <div className="flex justify-end gap-4">
             {/* Show different button based on whether scenes already exist */}
