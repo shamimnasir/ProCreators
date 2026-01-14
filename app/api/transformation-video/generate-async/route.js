@@ -262,8 +262,8 @@ async function processTransformationJob(jobId, params) {
       throw new Error('Failed to generate enough images')
     }
     
-    // Step 2: Generate AI videos from images
-    await updateJobStatus(jobId, { status: 'generating-videos', progress: 25, message: '🎬 Creating AI videos (this takes a few minutes)...' })
+    // Step 2: Generate AI videos from images using Kling v2.1
+    await updateJobStatus(jobId, { status: 'generating-videos', progress: 25, message: '🎬 Creating realistic AI videos with Kling v2.1 (this takes 2-3 min per clip)...' })
     
     const videoUrls = []
     for (let i = 0; i < imageUrls.length; i++) {
