@@ -1157,7 +1157,7 @@ export default function TransformationVideoPage() {
               className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
             >
               {generating ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Creating AI Video with Kling...</>
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Creating AI Video...</>
               ) : (
                 <><Film className="mr-2 h-5 w-5" /> Generate Realistic AI Video</>
               )}
