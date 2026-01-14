@@ -1091,9 +1091,9 @@ export default function TransformationVideoPage() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <span className="text-2xl">🎬</span>
-                    Your Transformation Video
+                    Your AI Transformation Video
                   </CardTitle>
-                  <CardDescription>Your cinematic transformation video is ready!</CardDescription>
+                  <CardDescription>Your realistic AI-powered transformation video (Kling v2.1) is ready!</CardDescription>
                 </div>
                 <Button variant="outline" onClick={resetAll}>
                   <Plus className="mr-2 h-4 w-4" /> Create New
