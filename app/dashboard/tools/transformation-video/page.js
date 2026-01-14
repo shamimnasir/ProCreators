@@ -1049,54 +1049,96 @@ export default function TransformationVideoPage() {
                   <div className="space-y-4">
                     {scenes.map((scene, idx) => (
                       <div key={idx} className="p-4 rounded-lg border bg-muted/30">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm">
-                            {idx + 1}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{scene.title || `Construction Stage ${idx + 1}`}</h4>
-                            <p className="text-xs text-muted-foreground">5 seconds • AI Motion</p>
-                          </div>
-                          {scene.imageUrl && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-700">
-                              ✅ Image Cached
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {/* Show cached image preview if available */}
-                        {scene.imageUrl && (
-                          <div className="mb-3 rounded-lg overflow-hidden border bg-black/5">
-                            <img 
-                              src={scene.imageUrl} 
-                              alt={`Scene ${idx + 1} preview`}
-                              className="w-full h-32 object-cover"
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="space-y-2">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Visual Description (for image generation)</Label>
-                            <Textarea
-                              value={scene.visualPrompt || ''}
-                              onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
-                              rows={2}
-                              className="text-sm mt-1"
-                              placeholder="Describe the visual for this scene..."
-                            />
+                        <div className="flex items-start gap-4">
+                          {/* Scene Image - Left side with better proportions */}
+                          <div className="flex-shrink-0 w-48">
+                            <div className="relative rounded-lg overflow-hidden border-2 border-muted bg-black/5 aspect-[9/16]">
+                              {scene.imageUrl ? (
+                                <>
+                                  <img 
+                                    src={scene.imageUrl} 
+                                    alt={`Scene ${idx + 1} preview`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                                    <span>✅</span> Cached
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4">
+                                  <ImageIcon className="h-10 w-10 mb-2 opacity-50" />
+                                  <span className="text-xs text-center">Will be generated</span>
+                                </div>
+                              )}
+                              
+                              {/* Scene number badge */}
+                              <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-lg">
+                                {idx + 1}
+                              </div>
+                            </div>
+                            
+                            {/* Upload/Replace button */}
+                            <div className="mt-2">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                id={`scene-image-${idx}`}
+                                onChange={(e) => handleSceneImageUpload(idx, e)}
+                              />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs"
+                                onClick={() => document.getElementById(`scene-image-${idx}`).click()}
+                              >
+                                {scene.imageUrl ? (
+                                  <><RefreshCw className="h-3 w-3 mr-1" /> Replace Image</>
+                                ) : (
+                                  <><Upload className="h-3 w-3 mr-1" /> Upload Image</>
+                                )}
+                              </Button>
+                              {scene.imageUrl && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full text-xs mt-1 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                  onClick={() => removeSceneImage(idx)}
+                                >
+                                  <X className="h-3 w-3 mr-1" /> Remove
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           
-                          {/* Motion Prompt for video generation */}
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Motion Description (for AI video - workers, activity)</Label>
-                            <Textarea
-                              value={scene.motionPrompt || ''}
-                              onChange={(e) => updateScenePrompt(idx, 'motionPrompt', e.target.value)}
-                              rows={2}
-                              className="text-sm mt-1"
-                              placeholder="Describe the movement: workers walking, cranes operating, materials being lifted..."
-                            />
+                          {/* Scene Details - Right side */}
+                          <div className="flex-1 space-y-3">
+                            <div>
+                              <h4 className="font-semibold text-lg">{scene.title || `Construction Stage ${idx + 1}`}</h4>
+                              <p className="text-xs text-muted-foreground">5 seconds • AI Motion Video</p>
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs text-muted-foreground font-medium">Visual Description</Label>
+                              <Textarea
+                                value={scene.visualPrompt || ''}
+                                onChange={(e) => updateScenePrompt(idx, 'visualPrompt', e.target.value)}
+                                rows={3}
+                                className="text-sm mt-1"
+                                placeholder="Describe the visual for this scene..."
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label className="text-xs text-muted-foreground font-medium">Motion Description</Label>
+                              <Textarea
+                                value={scene.motionPrompt || ''}
+                                onChange={(e) => updateScenePrompt(idx, 'motionPrompt', e.target.value)}
+                                rows={2}
+                                className="text-sm mt-1"
+                                placeholder="Describe movement: workers walking, cranes operating, materials being lifted..."
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1108,7 +1150,7 @@ export default function TransformationVideoPage() {
                         <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
                           <span>✅</span>
                           <span>
-                            {scenes.filter(s => s.imageUrl).length} of {scenes.length} images cached - 
+                            {scenes.filter(s => s.imageUrl).length} of {scenes.length} images ready - 
                             these won't need to be regenerated!
                           </span>
                         </p>
