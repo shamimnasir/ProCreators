@@ -700,11 +700,11 @@ export default function TransformationVideoPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-primary">{videoDuration[0]}s</span>
                       <span className="text-xs text-muted-foreground">
-                        {sceneCount} scenes × 3s each
+                        {sceneCount} scenes × 5s each
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Duration is automatically calculated based on the number of scenes. Each Kling AI video clip is 3 seconds.
+                      Duration is automatically calculated. Each AI video clip uses the full 5-second generation for maximum value.
                     </p>
                   </div>
                 </div>
