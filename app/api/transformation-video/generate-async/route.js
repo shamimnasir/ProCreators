@@ -52,7 +52,7 @@ async function generateImageWithAI(prompt, jobId, index) {
 }
 
 // Generate AI video from image using Replicate - Kling v2.1 (high quality, realistic motion)
-async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
+async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, index, duration = 5) {
   console.log(`[${jobId}] Generating AI video ${index + 1} with Kling v2.1...`)
   
   const replicateKey = process.env.REPLICATE_API_TOKEN
@@ -66,8 +66,11 @@ async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
     // This model produces realistic motion and natural movement
     console.log(`[${jobId}] Using Kling v2.1 (standard 720p mode)...`)
     
-    // Create a motion-focused prompt from the visual prompt
-    const motionPrompt = `${prompt}, natural movement, smooth motion, cinematic, photorealistic, seamless transformation`
+    // Create a motion-focused prompt combining visual and motion descriptions
+    // Focus on construction/transformation motion for realistic building videos
+    const fullMotionPrompt = motionPrompt 
+      ? `${motionPrompt}. Progressive construction, workers moving, realistic building activity, smooth cinematic motion, time-lapse feel.`
+      : `${visualPrompt}, natural movement, workers actively building, construction in progress, smooth cinematic motion, photorealistic, seamless transformation, time-lapse construction feel`
     
     const response = await fetch('https://api.replicate.com/v1/models/kwaivgi/kling-v2.1/predictions', {
       method: 'POST',
@@ -79,9 +82,9 @@ async function generateAIVideo(imageUrl, prompt, jobId, index, duration = 5) {
         input: {
           mode: 'standard', // 720p, faster and more cost-effective
           duration: 5, // 5 seconds per clip
-          prompt: motionPrompt,
+          prompt: fullMotionPrompt,
           start_image: imageUrl,
-          negative_prompt: 'static, frozen, blurry, low quality, distorted, glitchy, jerky motion'
+          negative_prompt: 'static, frozen, blurry, low quality, distorted, glitchy, jerky motion, cartoon, anime, drawing, painting, illustration, unrealistic'
         }
       })
     })
