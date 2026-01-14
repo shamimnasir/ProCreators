@@ -120,8 +120,8 @@ export default function TransformationVideoPage() {
   const [videoDuration, setVideoDuration] = useState([25]) // Target 15-35 seconds
   const [format, setFormat] = useState('portrait')
   
-  // Voice settings
-  const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'none'
+  // Voice settings - Default to 'none' for pure visual transformation videos
+  const [voiceOption, setVoiceOption] = useState('none') // 'tts', 'upload', 'none'
   const [ttsLanguage, setTtsLanguage] = useState('en')
   const [availableVoices, setAvailableVoices] = useState([])
   const [voicesByVariant, setVoicesByVariant] = useState({})
