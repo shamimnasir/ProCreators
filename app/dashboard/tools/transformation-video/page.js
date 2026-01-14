@@ -519,8 +519,8 @@ export default function TransformationVideoPage() {
 
   const handleStartNew = useCallback(() => {
     resetAll()
-    setVoiceOption('tts')
-    setCaptionStyle('bold-outline')
+    setVoiceOption('none') // Default to no voice for pure visual transformation
+    setCaptionStyle('none')
     setLanguage('en')
     setTtsLanguage('en')
     setSceneCount(4)
