@@ -271,7 +271,15 @@ async function processTransformationJob(jobId, params) {
     const videoUrls = []
     for (let i = 0; i < imageUrls.length; i++) {
       try {
-        const videoUrl = await generateAIVideo(imageUrls[i].url, imageUrls[i].prompt, jobId, i, 5)
+        // Pass both visualPrompt and motionPrompt for better AI video generation
+        const videoUrl = await generateAIVideo(
+          imageUrls[i].url, 
+          imageUrls[i].prompt, 
+          imageUrls[i].scene?.motionPrompt || '', // Use motionPrompt if available
+          jobId, 
+          i, 
+          5
+        )
         videoUrls.push({ url: videoUrl, type: 'ai-video' })
         await updateJobStatus(jobId, { 
           progress: 25 + Math.floor((i + 1) / imageUrls.length * 45),
