@@ -694,6 +694,7 @@ export default function TransformationVideoPage() {
                     <SelectContent>
                       <SelectItem value="portrait">📱 Portrait (9:16)</SelectItem>
                       <SelectItem value="landscape">🖥️ Landscape (16:9)</SelectItem>
+                      <SelectItem value="square">⬜ Square (1:1)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
