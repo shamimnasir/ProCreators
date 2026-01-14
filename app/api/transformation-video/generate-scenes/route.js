@@ -286,7 +286,7 @@ function generateFallbackScenes(topic, sceneCount, language) {
         `Construction progress ${progressPercent}% - ${stage.title}:`
       } ${stage.suffix}. Ultra-realistic, cinematic golden hour lighting, photorealistic 8K quality, drone perspective looking down at the construction site, 50+ workers visible as small figures, atmospheric dust particles in warm sunlight, dramatic long shadows, epic scale.`,
       motionPrompt: `${stage.motion}, natural environmental movement, dust particles floating in golden light, shadows slowly shifting across the scene, birds flying overhead`,
-      duration: 3
+      duration: 5
     })
   }
   
