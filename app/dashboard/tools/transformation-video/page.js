@@ -543,7 +543,7 @@ export default function TransformationVideoPage() {
     setLanguage('en')
     setTtsLanguage('en')
     setSceneCount(8) // Default to 8 scenes for more realistic progression
-    setVideoDuration([25])
+    // videoDuration will auto-update via useEffect when sceneCount changes
     setFormat('portrait')
     setBackgroundMusic(null)
   }, [])
