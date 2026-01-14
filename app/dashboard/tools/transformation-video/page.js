@@ -115,8 +115,8 @@ export default function TransformationVideoPage() {
   const [scenes, setScenes] = useState([])
   const [generatingScenes, setGeneratingScenes] = useState(false)
   
-  // Video settings
-  const [sceneCount, setSceneCount] = useState(4)
+  // Video settings - Default to 8 scenes for more realistic progressive transformation
+  const [sceneCount, setSceneCount] = useState(8)
   const [videoDuration, setVideoDuration] = useState([25]) // Target 15-35 seconds
   const [format, setFormat] = useState('portrait')
   
