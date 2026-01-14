@@ -348,7 +348,7 @@ export default function JournalMakerPage() {
             getCurrentData={getCurrentData}
             loadDraftData={loadDraftData}
             onStartNew={handleStartNew}
-            dependencies={[journalTitle, journalDescription, category, paperSize, totalPages, sections, step]}
+            dependencies={[cover, journalType, purpose, duration, sections, step]}
             autoSaveEnabled={true}
             debounceMs={2000}
             minStepForAutoSave={1}
