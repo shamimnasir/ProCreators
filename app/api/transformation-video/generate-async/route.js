@@ -5,17 +5,10 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
+import { getCollection } from '@/lib/mongodb'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
-
-// MongoDB connection
-async function getCollection(name) {
-  const { MongoClient } = await import('mongodb')
-  const client = new MongoClient(process.env.MONGO_URL)
-  await client.connect()
-  return client.db().collection(name)
-}
 
 // Update job status
 async function updateJobStatus(jobId, updates) {
