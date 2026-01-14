@@ -609,8 +609,8 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       jobId,
-      message: 'Video generation started. Poll /api/transformation-video/status?jobId=' + jobId + ' for updates.',
-      estimatedTime: `${Math.ceil(scenes.length * 2)} minutes`
+      message: 'Video generation started with Kling v2.1 AI. Poll /api/transformation-video/status?jobId=' + jobId + ' for updates.',
+      estimatedTime: `${Math.ceil(scenes.length * 3)} minutes (using Kling v2.1 for realistic AI videos)`
     })
     
   } catch (error) {
