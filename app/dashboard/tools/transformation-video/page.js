@@ -561,7 +561,7 @@ export default function TransformationVideoPage() {
               <h1 className="text-3xl font-bold">AI Construction/Transformation Video</h1>
               <p className="text-white/80">Create realistic progressive building videos with workers & construction</p>
             </div>
-            <Badge className="ml-auto bg-white/20 text-white border-0">🏗️ Kling AI</Badge>
+            <Badge className="ml-auto bg-white/20 text-white border-0">🏗️ AI Video</Badge>
           </div>
           
           {/* Progress Steps */}
