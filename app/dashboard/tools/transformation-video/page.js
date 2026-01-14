@@ -379,6 +379,19 @@ export default function TransformationVideoPage() {
       })
       
       clearInterval(progressInterval)
+      
+      // Check if response is OK
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || `Server error: ${response.status}`)
+        } else {
+          // Server returned HTML or text (timeout, gateway error)
+          throw new Error('Video generation timed out. Please try with fewer scenes or shorter duration.')
+        }
+      }
+      
       const data = await response.json()
       
       if (data.success) {
