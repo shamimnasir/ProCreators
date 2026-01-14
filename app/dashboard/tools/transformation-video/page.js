@@ -426,20 +426,6 @@ export default function TransformationVideoPage() {
       setGenerating(false)
     }
   }
-          toast({ 
-            title: '🎬 Transformation Video Created!', 
-            description: `${actualDuration}s cinematic video ready`
-          })
-        }
-      } else {
-        throw new Error(data.error || 'Failed to generate video')
-      }
-    } catch (error) {
-      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
-    } finally {
-      setGenerating(false)
-    }
-  }
 
   // Download video
   const handleDownload = async () => {
