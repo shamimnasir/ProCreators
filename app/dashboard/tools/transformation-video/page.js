@@ -26,63 +26,63 @@ import {
 } from '@/config/voice-config'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 
-// Transformation Themes
+// Transformation Themes - Updated for Progressive Construction videos
 const TRANSFORMATION_THEMES = [
   {
     id: 'historical-evolution',
     name: 'Historical Evolution',
     icon: '🏛️',
-    description: 'Cities, monuments, landmarks through time',
+    description: 'Monuments, landmarks built from scratch',
     color: 'from-amber-500 to-orange-600',
-    examplePrompt: 'Show the evolution of the Pyramids of Giza from ancient construction to modern day tourist attraction'
+    examplePrompt: 'Show the construction of the Pyramids of Giza from the first stone being laid to the final magnificent structure, with workers, scaffolding, and construction activity throughout'
   },
   {
-    id: 'renovation',
-    name: 'Before/After Renovation',
-    icon: '🏠',
-    description: 'Old buildings to modern spaces',
-    color: 'from-blue-500 to-cyan-600',
-    examplePrompt: 'Transform an abandoned Victorian house into a beautiful modern home'
-  },
-  {
-    id: 'nature-transformation',
-    name: 'Nature Transformation',
-    icon: '🌿',
-    description: 'Seasons, growth, restoration',
-    color: 'from-green-500 to-emerald-600',
-    examplePrompt: 'Show a barren desert transforming into a lush green oasis over time'
+    id: 'religious-sites',
+    name: 'Religious Sites',
+    icon: '🕌',
+    description: 'Temples, mosques, churches being built',
+    color: 'from-emerald-500 to-teal-600',
+    examplePrompt: 'Show the evolution and construction of the Holy Kaaba and Masjid al-Haram in Mecca from ancient times to the modern magnificent complex, with pilgrims and construction workers in each era'
   },
   {
     id: 'urban-development',
     name: 'Urban Development',
     icon: '🌆',
-    description: 'Villages to modern cities',
+    description: 'Cities rising from villages',
     color: 'from-purple-500 to-pink-600',
-    examplePrompt: 'Transform a small fishing village into a bustling modern metropolis'
+    examplePrompt: 'Show a small fishing village transforming into a modern metropolis like Dubai, with construction workers building skyscrapers, cranes operating, and infrastructure developing'
   },
   {
-    id: 'restoration',
-    name: 'Art & Object Restoration',
-    icon: '🎨',
-    description: 'Damaged to restored beauty',
+    id: 'renovation',
+    name: 'Before/After Renovation',
+    icon: '🏠',
+    description: 'Buildings being restored/renovated',
+    color: 'from-blue-500 to-cyan-600',
+    examplePrompt: 'Show an abandoned Victorian mansion being renovated into a beautiful modern home, with workers repairing, painting, and restoring each part of the building'
+  },
+  {
+    id: 'nature-transformation',
+    name: 'Nature & Infrastructure',
+    icon: '🌿',
+    description: 'Land development, reforestation',
+    color: 'from-green-500 to-emerald-600',
+    examplePrompt: 'Show a barren desert transforming into a green oasis city, with workers planting trees, installing irrigation, and building sustainable structures'
+  },
+  {
+    id: 'iconic-structures',
+    name: 'Iconic Structures',
+    icon: '🗼',
+    description: 'Famous buildings being constructed',
     color: 'from-rose-500 to-red-600',
-    examplePrompt: 'Show the restoration of a damaged Renaissance painting to its original glory'
-  },
-  {
-    id: 'time-lapse',
-    name: 'Time-Lapse Stories',
-    icon: '⏰',
-    description: 'Day to night, seasons changing',
-    color: 'from-indigo-500 to-violet-600',
-    examplePrompt: 'A year in the life of a cherry blossom tree through all four seasons'
+    examplePrompt: 'Show the construction of the Eiffel Tower from the first iron beams to the final completed tower, with workers on scaffolding, cranes lifting materials, and Parisians watching'
   },
   {
     id: 'custom',
     name: 'Custom Transformation',
     icon: '✨',
-    description: 'Create your own unique transformation',
+    description: 'Create your own construction story',
     color: 'from-gray-500 to-slate-600',
-    examplePrompt: 'Describe any transformation you can imagine...'
+    examplePrompt: 'Describe any construction or transformation you want to visualize...'
   }
 ]
 
