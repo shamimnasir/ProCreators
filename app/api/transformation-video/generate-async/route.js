@@ -574,9 +574,15 @@ export async function POST(request) {
     const selectedVoice = formData.get('selectedVoice') || ''
     const captionStyle = formData.get('captionStyle') || 'bold-outline'
     
-    const dimensions = format === 'portrait'
-      ? { width: 1080, height: 1920 }
-      : { width: 1920, height: 1080 }
+    // Support portrait (9:16), landscape (16:9), and square (1:1)
+    let dimensions
+    if (format === 'portrait') {
+      dimensions = { width: 1080, height: 1920 }
+    } else if (format === 'square') {
+      dimensions = { width: 1080, height: 1080 }
+    } else {
+      dimensions = { width: 1920, height: 1080 }
+    }
     
     // Parse scenes
     const scenesJson = formData.get('scenes')
