@@ -198,5 +198,14 @@ export const FORMAT_OPTIONS = [
     width: 1920,
     height: 1080,
     icon: '🖥️'
+  },
+  {
+    value: 'square',
+    label: 'Square (1:1)',
+    description: 'Instagram Feed, Facebook, LinkedIn',
+    aspectRatio: '1:1',
+    width: 1080,
+    height: 1080,
+    icon: '⬜'
   }
 ]
