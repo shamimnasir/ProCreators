@@ -897,20 +897,31 @@ export default function TransformationVideoPage() {
 
           {/* Next Step Button */}
           <div className="flex justify-end gap-4">
-            <Button
-              size="lg"
-              onClick={imageSource === 'ai' ? generateScenes : () => setCurrentStep(2)}
-              disabled={!topic.trim() || generatingScenes || (imageSource === 'upload' && uploadedImages.length < 2)}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
-            >
-              {generatingScenes ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Scenes...</>
-              ) : imageSource === 'ai' ? (
-                <><Wand2 className="mr-2 h-5 w-5" /> Generate Scenes with AI</>
-              ) : (
-                <><ArrowRight className="mr-2 h-5 w-5" /> Continue to Generate</>
-              )}
-            </Button>
+            {/* Show different button based on whether scenes already exist */}
+            {imageSource === 'ai' && scenes.length > 0 ? (
+              <Button
+                size="lg"
+                onClick={() => setCurrentStep(2)}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+              >
+                <ArrowRight className="mr-2 h-5 w-5" /> Review {scenes.length} Scenes & Generate
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                onClick={imageSource === 'ai' ? generateScenes : () => setCurrentStep(2)}
+                disabled={!topic.trim() || generatingScenes || (imageSource === 'upload' && uploadedImages.length < 2)}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+              >
+                {generatingScenes ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Scenes...</>
+                ) : imageSource === 'ai' ? (
+                  <><Wand2 className="mr-2 h-5 w-5" /> Generate Scenes with AI</>
+                ) : (
+                  <><ArrowRight className="mr-2 h-5 w-5" /> Continue to Generate</>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       )}
