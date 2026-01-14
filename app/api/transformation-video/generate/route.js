@@ -315,7 +315,7 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
       url: imageUrl,
       prompt: prompt,
       duration: duration,
-      type: 'image-fallback',
+      type: 'image-ffmpeg',
       index: index
     }
   }
