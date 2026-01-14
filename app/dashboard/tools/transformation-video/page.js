@@ -511,6 +511,7 @@ export default function TransformationVideoPage() {
     if (data.ttsLanguage !== undefined) setTtsLanguage(data.ttsLanguage)
     if (data.selectedVoice !== undefined) setSelectedVoice(data.selectedVoice)
     if (data.captionStyle !== undefined) setCaptionStyle(data.captionStyle)
+    if (data.backgroundMusic !== undefined) setBackgroundMusic(data.backgroundMusic)
     
     // Determine the correct step to show based on loaded data
     // If we have scenes, show step 2 (scene review) instead of step 3 (which requires videoResult)
