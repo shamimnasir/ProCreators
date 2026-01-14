@@ -5,46 +5,65 @@ import path from 'path'
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-// Scene generation prompt template
-const SCENE_GENERATION_PROMPT = `You are an expert cinematic video director specializing in transformation and evolution videos.
+// Scene generation prompt template for Progressive Construction/Transformation videos
+// Inspired by viral transformation videos like Mecca/Kaaba evolution
+const SCENE_GENERATION_PROMPT = `You are an expert AI video director specializing in PROGRESSIVE CONSTRUCTION and TRANSFORMATION videos.
 
-Your task is to create {sceneCount} sequential scenes that show a compelling transformation story.
+Your goal is to create scene prompts that show realistic BUILDING/CONSTRUCTION PROCESS - where each stage shows:
+- Workers, laborers, builders actively constructing
+- Equipment, tools, scaffolding, cranes, materials
+- The structure progressively being built from ground up
+- People interacting with the construction (architects, workers, visitors)
 
 TOPIC: {topic}
 THEME: {theme}
-LANGUAGE: {language}
+TOTAL SCENES: {sceneCount}
 
 ## OUTPUT FORMAT
-Return a JSON array with exactly {sceneCount} scene objects. Each scene should have:
+Return a JSON array with exactly {sceneCount} scene objects. Each scene MUST have:
 
 {
-  "title": "Short scene title",
-  "visualPrompt": "Detailed visual description for AI image/video generation. Include: camera angle, lighting, mood, specific visual elements, time of day, atmosphere. Be cinematic and specific.",
-  "narration": "Brief narration text for this scene (1-2 sentences in {language})",
-  "transition": "Transition type to next scene (Hard Cut, Match Cut, Timelapse Morph, Dissolve, Zoom Transition)",
-  "duration": "Suggested duration in seconds (2-8)"
+  "title": "Stage title (e.g., 'Foundation Work', 'Frame Construction', 'Final Completion')",
+  "visualPrompt": "EXTREMELY DETAILED visual description showing ACTIVE CONSTRUCTION IN PROGRESS. Include specific details about: workers in period-appropriate clothing performing tasks, construction equipment/tools being used, materials (stone, wood, bricks, steel, concrete), scaffolding/supports, weather/lighting, aerial bird's-eye view angle. Make it look like a realistic construction time-lapse moment.",
+  "motionPrompt": "Describe the MOVEMENT in this scene: workers moving, cranes operating, materials being lifted, people walking, dust/particles moving, shadows shifting. This will be used to generate realistic video motion.",
+  "duration": 5
 }
 
-## SCENE STRUCTURE GUIDELINES
-1. Scene 1: Opening - Establish the "before" state dramatically
-2. Middle Scenes: Show progressive transformation stages
-3. Final Scene: Reveal the "after" state with impact
+## CRITICAL CONSTRUCTION SCENE REQUIREMENTS
 
-## VISUAL STYLE REQUIREMENTS
-- Ultra-realistic, cinematic lighting
-- Consistent visual style across all scenes
-- Dramatic camera angles (aerial, low angle, tracking)
-- Atmospheric elements (fog, particles, light rays)
-- Smooth transition logic between scenes
+### Scene Flow (from {sceneCount} total scenes):
+1. **Scene 1 - Site Preparation**: Empty land/desert/forest with surveyors marking ground, small teams arriving with basic tools, minimal structures
+2. **Middle Scenes - Progressive Construction**: 
+   - Foundation work with workers digging, laying stones/concrete
+   - Frame/structure rising with scaffolding, workers climbing, materials being hoisted
+   - Walls/features being built with teams of workers, period-appropriate construction methods
+   - Details being added, more workers, structures becoming recognizable
+3. **Final Scene - Completion/Modern Day**: Finished structure with maintenance workers, visitors, fully operational
 
-## EXAMPLE TRANSITIONS
-- Hard Cut: Dramatic scene change
-- Match Cut: Visual element carries between scenes (stone → stone)
-- Timelapse Morph: Time acceleration effect
-- Dissolve: Soft blend between eras
-- Zoom Transition: Camera pushes into detail, emerges in new scene
+### MANDATORY Visual Elements for EACH Scene:
+- **WORKERS/PEOPLE**: Always show 5-20+ small human figures actively working or walking. Describe their actions (laying bricks, carrying materials, supervising, climbing scaffolding)
+- **CONSTRUCTION ACTIVITY**: Show ongoing building work - not just static structures. Describe cranes lifting, cement being poured, stones being placed
+- **AERIAL PERSPECTIVE**: Bird's-eye or high-angle view looking down at the construction site
+- **TIME PERIOD ACCURACY**: If showing historical evolution, use period-appropriate construction methods (ancient = manual labor, modern = machinery)
+- **ENVIRONMENTAL CONTEXT**: Show surroundings changing too - roads forming, auxiliary buildings appearing, landscaping
 
-Generate exactly {sceneCount} scenes now. Return ONLY the JSON array, no other text.`
+### Motion Prompt Guidelines:
+- Describe 2-3 specific movements: "workers walking between structures", "crane arm slowly rotating", "dust particles floating in morning light"
+- Include natural motion: shadows moving, clouds drifting, birds flying
+- Describe morphing/growth: "building progressively rising", "walls expanding outward"
+
+## EXAMPLE for "Pyramids of Giza Construction":
+
+Scene 1 (Site Preparation):
+- visualPrompt: "Aerial bird's-eye view of golden Egyptian desert at dawn. Workers in white linen garments marking the ground with stakes and ropes in a perfect square pattern. Small groups of laborers arriving with wooden sleds carrying limestone blocks. Supervisors with scrolls directing teams. Ox carts bringing supplies on dusty paths. Dramatic morning light casting long shadows. Photorealistic, cinematic, 8K quality."
+- motionPrompt: "Workers walking across the sand carrying tools, ox carts slowly moving along paths, supervisors pointing and directing, dust clouds rising from the ground, morning shadows slowly shifting."
+
+Scene 3 (Construction Progress):
+- visualPrompt: "Aerial view of partially built pyramid, approximately 30% complete. Massive stone blocks being hauled up wooden ramps by teams of 50+ workers pulling ropes. Scaffolding and wooden support structures around the base. Workers on different levels positioning stones. Camps and workshops surrounding the construction site. Desert sun creating sharp shadows. Thousands of workers like ants on the structure. Ultra-realistic architectural construction scene."
+- motionPrompt: "Teams of workers slowly pulling stone blocks up ramps, workers on scaffolding positioning stones, people moving between camps and construction site, dust swirling around active work areas."
+
+NOW generate exactly {sceneCount} scenes for: "{topic}"
+Return ONLY the JSON array with all required fields. No other text.`
 
 export async function POST(request) {
   try {
