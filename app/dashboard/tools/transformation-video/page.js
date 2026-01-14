@@ -535,9 +535,10 @@ export default function TransformationVideoPage() {
     setCaptionStyle('none')
     setLanguage('en')
     setTtsLanguage('en')
-    setSceneCount(4)
+    setSceneCount(8) // Default to 8 scenes for more realistic progression
     setVideoDuration([25])
     setFormat('portrait')
+    setBackgroundMusic(null)
   }, [])
 
   return (
