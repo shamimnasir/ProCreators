@@ -446,7 +446,7 @@ export default function WorksheetMakerPage() {
               getCurrentData={getCurrentData}
               loadDraftData={loadDraftData}
               onStartNew={handleStartNew}
-              dependencies={[title, subject, gradeLevel, totalQuestions, selectedTypes, worksheetQuestions, customTopic, step]}
+              dependencies={[cover, subject, gradeLevel, totalQuestions, selectedTypes, worksheetQuestions, customTopic, step]}
               autoSaveEnabled={true}
               debounceMs={2000}
               minStepForAutoSave={1}
