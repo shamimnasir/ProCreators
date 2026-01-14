@@ -128,7 +128,7 @@ export default function TransformationVideoPage() {
   const [selectedVoice, setSelectedVoice] = useState('')
   const [loadingVoices, setLoadingVoices] = useState(false)
   const [voiceFile, setVoiceFile] = useState(null)
-  const [captionStyle, setCaptionStyle] = useState('bold-outline')
+  const [captionStyle, setCaptionStyle] = useState('none') // Default to no captions for pure visual transformation
   
   // Recording
   const [isRecording, setIsRecording] = useState(false)
