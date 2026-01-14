@@ -1153,20 +1153,58 @@ export default function TransformationVideoPage() {
             </Button>
           </div>
 
-          {/* Progress */}
+          {/* Progress - Enhanced with detailed time estimates */}
           {generating && (
-            <Card>
+            <Card className="border-primary/20">
               <CardContent className="py-6">
                 <div className="space-y-4">
-                  <div className="text-center mb-2">
-                    <Badge variant="secondary" className="mb-2">Powered by Kling v2.1 AI</Badge>
-                    <p className="text-xs text-muted-foreground">Generating realistic AI motion videos</p>
+                  <div className="text-center mb-4">
+                    <Badge variant="secondary" className="mb-2 px-3 py-1">🎬 Powered by Kling v2.1 AI</Badge>
+                    <p className="text-sm font-medium mt-2">Creating Realistic AI Motion Videos</p>
                   </div>
-                  <Progress value={progress} className="h-3" />
-                  <p className="text-center text-sm text-muted-foreground">{progressMessage}</p>
-                  <p className="text-center text-xs text-muted-foreground">
-                    ⏱️ Each video clip takes ~2-3 minutes to generate with realistic motion
-                  </p>
+                  
+                  {/* Main progress bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Progress</span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+                    <Progress value={progress} className="h-4" />
+                  </div>
+                  
+                  {/* Current status message */}
+                  <div className="p-3 rounded-lg bg-muted/50 text-center">
+                    <p className="text-sm font-medium text-foreground">{progressMessage}</p>
+                  </div>
+                  
+                  {/* Detailed time estimate */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div className="p-2 rounded bg-blue-50 dark:bg-blue-950/30">
+                      <p className="text-lg font-bold text-blue-600">{scenes.length || sceneCount}</p>
+                      <p className="text-xs text-muted-foreground">Total Scenes</p>
+                    </div>
+                    <div className="p-2 rounded bg-amber-50 dark:bg-amber-950/30">
+                      <p className="text-lg font-bold text-amber-600">~2-3 min</p>
+                      <p className="text-xs text-muted-foreground">Per Scene</p>
+                    </div>
+                    <div className="p-2 rounded bg-purple-50 dark:bg-purple-950/30">
+                      <p className="text-lg font-bold text-purple-600">~{Math.ceil((scenes.length || sceneCount) * 2.5)} min</p>
+                      <p className="text-xs text-muted-foreground">Est. Total</p>
+                    </div>
+                    <div className="p-2 rounded bg-green-50 dark:bg-green-950/30">
+                      <p className="text-lg font-bold text-green-600">{videoDuration[0]}s</p>
+                      <p className="text-xs text-muted-foreground">Final Video</p>
+                    </div>
+                  </div>
+                  
+                  {/* Explanation */}
+                  <div className="text-center p-3 rounded bg-muted/30 border border-dashed">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium">⏱️ Why does it take time?</span><br/>
+                      Kling AI creates realistic motion by analyzing each scene and generating fluid movement frame-by-frame. 
+                      More scenes = smoother transformation = better quality!
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
