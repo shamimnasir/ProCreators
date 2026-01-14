@@ -386,6 +386,11 @@ export default function TransformationVideoPage() {
           setProgress(status.progress || 0)
           setProgressMessage(status.message || 'Processing...')
           
+          // Update scenes with image URLs if available (for draft saving)
+          if (status.updatedScenes && status.updatedScenes.length > 0) {
+            setScenes(status.updatedScenes)
+          }
+          
           if (status.status === 'complete') {
             setProgress(100)
             setProgressMessage('✅ AI Video Complete!')
@@ -395,6 +400,11 @@ export default function TransformationVideoPage() {
               clipCount: status.clipCount
             })
             setCurrentStep(3)
+            
+            // Final update of scenes with image URLs
+            if (status.updatedScenes && status.updatedScenes.length > 0) {
+              setScenes(status.updatedScenes)
+            }
             
             toast({ 
               title: '🎬 AI Transformation Video Created!', 
