@@ -25,6 +25,7 @@ import {
   groupVoicesForUI 
 } from '@/config/voice-config'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
+import MusicPicker from './MusicPicker'
 
 // Transformation Themes - Updated for Progressive Construction videos
 const TRANSFORMATION_THEMES = [
