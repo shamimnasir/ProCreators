@@ -493,8 +493,9 @@ export default function TransformationVideoPage() {
     ttsLanguage,
     selectedVoice,
     captionStyle,
+    backgroundMusic,
     currentStep
-  }), [topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, currentStep])
+  }), [topic, selectedTheme, language, imageSource, scenes, sceneCount, videoDuration, format, voiceOption, ttsLanguage, selectedVoice, captionStyle, backgroundMusic, currentStep])
 
   const loadDraftData = useCallback((data) => {
     console.log('Loading draft data:', data)
