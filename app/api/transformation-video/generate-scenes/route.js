@@ -5,89 +5,81 @@ import path from 'path'
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-// Scene generation prompt template for Progressive Construction/Transformation videos
-// Inspired by viral transformation videos like Mecca/Kaaba evolution
-const SCENE_GENERATION_PROMPT = `You are an expert AI video director specializing in PROGRESSIVE CONSTRUCTION and TRANSFORMATION videos.
+// Scene generation prompt template for Progressive Transformation videos
+// CRITICAL: All scenes must maintain VISUAL CONSISTENCY - same location, same viewpoint, same composition
+const SCENE_GENERATION_PROMPT = `You are an expert AI video director specializing in TRANSFORMATION TIMELAPSE videos.
 
-Your goal is to create scene prompts that show realistic BUILDING/CONSTRUCTION PROCESS - where each stage shows:
-- Workers, laborers, builders actively constructing
-- Equipment, tools, scaffolding, cranes, materials
-- The structure progressively being built from ground up
-- People interacting with the construction (architects, workers, visitors)
+CRITICAL REQUIREMENT: ALL SCENES MUST SHOW THE EXACT SAME LOCATION FROM THE EXACT SAME CAMERA ANGLE.
+The only thing that changes between scenes is the PROGRESS of the transformation.
+Think of it like a security camera that stays fixed - the viewpoint NEVER moves, only the scene transforms.
 
 TOPIC: {topic}
 THEME: {theme}
 TOTAL SCENES: {sceneCount}
 
+## VISUAL CONSISTENCY RULES (MANDATORY FOR ALL SCENES)
+
+Before generating scenes, first establish these FIXED elements that MUST appear identically in EVERY scene:
+
+1. **FIXED CAMERA POSITION**: "Aerial drone view from 150 meters height, camera pointing straight down at 45-degree angle, facing [direction]"
+2. **FIXED LANDMARK**: Identify ONE central landmark/focal point that appears in the CENTER of every frame
+3. **FIXED COMPOSITION**: Same buildings/structures in same positions - left side, right side, background, foreground
+4. **FIXED SKY/HORIZON**: Same sky position, same horizon line, same time of day across all scenes
+5. **FIXED FRAME BOUNDARIES**: Same canal/road/path visible on [left/right], same distant buildings on horizon
+
 ## OUTPUT FORMAT
 Return a JSON array with exactly {sceneCount} scene objects. Each scene MUST have:
 
 {
-  "title": "Stage title (e.g., 'Foundation Work', 'Frame Construction', 'Final Completion')",
-  "visualPrompt": "EXTREMELY DETAILED visual description showing ACTIVE CONSTRUCTION IN PROGRESS. Include specific details about: workers in period-appropriate clothing performing tasks, construction equipment/tools being used, materials (stone, wood, bricks, steel, concrete), scaffolding/supports, weather/lighting, aerial bird's-eye view angle. Make it look like a realistic construction time-lapse moment.",
-  "motionPrompt": "Describe the MOVEMENT in this scene: workers moving, cranes operating, materials being lifted, people walking, dust/particles moving, shadows shifting. This will be used to generate realistic video motion.",
+  "title": "Stage title",
+  "visualPrompt": "Start with the EXACT SAME camera/composition description, then describe what has CHANGED in this stage",
+  "motionPrompt": "Describe movement within this fixed frame",
   "duration": 5
 }
 
-## CRITICAL CONSTRUCTION SCENE REQUIREMENTS
+## SCENE PROMPT STRUCTURE (EVERY SCENE MUST FOLLOW THIS)
 
-### Scene Flow for {sceneCount} scenes (MORE SCENES = MORE DETAILED PROGRESSION):
-Distribute scenes evenly across these construction phases:
+Each visualPrompt MUST start with this IDENTICAL prefix (customize based on topic):
+"[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at [CENTRAL LANDMARK]. [LEFT SIDE]: [fixed element]. [RIGHT SIDE]: [fixed element]. [BACKGROUND]: [fixed element]. [FOREGROUND]: [fixed element]. Golden hour lighting, photorealistic 8K. [/FIXED] [CHANGES IN THIS SCENE]: ..."
 
-**Phase 1 - Site Preparation (1-2 scenes):**
-- Empty land with surveyors marking ground
-- First workers arriving with basic tools
-- Ground breaking and excavation beginning
+## EXAMPLE - Slum to Italian City Transformation (6 scenes):
 
-**Phase 2 - Foundation (1-2 scenes):**
-- Foundation trenches being dug
-- Concrete/stone being poured/laid
-- Underground structures taking shape
+FIRST, establish the FIXED FRAME:
+- Camera: Aerial 150m, 45-degree down angle, facing north
+- Center: Main canal running north-south through frame
+- Left: Row of old buildings/huts
+- Right: Open area with garbage dumps
+- Background: Distant slum buildings, hazy sky
+- Foreground: Bridge crossing the canal
 
-**Phase 3 - Early Structure (2-3 scenes):**
-- First walls/columns rising
-- Scaffolding being erected
-- Basic frame/skeleton visible
+Scene 1 - Abandoned State:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a dirty canal running vertically through the center of frame. LEFT SIDE: Dilapidated slum huts with rusted tin roofs. RIGHT SIDE: Open garbage dump with debris piles. BACKGROUND: Dense slum buildings fading into smog. FOREGROUND: Broken wooden bridge crossing the canal. Overcast sky, murky water in canal. [/FIXED] [THIS SCENE]: The location in its abandoned, dirty state. Stagnant green water in canal, garbage floating, broken structures, graffiti on walls, weeds growing everywhere, muddy paths, scattered debris."
 
-**Phase 4 - Main Construction (2-3 scenes):**
-- Major structures reaching height
-- Multiple work crews on different levels
-- Features becoming recognizable
+Scene 2 - Cleanup Begins:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a dirty canal running vertically through the center of frame. LEFT SIDE: Dilapidated slum huts with rusted tin roofs. RIGHT SIDE: Open garbage dump with debris piles. BACKGROUND: Dense slum buildings fading into smog. FOREGROUND: Broken wooden bridge crossing the canal. Overcast sky. [/FIXED] [THIS SCENE]: Workers (30+) in orange vests cleaning the area. Garbage trucks on RIGHT removing debris. Workers with brooms sweeping paths. Canal water being drained. Scaffolding appearing on LEFT buildings. Construction barriers set up. Some garbage cleared, ground visible."
 
-**Phase 5 - Detail Work (1-2 scenes):**
-- Fine details being added
-- Surface finishing and decoration
-- Near-completion state
+Scene 3 - Renovation Active:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a canal running vertically through the center of frame. LEFT SIDE: Buildings now covered in scaffolding. RIGHT SIDE: Former garbage area now flattened construction site. BACKGROUND: Dense buildings. FOREGROUND: Old bridge being replaced. Clearer sky emerging. [/FIXED] [THIS SCENE]: Major renovation in progress. LEFT buildings getting new facades - workers on scaffolding painting walls terracotta orange. Canal walls being reinforced with stone. New cobblestone paths being laid. RIGHT side has construction crew pouring foundations. Bridge being rebuilt with new stone arches. 50+ workers visible."
 
-**Phase 6 - Completion (1 scene):**
-- Final touches being made
-- Visitors/users arriving
-- Modern day glory (if historical)
+Scene 4 - Structures Taking Shape:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a canal running vertically through the center of frame. LEFT SIDE: Buildings now showing Italian-style facades. RIGHT SIDE: New buildings under construction. BACKGROUND: Renovated buildings visible. FOREGROUND: New stone bridge nearly complete. Blue sky with white clouds. [/FIXED] [THIS SCENE]: Transformation becoming visible. LEFT buildings now have terracotta walls, green shutters, flower boxes. Canal has clean blue water, stone walls complete. RIGHT side has new Italian-style buildings rising, scaffolding still present. New trees being planted. Street lamps being installed. Workers adding finishing touches."
 
-### MANDATORY Visual Elements for EACH Scene:
-- **WORKERS/PEOPLE**: Always show 10-50+ small human figures actively working. Describe their specific actions (laying bricks, carrying materials, supervising, climbing scaffolding)
-- **CONSTRUCTION ACTIVITY**: Show ongoing building work - NOT static structures. Describe equipment operating, materials being moved
-- **AERIAL PERSPECTIVE**: Always use bird's-eye or high-angle drone view looking DOWN at the construction site
-- **TIME PERIOD ACCURACY**: Match construction methods to era (ancient = manual labor, modern = machinery)
-- **PROGRESSIVE CHANGE**: Each scene should show VISIBLE PROGRESS from the previous scene
+Scene 5 - Near Completion:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a canal running vertically through the center of frame. LEFT SIDE: Beautiful Italian buildings with terracotta and shutters. RIGHT SIDE: New piazza with fountain. BACKGROUND: Fully renovated cityscape. FOREGROUND: Elegant stone bridge with decorative railings. Clear blue sky. [/FIXED] [THIS SCENE]: Almost complete Italian transformation. Gondolas in the clean canal. Cobblestone streets finished. LEFT has cafes with outdoor seating, flower boxes on every window. RIGHT has completed piazza with marble fountain. Trees fully planted with leaves. Workers doing final touch-ups. Some tourists beginning to appear."
 
-### Motion Prompt Guidelines:
-- Always include: "workers moving across the site", "construction activity in progress"
-- Add scene-specific motion: "cranes rotating", "materials being lifted", "cement mixers churning"
-- Include ambient motion: "dust particles in sunlight", "shadows shifting", "birds flying overhead"
+Scene 6 - Completed Transformation:
+visualPrompt: "[FIXED] Aerial view from 150 meters, looking down at 45-degree angle at a canal running vertically through the center of frame. LEFT SIDE: Vibrant Italian buildings with terracotta walls and green shutters. RIGHT SIDE: Beautiful piazza with active fountain. BACKGROUND: Stunning Italian cityscape. FOREGROUND: Ornate stone bridge with people crossing. Golden sunset light. [/FIXED] [THIS SCENE]: Complete transformation to Italian paradise. Crystal clear canal with multiple gondolas and tourists. LEFT buildings have bustling cafes, colorful awnings, flower boxes overflowing. RIGHT piazza has people enjoying the fountain, outdoor restaurants. The exact same location, now unrecognizable as a former slum. Warm golden hour lighting, romantic atmosphere."
 
-## EXAMPLE for 8-scene "Holy Kaaba Construction":
-
-Scene 1: "Empty desert with surveyors marking the sacred foundation, small camp being set up"
-Scene 2: "Workers digging foundation trenches in the sand, stone blocks arriving on wooden sleds"
-Scene 3: "Foundation stones being laid carefully, first courses of the walls visible"
-Scene 4: "Walls rising to waist height, scaffolding going up, more workers arriving"
-Scene 5: "Structure taking recognizable cubic shape, black cloth draped over parts"
-Scene 6: "Main structure complete, workers adding gold details and inscriptions"
-Scene 7: "Early courtyard being paved, first pilgrims arriving to witness completion"
-Scene 8: "Modern massive complex with millions of pilgrims, aerial view of illuminated Masjid al-Haram"
+## KEY RULES:
+1. The [FIXED] section MUST be nearly identical in ALL scenes - only the [THIS SCENE] section changes
+2. Same landmarks must be visible in same positions across all scenes
+3. Camera angle and height NEVER changes
+4. Sky/weather can gradually improve (overcast → clear) but horizon position stays same
+5. Transformation is PROGRESSIVE - each scene shows MORE progress than the last
+6. Workers visible in middle scenes (2-5), completion scene (6) shows results
 
 NOW generate exactly {sceneCount} scenes for: "{topic}"
+Establish YOUR fixed frame elements first, then create scenes that maintain perfect visual consistency.
 Return ONLY the JSON array with all required fields. No other text.`
 
 export async function POST(request) {
