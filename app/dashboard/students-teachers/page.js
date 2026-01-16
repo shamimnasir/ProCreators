@@ -92,7 +92,8 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/study-notes',
         useCase: 'Note-taking, revision',
-        badge: 'Coming Soon'
+        badge: 'New',
+        isBuilt: true
       }
     ]
   },
