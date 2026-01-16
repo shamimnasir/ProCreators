@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
+import { generateImage } from '@/lib/gemini-image'
 
 // Presentation types with specific prompts
 const PRESENTATION_TYPES = {
@@ -13,6 +14,45 @@ const PRESENTATION_TYPES = {
   'research': 'research presentation with methodology and findings'
 }
 
+// Generate background image for a slide
+async function generateSlideBackground(slideTitle, slideType, topic, themeColor) {
+  const colorDescriptions = {
+    'modern-blue': 'deep blue and cyan gradient',
+    'corporate-dark': 'dark charcoal and subtle gold accents',
+    'fresh-green': 'fresh green and nature-inspired',
+    'elegant-purple': 'elegant purple and lavender gradient',
+    'warm-orange': 'warm orange and sunset tones',
+    'minimal-gray': 'minimal gray and white clean'
+  }
+  
+  const colorDesc = colorDescriptions[themeColor] || 'professional blue gradient'
+  
+  const imagePrompts = {
+    'title': `Professional presentation title slide background, ${colorDesc}, abstract geometric shapes, modern corporate design, cinematic lighting, 16:9 aspect ratio, no text, clean minimalist`,
+    'content': `Professional presentation slide background, ${colorDesc}, subtle abstract patterns, modern business design, soft gradient, 16:9 aspect ratio, no text, leaves space for content`,
+    'section': `Bold section divider slide background, ${colorDesc}, dramatic lighting, abstract shapes, modern design, 16:9 aspect ratio, no text`,
+    'quote': `Inspirational quote slide background, ${colorDesc}, elegant abstract design, subtle textures, atmospheric lighting, 16:9 aspect ratio, no text`,
+    'stats': `Data visualization slide background, ${colorDesc}, subtle grid patterns, modern tech aesthetic, clean design, 16:9 aspect ratio, no text`,
+    'two-column': `Comparison slide background, ${colorDesc}, split design elements, modern corporate, balanced composition, 16:9 aspect ratio, no text`,
+    'conclusion': `Professional conclusion slide background, ${colorDesc}, impactful design, celebratory yet professional, 16:9 aspect ratio, no text`,
+    'cta': `Call to action slide background, ${colorDesc}, energetic yet professional, modern design, eye-catching, 16:9 aspect ratio, no text`
+  }
+  
+  const basePrompt = imagePrompts[slideType] || imagePrompts['content']
+  const contextPrompt = `${basePrompt}. Theme related to: ${topic}. Slide title: ${slideTitle}`
+  
+  try {
+    const result = await generateImage(contextPrompt, 'gemini-3-pro-image-preview', 'standard', '1792x1024')
+    if (result.success && result.imageUrl) {
+      return result.imageUrl
+    }
+    return null
+  } catch (error) {
+    console.error('Failed to generate slide background:', error)
+    return null
+  }
+}
+
 export async function POST(request) {
   try {
     const { 
@@ -21,7 +61,9 @@ export async function POST(request) {
       slideCount = 8,
       language = 'english',
       audience = 'general',
-      additionalContext = ''
+      additionalContext = '',
+      theme = 'modern-blue',
+      generateImages = true
     } = await request.json()
     
     if (!topic) {
@@ -46,6 +88,7 @@ Rules:
 - Bullet points should be 5-8 words each
 - Include speaker notes for each slide
 - Make content engaging and memorable
+- For each slide, include an imagePrompt that describes a perfect background image
 - Use only plain ASCII characters, no special symbols or emojis`
 
     const userPrompt = `Create a ${slideCount}-slide ${typeContext} about: "${topic}"
@@ -63,14 +106,16 @@ Generate a complete presentation with this exact JSON structure:
       "type": "title",
       "title": "Presentation Title",
       "subtitle": "Subtitle here",
-      "speakerNotes": "Notes for the presenter"
+      "speakerNotes": "Notes for the presenter",
+      "imagePrompt": "Description of ideal background image for this slide"
     },
     {
       "slideNumber": 2,
       "type": "content",
       "title": "Slide Title",
       "bullets": ["Point 1", "Point 2", "Point 3", "Point 4"],
-      "speakerNotes": "Notes for this slide"
+      "speakerNotes": "Notes for this slide",
+      "imagePrompt": "Description of ideal background image"
     },
     {
       "slideNumber": 3,
@@ -78,14 +123,16 @@ Generate a complete presentation with this exact JSON structure:
       "title": "Comparison Title",
       "leftColumn": { "heading": "Left", "points": ["Point 1", "Point 2"] },
       "rightColumn": { "heading": "Right", "points": ["Point 1", "Point 2"] },
-      "speakerNotes": "Notes"
+      "speakerNotes": "Notes",
+      "imagePrompt": "Description of ideal background image"
     },
     {
       "slideNumber": 4,
       "type": "quote",
       "quote": "Impactful quote here",
       "attribution": "Author Name",
-      "speakerNotes": "Notes"
+      "speakerNotes": "Notes",
+      "imagePrompt": "Description of ideal background image"
     },
     {
       "slideNumber": 5,
@@ -96,7 +143,8 @@ Generate a complete presentation with this exact JSON structure:
         { "value": "2.5x", "label": "Description" },
         { "value": "$1M+", "label": "Description" }
       ],
-      "speakerNotes": "Notes"
+      "speakerNotes": "Notes",
+      "imagePrompt": "Description of ideal background image"
     }
   ]
 }
@@ -110,6 +158,8 @@ Slide Types to use:
 - "section" - Section divider
 - "conclusion" - Final slide with key takeaways
 - "cta" - Call to action (last slide)
+
+For imagePrompt: Describe a professional, modern background that fits the slide content. Be specific about colors, mood, and visual elements. The image should complement the text content.
 
 Mix different slide types for variety. End with either "conclusion" or "cta" type.
 
@@ -141,9 +191,55 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
 
     console.log(`Generated ${presentation.slides.length} slides successfully`)
 
+    // Generate background images for all slides if requested
+    if (generateImages) {
+      console.log('Generating background images for slides...')
+      
+      // Generate images in parallel for speed
+      const imagePromises = presentation.slides.map(async (slide, index) => {
+        try {
+          console.log(`Generating image for slide ${index + 1}...`)
+          const imageUrl = await generateSlideBackground(
+            slide.title || slide.quote || `Slide ${index + 1}`,
+            slide.type,
+            topic,
+            theme
+          )
+          return { index, imageUrl }
+        } catch (error) {
+          console.error(`Failed to generate image for slide ${index + 1}:`, error)
+          return { index, imageUrl: null }
+        }
+      })
+
+      const imageResults = await Promise.all(imagePromises)
+      
+      // Update slides with generated images
+      imageResults.forEach(({ index, imageUrl }) => {
+        if (imageUrl) {
+          presentation.slides[index].backgroundImage = imageUrl
+        }
+      })
+      
+      console.log('Background images generated')
+    }
+
+    // Add default styling to each slide
+    presentation.slides = presentation.slides.map((slide, index) => ({
+      ...slide,
+      id: `slide-${index + 1}-${Date.now()}`,
+      style: {
+        backgroundColor: '#1e40af',
+        textColor: '#ffffff',
+        fontSize: 'normal',
+        textAlign: 'left'
+      }
+    }))
+
     return NextResponse.json({
       success: true,
       presentation: {
+        id: `pres-${Date.now()}`,
         title: presentation.title || topic,
         subtitle: presentation.subtitle || '',
         slides: presentation.slides,
@@ -152,7 +248,9 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
           presentationType,
           slideCount: presentation.slides.length,
           language,
-          audience
+          audience,
+          theme,
+          createdAt: new Date().toISOString()
         }
       }
     })
