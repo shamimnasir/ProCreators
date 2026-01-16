@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 
-// Helper function to sanitize text
+// Helper function to sanitize text - keeps Unicode/Bangla characters
 function sanitizeText(text) {
   if (!text) return ''
   return String(text)
@@ -16,7 +16,6 @@ function sanitizeText(text) {
     .replace(/\u2013/g, '-')
     .replace(/\u2014/g, '--')
     .replace(/\u00A0/g, ' ')
-    .replace(/[^\x20-\x7E]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }
