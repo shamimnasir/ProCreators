@@ -153,6 +153,7 @@ export default function StudyNotesPage() {
 
   // Load draft data
   const loadDraftData = (data) => {
+    // First, set all the configuration data
     if (data.topic) setTopic(data.topic)
     if (data.customNotes) setCustomNotes(data.customNotes)
     if (data.inputMode) setInputMode(data.inputMode)
@@ -166,8 +167,19 @@ export default function StudyNotesPage() {
     if (typeof data.includeSummary === 'boolean') setIncludeSummary(data.includeSummary)
     if (data.colorTheme) setColorTheme(data.colorTheme)
     if (data.paperSize) setPaperSize(data.paperSize)
-    if (data.generatedNotes) setGeneratedNotes(data.generatedNotes)
-    if (data.step) setStep(data.step)
+    
+    // Set generated notes first
+    if (data.generatedNotes && typeof data.generatedNotes === 'object' && data.generatedNotes.content) {
+      setGeneratedNotes(data.generatedNotes)
+      // Only go to step 3 if we have valid generated notes
+      setStep(3)
+    } else if (data.step && data.step <= 2) {
+      // For steps 1 and 2, use the saved step
+      setStep(data.step)
+    } else {
+      // Default to step 1 if no valid data
+      setStep(1)
+    }
   }
 
   // Handle file upload
