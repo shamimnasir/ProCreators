@@ -341,7 +341,11 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
         y: subY - 12,
         width: 100,
         height: 24,
-        color: rgb(branchColor.red + 0.3, branchColor.green + 0.3, branchColor.blue + 0.3),
+        color: rgb(
+          Math.min(branchColor.red + 0.3, 1), 
+          Math.min(branchColor.green + 0.3, 1), 
+          Math.min(branchColor.blue + 0.3, 1)
+        ),
         borderWidth: 0
       })
       
