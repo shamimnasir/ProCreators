@@ -102,6 +102,11 @@ Rules:
 Target Audience: ${audience}
 ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
 
+IMPORTANT: The topic "${topic}" - detect its language and write ALL content in that SAME language.
+If the topic is in Bengali/বাংলা, write all slides in Bengali.
+If the topic is in any other language, write all slides in that language.
+Only the "imagePrompt" field should be in English.
+
 Generate a complete presentation with this exact JSON structure:
 {
   "title": "Main presentation title",
