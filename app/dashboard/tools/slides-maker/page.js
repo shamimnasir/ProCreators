@@ -170,14 +170,24 @@ function SlideEditor({ slide, onUpdate, onRegenerateImage, isGeneratingImage, to
 
       {/* Subtitle (for title slides) */}
       {slide.type === 'title' && (
-        <div className="space-y-2">
-          <Label>Subtitle</Label>
-          <Input
-            value={slide.subtitle || ''}
-            onChange={(e) => updateSlideField('subtitle', e.target.value)}
-            placeholder="Slide subtitle"
-          />
-        </div>
+        <>
+          <div className="space-y-2">
+            <Label>Subtitle</Label>
+            <Input
+              value={slide.subtitle || ''}
+              onChange={(e) => updateSlideField('subtitle', e.target.value)}
+              placeholder="Slide subtitle"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Author / Presenter Name</Label>
+            <Input
+              value={slide.authorName || ''}
+              onChange={(e) => updateSlideField('authorName', e.target.value)}
+              placeholder="Your name"
+            />
+          </div>
+        </>
       )}
 
       {/* Bullets (for content slides) */}
