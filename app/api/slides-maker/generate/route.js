@@ -28,18 +28,18 @@ async function generateSlideBackground(slideTitle, slideType, topic, themeColor)
   const colorDesc = colorDescriptions[themeColor] || 'professional blue gradient'
   
   const imagePrompts = {
-    'title': `Professional presentation title slide background, ${colorDesc}, abstract geometric shapes, modern corporate design, cinematic lighting, 16:9 aspect ratio, no text, clean minimalist`,
-    'content': `Professional presentation slide background, ${colorDesc}, subtle abstract patterns, modern business design, soft gradient, 16:9 aspect ratio, no text, leaves space for content`,
-    'section': `Bold section divider slide background, ${colorDesc}, dramatic lighting, abstract shapes, modern design, 16:9 aspect ratio, no text`,
-    'quote': `Inspirational quote slide background, ${colorDesc}, elegant abstract design, subtle textures, atmospheric lighting, 16:9 aspect ratio, no text`,
-    'stats': `Data visualization slide background, ${colorDesc}, subtle grid patterns, modern tech aesthetic, clean design, 16:9 aspect ratio, no text`,
-    'two-column': `Comparison slide background, ${colorDesc}, split design elements, modern corporate, balanced composition, 16:9 aspect ratio, no text`,
-    'conclusion': `Professional conclusion slide background, ${colorDesc}, impactful design, celebratory yet professional, 16:9 aspect ratio, no text`,
-    'cta': `Call to action slide background, ${colorDesc}, energetic yet professional, modern design, eye-catching, 16:9 aspect ratio, no text`
+    'title': `Professional presentation title slide background, ${colorDesc}, abstract geometric shapes, modern corporate design, cinematic lighting, 16:9 aspect ratio, absolutely NO TEXT or words or letters, clean minimalist, blur any text areas`,
+    'content': `Professional presentation slide background, ${colorDesc}, subtle abstract patterns, modern business design, soft gradient, 16:9 aspect ratio, absolutely NO TEXT or words or letters or numbers, leaves space for content, abstract only`,
+    'section': `Bold section divider slide background, ${colorDesc}, dramatic lighting, abstract shapes, modern design, 16:9 aspect ratio, absolutely NO TEXT or words, pure abstract visual`,
+    'quote': `Inspirational quote slide background, ${colorDesc}, elegant abstract design, subtle textures, atmospheric lighting, 16:9 aspect ratio, absolutely NO TEXT or words, purely visual abstract`,
+    'stats': `Data visualization slide background, ${colorDesc}, subtle grid patterns, modern tech aesthetic, clean design, 16:9 aspect ratio, absolutely NO TEXT or numbers or charts, abstract geometric only`,
+    'two-column': `Comparison slide background, ${colorDesc}, split design elements, modern corporate, balanced composition, 16:9 aspect ratio, absolutely NO TEXT or words, abstract patterns only`,
+    'conclusion': `Professional conclusion slide background, ${colorDesc}, impactful design, celebratory yet professional, 16:9 aspect ratio, absolutely NO TEXT or words, pure abstract visual`,
+    'cta': `Call to action slide background, ${colorDesc}, energetic yet professional, modern design, eye-catching, 16:9 aspect ratio, absolutely NO TEXT or words or buttons, abstract only`
   }
   
   const basePrompt = imagePrompts[slideType] || imagePrompts['content']
-  const contextPrompt = `${basePrompt}. Theme related to: ${topic}. Slide title: ${slideTitle}`
+  const contextPrompt = `${basePrompt}. Visual theme inspired by: ${topic}. IMPORTANT: Generate ONLY abstract visuals, absolutely NO text, words, letters, or readable characters anywhere in the image.`
   
   try {
     const result = await generateImage(contextPrompt, 'gemini-3-pro-image-preview', 'standard', '1792x1024')
