@@ -1156,6 +1156,44 @@ export default function SlidesMakerPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* Two Column - Infographic Style */}
+                    {currentSlide?.leftColumn && currentSlide?.rightColumn && (
+                      <div className="flex-1 grid grid-cols-2 gap-4 mt-4">
+                        {/* Left Column */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                          <h3 className="font-bold text-lg mb-3 drop-shadow">
+                            {currentSlide.leftColumn.heading}
+                          </h3>
+                          <div className="space-y-2">
+                            {currentSlide.leftColumn.points?.map((point, idx) => (
+                              <div key={idx} className="flex items-start gap-2 text-sm">
+                                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs mt-0.5 shrink-0">
+                                  {idx + 1}
+                                </div>
+                                <span>{point}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Right Column */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                          <h3 className="font-bold text-lg mb-3 drop-shadow">
+                            {currentSlide.rightColumn.heading}
+                          </h3>
+                          <div className="space-y-2">
+                            {currentSlide.rightColumn.points?.map((point, idx) => (
+                              <div key={idx} className="flex items-start gap-2 text-sm">
+                                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs mt-0.5 shrink-0">
+                                  {idx + 1}
+                                </div>
+                                <span>{point}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
