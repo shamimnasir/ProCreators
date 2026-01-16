@@ -1131,6 +1131,23 @@ Remember: ONLY use information from the source content. Do not add external info
           const jsonMatch = response.match(/\{[\s\S]*\}/)
           if (jsonMatch) {
             notes = JSON.parse(jsonMatch[0])
+            
+            // Ensure content fields have proper newlines (not escaped)
+            if (notes.content) {
+              notes.content = notes.content.replace(/\\n/g, '\n')
+            }
+            if (notes.keyTerms) {
+              notes.keyTerms = notes.keyTerms.replace(/\\n/g, '\n')
+            }
+            if (notes.examples) {
+              notes.examples = notes.examples.replace(/\\n/g, '\n')
+            }
+            if (notes.questions) {
+              notes.questions = notes.questions.replace(/\\n/g, '\n')
+            }
+            if (notes.summary) {
+              notes.summary = notes.summary.replace(/\\n/g, '\n')
+            }
           } else {
             throw new Error('No JSON found')
           }
