@@ -167,6 +167,8 @@ export default function StudyNotesPage() {
     if (data.subject) setSubject(data.subject)
     if (data.gradeLevel) setGradeLevel(data.gradeLevel)
     if (data.detailLevel) setDetailLevel(data.detailLevel)
+    if (data.authorName) setAuthorName(data.authorName)
+    if (data.instituteName) setInstituteName(data.instituteName)
     if (typeof data.includeKeyTerms === 'boolean') setIncludeKeyTerms(data.includeKeyTerms)
     if (typeof data.includeExamples === 'boolean') setIncludeExamples(data.includeExamples)
     if (typeof data.includeQuestions === 'boolean') setIncludeQuestions(data.includeQuestions)
