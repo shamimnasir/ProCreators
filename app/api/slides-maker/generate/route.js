@@ -110,41 +110,46 @@ export async function POST(request) {
     
     console.log(`Detected language: ${detectedLanguage}`)
 
-    const systemPrompt = `You are an expert presentation designer. You MUST write ALL content in ${detectedLanguage} using ${languageScript}.
-
-ABSOLUTE REQUIREMENT - OUTPUT LANGUAGE: ${detectedLanguage}
-- Every title MUST be in ${detectedLanguage}
-- Every bullet point MUST be in ${detectedLanguage}  
-- Every subtitle MUST be in ${detectedLanguage}
-- Every quote MUST be in ${detectedLanguage}
-- Every speaker note MUST be in ${detectedLanguage}
-- ONLY the "imagePrompt" field should be in English
-
-DO NOT write in English. Write ONLY in ${detectedLanguage}.
-
+    // For non-English, use a much more directive prompt
+    const isNonEnglish = detectedLanguage !== 'English'
+    
+    const systemPrompt = isNonEnglish 
+      ? `You are a presentation designer who writes ONLY in ${detectedLanguage}.
+RULE 1: All text content must be in ${detectedLanguage} using ${languageScript}.
+RULE 2: Never write English except for the "imagePrompt" field.
+RULE 3: If the user's topic is "${topic}", respond in the same language.`
+      : `You are an expert presentation designer. Create compelling, professional presentation slides.
 Rules:
 - Each slide should have a clear purpose
-- Use concise, impactful text (not too wordy)
+- Use concise, impactful text
 - Bullet points should be 5-8 words each
-- Include speaker notes for each slide
-- Make content engaging and memorable
-- For each slide, include an imagePrompt that describes a perfect background image (ALWAYS in English for image generation)`
+- Include speaker notes for each slide`
 
-    const userPrompt = `Create a ${slideCount}-slide ${typeContext} about: "${topic}"
+    const languageDirective = isNonEnglish 
+      ? `
+
+🚨 LANGUAGE: ${detectedLanguage} 🚨
+The input topic "${topic}" is in ${detectedLanguage}.
+YOU MUST WRITE ALL OUTPUT IN ${detectedLanguage}.
+- title: MUST be ${detectedLanguage}
+- subtitle: MUST be ${detectedLanguage}
+- bullets: MUST be ${detectedLanguage}
+- quote: MUST be ${detectedLanguage}
+- stats labels: MUST be ${detectedLanguage}
+- speakerNotes: MUST be ${detectedLanguage}
+- ONLY "imagePrompt" is in English
+
+DO NOT translate to English. Keep everything in ${detectedLanguage}.
+
+`
+      : ''
+
+    const userPrompt = `${languageDirective}Create a ${slideCount}-slide ${typeContext} about: "${topic}"
 
 Target Audience: ${audience}
 ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
 
-⚠️ CRITICAL: The topic is in ${detectedLanguage}. You MUST write ALL slide content in ${detectedLanguage} using ${languageScript}.
-
-Example if topic is in Bengali:
-- title: "বাংলাদেশের ইতিহাস" (NOT "History of Bangladesh")
-- bullets: ["প্রথম পয়েন্ট", "দ্বিতীয় পয়েন্ট"] (NOT English)
-
-WRITE EVERYTHING IN: ${detectedLanguage}
-Only "imagePrompt" should be English.
-
-Generate a complete presentation with this exact JSON structure:
+Generate a JSON presentation. ${isNonEnglish ? `ALL text content in ${detectedLanguage}, except imagePrompt which is English.` : ''}
 {
   "title": "[TITLE IN ${detectedLanguage}]",
   "subtitle": "[SUBTITLE IN ${detectedLanguage}]",
