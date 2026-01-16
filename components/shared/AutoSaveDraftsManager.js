@@ -99,7 +99,8 @@ export default function AutoSaveDraftsManager({
       // Check for meaningful content
       const hasContent = currentData.title || currentData.story || currentData.pages || 
                         currentData.content || currentData.items || currentData.data ||
-                        currentData.chapters || currentData.cards || currentData.slides
+                        currentData.chapters || currentData.cards || currentData.slides ||
+                        currentData.generatedNotes || currentData.topic
       if (!hasContent) {
         return { success: false, error: 'No content to save' }
       }
