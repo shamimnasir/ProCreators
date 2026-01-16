@@ -401,6 +401,7 @@ export default function SlidesMakerPage() {
   // Load draft data
   const loadDraftData = useCallback((data) => {
     if (data.topic) setTopic(data.topic)
+    if (data.authorName) setAuthorName(data.authorName)
     if (data.presentationType) setPresentationType(data.presentationType)
     if (data.slideCount) setSlideCount(data.slideCount)
     if (data.language) setLanguage(data.language)
