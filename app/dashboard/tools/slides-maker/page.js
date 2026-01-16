@@ -685,7 +685,7 @@ export default function SlidesMakerPage() {
           getCurrentData={getCurrentData}
           loadDraftData={loadDraftData}
           onStartNew={handleStartNew}
-          dependencies={[topic, presentationType, slideCount, theme, presentation, currentSlideIndex]}
+          dependencies={[topic, authorName, presentationType, slideCount, theme, presentation, currentSlideIndex]}
           minStepForAutoSave={1}
           currentStep={step}
         />
