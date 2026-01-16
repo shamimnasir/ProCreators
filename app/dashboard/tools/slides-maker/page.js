@@ -1069,7 +1069,7 @@ export default function SlidesMakerPage() {
                 {/* Slide Preview Area */}
                 <div className={`relative rounded-lg overflow-hidden border shadow-lg ${
                   aspectRatio === '16:9' ? 'aspect-video' : 'aspect-[4/3]'
-                }`}>
+                }`} style={{ fontFamily: "'Noto Sans Bengali', 'Inter', sans-serif" }}>
                   {/* Background Image or Color */}
                   <div 
                     className="absolute inset-0"
@@ -1082,52 +1082,56 @@ export default function SlidesMakerPage() {
                   >
                     {/* Overlay for text readability */}
                     {currentSlide?.backgroundImage && (
-                      <div className="absolute inset-0 bg-black/30" />
+                      <div className="absolute inset-0 bg-black/40" />
                     )}
                   </div>
                   
                   {/* Content */}
                   <div 
-                    className="absolute inset-0 p-6 flex flex-col"
+                    className={`absolute inset-0 p-6 flex flex-col ${
+                      ['title', 'section', 'quote'].includes(currentSlide?.type) ? 'items-center justify-center text-center' : ''
+                    }`}
                     style={{ 
                       color: currentSlide?.style?.textColor || '#ffffff',
-                      textAlign: currentSlide?.style?.textAlign || 'left'
+                      fontFamily: "'Noto Sans Bengali', 'Inter', sans-serif"
                     }}
                   >
                     {/* Slide Type Badge */}
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className={`flex items-center gap-2 mb-4 ${['title', 'section', 'quote'].includes(currentSlide?.type) ? 'absolute top-4 left-4' : ''}`}>
                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                         {SLIDE_TYPE_ICONS[currentSlide?.type] || <FileText className="h-3 w-3" />}
                         <span className="ml-1 capitalize">{currentSlide?.type}</span>
                       </Badge>
                     </div>
 
-                    {/* Title */}
+                    {/* Title - Center for title/section slides */}
                     {currentSlide?.title && (
-                      <h2 className="text-2xl md:text-3xl font-bold mb-3 drop-shadow-lg">
+                      <h2 className={`text-2xl md:text-3xl font-bold mb-3 drop-shadow-lg ${
+                        ['title', 'section'].includes(currentSlide?.type) ? 'text-center' : ''
+                      }`} style={{ fontFamily: "'Noto Sans Bengali', 'Inter', sans-serif" }}>
                         {currentSlide.title}
                       </h2>
                     )}
 
                     {/* Subtitle for title slides */}
                     {currentSlide?.subtitle && (
-                      <p className="text-lg md:text-xl opacity-90 mb-3 drop-shadow">{currentSlide.subtitle}</p>
+                      <p className="text-lg md:text-xl opacity-90 mb-3 drop-shadow text-center">{currentSlide.subtitle}</p>
                     )}
 
                     {/* Author Name for title slides */}
                     {currentSlide?.type === 'title' && currentSlide?.authorName && (
-                      <p className="text-base opacity-80 mt-2 drop-shadow font-medium">
-                        By: {currentSlide.authorName}
+                      <p className="text-base opacity-80 mt-4 drop-shadow font-medium text-center">
+                        — {currentSlide.authorName}
                       </p>
                     )}
 
                     {/* Bullets - Infographic Style */}
                     {currentSlide?.bullets && currentSlide.bullets.length > 0 && (
-                      <div className="flex-1 grid gap-3 mt-4">
+                      <div className="flex-1 grid gap-2 mt-4 w-full">
                         {currentSlide.bullets.map((bullet, idx) => (
                           <div 
                             key={idx} 
-                            className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 drop-shadow"
+                            className="flex items-center gap-3 bg-white/15 backdrop-blur-sm rounded-lg px-4 py-2 drop-shadow border border-white/10"
                           >
                             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
                               {idx + 1}
