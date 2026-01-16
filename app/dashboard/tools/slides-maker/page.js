@@ -727,11 +727,28 @@ export default function SlidesMakerPage() {
                   <Label htmlFor="topic">Presentation Topic *</Label>
                   <Input
                     id="topic"
-                    placeholder="e.g., Introduction to Machine Learning, Q4 Sales Report, Climate Change Solutions..."
+                    placeholder="e.g., Introduction to Machine Learning, জলবায়ু পরিবর্তন, Q4 Sales Report..."
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     className="mt-1"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    💡 Tip: Type in any language - slides will be generated in that language
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="authorName">Your Name / Presenter (Optional)</Label>
+                  <Input
+                    id="authorName"
+                    placeholder="e.g., John Doe, রহিম উদ্দিন..."
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Displayed on the title slide
+                  </p>
                 </div>
 
                 <div>
