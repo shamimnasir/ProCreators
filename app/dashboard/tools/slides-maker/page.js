@@ -384,6 +384,7 @@ export default function SlidesMakerPage() {
       slides: presentation?.slides || null,
       // All the form data
       topic,
+      authorName,
       presentationType,
       slideCount,
       language,
@@ -395,7 +396,7 @@ export default function SlidesMakerPage() {
       currentSlideIndex,
       step
     }
-  }, [topic, presentationType, slideCount, language, audience, additionalContext, theme, aspectRatio, presentation, currentSlideIndex, step])
+  }, [topic, authorName, presentationType, slideCount, language, audience, additionalContext, theme, aspectRatio, presentation, currentSlideIndex, step])
 
   // Load draft data
   const loadDraftData = useCallback((data) => {
