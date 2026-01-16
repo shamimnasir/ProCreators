@@ -373,6 +373,11 @@ export default function SlidesMakerPage() {
     if (!topic && !presentation) return null
     
     return {
+      // Title field for the draft manager
+      title: presentation?.title || topic || 'Untitled Presentation',
+      // Slides field checked by auto-save
+      slides: presentation?.slides || null,
+      // All the form data
       topic,
       presentationType,
       slideCount,
