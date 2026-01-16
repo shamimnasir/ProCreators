@@ -429,11 +429,12 @@ function drawTwoColumnSlide(page, slide, theme, fonts, dimensions) {
   page.drawText(sanitizeText(rightCol.heading || 'Right'), {
     x: rightX + 15, y: rightY + 5,
     size: 20, font: boldFont, color: theme.lightText
-  })
-  rightY -= 55
+  });
+  rightY -= 55;
   
   // Right points
-  (rightCol.points || []).forEach(point => {
+  const rightPoints = rightCol.points || [];
+  rightPoints.forEach(point => {
     page.drawCircle({ x: rightX + 10, y: rightY + 6, size: 4, color: theme.primary })
     const lines = wrapText(point, regularFont, 18, colWidth - 30)
     lines.forEach((line, i) => {
