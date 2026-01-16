@@ -1012,13 +1012,42 @@ export async function POST(request) {
         if (file && file.size > 0) {
           const bytes = await file.arrayBuffer()
           const buffer = Buffer.from(bytes)
-          if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+          const fileName = file.name.toLowerCase()
+          
+          if (file.type === 'text/plain' || fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+            // Plain text files
             sourceContent = buffer.toString('utf-8')
+          } else if (file.type === 'application/pdf' || fileName.endsWith('.pdf')) {
+            // PDF files - extract text
+            console.log('Extracting text from PDF:', file.name)
+            sourceContent = await extractTextFromPDF(buffer)
+            if (!sourceContent || sourceContent.trim().length < 50) {
+              return NextResponse.json({
+                success: false,
+                error: 'Could not extract text from PDF. The PDF might be image-based or protected. Please try copying the text manually.'
+              }, { status: 400 })
+            }
+            console.log('Extracted PDF text length:', sourceContent.length)
           } else {
+            // Try to read as text for other files
             sourceContent = buffer.toString('utf-8')
           }
         } else if (customNotes) {
           sourceContent = customNotes
+        }
+        
+        // Validate we have content to work with
+        if (!sourceContent || sourceContent.trim().length < 20) {
+          return NextResponse.json({
+            success: false,
+            error: 'No valid content found. Please paste your notes or upload a text-based file.'
+          }, { status: 400 })
+        }
+        
+        // Truncate very long content to avoid token limits (keep first ~15000 chars)
+        if (sourceContent.length > 15000) {
+          console.log('Truncating content from', sourceContent.length, 'to 15000 chars')
+          sourceContent = sourceContent.substring(0, 15000) + '\n\n[Content truncated for processing...]'
         }
         
         // Build the prompt
