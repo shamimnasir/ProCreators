@@ -6,9 +6,9 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
-// Helper to run LLM
+// Helper to run LLM - using temp file to avoid E2BIG error with large content
 async function runLLM(prompt, systemPrompt = 'You are an expert educator and study guide creator.') {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
       
@@ -17,7 +17,14 @@ async function runLLM(prompt, systemPrompt = 'You are an expert educator and stu
         system_prompt: systemPrompt
       })
       
-      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, inputData], {
+      // Write input to temp file to avoid command line argument size limit
+      const tempDir = path.join(process.cwd(), 'tmp')
+      await fs.mkdir(tempDir, { recursive: true })
+      const tempFile = path.join(tempDir, `llm-input-${uuidv4()}.json`)
+      await fs.writeFile(tempFile, inputData, 'utf-8')
+      
+      // Pass temp file path instead of data directly
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, '--file', tempFile], {
         env: { ...process.env }
       })
 
@@ -32,7 +39,14 @@ async function runLLM(prompt, systemPrompt = 'You are an expert educator and stu
         stderr += data.toString()
       })
 
-      pythonProcess.on('close', (code) => {
+      pythonProcess.on('close', async (code) => {
+        // Clean up temp file
+        try {
+          await fs.unlink(tempFile)
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        
         if (code !== 0) {
           console.error('LLM stderr:', stderr)
           reject(new Error(`LLM process failed: ${stderr}`))
@@ -46,7 +60,13 @@ async function runLLM(prompt, systemPrompt = 'You are an expert educator and stu
         }
       })
       
-      pythonProcess.on('error', (err) => {
+      pythonProcess.on('error', async (err) => {
+        // Clean up temp file on error
+        try {
+          await fs.unlink(tempFile)
+        } catch (e) {
+          // Ignore cleanup errors
+        }
         reject(new Error(`Failed to start LLM process: ${err.message}`))
       })
     } catch (error) {
