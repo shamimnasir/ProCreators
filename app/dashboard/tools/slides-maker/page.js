@@ -658,6 +658,33 @@ export default function SlidesMakerPage() {
       if (data.success && data.downloadUrl) {
         setDownloadUrl(data.downloadUrl)
         
+        // Save updated presentation to library with PDF path
+        try {
+          await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'slides-maker',
+              title: presentation.title || topic,
+              description: `${presentation.slides.length} slides - PDF generated`,
+              content: JSON.stringify(presentation),
+              filePath: data.downloadUrl,
+              metadata: {
+                slideCount: presentation.slides.length,
+                presentationType,
+                theme,
+                language,
+                audience,
+                authorName,
+                pdfGenerated: true
+              }
+            })
+          })
+          console.log('Presentation with PDF saved to library')
+        } catch (libError) {
+          console.error('Failed to save to library:', libError)
+        }
+        
         // Trigger download
         const link = document.createElement('a')
         link.href = data.downloadUrl
@@ -668,7 +695,7 @@ export default function SlidesMakerPage() {
 
         toast({
           title: "PDF Downloaded!",
-          description: "Your presentation has been saved."
+          description: "Your presentation has been saved to Library."
         })
       } else {
         throw new Error(data.error || 'Failed to generate PDF')
