@@ -153,6 +153,13 @@ export default function StudyNotesPage() {
 
   // Load draft data
   const loadDraftData = (data) => {
+    console.log('Loading draft data:', JSON.stringify(data, null, 2).slice(0, 500))
+    console.log('Has generatedNotes:', !!data.generatedNotes)
+    console.log('generatedNotes type:', typeof data.generatedNotes)
+    if (data.generatedNotes) {
+      console.log('generatedNotes.content exists:', !!data.generatedNotes.content)
+    }
+    
     // First, set all the configuration data
     if (data.topic) setTopic(data.topic)
     if (data.customNotes) setCustomNotes(data.customNotes)
@@ -170,13 +177,16 @@ export default function StudyNotesPage() {
     
     // Set generated notes first
     if (data.generatedNotes && typeof data.generatedNotes === 'object' && data.generatedNotes.content) {
+      console.log('Setting generatedNotes and going to step 3')
       setGeneratedNotes(data.generatedNotes)
       // Only go to step 3 if we have valid generated notes
       setStep(3)
     } else if (data.step && data.step <= 2) {
+      console.log('Setting step to:', data.step)
       // For steps 1 and 2, use the saved step
       setStep(data.step)
     } else {
+      console.log('Defaulting to step 1')
       // Default to step 1 if no valid data
       setStep(1)
     }
