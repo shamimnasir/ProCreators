@@ -76,17 +76,51 @@ export async function POST(request) {
     console.log(`Generating ${slideCount} slides for: "${topic}" (${presentationType})`)
 
     const typeContext = PRESENTATION_TYPES[presentationType] || PRESENTATION_TYPES['business']
+    
+    // Detect if topic contains non-ASCII characters (likely non-English)
+    const containsBengali = /[\u0980-\u09FF]/.test(topic)
+    const containsHindi = /[\u0900-\u097F]/.test(topic)
+    const containsArabic = /[\u0600-\u06FF]/.test(topic)
+    const containsChinese = /[\u4E00-\u9FFF]/.test(topic)
+    const containsJapanese = /[\u3040-\u30FF]/.test(topic)
+    const containsKorean = /[\uAC00-\uD7AF]/.test(topic)
+    
+    let detectedLanguage = 'English'
+    let languageScript = 'Latin'
+    
+    if (containsBengali) {
+      detectedLanguage = 'Bengali (বাংলা)'
+      languageScript = 'Bengali script'
+    } else if (containsHindi) {
+      detectedLanguage = 'Hindi (हिन्दी)'
+      languageScript = 'Devanagari script'
+    } else if (containsArabic) {
+      detectedLanguage = 'Arabic (العربية)'
+      languageScript = 'Arabic script'
+    } else if (containsChinese) {
+      detectedLanguage = 'Chinese (中文)'
+      languageScript = 'Chinese characters'
+    } else if (containsJapanese) {
+      detectedLanguage = 'Japanese (日本語)'
+      languageScript = 'Japanese script'
+    } else if (containsKorean) {
+      detectedLanguage = 'Korean (한국어)'
+      languageScript = 'Korean script'
+    }
+    
+    console.log(`Detected language: ${detectedLanguage}`)
 
-    const systemPrompt = `You are an expert presentation designer and content strategist. Create compelling, professional presentation slides.
+    const systemPrompt = `You are an expert presentation designer. You MUST write ALL content in ${detectedLanguage} using ${languageScript}.
 
-CRITICAL LANGUAGE RULE:
-- DETECT the language of the user's topic/input
-- Generate ALL slide content (titles, bullets, quotes, speaker notes) in the SAME language as the input
-- If the topic is in Bengali (বাংলা), write everything in Bengali
-- If the topic is in Hindi, write everything in Hindi
-- If the topic is in English, write everything in English
-- Match the exact language and script of the input topic
-- The imagePrompt field should ALWAYS be in English (for image generation)
+ABSOLUTE REQUIREMENT - OUTPUT LANGUAGE: ${detectedLanguage}
+- Every title MUST be in ${detectedLanguage}
+- Every bullet point MUST be in ${detectedLanguage}  
+- Every subtitle MUST be in ${detectedLanguage}
+- Every quote MUST be in ${detectedLanguage}
+- Every speaker note MUST be in ${detectedLanguage}
+- ONLY the "imagePrompt" field should be in English
+
+DO NOT write in English. Write ONLY in ${detectedLanguage}.
 
 Rules:
 - Each slide should have a clear purpose
@@ -94,18 +128,21 @@ Rules:
 - Bullet points should be 5-8 words each
 - Include speaker notes for each slide
 - Make content engaging and memorable
-- For each slide, include an imagePrompt that describes a perfect background image (always in English)
-- Use only plain text characters appropriate for the detected language`
+- For each slide, include an imagePrompt that describes a perfect background image (ALWAYS in English for image generation)`
 
     const userPrompt = `Create a ${slideCount}-slide ${typeContext} about: "${topic}"
 
 Target Audience: ${audience}
 ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
 
-IMPORTANT: The topic "${topic}" - detect its language and write ALL content in that SAME language.
-If the topic is in Bengali/বাংলা, write all slides in Bengali.
-If the topic is in any other language, write all slides in that language.
-Only the "imagePrompt" field should be in English.
+⚠️ CRITICAL: The topic is in ${detectedLanguage}. You MUST write ALL slide content in ${detectedLanguage} using ${languageScript}.
+
+Example if topic is in Bengali:
+- title: "বাংলাদেশের ইতিহাস" (NOT "History of Bangladesh")
+- bullets: ["প্রথম পয়েন্ট", "দ্বিতীয় পয়েন্ট"] (NOT English)
+
+WRITE EVERYTHING IN: ${detectedLanguage}
+Only "imagePrompt" should be English.
 
 Generate a complete presentation with this exact JSON structure:
 {
