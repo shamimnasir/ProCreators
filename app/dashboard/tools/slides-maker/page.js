@@ -372,9 +372,13 @@ export default function SlidesMakerPage() {
     // Only return data if there's meaningful content
     if (!topic && !presentation) return null
     
+    // When there's a presentation, use its title; otherwise use topic
+    // Include 'content' field so auto-save recognizes there's data to save
     return {
       // Title field for the draft manager
       title: presentation?.title || topic || 'Untitled Presentation',
+      // Content field - triggers auto-save when there's any meaningful data
+      content: topic || null,
       // Slides field checked by auto-save
       slides: presentation?.slides || null,
       // All the form data
