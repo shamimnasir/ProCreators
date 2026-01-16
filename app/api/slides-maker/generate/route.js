@@ -76,11 +76,17 @@ export async function POST(request) {
     console.log(`Generating ${slideCount} slides for: "${topic}" (${presentationType})`)
 
     const typeContext = PRESENTATION_TYPES[presentationType] || PRESENTATION_TYPES['business']
-    const languageInstruction = language === 'bengali' ? 'Write ALL content in Bengali (বাংলা) language.' : 'Write in English.'
 
     const systemPrompt = `You are an expert presentation designer and content strategist. Create compelling, professional presentation slides.
 
-${languageInstruction}
+CRITICAL LANGUAGE RULE:
+- DETECT the language of the user's topic/input
+- Generate ALL slide content (titles, bullets, quotes, speaker notes) in the SAME language as the input
+- If the topic is in Bengali (বাংলা), write everything in Bengali
+- If the topic is in Hindi, write everything in Hindi
+- If the topic is in English, write everything in English
+- Match the exact language and script of the input topic
+- The imagePrompt field should ALWAYS be in English (for image generation)
 
 Rules:
 - Each slide should have a clear purpose
@@ -88,8 +94,8 @@ Rules:
 - Bullet points should be 5-8 words each
 - Include speaker notes for each slide
 - Make content engaging and memorable
-- For each slide, include an imagePrompt that describes a perfect background image
-- Use only plain ASCII characters, no special symbols or emojis`
+- For each slide, include an imagePrompt that describes a perfect background image (always in English)
+- Use only plain text characters appropriate for the detected language`
 
     const userPrompt = `Create a ${slideCount}-slide ${typeContext} about: "${topic}"
 
