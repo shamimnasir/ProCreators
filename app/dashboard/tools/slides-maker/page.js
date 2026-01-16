@@ -1093,9 +1093,9 @@ export default function SlidesMakerPage() {
 
       {/* Step 3: Edit, Preview & Download */}
       {step === 3 && presentation && (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className={`grid gap-6 ${editMode ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}>
           {/* Slide Preview */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className={`${editMode ? 'lg:col-span-1' : 'lg:col-span-2'} space-y-4`}>
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -1113,10 +1113,15 @@ export default function SlidesMakerPage() {
                       onClick={() => setEditMode(!editMode)}
                     >
                       <Edit3 className="h-4 w-4 mr-1" />
-                      {editMode ? 'Done' : 'Edit'}
+                      {editMode ? 'Done Editing' : 'Edit Slide'}
                     </Button>
                   </div>
                 </div>
+                {!editMode && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Click "Edit Slide" to change text, images, or background
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 {/* Slide Preview Area */}
