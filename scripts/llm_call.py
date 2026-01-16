@@ -42,7 +42,7 @@ async def call_llm(prompt, system_prompt="You are a creative activity book creat
 
 if __name__ == "__main__":
     try:
-        # Read input from command line arguments
+        # Read input from command line arguments or file
         if len(sys.argv) < 2:
             print(json.dumps({
                 "success": False,
@@ -51,7 +51,14 @@ if __name__ == "__main__":
             }))
             sys.exit(1)
         
-        input_data = json.loads(sys.argv[1])
+        # Check if using file input (for large content)
+        if sys.argv[1] == '--file' and len(sys.argv) >= 3:
+            file_path = sys.argv[2]
+            with open(file_path, 'r', encoding='utf-8') as f:
+                input_data = json.load(f)
+        else:
+            input_data = json.loads(sys.argv[1])
+        
         prompt = input_data.get('prompt')
         system_prompt = input_data.get('system_prompt', "You are a creative activity book creator. Generate engaging, age-appropriate content.")
         
