@@ -27,6 +27,7 @@ const TOOL_TYPES = [
   { value: 'journal', label: 'Journal Maker', icon: '📓' },
   { value: 'worksheet', label: 'Worksheet Generator', icon: '📝' },
   { value: 'checklist', label: 'Checklist Maker', icon: '✅' },
+  { value: 'slides-maker', label: 'AI Presentation Maker', icon: '📊' },
 ]
 
 export default function LibraryPage() {
