@@ -489,9 +489,35 @@ export default function SlidesMakerPage() {
         setPresentation(data.presentation)
         setCurrentSlideIndex(0)
         setStep(3)
+        
+        // Save to library automatically
+        try {
+          await fetch('/api/library/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'slides-maker',
+              title: data.presentation.title || topic,
+              description: `${data.presentation.slides.length} slides about "${topic}"`,
+              content: JSON.stringify(data.presentation),
+              metadata: {
+                slideCount: data.presentation.slides.length,
+                presentationType,
+                theme,
+                language,
+                audience,
+                authorName
+              }
+            })
+          })
+          console.log('Presentation saved to library')
+        } catch (libError) {
+          console.error('Failed to save to library:', libError)
+        }
+        
         toast({
           title: "Presentation Created!",
-          description: `Generated ${data.presentation.slides.length} slides with AI backgrounds.`
+          description: `Generated ${data.presentation.slides.length} slides with AI backgrounds. Saved to Library.`
         })
       } else {
         throw new Error(data.error || 'Failed to generate presentation')
