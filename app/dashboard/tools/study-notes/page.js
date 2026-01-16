@@ -117,6 +117,10 @@ export default function StudyNotesPage() {
   const [gradeLevel, setGradeLevel] = useState('undergraduate')
   const [detailLevel, setDetailLevel] = useState('medium') // 'brief', 'medium', 'detailed'
   
+  // Step 1: Author Info (for teachers)
+  const [authorName, setAuthorName] = useState('')
+  const [instituteName, setInstituteName] = useState('')
+  
   // Step 2: Generation Options
   const [includeKeyTerms, setIncludeKeyTerms] = useState(true)
   const [includeExamples, setIncludeExamples] = useState(true)
