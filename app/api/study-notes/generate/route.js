@@ -83,7 +83,6 @@ function wrapText(text, font, fontSize, maxWidth) {
         currentLine = testLine
       }
     } catch {
-      // If width calculation fails, just add the word
       if (currentLine.length > 60) {
         lines.push(currentLine)
         currentLine = word
@@ -101,17 +100,9 @@ function wrapText(text, font, fontSize, maxWidth) {
 // Safe text drawing (handles special characters)
 function safeDrawText(page, text, options) {
   try {
-    // Clean text of problematic characters
-    const cleanText = text
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Control characters
-      .replace(/[^\x00-\x7F]/g, char => {
-        // Try to keep the character, replace if needed
-        return char
-      })
-    
+    const cleanText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
     page.drawText(cleanText, options)
   } catch (e) {
-    // Fallback: draw with ASCII-only version
     const asciiText = text.replace(/[^\x20-\x7E]/g, '?')
     try {
       page.drawText(asciiText, options)
@@ -121,9 +112,274 @@ function safeDrawText(page, text, options) {
   }
 }
 
-// Generate PDF using pdf-lib
+// Draw a rounded rectangle
+function drawRoundedRect(page, x, y, width, height, radius, options) {
+  // For pdf-lib, we draw a simple rectangle (rounded corners require complex paths)
+  page.drawRectangle({
+    x,
+    y,
+    width,
+    height,
+    ...options
+  })
+}
+
+// Draw Mind Map Node
+function drawMindMapNode(page, x, y, text, font, fontSize, nodeColor, textColor, maxWidth = 150) {
+  const padding = 10
+  const lines = wrapText(text, font, fontSize, maxWidth - padding * 2)
+  const lineHeight = fontSize + 4
+  const boxHeight = lines.length * lineHeight + padding * 2
+  const boxWidth = maxWidth
+  
+  // Draw node background
+  page.drawRectangle({
+    x: x - boxWidth / 2,
+    y: y - boxHeight / 2,
+    width: boxWidth,
+    height: boxHeight,
+    color: nodeColor,
+    borderColor: rgb(nodeColor.red * 0.7, nodeColor.green * 0.7, nodeColor.blue * 0.7),
+    borderWidth: 1.5
+  })
+  
+  // Draw text
+  let textY = y + boxHeight / 2 - padding - fontSize
+  for (const line of lines) {
+    const textWidth = font.widthOfTextAtSize(line, fontSize)
+    safeDrawText(page, line, {
+      x: x - textWidth / 2,
+      y: textY,
+      size: fontSize,
+      font,
+      color: textColor
+    })
+    textY -= lineHeight
+  }
+  
+  return { width: boxWidth, height: boxHeight }
+}
+
+// Draw connection line between nodes
+function drawConnection(page, x1, y1, x2, y2, color) {
+  page.drawLine({
+    start: { x: x1, y: y1 },
+    end: { x: x2, y: y2 },
+    thickness: 2,
+    color,
+    opacity: 0.6
+  })
+}
+
+// Generate Mind Map PDF
+async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
+  const { width, height, margin, primary, secondary, accent, authorName, instituteName } = config
+  const { regularFont, boldFont } = fonts
+  
+  let page = pdfDoc.addPage([width, height])
+  
+  // Header
+  page.drawRectangle({
+    x: 0,
+    y: height - 100,
+    width,
+    height: 100,
+    color: rgb(primary.r, primary.g, primary.b)
+  })
+  
+  // Title
+  const titleText = notes.title || 'Study Notes Mind Map'
+  const titleLines = wrapText(titleText, boldFont, 24, width - 100)
+  let titleY = height - 40
+  for (const line of titleLines) {
+    safeDrawText(page, line, {
+      x: margin,
+      y: titleY,
+      size: 24,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    })
+    titleY -= 30
+  }
+  
+  // Author/Institute info
+  if (authorName || instituteName) {
+    const authorText = [authorName, instituteName].filter(Boolean).join(' • ')
+    safeDrawText(page, authorText, {
+      x: margin,
+      y: height - 85,
+      size: 11,
+      font: regularFont,
+      color: rgb(0.9, 0.9, 0.9)
+    })
+  }
+  
+  // Style badge
+  safeDrawText(page, 'Mind Map Style', {
+    x: width - margin - 100,
+    y: height - 40,
+    size: 10,
+    font: regularFont,
+    color: rgb(0.9, 0.9, 0.9)
+  })
+  
+  // Mind Map Area
+  const mapCenterX = width / 2
+  const mapCenterY = (height - 100) / 2 + 30
+  
+  // Central node
+  const centralColor = rgb(primary.r, primary.g, primary.b)
+  const centralText = notes.title || 'Main Topic'
+  
+  // Draw central node (larger)
+  page.drawEllipse({
+    x: mapCenterX,
+    y: mapCenterY,
+    xScale: 80,
+    yScale: 40,
+    color: centralColor,
+    borderColor: rgb(primary.r * 0.6, primary.g * 0.6, primary.b * 0.6),
+    borderWidth: 3
+  })
+  
+  const centralLines = wrapText(centralText, boldFont, 11, 140)
+  let cY = mapCenterY + (centralLines.length * 7)
+  for (const line of centralLines) {
+    const cWidth = boldFont.widthOfTextAtSize(line, 11)
+    safeDrawText(page, line, {
+      x: mapCenterX - cWidth / 2,
+      y: cY,
+      size: 11,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    })
+    cY -= 14
+  }
+  
+  // Parse content into branches
+  const branches = []
+  if (notes.content) {
+    const sections = notes.content.split(/(?=##\s|(?:^|\n)[IVX]+\.\s)/g).filter(s => s.trim())
+    sections.forEach((section, i) => {
+      const lines = section.trim().split('\n')
+      const title = lines[0].replace(/^#+\s*|^[IVX]+\.\s*/g, '').trim()
+      const points = lines.slice(1)
+        .filter(l => l.trim().startsWith('-') || l.trim().startsWith('•'))
+        .map(l => l.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim())
+        .slice(0, 3) // Max 3 sub-points
+      if (title) {
+        branches.push({ title, points })
+      }
+    })
+  }
+  
+  // Draw branches around the center
+  const branchColors = [
+    rgb(0.2, 0.5, 0.8),
+    rgb(0.3, 0.7, 0.4),
+    rgb(0.8, 0.4, 0.2),
+    rgb(0.6, 0.3, 0.7),
+    rgb(0.8, 0.6, 0.2),
+    rgb(0.4, 0.6, 0.8)
+  ]
+  
+  const numBranches = Math.min(branches.length, 6)
+  const angleStep = (Math.PI * 2) / Math.max(numBranches, 1)
+  const branchRadius = 180
+  
+  branches.slice(0, 6).forEach((branch, i) => {
+    const angle = -Math.PI / 2 + i * angleStep
+    const branchX = mapCenterX + Math.cos(angle) * branchRadius
+    const branchY = mapCenterY + Math.sin(angle) * (branchRadius * 0.7)
+    const branchColor = branchColors[i % branchColors.length]
+    
+    // Draw connection to center
+    drawConnection(page, mapCenterX, mapCenterY, branchX, branchY, branchColor)
+    
+    // Draw branch node
+    page.drawRectangle({
+      x: branchX - 70,
+      y: branchY - 20,
+      width: 140,
+      height: 40,
+      color: branchColor,
+      borderWidth: 0
+    })
+    
+    const branchLines = wrapText(branch.title, boldFont, 10, 130)
+    let bY = branchY + 10
+    branchLines.slice(0, 2).forEach(line => {
+      const bWidth = boldFont.widthOfTextAtSize(line, 10)
+      safeDrawText(page, line, {
+        x: branchX - bWidth / 2,
+        y: bY,
+        size: 10,
+        font: boldFont,
+        color: rgb(1, 1, 1)
+      })
+      bY -= 12
+    })
+    
+    // Draw sub-points
+    branch.points.slice(0, 2).forEach((point, j) => {
+      const subAngle = angle + (j - 0.5) * 0.3
+      const subX = branchX + Math.cos(subAngle) * 100
+      const subY = branchY + Math.sin(subAngle) * 60
+      
+      // Connection line
+      page.drawLine({
+        start: { x: branchX, y: branchY },
+        end: { x: subX, y: subY },
+        thickness: 1,
+        color: branchColor,
+        opacity: 0.4
+      })
+      
+      // Sub-node
+      page.drawRectangle({
+        x: subX - 50,
+        y: subY - 12,
+        width: 100,
+        height: 24,
+        color: rgb(branchColor.red + 0.3, branchColor.green + 0.3, branchColor.blue + 0.3),
+        borderWidth: 0
+      })
+      
+      const subText = point.length > 20 ? point.substring(0, 18) + '...' : point
+      const subWidth = regularFont.widthOfTextAtSize(subText, 8)
+      safeDrawText(page, subText, {
+        x: subX - subWidth / 2,
+        y: subY - 3,
+        size: 8,
+        font: regularFont,
+        color: rgb(0.1, 0.1, 0.1)
+      })
+    })
+  })
+  
+  // Footer
+  safeDrawText(page, 'Created with ProCreators Study Notes Generator', {
+    x: margin,
+    y: 20,
+    size: 8,
+    font: regularFont,
+    color: rgb(0.5, 0.5, 0.5)
+  })
+  
+  safeDrawText(page, `Page 1`, {
+    x: width - margin - 30,
+    y: 20,
+    size: 8,
+    font: regularFont,
+    color: rgb(0.5, 0.5, 0.5)
+  })
+  
+  return page
+}
+
+// Generate visually appealing standard PDF
 async function generatePDF(notes, config) {
-  const { topic, noteStyle, colorTheme, paperSize } = config
+  const { topic, noteStyle, colorTheme, paperSize, authorName, instituteName } = config
   
   // Paper sizes
   const sizes = {
@@ -147,12 +403,219 @@ async function generatePDF(notes, config) {
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
   const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
   
+  const fonts = { regularFont, boldFont, italicFont }
+  const configWithDimensions = { 
+    width, height, margin, primary, secondary, accent,
+    authorName, instituteName
+  }
+  
+  // For Mind Map style, generate a visual mind map
+  if (noteStyle === 'mindmap') {
+    await generateMindMapPDF(notes, configWithDimensions, pdfDoc, fonts)
+    
+    // Add a second page with detailed content
+    let currentPage = pdfDoc.addPage([width, height])
+    let y = height - margin
+    
+    // Second page header
+    currentPage.drawRectangle({
+      x: 0,
+      y: height - 60,
+      width,
+      height: 60,
+      color: rgb(primary.r, primary.g, primary.b)
+    })
+    
+    safeDrawText(currentPage, 'Detailed Notes', {
+      x: margin,
+      y: height - 40,
+      size: 18,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    })
+    
+    y = height - 80
+    
+    // Helper to add page
+    const ensureSpace = (needed) => {
+      if (y - needed < margin + 30) {
+        currentPage = pdfDoc.addPage([width, height])
+        y = height - margin
+        return true
+      }
+      return false
+    }
+    
+    // Draw content sections
+    const drawSection = (title, content, icon, bgColor) => {
+      if (!content) return
+      
+      ensureSpace(80)
+      
+      // Section header with icon
+      currentPage.drawRectangle({
+        x: margin,
+        y: y - 28,
+        width: width - 2 * margin,
+        height: 32,
+        color: bgColor
+      })
+      
+      // Decorative left border
+      currentPage.drawRectangle({
+        x: margin,
+        y: y - 28,
+        width: 5,
+        height: 32,
+        color: rgb(primary.r, primary.g, primary.b)
+      })
+      
+      safeDrawText(currentPage, `${icon}  ${title}`, {
+        x: margin + 15,
+        y: y - 20,
+        size: 13,
+        font: boldFont,
+        color: rgb(primary.r, primary.g, primary.b)
+      })
+      
+      y -= 45
+      
+      // Content
+      const lines = content.split('\n')
+      const contentWidth = width - 2 * margin - 30
+      
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed) {
+          y -= 8
+          continue
+        }
+        
+        let fontSize = 10
+        let font = regularFont
+        let textColor = rgb(0.15, 0.15, 0.15)
+        let indent = 20
+        
+        // Handle markdown formatting
+        if (trimmed.startsWith('### ')) {
+          fontSize = 11
+          font = boldFont
+          textColor = rgb(secondary.r, secondary.g, secondary.b)
+          const text = trimmed.substring(4)
+          ensureSpace(20)
+          y -= 5
+          const wrapped = wrapText(text, font, fontSize, contentWidth)
+          for (const wl of wrapped) {
+            safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+            y -= fontSize + 5
+          }
+          continue
+        }
+        
+        if (trimmed.startsWith('## ')) {
+          fontSize = 12
+          font = boldFont
+          textColor = rgb(primary.r, primary.g, primary.b)
+          const text = trimmed.substring(3)
+          ensureSpace(25)
+          y -= 8
+          const wrapped = wrapText(text, font, fontSize, contentWidth)
+          for (const wl of wrapped) {
+            safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+            y -= fontSize + 5
+          }
+          y -= 3
+          continue
+        }
+        
+        // Bullet points with visual styling
+        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+          const text = trimmed.substring(2).replace(/\*\*/g, '')
+          ensureSpace(18)
+          
+          // Draw bullet circle
+          currentPage.drawEllipse({
+            x: margin + indent + 5,
+            y: y + 3,
+            xScale: 3,
+            yScale: 3,
+            color: rgb(secondary.r, secondary.g, secondary.b)
+          })
+          
+          const wrapped = wrapText(text, font, fontSize, contentWidth - 20)
+          for (let i = 0; i < wrapped.length; i++) {
+            safeDrawText(currentPage, wrapped[i], {
+              x: margin + indent + 15,
+              y,
+              size: fontSize,
+              font,
+              color: textColor
+            })
+            y -= fontSize + 5
+          }
+          continue
+        }
+        
+        // Regular text
+        const processedText = trimmed.replace(/\*\*/g, '')
+        ensureSpace(16)
+        const wrapped = wrapText(processedText, font, fontSize, contentWidth)
+        for (const wl of wrapped) {
+          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+          y -= fontSize + 5
+        }
+      }
+      
+      y -= 15
+    }
+    
+    // Main content
+    if (notes.content) {
+      drawSection('Notes', notes.content, '📚', rgb(accent.r, accent.g, accent.b))
+    }
+    
+    // Key Terms
+    if (notes.keyTerms) {
+      drawSection('Key Terms & Definitions', notes.keyTerms, '🔑', rgb(0.93, 0.95, 1))
+    }
+    
+    // Examples
+    if (notes.examples) {
+      drawSection('Examples', notes.examples, '💡', rgb(1, 0.98, 0.9))
+    }
+    
+    // Questions
+    if (notes.questions) {
+      drawSection('Review Questions', notes.questions, '❓', rgb(0.97, 0.93, 1))
+    }
+    
+    // Summary
+    if (notes.summary) {
+      drawSection('Summary', notes.summary, '📝', rgb(0.92, 1, 0.95))
+    }
+    
+    // Add footers to all pages
+    const pages = pdfDoc.getPages()
+    pages.forEach((pg, i) => {
+      safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
+        x: width / 2 - 25,
+        y: 15,
+        size: 8,
+        font: regularFont,
+        color: rgb(0.5, 0.5, 0.5)
+      })
+    })
+    
+    return await pdfDoc.save()
+  }
+  
+  // Standard styles (Outline, Cornell, Summary, Q&A)
   let currentPage = pdfDoc.addPage([width, height])
   let y = height - margin
   
-  // Helper to add new page if needed
+  // Helper to add new page
   const ensureSpace = (needed) => {
-    if (y - needed < margin) {
+    if (y - needed < margin + 30) {
       currentPage = pdfDoc.addPage([width, height])
       y = height - margin
       return true
@@ -160,130 +623,209 @@ async function generatePDF(notes, config) {
     return false
   }
   
-  // Helper to draw section header
-  const drawSectionHeader = (title, icon, bgColor = accent) => {
-    ensureSpace(50)
+  // === HEADER ===
+  // Gradient-like header with two colors
+  currentPage.drawRectangle({
+    x: 0,
+    y: height - 95,
+    width,
+    height: 95,
+    color: rgb(primary.r, primary.g, primary.b)
+  })
+  
+  // Decorative accent bar
+  currentPage.drawRectangle({
+    x: 0,
+    y: height - 100,
+    width,
+    height: 5,
+    color: rgb(secondary.r, secondary.g, secondary.b)
+  })
+  
+  // Title
+  const titleText = notes.title || topic || 'Study Notes'
+  const titleLines = wrapText(titleText, boldFont, 22, width - margin * 2 - 40)
+  let titleY = height - 35
+  for (const line of titleLines) {
+    safeDrawText(currentPage, line, {
+      x: margin + 10,
+      y: titleY,
+      size: 22,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    })
+    titleY -= 28
+  }
+  
+  // Author & Institute info (if provided)
+  if (authorName || instituteName) {
+    const authorLine = [authorName, instituteName].filter(Boolean).join(' | ')
+    safeDrawText(currentPage, authorLine, {
+      x: margin + 10,
+      y: height - 75,
+      size: 10,
+      font: regularFont,
+      color: rgb(0.9, 0.9, 0.9)
+    })
+  }
+  
+  // Style badge
+  const styleName = {
+    'cornell': 'Cornell Method',
+    'outline': 'Outline Style',
+    'summary': 'Summary Notes',
+    'flashcard': 'Q&A Format',
+    'mindmap': 'Mind Map'
+  }[noteStyle] || 'Study Notes'
+  
+  // Draw badge
+  const badgeWidth = regularFont.widthOfTextAtSize(styleName, 9) + 16
+  currentPage.drawRectangle({
+    x: width - margin - badgeWidth - 10,
+    y: height - 45,
+    width: badgeWidth,
+    height: 20,
+    color: rgb(1, 1, 1),
+    opacity: 0.2
+  })
+  safeDrawText(currentPage, styleName, {
+    x: width - margin - badgeWidth - 2,
+    y: height - 40,
+    size: 9,
+    font: regularFont,
+    color: rgb(1, 1, 1)
+  })
+  
+  // Date
+  safeDrawText(currentPage, new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), {
+    x: width - margin - 100,
+    y: height - 75,
+    size: 9,
+    font: regularFont,
+    color: rgb(0.85, 0.85, 0.85)
+  })
+  
+  y = height - 120
+  
+  // Helper to draw section
+  const drawSection = (title, content, iconEmoji, bgColor) => {
+    if (!content) return
     
-    // Background
+    ensureSpace(70)
+    
+    // Section card background
+    const sectionStartY = y
+    
+    // Section header
     currentPage.drawRectangle({
       x: margin,
       y: y - 30,
       width: width - 2 * margin,
       height: 35,
-      color: rgb(bgColor.r, bgColor.g, bgColor.b),
-      borderColor: rgb(primary.r, primary.g, primary.b),
-      borderWidth: 1
+      color: bgColor
     })
     
-    // Title
-    safeDrawText(currentPage, `${icon} ${title}`, {
-      x: margin + 10,
-      y: y - 22,
-      size: 14,
+    // Left accent bar
+    currentPage.drawRectangle({
+      x: margin,
+      y: y - 30,
+      width: 4,
+      height: 35,
+      color: rgb(primary.r, primary.g, primary.b)
+    })
+    
+    safeDrawText(currentPage, `${iconEmoji}  ${title}`, {
+      x: margin + 15,
+      y: y - 20,
+      size: 13,
       font: boldFont,
       color: rgb(primary.r, primary.g, primary.b)
     })
     
     y -= 50
-  }
-  
-  // Helper to draw text content
-  const drawContent = (content, indent = 0) => {
-    if (!content) return
     
+    // Content
     const lines = content.split('\n')
-    const contentWidth = width - 2 * margin - indent - 20
+    const contentWidth = width - 2 * margin - 40
     
     for (const line of lines) {
       const trimmed = line.trim()
       if (!trimmed) {
-        y -= 8
+        y -= 6
         continue
       }
       
-      // Handle markdown-like formatting
-      let fontSize = 11
+      let fontSize = 10
       let font = regularFont
-      let textColor = rgb(0.1, 0.1, 0.1)
-      let lineIndent = indent
-      let prefix = ''
+      let textColor = rgb(0.15, 0.15, 0.15)
+      let indent = 25
       
+      // Headers
       if (trimmed.startsWith('### ')) {
-        fontSize = 12
+        fontSize = 11
         font = boldFont
         textColor = rgb(secondary.r, secondary.g, secondary.b)
         const text = trimmed.substring(4)
-        ensureSpace(20)
-        y -= 5
+        ensureSpace(18)
+        y -= 4
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, {
-            x: margin + lineIndent + 10,
-            y,
-            size: fontSize,
-            font,
-            color: textColor
-          })
+          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 4
         }
-        y -= 3
         continue
       }
       
       if (trimmed.startsWith('## ')) {
-        fontSize = 13
+        fontSize = 12
         font = boldFont
         textColor = rgb(primary.r, primary.g, primary.b)
         const text = trimmed.substring(3)
-        ensureSpace(25)
+        ensureSpace(22)
         y -= 8
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, {
-            x: margin + lineIndent + 10,
-            y,
-            size: fontSize,
-            font,
-            color: textColor
-          })
+          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 4
         }
-        y -= 5
+        y -= 4
         continue
       }
       
       if (trimmed.startsWith('# ')) {
-        fontSize = 15
+        fontSize = 14
         font = boldFont
         textColor = rgb(primary.r, primary.g, primary.b)
         const text = trimmed.substring(2)
-        ensureSpace(30)
+        ensureSpace(28)
         y -= 10
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, {
-            x: margin + lineIndent + 10,
-            y,
-            size: fontSize,
-            font,
-            color: textColor
-          })
+          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 5
         }
-        y -= 8
+        y -= 6
         continue
       }
       
-      // Bullet points
+      // Bullet points - styled
       if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-        lineIndent += 15
-        prefix = '• '
-        const text = trimmed.substring(2)
+        const text = trimmed.substring(2).replace(/\*\*/g, '')
         ensureSpace(16)
+        
+        // Draw bullet dot
+        currentPage.drawEllipse({
+          x: margin + indent + 3,
+          y: y + 3,
+          xScale: 2.5,
+          yScale: 2.5,
+          color: rgb(secondary.r, secondary.g, secondary.b)
+        })
+        
         const wrapped = wrapText(text, font, fontSize, contentWidth - 15)
         for (let i = 0; i < wrapped.length; i++) {
-          safeDrawText(currentPage, i === 0 ? prefix + wrapped[i] : '  ' + wrapped[i], {
-            x: margin + lineIndent,
+          safeDrawText(currentPage, wrapped[i], {
+            x: margin + indent + 12,
             y,
             size: fontSize,
             font,
@@ -296,14 +838,32 @@ async function generatePDF(notes, config) {
       
       // Numbered items
       if (/^\d+\.\s/.test(trimmed)) {
-        lineIndent += 15
         const match = trimmed.match(/^(\d+\.)\s(.*)/)
         if (match) {
           ensureSpace(16)
-          const wrapped = wrapText(match[2], font, fontSize, contentWidth - 25)
+          
+          // Number badge
+          const numBadgeX = margin + indent
+          currentPage.drawRectangle({
+            x: numBadgeX,
+            y: y - 3,
+            width: 18,
+            height: 15,
+            color: rgb(secondary.r, secondary.g, secondary.b)
+          })
+          safeDrawText(currentPage, match[1].replace('.', ''), {
+            x: numBadgeX + 5,
+            y: y,
+            size: 9,
+            font: boldFont,
+            color: rgb(1, 1, 1)
+          })
+          
+          const text = match[2].replace(/\*\*/g, '')
+          const wrapped = wrapText(text, font, fontSize, contentWidth - 30)
           for (let i = 0; i < wrapped.length; i++) {
-            safeDrawText(currentPage, i === 0 ? match[1] + ' ' + wrapped[i] : '    ' + wrapped[i], {
-              x: margin + lineIndent,
+            safeDrawText(currentPage, wrapped[i], {
+              x: margin + indent + 25,
               y,
               size: fontSize,
               font,
@@ -315,114 +875,72 @@ async function generatePDF(notes, config) {
         continue
       }
       
-      // Handle bold text markers
-      let processedText = trimmed.replace(/\*\*(.+?)\*\*/g, '$1')
-      
       // Regular paragraph
-      ensureSpace(16)
+      const processedText = trimmed.replace(/\*\*/g, '')
+      ensureSpace(14)
       const wrapped = wrapText(processedText, font, fontSize, contentWidth)
       for (const wl of wrapped) {
-        safeDrawText(currentPage, wl, {
-          x: margin + lineIndent + 10,
-          y,
-          size: fontSize,
-          font,
-          color: textColor
-        })
+        safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
         y -= fontSize + 4
       }
-      y -= 2
     }
+    
+    y -= 18
   }
-  
-  // === HEADER ===
-  // Draw header background
-  currentPage.drawRectangle({
-    x: margin,
-    y: height - margin - 80,
-    width: width - 2 * margin,
-    height: 80,
-    color: rgb(primary.r, primary.g, primary.b)
-  })
-  
-  // Title
-  const titleText = notes.title || topic || 'Study Notes'
-  const titleLines = wrapText(titleText, boldFont, 22, width - 2 * margin - 40)
-  let titleY = height - margin - 35
-  for (const line of titleLines) {
-    safeDrawText(currentPage, line, {
-      x: margin + 20,
-      y: titleY,
-      size: 22,
-      font: boldFont,
-      color: rgb(1, 1, 1)
-    })
-    titleY -= 28
-  }
-  
-  // Meta info
-  const metaText = `Style: ${noteStyle || 'Outline'} • Date: ${new Date().toLocaleDateString()}`
-  safeDrawText(currentPage, metaText, {
-    x: margin + 20,
-    y: height - margin - 70,
-    size: 10,
-    font: regularFont,
-    color: rgb(0.9, 0.9, 0.9)
-  })
-  
-  y = height - margin - 100
   
   // === MAIN CONTENT ===
   if (notes.content) {
-    drawSectionHeader('Notes', '📚')
-    drawContent(notes.content)
-    y -= 15
+    drawSection('Notes', notes.content, '📚', rgb(accent.r, accent.g, accent.b))
   }
   
   // === KEY TERMS ===
   if (notes.keyTerms) {
-    drawSectionHeader('Key Terms & Definitions', '#️⃣', { r: accent.r, g: accent.g, b: accent.b })
-    drawContent(notes.keyTerms, 5)
-    y -= 15
+    drawSection('Key Terms & Definitions', notes.keyTerms, '🔑', rgb(0.93, 0.95, 1))
   }
   
   // === EXAMPLES ===
   if (notes.examples) {
-    drawSectionHeader('Examples', '💡', { r: 0.99, g: 0.96, b: 0.76 })
-    drawContent(notes.examples, 5)
-    y -= 15
+    drawSection('Examples', notes.examples, '💡', rgb(1, 0.98, 0.9))
   }
   
   // === REVIEW QUESTIONS ===
   if (notes.questions) {
-    drawSectionHeader('Review Questions', '❓', { r: 0.95, g: 0.91, b: 1 })
-    drawContent(notes.questions, 5)
-    y -= 15
+    drawSection('Review Questions', notes.questions, '❓', rgb(0.97, 0.93, 1))
   }
   
   // === SUMMARY ===
   if (notes.summary) {
-    drawSectionHeader('Summary', '📝', { r: 0.86, g: 0.99, b: 0.88 })
-    drawContent(notes.summary, 5)
+    drawSection('Summary', notes.summary, '📝', rgb(0.92, 1, 0.95))
   }
   
-  // === FOOTER ===
+  // === FOOTERS ===
   const pages = pdfDoc.getPages()
   for (let i = 0; i < pages.length; i++) {
     const pg = pages[i]
-    safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
-      x: width / 2 - 30,
-      y: 25,
-      size: 9,
-      font: regularFont,
-      color: rgb(0.6, 0.6, 0.6)
+    
+    // Bottom border
+    pg.drawRectangle({
+      x: margin,
+      y: 35,
+      width: width - 2 * margin,
+      height: 1,
+      color: rgb(0.85, 0.85, 0.85)
     })
+    
+    safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
+      x: width / 2 - 25,
+      y: 20,
+      size: 8,
+      font: regularFont,
+      color: rgb(0.5, 0.5, 0.5)
+    })
+    
     safeDrawText(pg, 'Created with ProCreators Study Notes Generator', {
       x: margin,
-      y: 25,
+      y: 20,
       size: 8,
       font: italicFont,
-      color: rgb(0.7, 0.7, 0.7)
+      color: rgb(0.6, 0.6, 0.6)
     })
   }
   
@@ -458,35 +976,31 @@ export async function POST(request) {
         if (file && file.size > 0) {
           const bytes = await file.arrayBuffer()
           const buffer = Buffer.from(bytes)
-          
-          // For text files, read directly
           if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
             sourceContent = buffer.toString('utf-8')
           } else {
-            // For other files, we'd need additional processing
-            // For now, treat as text
             sourceContent = buffer.toString('utf-8')
           }
         } else if (customNotes) {
           sourceContent = customNotes
         }
         
-        // Build the prompt based on input mode
+        // Build the prompt
         let prompt = ''
         const systemPrompt = `You are an expert educator and study notes creator. You specialize in creating clear, well-organized study materials that help students learn effectively. Create notes in the student's language if the topic is given in a non-English language.`
         
         const detailInstructions = {
-          brief: 'Keep the notes concise and focused on the most essential points only. Aim for brevity.',
-          medium: 'Provide a balanced level of detail covering all important concepts with some explanation.',
-          detailed: 'Create comprehensive, in-depth notes with thorough explanations and extensive coverage.'
+          brief: 'Keep the notes concise and focused on the most essential points only.',
+          medium: 'Provide a balanced level of detail covering all important concepts.',
+          detailed: 'Create comprehensive, in-depth notes with thorough explanations.'
         }
         
         const styleInstructions = {
-          cornell: 'Structure the notes using the Cornell Method with a main notes section, cue column for questions/keywords, and a summary section.',
-          outline: 'Structure the notes using the Outline Method with hierarchical bullet points: main topics, sub-topics, and supporting details.',
-          mindmap: 'Structure the notes with a central concept and connected branches showing relationships between ideas. Use indentation to show hierarchy. Format as an outline showing connections.',
-          summary: 'Create condensed summary notes focusing on key takeaways, important facts, and quick review points.',
-          flashcard: 'Structure the content as question and answer pairs that are suitable for self-testing and active recall.'
+          cornell: 'Structure the notes using the Cornell Method with main notes, cue questions, and summary.',
+          outline: 'Structure the notes using the Outline Method with hierarchical bullet points.',
+          mindmap: 'Structure the notes as a mind map with a central concept and connected branches. Use clear section headers (## Section Name) for main branches and bullet points for sub-topics.',
+          summary: 'Create condensed summary notes focusing on key takeaways and important facts.',
+          flashcard: 'Structure the content as question and answer pairs for self-testing.'
         }
         
         if (inputMode === 'topic') {
@@ -500,14 +1014,14 @@ Note Style: ${styleInstructions[noteStyle] || styleInstructions.outline}
 Please provide the notes in the following JSON format:
 {
   "title": "Title of the notes",
-  "content": "Main notes content with clear sections, bullet points, and organized information. Use markdown formatting like **bold** for key terms, ## for section headers, and - for bullet points.",
-  ${includeKeyTerms ? '"keyTerms": "List of key terms with their definitions. Format each as: **Term**: Definition",' : ''}
-  ${includeExamples ? '"examples": "Real-world examples and illustrations to help understand the concepts",' : ''}
-  ${includeQuestions ? '"questions": "Review questions for self-testing. Include a mix of recall and application questions",' : ''}
-  ${includeSummary ? '"summary": "A concise summary of the main points covered in these notes"' : ''}
+  "content": "Main notes content with clear sections using ## for headers and - for bullet points. Make it well-organized.",
+  ${includeKeyTerms ? '"keyTerms": "List of key terms with definitions. Format: **Term**: Definition",' : ''}
+  ${includeExamples ? '"examples": "Real-world examples to help understand the concepts",' : ''}
+  ${includeQuestions ? '"questions": "Review questions for self-testing",' : ''}
+  ${includeSummary ? '"summary": "A concise summary of the main points"' : ''}
 }
 
-Make the notes educational, clear, and well-organized. Use the appropriate language based on the topic.`
+Make the notes educational, clear, and well-organized.`
         } else {
           prompt = `Transform the following content into well-organized study notes:
 
@@ -520,17 +1034,17 @@ Academic Level: ${gradeLevel}
 Detail Level: ${detailInstructions[detailLevel] || detailInstructions.medium}
 Note Style: ${styleInstructions[noteStyle] || styleInstructions.outline}
 
-Please reorganize and enhance this content into the following JSON format:
+Please reorganize into the following JSON format:
 {
-  "title": "A clear, descriptive title for these notes",
-  "content": "Reorganized main notes content with clear sections, bullet points, and improved structure. Use markdown formatting like **bold** for key terms, ## for section headers, and - for bullet points.",
-  ${includeKeyTerms ? '"keyTerms": "Key terms and definitions extracted from the content. Format each as: **Term**: Definition",' : ''}
-  ${includeExamples ? '"examples": "Examples from the content or additional ones to help understanding",' : ''}
-  ${includeQuestions ? '"questions": "Review questions based on the content for self-testing",' : ''}
-  ${includeSummary ? '"summary": "A concise summary of the main points"' : ''}
+  "title": "A clear title for these notes",
+  "content": "Reorganized notes with clear sections using ## for headers and - for bullet points.",
+  ${includeKeyTerms ? '"keyTerms": "Key terms and definitions from the content",' : ''}
+  ${includeExamples ? '"examples": "Examples from the content",' : ''}
+  ${includeQuestions ? '"questions": "Review questions based on the content",' : ''}
+  ${includeSummary ? '"summary": "A concise summary"' : ''}
 }
 
-Improve the organization, add structure, and make it easier to study from. Maintain the original language of the content.`
+Improve the organization and make it easier to study from.`
         }
         
         // Generate notes using LLM
@@ -547,7 +1061,6 @@ Improve the organization, add structure, and make it easier to study from. Maint
           }
         } catch (parseError) {
           console.error('JSON parse error:', parseError)
-          // Create structured response from text
           notes = {
             title: topic || 'Study Notes',
             content: response,
@@ -555,10 +1068,7 @@ Improve the organization, add structure, and make it easier to study from. Maint
           }
         }
         
-        return NextResponse.json({
-          success: true,
-          notes
-        })
+        return NextResponse.json({ success: true, notes })
       }
     }
     
@@ -567,7 +1077,7 @@ Improve the organization, add structure, and make it easier to study from. Maint
     const { action } = body
     
     if (action === 'generate-pdf') {
-      const { notes, topic, noteStyle, colorTheme, paperSize } = body
+      const { notes, topic, noteStyle, colorTheme, paperSize, authorName, instituteName } = body
       
       // Create output directory
       const outputDir = path.join(process.cwd(), 'public', 'generated', 'study-notes')
@@ -577,12 +1087,14 @@ Improve the organization, add structure, and make it easier to study from. Maint
       const filename = `study-notes-${uuidv4()}.pdf`
       const outputPath = path.join(outputDir, filename)
       
-      // Generate PDF using pdf-lib
+      // Generate PDF
       const pdfBuffer = await generatePDF(notes, {
         topic,
         noteStyle,
         colorTheme,
-        paperSize
+        paperSize,
+        authorName,
+        instituteName
       })
       
       // Save the PDF file
@@ -599,7 +1111,7 @@ Improve the organization, add structure, and make it easier to study from. Maint
           body: JSON.stringify({
             toolId: 'study-notes',
             title: notes.title || topic || 'Study Notes',
-            data: { notes, topic, noteStyle, pdfUrl },
+            data: { notes, topic, noteStyle, pdfUrl, authorName, instituteName },
             thumbnailUrl: null
           })
         })
@@ -607,22 +1119,12 @@ Improve the organization, add structure, and make it easier to study from. Maint
         console.log('Library save skipped:', e.message)
       }
       
-      return NextResponse.json({
-        success: true,
-        pdfUrl,
-        filename
-      })
+      return NextResponse.json({ success: true, pdfUrl, filename })
     }
     
-    return NextResponse.json(
-      { success: false, error: 'Invalid action' },
-      { status: 400 }
-    )
+    return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
   } catch (error) {
     console.error('Study notes generation error:', error)
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
