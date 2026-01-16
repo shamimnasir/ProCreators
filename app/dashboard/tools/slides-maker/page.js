@@ -351,6 +351,7 @@ export default function SlidesMakerPage() {
 
   // Step 1: Topic & Type
   const [topic, setTopic] = useState('')
+  const [authorName, setAuthorName] = useState('')
   const [presentationType, setPresentationType] = useState('business')
   const [slideCount, setSlideCount] = useState(8)
   const [language, setLanguage] = useState('english')
