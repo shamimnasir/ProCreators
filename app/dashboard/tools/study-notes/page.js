@@ -133,7 +133,7 @@ export default function StudyNotesPage() {
 
   // Get current data for drafts
   const getCurrentData = useCallback(() => ({
-    title: topic || 'Study Notes',
+    title: generatedNotes?.title || topic || 'Study Notes',
     topic,
     customNotes,
     inputMode,
@@ -147,7 +147,7 @@ export default function StudyNotesPage() {
     includeSummary,
     colorTheme,
     paperSize,
-    generatedNotes,
+    generatedNotes: generatedNotes || null,
     step
   }), [topic, customNotes, inputMode, noteStyle, subject, gradeLevel, detailLevel, includeKeyTerms, includeExamples, includeQuestions, includeSummary, colorTheme, paperSize, generatedNotes, step])
 
