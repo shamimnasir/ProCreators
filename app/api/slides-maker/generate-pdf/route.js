@@ -377,90 +377,100 @@ function drawSectionSlide(page, slide, fonts, dimensions, textColor, getX, hasBa
 function drawContentSlide(page, slide, fonts, dimensions, textColor, getX, hasBangla) {
   const { width, height } = dimensions
   const { boldFont, regularFont, banglaFont, banglaBoldFont } = fonts
-  const margin = 50
+  const margin = 40
   const contentWidth = width - (margin * 2)
   
   const titleFont = hasBangla && banglaBoldFont ? banglaBoldFont : boldFont
   const bodyFont = hasBangla && banglaFont ? banglaFont : regularFont
   
+  // Draw content area background to cover any background image text
+  page.drawRectangle({
+    x: margin - 10,
+    y: 40,
+    width: contentWidth + 20,
+    height: height - 80,
+    color: rgb(0, 0, 0),
+    opacity: 0.55
+  })
+  
   // Title
-  const titleLines = wrapText(slide.title || '', titleFont, 30, contentWidth)
-  let y = height - 65
+  const titleLines = wrapText(slide.title || '', titleFont, 28, contentWidth)
+  let y = height - 60
   titleLines.forEach(line => {
     try {
       safeDrawText(page, line, {
-        x: margin, y, size: 30, font: titleFont, color: textColor
+        x: margin, y, size: 28, font: titleFont, color: textColor
       })
     } catch (e) {
       safeDrawText(page, line, {
-        x: margin, y, size: 30, font: boldFont, color: textColor
+        x: margin, y, size: 28, font: boldFont, color: textColor
       })
     }
-    y -= 38
+    y -= 36
   })
   
-  y -= 25
+  y -= 20
   
   // Bullets - INFOGRAPHIC STYLE with numbered cards
   const bullets = slide.bullets || []
-  const bulletHeight = 45
+  const bulletHeight = 42
   
   bullets.forEach((bullet, idx) => {
-    if (y < 70) return
+    if (y < 65) return
     
     // Draw bullet card background
     page.drawRectangle({
       x: margin,
-      y: y - 8,
+      y: y - 6,
       width: contentWidth,
       height: bulletHeight,
       color: rgb(1, 1, 1),
-      opacity: 0.15
+      opacity: 0.18
     })
     
     // Draw number circle
     page.drawCircle({
-      x: margin + 25,
+      x: margin + 22,
       y: y + 14,
-      size: 16,
+      size: 15,
       color: rgb(1, 1, 1),
-      opacity: 0.3
+      opacity: 0.35
     })
     
     // Draw number
     const numStr = String(idx + 1)
     safeDrawText(page, numStr, {
-      x: margin + 21 - (numStr.length > 1 ? 3 : 0),
+      x: margin + 18 - (numStr.length > 1 ? 3 : 0),
       y: y + 8,
-      size: 14,
+      size: 13,
       font: boldFont,
       color: textColor
     })
     
     // Bullet text
-    const bulletLines = wrapText(bullet, bodyFont, 17, contentWidth - 70)
-    let bulletY = y + 16
+    const bulletLines = wrapText(bullet, bodyFont, 16, contentWidth - 60)
+    let bulletY = y + 15
     bulletLines.forEach((line, lineIdx) => {
       try {
         safeDrawText(page, line, {
-          x: margin + 50,
-          y: bulletY - (lineIdx * 20),
-          size: 17,
+          x: margin + 48,
+          y: bulletY - (lineIdx * 18),
+          size: 16,
           font: bodyFont,
           color: textColor
         })
       } catch (e) {
         safeDrawText(page, line, {
-          x: margin + 50,
-          y: bulletY - (lineIdx * 20),
-          size: 17,
+          x: margin + 48,
+          y: bulletY - (lineIdx * 18),
+          size: 16,
           font: regularFont,
           color: textColor
         })
       }
     })
     
-    y -= bulletHeight + 8
+    y -= bulletHeight + 6
   })
 }
 
