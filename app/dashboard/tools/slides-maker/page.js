@@ -1304,44 +1304,6 @@ export default function SlidesMakerPage() {
               </CardContent>
             </Card>
 
-            {/* Slide Editor - Shows when edit mode is on */}
-            {editMode && currentSlide && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Edit3 className="h-4 w-4" />
-                      Edit Slide {currentSlideIndex + 1}
-                    </CardTitle>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={handleAddSlide}>
-                        <Plus className="h-4 w-4 mr-1" /> Add Slide
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleDeleteSlide}
-                        disabled={presentation.slides.length <= 1}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" /> Delete
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <SlideEditor
-                    slide={currentSlide}
-                    onUpdate={handleUpdateSlide}
-                    onRegenerateImage={handleRegenerateImage}
-                    isGeneratingImage={generatingImageIndex === currentSlideIndex}
-                    topic={topic}
-                    theme={theme}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
             {/* Speaker Notes - Shows when not in edit mode */}
             {!editMode && currentSlide?.speakerNotes && (
               <Card>
@@ -1358,8 +1320,54 @@ export default function SlidesMakerPage() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
+          {/* Edit Panel - Shows as sidebar when in edit mode */}
+          {editMode && currentSlide && (
+            <div className="space-y-4">
+              <Card className="border-primary">
+                <CardHeader className="pb-2 bg-primary/5">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Edit3 className="h-5 w-5 text-primary" />
+                      Edit Slide {currentSlideIndex + 1}
+                    </CardTitle>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Change text, upload images, or generate new backgrounds
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <SlideEditor
+                    slide={currentSlide}
+                    onUpdate={handleUpdateSlide}
+                    onRegenerateImage={handleRegenerateImage}
+                    isGeneratingImage={generatingImageIndex === currentSlideIndex}
+                    topic={topic}
+                    theme={theme}
+                  />
+                  
+                  {/* Slide Actions */}
+                  <div className="flex gap-2 mt-4 pt-4 border-t">
+                    <Button variant="outline" size="sm" onClick={handleAddSlide} className="flex-1">
+                      <Plus className="h-4 w-4 mr-1" /> Add Slide
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDeleteSlide}
+                      disabled={presentation.slides.length <= 1}
+                      className="flex-1 text-red-500 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Sidebar - Shows when NOT in edit mode */}
+          {!editMode && (
+            <div className="space-y-4">
             {/* Presentation Info */}
             <Card>
               <CardHeader>
