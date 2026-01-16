@@ -149,73 +149,56 @@ DO NOT translate to English. Keep everything in ${detectedLanguage}.
 Target Audience: ${audience}
 ${additionalContext ? `Additional Context: ${additionalContext}` : ''}
 
-Generate a JSON presentation. ${isNonEnglish ? `ALL text content in ${detectedLanguage}, except imagePrompt which is English.` : ''}
+Generate a JSON presentation.${isNonEnglish ? ` Write ALL content in ${detectedLanguage}. Only imagePrompt in English.` : ''}
+
+JSON Structure:
 {
-  "title": "[TITLE IN ${detectedLanguage}]",
-  "subtitle": "[SUBTITLE IN ${detectedLanguage}]",
+  "title": "Presentation title here",
+  "subtitle": "Subtitle or tagline",
   "slides": [
     {
       "slideNumber": 1,
       "type": "title",
-      "title": "[TITLE IN ${detectedLanguage}]",
-      "subtitle": "[SUBTITLE IN ${detectedLanguage}]",
-      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
-      "imagePrompt": "Description in English for image generation"
+      "title": "Main Title",
+      "subtitle": "Subtitle",
+      "speakerNotes": "Notes for presenter",
+      "imagePrompt": "Professional background description in English"
     },
     {
       "slideNumber": 2,
       "type": "content",
-      "title": "[TITLE IN ${detectedLanguage}]",
-      "bullets": ["[POINT IN ${detectedLanguage}]", "[POINT IN ${detectedLanguage}]"],
-      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
-      "imagePrompt": "Description in English for image generation"
+      "title": "Slide Title",
+      "bullets": ["Point 1", "Point 2", "Point 3", "Point 4"],
+      "speakerNotes": "Notes",
+      "imagePrompt": "Background description in English"
     },
     {
       "slideNumber": 3,
-      "type": "two-column",
-      "title": "[TITLE IN ${detectedLanguage}]",
-      "leftColumn": { "heading": "[HEADING IN ${detectedLanguage}]", "points": ["[POINT]", "[POINT]"] },
-      "rightColumn": { "heading": "[HEADING IN ${detectedLanguage}]", "points": ["[POINT]", "[POINT]"] },
-      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
-      "imagePrompt": "Description in English"
+      "type": "stats",
+      "title": "Key Statistics",
+      "stats": [
+        { "value": "85%", "label": "Description" },
+        { "value": "2.5x", "label": "Description" }
+      ],
+      "speakerNotes": "Notes",
+      "imagePrompt": "Background description in English"
     },
     {
       "slideNumber": 4,
       "type": "quote",
-      "quote": "[QUOTE IN ${detectedLanguage}]",
-      "attribution": "[AUTHOR NAME]",
-      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
-      "imagePrompt": "Description in English"
-    },
-    {
-      "slideNumber": 5,
-      "type": "stats",
-      "title": "[TITLE IN ${detectedLanguage}]",
-      "stats": [
-        { "value": "85%", "label": "[LABEL IN ${detectedLanguage}]" },
-        { "value": "2.5x", "label": "[LABEL IN ${detectedLanguage}]" }
-      ],
-      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
-      "imagePrompt": "Description in English"
+      "quote": "Impactful quote text",
+      "attribution": "Author Name",
+      "speakerNotes": "Notes",
+      "imagePrompt": "Background description in English"
     }
   ]
 }
 
-Slide Types to use:
-- "title" - Opening slide (slide 1)
-- "content" - Standard bullet points
-- "two-column" - Side by side comparison
-- "quote" - Impactful quote
-- "stats" - Key numbers/statistics
-- "section" - Section divider
-- "conclusion" - Final slide with key takeaways
-- "cta" - Call to action (last slide)
+Slide Types: title, content, two-column, quote, stats, section, conclusion, cta
+Mix different types for variety. End with conclusion or cta.
+${isNonEnglish ? `\n⚠️ REMINDER: Write content in ${detectedLanguage}, not English!` : ''}
 
-For imagePrompt: Describe a professional, modern background that fits the slide content. Be specific about colors, mood, and visual elements. The image should complement the text content.
-
-Mix different slide types for variety. End with either "conclusion" or "cta" type.
-
-IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
+Return ONLY valid JSON.`
 
     const result = await generateText(userPrompt, systemPrompt)
 
