@@ -1094,26 +1094,38 @@ export default function SlidesMakerPage() {
 
                     {/* Title */}
                     {currentSlide?.title && (
-                      <h2 className="text-xl md:text-2xl font-bold mb-4 drop-shadow-lg">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-3 drop-shadow-lg">
                         {currentSlide.title}
                       </h2>
                     )}
 
                     {/* Subtitle for title slides */}
                     {currentSlide?.subtitle && (
-                      <p className="text-lg opacity-90 mb-4 drop-shadow">{currentSlide.subtitle}</p>
+                      <p className="text-lg md:text-xl opacity-90 mb-3 drop-shadow">{currentSlide.subtitle}</p>
                     )}
 
-                    {/* Bullets */}
-                    {currentSlide?.bullets && (
-                      <ul className="space-y-2 flex-1">
+                    {/* Author Name for title slides */}
+                    {currentSlide?.type === 'title' && currentSlide?.authorName && (
+                      <p className="text-base opacity-80 mt-2 drop-shadow font-medium">
+                        By: {currentSlide.authorName}
+                      </p>
+                    )}
+
+                    {/* Bullets - Infographic Style */}
+                    {currentSlide?.bullets && currentSlide.bullets.length > 0 && (
+                      <div className="flex-1 grid gap-3 mt-4">
                         {currentSlide.bullets.map((bullet, idx) => (
-                          <li key={idx} className="flex items-start gap-2 drop-shadow">
-                            <div className="w-2 h-2 rounded-full bg-current mt-2 opacity-80" />
-                            <span>{bullet}</span>
-                          </li>
+                          <div 
+                            key={idx} 
+                            className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 drop-shadow"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
+                              {idx + 1}
+                            </div>
+                            <span className="text-sm md:text-base">{bullet}</span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
 
                     {/* Quote */}
