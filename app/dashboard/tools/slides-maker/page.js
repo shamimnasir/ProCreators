@@ -1140,15 +1140,18 @@ export default function SlidesMakerPage() {
                       </div>
                     )}
 
-                    {/* Stats */}
-                    {currentSlide?.stats && (
-                      <div className="flex-1 grid grid-cols-3 gap-4 items-center">
+                    {/* Stats - Infographic Style */}
+                    {currentSlide?.stats && currentSlide.stats.length > 0 && (
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 items-center mt-4">
                         {currentSlide.stats.map((stat, idx) => (
-                          <div key={idx} className="text-center p-4 rounded-lg bg-white/10 backdrop-blur">
-                            <div className="text-2xl font-bold drop-shadow-lg">
+                          <div 
+                            key={idx} 
+                            className="text-center p-4 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-lg"
+                          >
+                            <div className="text-3xl md:text-4xl font-bold drop-shadow-lg mb-1">
                               {stat.value}
                             </div>
-                            <div className="text-sm opacity-80">{stat.label}</div>
+                            <div className="text-sm opacity-90 font-medium">{stat.label}</div>
                           </div>
                         ))}
                       </div>
