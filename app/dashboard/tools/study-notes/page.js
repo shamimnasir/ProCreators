@@ -374,7 +374,7 @@ export default function StudyNotesPage() {
         <AutoSaveDraftsManager
           toolType="study-notes"
           getCurrentData={getCurrentData}
-          onLoadDraft={loadDraftData}
+          loadDraftData={loadDraftData}
           currentStep={step}
         />
       </div>
