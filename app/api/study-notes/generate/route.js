@@ -1128,24 +1128,48 @@ Remember: ONLY use information from the source content. Do not add external info
         // Parse JSON from response
         let notes
         try {
-          const jsonMatch = response.match(/\{[\s\S]*\}/)
+          // Find JSON in response
+          let jsonMatch = response.match(/\{[\s\S]*\}/)
           if (jsonMatch) {
-            notes = JSON.parse(jsonMatch[0])
+            let jsonStr = jsonMatch[0]
             
-            // Ensure content fields have proper newlines (not escaped)
-            if (notes.content) {
+            // Clean up common JSON issues from LLM responses
+            // Fix unescaped newlines inside strings
+            jsonStr = jsonStr.replace(/:\s*"([^"]*?)(?<!\\)\n([^"]*?)"/g, (match, p1, p2) => {
+              return `: "${p1}\\n${p2}"`
+            })
+            
+            try {
+              notes = JSON.parse(jsonStr)
+            } catch (e) {
+              // If parsing fails, try to extract key fields manually
+              console.log('First JSON parse failed, trying manual extraction')
+              
+              const titleMatch = jsonStr.match(/"title"\s*:\s*"([^"]+)"/)
+              const contentMatch = jsonStr.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"|"\s*\}|\",\s*\")/)
+              const summaryMatch = jsonStr.match(/"summary"\s*:\s*"([^"]*)"/)
+              
+              notes = {
+                title: titleMatch ? titleMatch[1] : (topic || 'Study Notes'),
+                content: contentMatch ? contentMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : response,
+                summary: summaryMatch ? summaryMatch[1].replace(/\\n/g, '\n') : ''
+              }
+            }
+            
+            // Ensure content fields have proper newlines
+            if (notes && typeof notes.content === 'string') {
               notes.content = notes.content.replace(/\\n/g, '\n')
             }
-            if (notes.keyTerms) {
+            if (notes && typeof notes.keyTerms === 'string') {
               notes.keyTerms = notes.keyTerms.replace(/\\n/g, '\n')
             }
-            if (notes.examples) {
+            if (notes && typeof notes.examples === 'string') {
               notes.examples = notes.examples.replace(/\\n/g, '\n')
             }
-            if (notes.questions) {
+            if (notes && typeof notes.questions === 'string') {
               notes.questions = notes.questions.replace(/\\n/g, '\n')
             }
-            if (notes.summary) {
+            if (notes && typeof notes.summary === 'string') {
               notes.summary = notes.summary.replace(/\\n/g, '\n')
             }
           } else {
