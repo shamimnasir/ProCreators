@@ -312,7 +312,9 @@ export default function StudyNotesPage() {
           topic,
           noteStyle,
           colorTheme: COLOR_THEMES.find(t => t.id === colorTheme),
-          paperSize
+          paperSize,
+          authorName,
+          instituteName
         })
       })
 
