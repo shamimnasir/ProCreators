@@ -6,6 +6,18 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
+// Helper to extract text from PDF
+async function extractTextFromPDF(buffer) {
+  try {
+    const pdfParse = (await import('pdf-parse')).default
+    const data = await pdfParse(buffer)
+    return data.text || ''
+  } catch (error) {
+    console.error('PDF extraction error:', error)
+    return ''
+  }
+}
+
 // Helper to run LLM - using temp file to avoid E2BIG error with large content
 async function runLLM(prompt, systemPrompt = 'You are an expert educator and study guide creator.') {
   return new Promise(async (resolve, reject) => {
