@@ -283,6 +283,16 @@ function drawTitleSlide(page, slide, fonts, dimensions, textColor, getX, hasBang
   const titleFont = hasBangla && banglaBoldFont ? banglaBoldFont : boldFont
   const bodyFont = hasBangla && banglaFont ? banglaFont : regularFont
   
+  // Draw center content area background
+  page.drawRectangle({
+    x: 50,
+    y: height / 2 - 100,
+    width: width - 100,
+    height: 200,
+    color: rgb(0, 0, 0),
+    opacity: 0.5
+  })
+  
   // Title
   const titleLines = wrapText(slide.title || '', titleFont, 44, width - 100)
   let y = height / 2 + (titleLines.length * 25) + 20
