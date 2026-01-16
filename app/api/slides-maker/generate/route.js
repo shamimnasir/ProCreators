@@ -146,53 +146,52 @@ Only "imagePrompt" should be English.
 
 Generate a complete presentation with this exact JSON structure:
 {
-  "title": "Main presentation title",
-  "subtitle": "Subtitle or tagline",
+  "title": "[TITLE IN ${detectedLanguage}]",
+  "subtitle": "[SUBTITLE IN ${detectedLanguage}]",
   "slides": [
     {
       "slideNumber": 1,
       "type": "title",
-      "title": "Presentation Title",
-      "subtitle": "Subtitle here",
-      "speakerNotes": "Notes for the presenter",
-      "imagePrompt": "Description of ideal background image for this slide"
+      "title": "[TITLE IN ${detectedLanguage}]",
+      "subtitle": "[SUBTITLE IN ${detectedLanguage}]",
+      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
+      "imagePrompt": "Description in English for image generation"
     },
     {
       "slideNumber": 2,
       "type": "content",
-      "title": "Slide Title",
-      "bullets": ["Point 1", "Point 2", "Point 3", "Point 4"],
-      "speakerNotes": "Notes for this slide",
-      "imagePrompt": "Description of ideal background image"
+      "title": "[TITLE IN ${detectedLanguage}]",
+      "bullets": ["[POINT IN ${detectedLanguage}]", "[POINT IN ${detectedLanguage}]"],
+      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
+      "imagePrompt": "Description in English for image generation"
     },
     {
       "slideNumber": 3,
       "type": "two-column",
-      "title": "Comparison Title",
-      "leftColumn": { "heading": "Left", "points": ["Point 1", "Point 2"] },
-      "rightColumn": { "heading": "Right", "points": ["Point 1", "Point 2"] },
-      "speakerNotes": "Notes",
-      "imagePrompt": "Description of ideal background image"
+      "title": "[TITLE IN ${detectedLanguage}]",
+      "leftColumn": { "heading": "[HEADING IN ${detectedLanguage}]", "points": ["[POINT]", "[POINT]"] },
+      "rightColumn": { "heading": "[HEADING IN ${detectedLanguage}]", "points": ["[POINT]", "[POINT]"] },
+      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
+      "imagePrompt": "Description in English"
     },
     {
       "slideNumber": 4,
       "type": "quote",
-      "quote": "Impactful quote here",
-      "attribution": "Author Name",
-      "speakerNotes": "Notes",
-      "imagePrompt": "Description of ideal background image"
+      "quote": "[QUOTE IN ${detectedLanguage}]",
+      "attribution": "[AUTHOR NAME]",
+      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
+      "imagePrompt": "Description in English"
     },
     {
       "slideNumber": 5,
       "type": "stats",
-      "title": "Key Statistics",
+      "title": "[TITLE IN ${detectedLanguage}]",
       "stats": [
-        { "value": "85%", "label": "Description" },
-        { "value": "2.5x", "label": "Description" },
-        { "value": "$1M+", "label": "Description" }
+        { "value": "85%", "label": "[LABEL IN ${detectedLanguage}]" },
+        { "value": "2.5x", "label": "[LABEL IN ${detectedLanguage}]" }
       ],
-      "speakerNotes": "Notes",
-      "imagePrompt": "Description of ideal background image"
+      "speakerNotes": "[NOTES IN ${detectedLanguage}]",
+      "imagePrompt": "Description in English"
     }
   ]
 }
