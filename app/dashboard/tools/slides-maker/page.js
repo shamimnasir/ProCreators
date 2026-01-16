@@ -420,6 +420,7 @@ export default function SlidesMakerPage() {
   // Start new
   const handleStartNew = useCallback(() => {
     setTopic('')
+    setAuthorName('')
     setPresentationType('business')
     setSlideCount(8)
     setLanguage('english')
