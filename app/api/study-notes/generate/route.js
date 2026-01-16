@@ -1088,28 +1088,38 @@ Please provide the notes in the following JSON format:
 
 Make the notes educational, clear, and well-organized.`
         } else {
-          prompt = `Transform the following content into well-organized study notes:
+          // For user-uploaded content, be very explicit about using ONLY that content
+          prompt = `IMPORTANT: You MUST create study notes ONLY from the content provided below. Do NOT add any information that is not in the source material. The notes should be a reorganization of THIS specific content.
 
----
+=== SOURCE CONTENT START ===
 ${sourceContent}
----
+=== SOURCE CONTENT END ===
+
+Your task: Transform the above content into well-organized study notes.
 
 Subject Area: ${subject}
 Academic Level: ${gradeLevel}
 Detail Level: ${detailInstructions[detailLevel] || detailInstructions.medium}
 Note Style: ${styleInstructions[noteStyle] || styleInstructions.outline}
 
-Please reorganize into the following JSON format:
+CRITICAL RULES:
+1. The title MUST reflect what the source content is actually about
+2. ALL information in the notes must come from the source content above
+3. Do NOT invent or add topics not present in the source
+4. If the source is about KDP/Amazon publishing, the notes must be about KDP/Amazon publishing
+5. If the source is about a specific business/topic, focus on that exact topic
+
+Please provide the notes in this JSON format:
 {
-  "title": "A clear title for these notes",
-  "content": "Reorganized notes with clear sections using ## for headers and - for bullet points.",
-  ${includeKeyTerms ? '"keyTerms": "Key terms and definitions from the content",' : ''}
-  ${includeExamples ? '"examples": "Examples from the content",' : ''}
-  ${includeQuestions ? '"questions": "Review questions based on the content",' : ''}
-  ${includeSummary ? '"summary": "A concise summary"' : ''}
+  "title": "A title that accurately describes the source content",
+  "content": "Reorganized notes with clear sections using ## for headers and - for bullet points. ONLY use information from the source content.",
+  ${includeKeyTerms ? '"keyTerms": "Key terms and definitions extracted FROM the source content",' : ''}
+  ${includeExamples ? '"examples": "Examples mentioned IN the source content",' : ''}
+  ${includeQuestions ? '"questions": "Review questions based on the source content",' : ''}
+  ${includeSummary ? '"summary": "A summary of the main points from the source content"' : ''}
 }
 
-Improve the organization and make it easier to study from.`
+Remember: ONLY use information from the source content. Do not add external information.`
         }
         
         // Generate notes using LLM
