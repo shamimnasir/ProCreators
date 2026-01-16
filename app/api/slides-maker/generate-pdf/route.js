@@ -363,6 +363,16 @@ function drawSectionSlide(page, slide, fonts, dimensions, textColor, getX, hasBa
   
   const titleFont = hasBangla && banglaBoldFont ? banglaBoldFont : boldFont
   
+  // Draw center content area background
+  page.drawRectangle({
+    x: 50,
+    y: height / 2 - 60,
+    width: width - 100,
+    height: 120,
+    color: rgb(0, 0, 0),
+    opacity: 0.55
+  })
+  
   const titleLines = wrapText(slide.title || '', titleFont, 40, width - 100)
   let y = height / 2 + (titleLines.length * 25)
   titleLines.forEach(line => {
