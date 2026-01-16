@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
@@ -53,311 +55,378 @@ async function runLLM(prompt, systemPrompt = 'You are an expert educator and stu
   })
 }
 
-// Generate PDF HTML
-function generateStudyNotesHTML(notes, config) {
+// Helper to convert hex to RGB
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16) / 255,
+    g: parseInt(result[2], 16) / 255,
+    b: parseInt(result[3], 16) / 255
+  } : { r: 0.1, g: 0.25, b: 0.7 }
+}
+
+// Text wrapping helper
+function wrapText(text, font, fontSize, maxWidth) {
+  if (!text) return []
+  const words = text.split(' ')
+  const lines = []
+  let currentLine = ''
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word
+    try {
+      const width = font.widthOfTextAtSize(testLine, fontSize)
+      if (width > maxWidth && currentLine) {
+        lines.push(currentLine)
+        currentLine = word
+      } else {
+        currentLine = testLine
+      }
+    } catch {
+      // If width calculation fails, just add the word
+      if (currentLine.length > 60) {
+        lines.push(currentLine)
+        currentLine = word
+      } else {
+        currentLine = testLine
+      }
+    }
+  }
+  if (currentLine) {
+    lines.push(currentLine)
+  }
+  return lines
+}
+
+// Safe text drawing (handles special characters)
+function safeDrawText(page, text, options) {
+  try {
+    // Clean text of problematic characters
+    const cleanText = text
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Control characters
+      .replace(/[^\x00-\x7F]/g, char => {
+        // Try to keep the character, replace if needed
+        return char
+      })
+    
+    page.drawText(cleanText, options)
+  } catch (e) {
+    // Fallback: draw with ASCII-only version
+    const asciiText = text.replace(/[^\x20-\x7E]/g, '?')
+    try {
+      page.drawText(asciiText, options)
+    } catch (e2) {
+      console.log('Text draw failed:', e2.message)
+    }
+  }
+}
+
+// Generate PDF using pdf-lib
+async function generatePDF(notes, config) {
   const { topic, noteStyle, colorTheme, paperSize } = config
   
-  const pageWidth = paperSize === 'a4' ? '210mm' : '8.5in'
-  const pageHeight = paperSize === 'a4' ? '297mm' : '11in'
-  
-  const primaryColor = colorTheme?.primary || '#1e40af'
-  const secondaryColor = colorTheme?.secondary || '#3b82f6'
-  const accentColor = colorTheme?.accent || '#dbeafe'
-
-  // Format markdown-like content to HTML
-  const formatContent = (content) => {
-    if (!content) return ''
-    
-    return content
-      .split('\n')
-      .map(line => {
-        const trimmed = line.trim()
-        
-        // Headers
-        if (trimmed.startsWith('### ')) {
-          return `<h4 class="sub-heading">${trimmed.substring(4)}</h4>`
-        }
-        if (trimmed.startsWith('## ')) {
-          return `<h3 class="section-heading">${trimmed.substring(3)}</h3>`
-        }
-        if (trimmed.startsWith('# ')) {
-          return `<h2 class="main-heading">${trimmed.substring(2)}</h2>`
-        }
-        
-        // Bullet points
-        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-          return `<li>${trimmed.substring(2)}</li>`
-        }
-        
-        // Numbered lists
-        if (/^\d+\.\s/.test(trimmed)) {
-          return `<li>${trimmed.replace(/^\d+\.\s/, '')}</li>`
-        }
-        
-        // Bold text
-        let processed = trimmed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        
-        // Italic text
-        processed = processed.replace(/\*(.+?)\*/g, '<em>$1</em>')
-        
-        return processed ? `<p>${processed}</p>` : ''
-      })
-      .join('')
+  // Paper sizes
+  const sizes = {
+    'letter': { width: 612, height: 792 },
+    'a4': { width: 595, height: 842 }
   }
-
-  const styleSpecificCSS = noteStyle === 'cornell' ? `
-    .cornell-container {
-      display: grid;
-      grid-template-columns: 2.5in 1fr;
-      gap: 16px;
-      min-height: 400px;
+  const { width, height } = sizes[paperSize] || sizes['letter']
+  const margin = 50
+  
+  // Colors
+  const primary = hexToRgb(colorTheme?.primary || '#1e40af')
+  const secondary = hexToRgb(colorTheme?.secondary || '#3b82f6')
+  const accent = hexToRgb(colorTheme?.accent || '#dbeafe')
+  
+  // Create PDF
+  const pdfDoc = await PDFDocument.create()
+  pdfDoc.registerFontkit(fontkit)
+  
+  // Embed fonts
+  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+  
+  let currentPage = pdfDoc.addPage([width, height])
+  let y = height - margin
+  
+  // Helper to add new page if needed
+  const ensureSpace = (needed) => {
+    if (y - needed < margin) {
+      currentPage = pdfDoc.addPage([width, height])
+      y = height - margin
+      return true
     }
-    .cue-column {
-      background: ${accentColor};
-      padding: 16px;
-      border-radius: 8px;
-      border-right: 3px solid ${primaryColor};
+    return false
+  }
+  
+  // Helper to draw section header
+  const drawSectionHeader = (title, icon, bgColor = accent) => {
+    ensureSpace(50)
+    
+    // Background
+    currentPage.drawRectangle({
+      x: margin,
+      y: y - 30,
+      width: width - 2 * margin,
+      height: 35,
+      color: rgb(bgColor.r, bgColor.g, bgColor.b),
+      borderColor: rgb(primary.r, primary.g, primary.b),
+      borderWidth: 1
+    })
+    
+    // Title
+    safeDrawText(currentPage, `${icon} ${title}`, {
+      x: margin + 10,
+      y: y - 22,
+      size: 14,
+      font: boldFont,
+      color: rgb(primary.r, primary.g, primary.b)
+    })
+    
+    y -= 50
+  }
+  
+  // Helper to draw text content
+  const drawContent = (content, indent = 0) => {
+    if (!content) return
+    
+    const lines = content.split('\n')
+    const contentWidth = width - 2 * margin - indent - 20
+    
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed) {
+        y -= 8
+        continue
+      }
+      
+      // Handle markdown-like formatting
+      let fontSize = 11
+      let font = regularFont
+      let textColor = rgb(0.1, 0.1, 0.1)
+      let lineIndent = indent
+      let prefix = ''
+      
+      if (trimmed.startsWith('### ')) {
+        fontSize = 12
+        font = boldFont
+        textColor = rgb(secondary.r, secondary.g, secondary.b)
+        const text = trimmed.substring(4)
+        ensureSpace(20)
+        y -= 5
+        const wrapped = wrapText(text, font, fontSize, contentWidth)
+        for (const wl of wrapped) {
+          safeDrawText(currentPage, wl, {
+            x: margin + lineIndent + 10,
+            y,
+            size: fontSize,
+            font,
+            color: textColor
+          })
+          y -= fontSize + 4
+        }
+        y -= 3
+        continue
+      }
+      
+      if (trimmed.startsWith('## ')) {
+        fontSize = 13
+        font = boldFont
+        textColor = rgb(primary.r, primary.g, primary.b)
+        const text = trimmed.substring(3)
+        ensureSpace(25)
+        y -= 8
+        const wrapped = wrapText(text, font, fontSize, contentWidth)
+        for (const wl of wrapped) {
+          safeDrawText(currentPage, wl, {
+            x: margin + lineIndent + 10,
+            y,
+            size: fontSize,
+            font,
+            color: textColor
+          })
+          y -= fontSize + 4
+        }
+        y -= 5
+        continue
+      }
+      
+      if (trimmed.startsWith('# ')) {
+        fontSize = 15
+        font = boldFont
+        textColor = rgb(primary.r, primary.g, primary.b)
+        const text = trimmed.substring(2)
+        ensureSpace(30)
+        y -= 10
+        const wrapped = wrapText(text, font, fontSize, contentWidth)
+        for (const wl of wrapped) {
+          safeDrawText(currentPage, wl, {
+            x: margin + lineIndent + 10,
+            y,
+            size: fontSize,
+            font,
+            color: textColor
+          })
+          y -= fontSize + 5
+        }
+        y -= 8
+        continue
+      }
+      
+      // Bullet points
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+        lineIndent += 15
+        prefix = '• '
+        const text = trimmed.substring(2)
+        ensureSpace(16)
+        const wrapped = wrapText(text, font, fontSize, contentWidth - 15)
+        for (let i = 0; i < wrapped.length; i++) {
+          safeDrawText(currentPage, i === 0 ? prefix + wrapped[i] : '  ' + wrapped[i], {
+            x: margin + lineIndent,
+            y,
+            size: fontSize,
+            font,
+            color: textColor
+          })
+          y -= fontSize + 4
+        }
+        continue
+      }
+      
+      // Numbered items
+      if (/^\d+\.\s/.test(trimmed)) {
+        lineIndent += 15
+        const match = trimmed.match(/^(\d+\.)\s(.*)/)
+        if (match) {
+          ensureSpace(16)
+          const wrapped = wrapText(match[2], font, fontSize, contentWidth - 25)
+          for (let i = 0; i < wrapped.length; i++) {
+            safeDrawText(currentPage, i === 0 ? match[1] + ' ' + wrapped[i] : '    ' + wrapped[i], {
+              x: margin + lineIndent,
+              y,
+              size: fontSize,
+              font,
+              color: textColor
+            })
+            y -= fontSize + 4
+          }
+        }
+        continue
+      }
+      
+      // Handle bold text markers
+      let processedText = trimmed.replace(/\*\*(.+?)\*\*/g, '$1')
+      
+      // Regular paragraph
+      ensureSpace(16)
+      const wrapped = wrapText(processedText, font, fontSize, contentWidth)
+      for (const wl of wrapped) {
+        safeDrawText(currentPage, wl, {
+          x: margin + lineIndent + 10,
+          y,
+          size: fontSize,
+          font,
+          color: textColor
+        })
+        y -= fontSize + 4
+      }
+      y -= 2
     }
-    .notes-column {
-      padding: 16px;
-    }
-    .summary-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: ${accentColor};
-      border-top: 3px solid ${primaryColor};
-      border-radius: 8px;
-    }
-  ` : ''
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    @page {
-      size: ${pageWidth} ${pageHeight};
-      margin: 0;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Inter', 'Noto Sans', 'Noto Sans Bengali', sans-serif;
-      font-size: 11pt;
-      line-height: 1.6;
-      color: #1f2937;
-      background: white;
-    }
-    
-    .page {
-      width: ${pageWidth};
-      min-height: ${pageHeight};
-      padding: 0.6in;
-      page-break-after: always;
-      background: white;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
-      color: white;
-      padding: 24px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-    }
-    
-    .header h1 {
-      font-size: 22pt;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .header .meta {
-      font-size: 10pt;
-      opacity: 0.9;
-    }
-    
-    .section {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-      page-break-inside: avoid;
-    }
-    
-    .section h2 {
-      font-size: 14pt;
-      font-weight: 600;
-      color: ${primaryColor};
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 2px solid ${accentColor};
-      padding-bottom: 8px;
-    }
-    
-    .section-icon {
-      font-size: 18pt;
-    }
-    
-    .content {
-      line-height: 1.8;
-    }
-    
-    .content p {
-      margin-bottom: 10px;
-    }
-    
-    .content li {
-      margin-bottom: 6px;
-      margin-left: 20px;
-    }
-    
-    .content ul, .content ol {
-      margin-top: 8px;
-      margin-bottom: 12px;
-    }
-    
-    .main-heading {
-      font-size: 14pt;
-      font-weight: 600;
-      color: ${primaryColor};
-      margin: 16px 0 8px 0;
-    }
-    
-    .section-heading {
-      font-size: 12pt;
-      font-weight: 600;
-      color: ${secondaryColor};
-      margin: 12px 0 6px 0;
-    }
-    
-    .sub-heading {
-      font-size: 11pt;
-      font-weight: 600;
-      margin: 10px 0 4px 0;
-    }
-    
-    .key-terms {
-      background: ${accentColor};
-      border-left: 4px solid ${primaryColor};
-    }
-    
-    .examples {
-      background: #fef9c3;
-      border-left: 4px solid #eab308;
-    }
-    
-    .questions {
-      background: #f3e8ff;
-      border-left: 4px solid #9333ea;
-    }
-    
-    .summary {
-      background: #dcfce7;
-      border-left: 4px solid #22c55e;
-    }
-    
-    .footer {
-      text-align: center;
-      font-size: 9pt;
-      color: #9ca3af;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
-    }
-    
-    ${styleSpecificCSS}
-  </style>
-</head>
-<body>
-  <div class="page">
-    <div class="header">
-      <h1>${notes.title || topic || 'Study Notes'}</h1>
-      <div class="meta">
-        ${noteStyle ? `Style: ${noteStyle.charAt(0).toUpperCase() + noteStyle.slice(1)} Method` : ''}
-        ${notes.subject ? ` • Subject: ${notes.subject}` : ''}
-        ${notes.date ? ` • Date: ${notes.date}` : ` • Date: ${new Date().toLocaleDateString()}`}
-      </div>
-    </div>
-    
-    ${noteStyle === 'cornell' ? `
-    <div class="cornell-container">
-      <div class="cue-column">
-        <h3 style="color: ${primaryColor}; margin-bottom: 12px;">📝 Cue Column</h3>
-        <p style="font-size: 10pt; color: #666; margin-bottom: 12px;">Questions & Keywords</p>
-        ${notes.questions ? formatContent(notes.questions) : '<p>Write your review questions here...</p>'}
-      </div>
-      <div class="notes-column">
-        <div class="content">
-          ${formatContent(notes.content)}
-        </div>
-      </div>
-    </div>
-    <div class="summary-section">
-      <h3 style="color: ${primaryColor}; margin-bottom: 12px;">📋 Summary</h3>
-      ${notes.summary ? formatContent(notes.summary) : '<p>Write your summary here after reviewing...</p>'}
-    </div>
-    ` : `
-    <div class="section">
-      <h2><span class="section-icon">📚</span> Notes</h2>
-      <div class="content">
-        ${formatContent(notes.content)}
-      </div>
-    </div>
-    `}
-    
-    ${notes.keyTerms ? `
-    <div class="section key-terms">
-      <h2><span class="section-icon">#️⃣</span> Key Terms & Definitions</h2>
-      <div class="content">
-        ${formatContent(notes.keyTerms)}
-      </div>
-    </div>
-    ` : ''}
-    
-    ${notes.examples && noteStyle !== 'cornell' ? `
-    <div class="section examples">
-      <h2><span class="section-icon">💡</span> Examples</h2>
-      <div class="content">
-        ${formatContent(notes.examples)}
-      </div>
-    </div>
-    ` : ''}
-    
-    ${notes.questions && noteStyle !== 'cornell' ? `
-    <div class="section questions">
-      <h2><span class="section-icon">❓</span> Review Questions</h2>
-      <div class="content">
-        ${formatContent(notes.questions)}
-      </div>
-    </div>
-    ` : ''}
-    
-    ${notes.summary && noteStyle !== 'cornell' ? `
-    <div class="section summary">
-      <h2><span class="section-icon">📝</span> Summary</h2>
-      <div class="content">
-        ${formatContent(notes.summary)}
-      </div>
-    </div>
-    ` : ''}
-    
-    <div class="footer">
-      Created with ProCreators Study Notes Generator
-    </div>
-  </div>
-</body>
-</html>
-  `
+  }
+  
+  // === HEADER ===
+  // Draw header background
+  currentPage.drawRectangle({
+    x: margin,
+    y: height - margin - 80,
+    width: width - 2 * margin,
+    height: 80,
+    color: rgb(primary.r, primary.g, primary.b)
+  })
+  
+  // Title
+  const titleText = notes.title || topic || 'Study Notes'
+  const titleLines = wrapText(titleText, boldFont, 22, width - 2 * margin - 40)
+  let titleY = height - margin - 35
+  for (const line of titleLines) {
+    safeDrawText(currentPage, line, {
+      x: margin + 20,
+      y: titleY,
+      size: 22,
+      font: boldFont,
+      color: rgb(1, 1, 1)
+    })
+    titleY -= 28
+  }
+  
+  // Meta info
+  const metaText = `Style: ${noteStyle || 'Outline'} • Date: ${new Date().toLocaleDateString()}`
+  safeDrawText(currentPage, metaText, {
+    x: margin + 20,
+    y: height - margin - 70,
+    size: 10,
+    font: regularFont,
+    color: rgb(0.9, 0.9, 0.9)
+  })
+  
+  y = height - margin - 100
+  
+  // === MAIN CONTENT ===
+  if (notes.content) {
+    drawSectionHeader('Notes', '📚')
+    drawContent(notes.content)
+    y -= 15
+  }
+  
+  // === KEY TERMS ===
+  if (notes.keyTerms) {
+    drawSectionHeader('Key Terms & Definitions', '#️⃣', { r: accent.r, g: accent.g, b: accent.b })
+    drawContent(notes.keyTerms, 5)
+    y -= 15
+  }
+  
+  // === EXAMPLES ===
+  if (notes.examples) {
+    drawSectionHeader('Examples', '💡', { r: 0.99, g: 0.96, b: 0.76 })
+    drawContent(notes.examples, 5)
+    y -= 15
+  }
+  
+  // === REVIEW QUESTIONS ===
+  if (notes.questions) {
+    drawSectionHeader('Review Questions', '❓', { r: 0.95, g: 0.91, b: 1 })
+    drawContent(notes.questions, 5)
+    y -= 15
+  }
+  
+  // === SUMMARY ===
+  if (notes.summary) {
+    drawSectionHeader('Summary', '📝', { r: 0.86, g: 0.99, b: 0.88 })
+    drawContent(notes.summary, 5)
+  }
+  
+  // === FOOTER ===
+  const pages = pdfDoc.getPages()
+  for (let i = 0; i < pages.length; i++) {
+    const pg = pages[i]
+    safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
+      x: width / 2 - 30,
+      y: 25,
+      size: 9,
+      font: regularFont,
+      color: rgb(0.6, 0.6, 0.6)
+    })
+    safeDrawText(pg, 'Created with ProCreators Study Notes Generator', {
+      x: margin,
+      y: 25,
+      size: 8,
+      font: italicFont,
+      color: rgb(0.7, 0.7, 0.7)
+    })
+  }
+  
+  return await pdfDoc.save()
 }
 
 export async function POST(request) {
@@ -415,7 +484,7 @@ export async function POST(request) {
         const styleInstructions = {
           cornell: 'Structure the notes using the Cornell Method with a main notes section, cue column for questions/keywords, and a summary section.',
           outline: 'Structure the notes using the Outline Method with hierarchical bullet points: main topics, sub-topics, and supporting details.',
-          mindmap: 'Structure the notes with a central concept and connected branches showing relationships between ideas. Use indentation to show hierarchy.',
+          mindmap: 'Structure the notes with a central concept and connected branches showing relationships between ideas. Use indentation to show hierarchy. Format as an outline showing connections.',
           summary: 'Create condensed summary notes focusing on key takeaways, important facts, and quick review points.',
           flashcard: 'Structure the content as question and answer pairs that are suitable for self-testing and active recall.'
         }
@@ -500,14 +569,6 @@ Improve the organization, add structure, and make it easier to study from. Maint
     if (action === 'generate-pdf') {
       const { notes, topic, noteStyle, colorTheme, paperSize } = body
       
-      // Generate HTML
-      const html = generateStudyNotesHTML(notes, {
-        topic,
-        noteStyle,
-        colorTheme,
-        paperSize
-      })
-      
       // Create output directory
       const outputDir = path.join(process.cwd(), 'public', 'generated', 'study-notes')
       await fs.mkdir(outputDir, { recursive: true })
@@ -516,9 +577,13 @@ Improve the organization, add structure, and make it easier to study from. Maint
       const filename = `study-notes-${uuidv4()}.pdf`
       const outputPath = path.join(outputDir, filename)
       
-      // Generate PDF using Puppeteer
-      const { generatePDFFromHTML: puppeteerGenerate } = await import('@/lib/html-pdf-generator')
-      const pdfBuffer = await puppeteerGenerate(html)
+      // Generate PDF using pdf-lib
+      const pdfBuffer = await generatePDF(notes, {
+        topic,
+        noteStyle,
+        colorTheme,
+        paperSize
+      })
       
       // Save the PDF file
       await fs.writeFile(outputPath, pdfBuffer)
