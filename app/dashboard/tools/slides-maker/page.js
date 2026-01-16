@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +15,9 @@ import {
   ArrowLeft, ArrowRight, CheckCircle, Eye,
   ChevronLeft, ChevronRight, Edit3, RefreshCw,
   Palette, Users, Target, FileText, Layout,
-  Quote, BarChart3, Columns, ListChecks
+  Quote, BarChart3, Columns, ListChecks, Plus,
+  Trash2, Upload, Image as ImageIcon, Type,
+  AlignLeft, AlignCenter, AlignRight, Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -72,10 +74,279 @@ const SLIDE_TYPE_ICONS = {
   'cta': <Target className="h-4 w-4" />
 }
 
+// Slide Editor Component
+function SlideEditor({ slide, onUpdate, onRegenerateImage, isGeneratingImage, topic, theme }) {
+  const fileInputRef = useRef(null)
+  
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      onUpdate({ ...slide, backgroundImage: event.target.result, customImage: true })
+    }
+    reader.readAsDataURL(file)
+  }
+  
+  const updateSlideField = (field, value) => {
+    onUpdate({ ...slide, [field]: value })
+  }
+  
+  const updateSlideStyle = (styleField, value) => {
+    onUpdate({ 
+      ...slide, 
+      style: { ...slide.style, [styleField]: value } 
+    })
+  }
+  
+  const updateBullet = (index, value) => {
+    const newBullets = [...(slide.bullets || [])]
+    newBullets[index] = value
+    onUpdate({ ...slide, bullets: newBullets })
+  }
+  
+  const addBullet = () => {
+    const newBullets = [...(slide.bullets || []), 'New point']
+    onUpdate({ ...slide, bullets: newBullets })
+  }
+  
+  const removeBullet = (index) => {
+    const newBullets = (slide.bullets || []).filter((_, i) => i !== index)
+    onUpdate({ ...slide, bullets: newBullets })
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Image Section */}
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <ImageIcon className="h-4 w-4" />
+          Background Image
+        </Label>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-1"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Image
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRegenerateImage(slide)}
+            disabled={isGeneratingImage}
+            className="flex-1"
+          >
+            {isGeneratingImage ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4 mr-2" />
+            )}
+            AI Generate
+          </Button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+      </div>
+
+      {/* Title */}
+      <div className="space-y-2">
+        <Label>Title</Label>
+        <Input
+          value={slide.title || ''}
+          onChange={(e) => updateSlideField('title', e.target.value)}
+          placeholder="Slide title"
+        />
+      </div>
+
+      {/* Subtitle (for title slides) */}
+      {slide.type === 'title' && (
+        <div className="space-y-2">
+          <Label>Subtitle</Label>
+          <Input
+            value={slide.subtitle || ''}
+            onChange={(e) => updateSlideField('subtitle', e.target.value)}
+            placeholder="Slide subtitle"
+          />
+        </div>
+      )}
+
+      {/* Bullets (for content slides) */}
+      {slide.bullets && (
+        <div className="space-y-2">
+          <Label className="flex items-center justify-between">
+            <span>Bullet Points</span>
+            <Button variant="ghost" size="sm" onClick={addBullet}>
+              <Plus className="h-4 w-4 mr-1" /> Add
+            </Button>
+          </Label>
+          {slide.bullets.map((bullet, idx) => (
+            <div key={idx} className="flex gap-2">
+              <Input
+                value={bullet}
+                onChange={(e) => updateBullet(idx, e.target.value)}
+                placeholder={`Point ${idx + 1}`}
+              />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => removeBullet(idx)}
+                className="shrink-0"
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Quote (for quote slides) */}
+      {slide.type === 'quote' && (
+        <>
+          <div className="space-y-2">
+            <Label>Quote</Label>
+            <Textarea
+              value={slide.quote || ''}
+              onChange={(e) => updateSlideField('quote', e.target.value)}
+              placeholder="Enter the quote"
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Attribution</Label>
+            <Input
+              value={slide.attribution || ''}
+              onChange={(e) => updateSlideField('attribution', e.target.value)}
+              placeholder="Quote author"
+            />
+          </div>
+        </>
+      )}
+
+      {/* Stats (for stats slides) */}
+      {slide.stats && (
+        <div className="space-y-2">
+          <Label>Statistics</Label>
+          {slide.stats.map((stat, idx) => (
+            <div key={idx} className="grid grid-cols-2 gap-2">
+              <Input
+                value={stat.value}
+                onChange={(e) => {
+                  const newStats = [...slide.stats]
+                  newStats[idx] = { ...stat, value: e.target.value }
+                  updateSlideField('stats', newStats)
+                }}
+                placeholder="Value (e.g., 85%)"
+              />
+              <Input
+                value={stat.label}
+                onChange={(e) => {
+                  const newStats = [...slide.stats]
+                  newStats[idx] = { ...stat, label: e.target.value }
+                  updateSlideField('stats', newStats)
+                }}
+                placeholder="Label"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Speaker Notes */}
+      <div className="space-y-2">
+        <Label>Speaker Notes</Label>
+        <Textarea
+          value={slide.speakerNotes || ''}
+          onChange={(e) => updateSlideField('speakerNotes', e.target.value)}
+          placeholder="Notes for the presenter..."
+          rows={2}
+        />
+      </div>
+
+      {/* Style Controls */}
+      <div className="border-t pt-4 mt-4">
+        <Label className="flex items-center gap-2 mb-3">
+          <Palette className="h-4 w-4" />
+          Slide Style
+        </Label>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {/* Background Color */}
+          <div className="space-y-2">
+            <Label className="text-xs">Background Color</Label>
+            <div className="flex gap-2">
+              <input
+                type="color"
+                value={slide.style?.backgroundColor || '#1e40af'}
+                onChange={(e) => updateSlideStyle('backgroundColor', e.target.value)}
+                className="w-10 h-10 rounded cursor-pointer"
+              />
+              <Input
+                value={slide.style?.backgroundColor || '#1e40af'}
+                onChange={(e) => updateSlideStyle('backgroundColor', e.target.value)}
+                className="flex-1"
+              />
+            </div>
+          </div>
+          
+          {/* Text Color */}
+          <div className="space-y-2">
+            <Label className="text-xs">Text Color</Label>
+            <div className="flex gap-2">
+              <input
+                type="color"
+                value={slide.style?.textColor || '#ffffff'}
+                onChange={(e) => updateSlideStyle('textColor', e.target.value)}
+                className="w-10 h-10 rounded cursor-pointer"
+              />
+              <Input
+                value={slide.style?.textColor || '#ffffff'}
+                onChange={(e) => updateSlideStyle('textColor', e.target.value)}
+                className="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Text Alignment */}
+        <div className="mt-3 space-y-2">
+          <Label className="text-xs">Text Alignment</Label>
+          <div className="flex gap-2">
+            {[
+              { value: 'left', icon: <AlignLeft className="h-4 w-4" /> },
+              { value: 'center', icon: <AlignCenter className="h-4 w-4" /> },
+              { value: 'right', icon: <AlignRight className="h-4 w-4" /> }
+            ].map(align => (
+              <Button
+                key={align.value}
+                variant={slide.style?.textAlign === align.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => updateSlideStyle('textAlign', align.value)}
+              >
+                {align.icon}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SlidesMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [generatingImageIndex, setGeneratingImageIndex] = useState(null)
   const { toast } = useToast()
 
   // Step 1: Topic & Type
@@ -94,19 +365,27 @@ export default function SlidesMakerPage() {
   const [presentation, setPresentation] = useState(null)
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
   const [downloadUrl, setDownloadUrl] = useState(null)
+  const [editMode, setEditMode] = useState(false)
 
-  // Auto-save data getter
-  const getCurrentData = useCallback(() => ({
-    topic,
-    presentationType,
-    slideCount,
-    language,
-    audience,
-    additionalContext,
-    theme,
-    aspectRatio,
-    presentation
-  }), [topic, presentationType, slideCount, language, audience, additionalContext, theme, aspectRatio, presentation])
+  // Auto-save data getter - FIXED to include all presentation data
+  const getCurrentData = useCallback(() => {
+    // Only return data if there's meaningful content
+    if (!topic && !presentation) return null
+    
+    return {
+      topic,
+      presentationType,
+      slideCount,
+      language,
+      audience,
+      additionalContext,
+      theme,
+      aspectRatio,
+      presentation,
+      currentSlideIndex,
+      step
+    }
+  }, [topic, presentationType, slideCount, language, audience, additionalContext, theme, aspectRatio, presentation, currentSlideIndex, step])
 
   // Load draft data
   const loadDraftData = useCallback((data) => {
@@ -122,6 +401,8 @@ export default function SlidesMakerPage() {
       setPresentation(data.presentation)
       setStep(3)
     }
+    if (data.currentSlideIndex !== undefined) setCurrentSlideIndex(data.currentSlideIndex)
+    if (data.step && !data.presentation) setStep(data.step)
   }, [])
 
   // Start new
@@ -137,6 +418,7 @@ export default function SlidesMakerPage() {
     setPresentation(null)
     setCurrentSlideIndex(0)
     setDownloadUrl(null)
+    setEditMode(false)
     setStep(1)
   }, [])
 
@@ -155,7 +437,7 @@ export default function SlidesMakerPage() {
     try {
       toast({
         title: "Generating Presentation...",
-        description: "AI is creating your slides. This may take a moment."
+        description: "AI is creating slides with background images. This may take 1-2 minutes."
       })
 
       const response = await fetch('/api/slides-maker/generate', {
@@ -167,7 +449,9 @@ export default function SlidesMakerPage() {
           slideCount,
           language,
           audience,
-          additionalContext
+          additionalContext,
+          theme,
+          generateImages: true
         })
       })
 
@@ -179,7 +463,7 @@ export default function SlidesMakerPage() {
         setStep(3)
         toast({
           title: "Presentation Created!",
-          description: `Generated ${data.presentation.slides.length} slides successfully.`
+          description: `Generated ${data.presentation.slides.length} slides with AI backgrounds.`
         })
       } else {
         throw new Error(data.error || 'Failed to generate presentation')
@@ -194,6 +478,104 @@ export default function SlidesMakerPage() {
     } finally {
       setGenerating(false)
     }
+  }
+
+  // Update a specific slide
+  const handleUpdateSlide = (updatedSlide) => {
+    if (!presentation) return
+    
+    const newSlides = presentation.slides.map((slide, idx) => 
+      idx === currentSlideIndex ? updatedSlide : slide
+    )
+    
+    setPresentation({
+      ...presentation,
+      slides: newSlides
+    })
+  }
+
+  // Regenerate image for current slide
+  const handleRegenerateImage = async (slide) => {
+    setGeneratingImageIndex(currentSlideIndex)
+    
+    try {
+      const response = await fetch('/api/slides-maker/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slideTitle: slide.title || slide.quote,
+          slideType: slide.type,
+          topic,
+          theme
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success && data.imageUrl) {
+        handleUpdateSlide({
+          ...slide,
+          backgroundImage: data.imageUrl,
+          customImage: false
+        })
+        toast({
+          title: "Image Generated",
+          description: "New background image created successfully."
+        })
+      } else {
+        throw new Error(data.error || 'Failed to generate image')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setGeneratingImageIndex(null)
+    }
+  }
+
+  // Add new slide
+  const handleAddSlide = () => {
+    if (!presentation) return
+    
+    const newSlide = {
+      id: `slide-${Date.now()}`,
+      slideNumber: presentation.slides.length + 1,
+      type: 'content',
+      title: 'New Slide',
+      bullets: ['Point 1', 'Point 2', 'Point 3'],
+      speakerNotes: '',
+      style: {
+        backgroundColor: THEMES.find(t => t.id === theme)?.color || '#1e40af',
+        textColor: '#ffffff',
+        textAlign: 'left'
+      }
+    }
+    
+    setPresentation({
+      ...presentation,
+      slides: [...presentation.slides, newSlide]
+    })
+    setCurrentSlideIndex(presentation.slides.length)
+  }
+
+  // Delete current slide
+  const handleDeleteSlide = () => {
+    if (!presentation || presentation.slides.length <= 1) return
+    
+    const newSlides = presentation.slides.filter((_, idx) => idx !== currentSlideIndex)
+    // Renumber slides
+    newSlides.forEach((slide, idx) => {
+      slide.slideNumber = idx + 1
+    })
+    
+    setPresentation({
+      ...presentation,
+      slides: newSlides
+    })
+    setCurrentSlideIndex(Math.min(currentSlideIndex, newSlides.length - 1))
   }
 
   // Generate PDF
@@ -249,12 +631,6 @@ export default function SlidesMakerPage() {
     }
   }
 
-  // Regenerate presentation
-  const handleRegenerate = () => {
-    setPresentation(null)
-    setStep(1)
-  }
-
   // Current slide for preview
   const currentSlide = presentation?.slides?.[currentSlideIndex]
 
@@ -273,7 +649,7 @@ export default function SlidesMakerPage() {
               <Presentation className="h-7 w-7 text-blue-500" />
               AI Presentation Maker
             </h1>
-            <p className="text-muted-foreground">Create professional slides in minutes</p>
+            <p className="text-muted-foreground">Create beautiful slides with AI-generated backgrounds</p>
           </div>
         </div>
         <AutoSaveDraftsManager
@@ -281,7 +657,7 @@ export default function SlidesMakerPage() {
           getCurrentData={getCurrentData}
           loadDraftData={loadDraftData}
           onStartNew={handleStartNew}
-          dependencies={[topic, presentationType, slideCount, theme]}
+          dependencies={[topic, presentationType, slideCount, theme, presentation, currentSlideIndex]}
           minStepForAutoSave={1}
           currentStep={step}
         />
@@ -310,7 +686,7 @@ export default function SlidesMakerPage() {
       <div className="text-center text-sm text-muted-foreground">
         {step === 1 && "Step 1: Topic & Content"}
         {step === 2 && "Step 2: Design & Style"}
-        {step === 3 && "Step 3: Review & Download"}
+        {step === 3 && "Step 3: Edit, Customize & Download"}
       </div>
 
       {/* Step 1: Topic & Content */}
@@ -325,7 +701,7 @@ export default function SlidesMakerPage() {
                   What's your presentation about?
                 </CardTitle>
                 <CardDescription>
-                  Enter your topic and AI will create a complete slide deck
+                  Enter your topic and AI will create slides with beautiful backgrounds
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -439,15 +815,19 @@ export default function SlidesMakerPage() {
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                  <span>Smart content structure</span>
+                  <span>AI-generated background images</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                  <span>Multiple slide layouts</span>
+                  <span>Editable text & content</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                  <span>Speaker notes included</span>
+                  <span>Custom colors & styling</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>Upload your own images</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
@@ -480,7 +860,7 @@ export default function SlidesMakerPage() {
                   <Palette className="h-5 w-5 text-purple-500" />
                   Choose Your Theme
                 </CardTitle>
-                <CardDescription>Select a color scheme for your presentation</CardDescription>
+                <CardDescription>This will influence AI-generated background colors</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -598,11 +978,22 @@ export default function SlidesMakerPage() {
                 )}
               </Button>
             </div>
+            
+            {generating && (
+              <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200">
+                <CardContent className="pt-4">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <Loader2 className="h-4 w-4 inline mr-2 animate-spin" />
+                    Generating slides and AI backgrounds... This may take 1-2 minutes.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       )}
 
-      {/* Step 3: Preview & Download */}
+      {/* Step 3: Edit, Preview & Download */}
       {step === 3 && presentation && (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Slide Preview */}
@@ -614,9 +1005,19 @@ export default function SlidesMakerPage() {
                     <Eye className="h-5 w-5" />
                     Slide Preview
                   </CardTitle>
-                  <Badge variant="outline">
-                    {currentSlideIndex + 1} / {presentation.slides.length}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">
+                      {currentSlideIndex + 1} / {presentation.slides.length}
+                    </Badge>
+                    <Button
+                      variant={editMode ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setEditMode(!editMode)}
+                    >
+                      <Edit3 className="h-4 w-4 mr-1" />
+                      {editMode ? 'Done' : 'Edit'}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -624,103 +1025,85 @@ export default function SlidesMakerPage() {
                 <div className={`relative rounded-lg overflow-hidden border shadow-lg ${
                   aspectRatio === '16:9' ? 'aspect-video' : 'aspect-[4/3]'
                 }`}>
-                  <div className={`absolute inset-0 p-6 ${
-                    theme === 'corporate-dark' ? 'bg-gray-900 text-white' : 'bg-white'
-                  }`}>
-                    {/* Top accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-2 ${THEMES.find(t => t.id === theme)?.preview}`} />
-                    
-                    {currentSlide && (
-                      <div className="h-full flex flex-col">
-                        {/* Slide Type Badge */}
-                        <div className="flex items-center gap-2 mb-4">
-                          <Badge variant="secondary" className="text-xs">
-                            {SLIDE_TYPE_ICONS[currentSlide.type] || <FileText className="h-3 w-3" />}
-                            <span className="ml-1 capitalize">{currentSlide.type}</span>
-                          </Badge>
-                        </div>
+                  {/* Background Image or Color */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: currentSlide?.style?.backgroundColor || '#1e40af',
+                      backgroundImage: currentSlide?.backgroundImage ? `url(${currentSlide.backgroundImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
+                    {/* Overlay for text readability */}
+                    {currentSlide?.backgroundImage && (
+                      <div className="absolute inset-0 bg-black/30" />
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div 
+                    className="absolute inset-0 p-6 flex flex-col"
+                    style={{ 
+                      color: currentSlide?.style?.textColor || '#ffffff',
+                      textAlign: currentSlide?.style?.textAlign || 'left'
+                    }}
+                  >
+                    {/* Slide Type Badge */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                        {SLIDE_TYPE_ICONS[currentSlide?.type] || <FileText className="h-3 w-3" />}
+                        <span className="ml-1 capitalize">{currentSlide?.type}</span>
+                      </Badge>
+                    </div>
 
-                        {/* Title */}
-                        {currentSlide.title && (
-                          <h2 className={`text-xl md:text-2xl font-bold mb-4 ${
-                            theme === 'corporate-dark' ? 'text-white' : ''
-                          }`} style={{ color: theme !== 'corporate-dark' ? THEMES.find(t => t.id === theme)?.color : undefined }}>
-                            {currentSlide.title}
-                          </h2>
+                    {/* Title */}
+                    {currentSlide?.title && (
+                      <h2 className="text-xl md:text-2xl font-bold mb-4 drop-shadow-lg">
+                        {currentSlide.title}
+                      </h2>
+                    )}
+
+                    {/* Subtitle for title slides */}
+                    {currentSlide?.subtitle && (
+                      <p className="text-lg opacity-90 mb-4 drop-shadow">{currentSlide.subtitle}</p>
+                    )}
+
+                    {/* Bullets */}
+                    {currentSlide?.bullets && (
+                      <ul className="space-y-2 flex-1">
+                        {currentSlide.bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex items-start gap-2 drop-shadow">
+                            <div className="w-2 h-2 rounded-full bg-current mt-2 opacity-80" />
+                            <span>{bullet}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Quote */}
+                    {currentSlide?.quote && (
+                      <div className="flex-1 flex flex-col justify-center">
+                        <blockquote className="text-xl italic drop-shadow-lg">
+                          "{currentSlide.quote}"
+                        </blockquote>
+                        {currentSlide.attribution && (
+                          <p className="mt-2 opacity-80 drop-shadow">— {currentSlide.attribution}</p>
                         )}
+                      </div>
+                    )}
 
-                        {/* Subtitle for title slides */}
-                        {currentSlide.subtitle && (
-                          <p className="text-lg text-muted-foreground mb-4">{currentSlide.subtitle}</p>
-                        )}
-
-                        {/* Bullets */}
-                        {currentSlide.bullets && (
-                          <ul className="space-y-2 flex-1">
-                            {currentSlide.bullets.map((bullet, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <div className={`w-2 h-2 rounded-full mt-2 ${THEMES.find(t => t.id === theme)?.preview}`} />
-                                <span>{bullet}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                        {/* Quote */}
-                        {currentSlide.quote && (
-                          <div className="flex-1 flex flex-col justify-center">
-                            <blockquote className="text-xl italic border-l-4 pl-4" style={{ borderColor: THEMES.find(t => t.id === theme)?.color }}>
-                              "{currentSlide.quote}"
-                            </blockquote>
-                            {currentSlide.attribution && (
-                              <p className="mt-2 text-muted-foreground">— {currentSlide.attribution}</p>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Stats */}
-                        {currentSlide.stats && (
-                          <div className="flex-1 grid grid-cols-3 gap-4">
-                            {currentSlide.stats.map((stat, idx) => (
-                              <div key={idx} className="text-center p-4 rounded-lg bg-muted/50">
-                                <div className="text-2xl font-bold" style={{ color: THEMES.find(t => t.id === theme)?.color }}>
-                                  {stat.value}
-                                </div>
-                                <div className="text-sm text-muted-foreground">{stat.label}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Two Column */}
-                        {currentSlide.leftColumn && currentSlide.rightColumn && (
-                          <div className="flex-1 grid grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-semibold mb-2 p-2 rounded text-white" style={{ backgroundColor: THEMES.find(t => t.id === theme)?.color }}>
-                                {currentSlide.leftColumn.heading}
-                              </h4>
-                              <ul className="space-y-1 text-sm">
-                                {currentSlide.leftColumn.points?.map((p, i) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <span>•</span> {p}
-                                  </li>
-                                ))}
-                              </ul>
+                    {/* Stats */}
+                    {currentSlide?.stats && (
+                      <div className="flex-1 grid grid-cols-3 gap-4 items-center">
+                        {currentSlide.stats.map((stat, idx) => (
+                          <div key={idx} className="text-center p-4 rounded-lg bg-white/10 backdrop-blur">
+                            <div className="text-2xl font-bold drop-shadow-lg">
+                              {stat.value}
                             </div>
-                            <div>
-                              <h4 className="font-semibold mb-2 p-2 rounded text-white bg-gray-500">
-                                {currentSlide.rightColumn.heading}
-                              </h4>
-                              <ul className="space-y-1 text-sm">
-                                {currentSlide.rightColumn.points?.map((p, i) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <span>•</span> {p}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                            <div className="text-sm opacity-80">{stat.label}</div>
                           </div>
-                        )}
+                        ))}
                       </div>
                     )}
                   </div>
@@ -761,8 +1144,46 @@ export default function SlidesMakerPage() {
               </CardContent>
             </Card>
 
-            {/* Speaker Notes */}
-            {currentSlide?.speakerNotes && (
+            {/* Slide Editor - Shows when edit mode is on */}
+            {editMode && currentSlide && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Edit3 className="h-4 w-4" />
+                      Edit Slide {currentSlideIndex + 1}
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleAddSlide}>
+                        <Plus className="h-4 w-4 mr-1" /> Add Slide
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleDeleteSlide}
+                        disabled={presentation.slides.length <= 1}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <SlideEditor
+                    slide={currentSlide}
+                    onUpdate={handleUpdateSlide}
+                    onRegenerateImage={handleRegenerateImage}
+                    isGeneratingImage={generatingImageIndex === currentSlideIndex}
+                    topic={topic}
+                    theme={theme}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Speaker Notes - Shows when not in edit mode */}
+            {!editMode && currentSlide?.speakerNotes && (
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
@@ -812,16 +1233,25 @@ export default function SlidesMakerPage() {
                 <div className="space-y-1">
                   {presentation.slides.map((slide, idx) => (
                     <button
-                      key={idx}
+                      key={slide.id || idx}
                       onClick={() => setCurrentSlideIndex(idx)}
-                      className={`w-full text-left p-2 rounded text-sm transition-colors ${
+                      className={`w-full text-left p-2 rounded text-sm transition-colors flex items-center gap-2 ${
                         idx === currentSlideIndex 
                           ? 'bg-primary text-primary-foreground' 
                           : 'hover:bg-muted'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{idx + 1}.</span>
+                      {/* Thumbnail */}
+                      <div 
+                        className="w-10 h-6 rounded flex-shrink-0 border"
+                        style={{
+                          backgroundColor: slide.style?.backgroundColor || '#1e40af',
+                          backgroundImage: slide.backgroundImage ? `url(${slide.backgroundImage})` : 'none',
+                          backgroundSize: 'cover'
+                        }}
+                      />
+                      <div className="flex-1 truncate">
+                        <span className="font-medium">{idx + 1}.</span>{' '}
                         <span className="truncate">{slide.title || `Slide ${idx + 1}`}</span>
                       </div>
                     </button>
@@ -853,7 +1283,7 @@ export default function SlidesMakerPage() {
               
               <Button 
                 variant="outline" 
-                onClick={handleRegenerate}
+                onClick={handleStartNew}
                 className="w-full"
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
