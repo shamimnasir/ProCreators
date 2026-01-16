@@ -597,6 +597,35 @@ export default function StudyNotesPage() {
                 </div>
               </div>
 
+              {/* Author / Institute Info */}
+              <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <GraduationCap className="h-4 w-4" />
+                  Optional: Add Your Information
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Author / Teacher Name</Label>
+                    <Input
+                      value={authorName}
+                      onChange={(e) => setAuthorName(e.target.value)}
+                      placeholder="e.g., Dr. John Smith"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Institute / School Name</Label>
+                    <Input
+                      value={instituteName}
+                      onChange={(e) => setInstituteName(e.target.value)}
+                      placeholder="e.g., Harvard University"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This information will appear on the study notes PDF header
+                </p>
+              </div>
+
               <Button 
                 className="w-full" 
                 size="lg" 
