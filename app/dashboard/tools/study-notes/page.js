@@ -468,7 +468,7 @@ export default function StudyNotesPage() {
 
                   <div className="space-y-2">
                     <Label>Upload Document</Label>
-                    <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                    <div className="relative border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                       {uploadedFile ? (
                         <div className="flex items-center justify-center gap-3">
                           <FileUp className="h-8 w-8 text-primary" />
@@ -478,7 +478,7 @@ export default function StudyNotesPage() {
                               {(uploadedFile.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
-                          <Button variant="ghost" size="sm" onClick={removeFile}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); removeFile(); }}>
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
