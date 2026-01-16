@@ -5,64 +5,6 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 
-// Slide design themes
-const THEMES = {
-  'modern-blue': {
-    primary: rgb(0.1, 0.4, 0.8),
-    secondary: rgb(0.2, 0.5, 0.9),
-    accent: rgb(0.9, 0.95, 1),
-    text: rgb(0.1, 0.1, 0.15),
-    lightText: rgb(1, 1, 1),
-    background: rgb(1, 1, 1),
-    name: 'Modern Blue'
-  },
-  'corporate-dark': {
-    primary: rgb(0.15, 0.15, 0.2),
-    secondary: rgb(0.25, 0.25, 0.3),
-    accent: rgb(0.95, 0.6, 0.1),
-    text: rgb(1, 1, 1),
-    lightText: rgb(1, 1, 1),
-    background: rgb(0.12, 0.12, 0.15),
-    name: 'Corporate Dark'
-  },
-  'fresh-green': {
-    primary: rgb(0.1, 0.6, 0.4),
-    secondary: rgb(0.15, 0.7, 0.5),
-    accent: rgb(0.9, 1, 0.95),
-    text: rgb(0.1, 0.15, 0.1),
-    lightText: rgb(1, 1, 1),
-    background: rgb(1, 1, 1),
-    name: 'Fresh Green'
-  },
-  'elegant-purple': {
-    primary: rgb(0.4, 0.2, 0.6),
-    secondary: rgb(0.5, 0.3, 0.7),
-    accent: rgb(0.95, 0.92, 1),
-    text: rgb(0.15, 0.1, 0.2),
-    lightText: rgb(1, 1, 1),
-    background: rgb(1, 1, 1),
-    name: 'Elegant Purple'
-  },
-  'warm-orange': {
-    primary: rgb(0.9, 0.4, 0.1),
-    secondary: rgb(0.95, 0.5, 0.2),
-    accent: rgb(1, 0.97, 0.93),
-    text: rgb(0.2, 0.15, 0.1),
-    lightText: rgb(1, 1, 1),
-    background: rgb(1, 1, 1),
-    name: 'Warm Orange'
-  },
-  'minimal-gray': {
-    primary: rgb(0.3, 0.3, 0.35),
-    secondary: rgb(0.5, 0.5, 0.55),
-    accent: rgb(0.96, 0.96, 0.97),
-    text: rgb(0.15, 0.15, 0.15),
-    lightText: rgb(1, 1, 1),
-    background: rgb(1, 1, 1),
-    name: 'Minimal Gray'
-  }
-}
-
 // Helper function to sanitize text
 function sanitizeText(text) {
   if (!text) return ''
@@ -77,6 +19,16 @@ function sanitizeText(text) {
     .replace(/[^\x20-\x7E]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+// Convert hex color to RGB
+function hexToRgb(hex) {
+  if (!hex) return rgb(1, 1, 1)
+  hex = hex.replace('#', '')
+  const r = parseInt(hex.substring(0, 2), 16) / 255
+  const g = parseInt(hex.substring(2, 4), 16) / 255
+  const b = parseInt(hex.substring(4, 6), 16) / 255
+  return rgb(r, g, b)
 }
 
 // Wrap text helper
@@ -107,94 +59,180 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines
 }
 
+// Fetch and embed image
+async function embedImage(pdfDoc, imageUrl) {
+  try {
+    if (!imageUrl) return null
+    
+    // Handle base64 images
+    if (imageUrl.startsWith('data:image/')) {
+      const matches = imageUrl.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/)
+      if (matches) {
+        const type = matches[1]
+        const base64Data = matches[2]
+        const imageBytes = Buffer.from(base64Data, 'base64')
+        
+        if (type === 'png') {
+          return await pdfDoc.embedPng(imageBytes)
+        } else {
+          return await pdfDoc.embedJpg(imageBytes)
+        }
+      }
+    }
+    
+    // Handle URL images
+    if (imageUrl.startsWith('http')) {
+      const response = await fetch(imageUrl)
+      if (!response.ok) return null
+      
+      const arrayBuffer = await response.arrayBuffer()
+      const imageBytes = new Uint8Array(arrayBuffer)
+      
+      // Try PNG first, then JPG
+      try {
+        return await pdfDoc.embedPng(imageBytes)
+      } catch {
+        try {
+          return await pdfDoc.embedJpg(imageBytes)
+        } catch {
+          return null
+        }
+      }
+    }
+    
+    // Handle local file paths
+    if (imageUrl.startsWith('/')) {
+      const filePath = path.join('/app/public', imageUrl)
+      const imageBytes = await fs.readFile(filePath)
+      
+      if (imageUrl.endsWith('.png')) {
+        return await pdfDoc.embedPng(imageBytes)
+      } else {
+        return await pdfDoc.embedJpg(imageBytes)
+      }
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error embedding image:', error)
+    return null
+  }
+}
+
 // Draw a single slide
-function drawSlide(page, slide, theme, fonts, dimensions) {
+async function drawSlide(page, slide, pdfDoc, fonts, dimensions) {
   const { width, height } = dimensions
-  const { boldFont, regularFont } = fonts
-  const margin = 60
+  const { boldFont, regularFont, italicFont } = fonts
+  const margin = 50
   const contentWidth = width - (margin * 2)
   
-  // Background
+  // Get slide colors from style
+  const bgColor = slide.style?.backgroundColor ? hexToRgb(slide.style.backgroundColor) : rgb(0.1, 0.4, 0.8)
+  const textColor = slide.style?.textColor ? hexToRgb(slide.style.textColor) : rgb(1, 1, 1)
+  const textAlign = slide.style?.textAlign || 'left'
+  
+  // Background color
   page.drawRectangle({
     x: 0, y: 0, width, height,
-    color: theme.background
+    color: bgColor
   })
   
-  // Top accent bar
-  page.drawRectangle({
-    x: 0, y: height - 8, width, height: 8,
-    color: theme.primary
-  })
+  // Embed and draw background image if available
+  if (slide.backgroundImage) {
+    try {
+      const embeddedImage = await embedImage(pdfDoc, slide.backgroundImage)
+      if (embeddedImage) {
+        const imgDims = embeddedImage.scale(1)
+        const scale = Math.max(width / imgDims.width, height / imgDims.height)
+        const scaledWidth = imgDims.width * scale
+        const scaledHeight = imgDims.height * scale
+        
+        page.drawImage(embeddedImage, {
+          x: (width - scaledWidth) / 2,
+          y: (height - scaledHeight) / 2,
+          width: scaledWidth,
+          height: scaledHeight,
+          opacity: 0.9
+        })
+        
+        // Add overlay for text readability
+        page.drawRectangle({
+          x: 0, y: 0, width, height,
+          color: rgb(0, 0, 0),
+          opacity: 0.3
+        })
+      }
+    } catch (err) {
+      console.error('Failed to embed background image:', err)
+    }
+  }
   
-  // Slide number badge
-  page.drawRectangle({
-    x: width - 70, y: 20, width: 50, height: 25,
-    color: theme.primary
-  })
+  // Slide number
   page.drawText(String(slide.slideNumber || ''), {
-    x: width - 52, y: 27,
-    size: 14, font: boldFont, color: theme.lightText
+    x: width - 40, y: 20,
+    size: 12, font: regularFont, color: textColor, opacity: 0.7
   })
   
   const slideType = slide.type || 'content'
   
+  // Calculate X position based on alignment
+  const getX = (textWidth) => {
+    if (textAlign === 'center') return (width - textWidth) / 2
+    if (textAlign === 'right') return width - margin - textWidth
+    return margin
+  }
+  
   switch (slideType) {
     case 'title':
-      drawTitleSlide(page, slide, theme, fonts, dimensions)
+      await drawTitleSlide(page, slide, fonts, dimensions, textColor, getX)
       break
     case 'section':
-      drawSectionSlide(page, slide, theme, fonts, dimensions)
+      await drawSectionSlide(page, slide, fonts, dimensions, textColor, getX)
       break
     case 'quote':
-      drawQuoteSlide(page, slide, theme, fonts, dimensions)
+      await drawQuoteSlide(page, slide, fonts, dimensions, textColor, getX)
       break
     case 'stats':
-      drawStatsSlide(page, slide, theme, fonts, dimensions)
+      await drawStatsSlide(page, slide, fonts, dimensions, textColor, bgColor, getX)
       break
     case 'two-column':
-      drawTwoColumnSlide(page, slide, theme, fonts, dimensions)
+      await drawTwoColumnSlide(page, slide, fonts, dimensions, textColor, bgColor)
       break
     case 'conclusion':
     case 'cta':
-      drawConclusionSlide(page, slide, theme, fonts, dimensions)
+      await drawConclusionSlide(page, slide, fonts, dimensions, textColor, bgColor, getX)
       break
     default:
-      drawContentSlide(page, slide, theme, fonts, dimensions)
+      await drawContentSlide(page, slide, fonts, dimensions, textColor, getX)
   }
 }
 
 // Title slide
-function drawTitleSlide(page, slide, theme, fonts, dimensions) {
+function drawTitleSlide(page, slide, fonts, dimensions, textColor, getX) {
   const { width, height } = dimensions
   const { boldFont, regularFont } = fonts
   
-  // Large colored background section
-  page.drawRectangle({
-    x: 0, y: height * 0.3, width, height: height * 0.7,
-    color: theme.primary
-  })
-  
   // Title
-  const titleLines = wrapText(slide.title || '', boldFont, 48, width - 120)
-  let y = height * 0.6 + (titleLines.length * 30)
+  const titleLines = wrapText(slide.title || '', boldFont, 48, width - 100)
+  let y = height / 2 + (titleLines.length * 25)
   titleLines.forEach(line => {
     const titleWidth = boldFont.widthOfTextAtSize(line, 48)
     page.drawText(line, {
-      x: (width - titleWidth) / 2, y,
-      size: 48, font: boldFont, color: theme.lightText
+      x: getX(titleWidth), y,
+      size: 48, font: boldFont, color: textColor
     })
     y -= 58
   })
   
   // Subtitle
   if (slide.subtitle) {
-    const subtitleLines = wrapText(slide.subtitle, regularFont, 24, width - 120)
+    const subtitleLines = wrapText(slide.subtitle, regularFont, 24, width - 100)
     y -= 20
     subtitleLines.forEach(line => {
       const subWidth = regularFont.widthOfTextAtSize(line, 24)
       page.drawText(line, {
-        x: (width - subWidth) / 2, y,
-        size: 24, font: regularFont, color: rgb(1, 1, 1, 0.9)
+        x: getX(subWidth), y,
+        size: 24, font: regularFont, color: textColor, opacity: 0.85
       })
       y -= 32
     })
@@ -202,189 +240,165 @@ function drawTitleSlide(page, slide, theme, fonts, dimensions) {
 }
 
 // Section divider slide
-function drawSectionSlide(page, slide, theme, fonts, dimensions) {
+function drawSectionSlide(page, slide, fonts, dimensions, textColor, getX) {
   const { width, height } = dimensions
   const { boldFont } = fonts
   
-  // Colored background
-  page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: theme.primary
-  })
-  
-  // Section title
-  const titleLines = wrapText(slide.title || '', boldFont, 44, width - 120)
+  const titleLines = wrapText(slide.title || '', boldFont, 44, width - 100)
   let y = height / 2 + (titleLines.length * 25)
   titleLines.forEach(line => {
     const titleWidth = boldFont.widthOfTextAtSize(line, 44)
     page.drawText(line, {
-      x: (width - titleWidth) / 2, y,
-      size: 44, font: boldFont, color: theme.lightText
+      x: getX(titleWidth), y,
+      size: 44, font: boldFont, color: textColor
     })
     y -= 54
   })
 }
 
 // Content slide with bullets
-function drawContentSlide(page, slide, theme, fonts, dimensions) {
+function drawContentSlide(page, slide, fonts, dimensions, textColor, getX) {
   const { width, height } = dimensions
   const { boldFont, regularFont } = fonts
-  const margin = 60
+  const margin = 50
   const contentWidth = width - (margin * 2)
   
   // Title
-  const titleLines = wrapText(slide.title || '', boldFont, 36, contentWidth)
-  let y = height - 80
+  const titleLines = wrapText(slide.title || '', boldFont, 32, contentWidth)
+  let y = height - 70
   titleLines.forEach(line => {
     page.drawText(line, {
-      x: margin, y, size: 36, font: boldFont, color: theme.primary
-    })
-    y -= 44
-  })
-  
-  // Underline
-  page.drawRectangle({
-    x: margin, y: y + 10, width: 100, height: 4,
-    color: theme.secondary
-  })
-  
-  y -= 40
-  
-  // Bullets
-  const bullets = slide.bullets || []
-  bullets.forEach((bullet, idx) => {
-    if (y < 80) return
-    
-    // Bullet point
-    page.drawCircle({
-      x: margin + 10, y: y + 6, size: 5,
-      color: theme.primary
-    })
-    
-    // Bullet text
-    const bulletLines = wrapText(bullet, regularFont, 22, contentWidth - 40)
-    bulletLines.forEach((line, lineIdx) => {
-      page.drawText(line, {
-        x: margin + 30, y: y - (lineIdx * 28),
-        size: 22, font: regularFont, color: theme.text
-      })
-    })
-    y -= (bulletLines.length * 28) + 20
-  })
-}
-
-// Quote slide
-function drawQuoteSlide(page, slide, theme, fonts, dimensions) {
-  const { width, height } = dimensions
-  const { boldFont, regularFont, italicFont } = fonts
-  
-  // Light accent background
-  page.drawRectangle({
-    x: 0, y: 0, width, height,
-    color: theme.accent
-  })
-  
-  // Large quote mark
-  page.drawText('"', {
-    x: 60, y: height - 150,
-    size: 150, font: boldFont, color: theme.primary
-  })
-  
-  // Quote text
-  const quoteLines = wrapText(slide.quote || '', italicFont, 28, width - 160)
-  let y = height - 200
-  quoteLines.forEach(line => {
-    page.drawText(line, {
-      x: 80, y, size: 28, font: italicFont, color: theme.text
+      x: margin, y, size: 32, font: boldFont, color: textColor
     })
     y -= 40
   })
   
+  y -= 30
+  
+  // Bullets
+  const bullets = slide.bullets || []
+  bullets.forEach((bullet) => {
+    if (y < 60) return
+    
+    // Bullet point
+    page.drawCircle({
+      x: margin + 8, y: y + 5, size: 4,
+      color: textColor, opacity: 0.8
+    })
+    
+    // Bullet text
+    const bulletLines = wrapText(bullet, regularFont, 20, contentWidth - 30)
+    bulletLines.forEach((line, lineIdx) => {
+      page.drawText(line, {
+        x: margin + 25, y: y - (lineIdx * 26),
+        size: 20, font: regularFont, color: textColor
+      })
+    })
+    y -= (bulletLines.length * 26) + 18
+  })
+}
+
+// Quote slide
+function drawQuoteSlide(page, slide, fonts, dimensions, textColor, getX) {
+  const { width, height } = dimensions
+  const { boldFont, regularFont, italicFont } = fonts
+  
+  // Large quote mark
+  page.drawText('"', {
+    x: 50, y: height - 120,
+    size: 120, font: boldFont, color: textColor, opacity: 0.3
+  })
+  
+  // Quote text
+  const quoteLines = wrapText(slide.quote || '', italicFont, 26, width - 140)
+  let y = height - 180
+  quoteLines.forEach(line => {
+    page.drawText(line, {
+      x: 70, y, size: 26, font: italicFont, color: textColor
+    })
+    y -= 36
+  })
+  
   // Attribution
   if (slide.attribution) {
-    y -= 30
+    y -= 25
     page.drawText(`- ${sanitizeText(slide.attribution)}`, {
-      x: 80, y, size: 20, font: regularFont, color: theme.secondary
+      x: 70, y, size: 18, font: regularFont, color: textColor, opacity: 0.8
     })
   }
 }
 
 // Stats slide
-function drawStatsSlide(page, slide, theme, fonts, dimensions) {
+function drawStatsSlide(page, slide, fonts, dimensions, textColor, bgColor, getX) {
   const { width, height } = dimensions
   const { boldFont, regularFont } = fonts
-  const margin = 60
+  const margin = 50
   
   // Title
-  const titleLines = wrapText(slide.title || 'Key Statistics', boldFont, 36, width - 120)
-  let y = height - 80
+  const titleLines = wrapText(slide.title || 'Key Statistics', boldFont, 32, width - 100)
+  let y = height - 70
   titleLines.forEach(line => {
     page.drawText(line, {
-      x: margin, y, size: 36, font: boldFont, color: theme.primary
+      x: margin, y, size: 32, font: boldFont, color: textColor
     })
-    y -= 44
+    y -= 40
   })
   
   // Stats grid
   const stats = slide.stats || []
-  const statWidth = (width - margin * 2 - 40) / Math.min(stats.length, 3)
+  const statCount = Math.min(stats.length, 3)
+  const statWidth = (width - margin * 2 - 40) / statCount
   
   stats.slice(0, 3).forEach((stat, idx) => {
     const x = margin + (idx * (statWidth + 20))
-    const boxY = height - 250
+    const boxY = height - 280
     
     // Stat box background
     page.drawRectangle({
-      x, y: boxY, width: statWidth, height: 150,
-      color: theme.accent
-    })
-    
-    // Top accent
-    page.drawRectangle({
-      x, y: boxY + 146, width: statWidth, height: 4,
-      color: theme.primary
+      x, y: boxY, width: statWidth, height: 140,
+      color: rgb(1, 1, 1), opacity: 0.15
     })
     
     // Value
     const value = sanitizeText(stat.value || '')
-    const valueWidth = boldFont.widthOfTextAtSize(value, 42)
+    const valueWidth = boldFont.widthOfTextAtSize(value, 38)
     page.drawText(value, {
-      x: x + (statWidth - valueWidth) / 2, y: boxY + 90,
-      size: 42, font: boldFont, color: theme.primary
+      x: x + (statWidth - valueWidth) / 2, y: boxY + 85,
+      size: 38, font: boldFont, color: textColor
     })
     
     // Label
-    const labelLines = wrapText(stat.label || '', regularFont, 16, statWidth - 20)
-    let labelY = boxY + 50
+    const labelLines = wrapText(stat.label || '', regularFont, 14, statWidth - 20)
+    let labelY = boxY + 45
     labelLines.forEach(line => {
-      const labelWidth = regularFont.widthOfTextAtSize(line, 16)
+      const labelWidth = regularFont.widthOfTextAtSize(line, 14)
       page.drawText(line, {
         x: x + (statWidth - labelWidth) / 2, y: labelY,
-        size: 16, font: regularFont, color: theme.text
+        size: 14, font: regularFont, color: textColor, opacity: 0.85
       })
-      labelY -= 22
+      labelY -= 20
     })
   })
 }
 
 // Two-column slide
-function drawTwoColumnSlide(page, slide, theme, fonts, dimensions) {
+function drawTwoColumnSlide(page, slide, fonts, dimensions, textColor, bgColor) {
   const { width, height } = dimensions
   const { boldFont, regularFont } = fonts
-  const margin = 60
+  const margin = 50
   const colWidth = (width - margin * 2 - 40) / 2
   
   // Title
-  const titleLines = wrapText(slide.title || '', boldFont, 36, width - 120)
-  let y = height - 80
+  const titleLines = wrapText(slide.title || '', boldFont, 32, width - 100)
+  let y = height - 70
   titleLines.forEach(line => {
     page.drawText(line, {
-      x: margin, y, size: 36, font: boldFont, color: theme.primary
+      x: margin, y, size: 32, font: boldFont, color: textColor
     })
-    y -= 44
+    y -= 40
   })
   
-  y -= 30
+  y -= 25
   const contentY = y
   
   // Left column
@@ -393,27 +407,27 @@ function drawTwoColumnSlide(page, slide, theme, fonts, dimensions) {
   
   // Left heading
   page.drawRectangle({
-    x: margin, y: leftY - 5, width: colWidth, height: 40,
-    color: theme.primary
+    x: margin, y: leftY - 5, width: colWidth, height: 35,
+    color: rgb(1, 1, 1), opacity: 0.2
   })
   page.drawText(sanitizeText(leftCol.heading || 'Left'), {
-    x: margin + 15, y: leftY + 5,
-    size: 20, font: boldFont, color: theme.lightText
-  });
-  leftY -= 55;
+    x: margin + 12, y: leftY + 5,
+    size: 18, font: boldFont, color: textColor
+  })
+  leftY -= 50
   
   // Left points
-  const leftPoints = leftCol.points || [];
+  const leftPoints = leftCol.points || []
   leftPoints.forEach(point => {
-    page.drawCircle({ x: margin + 10, y: leftY + 6, size: 4, color: theme.secondary })
-    const lines = wrapText(point, regularFont, 18, colWidth - 30)
+    page.drawCircle({ x: margin + 8, y: leftY + 5, size: 3, color: textColor })
+    const lines = wrapText(point, regularFont, 16, colWidth - 25)
     lines.forEach((line, i) => {
       page.drawText(line, {
-        x: margin + 25, y: leftY - (i * 24),
-        size: 18, font: regularFont, color: theme.text
+        x: margin + 20, y: leftY - (i * 22),
+        size: 16, font: regularFont, color: textColor
       })
     })
-    leftY -= (lines.length * 24) + 15
+    leftY -= (lines.length * 22) + 12
   })
   
   // Right column
@@ -423,77 +437,71 @@ function drawTwoColumnSlide(page, slide, theme, fonts, dimensions) {
   
   // Right heading
   page.drawRectangle({
-    x: rightX, y: rightY - 5, width: colWidth, height: 40,
-    color: theme.secondary
+    x: rightX, y: rightY - 5, width: colWidth, height: 35,
+    color: rgb(1, 1, 1), opacity: 0.2
   })
   page.drawText(sanitizeText(rightCol.heading || 'Right'), {
-    x: rightX + 15, y: rightY + 5,
-    size: 20, font: boldFont, color: theme.lightText
-  });
-  rightY -= 55;
+    x: rightX + 12, y: rightY + 5,
+    size: 18, font: boldFont, color: textColor
+  })
+  rightY -= 50
   
   // Right points
-  const rightPoints = rightCol.points || [];
+  const rightPoints = rightCol.points || []
   rightPoints.forEach(point => {
-    page.drawCircle({ x: rightX + 10, y: rightY + 6, size: 4, color: theme.primary })
-    const lines = wrapText(point, regularFont, 18, colWidth - 30)
+    page.drawCircle({ x: rightX + 8, y: rightY + 5, size: 3, color: textColor })
+    const lines = wrapText(point, regularFont, 16, colWidth - 25)
     lines.forEach((line, i) => {
       page.drawText(line, {
-        x: rightX + 25, y: rightY - (i * 24),
-        size: 18, font: regularFont, color: theme.text
+        x: rightX + 20, y: rightY - (i * 22),
+        size: 16, font: regularFont, color: textColor
       })
     })
-    rightY -= (lines.length * 24) + 15
+    rightY -= (lines.length * 22) + 12
   })
 }
 
 // Conclusion/CTA slide
-function drawConclusionSlide(page, slide, theme, fonts, dimensions) {
+function drawConclusionSlide(page, slide, fonts, dimensions, textColor, bgColor, getX) {
   const { width, height } = dimensions
   const { boldFont, regularFont } = fonts
-  const margin = 60
-  
-  // Gradient-like effect with rectangles
-  page.drawRectangle({
-    x: 0, y: 0, width, height: height * 0.4,
-    color: theme.primary
-  })
+  const margin = 50
   
   // Title
-  const titleLines = wrapText(slide.title || 'Thank You', boldFont, 40, width - 120)
-  let y = height - 100
+  const titleLines = wrapText(slide.title || 'Thank You', boldFont, 36, width - 100)
+  let y = height - 90
   titleLines.forEach(line => {
-    const titleWidth = boldFont.widthOfTextAtSize(line, 40)
+    const titleWidth = boldFont.widthOfTextAtSize(line, 36)
     page.drawText(line, {
-      x: (width - titleWidth) / 2, y,
-      size: 40, font: boldFont, color: theme.primary
+      x: getX(titleWidth), y,
+      size: 36, font: boldFont, color: textColor
     })
-    y -= 50
+    y -= 46
   })
   
   // Bullets/Key takeaways
   const bullets = slide.bullets || slide.takeaways || []
-  y -= 30
+  y -= 25
   bullets.forEach(bullet => {
-    if (y < height * 0.45) return
-    page.drawCircle({ x: margin + 10, y: y + 6, size: 5, color: theme.secondary })
-    const lines = wrapText(bullet, regularFont, 22, width - margin * 2 - 40)
+    if (y < 80) return
+    page.drawCircle({ x: margin + 8, y: y + 5, size: 4, color: textColor })
+    const lines = wrapText(bullet, regularFont, 20, width - margin * 2 - 30)
     lines.forEach((line, i) => {
       page.drawText(line, {
-        x: margin + 30, y: y - (i * 28),
-        size: 22, font: regularFont, color: theme.text
+        x: margin + 25, y: y - (i * 26),
+        size: 20, font: regularFont, color: textColor
       })
     })
-    y -= (lines.length * 28) + 20
+    y -= (lines.length * 26) + 16
   })
   
   // CTA text at bottom
   if (slide.cta || slide.callToAction) {
     const ctaText = sanitizeText(slide.cta || slide.callToAction)
-    const ctaWidth = boldFont.widthOfTextAtSize(ctaText, 24)
+    const ctaWidth = boldFont.widthOfTextAtSize(ctaText, 22)
     page.drawText(ctaText, {
-      x: (width - ctaWidth) / 2, y: height * 0.15,
-      size: 24, font: boldFont, color: theme.lightText
+      x: getX(ctaWidth), y: 60,
+      size: 22, font: boldFont, color: textColor
     })
   }
 }
@@ -513,7 +521,7 @@ export async function POST(request) {
       )
     }
 
-    console.log(`Creating PDF with ${presentation.slides.length} slides, theme: ${theme}`)
+    console.log(`Creating PDF with ${presentation.slides.length} slides`)
 
     // Page dimensions based on aspect ratio
     const dimensions = aspectRatio === '4:3' 
@@ -526,12 +534,11 @@ export async function POST(request) {
     const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
     
     const fonts = { regularFont, boldFont, italicFont }
-    const selectedTheme = THEMES[theme] || THEMES['modern-blue']
 
     // Generate each slide
     for (const slide of presentation.slides) {
       const page = pdfDoc.addPage([dimensions.width, dimensions.height])
-      drawSlide(page, slide, selectedTheme, fonts, dimensions)
+      await drawSlide(page, slide, pdfDoc, fonts, dimensions)
     }
 
     // Save PDF
@@ -546,36 +553,38 @@ export async function POST(request) {
     await fs.writeFile(filePath, pdfBytes)
 
     // Save to library
-    const libraryCollection = await getCollection('library')
-    const documentId = randomUUID()
-    
-    await libraryCollection.insertOne({
-      id: documentId,
-      oduserId: 'default-user',
-      type: 'document',
-      category: 'presentation',
-      title: presentation.title || 'Untitled Presentation',
-      description: `${presentation.slides.length} slides - ${selectedTheme.name}`,
-      filePath: `/presentations/${fileName}`,
-      fileSize: pdfBytes.length,
-      tool: 'slides-maker',
-      metadata: {
-        slideCount: presentation.slides.length,
-        theme,
-        aspectRatio,
-        slides: presentation.slides.map(s => ({ number: s.slideNumber, title: s.title, type: s.type }))
-      },
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    })
+    try {
+      const libraryCollection = await getCollection('library')
+      const documentId = randomUUID()
+      
+      await libraryCollection.insertOne({
+        id: documentId,
+        oduserId: 'default-user',
+        type: 'document',
+        category: 'presentation',
+        title: presentation.title || 'Untitled Presentation',
+        description: `${presentation.slides.length} slides`,
+        filePath: `/presentations/${fileName}`,
+        fileSize: pdfBytes.length,
+        tool: 'slides-maker',
+        metadata: {
+          slideCount: presentation.slides.length,
+          theme,
+          aspectRatio
+        },
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      })
+    } catch (dbError) {
+      console.error('Failed to save to library:', dbError)
+    }
 
     console.log(`Presentation PDF generated: ${filePath}`)
 
     return NextResponse.json({
       success: true,
       downloadUrl: `/presentations/${fileName}`,
-      pageCount: presentation.slides.length,
-      libraryId: documentId
+      pageCount: presentation.slides.length
     })
 
   } catch (error) {
