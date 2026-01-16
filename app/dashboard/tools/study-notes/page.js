@@ -145,6 +145,8 @@ export default function StudyNotesPage() {
     subject,
     gradeLevel,
     detailLevel,
+    authorName,
+    instituteName,
     includeKeyTerms,
     includeExamples,
     includeQuestions,
@@ -153,7 +155,7 @@ export default function StudyNotesPage() {
     paperSize,
     generatedNotes: generatedNotes || null,
     step
-  }), [topic, customNotes, inputMode, noteStyle, subject, gradeLevel, detailLevel, includeKeyTerms, includeExamples, includeQuestions, includeSummary, colorTheme, paperSize, generatedNotes, step])
+  }), [topic, customNotes, inputMode, noteStyle, subject, gradeLevel, detailLevel, authorName, instituteName, includeKeyTerms, includeExamples, includeQuestions, includeSummary, colorTheme, paperSize, generatedNotes, step])
 
   // Load draft data
   const loadDraftData = (data) => {
