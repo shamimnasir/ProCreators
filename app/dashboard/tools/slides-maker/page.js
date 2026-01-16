@@ -458,6 +458,7 @@ export default function SlidesMakerPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic,
+          authorName,
           presentationType,
           slideCount,
           language,
@@ -471,6 +472,10 @@ export default function SlidesMakerPage() {
       const data = await response.json()
 
       if (data.success && data.presentation) {
+        // Add author name to title slide if provided
+        if (authorName && data.presentation.slides?.length > 0) {
+          data.presentation.slides[0].authorName = authorName
+        }
         setPresentation(data.presentation)
         setCurrentSlideIndex(0)
         setStep(3)
