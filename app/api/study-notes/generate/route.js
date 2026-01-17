@@ -1356,8 +1356,8 @@ Remember: ONLY use information from the source content. Do not add external info
       const filename = `study-notes-${uuidv4()}.pdf`
       const outputPath = path.join(outputDir, filename)
       
-      // Generate PDF
-      const pdfBuffer = await generatePDF(notes, {
+      // Generate PDF using HTML-to-PDF (Puppeteer) for proper Bangla font rendering
+      const pdfBuffer = await generatePDFWithHTML(notes, {
         topic,
         noteStyle,
         colorTheme,
@@ -1395,5 +1395,284 @@ Remember: ONLY use information from the source content. Do not add external info
   } catch (error) {
     console.error('Study notes generation error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  }
+}
+
+// Generate PDF using HTML and Puppeteer for proper Unicode/Bangla support
+async function generatePDFWithHTML(notes, config) {
+  const { topic, noteStyle, colorTheme, paperSize, authorName, instituteName } = config
+  
+  const primaryColor = colorTheme?.primary || '#1e40af'
+  const secondaryColor = colorTheme?.secondary || '#3b82f6'
+  const accentColor = colorTheme?.accent || '#dbeafe'
+  
+  // Helper to convert markdown-like content to HTML
+  const formatContent = (content) => {
+    if (!content) return ''
+    
+    return content
+      .split('\n')
+      .map(line => {
+        const trimmed = line.trim()
+        if (!trimmed) return '<br/>'
+        
+        // Headers
+        if (trimmed.startsWith('### ')) {
+          return `<h4 class="sub-heading">${escapeHTML(trimmed.substring(4))}</h4>`
+        }
+        if (trimmed.startsWith('## ')) {
+          return `<h3 class="section-heading">${escapeHTML(trimmed.substring(3))}</h3>`
+        }
+        if (trimmed.startsWith('# ')) {
+          return `<h2 class="main-heading">${escapeHTML(trimmed.substring(2))}</h2>`
+        }
+        
+        // Bullet points
+        if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+          return `<li>${formatInlineText(trimmed.substring(2))}</li>`
+        }
+        
+        // Numbered items
+        if (/^\d+\.\s/.test(trimmed)) {
+          return `<li class="numbered">${formatInlineText(trimmed.replace(/^\d+\.\s/, ''))}</li>`
+        }
+        
+        return `<p>${formatInlineText(trimmed)}</p>`
+      })
+      .join('\n')
+  }
+  
+  // Format inline text (bold, etc)
+  const formatInlineText = (text) => {
+    return escapeHTML(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+  }
+  
+  // Escape HTML
+  const escapeHTML = (text) => {
+    if (!text) return ''
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+  
+  const styleName = {
+    'cornell': 'Cornell Method',
+    'outline': 'Outline Style',
+    'summary': 'Summary Notes',
+    'flashcard': 'Q&A Format',
+    'mindmap': 'Mind Map'
+  }[noteStyle] || 'Study Notes'
+  
+  const html = `
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Noto Sans Bengali', 'Noto Sans', sans-serif;
+      font-size: 11pt;
+      line-height: 1.7;
+      color: #1f2937;
+      background: white;
+    }
+    
+    .page {
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
+      color: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+    }
+    
+    .header h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .header .meta {
+      font-size: 10pt;
+      opacity: 0.9;
+    }
+    
+    .header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 9pt;
+      margin-top: 10px;
+    }
+    
+    /* Sections */
+    .section {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid ${primaryColor};
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      page-break-inside: avoid;
+    }
+    
+    .section h2 {
+      font-size: 14pt;
+      font-weight: 600;
+      color: ${primaryColor};
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section.key-terms { background: ${accentColor}; border-left-color: ${primaryColor}; }
+    .section.examples { background: #fef9c3; border-left-color: #eab308; }
+    .section.questions { background: #f3e8ff; border-left-color: #9333ea; }
+    .section.summary { background: #dcfce7; border-left-color: #22c55e; }
+    
+    /* Content */
+    .content { line-height: 1.8; }
+    .content p { margin-bottom: 10px; }
+    .content li { margin-bottom: 8px; margin-left: 25px; }
+    .content ul, .content ol { margin: 10px 0; }
+    
+    .main-heading {
+      font-size: 14pt;
+      font-weight: 600;
+      color: ${primaryColor};
+      margin: 18px 0 10px 0;
+    }
+    
+    .section-heading {
+      font-size: 12pt;
+      font-weight: 600;
+      color: ${secondaryColor};
+      margin: 14px 0 8px 0;
+    }
+    
+    .sub-heading {
+      font-size: 11pt;
+      font-weight: 600;
+      margin: 10px 0 6px 0;
+    }
+    
+    strong { color: ${primaryColor}; }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 9pt;
+      color: #9ca3af;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>${escapeHTML(notes.title || topic || 'Study Notes')}</h1>
+      <div class="meta">
+        ${authorName || instituteName ? `${escapeHTML(authorName || '')}${authorName && instituteName ? ' | ' : ''}${escapeHTML(instituteName || '')} • ` : ''}
+        ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </div>
+      <span class="badge">${styleName}</span>
+    </div>
+    
+    ${notes.content ? `
+    <div class="section">
+      <h2>📚 Notes</h2>
+      <div class="content">
+        ${formatContent(notes.content)}
+      </div>
+    </div>
+    ` : ''}
+    
+    ${notes.keyTerms ? `
+    <div class="section key-terms">
+      <h2>🔑 Key Terms & Definitions</h2>
+      <div class="content">
+        ${formatContent(notes.keyTerms)}
+      </div>
+    </div>
+    ` : ''}
+    
+    ${notes.examples ? `
+    <div class="section examples">
+      <h2>💡 Examples</h2>
+      <div class="content">
+        ${formatContent(notes.examples)}
+      </div>
+    </div>
+    ` : ''}
+    
+    ${notes.questions ? `
+    <div class="section questions">
+      <h2>❓ Review Questions</h2>
+      <div class="content">
+        ${formatContent(notes.questions)}
+      </div>
+    </div>
+    ` : ''}
+    
+    ${notes.summary ? `
+    <div class="section summary">
+      <h2>📝 Summary</h2>
+      <div class="content">
+        ${formatContent(notes.summary)}
+      </div>
+    </div>
+    ` : ''}
+    
+    <div class="footer">
+      Created with ProCreators Study Notes Generator
+    </div>
+  </div>
+</body>
+</html>
+  `
+  
+  // Generate PDF using Puppeteer
+  const puppeteer = (await import('puppeteer-core')).default
+  
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/chromium',
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ]
+  })
+  
+  try {
+    const page = await browser.newPage()
+    await page.setContent(html, { waitUntil: 'networkidle0' })
+    
+    const pdfBuffer = await page.pdf({
+      format: paperSize === 'a4' ? 'A4' : 'Letter',
+      printBackground: true,
+      margin: { top: '15mm', right: '15mm', bottom: '15mm', left: '15mm' }
+    })
+    
+    return pdfBuffer
+  } finally {
+    await browser.close()
   }
 }
