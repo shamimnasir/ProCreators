@@ -160,16 +160,41 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines
 }
 
-// Safe text drawing - handles font errors gracefully
-function safeDrawText(page, text, options) {
+// Safe text drawing - handles font errors gracefully, tries Bangla font first
+function safeDrawText(page, text, options, banglaFont = null, fallbackFont = null) {
+  const cleanText = sanitizeText(text)
+  if (!cleanText) return
+  
+  // Try with the provided font first
   try {
-    const cleanText = sanitizeText(text)
-    if (!cleanText) return
     page.drawText(cleanText, options)
+    return
   } catch (e) {
-    // If font doesn't support characters, skip
-    console.warn('Text drawing error:', e.message?.substring(0, 100))
+    // Font failed, try alternatives
   }
+  
+  // If we have a Bangla font and text has Bangla, try Bangla font
+  if (banglaFont && containsBangla(cleanText)) {
+    try {
+      page.drawText(cleanText, { ...options, font: banglaFont })
+      return
+    } catch (e) {
+      // Bangla font also failed
+    }
+  }
+  
+  // Try fallback font
+  if (fallbackFont) {
+    try {
+      page.drawText(cleanText, { ...options, font: fallbackFont })
+      return
+    } catch (e) {
+      // Fallback also failed
+    }
+  }
+  
+  // Last resort - skip the text
+  console.warn('Could not render text:', cleanText.substring(0, 50))
 }
 
 // Draw a rounded rectangle
