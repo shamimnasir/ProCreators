@@ -161,7 +161,7 @@ function wrapText(text, font, fontSize, maxWidth) {
 }
 
 // Safe text drawing - handles font errors gracefully, tries Bangla font first
-function safeDrawText(page, text, options, banglaFont = null, fallbackFont = null) {
+function drawText(page, text, options, banglaFont = null, fallbackFont = null) {
   const cleanText = sanitizeText(text)
   if (!cleanText) return
   
@@ -232,7 +232,7 @@ function drawMindMapNode(page, x, y, text, font, fontSize, nodeColor, textColor,
   let textY = y + boxHeight / 2 - padding - fontSize
   for (const line of lines) {
     const textWidth = font.widthOfTextAtSize(line, fontSize)
-    safeDrawText(page, line, {
+    drawText(page, line, {
       x: x - textWidth / 2,
       y: textY,
       size: fontSize,
@@ -277,7 +277,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
   const titleLines = wrapText(titleText, boldFont, 24, width - 100)
   let titleY = height - 40
   for (const line of titleLines) {
-    safeDrawText(page, line, {
+    drawText(page, line, {
       x: margin,
       y: titleY,
       size: 24,
@@ -290,7 +290,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
   // Author/Institute info
   if (authorName || instituteName) {
     const authorText = [authorName, instituteName].filter(Boolean).join(' • ')
-    safeDrawText(page, authorText, {
+    drawText(page, authorText, {
       x: margin,
       y: height - 85,
       size: 11,
@@ -300,7 +300,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
   }
   
   // Style badge
-  safeDrawText(page, 'Mind Map Style', {
+  drawText(page, 'Mind Map Style', {
     x: width - margin - 100,
     y: height - 40,
     size: 10,
@@ -331,7 +331,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
   let cY = mapCenterY + (centralLines.length * 7)
   for (const line of centralLines) {
     const cWidth = boldFont.widthOfTextAtSize(line, 11)
-    safeDrawText(page, line, {
+    drawText(page, line, {
       x: mapCenterX - cWidth / 2,
       y: cY,
       size: 11,
@@ -395,7 +395,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
     let bY = branchY + 10
     branchLines.slice(0, 2).forEach(line => {
       const bWidth = boldFont.widthOfTextAtSize(line, 10)
-      safeDrawText(page, line, {
+      drawText(page, line, {
         x: branchX - bWidth / 2,
         y: bY,
         size: 10,
@@ -436,7 +436,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
       
       const subText = point.length > 20 ? point.substring(0, 18) + '...' : point
       const subWidth = regularFont.widthOfTextAtSize(subText, 8)
-      safeDrawText(page, subText, {
+      drawText(page, subText, {
         x: subX - subWidth / 2,
         y: subY - 3,
         size: 8,
@@ -447,7 +447,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
   })
   
   // Footer
-  safeDrawText(page, 'Created with ProCreators Study Notes Generator', {
+  drawText(page, 'Created with ProCreators Study Notes Generator', {
     x: margin,
     y: 20,
     size: 8,
@@ -455,7 +455,7 @@ async function generateMindMapPDF(notes, config, pdfDoc, fonts) {
     color: rgb(0.5, 0.5, 0.5)
   })
   
-  safeDrawText(page, `Page 1`, {
+  drawText(page, `Page 1`, {
     x: width - margin - 30,
     y: 20,
     size: 8,
