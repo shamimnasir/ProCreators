@@ -462,10 +462,38 @@ async function generatePDF(notes, config) {
   const pdfDoc = await PDFDocument.create()
   pdfDoc.registerFontkit(fontkit)
   
-  // Embed fonts
-  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
-  const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+  // Check if notes contain Bangla text
+  const hasBangla = notesHaveBangla(notes)
+  
+  // Embed fonts - use Noto Sans for better Unicode support
+  let regularFont, boldFont, italicFont
+  
+  try {
+    // Try to load custom fonts with Bangla support
+    const notoRegularBytes = await fs.readFile('/app/public/fonts/NotoSans-Regular.ttf')
+    const notoBoldBytes = await fs.readFile('/app/public/fonts/NotoSans-Bold.ttf')
+    regularFont = await pdfDoc.embedFont(notoRegularBytes)
+    boldFont = await pdfDoc.embedFont(notoBoldBytes)
+    italicFont = regularFont // Noto doesn't have italic, use regular
+    
+    // If content has Bangla, embed Bangla fonts
+    if (hasBangla) {
+      try {
+        const banglaRegularBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Regular.ttf')
+        const banglaBoldBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Bold.ttf')
+        regularFont = await pdfDoc.embedFont(banglaRegularBytes)
+        boldFont = await pdfDoc.embedFont(banglaBoldBytes)
+        console.log('Loaded Bangla fonts for study notes PDF')
+      } catch (banglaErr) {
+        console.warn('Could not load Bangla fonts:', banglaErr.message)
+      }
+    }
+  } catch (fontError) {
+    console.warn('Custom fonts not available, using standard fonts:', fontError.message)
+    regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
+  }
   
   const fonts = { regularFont, boldFont, italicFont }
   const configWithDimensions = { 
