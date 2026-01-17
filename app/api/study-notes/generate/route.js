@@ -933,14 +933,13 @@ async function generatePDF(notes, config) {
       }
       
       let fontSize = 10
-      let font = regularFont
       let textColor = rgb(0.15, 0.15, 0.15)
       let indent = 25
       
       // Headers
       if (trimmed.startsWith('### ')) {
         fontSize = 11
-        font = boldFont
+        const font = getFont(trimmed, true)
         textColor = rgb(secondary.r, secondary.g, secondary.b)
         const text = trimmed.substring(4)
         ensureSpace(18)
@@ -955,7 +954,7 @@ async function generatePDF(notes, config) {
       
       if (trimmed.startsWith('## ')) {
         fontSize = 12
-        font = boldFont
+        const font = getFont(trimmed, true)
         textColor = rgb(primary.r, primary.g, primary.b)
         const text = trimmed.substring(3)
         ensureSpace(22)
@@ -971,7 +970,7 @@ async function generatePDF(notes, config) {
       
       if (trimmed.startsWith('# ')) {
         fontSize = 14
-        font = boldFont
+        const font = getFont(trimmed, true)
         textColor = rgb(primary.r, primary.g, primary.b)
         const text = trimmed.substring(2)
         ensureSpace(28)
@@ -988,6 +987,7 @@ async function generatePDF(notes, config) {
       // Bullet points - styled
       if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
         const text = trimmed.substring(2).replace(/\*\*/g, '')
+        const font = getFont(text, false)
         ensureSpace(16)
         
         // Draw bullet dot
