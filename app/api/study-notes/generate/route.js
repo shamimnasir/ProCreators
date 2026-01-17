@@ -160,18 +160,15 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines
 }
 
-// Safe text drawing (handles special characters)
+// Safe text drawing - handles font errors gracefully
 function safeDrawText(page, text, options) {
   try {
-    const cleanText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+    const cleanText = sanitizeText(text)
+    if (!cleanText) return
     page.drawText(cleanText, options)
   } catch (e) {
-    const asciiText = text.replace(/[^\x20-\x7E]/g, '?')
-    try {
-      page.drawText(asciiText, options)
-    } catch (e2) {
-      console.log('Text draw failed:', e2.message)
-    }
+    // If font doesn't support characters, skip
+    console.warn('Text drawing error:', e.message?.substring(0, 100))
   }
 }
 
