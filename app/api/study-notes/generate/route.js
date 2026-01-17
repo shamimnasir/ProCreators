@@ -820,14 +820,15 @@ async function generatePDF(notes, config) {
   
   // Title
   const titleText = notes.title || topic || 'Study Notes'
-  const titleLines = wrapText(titleText, boldFont, 22, width - margin * 2 - 40)
+  const titleFont = getFont(titleText, true)
+  const titleLines = wrapText(titleText, titleFont, 22, width - margin * 2 - 40)
   let titleY = height - 35
   for (const line of titleLines) {
-    safeDrawText(currentPage, line, {
+    drawText(currentPage, line, {
       x: margin + 10,
       y: titleY,
       size: 22,
-      font: boldFont,
+      font: titleFont,
       color: rgb(1, 1, 1)
     })
     titleY -= 28
@@ -836,11 +837,11 @@ async function generatePDF(notes, config) {
   // Author & Institute info (if provided)
   if (authorName || instituteName) {
     const authorLine = [authorName, instituteName].filter(Boolean).join(' | ')
-    safeDrawText(currentPage, authorLine, {
+    drawText(currentPage, authorLine, {
       x: margin + 10,
       y: height - 75,
       size: 10,
-      font: regularFont,
+      font: getFont(authorLine, false),
       color: rgb(0.9, 0.9, 0.9)
     })
   }
@@ -864,7 +865,7 @@ async function generatePDF(notes, config) {
     color: rgb(1, 1, 1),
     opacity: 0.2
   })
-  safeDrawText(currentPage, styleName, {
+  drawText(currentPage, styleName, {
     x: width - margin - badgeWidth - 2,
     y: height - 40,
     size: 9,
@@ -873,7 +874,7 @@ async function generatePDF(notes, config) {
   })
   
   // Date
-  safeDrawText(currentPage, new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), {
+  drawText(currentPage, new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), {
     x: width - margin - 100,
     y: height - 75,
     size: 9,
