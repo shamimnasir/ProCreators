@@ -141,7 +141,8 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/exam-prep',
         useCase: 'Board exams, certifications',
-        badge: 'Coming Soon'
+        badge: 'New',
+        isBuilt: true
       }
     ]
   },
