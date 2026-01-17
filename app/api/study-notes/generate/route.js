@@ -464,26 +464,27 @@ async function generatePDF(notes, config) {
   
   // Check if notes contain Bangla text
   const hasBangla = notesHaveBangla(notes)
+  console.log('Notes contain Bangla:', hasBangla)
   
-  // Embed fonts - use Noto Sans for better Unicode support
-  let regularFont, boldFont, italicFont
+  // Embed fonts - keep BOTH standard and Bangla fonts
+  let regularFont, boldFont, italicFont, banglaFont, banglaBoldFont
   
   try {
-    // Try to load custom fonts with Bangla support
+    // Load standard fonts first
     const notoRegularBytes = await fs.readFile('/app/public/fonts/NotoSans-Regular.ttf')
     const notoBoldBytes = await fs.readFile('/app/public/fonts/NotoSans-Bold.ttf')
     regularFont = await pdfDoc.embedFont(notoRegularBytes)
     boldFont = await pdfDoc.embedFont(notoBoldBytes)
-    italicFont = regularFont // Noto doesn't have italic, use regular
+    italicFont = regularFont
     
-    // If content has Bangla, embed Bangla fonts
+    // Load Bangla fonts if content has Bangla
     if (hasBangla) {
       try {
         const banglaRegularBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Regular.ttf')
         const banglaBoldBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Bold.ttf')
-        regularFont = await pdfDoc.embedFont(banglaRegularBytes)
-        boldFont = await pdfDoc.embedFont(banglaBoldBytes)
-        console.log('Loaded Bangla fonts for study notes PDF')
+        banglaFont = await pdfDoc.embedFont(banglaRegularBytes)
+        banglaBoldFont = await pdfDoc.embedFont(banglaBoldBytes)
+        console.log('Bangla fonts loaded successfully for study notes')
       } catch (banglaErr) {
         console.warn('Could not load Bangla fonts:', banglaErr.message)
       }
@@ -495,7 +496,16 @@ async function generatePDF(notes, config) {
     italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
   }
   
-  const fonts = { regularFont, boldFont, italicFont }
+  // Create fonts object with all fonts available
+  const fonts = { regularFont, boldFont, italicFont, banglaFont, banglaBoldFont }
+  
+  // Helper to get the right font based on text content
+  const getFont = (text, useBold = false) => {
+    if (hasBangla && containsBangla(text)) {
+      return useBold ? (banglaBoldFont || boldFont) : (banglaFont || regularFont)
+    }
+    return useBold ? boldFont : regularFont
+  }
   const configWithDimensions = { 
     width, height, margin, primary, secondary, accent,
     authorName, instituteName
