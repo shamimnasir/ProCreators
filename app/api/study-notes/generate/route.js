@@ -1036,18 +1036,28 @@ export async function POST(request) {
           sourceContent = customNotes
         }
         
-        // Validate we have content to work with
-        if (!sourceContent || sourceContent.trim().length < 20) {
-          return NextResponse.json({
-            success: false,
-            error: 'No valid content found. Please paste your notes or upload a text-based file.'
-          }, { status: 400 })
+        // Validate we have content to work with (only for upload mode)
+        if (inputMode === 'upload' || inputMode !== 'topic') {
+          if (!sourceContent || sourceContent.trim().length < 20) {
+            return NextResponse.json({
+              success: false,
+              error: 'No valid content found. Please paste your notes or upload a text-based file.'
+            }, { status: 400 })
+          }
+          
+          // Truncate very long content to avoid token limits (keep first ~15000 chars)
+          if (sourceContent.length > 15000) {
+            console.log('Truncating content from', sourceContent.length, 'to 15000 chars')
+            sourceContent = sourceContent.substring(0, 15000) + '\n\n[Content truncated for processing...]'
+          }
         }
         
-        // Truncate very long content to avoid token limits (keep first ~15000 chars)
-        if (sourceContent.length > 15000) {
-          console.log('Truncating content from', sourceContent.length, 'to 15000 chars')
-          sourceContent = sourceContent.substring(0, 15000) + '\n\n[Content truncated for processing...]'
+        // For topic mode, validate that topic is provided
+        if (inputMode === 'topic' && (!topic || topic.trim().length < 2)) {
+          return NextResponse.json({
+            success: false,
+            error: 'Please enter a topic to generate study notes.'
+          }, { status: 400 })
         }
         
         // Build the prompt
