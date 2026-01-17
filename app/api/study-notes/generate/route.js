@@ -128,30 +128,30 @@ function hexToRgb(hex) {
   } : { r: 0.1, g: 0.25, b: 0.7 }
 }
 
-// Text wrapping helper
+// Text wrapping helper - safe for custom fonts
 function wrapText(text, font, fontSize, maxWidth) {
-  if (!text) return []
-  const words = text.split(' ')
+  const cleanText = sanitizeText(text || '')
+  if (!cleanText) return []
+  
+  const words = cleanText.split(/\s+/).filter(w => w.length > 0)
   const lines = []
   let currentLine = ''
 
   for (const word of words) {
+    if (!word) continue
     const testLine = currentLine ? `${currentLine} ${word}` : word
     try {
       const width = font.widthOfTextAtSize(testLine, fontSize)
-      if (width > maxWidth && currentLine) {
-        lines.push(currentLine)
-        currentLine = word
-      } else {
+      if (width <= maxWidth) {
         currentLine = testLine
+      } else {
+        if (currentLine) lines.push(currentLine)
+        currentLine = word
       }
     } catch {
-      if (currentLine.length > 60) {
-        lines.push(currentLine)
-        currentLine = word
-      } else {
-        currentLine = testLine
-      }
+      // If width calculation fails, add current line and start new
+      if (currentLine) lines.push(currentLine)
+      currentLine = word
     }
   }
   if (currentLine) {
