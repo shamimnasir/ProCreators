@@ -602,7 +602,7 @@ async function generatePDF(notes, config) {
       color: rgb(primary.r, primary.g, primary.b)
     })
     
-    safeDrawText(currentPage, 'Detailed Notes', {
+    drawText(currentPage, 'Detailed Notes', {
       x: margin,
       y: height - 40,
       size: 18,
@@ -646,7 +646,7 @@ async function generatePDF(notes, config) {
         color: rgb(primary.r, primary.g, primary.b)
       })
       
-      safeDrawText(currentPage, `${icon}  ${title}`, {
+      drawText(currentPage, `${icon}  ${title}`, {
         x: margin + 15,
         y: y - 20,
         size: 13,
@@ -682,7 +682,7 @@ async function generatePDF(notes, config) {
           y -= 5
           const wrapped = wrapText(text, font, fontSize, contentWidth)
           for (const wl of wrapped) {
-            safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+            drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
             y -= fontSize + 5
           }
           continue
@@ -697,7 +697,7 @@ async function generatePDF(notes, config) {
           y -= 8
           const wrapped = wrapText(text, font, fontSize, contentWidth)
           for (const wl of wrapped) {
-            safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+            drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
             y -= fontSize + 5
           }
           y -= 3
@@ -720,7 +720,7 @@ async function generatePDF(notes, config) {
           
           const wrapped = wrapText(text, font, fontSize, contentWidth - 20)
           for (let i = 0; i < wrapped.length; i++) {
-            safeDrawText(currentPage, wrapped[i], {
+            drawText(currentPage, wrapped[i], {
               x: margin + indent + 15,
               y,
               size: fontSize,
@@ -737,7 +737,7 @@ async function generatePDF(notes, config) {
         ensureSpace(16)
         const wrapped = wrapText(processedText, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+          drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 5
         }
       }
@@ -911,7 +911,7 @@ async function generatePDF(notes, config) {
       color: rgb(primary.r, primary.g, primary.b)
     })
     
-    safeDrawText(currentPage, `${iconEmoji}  ${title}`, {
+    drawText(currentPage, `${iconEmoji}  ${title}`, {
       x: margin + 15,
       y: y - 20,
       size: 13,
@@ -947,7 +947,7 @@ async function generatePDF(notes, config) {
         y -= 4
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+          drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 4
         }
         continue
@@ -962,7 +962,7 @@ async function generatePDF(notes, config) {
         y -= 8
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+          drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 4
         }
         y -= 4
@@ -978,7 +978,7 @@ async function generatePDF(notes, config) {
         y -= 10
         const wrapped = wrapText(text, font, fontSize, contentWidth)
         for (const wl of wrapped) {
-          safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+          drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
           y -= fontSize + 5
         }
         y -= 6
@@ -1001,7 +1001,7 @@ async function generatePDF(notes, config) {
         
         const wrapped = wrapText(text, font, fontSize, contentWidth - 15)
         for (let i = 0; i < wrapped.length; i++) {
-          safeDrawText(currentPage, wrapped[i], {
+          drawText(currentPage, wrapped[i], {
             x: margin + indent + 12,
             y,
             size: fontSize,
@@ -1028,7 +1028,7 @@ async function generatePDF(notes, config) {
             height: 15,
             color: rgb(secondary.r, secondary.g, secondary.b)
           })
-          safeDrawText(currentPage, match[1].replace('.', ''), {
+          drawText(currentPage, match[1].replace('.', ''), {
             x: numBadgeX + 5,
             y: y,
             size: 9,
@@ -1039,7 +1039,7 @@ async function generatePDF(notes, config) {
           const text = match[2].replace(/\*\*/g, '')
           const wrapped = wrapText(text, font, fontSize, contentWidth - 30)
           for (let i = 0; i < wrapped.length; i++) {
-            safeDrawText(currentPage, wrapped[i], {
+            drawText(currentPage, wrapped[i], {
               x: margin + indent + 25,
               y,
               size: fontSize,
@@ -1057,7 +1057,7 @@ async function generatePDF(notes, config) {
       ensureSpace(14)
       const wrapped = wrapText(processedText, font, fontSize, contentWidth)
       for (const wl of wrapped) {
-        safeDrawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
+        drawText(currentPage, wl, { x: margin + indent, y, size: fontSize, font, color: textColor })
         y -= fontSize + 4
       }
     }
