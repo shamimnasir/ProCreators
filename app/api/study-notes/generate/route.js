@@ -531,6 +531,55 @@ async function generatePDF(notes, config) {
     }
     return useBold ? boldFont : regularFont
   }
+  
+  // Create a bound safeDrawText that includes font fallbacks
+  const drawText = (page, text, options) => {
+    const cleanText = sanitizeText(text)
+    if (!cleanText) return
+    
+    // Determine which font to use based on content
+    const textHasBangla = containsBangla(cleanText)
+    const primaryFont = options.font
+    const fallbackFont = textHasBangla ? (banglaFont || regularFont) : regularFont
+    
+    // Try primary font first
+    try {
+      page.drawText(cleanText, options)
+      return
+    } catch (e) {
+      // Primary font failed
+    }
+    
+    // If text has Bangla and we have Bangla font, try it
+    if (textHasBangla && banglaFont && options.font !== banglaFont) {
+      try {
+        page.drawText(cleanText, { ...options, font: banglaFont })
+        return
+      } catch (e) {
+        // Bangla font also failed
+      }
+    }
+    
+    // Try with bold Bangla if we have it
+    if (textHasBangla && banglaBoldFont && options.font !== banglaBoldFont) {
+      try {
+        page.drawText(cleanText, { ...options, font: banglaBoldFont })
+        return
+      } catch (e) {
+        // Bold Bangla also failed
+      }
+    }
+    
+    // Try regular font as last resort
+    if (options.font !== regularFont) {
+      try {
+        page.drawText(cleanText, { ...options, font: regularFont })
+        return
+      } catch (e) {
+        // Everything failed
+      }
+    }
+  }
   const configWithDimensions = { 
     width, height, margin, primary, secondary, accent,
     authorName, instituteName
