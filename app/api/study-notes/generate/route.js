@@ -1037,6 +1037,7 @@ async function generatePDF(notes, config) {
           })
           
           const text = match[2].replace(/\*\*/g, '')
+          const font = getFont(text, false)
           const wrapped = wrapText(text, font, fontSize, contentWidth - 30)
           for (let i = 0; i < wrapped.length; i++) {
             drawText(currentPage, wrapped[i], {
@@ -1054,6 +1055,7 @@ async function generatePDF(notes, config) {
       
       // Regular paragraph
       const processedText = trimmed.replace(/\*\*/g, '')
+      const font = getFont(processedText, false)
       ensureSpace(14)
       const wrapped = wrapText(processedText, font, fontSize, contentWidth)
       for (const wl of wrapped) {
