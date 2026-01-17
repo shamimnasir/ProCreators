@@ -773,7 +773,7 @@ async function generatePDF(notes, config) {
     // Add footers to all pages
     const pages = pdfDoc.getPages()
     pages.forEach((pg, i) => {
-      safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
+      drawText(pg, `Page ${i + 1} of ${pages.length}`, {
         x: width / 2 - 25,
         y: 15,
         size: 8,
@@ -1104,7 +1104,7 @@ async function generatePDF(notes, config) {
       color: rgb(0.85, 0.85, 0.85)
     })
     
-    safeDrawText(pg, `Page ${i + 1} of ${pages.length}`, {
+    drawText(pg, `Page ${i + 1} of ${pages.length}`, {
       x: width / 2 - 25,
       y: 20,
       size: 8,
@@ -1112,7 +1112,7 @@ async function generatePDF(notes, config) {
       color: rgb(0.5, 0.5, 0.5)
     })
     
-    safeDrawText(pg, 'Created with ProCreators Study Notes Generator', {
+    drawText(pg, 'Created with ProCreators Study Notes Generator', {
       x: margin,
       y: 20,
       size: 8,
