@@ -6,6 +6,37 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
+// Check if text contains Bangla characters
+function containsBangla(text) {
+  if (!text) return false
+  return /[\u0980-\u09FF]/.test(text)
+}
+
+// Check if any notes content has Bangla
+function notesHaveBangla(notes) {
+  if (!notes) return false
+  return containsBangla(notes.title) || 
+         containsBangla(notes.content) || 
+         containsBangla(notes.keyTerms) ||
+         containsBangla(notes.examples) ||
+         containsBangla(notes.questions) ||
+         containsBangla(notes.summary)
+}
+
+// Sanitize text - keeps Unicode/Bangla characters
+function sanitizeText(text) {
+  if (!text) return ''
+  return String(text)
+    .replace(/[\r\t]/g, ' ')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2026/g, '...')
+    .replace(/\u2013/g, '-')
+    .replace(/\u2014/g, '--')
+    .replace(/\u00A0/g, ' ')
+    .trim()
+}
+
 // Helper to extract text from PDF
 async function extractTextFromPDF(buffer) {
   try {
