@@ -105,46 +105,98 @@ async function runLLM(prompt, systemPrompt = 'You are an expert exam preparation
   })
 }
 
-// Web search using DuckDuckGo (no API key required)
-async function webSearch(query, numResults = 5) {
+// Helper function to delay execution
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Web search using DuckDuckGo (free, no API key required)
+// Falls back gracefully if rate-limited - official source scraping still works
+async function webSearch(query, numResults = 5, retryCount = 0) {
   try {
-    // Use DuckDuckGo HTML search (no API key needed)
-    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`
+    // Add small delay between searches to avoid rate limiting
+    if (retryCount > 0) {
+      await delay(1000 * retryCount) // Exponential backoff
+    }
+    
+    // Use DuckDuckGo Lite (lighter, less likely to be blocked)
+    const searchUrl = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}`
+    
+    // Rotate user agents to reduce blocking
+    const userAgents = [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+    ]
+    const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)]
     
     const response = await fetch(searchUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-US,en;q=0.9'
-      }
+        'User-Agent': randomUA,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'no-cache'
+      },
+      signal: AbortSignal.timeout(8000)
     })
     
     if (!response.ok) {
-      console.log('DuckDuckGo search failed, status:', response.status)
+      console.log(`DuckDuckGo search failed (status ${response.status}), retrying...`)
+      if (retryCount < 2) {
+        return webSearch(query, numResults, retryCount + 1)
+      }
       return []
     }
     
     const html = await response.text()
     
-    // Extract search results from DuckDuckGo HTML
+    // Extract search results from DuckDuckGo Lite HTML
     const results = []
-    const resultRegex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi
-    const snippetRegex = /<a[^>]*class="result__snippet"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)<\/a>/gi
     
-    let match
-    while ((match = resultRegex.exec(html)) !== null && results.length < numResults) {
-      const url = match[1]
-      const title = match[2].replace(/<[^>]*>/g, '').trim()
-      
-      if (url && title && !url.includes('duckduckgo.com')) {
-        results.push({ url, title, snippet: '' })
+    // DuckDuckGo Lite uses different HTML structure
+    // Look for links in the results table
+    const linkRegex = /<a[^>]*rel="nofollow"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/gi
+    const altLinkRegex = /<a[^>]*class="result-link"[^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>/gi
+    const resultARegex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi
+    
+    // Try multiple patterns
+    for (const regex of [linkRegex, altLinkRegex, resultARegex]) {
+      let match
+      regex.lastIndex = 0 // Reset regex state
+      while ((match = regex.exec(html)) !== null && results.length < numResults) {
+        let url = match[1]
+        const title = match[2].replace(/<[^>]*>/g, '').trim()
+        
+        // Decode URL if needed (DuckDuckGo sometimes wraps URLs)
+        if (url.includes('uddg=')) {
+          const uddgMatch = url.match(/uddg=([^&]+)/)
+          if (uddgMatch) {
+            url = decodeURIComponent(uddgMatch[1])
+          }
+        }
+        
+        // Filter out DuckDuckGo internal links and duplicates
+        if (url && title && 
+            !url.includes('duckduckgo.com') && 
+            !url.includes('duck.co') &&
+            url.startsWith('http') &&
+            !results.some(r => r.url === url)) {
+          results.push({ url, title, snippet: '' })
+        }
       }
+      if (results.length >= numResults) break
     }
     
-    console.log(`Web search for "${query}" found ${results.length} results`)
+    console.log(`Web search for "${query.substring(0, 40)}..." found ${results.length} results`)
     return results
   } catch (error) {
-    console.error('Web search error:', error.message)
+    if (error.name === 'AbortError') {
+      console.log('Web search timed out, skipping...')
+    } else {
+      console.error('Web search error:', error.message)
+    }
+    // Graceful degradation - official sources still work
     return []
   }
 }
