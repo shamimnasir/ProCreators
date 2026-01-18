@@ -160,7 +160,8 @@ const EDUCATION_CATEGORIES = [
         icon: '✍️',
         href: '/dashboard/tools/essay-helper',
         useCase: 'Academic writing',
-        badge: 'Coming Soon'
+        badge: 'New',
+        isBuilt: true
       },
       {
         id: 'citation-generator',
