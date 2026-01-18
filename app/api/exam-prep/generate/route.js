@@ -310,67 +310,98 @@ Return ONLY valid JSON.`
   }
 }
 
-// Generate practice questions
+// Generate practice questions with enhanced context
 async function generateQuestions(config) {
   const { examName, examInfo, practiceMode, difficulty, subject, questionCount, includeExplanations } = config
   
   const difficultyInstructions = {
-    easy: 'Basic level questions testing fundamental concepts',
-    medium: 'Intermediate level questions requiring good understanding',
-    hard: 'Advanced level questions that test deep knowledge and analytical skills',
-    mixed: 'Mix of easy (30%), medium (50%), and hard (20%) questions'
+    easy: 'Basic level questions testing fundamental concepts. These should be straightforward recall or simple application questions.',
+    medium: 'Intermediate level questions requiring good understanding. Include some analysis and application of concepts.',
+    hard: 'Advanced level questions that test deep knowledge, critical thinking, and analytical skills. Include complex scenarios.',
+    mixed: 'Mix of easy (30%), medium (50%), and hard (20%) questions for balanced practice.'
   }
   
+  // Build comprehensive exam context from web-enhanced info
   let examContext = ''
+  let sourceInfo = ''
+  
   if (examInfo) {
     examContext = `
-Exam Details:
-- Pattern: ${examInfo.pattern || 'Standard competitive exam'}
-- Sections: ${examInfo.sections || 'General'}
-- Question Types: ${examInfo.questionTypes || 'Multiple Choice'}
+=== EXAM DETAILS (from official sources and web search) ===
+- Full Name: ${examInfo.examName || examName}
+- Conducting Authority: ${examInfo.authority || 'Not specified'}
+- Country/Region: ${examInfo.country || 'Global'}
+- Exam Pattern: ${examInfo.pattern || 'Standard competitive exam format'}
+- Sections/Subjects: ${examInfo.sections || 'General subjects'}
+- Question Types: ${examInfo.questionTypes || 'Multiple Choice Questions'}
+- Duration: ${examInfo.duration || 'Standard duration'}
+- Total Marks: ${examInfo.totalMarks || 'As per standard format'}
+- Recent Changes: ${examInfo.recentChanges || 'No major recent changes'}
 - Important Topics: ${examInfo.importantTopics?.join(', ') || 'Various topics'}
+- Sample Question Formats: ${examInfo.sampleQuestionTypes?.join(', ') || 'MCQ format'}
 `
+    
+    // Add source attribution
+    if (examInfo.sources) {
+      const officialCount = examInfo.sources.officialSources?.length || 0
+      const webCount = examInfo.sources.webSearchSources?.length || 0
+      sourceInfo = `\n[Data sourced from ${officialCount} official sources and ${webCount} web sources]`
+    }
   }
   
-  const prompt = `Generate ${questionCount} practice questions for the "${examName}" exam.
+  const prompt = `You are an expert question paper setter for "${examName}".
 
 ${examContext}
 
-Configuration:
-- Difficulty: ${difficulty} - ${difficultyInstructions[difficulty]}
-- Subject/Topic Focus: ${subject || 'General/Mixed subjects'}
-- Include explanations: ${includeExplanations ? 'Yes, detailed explanations for each answer' : 'Brief or no explanations'}
+TASK: Generate ${questionCount} HIGH-QUALITY practice questions that EXACTLY match the exam pattern and style.
 
-Generate questions in this JSON format:
+CONFIGURATION:
+- Difficulty Level: ${difficulty} - ${difficultyInstructions[difficulty]}
+- Subject/Topic Focus: ${subject || 'Mixed subjects covering all major areas'}
+- Include Detailed Explanations: ${includeExplanations ? 'YES - provide thorough explanations with concepts' : 'Brief explanations only'}
+
+CRITICAL REQUIREMENTS:
+1. Questions MUST match the actual exam pattern (${examInfo?.pattern || 'standard MCQ format'})
+2. Cover topics from: ${examInfo?.importantTopics?.slice(0, 5).join(', ') || 'the official syllabus'}
+3. Use the EXACT question style used in this exam
+4. For ${examName}, ensure questions reflect the ${examInfo?.authority || 'official'} examination standards
+5. Include current affairs (2024-2025) for relevant exams
+6. Make distractors (wrong options) plausible but clearly incorrect
+7. Each explanation should teach the underlying concept
+
+Generate questions in this EXACT JSON format:
 {
   "questions": [
     {
       "number": 1,
       "type": "multiple-choice",
-      "question": "Question text here",
-      "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+      "question": "Clear, well-formatted question text",
+      "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
       "correctAnswer": "A",
-      "explanation": "Explanation of why this is correct",
-      "difficulty": "easy|medium|hard",
-      "topic": "Topic category"
+      "explanation": "Detailed explanation of why A is correct and why other options are wrong",
+      "difficulty": "easy",
+      "topic": "Specific topic category",
+      "source": "Based on ${examInfo?.authority || 'official'} exam pattern"
     }
   ]
 }
 
-Rules:
-1. Questions should be realistic and match actual exam patterns
-2. All questions should have exactly 4 options (A, B, C, D)
-3. Include a mix of conceptual, analytical, and application-based questions
-4. Explanations should be educational and help understand the concept
-5. Topics should be relevant to the exam syllabus
-6. For language exams (IELTS, TOEFL), include reading comprehension, grammar, and vocabulary questions
-7. For competitive exams (BCS, UPSC), include current affairs, reasoning, and subject-specific questions
-8. Generate questions in the appropriate language (English for international exams, may include local language for regional exams)
+QUESTION TYPE GUIDELINES:
+- For IELTS/TOEFL: Include reading passages, sentence completion, vocabulary in context
+- For BCS/UPSC: Include current affairs, constitutional knowledge, general science, reasoning
+- For JEE/NEET: Include numerical problems with calculations
+- For CFA/CA: Include case-based scenarios
+- For Google Certs: Include practical scenario-based questions
 
-Return ONLY valid JSON.`
+Return ONLY valid JSON with ${questionCount} questions.`
 
   try {
-    const response = await runLLM(prompt, `You are an expert question paper setter for ${examName}. Generate high-quality practice questions that accurately reflect the exam pattern and difficulty.`)
+    const systemPrompt = `You are an expert question paper setter specializing in ${examName}. 
+You have deep knowledge of the exam pattern from ${examInfo?.authority || 'the official examining body'}.
+Generate questions that are indistinguishable from actual exam questions.
+Always return valid JSON only.`
+    
+    const response = await runLLM(prompt, systemPrompt)
     
     // Parse JSON from response
     let jsonStr = response
