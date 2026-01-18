@@ -78,6 +78,34 @@ const EXAM_CATEGORIES = [
     ]
   },
   {
+    id: 'google-certifications',
+    name: 'Google Certifications',
+    icon: '🔵',
+    description: 'Google Career & Education certificates',
+    exams: [
+      // Google Career Certificates
+      { id: 'google-data-analytics', name: 'Google Data Analytics', country: 'Global', description: 'Data analysis, visualization & AI tools' },
+      { id: 'google-it-support', name: 'Google IT Support', country: 'Global', description: 'IT troubleshooting & networking' },
+      { id: 'google-cybersecurity', name: 'Google Cybersecurity', country: 'Global', description: 'Security fundamentals & threat detection' },
+      { id: 'google-project-management', name: 'Google Project Management', country: 'Global', description: 'Agile/Scrum & project planning' },
+      { id: 'google-ux-design', name: 'Google UX Design', country: 'Global', description: 'User research & prototyping (Figma)' },
+      { id: 'google-digital-marketing', name: 'Google Digital Marketing', country: 'Global', description: 'Digital marketing & e-commerce' },
+      { id: 'google-ai-essentials', name: 'Google AI Essentials', country: 'Global', description: 'AI fundamentals & applications' },
+      // Google Cloud Certifications
+      { id: 'google-cloud-digital-leader', name: 'Google Cloud Digital Leader', country: 'Global', description: 'Cloud concepts & GCP basics' },
+      { id: 'google-cloud-associate', name: 'Google Cloud Associate Engineer', country: 'Global', description: 'GCP infrastructure & deployment' },
+      { id: 'google-cloud-professional', name: 'Google Cloud Professional Architect', country: 'Global', description: 'Advanced cloud architecture' },
+      // Google Education Certifications  
+      { id: 'google-educator-l1', name: 'Google Certified Educator Level 1', country: 'Global', description: 'Google Workspace for classroom' },
+      { id: 'google-educator-l2', name: 'Google Certified Educator Level 2', country: 'Global', description: 'Advanced education technology' },
+      { id: 'google-gemini-educator', name: 'Gemini Certified Educator', country: 'Global', description: 'AI mastery for lesson plans' },
+      { id: 'google-gemini-student', name: 'Gemini Certified Student', country: 'Global', description: 'AI skills for university students' },
+      { id: 'google-certified-trainer', name: 'Google Certified Trainer', country: 'Global', description: 'Train educators on Google tools' },
+      { id: 'google-certified-coach', name: 'Google Certified Coach', country: 'Global', description: 'One-to-one coaching support' },
+      { id: 'google-certified-innovator', name: 'Google Certified Innovator', country: 'Global', description: 'Transform teaching with technology' },
+    ]
+  },
+  {
     id: 'professional',
     name: 'Professional Certifications',
     icon: '💼',
@@ -102,11 +130,11 @@ const EXAM_CATEGORIES = [
       { id: 'aws-saa', name: 'AWS Solutions Architect', country: 'Global', description: 'Amazon Web Services certification' },
       { id: 'aws-dev', name: 'AWS Developer', country: 'Global', description: 'AWS Developer Associate' },
       { id: 'azure', name: 'Microsoft Azure', country: 'Global', description: 'Azure cloud certifications' },
-      { id: 'gcp', name: 'Google Cloud (GCP)', country: 'Global', description: 'Google Cloud Platform certs' },
       { id: 'pmp', name: 'PMP', country: 'Global', description: 'Project Management Professional' },
       { id: 'cissp', name: 'CISSP', country: 'Global', description: 'Cybersecurity certification' },
       { id: 'comptia', name: 'CompTIA A+/Network+', country: 'Global', description: 'IT fundamentals certifications' },
       { id: 'ccna', name: 'Cisco CCNA', country: 'Global', description: 'Networking certification' },
+      { id: 'scrum-master', name: 'Certified Scrum Master', country: 'Global', description: 'Agile Scrum certification' },
     ]
   },
   {
