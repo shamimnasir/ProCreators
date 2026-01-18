@@ -697,14 +697,14 @@ export default function ExamPrepPage() {
                         <p><strong>Full Name:</strong> {examInfo.examName}</p>
                       )}
                       {examInfo.authority && <p><strong>Authority:</strong> {examInfo.authority}</p>}
-                      {examInfo.pattern && <p><strong>Pattern:</strong> {examInfo.pattern}</p>}
-                      {examInfo.sections && <p><strong>Sections:</strong> {examInfo.sections}</p>}
-                      {examInfo.questionTypes && <p><strong>Question Types:</strong> {examInfo.questionTypes}</p>}
-                      {examInfo.duration && <p><strong>Duration:</strong> {examInfo.duration}</p>}
-                      {examInfo.totalMarks && <p><strong>Total Marks:</strong> {examInfo.totalMarks}</p>}
+                      {examInfo.pattern && <p><strong>Pattern:</strong> {typeof examInfo.pattern === 'string' ? examInfo.pattern : JSON.stringify(examInfo.pattern)}</p>}
+                      {examInfo.sections && <p><strong>Sections:</strong> {Array.isArray(examInfo.sections) ? examInfo.sections.join(', ') : examInfo.sections}</p>}
+                      {examInfo.questionTypes && <p><strong>Question Types:</strong> {Array.isArray(examInfo.questionTypes) ? examInfo.questionTypes.join(', ') : examInfo.questionTypes}</p>}
+                      {examInfo.duration && <p><strong>Duration:</strong> {typeof examInfo.duration === 'string' ? examInfo.duration : JSON.stringify(examInfo.duration)}</p>}
+                      {examInfo.totalMarks && <p><strong>Total Marks:</strong> {typeof examInfo.totalMarks === 'string' ? examInfo.totalMarks : JSON.stringify(examInfo.totalMarks)}</p>}
                       {examInfo.recentChanges && (
                         <p className="text-blue-700 dark:text-blue-300">
-                          <strong>Recent Updates:</strong> {examInfo.recentChanges}
+                          <strong>Recent Updates:</strong> {typeof examInfo.recentChanges === 'string' ? examInfo.recentChanges : JSON.stringify(examInfo.recentChanges)}
                         </p>
                       )}
                     </div>
