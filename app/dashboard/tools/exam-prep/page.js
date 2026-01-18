@@ -877,11 +877,20 @@ export default function ExamPrepPage() {
               </Button>
               <Button className="flex-1" onClick={generateQuestions} disabled={loading}>
                 {loading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching Web & Generating...</>
                 ) : (
                   <><Sparkles className="mr-2 h-4 w-4" /> Generate Practice Questions</>
                 )}
               </Button>
+            </div>
+            
+            {/* Disclaimer */}
+            <div className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>
+                Questions are AI-generated based on official exam patterns from web search. 
+                They are for practice purposes only and may not represent actual exam questions.
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -890,6 +899,24 @@ export default function ExamPrepPage() {
       {/* Step 3: Practice Session */}
       {step === 3 && questions.length > 0 && (
         <div className="space-y-4">
+          {/* AI Disclaimer Banner */}
+          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-center gap-3">
+            <div className="bg-blue-100 dark:bg-blue-900 rounded-full p-1.5">
+              <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">AI-Generated Practice Questions</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Based on {examInfo?.sources?.officialSources?.length > 0 ? 'official sources & ' : ''}web search • For practice only
+              </p>
+            </div>
+            {examInfo?.authority && (
+              <Badge variant="outline" className="text-xs border-blue-300">
+                {examInfo.authority} Pattern
+              </Badge>
+            )}
+          </div>
+          
           {/* Practice Header */}
           <Card>
             <CardContent className="py-4">
