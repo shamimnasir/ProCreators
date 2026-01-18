@@ -4,6 +4,45 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
+// Official exam website mappings for better search results
+const OFFICIAL_EXAM_SOURCES = {
+  // Study Abroad
+  'ielts': { urls: ['https://www.ielts.org', 'https://takeielts.britishcouncil.org'], authority: 'British Council / IDP' },
+  'toefl': { urls: ['https://www.ets.org/toefl'], authority: 'ETS' },
+  'gre': { urls: ['https://www.ets.org/gre'], authority: 'ETS' },
+  'gmat': { urls: ['https://www.mba.com/exams/gmat-exam'], authority: 'GMAC' },
+  'sat': { urls: ['https://collegereadiness.collegeboard.org/sat'], authority: 'College Board' },
+  'pte': { urls: ['https://www.pearsonpte.com'], authority: 'Pearson' },
+  
+  // India Exams
+  'upsc-cse': { urls: ['https://www.upsc.gov.in'], authority: 'UPSC India' },
+  'upsc-prelims': { urls: ['https://www.upsc.gov.in'], authority: 'UPSC India' },
+  'jee-main': { urls: ['https://jeemain.nta.nic.in'], authority: 'NTA India' },
+  'jee-advanced': { urls: ['https://jeeadv.ac.in'], authority: 'IIT' },
+  'neet': { urls: ['https://neet.nta.nic.in'], authority: 'NTA India' },
+  'ssc-cgl': { urls: ['https://ssc.nic.in'], authority: 'SSC India' },
+  
+  // Bangladesh Exams
+  'bcs-bangladesh': { urls: ['https://bpsc.gov.bd'], authority: 'BPSC Bangladesh' },
+  
+  // Professional
+  'cfa': { urls: ['https://www.cfainstitute.org'], authority: 'CFA Institute' },
+  'cpa': { urls: ['https://www.aicpa.org'], authority: 'AICPA' },
+  'usmle': { urls: ['https://www.usmle.org'], authority: 'NBME/FSMB' },
+  
+  // Tech
+  'aws-saa': { urls: ['https://aws.amazon.com/certification'], authority: 'Amazon Web Services' },
+  'azure': { urls: ['https://learn.microsoft.com/certifications'], authority: 'Microsoft' },
+  'pmp': { urls: ['https://www.pmi.org/certifications/project-management-pmp'], authority: 'PMI' },
+  
+  // Google
+  'google-data-analytics': { urls: ['https://grow.google/certificates/data-analytics'], authority: 'Google' },
+  'google-cybersecurity': { urls: ['https://grow.google/certificates/cybersecurity'], authority: 'Google' },
+  'google-project-management': { urls: ['https://grow.google/certificates/project-management'], authority: 'Google' },
+  'google-ux-design': { urls: ['https://grow.google/certificates/ux-design'], authority: 'Google' },
+  'google-cloud-associate': { urls: ['https://cloud.google.com/certification'], authority: 'Google Cloud' },
+}
+
 // Helper to run LLM
 async function runLLM(prompt, systemPrompt = 'You are an expert exam preparation assistant.') {
   return new Promise(async (resolve, reject) => {
@@ -66,40 +105,203 @@ async function runLLM(prompt, systemPrompt = 'You are an expert exam preparation
   })
 }
 
-// Search for exam information using web search simulation via LLM
-async function searchExamInfo(examName) {
-  const prompt = `You are an expert on competitive exams and standardized tests worldwide. 
+// Web search using DuckDuckGo (no API key required)
+async function webSearch(query, numResults = 5) {
+  try {
+    // Use DuckDuckGo HTML search (no API key needed)
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`
+    
+    const response = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    })
+    
+    if (!response.ok) {
+      console.log('DuckDuckGo search failed, status:', response.status)
+      return []
+    }
+    
+    const html = await response.text()
+    
+    // Extract search results from DuckDuckGo HTML
+    const results = []
+    const resultRegex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi
+    const snippetRegex = /<a[^>]*class="result__snippet"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)<\/a>/gi
+    
+    let match
+    while ((match = resultRegex.exec(html)) !== null && results.length < numResults) {
+      const url = match[1]
+      const title = match[2].replace(/<[^>]*>/g, '').trim()
+      
+      if (url && title && !url.includes('duckduckgo.com')) {
+        results.push({ url, title, snippet: '' })
+      }
+    }
+    
+    console.log(`Web search for "${query}" found ${results.length} results`)
+    return results
+  } catch (error) {
+    console.error('Web search error:', error.message)
+    return []
+  }
+}
 
-Provide detailed information about the exam: "${examName}"
+// Scrape content from a URL
+async function scrapeUrl(url) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml'
+      },
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    })
+    
+    if (!response.ok) return null
+    
+    const html = await response.text()
+    
+    // Extract text content from HTML
+    let text = html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+      .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, '')
+      .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, '')
+      .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    
+    // Limit content
+    return text.substring(0, 5000)
+  } catch (error) {
+    console.error(`Scrape error for ${url}:`, error.message)
+    return null
+  }
+}
 
-Include the following in your response as JSON:
+// HYBRID APPROACH: Search web for official exam info, then use LLM to structure it
+async function searchExamInfo(examName, examId = null) {
+  console.log(`\n=== HYBRID EXAM SEARCH: ${examName} ===`)
+  
+  let webContent = []
+  let officialSources = []
+  let searchSources = []
+  
+  // Step 1: Check if we have known official sources
+  const knownSource = examId ? OFFICIAL_EXAM_SOURCES[examId] : null
+  
+  // Step 2: Try to scrape official sources first
+  if (knownSource) {
+    console.log(`Found official source config for ${examId}`)
+    for (const url of knownSource.urls) {
+      try {
+        const content = await scrapeUrl(url)
+        if (content && content.length > 200) {
+          webContent.push(content)
+          officialSources.push({ url, authority: knownSource.authority })
+          console.log(`✓ Scraped official source: ${url}`)
+        }
+      } catch (e) {
+        console.log(`✗ Failed to scrape ${url}`)
+      }
+    }
+  }
+  
+  // Step 3: Web search for additional information
+  const searchQueries = [
+    `${examName} exam pattern syllabus official`,
+    `${examName} exam structure questions format 2024 2025`,
+    `${examName} exam preparation guide topics`
+  ]
+  
+  for (const query of searchQueries) {
+    if (webContent.length >= 3) break // Enough content
+    
+    const searchResults = await webSearch(query, 3)
+    
+    for (const result of searchResults) {
+      if (webContent.length >= 5) break
+      
+      // Skip already scraped URLs
+      if (officialSources.some(s => result.url.includes(s.url))) continue
+      
+      try {
+        const content = await scrapeUrl(result.url)
+        if (content && content.length > 300) {
+          webContent.push(content)
+          searchSources.push({ url: result.url, title: result.title })
+          console.log(`✓ Scraped search result: ${result.url}`)
+        }
+      } catch (e) {
+        // Skip failed scrapes
+      }
+    }
+  }
+  
+  console.log(`Total web content pieces: ${webContent.length}`)
+  
+  // Step 4: Use LLM to analyze and structure the information
+  const webDataSummary = webContent.length > 0 
+    ? `\n\nWEB SEARCH DATA (use this as primary source):\n${webContent.slice(0, 3).join('\n\n---\n\n')}`
+    : ''
+  
+  const prompt = `You are an expert on competitive exams and standardized tests worldwide.
+
+Analyze the following information about the exam: "${examName}"
+${webDataSummary}
+
+Based on the web data above (if available) AND your knowledge, provide ACCURATE and UP-TO-DATE information about this exam.
+
+IMPORTANT: 
+- Prioritize information from the web data if available
+- If web data conflicts with your knowledge, prefer web data (it's more recent)
+- Be specific about question patterns, marking schemes, and time limits
+- Include the exact number of questions if known
+
+Return your response as JSON:
 {
   "examName": "Full official name of the exam",
   "country": "Country/Region where this exam is conducted",
   "authority": "Conducting authority/organization",
-  "pattern": "Brief description of exam pattern (e.g., 'Multiple choice questions with negative marking')",
-  "sections": "List of sections/subjects covered",
-  "questionTypes": "Types of questions (MCQ, descriptive, etc.)",
-  "duration": "Total exam duration",
-  "totalMarks": "Total marks",
+  "officialWebsite": "Official website URL if known",
+  "pattern": "Detailed exam pattern (e.g., 'Paper 1: 100 MCQs, 2 hours, negative marking -0.33')",
+  "sections": "List all sections/subjects covered with question distribution",
+  "questionTypes": "Types of questions (MCQ, descriptive, case study, etc.)",
+  "duration": "Total exam duration with breakdown if applicable",
+  "totalMarks": "Total marks with section-wise breakdown",
   "passingCriteria": "Minimum passing marks or criteria",
-  "frequency": "How often the exam is conducted (yearly, twice a year, etc.)",
+  "frequency": "How often the exam is conducted",
   "eligibility": "Basic eligibility criteria",
-  "importantTopics": ["List of important topics to focus on"],
-  "tips": ["Preparation tips"]
+  "importantTopics": ["List of 8-10 most important topics to focus on"],
+  "recentChanges": "Any recent changes to exam pattern (2023-2025)",
+  "tips": ["5 specific preparation tips for this exam"],
+  "sampleQuestionTypes": ["Examples of question formats used in this exam"]
 }
-
-If you don't have accurate information about this specific exam, provide a reasonable exam structure that would be typical for this type of examination.
 
 Return ONLY valid JSON.`
 
   try {
-    const response = await runLLM(prompt, 'You are an expert on competitive examinations worldwide. Provide accurate exam information in JSON format only.')
+    const response = await runLLM(prompt, 'You are an expert on competitive examinations worldwide. Analyze web data and provide accurate, structured exam information in JSON format only.')
     
     // Parse JSON from response
     let jsonMatch = response.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+      const examInfo = JSON.parse(jsonMatch[0])
+      
+      // Add source information
+      examInfo.sources = {
+        officialSources: officialSources.map(s => ({ url: s.url, authority: s.authority })),
+        webSearchSources: searchSources.map(s => ({ url: s.url, title: s.title })),
+        dataFreshness: webContent.length > 0 ? 'Web-enhanced (searched official and web sources)' : 'AI knowledge base only',
+        searchedAt: new Date().toISOString()
+      }
+      
+      console.log(`=== EXAM INFO READY (${webContent.length} web sources used) ===\n`)
+      return examInfo
     }
     return null
   } catch (error) {
