@@ -242,34 +242,60 @@ export default function ExamPrepPage() {
     if (data.step) setStep(Math.min(data.step, 2))
   }
 
-  // Search for exam information
+  // Search for exam information (HYBRID: Web + AI)
   const searchExamInfo = async () => {
     const examName = customExamName || EXAM_CATEGORIES.flatMap(c => c.exams).find(e => e.id === selectedExam)?.name
     if (!examName) return
 
     setSearchingExam(true)
     try {
-      const response = await fetch('/api/exam-prep/search-exam', {
+      const response = await fetch('/api/exam-prep/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ examName })
+        body: JSON.stringify({ 
+          action: 'search-exam',
+          examName,
+          examId: selectedExam || null // Pass exam ID for official source lookup
+        })
       })
       
       const data = await response.json()
-      if (data.success) {
+      if (data.success && data.examInfo) {
         setExamInfo(data.examInfo)
-        toast({
-          title: 'Exam Info Found!',
-          description: `Found pattern and details for ${examName}`
-        })
+        
+        // Show appropriate toast based on source
+        const officialCount = data.examInfo.sources?.officialSources?.length || 0
+        const webCount = data.examInfo.sources?.webSearchSources?.length || 0
+        
+        if (officialCount > 0) {
+          toast({
+            title: '✅ Official Sources Found!',
+            description: `Found ${officialCount} official + ${webCount} web sources for ${examName}`
+          })
+        } else if (webCount > 0) {
+          toast({
+            title: '🔍 Web Search Complete',
+            description: `Found ${webCount} web sources for ${examName}`
+          })
+        } else {
+          toast({
+            title: '🤖 AI Knowledge Used',
+            description: `Using AI knowledge base for ${examName}`
+          })
+        }
       } else {
         toast({
           title: 'Search Complete',
-          description: 'Proceeding with general exam format'
+          description: 'Proceeding with AI-generated exam format'
         })
       }
     } catch (error) {
       console.error('Exam search error:', error)
+      toast({
+        title: 'Search Error',
+        description: 'Proceeding with AI knowledge base',
+        variant: 'destructive'
+      })
     } finally {
       setSearchingExam(false)
     }
@@ -291,6 +317,7 @@ export default function ExamPrepPage() {
         body: JSON.stringify({
           action: 'generate-questions',
           examName,
+          examId: selectedExam || null,
           examInfo,
           practiceMode,
           difficulty,
@@ -312,7 +339,7 @@ export default function ExamPrepPage() {
         setStep(3)
         toast({
           title: 'Questions Generated!',
-          description: `${data.questions.length} questions ready for practice`
+          description: `${data.questions.length} AI-generated practice questions ready`
         })
       } else {
         throw new Error(data.error || 'Failed to generate questions')
