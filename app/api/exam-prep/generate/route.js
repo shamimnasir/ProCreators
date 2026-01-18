@@ -292,6 +292,40 @@ Return ONLY valid JSON.`
     if (jsonMatch) {
       const examInfo = JSON.parse(jsonMatch[0])
       
+      // Normalize all fields to be strings (not objects or arrays for display fields)
+      const normalizeField = (field) => {
+        if (field === null || field === undefined) return null
+        if (typeof field === 'string') return field
+        if (Array.isArray(field)) return field.join(', ')
+        if (typeof field === 'object') {
+          // Convert object to readable string
+          return Object.entries(field).map(([k, v]) => `${k}: ${v}`).join('; ')
+        }
+        return String(field)
+      }
+      
+      // Normalize display fields
+      examInfo.pattern = normalizeField(examInfo.pattern)
+      examInfo.sections = normalizeField(examInfo.sections)
+      examInfo.questionTypes = normalizeField(examInfo.questionTypes)
+      examInfo.duration = normalizeField(examInfo.duration)
+      examInfo.totalMarks = normalizeField(examInfo.totalMarks)
+      examInfo.passingCriteria = normalizeField(examInfo.passingCriteria)
+      examInfo.frequency = normalizeField(examInfo.frequency)
+      examInfo.eligibility = normalizeField(examInfo.eligibility)
+      examInfo.recentChanges = normalizeField(examInfo.recentChanges)
+      
+      // Keep arrays as arrays for these fields
+      if (examInfo.importantTopics && !Array.isArray(examInfo.importantTopics)) {
+        examInfo.importantTopics = [examInfo.importantTopics]
+      }
+      if (examInfo.tips && !Array.isArray(examInfo.tips)) {
+        examInfo.tips = [examInfo.tips]
+      }
+      if (examInfo.sampleQuestionTypes && !Array.isArray(examInfo.sampleQuestionTypes)) {
+        examInfo.sampleQuestionTypes = [examInfo.sampleQuestionTypes]
+      }
+      
       // Add source information
       examInfo.sources = {
         officialSources: officialSources.map(s => ({ url: s.url, authority: s.authority })),
