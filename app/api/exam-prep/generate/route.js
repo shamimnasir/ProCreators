@@ -698,29 +698,38 @@ export async function POST(request) {
     const body = await request.json()
     const { action } = body
     
-    // Search for exam information
+    // Search for exam information (HYBRID APPROACH)
     if (action === 'search-exam') {
-      const { examName } = body
+      const { examName, examId } = body
       
       if (!examName) {
         return NextResponse.json({ success: false, error: 'Exam name required' }, { status: 400 })
       }
       
-      const examInfo = await searchExamInfo(examName)
+      console.log(`\n📚 Exam Search Request: ${examName} (ID: ${examId || 'custom'})`)
+      
+      // Use hybrid approach: web search + LLM
+      const examInfo = await searchExamInfo(examName, examId)
       
       return NextResponse.json({
         success: true,
-        examInfo
+        examInfo,
+        searchMethod: 'hybrid', // Indicates we used web + AI
+        message: examInfo?.sources?.officialSources?.length > 0 
+          ? `Found information from ${examInfo.sources.officialSources.length} official sources`
+          : 'Generated from AI knowledge base with web search enhancement'
       })
     }
     
     // Generate practice questions
     if (action === 'generate-questions') {
+      console.log(`\n📝 Question Generation Request: ${body.examName}`)
       const questions = await generateQuestions(body)
       
       return NextResponse.json({
         success: true,
-        questions
+        questions,
+        disclaimer: 'These questions are AI-generated for practice purposes based on official exam patterns. They may not represent actual exam questions.'
       })
     }
     
