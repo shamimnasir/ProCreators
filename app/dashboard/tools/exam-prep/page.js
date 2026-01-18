@@ -540,8 +540,8 @@ export default function ExamPrepPage() {
               {/* Exam Selection or Custom Input */}
               {examCategory && examCategory !== 'custom' && (
                 <div className="space-y-3">
-                  <Label>Select Exam</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <Label>Select Exam ({getAvailableExams().length} available)</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {getAvailableExams().map((exam) => (
                       <button
                         key={exam.id}
@@ -550,14 +550,19 @@ export default function ExamPrepPage() {
                           setCustomExamName('')
                           setExamInfo(null)
                         }}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`p-4 rounded-lg border-2 text-left transition-all ${
                           selectedExam === exam.id 
-                            ? 'border-primary bg-primary/10' 
+                            ? 'border-primary bg-primary/10 ring-1 ring-primary' 
                             : 'border-muted hover:border-primary/50'
                         }`}
                       >
-                        <div className="font-medium text-sm">{exam.name}</div>
-                        <Badge variant="secondary" className="text-xs mt-1">{exam.country}</Badge>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-medium text-sm">{exam.name}</div>
+                          <Badge variant="secondary" className="text-xs shrink-0">{exam.country}</Badge>
+                        </div>
+                        {exam.description && (
+                          <div className="text-xs text-muted-foreground mt-1">{exam.description}</div>
+                        )}
                       </button>
                     ))}
                   </div>
