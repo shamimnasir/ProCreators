@@ -170,7 +170,8 @@ const EDUCATION_CATEGORIES = [
         icon: '📚',
         href: '/dashboard/tools/citation-generator',
         useCase: 'Research papers',
-        badge: 'Coming Soon'
+        badge: 'New',
+        isBuilt: true
       },
       {
         id: 'grammar-checker',
