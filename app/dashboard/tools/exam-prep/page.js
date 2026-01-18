@@ -655,28 +655,91 @@ export default function ExamPrepPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    We'll search the web to find the exam pattern, question types, and marking scheme
+                    We'll search official websites and the web to find the exam pattern, question types, and marking scheme
                   </p>
                 </div>
               )}
 
-              {/* Exam Info Preview */}
+              {/* Exam Info Preview - Enhanced with Source Attribution */}
               {examInfo && (
                 <Card className="bg-green-50 dark:bg-green-950/30 border-green-200">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-green-800 dark:text-green-200 text-base flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5" />
-                      Exam Pattern Found
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-green-800 dark:text-green-200 text-base flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5" />
+                        Exam Pattern Found
+                      </CardTitle>
+                      {/* Data Freshness Badge */}
+                      {examInfo.sources && (
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            examInfo.sources.officialSources?.length > 0 
+                              ? 'border-green-500 text-green-700' 
+                              : examInfo.sources.webSearchSources?.length > 0
+                                ? 'border-blue-500 text-blue-700'
+                                : 'border-yellow-500 text-yellow-700'
+                          }`}
+                        >
+                          {examInfo.sources.officialSources?.length > 0 
+                            ? `✓ ${examInfo.sources.officialSources.length} Official Sources` 
+                            : examInfo.sources.webSearchSources?.length > 0
+                              ? `🔍 ${examInfo.sources.webSearchSources.length} Web Sources`
+                              : '🤖 AI Knowledge'
+                          }
+                        </Badge>
+                      )}
+                    </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <div className="text-sm space-y-2 text-green-700 dark:text-green-300">
+                      {examInfo.examName && examInfo.examName !== (customExamName || selectedExamInfo?.name) && (
+                        <p><strong>Full Name:</strong> {examInfo.examName}</p>
+                      )}
+                      {examInfo.authority && <p><strong>Authority:</strong> {examInfo.authority}</p>}
                       {examInfo.pattern && <p><strong>Pattern:</strong> {examInfo.pattern}</p>}
                       {examInfo.sections && <p><strong>Sections:</strong> {examInfo.sections}</p>}
                       {examInfo.questionTypes && <p><strong>Question Types:</strong> {examInfo.questionTypes}</p>}
                       {examInfo.duration && <p><strong>Duration:</strong> {examInfo.duration}</p>}
                       {examInfo.totalMarks && <p><strong>Total Marks:</strong> {examInfo.totalMarks}</p>}
+                      {examInfo.recentChanges && (
+                        <p className="text-blue-700 dark:text-blue-300">
+                          <strong>Recent Updates:</strong> {examInfo.recentChanges}
+                        </p>
+                      )}
                     </div>
+                    
+                    {/* Source Links */}
+                    {examInfo.sources && (examInfo.sources.officialSources?.length > 0 || examInfo.sources.webSearchSources?.length > 0) && (
+                      <div className="pt-3 border-t border-green-200 dark:border-green-800">
+                        <p className="text-xs font-medium text-green-800 dark:text-green-200 mb-2">Sources Referenced:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {examInfo.sources.officialSources?.map((source, idx) => (
+                            <a 
+                              key={`official-${idx}`}
+                              href={source.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/50 rounded hover:bg-green-200 transition-colors"
+                            >
+                              ✓ {source.authority || 'Official'}
+                            </a>
+                          ))}
+                          {examInfo.sources.webSearchSources?.slice(0, 3).map((source, idx) => (
+                            <a 
+                              key={`web-${idx}`}
+                              href={source.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/50 rounded hover:bg-blue-200 transition-colors truncate max-w-32"
+                              title={source.title}
+                            >
+                              🔗 {source.title?.substring(0, 20) || 'Web'}...
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
