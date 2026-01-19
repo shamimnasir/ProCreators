@@ -16,7 +16,8 @@ import {
   ArrowLeft, ArrowRight, CheckCircle, Copy,
   BookOpen, Brain, Target, Lightbulb, PenTool,
   ListOrdered, AlignLeft, RefreshCw, Eye,
-  Wand2, FileEdit, Quote, Layers, GraduationCap
+  Wand2, FileEdit, Quote, Layers, GraduationCap,
+  Upload, FileUp, X, File
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
