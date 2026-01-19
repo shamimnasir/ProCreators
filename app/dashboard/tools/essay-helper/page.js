@@ -193,6 +193,81 @@ export default function EssayHelperPage() {
     }
   }
 
+  // Handle file upload for Essay Improver
+  const handleFileUpload = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ]
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload a PDF, DOC, DOCX, or TXT file',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Maximum file size is 10MB',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setUploadingFile(true)
+    setUploadedFile({ name: file.name, size: file.size })
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/essay-helper/extract-text', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      if (data.success && data.text) {
+        setExistingContent(data.text)
+        toast({
+          title: 'File uploaded successfully!',
+          description: `Extracted ${data.wordCount || 'text'} from ${file.name}`
+        })
+      } else {
+        throw new Error(data.error || 'Failed to extract text')
+      }
+    } catch (error) {
+      toast({
+        title: 'Upload failed',
+        description: error.message,
+        variant: 'destructive'
+      })
+      setUploadedFile(null)
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+
+  // Clear uploaded file
+  const clearUploadedFile = () => {
+    setUploadedFile(null)
+    setExistingContent('')
+    // Reset file input
+    const fileInput = document.getElementById('essay-file-upload')
+    if (fileInput) fileInput.value = ''
+  }
+
   // Generate content
   const generateContent = async () => {
     if (!topic && writingMode !== 'brainstorm') {
