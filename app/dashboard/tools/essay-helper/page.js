@@ -132,6 +132,11 @@ export default function EssayHelperPage() {
   const [additionalInstructions, setAdditionalInstructions] = useState('')
   const [outlinePoints, setOutlinePoints] = useState(['', '', ''])
   
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const [inputMethod, setInputMethod] = useState('paste') // 'paste' or 'upload'
+  
   // Output
   const [generatedContent, setGeneratedContent] = useState(null)
   const [pdfUrl, setPdfUrl] = useState(null)
