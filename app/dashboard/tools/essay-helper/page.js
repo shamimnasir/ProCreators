@@ -604,17 +604,122 @@ export default function EssayHelperPage() {
 
             {/* Existing Content for Improve mode */}
             {writingMode === 'improve' && (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label className="flex items-center gap-2">
                   <FileEdit className="h-4 w-4" />
                   Your Existing Essay
                 </Label>
-                <Textarea
-                  value={existingContent}
-                  onChange={(e) => setExistingContent(e.target.value)}
-                  placeholder="Paste your essay here for analysis and improvement suggestions..."
-                  rows={10}
-                />
+                
+                {/* Input Method Tabs */}
+                <Tabs value={inputMethod} onValueChange={setInputMethod} className="w-full">
+                  <TabsList className="grid grid-cols-2 w-full max-w-sm">
+                    <TabsTrigger value="paste" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Paste Text
+                    </TabsTrigger>
+                    <TabsTrigger value="upload" className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload File
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="paste" className="mt-4">
+                    <Textarea
+                      value={existingContent}
+                      onChange={(e) => setExistingContent(e.target.value)}
+                      placeholder="Paste your essay here for analysis and improvement suggestions..."
+                      rows={10}
+                      className="min-h-[250px]"
+                    />
+                    {existingContent && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Word count: ~{existingContent.split(/\s+/).filter(w => w).length} words
+                      </p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="upload" className="mt-4">
+                    <div className="space-y-4">
+                      {/* File Upload Area */}
+                      {!uploadedFile ? (
+                        <label 
+                          htmlFor="essay-file-upload"
+                          className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            {uploadingFile ? (
+                              <>
+                                <Loader2 className="h-10 w-10 mb-3 text-primary animate-spin" />
+                                <p className="text-sm text-muted-foreground">Extracting text...</p>
+                              </>
+                            ) : (
+                              <>
+                                <FileUp className="h-10 w-10 mb-3 text-muted-foreground" />
+                                <p className="mb-2 text-sm text-muted-foreground">
+                                  <span className="font-semibold">Click to upload</span> or drag and drop
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  PDF, DOC, DOCX, or TXT (max 10MB)
+                                </p>
+                              </>
+                            )}
+                          </div>
+                          <input
+                            id="essay-file-upload"
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                            onChange={handleFileUpload}
+                            disabled={uploadingFile}
+                          />
+                        </label>
+                      ) : (
+                        <div className="p-4 border rounded-lg bg-muted/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded-lg">
+                                <File className="h-6 w-6 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm">{uploadedFile.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {(uploadedFile.size / 1024).toFixed(1)} KB
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={clearUploadedFile}
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          {existingContent && (
+                            <div className="mt-3 pt-3 border-t">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-medium text-muted-foreground">Extracted Text Preview:</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  ~{existingContent.split(/\s+/).filter(w => w).length} words
+                                </Badge>
+                              </div>
+                              <div className="max-h-32 overflow-y-auto text-sm text-muted-foreground bg-background/50 p-2 rounded border">
+                                {existingContent.substring(0, 500)}
+                                {existingContent.length > 500 && '...'}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <p className="text-xs text-muted-foreground">
+                        Supported formats: PDF, Microsoft Word (.doc, .docx), Plain Text (.txt)
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
 
