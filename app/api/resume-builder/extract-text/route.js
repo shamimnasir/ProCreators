@@ -21,8 +21,7 @@ async function extractFromPDF(filePath) {
   
   // Fallback to pdf-parse (JavaScript library)
   try {
-    const pdfParseModule = await import('pdf-parse/lib/pdf-parse.js')
-    const pdfParse = pdfParseModule.default || pdfParseModule
+    const pdfParse = require('pdf-parse')
     const dataBuffer = await readFile(filePath)
     const data = await pdfParse(dataBuffer)
     if (data.text && data.text.trim().length > 0) {
