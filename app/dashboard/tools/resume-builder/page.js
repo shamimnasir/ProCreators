@@ -119,7 +119,7 @@ function EditableListItem({ value, onChange, onDelete }) {
       onClick={() => { setTempValue(value); setEditing(true) }} title="Click to edit">
       <span className="mt-0.5">•</span>
       <span className="flex-1">{value}</span>
-      <Edit3 className="h-3 w-3 opacity-30 mt-1" />
+      <Edit3 className="h-3 w-3 opacity-30 mt-1 edit-icon" />
     </li>
   )
 }
