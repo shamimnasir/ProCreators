@@ -87,7 +87,7 @@ function EditableText({ value, onChange, className = '', multiline = false, plac
     <span onClick={() => { setTempValue(value); setEditing(true) }}
       className={`cursor-pointer hover:bg-white/20 hover:outline hover:outline-2 hover:outline-dashed hover:outline-white/50 rounded px-1 transition-all ${className}`}
       title="Click to edit">
-      {value || placeholder} <Edit3 className="inline h-3 w-3 ml-1 opacity-50" />
+      {value || placeholder} <Edit3 className="inline h-3 w-3 ml-1 opacity-50 edit-icon print:hidden" />
     </span>
   )
 }
