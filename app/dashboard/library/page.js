@@ -28,6 +28,13 @@ const TOOL_TYPES = [
   { value: 'worksheet', label: 'Worksheet Generator', icon: '📝' },
   { value: 'checklist', label: 'Checklist Maker', icon: '✅' },
   { value: 'slides-maker', label: 'AI Presentation Maker', icon: '📊' },
+  { value: 'study-notes', label: 'Study Notes', icon: '📚' },
+  { value: 'quiz', label: 'Quiz Maker', icon: '❓' },
+  { value: 'flashcards', label: 'Flashcards', icon: '🎴' },
+  { value: 'lesson-planner', label: 'Lesson Planner', icon: '📋' },
+  { value: 'essay-helper', label: 'Essay Helper', icon: '✍️' },
+  { value: 'exam-prep', label: 'Exam Prep', icon: '📝' },
+  { value: 'citation-generator', label: 'Citation Generator', icon: '📚' },
 ]
 
 export default function LibraryPage() {
