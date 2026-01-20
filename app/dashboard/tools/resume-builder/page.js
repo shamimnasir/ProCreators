@@ -482,33 +482,34 @@ export default function ResumeBuilderPage() {
 
   // Check for prefilled data from Job Analyzer on mount
   useEffect(() => {
-    try {
-      const savedData = localStorage.getItem('resumeBuilderData')
-      if (savedData) {
-        const data = JSON.parse(savedData)
-        // Only use data if it's recent (within 5 minutes)
-        if (data.timestamp && Date.now() - data.timestamp < 5 * 60 * 1000) {
-          if (data.resumeText) setRawInfo(data.resumeText)
-          if (data.targetJob) setTargetJob(data.targetJob)
-          if (data.missingKeywords) {
-            setMissingKeywordsInfo({
-              keywords: data.missingKeywords,
-              recommendations: data.recommendations,
-              matchScore: data.matchScore
-            })
+    const loadPrefilledData = () => {
+      try {
+        const savedData = localStorage.getItem('resumeBuilderData')
+        if (savedData) {
+          const data = JSON.parse(savedData)
+          console.log('Found prefilled data:', data)
+          // Only use data if it's recent (within 10 minutes)
+          if (data.timestamp && Date.now() - data.timestamp < 10 * 60 * 1000) {
+            if (data.resumeText) setRawInfo(data.resumeText)
+            if (data.targetJob) setTargetJob(data.targetJob)
+            if (data.missingKeywords && data.missingKeywords.length > 0) {
+              setMissingKeywordsInfo({
+                keywords: data.missingKeywords,
+                recommendations: data.recommendations || '',
+                matchScore: data.matchScore || 0
+              })
+            }
+            setPrefilledFrom('Job Description Analyzer')
           }
-          setPrefilledFrom('Job Description Analyzer')
-          toast({ 
-            title: '✨ Data Imported!', 
-            description: 'Your resume and job target have been pre-filled. Missing keywords highlighted below!' 
-          })
+          // Clear the data after reading
+          localStorage.removeItem('resumeBuilderData')
         }
-        // Clear the data after reading
-        localStorage.removeItem('resumeBuilderData')
+      } catch (e) {
+        console.log('Error loading prefilled data:', e)
       }
-    } catch (e) {
-      console.log('No prefilled data found')
     }
+    
+    loadPrefilledData()
   }, [])
 
   const handleHeadshotUpload = (e) => {
