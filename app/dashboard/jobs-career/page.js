@@ -79,7 +79,7 @@ const CAREER_CATEGORIES = [
         icon: '💰',
         href: '/dashboard/tools/salary-negotiator',
         useCase: 'Negotiations',
-        badge: ''
+        badge: 'New'
       }
     ]
   },
