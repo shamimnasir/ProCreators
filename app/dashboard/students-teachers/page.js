@@ -180,7 +180,8 @@ const EDUCATION_CATEGORIES = [
         icon: '✅',
         href: '/dashboard/tools/grammar-checker',
         useCase: 'All writing',
-        badge: 'Coming Soon'
+        badge: 'New',
+        isBuilt: true
       }
     ]
   },
