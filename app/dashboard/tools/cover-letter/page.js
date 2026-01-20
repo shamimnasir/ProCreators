@@ -225,6 +225,7 @@ export default function CoverLetterPage() {
   const [coverLetterData, setCoverLetterData] = useState(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [prefilledFrom, setPrefilledFrom] = useState(null)
   const { toast } = useToast()
   
   // Form state
@@ -249,6 +250,33 @@ export default function CoverLetterPage() {
   const [length, setLength] = useState('standard')
   const [theme, setTheme] = useState('modern')
   const [focusAreas, setFocusAreas] = useState('')
+
+  // Check for prefilled data from Job Analyzer on mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('coverLetterData')
+      if (savedData) {
+        const data = JSON.parse(savedData)
+        // Only use data if it's recent (within 5 minutes)
+        if (data.timestamp && Date.now() - data.timestamp < 5 * 60 * 1000) {
+          if (data.jobTitle) setJobTitle(data.jobTitle)
+          if (data.companyName) setCompanyName(data.companyName)
+          if (data.jobDescription) setJobDescription(data.jobDescription)
+          if (data.matchingKeywords) setKeySkills(data.matchingKeywords)
+          if (data.strongPoints) setRelevantAchievements(data.strongPoints)
+          setPrefilledFrom('Job Description Analyzer')
+          toast({ 
+            title: '✨ Data Pre-filled!', 
+            description: 'Job details imported from analyzer' 
+          })
+        }
+        // Clear the data after reading
+        localStorage.removeItem('coverLetterData')
+      }
+    } catch (e) {
+      console.log('No prefilled data found')
+    }
+  }, [])
 
   const handleGenerate = async () => {
     if (!fullName || !jobTitle || !companyName) {
