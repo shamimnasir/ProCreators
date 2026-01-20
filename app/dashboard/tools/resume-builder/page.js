@@ -669,6 +669,20 @@ export default function ResumeBuilderPage() {
 
       {!resumeData ? (
         <>
+          {/* Pre-filled from Job Analyzer */}
+          {prefilledFrom && missingKeywordsInfo && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <Target className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <strong>✨ Imported from {prefilledFrom}!</strong> Your match score was {missingKeywordsInfo.matchScore}%.
+                <br />
+                <span className="text-sm">
+                  <strong>Keywords to add:</strong> {missingKeywordsInfo.keywords}
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Warning about LinkedIn */}
           <Alert className="bg-amber-50 border-amber-200">
             <AlertCircle className="h-4 w-4 text-amber-600" />
