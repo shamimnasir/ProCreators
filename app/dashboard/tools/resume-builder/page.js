@@ -530,29 +530,99 @@ export default function ResumeBuilderPage() {
   const removeReference = (idx) => references.length > 1 && setReferences(references.filter((_, i) => i !== idx))
   const updateReference = (idx, field, value) => { const u = [...references]; u[idx][field] = value; setReferences(u) }
 
-  const downloadResume = () => {
+  const [downloading, setDownloading] = useState(false)
+
+  const downloadResume = useCallback(async () => {
     if (!resumeData) return
-    const printWindow = window.open('', '_blank')
-    if (printWindow) {
-      const accentColor = { modern: '#2563eb', classic: '#1f2937', creative: '#9333ea', minimal: '#475569', tech: '#059669', executive: '#b45309' }[template]
-      const headerBg = { modern: 'linear-gradient(135deg, #2563eb, #4f46e5)', classic: 'linear-gradient(135deg, #1f2937, #111827)', creative: 'linear-gradient(135deg, #9333ea, #db2777)', minimal: 'linear-gradient(135deg, #475569, #334155)', tech: 'linear-gradient(135deg, #059669, #0d9488)', executive: 'linear-gradient(135deg, #b45309, #c2410c)' }[template]
-      printWindow.document.write(`<!DOCTYPE html><html><head><title>${resumeData.name} - Resume</title>
-        <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;line-height:1.5;font-size:11pt}.header{background:${headerBg};color:white;padding:30px;display:flex;gap:20px;align-items:center}.headshot{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.3)}.header h1{font-size:24pt;margin-bottom:4px}.header p{opacity:0.9;font-size:14pt;margin-bottom:10px}.contact{display:flex;flex-wrap:wrap;gap:15px;font-size:10pt;opacity:0.85}.content{padding:25px 30px}.section{margin-bottom:20px}.section h2{color:${accentColor};font-size:12pt;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #e5e7eb;padding-bottom:6px;margin-bottom:12px}.exp-item{margin-bottom:15px;padding-left:12px;border-left:2px solid #e5e7eb}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:25px}.skill-tag{background:${accentColor}15;color:${accentColor};padding:2px 8px;border-radius:10px;font-size:9pt;display:inline-block;margin:2px}.ref-item{margin-bottom:10px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
-        </head><body>
-        <div class="header">${headshot ? `<img src="${headshot}" class="headshot"/>` : ''}<div><h1>${resumeData.name}</h1><p>${resumeData.title}</p><div class="contact">${resumeData.email ? `<span>📧 ${resumeData.email}</span>` : ''}${resumeData.phone ? `<span>📱 ${resumeData.phone}</span>` : ''}${resumeData.location ? `<span>📍 ${resumeData.location}</span>` : ''}</div></div></div>
-        <div class="content">
-        ${resumeData.summary ? `<div class="section"><h2>Professional Summary</h2><p>${resumeData.summary}</p></div>` : ''}
-        ${resumeData.experience?.length > 0 ? `<div class="section"><h2>Experience</h2>${resumeData.experience.map(e => `<div class="exp-item"><strong>${e.title}</strong> at <span style="color:${accentColor}">${e.company}</span> (${e.duration})<ul>${e.achievements?.map(a => `<li>• ${a}</li>`).join('') || ''}</ul></div>`).join('')}</div>` : ''}
-        <div class="two-col">
-        ${resumeData.education?.length > 0 ? `<div class="section"><h2>Education</h2>${resumeData.education.map(e => `<p><strong>${e.degree}</strong><br/>${e.school} (${e.year})</p>`).join('')}</div>` : ''}
-        ${resumeData.skills ? `<div class="section"><h2>Skills</h2>${resumeData.skills.technical?.map(s => `<span class="skill-tag">${s}</span>`).join('') || ''}</div>` : ''}
-        </div>
-        ${resumeData.references?.length > 0 ? `<div class="section"><h2>References</h2><div class="two-col">${resumeData.references.map(r => `<div class="ref-item"><strong>${r.name}</strong><br/><span style="color:${accentColor}">${r.designation}</span><br/>${r.company}${r.email ? `<br/>${r.email}` : ''}${r.phone ? ` | ${r.phone}` : ''}</div>`).join('')}</div></div>` : ''}
-        </div></body></html>`)
-      printWindow.document.close()
-      setTimeout(() => printWindow.print(), 500)
+    
+    const resumeElement = document.getElementById('resume-preview')
+    if (!resumeElement) {
+      toast({ title: 'Error', description: 'Resume preview not found', variant: 'destructive' })
+      return
     }
-  }
+
+    setDownloading(true)
+    toast({ title: 'Generating PDF...', description: 'Please wait while we create your resume' })
+
+    try {
+      // Hide edit icons before capture
+      const editIcons = resumeElement.querySelectorAll('.edit-icon, [class*="Edit3"]')
+      editIcons.forEach(icon => icon.style.visibility = 'hidden')
+
+      // Capture the resume with high quality
+      const canvas = await html2canvas(resumeElement, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000,
+        onclone: (clonedDoc) => {
+          // Remove hover effects and edit indicators in cloned document
+          const clonedElement = clonedDoc.getElementById('resume-preview')
+          if (clonedElement) {
+            clonedElement.querySelectorAll('[title="Click to edit"]').forEach(el => {
+              el.removeAttribute('title')
+              el.style.cursor = 'default'
+            })
+            clonedElement.querySelectorAll('.lucide-edit-3, .lucide-edit').forEach(el => {
+              el.style.display = 'none'
+            })
+            // Remove any dashed outlines
+            clonedElement.querySelectorAll('*').forEach(el => {
+              if (el.style) {
+                el.style.outline = 'none'
+              }
+            })
+          }
+        }
+      })
+
+      // Show edit icons again
+      editIcons.forEach(icon => icon.style.visibility = 'visible')
+
+      // Calculate PDF dimensions (A4)
+      const imgWidth = 210 // A4 width in mm
+      const pageHeight = 297 // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      
+      const pdf = new jsPDF({
+        orientation: imgHeight > pageHeight ? 'portrait' : 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      // If the content is longer than one page, we need to handle multi-page
+      let heightLeft = imgHeight
+      let position = 0
+      const imgData = canvas.toDataURL('image/jpeg', 0.95)
+
+      // Add first page
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+
+      // Generate filename
+      const fileName = `${resumeData.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'Resume'}_Resume.pdf`
+      
+      // Direct download - no print dialog
+      pdf.save(fileName)
+      
+      toast({ title: '✅ PDF Downloaded!', description: `Saved as ${fileName}` })
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      toast({ title: 'Download Failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setDownloading(false)
+    }
+  }, [resumeData, toast])
 
   return (
     <div className="space-y-6">
