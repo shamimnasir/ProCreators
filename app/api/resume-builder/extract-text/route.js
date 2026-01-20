@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, unlink, mkdir } from 'fs/promises'
+import { writeFile, unlink, mkdir, readFile } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { exec } from 'child_process'
@@ -7,15 +7,31 @@ import { promisify } from 'util'
 
 const execAsync = promisify(exec)
 
-// Extract text from PDF using pdftotext (poppler-utils)
+// Extract text from PDF using pdftotext (poppler-utils) with fallback to pdf-parse
 async function extractFromPDF(filePath) {
+  // First try pdftotext (system tool)
   try {
     const { stdout } = await execAsync(`pdftotext -layout "${filePath}" -`)
-    return stdout.trim()
+    if (stdout && stdout.trim().length > 10) {
+      return stdout.trim()
+    }
   } catch (error) {
-    console.error('PDF extraction error:', error)
-    throw new Error('Failed to extract text from PDF')
+    console.log('pdftotext failed, trying pdf-parse fallback:', error.message)
   }
+  
+  // Fallback to pdf-parse (JavaScript library)
+  try {
+    const pdfParse = (await import('pdf-parse')).default
+    const dataBuffer = await readFile(filePath)
+    const data = await pdfParse(dataBuffer)
+    if (data.text && data.text.trim().length > 0) {
+      return data.text.trim()
+    }
+  } catch (error) {
+    console.error('pdf-parse fallback also failed:', error.message)
+  }
+  
+  throw new Error('Failed to extract text from PDF. Please try a different PDF or copy-paste the content.')
 }
 
 // Extract text from DOCX using a simple approach
