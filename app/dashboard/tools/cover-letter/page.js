@@ -388,6 +388,16 @@ export default function CoverLetterPage() {
 
       {!coverLetterData ? (
         <>
+          {/* Pre-filled Banner */}
+          {prefilledFrom && (
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>✨ Data imported from {prefilledFrom}!</strong> Job title, company, and description have been pre-filled. Just add your personal info and generate!
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Tips Banner */}
           <Alert className="bg-purple-50 border-purple-200">
             <Lightbulb className="h-4 w-4 text-purple-600" />
