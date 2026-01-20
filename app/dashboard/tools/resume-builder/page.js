@@ -477,6 +477,39 @@ export default function ResumeBuilderPage() {
   const [education, setEducation] = useState([{ degree: '', school: '', year: '' }])
   const [skills, setSkills] = useState('')
   const [references, setReferences] = useState([{ name: '', designation: '', company: '', email: '', phone: '' }])
+  const [prefilledFrom, setPrefilledFrom] = useState(null)
+  const [missingKeywordsInfo, setMissingKeywordsInfo] = useState(null)
+
+  // Check for prefilled data from Job Analyzer on mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('resumeBuilderData')
+      if (savedData) {
+        const data = JSON.parse(savedData)
+        // Only use data if it's recent (within 5 minutes)
+        if (data.timestamp && Date.now() - data.timestamp < 5 * 60 * 1000) {
+          if (data.resumeText) setRawInfo(data.resumeText)
+          if (data.targetJob) setTargetJob(data.targetJob)
+          if (data.missingKeywords) {
+            setMissingKeywordsInfo({
+              keywords: data.missingKeywords,
+              recommendations: data.recommendations,
+              matchScore: data.matchScore
+            })
+          }
+          setPrefilledFrom('Job Description Analyzer')
+          toast({ 
+            title: '✨ Data Imported!', 
+            description: 'Your resume and job target have been pre-filled. Missing keywords highlighted below!' 
+          })
+        }
+        // Clear the data after reading
+        localStorage.removeItem('resumeBuilderData')
+      }
+    } catch (e) {
+      console.log('No prefilled data found')
+    }
+  }, [])
 
   const handleHeadshotUpload = (e) => {
     const file = e.target.files?.[0]
