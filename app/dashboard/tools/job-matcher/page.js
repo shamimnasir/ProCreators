@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +15,7 @@ import {
   Target, Sparkles, Loader2, CheckCircle, XCircle, AlertTriangle,
   FileText, Briefcase, TrendingUp, Lightbulb, RefreshCw, Upload,
   ChevronRight, Award, Zap, Shield, ArrowUp, ArrowDown, Minus,
-  Copy, Check, FileUp, X
+  Copy, Check, FileUp, X, ExternalLink
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
