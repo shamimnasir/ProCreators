@@ -38,7 +38,9 @@ async function runLLM(prompt, systemPrompt = 'You are an expert cover letter wri
       pythonProcess.on('close', async (code) => {
         try {
           await fs.unlink(tempFile)
-        } catch (e) {}
+        } catch (e) {
+          // Ignore cleanup errors
+        }
         
         if (code !== 0) {
           console.error('LLM stderr:', stderr)
