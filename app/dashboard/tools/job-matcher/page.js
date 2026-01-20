@@ -742,21 +742,39 @@ Nice to have:
                 Next Steps
               </h3>
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg">
+                <button 
+                  onClick={goToResumeBuilder}
+                  className="bg-white p-4 rounded-lg hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer text-left border-2 border-transparent hover:border-blue-300 group"
+                >
                   <div className="text-2xl mb-2">📝</div>
-                  <p className="font-medium">Update Resume</p>
-                  <p className="text-sm text-gray-600">Add missing keywords to your resume</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg">
+                  <p className="font-medium group-hover:text-blue-600">Update Resume</p>
+                  <p className="text-sm text-gray-600">Add {analysisData?.missingKeywords?.length || 0} missing keywords</p>
+                  <div className="flex items-center gap-1 text-xs text-blue-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Open Resume Builder <ExternalLink className="h-3 w-3" />
+                  </div>
+                </button>
+                <button 
+                  onClick={goToCoverLetter}
+                  className="bg-white p-4 rounded-lg hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer text-left border-2 border-transparent hover:border-purple-300 group"
+                >
                   <div className="text-2xl mb-2">✉️</div>
-                  <p className="font-medium">Write Cover Letter</p>
-                  <p className="text-sm text-gray-600">Use our Cover Letter Generator</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg">
-                  <div className="text-2xl mb-2">🎯</div>
-                  <p className="font-medium">Apply</p>
-                  <p className="text-sm text-gray-600">Submit your optimized application</p>
-                </div>
+                  <p className="font-medium group-hover:text-purple-600">Write Cover Letter</p>
+                  <p className="text-sm text-gray-600">Pre-filled with job details</p>
+                  <div className="flex items-center gap-1 text-xs text-purple-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Open Cover Letter Generator <ExternalLink className="h-3 w-3" />
+                  </div>
+                </button>
+                <button 
+                  onClick={copyMissingKeywords}
+                  className="bg-white p-4 rounded-lg hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer text-left border-2 border-transparent hover:border-green-300 group"
+                >
+                  <div className="text-2xl mb-2">📋</div>
+                  <p className="font-medium group-hover:text-green-600">Copy Keywords</p>
+                  <p className="text-sm text-gray-600">Copy all missing keywords</p>
+                  <div className="flex items-center gap-1 text-xs text-green-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Copy to clipboard <Copy className="h-3 w-3" />
+                  </div>
+                </button>
               </div>
             </CardContent>
           </Card>
