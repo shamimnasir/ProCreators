@@ -466,6 +466,32 @@ Make each section detailed with specific activities, time allocations, and pract
 
       const pdfUrl = `/generated/lesson-plans/${filename}`
 
+      // Save to library
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        await fetch(`${baseUrl}/api/library/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'lesson-planner',
+            title: lessonPlan.title || 'Lesson Plan',
+            content: pdfUrl,
+            filePath: pdfUrl,
+            description: `${subject} - ${gradeLevel} - ${duration}`,
+            metadata: {
+              subject,
+              gradeLevel,
+              duration,
+              topic,
+              pdfUrl
+            }
+          })
+        })
+        console.log('Lesson plan saved to library:', filename)
+      } catch (e) {
+        console.log('Library save skipped:', e.message)
+      }
+
       return NextResponse.json({
         success: true,
         pdfUrl,
