@@ -367,9 +367,45 @@ export async function POST(request) {
       const outputPath = path.join(outputDir, filename)
       await fs.writeFile(outputPath, pdfBuffer)
       
+      const pdfUrl = `/generated/citations/${filename}`
+      
+      // Save to library
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        const citationCount = bibliography.split('\n\n').filter(b => b.trim()).length
+        const styleName = {
+          'apa7': 'APA 7th',
+          'mla9': 'MLA 9th',
+          'chicago': 'Chicago',
+          'harvard': 'Harvard',
+          'ieee': 'IEEE',
+          'vancouver': 'Vancouver'
+        }[citationStyle] || citationStyle
+        
+        await fetch(`${baseUrl}/api/library/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'citation-generator',
+            title: `Bibliography (${styleName})`,
+            content: pdfUrl,
+            filePath: pdfUrl,
+            description: `${citationCount} citations in ${styleName} format`,
+            metadata: {
+              citationStyle,
+              citationCount,
+              pdfUrl
+            }
+          })
+        })
+        console.log('Bibliography saved to library:', filename)
+      } catch (e) {
+        console.log('Library save skipped:', e.message)
+      }
+      
       return NextResponse.json({
         success: true,
-        pdfUrl: `/generated/citations/${filename}`,
+        pdfUrl,
         filename
       })
     }
