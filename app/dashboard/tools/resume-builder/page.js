@@ -10,10 +10,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   FileText, Download, Sparkles, Loader2, Briefcase, Plus, Trash2, 
-  Upload, CheckCircle, X, ChevronDown, ChevronUp, FileUp, Copy, RefreshCw
+  Upload, CheckCircle, X, ChevronDown, ChevronUp, FileUp, Copy, RefreshCw,
+  Mail, Phone, MapPin, Linkedin, Award, GraduationCap, Wrench
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import ReactMarkdown from 'react-markdown'
 
 const RESUME_TEMPLATES = [
   { id: 'modern', name: 'Modern Professional', icon: '💼', description: 'Clean, contemporary design' },
@@ -37,16 +37,225 @@ const JOB_INDUSTRIES = [
   { id: 'other', name: 'Other' },
 ]
 
+const TEMPLATE_STYLES = {
+  modern: {
+    primary: 'bg-gradient-to-r from-blue-600 to-indigo-600',
+    accent: 'text-blue-600',
+    border: 'border-blue-200',
+    bg: 'bg-blue-50',
+    headerBg: 'bg-gradient-to-r from-blue-600 to-indigo-600'
+  },
+  classic: {
+    primary: 'bg-gradient-to-r from-gray-800 to-gray-900',
+    accent: 'text-gray-800',
+    border: 'border-gray-300',
+    bg: 'bg-gray-50',
+    headerBg: 'bg-gradient-to-r from-gray-800 to-gray-900'
+  },
+  creative: {
+    primary: 'bg-gradient-to-r from-purple-600 to-pink-600',
+    accent: 'text-purple-600',
+    border: 'border-purple-200',
+    bg: 'bg-purple-50',
+    headerBg: 'bg-gradient-to-r from-purple-600 to-pink-600'
+  },
+  minimal: {
+    primary: 'bg-gradient-to-r from-slate-700 to-slate-800',
+    accent: 'text-slate-700',
+    border: 'border-slate-200',
+    bg: 'bg-slate-50',
+    headerBg: 'bg-gradient-to-r from-slate-700 to-slate-800'
+  },
+  tech: {
+    primary: 'bg-gradient-to-r from-emerald-600 to-teal-600',
+    accent: 'text-emerald-600',
+    border: 'border-emerald-200',
+    bg: 'bg-emerald-50',
+    headerBg: 'bg-gradient-to-r from-emerald-600 to-teal-600'
+  },
+  executive: {
+    primary: 'bg-gradient-to-r from-amber-700 to-orange-700',
+    accent: 'text-amber-700',
+    border: 'border-amber-200',
+    bg: 'bg-amber-50',
+    headerBg: 'bg-gradient-to-r from-amber-700 to-orange-700'
+  }
+}
+
+// Visual Resume Component
+function VisualResume({ data, template }) {
+  const style = TEMPLATE_STYLES[template] || TEMPLATE_STYLES.modern
+  
+  if (!data) return null
+
+  return (
+    <div className="bg-white shadow-2xl rounded-lg overflow-hidden max-w-4xl mx-auto" id="resume-preview">
+      {/* Header Section */}
+      <div className={`${style.headerBg} text-white p-8`}>
+        <h1 className="text-3xl font-bold mb-1">{data.name || 'Your Name'}</h1>
+        <p className="text-xl opacity-90 mb-4">{data.title || 'Professional Title'}</p>
+        <div className="flex flex-wrap gap-4 text-sm opacity-90">
+          {data.email && (
+            <span className="flex items-center gap-1">
+              <Mail className="h-4 w-4" /> {data.email}
+            </span>
+          )}
+          {data.phone && (
+            <span className="flex items-center gap-1">
+              <Phone className="h-4 w-4" /> {data.phone}
+            </span>
+          )}
+          {data.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-4 w-4" /> {data.location}
+            </span>
+          )}
+          {data.linkedin && (
+            <span className="flex items-center gap-1">
+              <Linkedin className="h-4 w-4" /> {data.linkedin}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="p-8">
+        {/* Summary */}
+        {data.summary && (
+          <div className="mb-6">
+            <h2 className={`text-lg font-bold ${style.accent} border-b-2 ${style.border} pb-2 mb-3 flex items-center gap-2`}>
+              <Briefcase className="h-5 w-5" /> PROFESSIONAL SUMMARY
+            </h2>
+            <p className="text-gray-700 leading-relaxed">{data.summary}</p>
+          </div>
+        )}
+
+        {/* Experience */}
+        {data.experience && data.experience.length > 0 && (
+          <div className="mb-6">
+            <h2 className={`text-lg font-bold ${style.accent} border-b-2 ${style.border} pb-2 mb-4 flex items-center gap-2`}>
+              <Briefcase className="h-5 w-5" /> PROFESSIONAL EXPERIENCE
+            </h2>
+            <div className="space-y-5">
+              {data.experience.map((exp, idx) => (
+                <div key={idx} className="relative pl-4 border-l-2 border-gray-200">
+                  <div className="flex flex-wrap justify-between items-start mb-1">
+                    <div>
+                      <h3 className="font-bold text-gray-900">{exp.title}</h3>
+                      <p className={`${style.accent} font-medium`}>{exp.company}</p>
+                    </div>
+                    <div className="text-right text-sm text-gray-600">
+                      <p>{exp.duration}</p>
+                      {exp.location && <p>{exp.location}</p>}
+                    </div>
+                  </div>
+                  {exp.achievements && (
+                    <ul className="mt-2 space-y-1">
+                      {exp.achievements.map((achievement, aidx) => (
+                        <li key={aidx} className="text-gray-700 text-sm flex items-start gap-2">
+                          <span className={`${style.accent} mt-1`}>•</span>
+                          <span>{achievement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Education */}
+          {data.education && data.education.length > 0 && (
+            <div>
+              <h2 className={`text-lg font-bold ${style.accent} border-b-2 ${style.border} pb-2 mb-3 flex items-center gap-2`}>
+                <GraduationCap className="h-5 w-5" /> EDUCATION
+              </h2>
+              <div className="space-y-3">
+                {data.education.map((edu, idx) => (
+                  <div key={idx}>
+                    <h3 className="font-bold text-gray-900">{edu.degree}</h3>
+                    <p className="text-gray-700">{edu.school}</p>
+                    <p className="text-sm text-gray-500">{edu.year}</p>
+                    {edu.details && <p className="text-sm text-gray-600 mt-1">{edu.details}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Skills */}
+          {data.skills && (
+            <div>
+              <h2 className={`text-lg font-bold ${style.accent} border-b-2 ${style.border} pb-2 mb-3 flex items-center gap-2`}>
+                <Wrench className="h-5 w-5" /> SKILLS
+              </h2>
+              <div className="space-y-3">
+                {data.skills.technical && data.skills.technical.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Technical Skills</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {data.skills.technical.map((skill, idx) => (
+                        <span key={idx} className={`${style.bg} ${style.accent} text-xs px-2 py-1 rounded`}>
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {data.skills.tools && data.skills.tools.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Tools & Technologies</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {data.skills.tools.map((tool, idx) => (
+                        <span key={idx} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {data.skills.soft && data.skills.soft.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-1">Soft Skills</h4>
+                    <p className="text-sm text-gray-600">{data.skills.soft.join(' • ')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Certifications */}
+        {data.certifications && data.certifications.length > 0 && (
+          <div className="mt-6">
+            <h2 className={`text-lg font-bold ${style.accent} border-b-2 ${style.border} pb-2 mb-3 flex items-center gap-2`}>
+              <Award className="h-5 w-5" /> CERTIFICATIONS
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {data.certifications.map((cert, idx) => (
+                <span key={idx} className={`${style.bg} ${style.accent} text-sm px-3 py-1 rounded-full`}>
+                  {cert}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ResumeBuilderPage() {
   const [template, setTemplate] = useState('modern')
   const [industry, setIndustry] = useState('tech')
   const [generating, setGenerating] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [generatedResume, setGeneratedResume] = useState(null)
-  const [suggestions, setSuggestions] = useState(null)
+  const [resumeData, setResumeData] = useState(null)
   const { toast } = useToast()
   const fileInputRef = useRef(null)
+  const resumeRef = useRef(null)
 
   // Combined input
   const [rawInfo, setRawInfo] = useState('')
@@ -70,7 +279,6 @@ export default function ResumeBuilderPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
     const allowedExtensions = ['pdf', 'doc', 'docx', 'txt']
     const fileExtension = file.name.split('.').pop()?.toLowerCase()
 
@@ -127,15 +335,14 @@ export default function ResumeBuilderPage() {
     if (!rawInfo && !personalInfo.name) {
       toast({
         title: 'Missing Information',
-        description: 'Please upload your CV, paste your info, or fill in your details',
+        description: 'Please upload your CV, paste your LinkedIn URL, or enter your details',
         variant: 'destructive'
       })
       return
     }
 
     setGenerating(true)
-    setGeneratedResume(null)
-    setSuggestions(null)
+    setResumeData(null)
 
     try {
       const response = await fetch('/api/resume-builder/generate', {
@@ -156,11 +363,10 @@ export default function ResumeBuilderPage() {
       const data = await response.json()
 
       if (data.success) {
-        setGeneratedResume(data.resume)
-        setSuggestions(data.suggestions)
+        setResumeData(data.resumeData)
         toast({
-          title: 'Resume Generated!',
-          description: 'Your professional resume is ready'
+          title: '🎉 Resume Generated!',
+          description: 'Your professional resume is ready to download'
         })
       } else {
         throw new Error(data.error)
@@ -208,23 +414,211 @@ export default function ResumeBuilderPage() {
     setEducation(updated)
   }
 
-  const copyToClipboard = () => {
-    if (generatedResume) {
-      navigator.clipboard.writeText(generatedResume)
-      toast({ title: 'Copied!', description: 'Resume copied to clipboard' })
+  const downloadResume = async () => {
+    if (!resumeRef.current) return
+    
+    // For now, we'll create a printable version
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      const styles = `
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; }
+          .header { background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; padding: 40px; }
+          .header h1 { font-size: 28px; margin-bottom: 5px; }
+          .header p { font-size: 18px; opacity: 0.9; margin-bottom: 15px; }
+          .contact { display: flex; flex-wrap: wrap; gap: 15px; font-size: 13px; }
+          .content { padding: 30px 40px; }
+          .section { margin-bottom: 25px; }
+          .section h2 { color: #2563eb; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px; }
+          .exp-item { margin-bottom: 20px; padding-left: 15px; border-left: 2px solid #e5e7eb; }
+          .exp-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+          .exp-title { font-weight: bold; }
+          .exp-company { color: #2563eb; }
+          .exp-date { color: #6b7280; font-size: 13px; }
+          .achievements { margin-top: 8px; }
+          .achievements li { margin-bottom: 4px; font-size: 13px; color: #374151; }
+          .skills-group { margin-bottom: 10px; }
+          .skills-label { font-weight: 600; font-size: 12px; color: #374151; margin-bottom: 5px; }
+          .skill-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+          .skill-tag { background: #eff6ff; color: #2563eb; padding: 3px 10px; border-radius: 12px; font-size: 11px; }
+          .cert-tag { background: #eff6ff; color: #2563eb; padding: 5px 12px; border-radius: 15px; font-size: 12px; display: inline-block; margin: 3px; }
+          .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        </style>
+      `
+      
+      const headerBg = template === 'modern' ? 'linear-gradient(135deg, #2563eb, #4f46e5)' :
+                       template === 'classic' ? 'linear-gradient(135deg, #1f2937, #111827)' :
+                       template === 'creative' ? 'linear-gradient(135deg, #9333ea, #db2777)' :
+                       template === 'minimal' ? 'linear-gradient(135deg, #475569, #334155)' :
+                       template === 'tech' ? 'linear-gradient(135deg, #059669, #0d9488)' :
+                       'linear-gradient(135deg, #b45309, #c2410c)'
+      
+      const accentColor = template === 'modern' ? '#2563eb' :
+                          template === 'classic' ? '#1f2937' :
+                          template === 'creative' ? '#9333ea' :
+                          template === 'minimal' ? '#475569' :
+                          template === 'tech' ? '#059669' :
+                          '#b45309'
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${resumeData.name} - Resume</title>
+          ${styles.replace(/#2563eb/g, accentColor)}
+          <style>
+            .header { background: ${headerBg}; }
+            .section h2 { color: ${accentColor}; }
+            .exp-company { color: ${accentColor}; }
+            .skill-tag, .cert-tag { background: ${accentColor}15; color: ${accentColor}; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${resumeData.name || 'Your Name'}</h1>
+            <p>${resumeData.title || 'Professional'}</p>
+            <div class="contact">
+              ${resumeData.email ? `<span>📧 ${resumeData.email}</span>` : ''}
+              ${resumeData.phone ? `<span>📱 ${resumeData.phone}</span>` : ''}
+              ${resumeData.location ? `<span>📍 ${resumeData.location}</span>` : ''}
+              ${resumeData.linkedin ? `<span>🔗 ${resumeData.linkedin}</span>` : ''}
+            </div>
+          </div>
+          <div class="content">
+            ${resumeData.summary ? `
+              <div class="section">
+                <h2>Professional Summary</h2>
+                <p>${resumeData.summary}</p>
+              </div>
+            ` : ''}
+            ${resumeData.experience && resumeData.experience.length > 0 ? `
+              <div class="section">
+                <h2>Professional Experience</h2>
+                ${resumeData.experience.map(exp => `
+                  <div class="exp-item">
+                    <div class="exp-header">
+                      <div>
+                        <div class="exp-title">${exp.title}</div>
+                        <div class="exp-company">${exp.company}</div>
+                      </div>
+                      <div class="exp-date">
+                        ${exp.duration}<br/>
+                        ${exp.location || ''}
+                      </div>
+                    </div>
+                    ${exp.achievements ? `
+                      <ul class="achievements">
+                        ${exp.achievements.map(a => `<li>• ${a}</li>`).join('')}
+                      </ul>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+            <div class="two-col">
+              ${resumeData.education && resumeData.education.length > 0 ? `
+                <div class="section">
+                  <h2>Education</h2>
+                  ${resumeData.education.map(edu => `
+                    <div style="margin-bottom: 12px;">
+                      <div style="font-weight: bold;">${edu.degree}</div>
+                      <div>${edu.school}</div>
+                      <div style="color: #6b7280; font-size: 13px;">${edu.year}</div>
+                      ${edu.details ? `<div style="font-size: 12px; color: #6b7280;">${edu.details}</div>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+              ${resumeData.skills ? `
+                <div class="section">
+                  <h2>Skills</h2>
+                  ${resumeData.skills.technical && resumeData.skills.technical.length > 0 ? `
+                    <div class="skills-group">
+                      <div class="skills-label">Technical Skills</div>
+                      <div class="skill-tags">
+                        ${resumeData.skills.technical.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${resumeData.skills.tools && resumeData.skills.tools.length > 0 ? `
+                    <div class="skills-group">
+                      <div class="skills-label">Tools & Technologies</div>
+                      <div class="skill-tags">
+                        ${resumeData.skills.tools.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${resumeData.skills.soft && resumeData.skills.soft.length > 0 ? `
+                    <div class="skills-group">
+                      <div class="skills-label">Soft Skills</div>
+                      <div style="font-size: 12px; color: #374151;">${resumeData.skills.soft.join(' • ')}</div>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+            ${resumeData.certifications && resumeData.certifications.length > 0 ? `
+              <div class="section">
+                <h2>Certifications</h2>
+                <div>
+                  ${resumeData.certifications.map(c => `<span class="cert-tag">${c}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </body>
+        </html>
+      `)
+      printWindow.document.close()
+      setTimeout(() => {
+        printWindow.print()
+      }, 500)
     }
   }
 
-  const downloadAsText = () => {
-    if (generatedResume) {
-      const blob = new Blob([generatedResume], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `resume_${targetJob?.replace(/\s+/g, '_') || 'professional'}.txt`
-      a.click()
-      URL.revokeObjectURL(url)
+  const copyAsText = () => {
+    if (!resumeData) return
+    
+    let text = `${resumeData.name}\n${resumeData.title}\n\n`
+    text += `Email: ${resumeData.email} | Phone: ${resumeData.phone}\n`
+    text += `Location: ${resumeData.location} | LinkedIn: ${resumeData.linkedin}\n\n`
+    
+    if (resumeData.summary) {
+      text += `PROFESSIONAL SUMMARY\n${resumeData.summary}\n\n`
     }
+    
+    if (resumeData.experience) {
+      text += `PROFESSIONAL EXPERIENCE\n`
+      resumeData.experience.forEach(exp => {
+        text += `\n${exp.title} at ${exp.company}\n${exp.duration} | ${exp.location}\n`
+        if (exp.achievements) {
+          exp.achievements.forEach(a => {
+            text += `• ${a}\n`
+          })
+        }
+      })
+      text += '\n'
+    }
+    
+    if (resumeData.education) {
+      text += `EDUCATION\n`
+      resumeData.education.forEach(edu => {
+        text += `${edu.degree} - ${edu.school} (${edu.year})\n`
+      })
+      text += '\n'
+    }
+    
+    if (resumeData.skills) {
+      text += `SKILLS\n`
+      if (resumeData.skills.technical) text += `Technical: ${resumeData.skills.technical.join(', ')}\n`
+      if (resumeData.skills.tools) text += `Tools: ${resumeData.skills.tools.join(', ')}\n`
+      if (resumeData.skills.soft) text += `Soft Skills: ${resumeData.skills.soft.join(', ')}\n`
+    }
+    
+    navigator.clipboard.writeText(text)
+    toast({ title: 'Copied!', description: 'Resume copied to clipboard as text' })
   }
 
   return (
@@ -246,7 +640,7 @@ export default function ResumeBuilderPage() {
         </Badge>
       </div>
 
-      {!generatedResume ? (
+      {!resumeData ? (
         <>
           {/* Main Input Section */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -258,7 +652,7 @@ export default function ResumeBuilderPage() {
                   Your Information
                 </CardTitle>
                 <CardDescription>
-                  Upload your existing CV or paste/describe your experience
+                  Upload CV, paste LinkedIn URL, or describe your experience
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -308,23 +702,25 @@ export default function ResumeBuilderPage() {
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">Or paste/type below</span>
+                    <span className="bg-white px-2 text-gray-500">Or enter details below</span>
                   </div>
                 </div>
 
                 {/* Text Area */}
                 <Textarea
-                  placeholder="Paste your LinkedIn profile, old resume text, or describe your experience:
+                  placeholder="Paste your LinkedIn profile URL, resume text, or describe your experience:
 
-Example:
-John Smith - Software Engineer with 5 years experience.
-Worked at Google and Microsoft.
-Skills: Python, JavaScript, React, AWS
-Stanford University, Computer Science degree 2019"
-                  className="min-h-[200px]"
+Examples:
+• https://linkedin.com/in/yourprofile
+• John Smith - Software Engineer at Google...
+• 5 years experience in Python, AWS, leading teams..."
+                  className="min-h-[180px]"
                   value={rawInfo}
                   onChange={(e) => setRawInfo(e.target.value)}
                 />
+                <p className="text-xs text-gray-500">
+                  💡 Tip: Just paste your LinkedIn URL and we'll create a complete professional resume!
+                </p>
               </CardContent>
             </Card>
 
@@ -574,105 +970,94 @@ Stanford University, Computer Science degree 2019"
           {/* Generate Button */}
           <Button 
             size="lg" 
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700" 
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-14 text-lg" 
             onClick={handleGenerate} 
             disabled={generating || (!rawInfo && !personalInfo.name)}
           >
             {generating ? (
-              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Your Resume...</>
+              <><Loader2 className="mr-2 h-6 w-6 animate-spin" /> Creating Your Professional Resume...</>
             ) : (
-              <><Sparkles className="mr-2 h-5 w-5" /> Generate Professional Resume</>
+              <><Sparkles className="mr-2 h-6 w-6" /> Generate Professional Resume</>
             )}
           </Button>
+
+          {/* Tips */}
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30">
+            <CardHeader>
+              <CardTitle className="text-indigo-800 dark:text-indigo-200">💡 What You'll Get</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="font-medium text-indigo-800 dark:text-indigo-200">✅ ATS-Friendly</p>
+                  <p className="text-indigo-700 dark:text-indigo-300">Passes Applicant Tracking Systems</p>
+                </div>
+                <div>
+                  <p className="font-medium text-indigo-800 dark:text-indigo-200">✅ Visually Appealing</p>
+                  <p className="text-indigo-700 dark:text-indigo-300">Professional design templates</p>
+                </div>
+                <div>
+                  <p className="font-medium text-indigo-800 dark:text-indigo-200">✅ Ready to Use</p>
+                  <p className="text-indigo-700 dark:text-indigo-300">No placeholders, fully completed</p>
+                </div>
+                <div>
+                  <p className="font-medium text-indigo-800 dark:text-indigo-200">✅ Download & Print</p>
+                  <p className="text-indigo-700 dark:text-indigo-300">Export as PDF instantly</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </>
       ) : (
         /* Generated Resume Display */
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Your Generated Resume</h2>
+            <h2 className="text-2xl font-bold">Your Professional Resume</h2>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setGeneratedResume(null)}>
+              <Button variant="outline" onClick={() => setResumeData(null)}>
                 <RefreshCw className="h-4 w-4 mr-2" /> Start Over
               </Button>
-              <Button variant="outline" onClick={copyToClipboard}>
-                <Copy className="h-4 w-4 mr-2" /> Copy
+              <Button variant="outline" onClick={copyAsText}>
+                <Copy className="h-4 w-4 mr-2" /> Copy Text
               </Button>
-              <Button onClick={downloadAsText}>
-                <Download className="h-4 w-4 mr-2" /> Download
+              <Button onClick={downloadResume} className="bg-green-600 hover:bg-green-700">
+                <Download className="h-4 w-4 mr-2" /> Download PDF
               </Button>
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Resume Preview */}
-            <Card className="lg:col-span-2">
-              <CardContent className="p-6">
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown>{generatedResume}</ReactMarkdown>
+          <div className="flex gap-4 mb-4">
+            <Label>Change Template:</Label>
+            <div className="flex gap-2">
+              {RESUME_TEMPLATES.map((t) => (
+                <Button
+                  key={t.id}
+                  variant={template === t.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTemplate(t.id)}
+                >
+                  {t.icon} {t.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div ref={resumeRef}>
+            <VisualResume data={resumeData} template={template} />
+          </div>
+
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+                <div>
+                  <h3 className="font-bold text-green-800">Your resume is ready!</h3>
+                  <p className="text-green-700">Click "Download PDF" to save your professional resume. You can also change the template style above.</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Suggestions Sidebar */}
-            <div className="space-y-4">
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
-                <CardHeader>
-                  <CardTitle className="text-amber-800 dark:text-amber-200 text-lg">💡 Improvement Tips</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-amber-900 dark:text-amber-100 prose prose-sm max-w-none">
-                    <ReactMarkdown>{suggestions}</ReactMarkdown>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Resume Details</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Target Job:</span>
-                    <span className="font-medium">{targetJob || 'General'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Industry:</span>
-                    <span className="font-medium">{JOB_INDUSTRIES.find(i => i.id === industry)?.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Template:</span>
-                    <span className="font-medium">{RESUME_TEMPLATES.find(t => t.id === template)?.name}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      )}
-
-      {/* Tips - Only show when not showing result */}
-      {!generatedResume && (
-        <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30">
-          <CardHeader>
-            <CardTitle className="text-indigo-800 dark:text-indigo-200">💡 Resume Tips</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="font-medium text-indigo-800 dark:text-indigo-200">ATS-Friendly</p>
-                <p className="text-indigo-700 dark:text-indigo-300">Our resumes pass Applicant Tracking Systems</p>
-              </div>
-              <div>
-                <p className="font-medium text-indigo-800 dark:text-indigo-200">Keyword Optimized</p>
-                <p className="text-indigo-700 dark:text-indigo-300">AI adds relevant keywords for your target job</p>
-              </div>
-              <div>
-                <p className="font-medium text-indigo-800 dark:text-indigo-200">Upload & Improve</p>
-                <p className="text-indigo-700 dark:text-indigo-300">Upload your existing CV to get an improved version</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       )}
     </div>
   )

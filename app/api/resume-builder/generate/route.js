@@ -62,6 +62,32 @@ async function runLLM(prompt, systemPrompt = 'You are an expert resume writer.')
   })
 }
 
+// Try to scrape LinkedIn profile
+async function scrapeLinkedIn(url) {
+  try {
+    // Use a web scraping approach
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    })
+    const html = await response.text()
+    
+    // Extract basic info from meta tags and visible content
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+    const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
+    
+    let extractedInfo = ''
+    if (titleMatch) extractedInfo += `Title: ${titleMatch[1]}\n`
+    if (descMatch) extractedInfo += `Summary: ${descMatch[1]}\n`
+    
+    return extractedInfo || null
+  } catch (error) {
+    console.log('LinkedIn scraping failed:', error.message)
+    return null
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
@@ -79,15 +105,28 @@ export async function POST(request) {
     if (!rawInfo && !personalInfo?.name) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Please provide your information - either paste your existing CV or fill in the details' 
+        error: 'Please provide your information - either paste your existing CV, enter a LinkedIn URL, or fill in the details' 
       }, { status: 400 })
     }
 
-    // Build comprehensive prompt
+    // Check if rawInfo contains a LinkedIn URL
+    let processedInfo = rawInfo || ''
+    const linkedInRegex = /https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+/i
+    const linkedInMatch = rawInfo?.match(linkedInRegex)
+    
+    if (linkedInMatch) {
+      // Try to scrape LinkedIn
+      const scrapedData = await scrapeLinkedIn(linkedInMatch[0])
+      if (scrapedData) {
+        processedInfo = `LinkedIn Profile URL: ${linkedInMatch[0]}\n${scrapedData}\n\nAdditional Info: ${rawInfo}`
+      }
+    }
+
+    // Build comprehensive context
     let userContext = ''
     
-    if (rawInfo) {
-      userContext += `\n## Raw Information (from existing CV or description):\n${rawInfo}\n`
+    if (processedInfo) {
+      userContext += `\n## Source Information:\n${processedInfo}\n`
     }
     
     if (personalInfo && personalInfo.name) {
@@ -123,59 +162,112 @@ export async function POST(request) {
     }
 
     const templateStyles = {
-      modern: 'Clean, contemporary design with clear sections and modern formatting. Use bullet points, action verbs, and quantifiable achievements.',
-      classic: 'Timeless, formal layout with traditional sections. Professional and conservative tone.',
-      creative: 'Eye-catching design elements, unique structure. Good for creative industries.',
-      minimal: 'Simple, elegant layout with lots of white space. Focus on essential information.',
-      tech: 'Technical-focused with prominent skills section, project highlights, and technology stack.',
-      executive: 'Senior leadership style with emphasis on strategic achievements, leadership roles, and business impact.'
+      modern: 'Modern Professional - Clean lines, bold section headers, professional color accents',
+      classic: 'Classic Traditional - Timeless, formal, conservative serif fonts',
+      creative: 'Creative Bold - Eye-catching design, creative industry appropriate',
+      minimal: 'Minimal Clean - Simple, elegant, lots of whitespace',
+      tech: 'Tech/IT Focused - Skills-prominent, technical achievements highlighted',
+      executive: 'Executive Level - Senior leadership emphasis, strategic focus'
     }
 
-    const systemPrompt = `You are an expert resume writer and career consultant. Create a professional, ATS-friendly resume based on the provided information.
+    const systemPrompt = `You are an elite professional resume writer with 20+ years of experience placing candidates at Fortune 500 companies. Your task is to create a COMPLETE, POLISHED, READY-TO-USE resume.
 
-IMPORTANT GUIDELINES:
-1. Create a complete, professional resume in clean markdown format
-2. Use bullet points with action verbs and quantifiable achievements
-3. Optimize for ATS (Applicant Tracking Systems) with proper keyword density
-4. Tailor the content for the target job and industry
-5. Include all standard resume sections: Contact Info, Summary, Experience, Education, Skills
-6. Make the summary compelling and targeted to the role
-7. Transform job descriptions into achievement-focused bullet points
-8. Add relevant keywords naturally throughout
+CRITICAL RULES:
+1. NEVER use placeholders like [Number], [Company], [Project Name], [Specific detail], etc.
+2. If information is missing, make intelligent, realistic assumptions based on the context
+3. If someone provides a LinkedIn URL, extract their name from the URL and create a realistic professional profile
+4. Every bullet point must be specific and quantified with realistic numbers
+5. The resume must be IMMEDIATELY USABLE - no editing required by the user
+6. Apply ALL best practices directly - don't list them as tips
 
-TEMPLATE STYLE: ${templateStyles[template] || templateStyles.modern}
-TARGET JOB: ${targetJob || 'Not specified'}
-INDUSTRY: ${industry || 'General'}
+RESUME BEST PRACTICES TO APPLY:
+- Start every bullet with strong action verbs (Led, Developed, Implemented, Architected, Optimized)
+- Include specific metrics and percentages (increased by 35%, reduced by 40%, managed team of 8)
+- Highlight leadership and collaboration
+- Include relevant technical skills and tools
+- Make the summary compelling and targeted to the role
+- Ensure ATS compatibility with proper keywords
 
-Output the resume in clean, professional markdown format that can be easily converted to PDF.`
+OUTPUT FORMAT:
+Return a JSON object with this exact structure:
+{
+  "name": "Full Name",
+  "title": "Professional Title",
+  "email": "email@example.com",
+  "phone": "+1 (555) 123-4567",
+  "location": "City, State",
+  "linkedin": "linkedin.com/in/username",
+  "summary": "2-3 sentence compelling professional summary",
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "location": "City, State",
+      "duration": "Month Year - Present",
+      "achievements": ["Achievement 1 with specific metrics", "Achievement 2", "Achievement 3"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree Name",
+      "school": "University Name",
+      "year": "Year",
+      "details": "GPA, honors, relevant coursework (optional)"
+    }
+  ],
+  "skills": {
+    "technical": ["Skill 1", "Skill 2"],
+    "tools": ["Tool 1", "Tool 2"],
+    "soft": ["Leadership", "Communication"]
+  },
+  "certifications": ["Certification 1", "Certification 2"]
+}
 
-    const userPrompt = `Create a professional resume based on this information:
+IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`
+
+    const userPrompt = `Create a complete, polished, ready-to-use professional resume based on this information:
+
 ${userContext}
 
-Generate a complete, polished resume that:
-1. Highlights the most relevant experience for ${targetJob || 'the target role'}
-2. Uses strong action verbs and quantifies achievements where possible
-3. Includes a compelling professional summary
-4. Optimizes for the ${industry || 'target'} industry
-5. Is ATS-friendly with proper formatting
+Target Job: ${targetJob || 'Software Professional'}
+Industry: ${industry || 'Technology'}
+Style: ${templateStyles[template] || templateStyles.modern}
 
-Provide the complete resume in markdown format.`
+REMEMBER:
+- NO placeholders - make intelligent assumptions for any missing information
+- If only a LinkedIn URL is provided, extract the name and create a realistic profile for someone in that industry
+- Every achievement must have specific, realistic metrics
+- The resume must be immediately usable without any edits
+- Return ONLY the JSON object, nothing else`
 
     // Generate the resume
-    const resumeContent = await runLLM(userPrompt, systemPrompt)
-
-    // Generate improvement suggestions
-    const suggestionsPrompt = `Analyze this resume and provide 3-5 brief, actionable suggestions for improvement. Be specific and helpful. Format as a simple numbered list.
-
-Resume:
-${resumeContent}`
-
-    const suggestions = await runLLM(suggestionsPrompt, 'You are a career coach. Provide brief, actionable resume improvement suggestions.')
+    const resumeResponse = await runLLM(userPrompt, systemPrompt)
+    
+    // Parse the JSON response
+    let resumeData
+    try {
+      // Clean up the response - remove any markdown formatting
+      let cleanResponse = resumeResponse
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim()
+      
+      resumeData = JSON.parse(cleanResponse)
+    } catch (parseError) {
+      console.error('Failed to parse resume JSON:', parseError)
+      // Try to extract JSON from the response
+      const jsonMatch = resumeResponse.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        resumeData = JSON.parse(jsonMatch[0])
+      } else {
+        throw new Error('Failed to generate structured resume data')
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      resume: resumeContent,
-      suggestions,
+      resumeData,
+      template,
       metadata: {
         targetJob: targetJob || 'General',
         industry: industry || 'General',
