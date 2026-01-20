@@ -602,6 +602,32 @@ export async function POST(request) {
       
       const pdfUrl = `/generated/essay-helper/${filename}`
       
+      // Save to library
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        await fetch(`${baseUrl}/api/library/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'essay-helper',
+            title: body.topic || body.content?.title || 'Essay',
+            content: pdfUrl,
+            filePath: pdfUrl,
+            description: `${body.essayType || 'Essay'} - ${body.writingMode || 'Generated'}`,
+            metadata: {
+              essayType: body.essayType,
+              writingMode: body.writingMode,
+              academicLevel: body.academicLevel,
+              citationStyle: body.citationStyle,
+              pdfUrl
+            }
+          })
+        })
+        console.log('Essay saved to library:', filename)
+      } catch (e) {
+        console.log('Library save skipped:', e.message)
+      }
+      
       return NextResponse.json({
         success: true,
         pdfUrl,
