@@ -842,7 +842,9 @@ Senior Software Engineer at Google (2020 - Present)
             <h2 className="text-2xl font-bold">Your Professional Resume</h2>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => { setResumeData(null); setLinkedInWarning(null) }}><RefreshCw className="h-4 w-4 mr-2" />Start Over</Button>
-              <Button onClick={downloadResume} className="bg-green-600 hover:bg-green-700"><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <Button onClick={downloadResume} className="bg-green-600 hover:bg-green-700" disabled={downloading}>
+                {downloading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating PDF...</> : <><Download className="h-4 w-4 mr-2" />Download PDF</>}
+              </Button>
             </div>
           </div>
 
