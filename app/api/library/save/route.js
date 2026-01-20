@@ -32,7 +32,7 @@ export async function POST(request) {
       category = 'video'
     } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
       category = 'image'
-    } else if (type === 'slides-maker' || type === 'ebook' || type === 'journal' || type === 'planner' || type === 'worksheet' || type === 'checklist') {
+    } else if (type === 'slides-maker' || type === 'ebook' || type === 'journal' || type === 'planner' || type === 'worksheet' || type === 'checklist' || type === 'study-notes' || type === 'essay-helper' || type === 'exam-prep' || type === 'citation-generator' || type === 'quiz-maker' || type === 'flashcards' || type === 'lesson-planner' || type === 'activity-book' || type === 'storybook') {
       category = 'document'
     }
 
