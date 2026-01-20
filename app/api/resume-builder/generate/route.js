@@ -62,28 +62,30 @@ async function runLLM(prompt, systemPrompt = 'You are an expert resume writer.')
   })
 }
 
-// Try to scrape LinkedIn profile
-async function scrapeLinkedIn(url) {
+// Try to fetch LinkedIn profile data using web crawl
+async function fetchLinkedInData(url) {
   try {
-    // Use a web scraping approach
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
+    // Try using the internal crawl API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/crawl`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: url,
+        extraction_method: 'scrape',
+        formats: 'markdown'
+      })
     })
-    const html = await response.text()
     
-    // Extract basic info from meta tags and visible content
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-    const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
-    
-    let extractedInfo = ''
-    if (titleMatch) extractedInfo += `Title: ${titleMatch[1]}\n`
-    if (descMatch) extractedInfo += `Summary: ${descMatch[1]}\n`
-    
-    return extractedInfo || null
+    if (response.ok) {
+      const data = await response.json()
+      if (data.content || data.markdown) {
+        return data.content || data.markdown
+      }
+    }
+    return null
   } catch (error) {
-    console.log('LinkedIn scraping failed:', error.message)
+    console.log('LinkedIn fetch failed:', error.message)
     return null
   }
 }
@@ -99,26 +101,33 @@ export async function POST(request) {
       personalInfo,
       experiences,
       education,
-      skills
+      skills,
+      references
     } = body
 
     if (!rawInfo && !personalInfo?.name) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Please provide your information - either paste your existing CV, enter a LinkedIn URL, or fill in the details' 
+        error: 'Please provide your information - paste your CV text, LinkedIn profile content, or fill in your details' 
       }, { status: 400 })
     }
 
-    // Check if rawInfo contains a LinkedIn URL
+    // Check if rawInfo contains a LinkedIn URL - inform user to paste profile content instead
     let processedInfo = rawInfo || ''
-    const linkedInRegex = /https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+/i
+    const linkedInRegex = /https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?/i
     const linkedInMatch = rawInfo?.match(linkedInRegex)
     
-    if (linkedInMatch) {
-      // Try to scrape LinkedIn
-      const scrapedData = await scrapeLinkedIn(linkedInMatch[0])
-      if (scrapedData) {
-        processedInfo = `LinkedIn Profile URL: ${linkedInMatch[0]}\n${scrapedData}\n\nAdditional Info: ${rawInfo}`
+    let linkedInWarning = ''
+    if (linkedInMatch && rawInfo?.trim() === linkedInMatch[0]) {
+      // User only pasted a LinkedIn URL without any other content
+      // Try to fetch the data
+      const linkedInData = await fetchLinkedInData(linkedInMatch[0])
+      
+      if (linkedInData && linkedInData.length > 100) {
+        processedInfo = `LinkedIn Profile Data:\n${linkedInData}`
+      } else {
+        linkedInWarning = 'NOTE: Could not fetch LinkedIn profile data directly. Using URL as reference only.'
+        processedInfo = `LinkedIn URL provided: ${linkedInMatch[0]} - Please extract any useful information from this URL if possible.`
       }
     }
 
@@ -127,6 +136,10 @@ export async function POST(request) {
     
     if (processedInfo) {
       userContext += `\n## Source Information:\n${processedInfo}\n`
+    }
+    
+    if (linkedInWarning) {
+      userContext += `\n${linkedInWarning}\n`
     }
     
     if (personalInfo && personalInfo.name) {
@@ -161,6 +174,18 @@ export async function POST(request) {
       userContext += `\n## Skills:\n${skills}\n`
     }
 
+    if (references && references.length > 0 && references[0].name) {
+      userContext += `\n## References:\n`
+      references.forEach((ref, idx) => {
+        if (ref.name) {
+          userContext += `${idx + 1}. ${ref.name} - ${ref.designation || 'Professional Reference'}\n`
+          if (ref.company) userContext += `   Company: ${ref.company}\n`
+          if (ref.email) userContext += `   Email: ${ref.email}\n`
+          if (ref.phone) userContext += `   Phone: ${ref.phone}\n`
+        }
+      })
+    }
+
     const templateStyles = {
       modern: 'Modern Professional - Clean lines, bold section headers, professional color accents',
       classic: 'Classic Traditional - Timeless, formal, conservative serif fonts',
@@ -170,75 +195,83 @@ export async function POST(request) {
       executive: 'Executive Level - Senior leadership emphasis, strategic focus'
     }
 
-    const systemPrompt = `You are an elite professional resume writer with 20+ years of experience placing candidates at Fortune 500 companies. Your task is to create a COMPLETE, POLISHED, READY-TO-USE resume.
+    const systemPrompt = `You are an elite professional resume writer with 20+ years of experience. Your task is to create a COMPLETE, POLISHED, READY-TO-USE resume.
 
 CRITICAL RULES:
-1. NEVER use placeholders like [Number], [Company], [Project Name], [Specific detail], etc.
-2. If information is missing, make intelligent, realistic assumptions based on the context
-3. If someone provides a LinkedIn URL, extract their name from the URL and create a realistic professional profile
-4. Every bullet point must be specific and quantified with realistic numbers
-5. The resume must be IMMEDIATELY USABLE - no editing required by the user
-6. Apply ALL best practices directly - don't list them as tips
+1. ONLY use information that is EXPLICITLY provided in the user's input
+2. DO NOT invent, fabricate, or assume any names, companies, dates, or achievements
+3. If the user provides limited information, create a resume template with that exact information
+4. If only a LinkedIn URL is provided without profile content, use generic placeholders like "[Your Name]" that the user can fill in
+5. Never generate fake metrics or achievements - only include what's explicitly stated
+6. If something is unclear, leave it as a placeholder rather than making it up
 
-RESUME BEST PRACTICES TO APPLY:
-- Start every bullet with strong action verbs (Led, Developed, Implemented, Architected, Optimized)
-- Include specific metrics and percentages (increased by 35%, reduced by 40%, managed team of 8)
-- Highlight leadership and collaboration
-- Include relevant technical skills and tools
-- Make the summary compelling and targeted to the role
-- Ensure ATS compatibility with proper keywords
+RESUME STRUCTURE:
+- Contact Info: Use exactly what's provided, or [Placeholder] if missing
+- Summary: Base ONLY on provided experience, or leave brief and general
+- Experience: Use ONLY the jobs/roles mentioned by the user
+- Education: Use ONLY the education mentioned by the user
+- Skills: Use ONLY the skills mentioned by the user
+- References: Include if provided by the user
 
 OUTPUT FORMAT:
 Return a JSON object with this exact structure:
 {
-  "name": "Full Name",
-  "title": "Professional Title",
-  "email": "email@example.com",
-  "phone": "+1 (555) 123-4567",
-  "location": "City, State",
-  "linkedin": "linkedin.com/in/username",
-  "summary": "2-3 sentence compelling professional summary",
+  "name": "Exact name from input or [Your Name]",
+  "title": "Professional Title based on input",
+  "email": "email from input or [Your Email]",
+  "phone": "phone from input or [Your Phone]",
+  "location": "location from input or [Your Location]",
+  "linkedin": "linkedin from input or empty string",
+  "summary": "Brief professional summary based ONLY on provided info",
   "experience": [
     {
-      "title": "Job Title",
-      "company": "Company Name",
-      "location": "City, State",
-      "duration": "Month Year - Present",
-      "achievements": ["Achievement 1 with specific metrics", "Achievement 2", "Achievement 3"]
+      "title": "Job Title from input",
+      "company": "Company from input",
+      "location": "Location if provided",
+      "duration": "Duration from input",
+      "achievements": ["Achievement from input only"]
     }
   ],
   "education": [
     {
-      "degree": "Degree Name",
-      "school": "University Name",
-      "year": "Year",
-      "details": "GPA, honors, relevant coursework (optional)"
+      "degree": "Degree from input",
+      "school": "School from input",
+      "year": "Year from input",
+      "details": "Details if provided"
     }
   ],
   "skills": {
-    "technical": ["Skill 1", "Skill 2"],
-    "tools": ["Tool 1", "Tool 2"],
-    "soft": ["Leadership", "Communication"]
+    "technical": ["Skills mentioned in input"],
+    "tools": ["Tools mentioned in input"],
+    "soft": ["Soft skills if mentioned"]
   },
-  "certifications": ["Certification 1", "Certification 2"]
+  "certifications": ["Certifications from input"],
+  "references": [
+    {
+      "name": "Reference name if provided",
+      "designation": "Their job title",
+      "company": "Their company",
+      "email": "Their email if provided",
+      "phone": "Their phone if provided"
+    }
+  ]
 }
 
-IMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`
+IMPORTANT: Return ONLY valid JSON, no markdown, no explanation. Use exactly what user provided - do not invent information.`
 
-    const userPrompt = `Create a complete, polished, ready-to-use professional resume based on this information:
+    const userPrompt = `Create a professional resume based ONLY on this information (do not invent or assume anything not explicitly stated):
 
 ${userContext}
 
-Target Job: ${targetJob || 'Software Professional'}
-Industry: ${industry || 'Technology'}
+Target Job: ${targetJob || 'Not specified'}
+Industry: ${industry || 'General'}
 Style: ${templateStyles[template] || templateStyles.modern}
 
-REMEMBER:
-- NO placeholders - make intelligent assumptions for any missing information
-- If only a LinkedIn URL is provided, extract the name and create a realistic profile for someone in that industry
-- Every achievement must have specific, realistic metrics
-- The resume must be immediately usable without any edits
-- Return ONLY the JSON object, nothing else`
+IMPORTANT REMINDERS:
+- Use ONLY the information provided above
+- Do NOT make up names, companies, dates, or achievements
+- If information is missing, use placeholders like [Your Name], [Your Company]
+- Return ONLY the JSON object`
 
     // Generate the resume
     const resumeResponse = await runLLM(userPrompt, systemPrompt)
@@ -264,10 +297,16 @@ REMEMBER:
       }
     }
 
+    // Ensure references array exists
+    if (!resumeData.references) {
+      resumeData.references = []
+    }
+
     return NextResponse.json({
       success: true,
       resumeData,
       template,
+      linkedInWarning: linkedInWarning || null,
       metadata: {
         targetJob: targetJob || 'General',
         industry: industry || 'General',
