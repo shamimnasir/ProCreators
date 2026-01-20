@@ -672,16 +672,44 @@ export default function ResumeBuilderPage() {
         <>
           {/* Pre-filled from Job Analyzer */}
           {prefilledFrom && missingKeywordsInfo && (
-            <Alert className="bg-blue-50 border-blue-200">
-              <Target className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                <strong>✨ Imported from {prefilledFrom}!</strong> Your match score was {missingKeywordsInfo.matchScore}%.
-                <br />
-                <span className="text-sm">
-                  <strong>Keywords to add:</strong> {missingKeywordsInfo.keywords}
-                </span>
-              </AlertDescription>
-            </Alert>
+            <Card className="bg-blue-50 border-blue-300 border-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-blue-800 flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  ✨ Imported from {prefilledFrom}!
+                  <Badge className="bg-blue-200 text-blue-800 ml-2">{missingKeywordsInfo.matchScore}% Match</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="bg-white p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-blue-800 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4" />
+                      Missing Keywords to Add:
+                    </p>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        navigator.clipboard.writeText(missingKeywordsInfo.keywords)
+                        toast({ title: 'Keywords copied!' })
+                      }}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy All
+                    </Button>
+                  </div>
+                  <p className="text-blue-700 font-medium text-lg">{missingKeywordsInfo.keywords}</p>
+                </div>
+                {missingKeywordsInfo.recommendations && (
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium mb-1">Recommendations:</p>
+                    <p className="whitespace-pre-line opacity-90">{missingKeywordsInfo.recommendations}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Warning about LinkedIn */}
