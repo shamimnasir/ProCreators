@@ -182,6 +182,16 @@ const EDUCATION_CATEGORIES = [
         useCase: 'All writing',
         badge: 'New',
         isBuilt: true
+      },
+      {
+        id: 'ai-humanizer',
+        name: 'AI Humanizer',
+        description: 'Make AI text sound human & bypass detectors',
+        icon: '🪄',
+        href: '/dashboard/tools/ai-humanizer',
+        useCase: 'Content rewriting',
+        badge: 'New',
+        isBuilt: true
       }
     ]
   },
