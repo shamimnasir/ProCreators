@@ -833,6 +833,32 @@ export async function POST(request) {
       
       const pdfUrl = `/generated/exam-prep/${filename}`
       
+      // Save to library
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        await fetch(`${baseUrl}/api/library/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'exam-prep',
+            title: `${body.examName || 'Exam'} Practice Test`,
+            content: pdfUrl,
+            filePath: pdfUrl,
+            description: `${body.questions?.length || 0} questions - ${body.difficulty || 'Mixed'} difficulty`,
+            metadata: {
+              examName: body.examName,
+              questionCount: body.questions?.length,
+              difficulty: body.difficulty,
+              subject: body.subject,
+              pdfUrl
+            }
+          })
+        })
+        console.log('Exam prep saved to library:', filename)
+      } catch (e) {
+        console.log('Library save skipped:', e.message)
+      }
+      
       return NextResponse.json({
         success: true,
         pdfUrl,
