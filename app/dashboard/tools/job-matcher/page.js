@@ -409,12 +409,71 @@ export default function JobMatcherPage() {
   const [uploadedFileName, setUploadedFileName] = useState('')
   const { toast } = useToast()
   const fileInputRef = useRef(null)
+  const router = useRouter()
   
   // Form state
   const [resumeText, setResumeText] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [jobTitle, setJobTitle] = useState('')
   const [companyName, setCompanyName] = useState('')
+
+  // Navigate to Resume Builder with analysis data
+  const goToResumeBuilder = () => {
+    // Prepare keywords to add
+    const missingKeywords = analysisData?.missingKeywords?.map(k => k.keyword).join(', ') || ''
+    const recommendations = analysisData?.recommendations?.map(r => `• ${r.action}`).join('\n') || ''
+    
+    // Store data in localStorage for the Resume Builder to pick up
+    const dataToPass = {
+      source: 'job-analyzer',
+      resumeText: resumeText,
+      targetJob: jobTitle,
+      companyName: companyName,
+      missingKeywords: missingKeywords,
+      recommendations: recommendations,
+      matchScore: analysisData?.matchScore,
+      timestamp: Date.now()
+    }
+    
+    localStorage.setItem('resumeBuilderData', JSON.stringify(dataToPass))
+    
+    toast({ 
+      title: 'Opening Resume Builder', 
+      description: 'Your analysis data has been transferred' 
+    })
+    
+    router.push('/dashboard/tools/resume-builder')
+  }
+
+  // Navigate to Cover Letter Generator with job data
+  const goToCoverLetter = () => {
+    // Store data in localStorage for the Cover Letter Generator to pick up
+    const dataToPass = {
+      source: 'job-analyzer',
+      jobTitle: jobTitle,
+      companyName: companyName,
+      jobDescription: jobDescription,
+      matchingKeywords: analysisData?.matchingKeywords?.map(k => k.keyword).join(', ') || '',
+      strongPoints: analysisData?.competitiveAnalysis?.strongPoints?.join(', ') || '',
+      timestamp: Date.now()
+    }
+    
+    localStorage.setItem('coverLetterData', JSON.stringify(dataToPass))
+    
+    toast({ 
+      title: 'Opening Cover Letter Generator', 
+      description: 'Job details have been transferred' 
+    })
+    
+    router.push('/dashboard/tools/cover-letter')
+  }
+
+  // Copy all missing keywords
+  const copyMissingKeywords = () => {
+    const keywords = analysisData?.missingKeywords?.map(k => k.keyword).join(', ') || ''
+    navigator.clipboard.writeText(keywords)
+    toast({ title: 'Keywords copied!', description: 'Add these to your resume' })
+  }
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
