@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,7 @@ import {
   FileText, Download, Sparkles, Loader2, Briefcase, Plus, Trash2, 
   Upload, CheckCircle, X, ChevronDown, ChevronUp, FileUp, Copy, RefreshCw,
   Mail, Phone, MapPin, Linkedin, Award, GraduationCap, Wrench, Camera,
-  Edit3, Check, User, AlertCircle, Users
+  Edit3, Check, User, AlertCircle, Users, Target
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import html2canvas from 'html2canvas'
