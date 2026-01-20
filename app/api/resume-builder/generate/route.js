@@ -1,10 +1,66 @@
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { spawn } from 'child_process'
+import path from 'path'
+import fs from 'fs/promises'
+import { v4 as uuidv4 } from 'uuid'
 
-const openai = new OpenAI({
-  apiKey: process.env.EMERGENT_LLM_KEY,
-  baseURL: 'https://api.emergentagi.com/v1'
-})
+// Helper to run LLM using Python script
+async function runLLM(prompt, systemPrompt = 'You are an expert resume writer.') {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
+      
+      const inputData = JSON.stringify({
+        prompt,
+        system_prompt: systemPrompt
+      })
+      
+      const tempDir = path.join(process.cwd(), 'tmp')
+      await fs.mkdir(tempDir, { recursive: true })
+      const tempFile = path.join(tempDir, `llm-input-${uuidv4()}.json`)
+      await fs.writeFile(tempFile, inputData, 'utf-8')
+      
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, '--file', tempFile], {
+        env: { ...process.env }
+      })
+
+      let stdout = ''
+      let stderr = ''
+
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString()
+      })
+
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString()
+      })
+
+      pythonProcess.on('close', async (code) => {
+        try {
+          await fs.unlink(tempFile)
+        } catch (e) {}
+        
+        if (code !== 0) {
+          console.error('LLM stderr:', stderr)
+          reject(new Error(`LLM process failed: ${stderr}`))
+        } else {
+          try {
+            const result = JSON.parse(stdout)
+            if (result.success) {
+              resolve(result.content)
+            } else {
+              reject(new Error(result.error || 'LLM call failed'))
+            }
+          } catch {
+            resolve(stdout.trim())
+          }
+        }
+      })
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 export async function POST(request) {
   try {
@@ -105,33 +161,16 @@ Generate a complete, polished resume that:
 
 Provide the complete resume in markdown format.`
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 3000
-    })
-
-    const resumeContent = completion.choices[0].message.content
+    // Generate the resume
+    const resumeContent = await runLLM(userPrompt, systemPrompt)
 
     // Generate improvement suggestions
-    const suggestionsCompletion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are a career coach. Analyze the resume and provide 3-5 brief, actionable suggestions for improvement. Be specific and helpful. Format as a simple list.' 
-        },
-        { role: 'user', content: `Analyze this resume and provide improvement suggestions:\n\n${resumeContent}` }
-      ],
-      temperature: 0.7,
-      max_tokens: 500
-    })
+    const suggestionsPrompt = `Analyze this resume and provide 3-5 brief, actionable suggestions for improvement. Be specific and helpful. Format as a simple numbered list.
 
-    const suggestions = suggestionsCompletion.choices[0].message.content
+Resume:
+${resumeContent}`
+
+    const suggestions = await runLLM(suggestionsPrompt, 'You are a career coach. Provide brief, actionable resume improvement suggestions.')
 
     return NextResponse.json({
       success: true,
