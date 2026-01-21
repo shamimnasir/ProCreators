@@ -204,7 +204,16 @@ export async function POST(request) {
       includeHashtags,
       postLength,
       specificNumbers,
-      subreddit
+      subreddit,
+      // Instagram fields
+      themePageNiche,
+      instagramStyle,
+      // Blog SEO fields
+      targetKeyword,
+      secondaryKeywords,
+      wordCountTarget,
+      writingStyle,
+      includeMetaDesc
     } = body
 
     if (!topic) {
@@ -231,6 +240,22 @@ export async function POST(request) {
     if (personalStory) context += `## Personal Story/Experience:\n${personalStory}\n`
     if (specificNumbers) context += `## Specific Numbers/Results: ${specificNumbers}\n`
     if (subreddit && platform === 'reddit') context += `## Target Subreddit: ${subreddit}\n`
+    
+    // Instagram-specific context
+    if (platform === 'instagram') {
+      if (themePageNiche) context += `## Theme Page Niche: ${themePageNiche}\n`
+      if (instagramStyle) context += `## Content Style: ${instagramStyle}\n`
+      context += `## This is for an Instagram THEME PAGE - content should be generic/universal, not personal\n`
+    }
+    
+    // Blog-specific context
+    if (platform === 'blog') {
+      if (targetKeyword) context += `## Target SEO Keyword: ${targetKeyword}\n`
+      if (secondaryKeywords) context += `## Secondary Keywords: ${secondaryKeywords}\n`
+      if (wordCountTarget) context += `## Target Word Count: ~${wordCountTarget} words\n`
+      if (writingStyle) context += `## Writing Style: ${writingStyle}\n`
+      if (includeMetaDesc) context += `## Include: Meta description, title tag, and heading structure\n`
+    }
     
     context += `\n## Options:\n`
     context += `- Include Emojis: ${includeEmojis ? 'Yes (use strategically)' : 'No'}\n`
