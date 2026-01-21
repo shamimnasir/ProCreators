@@ -133,26 +133,6 @@ const POST_FORMATS = {
     { id: 'step-by-step', name: 'Step-by-Step', icon: '📋', desc: 'Actionable guide', engagement: 'High' },
     { id: 'myth-buster', name: 'Myth Buster', icon: '💥', desc: 'Debunk misconceptions', engagement: 'High' },
     { id: 'data-driven', name: 'Data-Driven', icon: '📊', desc: 'Facts & statistics', engagement: 'High' }
-  ],
-  instagram: [
-    { id: 'motivation-quote', name: 'Motivation Quote', icon: '💪', desc: 'Inspirational text overlay', engagement: 'Very High' },
-    { id: 'carousel-tips', name: 'Carousel Tips', icon: '📚', desc: 'Swipe-through value', engagement: 'Very High' },
-    { id: 'reel-script', name: 'Reel Script', icon: '🎬', desc: 'Hook + body + CTA', engagement: 'Very High' },
-    { id: 'story-caption', name: 'Story Caption', icon: '📖', desc: 'Engaging narrative', engagement: 'High' },
-    { id: 'educational', name: 'Educational Post', icon: '🎓', desc: 'Teach something valuable', engagement: 'High' },
-    { id: 'relatable', name: 'Relatable Content', icon: '😂', desc: 'This is so me...', engagement: 'Very High' },
-    { id: 'transformation', name: 'Transformation', icon: '✨', desc: 'Before/after story', engagement: 'High' },
-    { id: 'question-hook', name: 'Question Hook', icon: '❓', desc: 'Engage with questions', engagement: 'High' }
-  ],
-  blog: [
-    { id: 'seo-article', name: 'SEO Article', icon: '🔍', desc: 'Keyword-optimized content', engagement: 'High' },
-    { id: 'how-to-guide', name: 'How-To Guide', icon: '📋', desc: 'Step-by-step tutorial', engagement: 'Very High' },
-    { id: 'listicle', name: 'Listicle', icon: '📝', desc: 'Top X things format', engagement: 'High' },
-    { id: 'ultimate-guide', name: 'Ultimate Guide', icon: '📚', desc: 'Comprehensive deep-dive', engagement: 'Very High' },
-    { id: 'comparison', name: 'Comparison Post', icon: '⚖️', desc: 'X vs Y analysis', engagement: 'High' },
-    { id: 'case-study', name: 'Case Study', icon: '📊', desc: 'Real-world example', engagement: 'High' },
-    { id: 'opinion-piece', name: 'Opinion Piece', icon: '💭', desc: 'Thought leadership', engagement: 'High' },
-    { id: 'news-analysis', name: 'News Analysis', icon: '📰', desc: 'Industry insights', engagement: 'High' }
   ]
 }
 
