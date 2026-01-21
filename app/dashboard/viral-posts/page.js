@@ -34,7 +34,7 @@ const VIRAL_CATEGORIES = [
       {
         id: 'social-media-posts',
         name: 'Social Media Post Creator',
-        description: 'Viral posts for LinkedIn, X, Facebook, Reddit & more',
+        description: 'Viral posts for 8 platforms including Instagram & Blog',
         icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'All platforms',
