@@ -414,14 +414,47 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Google Cloud TTS API Integration"
-    - "List Google TTS Voices API"
-    - "Story Reels - Simplified Google TTS UI"
+    - "Grammar Checker API"
+    - "AI Humanizer Analyze API"
+    - "AI Humanizer Rewrite API"
+    - "Blog Creator Generate API"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+    - agent: "main"
+      message: "NEW IMPLEMENTATION - Blog Post Creator with AI Humanizer & Grammar Checker Integration:
+      
+      **Created 3 new API endpoints:**
+      
+      1) **/api/grammar-checker/check** (POST)
+         - Analyzes text for grammar, spelling, punctuation, style, readability
+         - Returns: score (0-100), categoryScores, issues with suggestions, readability metrics, tips
+         - Input: { text: string, writingStyle: string }
+      
+      2) **/api/ai-humanizer/analyze** (POST)
+         - Detects if text is AI-generated or human-written
+         - Returns: aiProbability, humanProbability, confidence, indicators, suggestions
+         - Input: { text: string }
+      
+      3) **/api/ai-humanizer/humanize** (POST)
+         - Rewrites AI text to sound more human
+         - Supports levels: light, medium, heavy
+         - Supports techniques: vary_sentences, add_transitions, use_contractions, add_personality, simplify_vocab, add_examples, rhetorical_questions
+         - Input: { text: string, level: string, tone: string, techniques: string[] }
+         - Returns: { humanizedText: string, level, tone, techniquesApplied }
+      
+      **Frontend Integration (already exists):**
+      - Blog Creator UI calls these APIs automatically after blog generation
+      - Grammar scores and issues displayed in Grammar tab
+      - AI detection score displayed in results overview
+      - 'Humanize Now' button triggers humanization API
+      
+      **Testing Required:**
+      - Test each API endpoint with sample text
+      - Verify JSON response format
+      - Test full blog generation flow with humanization"
     - agent: "main"
       message: "ELEVENLABS REMOVED - GOOGLE CLOUD TTS IMPLEMENTED:
       
