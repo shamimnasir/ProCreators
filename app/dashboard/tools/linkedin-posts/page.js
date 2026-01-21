@@ -48,6 +48,15 @@ const PLATFORMS = [
     bestFor: 'Stories, Community, Longer posts'
   },
   { 
+    id: 'instagram', 
+    name: 'Instagram', 
+    icon: '📸', 
+    color: 'from-pink-500 via-purple-500 to-orange-500',
+    charLimit: 2200,
+    description: 'Theme pages, captions & Reels scripts',
+    bestFor: 'Theme pages, Visual content, Reels'
+  },
+  { 
     id: 'threads', 
     name: 'Threads', 
     icon: '🧵', 
@@ -73,6 +82,15 @@ const PLATFORMS = [
     charLimit: 10000,
     description: 'Expert answers & thought leadership',
     bestFor: 'Q&A, Expert positioning'
+  },
+  { 
+    id: 'blog', 
+    name: 'Blog Post', 
+    icon: '📝', 
+    color: 'from-emerald-500 to-teal-600',
+    charLimit: 50000,
+    description: 'SEO-optimized articles & blog content',
+    bestFor: 'SEO, Long-form, Authority building'
   }
 ]
 
