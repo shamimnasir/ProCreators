@@ -142,6 +142,10 @@ For titles:
 Always respond in valid JSON format.`
 
     // Generate the full script
+    const languageInstruction = isNonEnglish 
+      ? `\n\n**IMPORTANT: Generate ALL content in ${detectedLanguage}. The topic is in ${detectedLanguage}, so the script, titles, hooks, description, and tags MUST all be written in ${detectedLanguage}. Do NOT translate to English.**\n`
+      : ''
+
     const scriptPrompt = `Create a complete YouTube video script for:
 
 Topic: ${videoTopic}
@@ -152,26 +156,26 @@ Hook Style: ${hookType} - Template: ${hookTemplate}
 Target Audience: ${targetAudience || 'general audience'}
 Main Keyword: ${mainKeyword || videoTopic.split(' ').slice(0, 3).join(' ')}
 ${keyPoints ? `Key Points to Cover:\n${keyPoints}` : ''}
-
-Generate a complete response in this exact JSON format:
+${languageInstruction}
+Generate a complete response in this exact JSON format. ${isNonEnglish ? `Write everything in ${detectedLanguage}:` : ''}
 {
-  "script": "Full video script with [SCENE], [TEXT], [SOUND] markers. Structure: Hook (0-15s), Re-hook (15-30s), Main Content with pattern interrupts, Mid-video Loop, Payoff, CTA. Write ${lengthConfig.min}-${lengthConfig.max} words.",
+  "script": "Full video script ${isNonEnglish ? `in ${detectedLanguage} ` : ''}with [SCENE], [TEXT], [SOUND] markers. Structure: Hook (0-15s), Re-hook (15-30s), Main Content with pattern interrupts, Mid-video Loop, Payoff, CTA. Write ${lengthConfig.min}-${lengthConfig.max} words.",
   "titles": [
-    "Title 1 - Front-loaded keyword, 40-60 chars, curiosity-driven",
-    "Title 2 - Different angle, uses numbers if applicable",
-    "Title 3 - Contrarian or question-based",
-    "Title 4 - Benefit-focused",
-    "Title 5 - Urgency/scarcity angle"
+    "Title 1 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Front-loaded keyword, 40-60 chars, curiosity-driven",
+    "Title 2 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Different angle, uses numbers if applicable",
+    "Title 3 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Contrarian or question-based",
+    "Title 4 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Benefit-focused",
+    "Title 5 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Urgency/scarcity angle"
   ],
   "hooks": [
-    "Curiosity hook variation for first 15 seconds",
-    "Action hook variation - drop into the middle",
-    "Audience-centric hook - call out their problem",
-    "Time-promise hook - what they'll learn",
-    "Stakes hook - consequences of not watching",
-    "Contrarian hook - challenge common belief"
+    "Curiosity hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- variation for first 15 seconds",
+    "Action hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- drop into the middle",
+    "Audience-centric hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- call out their problem",
+    "Time-promise hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- what they'll learn",
+    "Stakes hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- consequences of not watching",
+    "Contrarian hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- challenge common belief"
   ],
-  "description": "Full YouTube description with:\n- Compelling first 2 lines (shown in search)\n- Summary of video\n- Timestamps for key sections\n- Links placeholders\n- Social media links placeholders\n- Relevant hashtags\n- Call to action",
+  "description": "Full YouTube description ${isNonEnglish ? `in ${detectedLanguage} ` : ''}with:\n- Compelling first 2 lines (shown in search)\n- Summary of video\n- Timestamps for key sections\n- Links placeholders\n- Social media links placeholders\n- Relevant hashtags\n- Call to action",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"]
 }
 
