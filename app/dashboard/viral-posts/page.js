@@ -20,7 +20,10 @@ import {
   Share2,
   Eye,
   Heart,
-  Zap
+  Zap,
+  Wand2,
+  Shield,
+  CheckCircle
 } from 'lucide-react'
 
 // Featured/Highlighted Tools - Top-level prominent tools
