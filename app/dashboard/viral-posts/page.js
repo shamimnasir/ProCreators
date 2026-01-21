@@ -332,6 +332,53 @@ export default function ViralPostsPage() {
         </CardContent>
       </Card>
 
+      {/* Featured Tools - Top Level Prominent */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="h-5 w-5 text-purple-500" />
+          <h2 className="text-xl font-bold">Featured Tools</h2>
+          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">Top Picks</Badge>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {FEATURED_TOOLS.map((tool) => (
+            <Link key={tool.id} href={tool.href}>
+              <Card className="group h-full hover:shadow-xl transition-all hover:-translate-y-2 cursor-pointer border-2 hover:border-purple-500/50 overflow-hidden">
+                <div className={`h-2 bg-gradient-to-r ${tool.gradient}`} />
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="text-4xl mb-2">{tool.icon}</div>
+                    <Badge className={`bg-gradient-to-r ${tool.gradient} text-white`}>
+                      {tool.badge}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                    {tool.name}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {tool.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {tool.features.map((feature) => (
+                      <Badge key={feature} variant="outline" className="text-[10px] bg-muted/50">
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="text-[10px]">{tool.useCase}</Badge>
+                    <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1">
+                      Open <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
