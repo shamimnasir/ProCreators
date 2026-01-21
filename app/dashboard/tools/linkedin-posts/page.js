@@ -229,6 +229,15 @@ export default function SocialMediaPostCreator() {
   const [postLength, setPostLength] = useState('medium')
   const [specificNumbers, setSpecificNumbers] = useState('')
   const [subreddit, setSubreddit] = useState('')
+  // Instagram theme page fields
+  const [themePageNiche, setThemePageNiche] = useState('')
+  const [instagramStyle, setInstagramStyle] = useState('motivational')
+  // Blog SEO fields
+  const [targetKeyword, setTargetKeyword] = useState('')
+  const [secondaryKeywords, setSecondaryKeywords] = useState('')
+  const [wordCountTarget, setWordCountTarget] = useState('1500')
+  const [writingStyle, setWritingStyle] = useState('conversational')
+  const [includeMetaDesc, setIncludeMetaDesc] = useState(true)
 
   const handleGenerate = async () => {
     if (!topic) {
