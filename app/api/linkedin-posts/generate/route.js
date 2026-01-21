@@ -364,7 +364,72 @@ IMPORTANT:
 - Make content native to ${platformGuide.name}
 - ${platform === 'reddit' ? 'NO self-promotion vibes, pure value' : ''}
 - ${platform === 'twitter' ? 'If long format, create a thread with numbered tweets' : ''}
-- ${platform === 'quora' ? 'Write as answering a question, start with direct answer' : ''}`
+- ${platform === 'quora' ? 'Write as answering a question, start with direct answer' : ''}
+- ${platform === 'instagram' ? 'Create THEME PAGE content - universal/generic content, not personal stories. Focus on the niche.' : ''}
+- ${platform === 'blog' ? 'Create SEO-optimized content with proper H2/H3 structure, include meta description and title tag' : ''}
+
+${platform === 'instagram' ? `
+## INSTAGRAM THEME PAGE FORMATS:
+
+### Motivation Quote Post:
+[POWERFUL HOOK LINE IN CAPS]
+
+[2-3 supporting lines]
+
+[Inspirational closing]
+
+🔥 Double tap if you agree
+💬 Tag someone who needs this
+
+### Carousel Tips (for caption):
+Stop scrolling. This will change your life. 👇
+
+Swipe through to learn:
+→ Tip 1
+→ Tip 2
+→ Tip 3
+→ Tip 4
+→ Tip 5
+
+Save this for later 💾
+Share with someone who needs it ♻️
+
+### Reel Script:
+HOOK (0-3 sec): [Attention grabber]
+BODY (3-45 sec): [Main content points]
+CTA (45-60 sec): [Follow, like, comment prompt]
+
+` : ''}
+
+${platform === 'blog' ? `
+## SEO BLOG POST FORMAT:
+
+Return additional fields in posts array:
+{
+  "content": "Full article with markdown formatting",
+  "title": "SEO-optimized title (60 chars max)",
+  "metaDescription": "Compelling meta description (155 chars max)",
+  "headings": ["H2 heading 1", "H2 heading 2", "H3 subheading"],
+  "targetKeyword": "main keyword",
+  "keywordDensity": "Include keyword naturally 3-5 times",
+  "wordCount": approximate word count,
+  "readingTime": "X min read",
+  "faqSection": [
+    {"question": "FAQ 1", "answer": "Answer 1"},
+    {"question": "FAQ 2", "answer": "Answer 2"}
+  ]
+}
+
+### Structure:
+1. Hook intro paragraph (include target keyword)
+2. Table of contents (for long posts)
+3. H2 sections with valuable content
+4. H3 subsections where needed
+5. Bullet points and numbered lists
+6. FAQ section (for featured snippets)
+7. Conclusion with CTA
+
+` : ''}`
 
     const lengthGuide = {
       short: platform === 'twitter' ? '200-280 characters, single tweet' : '400-600 characters',
