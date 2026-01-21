@@ -4,16 +4,11 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
-// Helper to run LLM
 async function runLLM(prompt, systemPrompt) {
   return new Promise(async (resolve, reject) => {
     try {
       const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
-      
-      const inputData = JSON.stringify({
-        prompt,
-        system_prompt: systemPrompt
-      })
+      const inputData = JSON.stringify({ prompt, system_prompt: systemPrompt })
       
       const tempDir = path.join(process.cwd(), 'tmp')
       await fs.mkdir(tempDir, { recursive: true })
@@ -27,13 +22,8 @@ async function runLLM(prompt, systemPrompt) {
       let stdout = ''
       let stderr = ''
 
-      pythonProcess.stdout.on('data', (data) => {
-        stdout += data.toString()
-      })
-
-      pythonProcess.stderr.on('data', (data) => {
-        stderr += data.toString()
-      })
+      pythonProcess.stdout.on('data', (data) => { stdout += data.toString() })
+      pythonProcess.stderr.on('data', (data) => { stderr += data.toString() })
 
       pythonProcess.on('close', async (code) => {
         try { await fs.unlink(tempFile) } catch (e) {}
@@ -43,16 +33,11 @@ async function runLLM(prompt, systemPrompt) {
         } else {
           try {
             const result = JSON.parse(stdout)
-            resolve(result.response || result.content || result)
+            resolve(result.success ? result.content : stdout.trim())
           } catch {
             resolve(stdout.trim())
           }
         }
-      })
-      
-      pythonProcess.on('error', async (err) => {
-        try { await fs.unlink(tempFile) } catch (e) {}
-        reject(new Error(`Failed to start LLM process: ${err.message}`))
       })
     } catch (error) {
       reject(error)
@@ -60,105 +45,98 @@ async function runLLM(prompt, systemPrompt) {
   })
 }
 
-// Analyze text for AI patterns
 export async function POST(request) {
   try {
     const body = await request.json()
     const { text } = body
-    
-    if (!text || text.trim().length < 20) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Please provide at least 20 characters of text' 
-      }, { status: 400 })
+
+    if (!text) {
+      return NextResponse.json({ success: false, error: 'Text is required' }, { status: 400 })
     }
 
-    const prompt = `Analyze the following text and estimate the probability that it was written by AI.
+    const systemPrompt = `You are an expert at detecting AI-generated content. Analyze text patterns, vocabulary choices, sentence structures, and writing characteristics to determine if content was likely written by AI or a human.
 
-TEXT TO ANALYZE:
-"""${text}"""
+Consider these AI writing indicators:
+- Overly formal or consistently neutral tone
+- Repetitive sentence structures
+- Excessive use of transition words
+- Perfect grammar with no colloquialisms
+- Lack of personal anecdotes or opinions
+- Generic examples without specific details
+- Predictable paragraph structures
 
-Look for these AI patterns:
-1. Perfect parallel structure and balanced sentences
-2. Overuse of transitional words (Furthermore, Moreover, Additionally, In conclusion)
-3. Formal, hedging language ("It is important to note that...")
-4. Lack of personal voice or opinions
-5. Generic, non-specific examples
-6. Perfectly organized structure (intro → body → conclusion)
-7. Repetitive sentence patterns
-8. Overly polished, error-free writing
-9. Use of phrases like "In today's world," "It's worth noting," "This comprehensive guide"
-10. Lack of contractions and casual language
+Human writing indicators:
+- Varied sentence lengths and structures
+- Colloquial language and contractions
+- Personal experiences and opinions
+- Minor imperfections that feel natural
+- Unique voice and personality
+- Specific, detailed examples
+- Emotional undertones
 
-Return your analysis as JSON:
+IMPORTANT: Return ONLY valid JSON, no markdown or extra text.`
+
+    const userPrompt = `Analyze this text to determine if it was written by AI or a human:
+
+"""${text.substring(0, 5000)}"""
+
+Return a JSON object with this EXACT structure:
 {
-  "aiProbability": <number_0_to_100>,
-  "confidence": "high|medium|low",
-  "patterns": [
-    "Pattern detected 1",
-    "Pattern detected 2"
-  ],
-  "humanIndicators": [
-    "Human-like element found 1"
-  ],
-  "verdict": "Likely AI|Possibly AI|Likely Human|Definitely Human"
+  "aiProbability": <0-100 percentage that text is AI-generated>,
+  "humanProbability": <0-100 percentage that text is human-written>,
+  "confidence": <"high"|"medium"|"low">,
+  "indicators": {
+    "ai": [
+      "Indicator 1 suggesting AI writing",
+      "Indicator 2 suggesting AI writing"
+    ],
+    "human": [
+      "Indicator 1 suggesting human writing",
+      "Indicator 2 suggesting human writing"
+    ]
+  },
+  "analysis": "Brief explanation of the assessment",
+  "suggestions": [
+    "Suggestion 1 to make text more human-like",
+    "Suggestion 2 to make text more human-like"
+  ]
 }
 
-Return ONLY valid JSON.`
+Return ONLY the JSON object.`
 
-    const systemPrompt = `You are an expert AI content detector. You can identify patterns that distinguish AI-generated text from human-written content. Analyze text objectively and provide probability estimates based on linguistic patterns, not content quality.`
-
-    const response = await runLLM(prompt, systemPrompt)
+    const response = await runLLM(userPrompt, systemPrompt)
     
-    // Parse JSON from response
-    let jsonMatch = response.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      const analysis = JSON.parse(jsonMatch[0])
-      return NextResponse.json({
-        success: true,
-        analysis
-      })
+    let analysis
+    try {
+      let cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      analysis = JSON.parse(cleanResponse)
+    } catch (parseError) {
+      const jsonMatch = response.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        analysis = JSON.parse(jsonMatch[0])
+      } else {
+        // Fallback
+        analysis = {
+          aiProbability: 50,
+          humanProbability: 50,
+          confidence: 'low',
+          indicators: {
+            ai: ['Unable to fully analyze'],
+            human: ['Some natural elements detected']
+          },
+          analysis: 'Analysis completed with limited confidence',
+          suggestions: ['Consider adding personal anecdotes', 'Vary sentence structures']
+        }
+      }
     }
-    
-    // Fallback estimation based on simple heuristics
-    const text_lower = text.toLowerCase()
-    let score = 50
-    
-    // AI indicators
-    if (text_lower.includes('furthermore')) score += 10
-    if (text_lower.includes('moreover')) score += 10
-    if (text_lower.includes('additionally')) score += 8
-    if (text_lower.includes('in conclusion')) score += 8
-    if (text_lower.includes('it is important to note')) score += 12
-    if (text_lower.includes('in today\'s world')) score += 10
-    if (text_lower.includes('comprehensive guide')) score += 8
-    if (!text.includes("'")) score += 5 // no contractions
-    
-    // Human indicators
-    if (text.includes("I think") || text.includes("I believe")) score -= 15
-    if (text.includes("!")) score -= 5
-    if (text.includes("?")) score -= 3
-    if (text_lower.includes("honestly")) score -= 10
-    if (text_lower.includes("actually")) score -= 8
-    if (text_lower.includes("kind of") || text_lower.includes("sort of")) score -= 10
-    
-    score = Math.max(5, Math.min(98, score))
-    
+
     return NextResponse.json({
       success: true,
-      analysis: {
-        aiProbability: score,
-        confidence: 'medium',
-        patterns: [],
-        verdict: score > 70 ? 'Likely AI' : score > 40 ? 'Possibly AI' : 'Likely Human'
-      }
+      analysis
     })
-    
+
   } catch (error) {
-    console.error('Analysis error:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
-    }, { status: 500 })
+    console.error('AI detection error:', error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
