@@ -133,6 +133,16 @@ const POST_FORMATS = {
     { id: 'step-by-step', name: 'Step-by-Step', icon: '📋', desc: 'Actionable guide', engagement: 'High' },
     { id: 'myth-buster', name: 'Myth Buster', icon: '💥', desc: 'Debunk misconceptions', engagement: 'High' },
     { id: 'data-driven', name: 'Data-Driven', icon: '📊', desc: 'Facts & statistics', engagement: 'High' }
+  ],
+  instagram: [
+    { id: 'motivation-quote', name: 'Motivation Quote', icon: '💪', desc: 'Inspirational text overlay', engagement: 'Very High' },
+    { id: 'carousel-tips', name: 'Carousel Tips', icon: '📚', desc: 'Swipe-through value', engagement: 'Very High' },
+    { id: 'reel-script', name: 'Reel Script', icon: '🎬', desc: 'Hook + body + CTA', engagement: 'Very High' },
+    { id: 'story-caption', name: 'Story Caption', icon: '📖', desc: 'Engaging narrative', engagement: 'High' },
+    { id: 'educational', name: 'Educational Post', icon: '🎓', desc: 'Teach something valuable', engagement: 'High' },
+    { id: 'relatable', name: 'Relatable Content', icon: '😂', desc: 'This is so me...', engagement: 'Very High' },
+    { id: 'transformation', name: 'Transformation', icon: '✨', desc: 'Before/after story', engagement: 'High' },
+    { id: 'question-hook', name: 'Question Hook', icon: '❓', desc: 'Engage with questions', engagement: 'High' }
   ]
 }
 
