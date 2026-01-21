@@ -362,17 +362,31 @@ export default function SocialMediaPostCreator() {
               <CardDescription>Select where you want to post</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
                 {PLATFORMS.map(p => (
-                  <Button
-                    key={p.id}
-                    variant={platform === p.id ? 'default' : 'outline'}
-                    className={`h-auto py-4 flex flex-col items-center ${platform === p.id ? `bg-gradient-to-r ${p.color} text-white ring-2 ring-offset-2` : ''}`}
-                    onClick={() => handlePlatformChange(p.id)}
-                  >
-                    <span className="text-2xl mb-1">{p.icon}</span>
-                    <span className="font-medium text-sm">{p.name}</span>
-                  </Button>
+                  p.isAdvanced ? (
+                    <Link key={p.id} href={p.advancedLink}>
+                      <Button
+                        variant="outline"
+                        className={`h-auto py-4 w-full flex flex-col items-center bg-gradient-to-r ${p.color} text-white hover:opacity-90 relative`}
+                      >
+                        <Badge className="absolute -top-2 -right-2 bg-yellow-500 text-black text-[10px]">Pro</Badge>
+                        <span className="text-2xl mb-1">{p.icon}</span>
+                        <span className="font-medium text-sm">{p.name}</span>
+                        <ExternalLink className="h-3 w-3 mt-1 opacity-70" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      key={p.id}
+                      variant={platform === p.id ? 'default' : 'outline'}
+                      className={`h-auto py-4 flex flex-col items-center ${platform === p.id ? `bg-gradient-to-r ${p.color} text-white ring-2 ring-offset-2` : ''}`}
+                      onClick={() => handlePlatformChange(p.id)}
+                    >
+                      <span className="text-2xl mb-1">{p.icon}</span>
+                      <span className="font-medium text-sm">{p.name}</span>
+                    </Button>
+                  )
                 ))}
               </div>
               
