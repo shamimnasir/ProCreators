@@ -211,7 +211,7 @@ export default function ViralPostsPage() {
               <Sparkles className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Viral Post Creation</h1>
+              <h1 className="text-3xl font-bold">Viral Content Creation</h1>
               <p className="text-white/80">Create content that breaks the algorithm</p>
             </div>
           </div>
