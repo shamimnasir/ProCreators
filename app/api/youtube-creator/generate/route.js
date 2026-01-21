@@ -23,27 +23,31 @@ const LENGTH_WORDS = {
 async function callLLM(prompt, systemPrompt) {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
-    const pythonProcess = spawn('python3', [scriptPath])
+    const inputData = JSON.stringify({
+      prompt,
+      system_prompt: systemPrompt
+    })
+    
+    // Use the virtual environment python and pass input as command line argument
+    const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, inputData])
     
     let stdout = ''
     let stderr = ''
-    
-    pythonProcess.stdin.write(JSON.stringify({
-      prompt,
-      system_prompt: systemPrompt
-    }))
-    pythonProcess.stdin.end()
     
     pythonProcess.stdout.on('data', (data) => { stdout += data.toString() })
     pythonProcess.stderr.on('data', (data) => { stderr += data.toString() })
     
     pythonProcess.on('close', (code) => {
       if (code !== 0) {
-        reject(new Error(stderr || 'LLM call failed'))
+        reject(new Error(stderr || stdout || 'LLM call failed'))
       } else {
         try {
           const result = JSON.parse(stdout)
-          resolve(result.response || result.content || stdout)
+          if (result.success) {
+            resolve(result.content || result.response || stdout)
+          } else {
+            reject(new Error(result.error || 'LLM call failed'))
+          }
         } catch {
           resolve(stdout.trim())
         }
