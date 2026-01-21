@@ -18,6 +18,7 @@ import {
   Users, Briefcase, BookOpen, Heart, AlertTriangle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 
 const PLATFORMS = [
   { 
