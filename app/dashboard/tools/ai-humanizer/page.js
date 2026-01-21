@@ -240,6 +240,31 @@ export default function AIHumanizerPage() {
         
         setAnalysisResult(data.analysis)
         
+        // Auto-save to library
+        try {
+          const titlePreview = inputText.substring(0, 50).trim() + (inputText.length > 50 ? '...' : '')
+          await saveToLibrary({
+            type: 'humanized-content',
+            category: 'text',
+            title: `Humanized: ${titlePreview}`,
+            description: `Humanized content with ${humanizationLevel} level, ${writingTone} tone`,
+            content: data.humanizedText,
+            metadata: {
+              humanizationLevel,
+              writingTone,
+              techniques: enabledTechniques,
+              originalAiScore: originalAnalysis?.aiProbability || null,
+              humanizedAiScore: humanizedAnalysis?.aiProbability || null,
+              improvement: data.analysis?.improvement || null,
+              wordCount: data.humanizedText.split(/\s+/).filter(w => w).length,
+              contentType: 'humanized-text'
+            }
+          })
+          console.log('Humanized content auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save to library:', saveError)
+        }
+        
         toast({
           title: 'Text Humanized!',
           description: `AI detection reduced by ${data.analysis?.improvement || 'significant'}%`
