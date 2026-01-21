@@ -69,7 +69,10 @@ export async function POST(request) {
       includeMetaTags,
       internalLinks,
       keyPoints,
-      competitorUrls
+      competitorUrls,
+      // Humanization settings
+      humanizationLevel,
+      enabledTechniques
     } = body
 
     if (!topic) {
@@ -87,6 +90,15 @@ export async function POST(request) {
     context += `## Writing Style: ${writingStyle}\n`
     context += `## Word Count Target: ~${wordCount} words\n`
     context += `## Tone: ${tone}\n`
+    
+    // Humanization settings
+    if (humanizationLevel && humanizationLevel !== 'none') {
+      context += `\n## HUMANIZATION SETTINGS:\n`
+      context += `## Level: ${humanizationLevel}\n`
+      if (enabledTechniques && enabledTechniques.length > 0) {
+        context += `## Techniques: ${enabledTechniques.join(', ')}\n`
+      }
+    }
     
     if (isAffiliateType) {
       context += `\n## AFFILIATE CONTENT SETTINGS:\n`
