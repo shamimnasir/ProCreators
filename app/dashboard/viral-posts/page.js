@@ -23,6 +23,43 @@ import {
   Zap
 } from 'lucide-react'
 
+// Featured/Highlighted Tools - Top-level prominent tools
+const FEATURED_TOOLS = [
+  {
+    id: 'content-humanizer',
+    name: 'AI Content Humanizer',
+    description: 'Transform AI-generated text into natural, human-sounding content that bypasses AI detection',
+    icon: '✨',
+    href: '/dashboard/tools/content-humanizer',
+    useCase: 'Bypass AI Detection',
+    badge: 'Pro',
+    gradient: 'from-purple-600 to-pink-600',
+    features: ['Undetectable Content', 'Multiple Tones', 'Deep Rewriting']
+  },
+  {
+    id: 'blog-creator',
+    name: 'Blog Post Creator',
+    description: 'SEO articles, affiliate content & product reviews with AI humanization built-in',
+    icon: '📝',
+    href: '/dashboard/tools/blog-creator',
+    useCase: 'Blogs, SEO, Affiliate',
+    badge: 'New',
+    gradient: 'from-blue-600 to-indigo-600',
+    features: ['SEO Optimized', 'Grammar Check', 'AI Humanizer']
+  },
+  {
+    id: 'social-media-posts',
+    name: 'Social Media Post Creator',
+    description: 'Viral posts for 7 platforms with AI generation and optimization',
+    icon: '📱',
+    href: '/dashboard/tools/linkedin-posts',
+    useCase: 'All Social Platforms',
+    badge: 'Hot',
+    gradient: 'from-rose-600 to-orange-600',
+    features: ['7 Platforms', 'Viral Hooks', 'Engagement Optimized']
+  }
+]
+
 const VIRAL_CATEGORIES = [
   {
     id: 'text',
@@ -39,6 +76,15 @@ const VIRAL_CATEGORIES = [
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'All social platforms',
         badge: 'Hot'
+      },
+      {
+        id: 'content-humanizer',
+        name: 'AI Content Humanizer',
+        description: 'Make AI text sound natural & bypass detection',
+        icon: '✨',
+        href: '/dashboard/tools/content-humanizer',
+        useCase: 'AI Detection Bypass',
+        badge: 'Pro'
       },
       {
         id: 'blog-creator',
