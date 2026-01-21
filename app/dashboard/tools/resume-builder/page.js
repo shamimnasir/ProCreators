@@ -549,6 +549,30 @@ export default function ResumeBuilderPage() {
       if (data.success) {
         setResumeData(data.resumeData)
         if (data.linkedInWarning) setLinkedInWarning(data.linkedInWarning)
+        
+        // Auto-save to library
+        try {
+          const resumeName = data.resumeData?.name || personalInfo?.name || 'Untitled'
+          await saveToLibrary({
+            type: 'resume',
+            category: 'text',
+            title: `Resume: ${resumeName}`,
+            description: `${targetJob || 'Professional'} resume for ${industry || 'general'} industry`,
+            content: JSON.stringify(data.resumeData),
+            metadata: {
+              targetJob,
+              industry,
+              template,
+              layout,
+              name: resumeName,
+              contentType: 'resume'
+            }
+          })
+          console.log('Resume auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save resume:', saveError)
+        }
+        
         toast({ title: '🎉 Resume Generated!' })
       } else throw new Error(data.error)
     } catch (err) { toast({ title: 'Failed', description: err.message, variant: 'destructive' }) }
