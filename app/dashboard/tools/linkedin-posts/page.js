@@ -263,6 +263,37 @@ export default function SocialMediaPostCreator() {
       if (data.success) {
         setResult(data.data)
         setActiveVariation(0)
+        
+        // Auto-save to library
+        try {
+          const posts = data.data?.posts || []
+          // Save the first (main) post variation
+          if (posts.length > 0) {
+            const mainPost = posts[0]
+            const selectedPlatformData = PLATFORMS.find(p => p.id === platform)
+            await saveToLibrary({
+              type: 'social-media-post',
+              category: 'text',
+              title: `${selectedPlatformData?.name || platform} Post: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
+              description: `${selectedPlatformData?.name || platform} post about ${topic.substring(0, 100)}`,
+              content: mainPost.content || mainPost,
+              metadata: {
+                platform,
+                postFormat,
+                topic,
+                tone,
+                hook: mainPost.hook || null,
+                hashtags: mainPost.hashtags || [],
+                variations: posts.length,
+                contentType: 'social-post'
+              }
+            })
+            console.log('Social media post auto-saved to library')
+          }
+        } catch (saveError) {
+          console.error('Failed to auto-save to library:', saveError)
+        }
+        
         toast({ title: '✨ Posts Generated!' })
       } else {
         throw new Error(data.error)
