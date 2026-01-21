@@ -5,7 +5,7 @@ import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 
 // Helper to run LLM using Python script
-async function runLLM(prompt, systemPrompt = 'You are a LinkedIn content expert.') {
+async function runLLM(prompt, systemPrompt = 'You are a social media content expert.') {
   return new Promise(async (resolve, reject) => {
     try {
       const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
@@ -64,10 +64,100 @@ async function runLLM(prompt, systemPrompt = 'You are a LinkedIn content expert.
   })
 }
 
+const PLATFORM_GUIDES = {
+  linkedin: {
+    name: 'LinkedIn',
+    charLimit: 3000,
+    style: 'Professional but engaging. Use line breaks after every 1-2 sentences. Short paragraphs. Business-focused value.',
+    formatting: 'Single line breaks between sentences, double line breaks between sections. Bullet points for lists.',
+    hashtags: '3-5 professional hashtags',
+    bestPractices: [
+      'First 2 lines must hook (before "see more")',
+      'Use whitespace liberally',
+      'Personal stories perform well',
+      'End with a question or CTA',
+      'Avoid external links in post body'
+    ]
+  },
+  twitter: {
+    name: 'X (Twitter)',
+    charLimit: 280,
+    style: 'Punchy, direct, conversational. Every word counts. Hot takes work well.',
+    formatting: 'For threads: Number each tweet (1/, 2/, etc). Single post: maximize impact in 280 chars.',
+    hashtags: '1-2 relevant hashtags max',
+    bestPractices: [
+      'First tweet must hook immediately',
+      'Use specific numbers',
+      'Contrarian takes get engagement',
+      'End threads with recap + CTA',
+      'Quote tweet worthy content'
+    ]
+  },
+  facebook: {
+    name: 'Facebook',
+    charLimit: 63206,
+    style: 'Conversational, emotional, community-focused. Storytelling works best.',
+    formatting: 'Longer paragraphs OK. Use emojis naturally. Questions drive comments.',
+    hashtags: '0-3 hashtags (less important on Facebook)',
+    bestPractices: [
+      'Emotional content gets shared',
+      'Ask questions to drive comments',
+      'Native video/images boost reach',
+      'Engagement in first hour matters most',
+      'Personal stories outperform promotional'
+    ]
+  },
+  threads: {
+    name: 'Threads',
+    charLimit: 500,
+    style: 'Casual, conversational, authentic. Like texting a friend. Less polished than LinkedIn.',
+    formatting: 'Short and punchy. Casual line breaks. Feels spontaneous.',
+    hashtags: '0-2 hashtags',
+    bestPractices: [
+      'Authentic > polished',
+      'Respond to others to grow',
+      'Hot takes perform well',
+      'Less professional than LinkedIn',
+      'Conversational tone wins'
+    ]
+  },
+  reddit: {
+    name: 'Reddit',
+    charLimit: 40000,
+    style: 'Authentic, detailed, value-first. NO self-promotion vibes. Community-focused.',
+    formatting: 'Use markdown. Headers for sections. Bullet points for lists. TL;DR at end for long posts.',
+    hashtags: 'No hashtags on Reddit',
+    bestPractices: [
+      'Provide genuine value first',
+      'Know the subreddit rules/culture',
+      'Self-promotion = downvotes',
+      'Detailed answers get upvoted',
+      'Engage authentically in comments',
+      'Use TL;DR for long posts'
+    ]
+  },
+  quora: {
+    name: 'Quora',
+    charLimit: 10000,
+    style: 'Expert, authoritative, detailed. Answer the question thoroughly with examples.',
+    formatting: 'Use headers for sections. Bold key points. Include personal experience.',
+    hashtags: 'No hashtags on Quora',
+    bestPractices: [
+      'Start with a direct answer',
+      'Use personal experience/stories',
+      'Include specific examples',
+      'Cite sources when relevant',
+      'Structure with headers for long answers',
+      'End with actionable takeaway'
+    ]
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
     const {
+      platform = 'linkedin',
       topic,
       postFormat,
       hookStyle,
@@ -80,7 +170,8 @@ export async function POST(request) {
       includeEmojis,
       includeHashtags,
       postLength,
-      specificNumbers
+      specificNumbers,
+      subreddit
     } = body
 
     if (!topic) {
@@ -90,8 +181,11 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
+    const platformGuide = PLATFORM_GUIDES[platform] || PLATFORM_GUIDES.linkedin
+
     // Build context
-    let context = `## Post Topic:\n${topic}\n\n`
+    let context = `## Platform: ${platformGuide.name}\n`
+    context += `## Post Topic:\n${topic}\n\n`
     
     context += `## Selected Format: ${postFormat}\n`
     context += `## Hook Style: ${hookStyle}\n`
@@ -103,235 +197,142 @@ export async function POST(request) {
     if (keyPoints) context += `## Key Points to Include:\n${keyPoints}\n`
     if (personalStory) context += `## Personal Story/Experience:\n${personalStory}\n`
     if (specificNumbers) context += `## Specific Numbers/Results: ${specificNumbers}\n`
+    if (subreddit && platform === 'reddit') context += `## Target Subreddit: ${subreddit}\n`
     
     context += `\n## Options:\n`
-    context += `- Include Emojis: ${includeEmojis ? 'Yes' : 'No'}\n`
-    context += `- Include Hashtags: ${includeHashtags ? 'Yes' : 'No'}\n`
+    context += `- Include Emojis: ${includeEmojis ? 'Yes (use strategically)' : 'No'}\n`
+    context += `- Include Hashtags: ${includeHashtags ? `Yes (${platformGuide.hashtags})` : 'No'}\n`
     context += `- CTA Type: ${ctaType}\n`
 
-    const systemPrompt = `You are a viral LinkedIn content strategist who has helped creators grow from 0 to 500K+ followers. You understand the LinkedIn algorithm deeply and know exactly what makes posts go viral.
+    const systemPrompt = `You are a viral social media content strategist who has helped creators grow massive followings across all major platforms. You deeply understand each platform's unique algorithm, culture, and what makes content go viral.
 
-## YOUR EXPERTISE:
-- Deep knowledge of LinkedIn's algorithm and engagement patterns
-- Mastery of viral post formats that consistently perform
-- Understanding of what stops the scroll in a professional context
-- Expertise in crafting hooks that demand attention
+## PLATFORM-SPECIFIC EXPERTISE FOR ${platformGuide.name.toUpperCase()}:
 
-## VIRAL LINKEDIN POST FORMATS YOU KNOW:
+### Character Limit: ${platformGuide.charLimit}
+### Style: ${platformGuide.style}
+### Formatting: ${platformGuide.formatting}
+### Hashtags: ${platformGuide.hashtags}
 
-### 1. Authority Builder Format:
-MOST PEOPLE ARE MISSING THIS.
+### Best Practices for ${platformGuide.name}:
+${platformGuide.bestPractices.map(bp => `- ${bp}`).join('\n')}
+
+## VIRAL POST FORMATS YOU KNOW:
+
+### Authority Builder:
+BOLD OPENING STATEMENT.
 
 This isn't luck — it's a repeatable system.
 
-We built [specific achievement with numbers].
+[Specific achievement with numbers]
 
-At a high level, here's what's happening:
+At a high level:
 - Point 1
 - Point 2
 - Point 3
 
-[More context with specifics]
+[Why this works]
 
-No [common approach].
-No [another approach].
-No [third approach].
+[CTA]
 
-[Why this works section with bullets]
-
-[Call to action]
-
-### 2. Contrarian Take Format:
+### Contrarian Take:
 Unpopular opinion:
 
 [Bold contrarian statement]
 
 Here's why everyone is wrong:
+1. [Reason]
+2. [Reason]
+3. [Reason]
 
-1. [First reason]
-2. [Second reason]
-3. [Third reason]
+### Story Hook:
+I [dramatic moment] [timeframe] ago.
 
-[Deeper explanation]
-
-The truth is:
-[Insight]
-
-[CTA]
-
-### 3. Story Hook Format:
-I got [negative event] [timeframe] ago.
-
-Best thing that ever happened to me.
+[Twist/lesson]
 
 Here's what I learned:
+[Lessons]
 
-[Story with lessons]
-
-### 4. Listicle Format:
+### Listicle:
 [Number] things I wish I knew before [X]:
 
-1. [Tip with brief explanation]
-2. [Tip with brief explanation]
+1. [Tip]
+2. [Tip]
 ...
 
-[Closing thought]
-
-### 5. Before/After Format:
-[Year]: [Negative state]
-[Year]: [Positive state with metrics]
-
-Here's what changed:
-
-[Explanation]
-
-### 6. Pattern Interrupt Format:
-[ALL CAPS COMMAND/SHOCK]
-
-[Explanation of why]
-
-[Supporting points]
-
-### 7. Hot Take Format:
-[Industry trend/common practice] is overrated.
+### Hot Take:
+[Trend/common belief] is overrated.
 
 Here's what actually works:
+[Alternative]
 
-[Alternative approach]
-
-## FORMATTING RULES FOR LINKEDIN:
-- Short sentences (max 10 words ideal)
-- Line breaks after every 1-2 sentences
-- Use whitespace liberally
-- Bullet points for scanability
-- No walls of text
-- First line MUST be a scroll-stopper
-- Use "See more" strategically (hook must be in first 3 lines)
-
-## HOOK FORMULAS THAT WORK:
-- Shocking statistic: "97% of [people] fail at [thing]."
+## HOOK FORMULAS:
+- Shocking stat: "97% of [people] fail at [thing]."
 - Bold statement: "MOST PEOPLE ARE MISSING THIS."
 - Question: "Why are you still [outdated behavior]?"
-- Story opener: "I almost quit last month."
+- Story: "I almost quit last month."
 - Contrarian: "Unpopular opinion:"
 - Command: "STOP doing this immediately."
-- Curiosity gap: "Nobody talks about this..."
+- Curiosity: "Nobody talks about this..."
 - Result first: "$500K in 6 months. Here's how:"
 
 ## CTA STRATEGIES:
-- Comment trigger: "Comment '[word]' and I'll send you..."
-- Question: "What would you add to this list?"
-- Save/Share: "♻️ Repost to help others | 💾 Save for later"
-- DM trigger: "DM me '[word]' for the full guide"
+- Comment: "Comment '[word]' and I'll send you..."
+- Question: "What would you add?"
+- Share: "♻️ Repost | 💾 Save for later"
+- DM: "DM me '[word]' for the full guide"
 
 ## OUTPUT FORMAT:
-Return a JSON object with this structure:
+Return a JSON object:
 {
   "posts": [
     {
-      "content": "Full post content with proper formatting and line breaks",
-      "hashtags": ["hashtag1", "hashtag2", "hashtag3", "hashtag4", "hashtag5"],
+      "content": "Full post with proper formatting and line breaks",
+      "hashtags": ["hashtag1", "hashtag2"],
       "analysis": {
         "hookStrength": "Very Strong/Strong/Medium",
         "viralPotential": "Very High/High/Medium",
         "engagementType": "Comments/Saves/Shares"
       }
-    },
-    {
-      "content": "Second variation...",
-      "hashtags": [...],
-      "analysis": {...}
-    },
-    {
-      "content": "Third variation...",
-      "hashtags": [...],
-      "analysis": {...}
     }
   ],
-  "alternativeHooks": [
-    "Alternative hook 1",
-    "Alternative hook 2",
-    "Alternative hook 3",
-    "Alternative hook 4",
-    "Alternative hook 5"
-  ],
-  "tips": [
-    "Tip for maximizing this post's reach",
-    "Another optimization tip",
-    "Posting strategy tip"
-  ]
+  "alternativeHooks": ["Hook 1", "Hook 2", "Hook 3", "Hook 4", "Hook 5"],
+  "tips": ["Platform-specific tip 1", "Tip 2", "Tip 3"]
 }
 
 IMPORTANT:
-- Return ONLY valid JSON, no markdown code blocks
-- Each post should use proper LinkedIn formatting with line breaks (\n)
-- Generate 3 different variations of the post
-- Make hooks scroll-stopping and attention-grabbing
-- If emojis are requested, use them strategically (not every line)
-- Hashtags should be relevant and mix popular + niche tags
-- Each variation should have a different angle or hook style`
+- Return ONLY valid JSON, no markdown blocks
+- Use proper line breaks (\\n) for formatting
+- Generate 3 post variations
+- Make content native to ${platformGuide.name}
+- ${platform === 'reddit' ? 'NO self-promotion vibes, pure value' : ''}
+- ${platform === 'twitter' ? 'If long format, create a thread with numbered tweets' : ''}
+- ${platform === 'quora' ? 'Write as answering a question, start with direct answer' : ''}`
 
     const lengthGuide = {
-      short: '400-600 characters, punchy and direct',
-      medium: '800-1200 characters, balanced detail',
-      long: '1400-1800 characters, comprehensive with multiple sections'
+      short: platform === 'twitter' ? '200-280 characters, single tweet' : '400-600 characters',
+      medium: platform === 'twitter' ? '280 characters or 3-5 tweet thread' : '800-1200 characters',
+      long: platform === 'twitter' ? '7-10 tweet thread' : '1400-2000+ characters'
     }
 
-    const formatGuides = {
-      'authority-builder': 'Use the Authority Builder format: Start with bold statement, share system/results with specific numbers, list key points with bullets, explain what you DON\'T do, end with CTA',
-      'contrarian-take': 'Use Contrarian Take format: Start with "Unpopular opinion:" followed by a bold contrarian statement, then explain why conventional wisdom is wrong',
-      'story-hook': 'Use Story Hook format: Start with a dramatic personal moment, then reveal the lesson learned',
-      'listicle': 'Use Listicle format: Number-based tips, each with brief explanation, easy to scan',
-      'before-after': 'Use Before/After format: Show transformation with specific dates/metrics',
-      'pattern-interrupt': 'Use Pattern Interrupt format: Start with ALL CAPS command that stops scroll',
-      'how-to-guide': 'Use How-To format: Step-by-step guide with clear instructions',
-      'hot-take': 'Use Hot Take format: Challenge something popular/trendy with specific reasoning',
-      'myth-buster': 'Use Myth Buster format: List common myths and debunk each with truth',
-      'engagement-bait': 'Use Engagement Driver format: Pose a controversial question that demands answers'
-    }
-
-    const hookGuides = {
-      'shocking-stat': 'Start with a surprising statistic',
-      'bold-statement': 'Start with ALL CAPS bold statement',
-      'question': 'Start with a provocative question',
-      'story-opener': 'Start with a dramatic story moment',
-      'contrarian': 'Start with "Unpopular opinion:"',
-      'command': 'Start with an urgent command (STOP, DELETE, etc.)',
-      'curiosity-gap': 'Start with something mysterious that creates curiosity',
-      'result-first': 'Start with impressive result/number'
-    }
-
-    const ctaGuides = {
-      'comment': 'End with: Comment "[relevant word]" and I\'ll send you [value]',
-      'question': 'End with an engaging question that invites discussion',
-      'save-share': 'End with: ♻️ Repost to help your network | 💾 Save for later',
-      'follow': 'End with: Follow [me/for more] for more [topic] insights',
-      'dm': 'End with: DM me "[word]" and I\'ll send you [specific value]',
-      'none': 'End naturally without explicit CTA'
-    }
-
-    const userPrompt = `Create 3 viral LinkedIn post variations based on this:
+    const userPrompt = `Create 3 viral ${platformGuide.name} post variations:
 
 ${context}
 
-## Specific Instructions:
-1. Format: ${formatGuides[postFormat] || 'Create an engaging post'}
-2. Hook Style: ${hookGuides[hookStyle] || 'Use an attention-grabbing hook'}
-3. Length: ${lengthGuide[postLength] || lengthGuide.medium}
-4. CTA: ${ctaGuides[ctaType] || 'End with engaging call-to-action'}
-5. Emojis: ${includeEmojis ? 'Use emojis strategically (not every line, max 5-8 total)' : 'Do not use emojis'}
-6. Hashtags: ${includeHashtags ? 'Include 5 relevant hashtags (mix of popular and niche)' : 'Do not include hashtags'}
+## Requirements:
+1. Format perfectly for ${platformGuide.name}
+2. Length: ${lengthGuide[postLength] || lengthGuide.medium}
+3. Hook must stop the scroll
+4. ${includeEmojis ? 'Use emojis strategically (not excessive)' : 'No emojis'}
+5. ${includeHashtags ? `Include ${platformGuide.hashtags}` : 'No hashtags'}
+6. Tone: ${tone}
+7. Each variation should have unique angle
+8. CTA style: ${ctaType}
+${platform === 'reddit' ? '9. Sound authentic, NOT promotional. Pure value.' : ''}
+${platform === 'quora' ? '9. Answer format - start with direct answer to implied question.' : ''}
+${platform === 'twitter' && postLength === 'long' ? '9. Create numbered thread (1/, 2/, etc.)' : ''}
 
-## Quality Requirements:
-- Hook MUST stop the scroll in the first line
-- Use proper LinkedIn formatting with line breaks
-- Each variation should have a unique angle
-- Include specific numbers/metrics when possible
-- Write in ${tone} tone
-- Target audience: ${targetAudience || 'professionals'}
-
-Generate 3 post variations + 5 alternative hooks + 3 optimization tips.
-Return ONLY the JSON object - no markdown formatting.`
+Generate 3 posts + 5 alternative hooks + 3 ${platformGuide.name}-specific tips.
+Return ONLY JSON - no markdown.`
 
     const response = await runLLM(userPrompt, systemPrompt)
     
@@ -345,7 +346,7 @@ Return ONLY the JSON object - no markdown formatting.`
       
       postsData = JSON.parse(cleanResponse)
     } catch (parseError) {
-      console.error('Failed to parse LinkedIn posts JSON:', parseError)
+      console.error('Failed to parse posts JSON:', parseError)
       const jsonMatch = response.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         postsData = JSON.parse(jsonMatch[0])
@@ -354,11 +355,13 @@ Return ONLY the JSON object - no markdown formatting.`
       }
     }
 
-    // Ensure hashtags array exists for each post
+    // Handle hashtags based on platform and user preference
     if (postsData.posts) {
       postsData.posts = postsData.posts.map(post => ({
         ...post,
-        hashtags: includeHashtags ? (post.hashtags || []) : []
+        hashtags: (includeHashtags && platform !== 'reddit' && platform !== 'quora') 
+          ? (post.hashtags || []) 
+          : []
       }))
     }
 
@@ -366,6 +369,7 @@ Return ONLY the JSON object - no markdown formatting.`
       success: true,
       data: postsData,
       metadata: {
+        platform,
         topic,
         postFormat,
         tone,
@@ -374,10 +378,10 @@ Return ONLY the JSON object - no markdown formatting.`
     })
 
   } catch (error) {
-    console.error('LinkedIn post generation error:', error)
+    console.error('Social media post generation error:', error)
     return NextResponse.json({
       success: false,
-      error: error.message || 'Failed to generate LinkedIn posts'
+      error: error.message || 'Failed to generate posts'
     }, { status: 500 })
   }
 }
