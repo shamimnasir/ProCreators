@@ -218,7 +218,7 @@ Generate the complete blog post. Return ONLY JSON.`
       // Try direct parsing first
       blogData = JSON.parse(cleanResponse)
     } catch (parseError) {
-      console.log('Initial parse failed, attempting recovery...')
+      console.log('Initial parse failed, attempting recovery...', parseError.message)
       
       try {
         // Extract JSON from response
@@ -226,41 +226,52 @@ Generate the complete blog post. Return ONLY JSON.`
         if (jsonMatch) {
           let jsonStr = jsonMatch[0]
           
-          // Fix common JSON issues:
-          // 1. Replace unescaped newlines in string values
-          // 2. Fix control characters
-          jsonStr = jsonStr
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, (char) => {
-              // Keep newlines and tabs but escape them properly
-              if (char === '\n') return '\\n'
-              if (char === '\r') return '\\r'
-              if (char === '\t') return '\\t'
-              return ''
-            })
+          // Fix common JSON issues - sanitize control characters
+          // Replace problematic characters that break JSON parsing
+          jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, (char) => {
+            const code = char.charCodeAt(0)
+            if (code === 10) return '\\n'  // newline
+            if (code === 13) return '\\r'  // carriage return  
+            if (code === 9) return '\\t'   // tab
+            return ' '  // replace other control chars with space
+          })
           
           blogData = JSON.parse(jsonStr)
         } else {
           throw new Error('No JSON found in response')
         }
       } catch (secondError) {
-        console.log('JSON recovery failed, creating structured response from raw content')
+        console.log('JSON recovery failed, creating structured response from raw content:', secondError.message)
         
         // Fallback: Create a structured response from raw text
-        const content = response
-          .replace(/```json\n?/g, '')
-          .replace(/```\n?/g, '')
-          .replace(/^\s*\{[\s\S]*?"content"\s*:\s*"/i, '')
-          .replace(/"\s*,?\s*"wordCount"[\s\S]*$/i, '')
-          .trim()
+        // Try to extract content from the malformed JSON
+        let content = response
+        
+        // Try to extract just the content field value
+        const contentMatch = response.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"wordCount|"\s*,\s*"readingTime|"\s*\})/i)
+        if (contentMatch) {
+          content = contentMatch[1]
+            .replace(/\\n/g, '\n')
+            .replace(/\\r/g, '')
+            .replace(/\\t/g, '  ')
+            .replace(/\\"/g, '"')
+        } else {
+          // Just clean up the raw response
+          content = response
+            .replace(/```json\n?/g, '')
+            .replace(/```\n?/g, '')
+            .replace(/^\s*\{[\s\S]*?"content"\s*:\s*"/i, '')
+            .trim()
+        }
         
         blogData = {
           title: topic,
           metaTitle: topic.substring(0, 60),
           metaDescription: `Learn everything about ${topic}. Complete guide with tips and recommendations.`,
           slug: topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 50),
-          content: content || response,
-          wordCount: (content || response).split(/\s+/).length,
-          readingTime: `${Math.ceil((content || response).split(/\s+/).length / 200)} min`,
+          content: content,
+          wordCount: content.split(/\s+/).length,
+          readingTime: `${Math.ceil(content.split(/\s+/).length / 200)} min`,
           outline: [],
           tips: ['Review the generated content for accuracy', 'Add internal links to related content']
         }
