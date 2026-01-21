@@ -34,11 +34,20 @@ const VIRAL_CATEGORIES = [
       {
         id: 'social-media-posts',
         name: 'Social Media Post Creator',
-        description: 'Viral posts for 8 platforms including Instagram & Blog',
+        description: 'Viral posts for 7 platforms with AI generation',
         icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
-        useCase: 'All platforms',
+        useCase: 'All social platforms',
         badge: 'Hot'
+      },
+      {
+        id: 'blog-creator',
+        name: 'Blog Post Creator',
+        description: 'SEO articles, affiliate content & product reviews',
+        icon: '📝',
+        href: '/dashboard/tools/blog-creator',
+        useCase: 'Blogs, SEO, Affiliate',
+        badge: 'New'
       },
       {
         id: 'threads',
