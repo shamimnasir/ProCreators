@@ -32,6 +32,15 @@ const VIRAL_CATEGORIES = [
     color: 'from-blue-500 to-indigo-500',
     tools: [
       {
+        id: 'linkedin-posts',
+        name: 'LinkedIn Post Writer',
+        description: 'Viral LinkedIn posts with 10+ proven formats',
+        icon: '💼',
+        href: '/dashboard/tools/linkedin-posts',
+        useCase: 'LinkedIn, Personal branding',
+        badge: 'Hot'
+      },
+      {
         id: 'threads',
         name: 'Thread Generator',
         description: 'Create viral Twitter/X threads that get engagement',
