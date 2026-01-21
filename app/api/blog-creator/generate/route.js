@@ -1,0 +1,221 @@
+import { NextResponse } from 'next/server'
+import { spawn } from 'child_process'
+import path from 'path'
+import fs from 'fs/promises'
+import { v4 as uuidv4 } from 'uuid'
+
+async function runLLM(prompt, systemPrompt) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
+      const inputData = JSON.stringify({ prompt, system_prompt: systemPrompt })
+      
+      const tempDir = path.join(process.cwd(), 'tmp')
+      await fs.mkdir(tempDir, { recursive: true })
+      const tempFile = path.join(tempDir, `llm-input-${uuidv4()}.json`)
+      await fs.writeFile(tempFile, inputData, 'utf-8')
+      
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, '--file', tempFile], {
+        env: { ...process.env }
+      })
+
+      let stdout = ''
+      let stderr = ''
+
+      pythonProcess.stdout.on('data', (data) => { stdout += data.toString() })
+      pythonProcess.stderr.on('data', (data) => { stderr += data.toString() })
+
+      pythonProcess.on('close', async (code) => {
+        try { await fs.unlink(tempFile) } catch (e) {}
+        
+        if (code !== 0) {
+          reject(new Error(`LLM process failed: ${stderr}`))
+        } else {
+          try {
+            const result = JSON.parse(stdout)
+            resolve(result.success ? result.content : stdout.trim())
+          } catch {
+            resolve(stdout.trim())
+          }
+        }
+      })
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
+export async function POST(request) {
+  try {
+    const body = await request.json()
+    const {
+      articleType,
+      topic,
+      targetKeyword,
+      secondaryKeywords,
+      industry,
+      targetAudience,
+      writingStyle,
+      wordCount,
+      tone,
+      products,
+      affiliateNetwork,
+      priceRange,
+      includeProsCons,
+      includeRatings,
+      includePricing,
+      includeFAQ,
+      includeTOC,
+      includeMetaTags,
+      internalLinks,
+      keyPoints,
+      competitorUrls
+    } = body
+
+    if (!topic) {
+      return NextResponse.json({ success: false, error: 'Topic is required' }, { status: 400 })
+    }
+
+    const isAffiliateType = ['affiliate-best', 'product-review', 'comparison', 'buyers-guide'].includes(articleType)
+
+    let context = `## Article Type: ${articleType}\n`
+    context += `## Topic: ${topic}\n`
+    context += `## Target Keyword: ${targetKeyword || topic}\n`
+    if (secondaryKeywords) context += `## Secondary Keywords: ${secondaryKeywords}\n`
+    if (industry) context += `## Industry: ${industry}\n`
+    if (targetAudience) context += `## Target Audience: ${targetAudience}\n`
+    context += `## Writing Style: ${writingStyle}\n`
+    context += `## Word Count Target: ~${wordCount} words\n`
+    context += `## Tone: ${tone}\n`
+    
+    if (isAffiliateType) {
+      context += `\n## AFFILIATE CONTENT SETTINGS:\n`
+      if (products) context += `## Products to Feature:\n${products}\n`
+      if (affiliateNetwork) context += `## Affiliate Network: ${affiliateNetwork}\n`
+      if (priceRange) context += `## Price Range Focus: ${priceRange}\n`
+      context += `## Include Pros/Cons: ${includeProsCons}\n`
+      context += `## Include Star Ratings: ${includeRatings}\n`
+      context += `## Include Pricing Tables: ${includePricing}\n`
+    }
+    
+    context += `\n## SEO FEATURES:\n`
+    context += `## Include FAQ Section: ${includeFAQ}\n`
+    context += `## Include Table of Contents: ${includeTOC}\n`
+    context += `## Generate Meta Tags: ${includeMetaTags}\n`
+    if (internalLinks) context += `## Internal Links to Include:\n${internalLinks}\n`
+    if (keyPoints) context += `\n## Key Points to Cover:\n${keyPoints}\n`
+
+    const articleTypeGuides = {
+      'seo-article': 'Standard SEO-optimized informational article',
+      'affiliate-best': 'Best X for Y format: "Best [products] for [audience/use case]". Include product recommendations with affiliate-friendly descriptions.',
+      'product-review': 'In-depth single product review with pros, cons, features, alternatives, and verdict.',
+      'comparison': 'X vs Y head-to-head comparison with feature tables, pros/cons for each, and clear winner recommendation.',
+      'how-to-guide': 'Step-by-step tutorial with numbered steps, tips, and common mistakes to avoid.',
+      'listicle': 'Top X / X Ways / X Tips format with numbered items and brief descriptions.',
+      'ultimate-guide': 'Comprehensive pillar content covering all aspects of the topic in depth.',
+      'buyers-guide': "What to look for when buying X - criteria, features to consider, price ranges, recommendations."
+    }
+
+    const systemPrompt = `You are an expert SEO content writer and affiliate marketing specialist who creates high-ranking, high-converting blog content.
+
+## YOUR EXPERTISE:
+- SEO-optimized content that ranks on Google
+- Affiliate content that converts (Amazon, ShareASale, CJ, etc.)
+- Product reviews that build trust and drive sales
+- "Best X for Y" articles that capture high-intent traffic
+
+## ARTICLE TYPE: ${articleTypeGuides[articleType] || 'SEO article'}
+
+## SEO BEST PRACTICES:
+1. Include target keyword in: title, first paragraph, H2 headers, conclusion
+2. Use H2 for main sections, H3 for subsections
+3. Short paragraphs (2-3 sentences max)
+4. Bullet points and numbered lists for scanability
+5. Internal and external links where natural
+6. FAQ section for featured snippet potential
+7. Meta title: 50-60 characters with keyword
+8. Meta description: 150-155 characters, compelling
+
+${isAffiliateType ? `
+## AFFILIATE CONTENT GUIDELINES:
+- Be honest and balanced (builds trust = more conversions)
+- Include clear pros AND cons for each product
+- Use comparison tables when multiple products
+- Add "Best for" recommendations (Best for beginners, Best budget option, etc.)
+- Natural affiliate disclosure placement
+- Price anchoring and value framing
+- Urgency without being pushy
+- Include alternatives at different price points
+` : ''}
+
+## OUTPUT FORMAT:
+Return a JSON object:
+{
+  "title": "SEO-optimized article title (50-60 chars)",
+  "metaTitle": "Meta title for SEO (50-60 chars)",
+  "metaDescription": "Compelling meta description (150-155 chars)",
+  "slug": "url-friendly-slug",
+  "content": "Full article content in markdown format with proper H2/H3 headers",
+  "wordCount": approximate word count number,
+  "readingTime": "X min",
+  "outline": [
+    {"type": "h2", "text": "Section title"},
+    {"type": "h3", "text": "Subsection title"}
+  ],
+  "tips": [
+    "SEO optimization tip 1",
+    "Content improvement tip 2",
+    "Conversion tip 3"
+  ]
+}
+
+IMPORTANT:
+- Return ONLY valid JSON
+- Write the FULL article (~${wordCount} words)
+- Use markdown formatting (## for H2, ### for H3, **bold**, *italic*, - bullets)
+- Include FAQ section if requested
+- For affiliate content, include product recommendations naturally
+- Be ${tone} in tone and ${writingStyle} in style`
+
+    const userPrompt = `Write a complete ${articleType} blog post:
+
+${context}
+
+Requirements:
+1. Write approximately ${wordCount} words of high-quality content
+2. Use proper H2/H3 structure with keyword placement
+3. ${includeFAQ ? 'Include a FAQ section with 4-5 questions' : 'No FAQ section needed'}
+4. ${includeTOC ? 'Structure content for table of contents' : ''}
+5. ${includeMetaTags ? 'Generate SEO meta title and description' : ''}
+6. Write in ${writingStyle} style with ${tone} tone
+7. Target keyword: "${targetKeyword || topic}"
+${isAffiliateType ? '8. Include product recommendations with pros/cons' : ''}
+
+Generate the complete blog post. Return ONLY JSON.`
+
+    const response = await runLLM(userPrompt, systemPrompt)
+    
+    let blogData
+    try {
+      let cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      blogData = JSON.parse(cleanResponse)
+    } catch (parseError) {
+      const jsonMatch = response.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        blogData = JSON.parse(jsonMatch[0])
+      } else {
+        throw new Error('Failed to parse blog content')
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: blogData,
+      metadata: { articleType, topic, targetKeyword, wordCount }
+    })
+
+  } catch (error) {
+    console.error('Blog generation error:', error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  }
+}
