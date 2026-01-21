@@ -77,8 +77,45 @@ export async function POST(request) {
     const lengthConfig = LENGTH_WORDS[videoLength] || LENGTH_WORDS.medium
     const hookTemplate = HOOK_TEMPLATES[hookType] || HOOK_TEMPLATES.curiosity
 
+    // Detect input language - check for non-ASCII characters that indicate Bengali/Hindi/etc.
+    const detectLanguage = (text) => {
+      // Bengali Unicode range: \u0980-\u09FF
+      if (/[\u0980-\u09FF]/.test(text)) return 'Bengali (বাংলা)'
+      // Hindi/Devanagari Unicode range: \u0900-\u097F
+      if (/[\u0900-\u097F]/.test(text)) return 'Hindi (हिंदी)'
+      // Tamil Unicode range: \u0B80-\u0BFF
+      if (/[\u0B80-\u0BFF]/.test(text)) return 'Tamil (தமிழ்)'
+      // Telugu Unicode range: \u0C00-\u0C7F
+      if (/[\u0C00-\u0C7F]/.test(text)) return 'Telugu (తెలుగు)'
+      // Arabic Unicode range: \u0600-\u06FF
+      if (/[\u0600-\u06FF]/.test(text)) return 'Arabic (العربية)'
+      // Chinese Unicode range
+      if (/[\u4E00-\u9FFF]/.test(text)) return 'Chinese (中文)'
+      // Japanese (Hiragana/Katakana)
+      if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'Japanese (日本語)'
+      // Korean
+      if (/[\uAC00-\uD7AF]/.test(text)) return 'Korean (한국어)'
+      // Spanish special chars
+      if (/[ñáéíóúü¿¡]/i.test(text)) return 'Spanish (Español)'
+      // French special chars
+      if (/[àâäéèêëïîôùûüÿœæç]/i.test(text)) return 'French (Français)'
+      return 'English'
+    }
+
+    const detectedLanguage = detectLanguage(videoTopic)
+    const isNonEnglish = detectedLanguage !== 'English'
+
     // System prompt for YouTube content generation
     const systemPrompt = `You are an expert YouTube content creator and scriptwriter who specializes in creating high-retention video content. You understand the YouTube algorithm, viewer psychology, and what makes videos go viral.
+
+${isNonEnglish ? `**CRITICAL INSTRUCTION - LANGUAGE REQUIREMENT:**
+The user has provided input in ${detectedLanguage}. You MUST generate ALL content (script, titles, hooks, description, tags) in ${detectedLanguage}. 
+- The script MUST be written entirely in ${detectedLanguage}
+- All titles MUST be in ${detectedLanguage}
+- All hooks MUST be in ${detectedLanguage}
+- The description MUST be in ${detectedLanguage}
+- Tags should be in ${detectedLanguage} (with some English keywords for SEO if appropriate)
+DO NOT translate to English. Write naturally in ${detectedLanguage}.` : ''}
 
 Your scripts follow the BENS (Big, Easy, New, Safe) high-retention structure:
 1. Hook (0-15 seconds): Immediately grab attention with the promised value
@@ -98,7 +135,7 @@ Key rules:
 For titles:
 - Front-load keywords in first 5 words
 - Keep 40-60 characters
-- Use curiosity words: Secret, Mistake, Hack, Instantly
+- Use curiosity words: Secret, Mistake, Hack, Instantly (or equivalent in target language)
 - Promise clear outcomes
 - Use numbers when applicable
 
