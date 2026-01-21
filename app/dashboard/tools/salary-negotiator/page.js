@@ -17,6 +17,7 @@ import {
   Briefcase, Users, AlertCircle, Check, Zap, Heart
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 
 const NEGOTIATION_TYPES = [
   { 
