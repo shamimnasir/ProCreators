@@ -22,6 +22,7 @@ import {
   PenTool, Brain, Eye, Settings2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 
 // Article types
 const ARTICLE_TYPES = [
