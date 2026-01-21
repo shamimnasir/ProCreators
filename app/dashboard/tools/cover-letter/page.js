@@ -308,6 +308,30 @@ export default function CoverLetterPage() {
       
       if (data.success) {
         setCoverLetterData(data.data)
+        
+        // Auto-save to library
+        try {
+          await saveToLibrary({
+            type: 'cover-letter',
+            category: 'text',
+            title: `Cover Letter: ${jobTitle || 'Position'} at ${companyName || 'Company'}`,
+            description: `Cover letter for ${jobTitle || 'position'} at ${companyName || 'company'}`,
+            content: data.data?.fullText || '',
+            metadata: {
+              jobTitle,
+              companyName,
+              tone,
+              length,
+              theme,
+              applicantName: yourName || '',
+              contentType: 'cover-letter'
+            }
+          })
+          console.log('Cover letter auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save cover letter:', saveError)
+        }
+        
         toast({ title: '✉️ Cover Letter Generated!' })
       } else {
         throw new Error(data.error)
