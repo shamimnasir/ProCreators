@@ -46,32 +46,41 @@ async function runLLM(prompt, systemPrompt) {
 }
 
 const HUMANIZATION_INSTRUCTIONS = {
-  light: `Apply LIGHT humanization:
+  light: `Apply LIGHT humanization to bypass AI detection:
 - Make subtle word replacements (use everyday alternatives)
 - Add natural transitions between ideas
 - Use contractions where appropriate (don't, won't, it's)
+- Add occasional filler words (actually, basically, honestly)
+- Include 1-2 personal asides
 - Keep the original structure mostly intact
 - Preserve all factual information`,
   
-  medium: `Apply MEDIUM humanization:
-- Vary sentence lengths significantly (mix short punchy sentences with longer ones)
-- Add personal touches and asides (e.g., "Here's the thing...", "Trust me on this...")
-- Include rhetorical questions to engage readers
-- Use more colloquial vocabulary
-- Add specific examples or analogies
-- Break up long paragraphs
-- Maintain core message but make it conversational`,
+  medium: `Apply MEDIUM humanization to bypass AI detection:
+- Vary sentence lengths dramatically (2-5 word sentences mixed with 20+ word sentences)
+- Add personal touches and asides ("Here's the thing...", "Trust me on this...", "I've seen this firsthand...")
+- Include rhetorical questions every 2-3 paragraphs
+- Use colloquial vocabulary and slang where appropriate
+- Add specific, detailed examples with names, places, numbers
+- Break up long paragraphs randomly
+- Start some sentences with "And", "But", "So"
+- Add occasional typo-like informality (gonna, wanna, kinda)
+- Include parenthetical thoughts (like this one)
+- Maintain core message but make it sound like a blog written by a passionate expert`,
   
-  heavy: `Apply HEAVY humanization:
-- Completely restructure the content while preserving meaning
-- Write as if explaining to a friend
-- Add personal opinions and commentary
-- Use humor or wit where appropriate
-- Include real-world examples and scenarios
-- Create a unique voice throughout
-- Add emotional undertones
-- Use fragments and informal punctuation when it feels natural
-- Make it impossible to detect as AI-written`
+  heavy: `Apply HEAVY humanization - make this COMPLETELY undetectable as AI:
+- Completely restructure every paragraph
+- Write exactly as a human expert would - with all their quirks
+- Add strong personal opinions ("I absolutely love...", "Honestly, I think...")
+- Use humor, sarcasm, and wit throughout
+- Include very specific real-world anecdotes with details
+- Create a distinctive, memorable voice
+- Add emotional reactions ("This blew my mind!", "Game changer!")
+- Use intentional sentence fragments. Like this. For emphasis.
+- Start paragraphs with casual openers ("So here's the deal...", "Okay, real talk...")
+- Mix formal and informal language unpredictably
+- Add self-deprecating humor or admitted uncertainties
+- Include dated references or pop culture mentions
+- Make it read like a passionate blogger, NOT like an AI`
 }
 
 const TECHNIQUE_PROMPTS = {
