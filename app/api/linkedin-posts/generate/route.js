@@ -484,7 +484,7 @@ Return ONLY JSON - no markdown.`
     if (postsData.posts) {
       postsData.posts = postsData.posts.map(post => ({
         ...post,
-        hashtags: (includeHashtags && platform !== 'reddit' && platform !== 'quora') 
+        hashtags: (includeHashtags && platform !== 'reddit' && platform !== 'quora' && platform !== 'blog') 
           ? (post.hashtags || []) 
           : []
       }))
