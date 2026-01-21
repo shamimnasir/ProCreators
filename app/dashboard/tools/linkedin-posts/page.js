@@ -406,6 +406,118 @@ export default function SocialMediaPostCreator() {
                   />
                 </div>
               )}
+              {platform === 'instagram' && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <Label>Theme Page Niche *</Label>
+                    <Select value={themePageNiche} onValueChange={setThemePageNiche}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your niche" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="motivation">💪 Motivation & Success</SelectItem>
+                        <SelectItem value="fitness">🏋️ Fitness & Health</SelectItem>
+                        <SelectItem value="wealth">💰 Wealth & Finance</SelectItem>
+                        <SelectItem value="quotes">💬 Quotes & Wisdom</SelectItem>
+                        <SelectItem value="mindset">🧠 Mindset & Growth</SelectItem>
+                        <SelectItem value="business">📈 Business & Entrepreneurship</SelectItem>
+                        <SelectItem value="lifestyle">✨ Lifestyle & Luxury</SelectItem>
+                        <SelectItem value="relationships">❤️ Relationships & Love</SelectItem>
+                        <SelectItem value="spirituality">🙏 Spirituality & Mindfulness</SelectItem>
+                        <SelectItem value="humor">😂 Humor & Memes</SelectItem>
+                        <SelectItem value="facts">🤓 Facts & Knowledge</SelectItem>
+                        <SelectItem value="nature">🌿 Nature & Travel</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Content Style</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {[
+                        { id: 'motivational', name: 'Motivational', icon: '🔥' },
+                        { id: 'educational', name: 'Educational', icon: '📚' },
+                        { id: 'relatable', name: 'Relatable', icon: '😅' }
+                      ].map(style => (
+                        <Button
+                          key={style.id}
+                          variant={instagramStyle === style.id ? 'default' : 'outline'}
+                          size="sm"
+                          className={`h-auto py-2 flex flex-col ${instagramStyle === style.id ? 'bg-pink-500 hover:bg-pink-600' : ''}`}
+                          onClick={() => setInstagramStyle(style.id)}
+                        >
+                          <span>{style.icon}</span>
+                          <span className="text-xs">{style.name}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {platform === 'blog' && (
+                <div className="mt-3 space-y-3 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                  <h4 className="font-medium text-emerald-800 flex items-center gap-2">
+                    <span>🔍</span> SEO Settings
+                  </h4>
+                  <div>
+                    <Label>Target Keyword *</Label>
+                    <Input 
+                      placeholder="e.g., best productivity apps 2025"
+                      value={targetKeyword}
+                      onChange={(e) => setTargetKeyword(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Main keyword to rank for</p>
+                  </div>
+                  <div>
+                    <Label>Secondary Keywords (optional)</Label>
+                    <Input 
+                      placeholder="e.g., productivity tools, time management apps"
+                      value={secondaryKeywords}
+                      onChange={(e) => setSecondaryKeywords(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Word Count Target</Label>
+                      <Select value={wordCountTarget} onValueChange={setWordCountTarget}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="800">~800 words (Short)</SelectItem>
+                          <SelectItem value="1500">~1,500 words (Medium)</SelectItem>
+                          <SelectItem value="2500">~2,500 words (Long)</SelectItem>
+                          <SelectItem value="4000">~4,000 words (Ultimate Guide)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Writing Style</Label>
+                      <Select value={writingStyle} onValueChange={setWritingStyle}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="conversational">Conversational</SelectItem>
+                          <SelectItem value="professional">Professional</SelectItem>
+                          <SelectItem value="academic">Academic</SelectItem>
+                          <SelectItem value="storytelling">Storytelling</SelectItem>
+                          <SelectItem value="journalistic">Journalistic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="meta-desc"
+                      checked={includeMetaDesc}
+                      onChange={(e) => setIncludeMetaDesc(e.target.checked)}
+                      className="rounded"
+                    />
+                    <Label htmlFor="meta-desc">Generate Meta Description & Title Tag</Label>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
