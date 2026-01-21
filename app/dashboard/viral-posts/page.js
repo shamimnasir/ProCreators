@@ -29,17 +29,6 @@ import {
 // Featured/Highlighted Tools - Top-level prominent tools
 const FEATURED_TOOLS = [
   {
-    id: 'youtube-creator',
-    name: 'YouTube Script & Content Creator',
-    description: 'High-retention scripts, viral titles, hooks & descriptions using BENS method',
-    icon: '🎬',
-    href: '/dashboard/tools/youtube-creator',
-    useCase: 'YouTube Videos',
-    badge: 'New',
-    gradient: 'from-red-600 to-red-700',
-    features: ['BENS Script Method', '6 Hook Types', 'SEO Titles']
-  },
-  {
     id: 'content-humanizer',
     name: 'AI Content Humanizer',
     description: 'Transform AI-generated text into natural, human-sounding content that bypasses AI detection',
@@ -60,6 +49,17 @@ const FEATURED_TOOLS = [
     badge: 'Hot',
     gradient: 'from-blue-600 to-indigo-600',
     features: ['SEO Optimized', 'Grammar Check', 'AI Humanizer']
+  },
+  {
+    id: 'social-media-posts',
+    name: 'Social Media Post Creator',
+    description: 'Viral posts for 8 platforms including YouTube with AI generation',
+    icon: '📱',
+    href: '/dashboard/tools/linkedin-posts',
+    useCase: 'All Social Platforms',
+    badge: 'New',
+    gradient: 'from-rose-600 to-orange-600',
+    features: ['8 Platforms', 'YouTube Scripts', 'Viral Hooks']
   }
 ]
 
