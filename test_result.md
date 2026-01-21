@@ -102,9 +102,57 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Replace ElevenLabs TTS with Google Cloud Text-to-Speech API using language_code parameter (bn for Bengali) to ensure proper Bengali text normalization and authentic Bangladeshi accent."
+user_problem_statement: "Integrate AI Humanizer and Grammar Checker functionality into the Blog Post Creator tool."
 
 backend:
+  - task: "Grammar Checker API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/grammar-checker/check/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW: Created grammar checking API that analyzes text for grammar, spelling, punctuation, style, and readability. Returns scores, issues with suggestions, and writing tips."
+
+  - task: "AI Humanizer Analyze API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/ai-humanizer/analyze/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW: Created AI detection analysis API that determines if text was AI-generated or human-written. Returns probability scores, indicators, and suggestions."
+
+  - task: "AI Humanizer Rewrite API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/ai-humanizer/humanize/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW: Created humanization API that rewrites AI-generated text to sound more human. Supports light/medium/heavy levels and various techniques like varying sentences, adding transitions, using contractions, etc."
+
+  - task: "Blog Creator Generate API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/blog-creator/generate/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "UPDATED: Blog creator API already accepts humanizationLevel and enabledTechniques parameters and includes them in the LLM prompt context."
+
   - task: "Google Cloud TTS API Integration"
     implemented: true
     working: "NA"
