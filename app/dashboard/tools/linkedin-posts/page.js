@@ -58,6 +58,17 @@ const PLATFORMS = [
     bestFor: 'Theme pages, Visual content, Reels'
   },
   { 
+    id: 'youtube', 
+    name: 'YouTube', 
+    icon: '🎬', 
+    color: 'from-red-600 to-red-700',
+    charLimit: 5000,
+    description: 'Scripts, titles, hooks & descriptions',
+    bestFor: 'Video scripts, SEO titles, Hooks',
+    isAdvanced: true,
+    advancedLink: '/dashboard/tools/youtube-creator'
+  },
+  { 
     id: 'threads', 
     name: 'Threads', 
     icon: '🧵', 
