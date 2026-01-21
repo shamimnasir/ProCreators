@@ -184,6 +184,7 @@ export default function YouTubeCreatorPage() {
         } catch (saveError) {
           console.error('Failed to auto-save:', saveError)
           toast({ title: '🎬 YouTube Content Generated!' })
+        }
       } else {
         throw new Error(data.error)
       }
