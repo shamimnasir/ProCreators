@@ -93,11 +93,11 @@ const CAREER_CATEGORIES = [
       {
         id: 'linkedin-posts',
         name: 'LinkedIn Post Writer',
-        description: 'Engaging posts that grow your network',
+        description: 'Viral posts with 10+ proven formats',
         icon: '💼',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'Personal branding',
-        badge: 'Trending'
+        badge: 'Hot'
       },
       {
         id: 'networking-message',
