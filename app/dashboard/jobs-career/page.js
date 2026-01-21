@@ -91,10 +91,10 @@ const CAREER_CATEGORIES = [
     color: 'from-purple-500 to-pink-500',
     tools: [
       {
-        id: 'linkedin-posts',
-        name: 'LinkedIn Post Writer',
-        description: 'Viral posts with 10+ proven formats',
-        icon: '💼',
+        id: 'social-media-posts',
+        name: 'Social Media Post Creator',
+        description: 'Viral posts for LinkedIn, X, Facebook & more',
+        icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'Personal branding',
         badge: 'Hot'
