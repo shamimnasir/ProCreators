@@ -32,12 +32,12 @@ const VIRAL_CATEGORIES = [
     color: 'from-blue-500 to-indigo-500',
     tools: [
       {
-        id: 'linkedin-posts',
-        name: 'LinkedIn Post Writer',
-        description: 'Viral LinkedIn posts with 10+ proven formats',
-        icon: '💼',
+        id: 'social-media-posts',
+        name: 'Social Media Post Creator',
+        description: 'Viral posts for LinkedIn, X, Facebook, Reddit & more',
+        icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
-        useCase: 'LinkedIn, Personal branding',
+        useCase: 'All platforms',
         badge: 'Hot'
       },
       {
