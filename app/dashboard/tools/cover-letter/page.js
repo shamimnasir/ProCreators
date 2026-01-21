@@ -17,6 +17,7 @@ import {
   Phone, MapPin, Linkedin, Edit3, Check, X, AlertCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 
