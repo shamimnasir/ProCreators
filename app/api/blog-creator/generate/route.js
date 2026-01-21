@@ -209,14 +209,61 @@ Generate the complete blog post. Return ONLY JSON.`
     
     let blogData
     try {
-      let cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      // Clean up the response
+      let cleanResponse = response
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim()
+      
+      // Try direct parsing first
       blogData = JSON.parse(cleanResponse)
     } catch (parseError) {
-      const jsonMatch = response.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        blogData = JSON.parse(jsonMatch[0])
-      } else {
-        throw new Error('Failed to parse blog content')
+      console.log('Initial parse failed, attempting recovery...')
+      
+      try {
+        // Extract JSON from response
+        const jsonMatch = response.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          let jsonStr = jsonMatch[0]
+          
+          // Fix common JSON issues:
+          // 1. Replace unescaped newlines in string values
+          // 2. Fix control characters
+          jsonStr = jsonStr
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, (char) => {
+              // Keep newlines and tabs but escape them properly
+              if (char === '\n') return '\\n'
+              if (char === '\r') return '\\r'
+              if (char === '\t') return '\\t'
+              return ''
+            })
+          
+          blogData = JSON.parse(jsonStr)
+        } else {
+          throw new Error('No JSON found in response')
+        }
+      } catch (secondError) {
+        console.log('JSON recovery failed, creating structured response from raw content')
+        
+        // Fallback: Create a structured response from raw text
+        const content = response
+          .replace(/```json\n?/g, '')
+          .replace(/```\n?/g, '')
+          .replace(/^\s*\{[\s\S]*?"content"\s*:\s*"/i, '')
+          .replace(/"\s*,?\s*"wordCount"[\s\S]*$/i, '')
+          .trim()
+        
+        blogData = {
+          title: topic,
+          metaTitle: topic.substring(0, 60),
+          metaDescription: `Learn everything about ${topic}. Complete guide with tips and recommendations.`,
+          slug: topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 50),
+          content: content || response,
+          wordCount: (content || response).split(/\s+/).length,
+          readingTime: `${Math.ceil((content || response).split(/\s+/).length / 200)} min`,
+          outline: [],
+          tips: ['Review the generated content for accuracy', 'Add internal links to related content']
+        }
       }
     }
 
