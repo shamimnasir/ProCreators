@@ -164,6 +164,36 @@ export default function BlogCreatorPage() {
       if (data.success) {
         setResult(data.data)
         setActiveTab('article')
+        
+        // Auto-save to library
+        try {
+          const articleType = ARTICLE_TYPES.find(t => t.id === articleTypeId)
+          await saveToLibrary({
+            type: 'blog-article',
+            category: 'text',
+            title: data.data.title || `${articleType?.name || 'Blog'}: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
+            description: data.data.metaDescription || `${articleType?.name || 'Blog article'} about ${topic.substring(0, 100)}`,
+            content: data.data.content || '',
+            metadata: {
+              articleType: articleTypeId,
+              topic,
+              mainKeyword,
+              secondaryKeywords,
+              wordCount: data.data.wordCount || wordCount,
+              tone,
+              writingStyle,
+              humanizationLevel,
+              includeFAQ,
+              includeTOC,
+              includeMetaTags,
+              contentType: 'blog-article'
+            }
+          })
+          console.log('Blog article auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save to library:', saveError)
+        }
+        
         toast({ title: '📝 Blog Post Generated!' })
         
         // Auto-run grammar check and AI detection after generation
