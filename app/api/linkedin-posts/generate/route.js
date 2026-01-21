@@ -432,9 +432,9 @@ Return additional fields in posts array:
 ` : ''}`
 
     const lengthGuide = {
-      short: platform === 'twitter' ? '200-280 characters, single tweet' : '400-600 characters',
-      medium: platform === 'twitter' ? '280 characters or 3-5 tweet thread' : '800-1200 characters',
-      long: platform === 'twitter' ? '7-10 tweet thread' : '1400-2000+ characters'
+      short: platform === 'twitter' ? '200-280 characters, single tweet' : platform === 'blog' ? `~${wordCountTarget || 800} words` : '400-600 characters',
+      medium: platform === 'twitter' ? '280 characters or 3-5 tweet thread' : platform === 'blog' ? `~${wordCountTarget || 1500} words` : '800-1200 characters',
+      long: platform === 'twitter' ? '7-10 tweet thread' : platform === 'blog' ? `~${wordCountTarget || 2500} words` : '1400-2000+ characters'
     }
 
     const userPrompt = `Create 3 viral ${platformGuide.name} post variations:
@@ -443,7 +443,7 @@ ${context}
 
 ## Requirements:
 1. Format perfectly for ${platformGuide.name}
-2. Length: ${lengthGuide[postLength] || lengthGuide.medium}
+2. Length: ${platform === 'blog' ? `~${wordCountTarget || 1500} words` : lengthGuide[postLength] || lengthGuide.medium}
 3. Hook must stop the scroll
 4. ${includeEmojis ? 'Use emojis strategically (not excessive)' : 'No emojis'}
 5. ${includeHashtags ? `Include ${platformGuide.hashtags}` : 'No hashtags'}
@@ -453,6 +453,8 @@ ${context}
 ${platform === 'reddit' ? '9. Sound authentic, NOT promotional. Pure value.' : ''}
 ${platform === 'quora' ? '9. Answer format - start with direct answer to implied question.' : ''}
 ${platform === 'twitter' && postLength === 'long' ? '9. Create numbered thread (1/, 2/, etc.)' : ''}
+${platform === 'instagram' ? `9. Create THEME PAGE content for ${themePageNiche || 'motivation'} niche. Style: ${instagramStyle || 'motivational'}. Generic/universal content.` : ''}
+${platform === 'blog' ? `9. SEO focus on keyword: "${targetKeyword || topic}". Secondary: ${secondaryKeywords || 'related terms'}. Style: ${writingStyle || 'conversational'}. Include meta description, title tag, H2/H3 structure, and FAQ section.` : ''}
 
 Generate 3 posts + 5 alternative hooks + 3 ${platformGuide.name}-specific tips.
 Return ONLY JSON - no markdown.`
