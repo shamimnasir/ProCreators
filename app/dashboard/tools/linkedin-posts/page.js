@@ -82,15 +82,6 @@ const PLATFORMS = [
     charLimit: 10000,
     description: 'Expert answers & thought leadership',
     bestFor: 'Q&A, Expert positioning'
-  },
-  { 
-    id: 'blog', 
-    name: 'Blog Post', 
-    icon: '📝', 
-    color: 'from-emerald-500 to-teal-600',
-    charLimit: 50000,
-    description: 'SEO-optimized articles & blog content',
-    bestFor: 'SEO, Long-form, Authority building'
   }
 ]
 
