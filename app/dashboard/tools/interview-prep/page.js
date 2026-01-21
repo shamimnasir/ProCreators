@@ -19,6 +19,7 @@ import {
   Star, BookOpen, Volume2, Timer, ArrowRight, RefreshCw
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 
 // Question category colors
 const CATEGORY_COLORS = {
