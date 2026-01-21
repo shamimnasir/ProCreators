@@ -160,7 +160,7 @@ export default function YouTubeCreatorPage() {
         
         // Auto-save to library
         try {
-          await saveToLibrary({
+          const saveResult = await saveToLibrary({
             type: 'youtube-content',
             category: 'text',
             title: `YouTube: ${videoTopic.substring(0, 50)}${videoTopic.length > 50 ? '...' : ''}`,
@@ -176,12 +176,14 @@ export default function YouTubeCreatorPage() {
               contentType: 'youtube-creator'
             }
           })
-          console.log('YouTube content auto-saved to library')
+          if (saveResult.success) {
+            toast({ title: '🎬 YouTube Content Generated!', description: '✅ Auto-saved to Library' })
+          } else {
+            toast({ title: '🎬 YouTube Content Generated!', description: '⚠️ Could not save to library' })
+          }
         } catch (saveError) {
           console.error('Failed to auto-save:', saveError)
-        }
-        
-        toast({ title: '🎬 YouTube Content Generated!' })
+          toast({ title: '🎬 YouTube Content Generated!' })
       } else {
         throw new Error(data.error)
       }
