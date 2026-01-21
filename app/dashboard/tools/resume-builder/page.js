@@ -16,6 +16,7 @@ import {
   Edit3, Check, User, AlertCircle, Users, Target
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 
