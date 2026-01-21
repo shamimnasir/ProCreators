@@ -399,6 +399,31 @@ export default function InterviewPrepPage() {
       if (data.success) {
         setInterviewData(data.data)
         setMode('questions')
+        
+        // Auto-save to library
+        try {
+          const questionsList = data.data.questions?.map(q => q.question || q).join('\n\n') || ''
+          await saveToLibrary({
+            type: 'interview-prep',
+            category: 'text',
+            title: `Interview Prep: ${jobTitle}`,
+            description: `Interview preparation questions for ${jobTitle}${company ? ` at ${company}` : ''}`,
+            content: questionsList,
+            metadata: {
+              jobTitle,
+              company,
+              experienceLevel,
+              interviewType,
+              focusAreas,
+              questionCount: data.data.questions?.length || 0,
+              contentType: 'interview-prep'
+            }
+          })
+          console.log('Interview prep auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save interview prep:', saveError)
+        }
+        
         toast({ title: '🎤 Questions Generated!', description: `${data.data.questions?.length || 0} questions ready` })
       } else {
         throw new Error(data.error)
