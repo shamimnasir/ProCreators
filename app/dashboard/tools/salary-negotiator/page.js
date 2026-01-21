@@ -168,6 +168,32 @@ export default function SalaryNegotiatorPage() {
       
       if (data.success) {
         setResult(data.data)
+        
+        // Auto-save to library
+        try {
+          const negotiationType = NEGOTIATION_TYPES.find(t => t.id === type)
+          await saveToLibrary({
+            type: 'salary-negotiation',
+            category: 'text',
+            title: `Salary Negotiation: ${jobTitle || 'Position'}`,
+            description: `${negotiationType?.name || 'Salary'} negotiation strategy for ${jobTitle || 'position'}`,
+            content: JSON.stringify(data.data),
+            metadata: {
+              negotiationType: type,
+              jobTitle,
+              industry,
+              currentSalary,
+              offeredSalary,
+              targetSalary,
+              experienceYears,
+              contentType: 'salary-negotiation'
+            }
+          })
+          console.log('Salary negotiation auto-saved to library')
+        } catch (saveError) {
+          console.error('Failed to auto-save salary negotiation:', saveError)
+        }
+        
         toast({ title: '💰 Negotiation Strategy Ready!' })
       } else {
         throw new Error(data.error)
