@@ -271,7 +271,16 @@ export default function SocialMediaPostCreator() {
           includeHashtags,
           postLength,
           specificNumbers,
-          subreddit
+          subreddit,
+          // Instagram fields
+          themePageNiche,
+          instagramStyle,
+          // Blog SEO fields
+          targetKeyword,
+          secondaryKeywords,
+          wordCountTarget,
+          writingStyle,
+          includeMetaDesc
         })
       })
       
