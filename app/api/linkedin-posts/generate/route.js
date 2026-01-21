@@ -150,6 +150,39 @@ const PLATFORM_GUIDES = {
       'Structure with headers for long answers',
       'End with actionable takeaway'
     ]
+  },
+  instagram: {
+    name: 'Instagram',
+    charLimit: 2200,
+    style: 'Visual-first, emotional, aspirational. Perfect for theme pages. Short punchy lines.',
+    formatting: 'Line breaks for readability. Emojis at start of lines. Hashtags at end.',
+    hashtags: '20-30 relevant hashtags (mix of popular and niche)',
+    bestPractices: [
+      'First line is the hook - make it count',
+      'Use line breaks liberally',
+      'Include a clear CTA',
+      'Emojis boost engagement',
+      'Ask questions to drive comments',
+      'Use relevant hashtags at the end',
+      'Create save-worthy content'
+    ]
+  },
+  blog: {
+    name: 'Blog Post',
+    charLimit: 50000,
+    style: 'SEO-optimized, value-packed, scannable. Use headers, bullets, and clear structure.',
+    formatting: 'H1 title, H2 sections, H3 subsections. Short paragraphs. Bullet points. Internal/external links.',
+    hashtags: 'No hashtags for blogs',
+    bestPractices: [
+      'Target keyword in title, first paragraph, headers',
+      'Use H2 and H3 headers for structure',
+      'Include internal and external links',
+      'Write compelling meta description',
+      'Add alt text suggestions for images',
+      'Include FAQ section for featured snippets',
+      'Use short paragraphs (2-3 sentences)',
+      'Add a clear conclusion with CTA'
+    ]
   }
 }
 
