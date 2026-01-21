@@ -424,6 +424,42 @@ export default function SocialMediaPostCreator() {
                       ))}
                     </div>
                   </div>
+                  {/* Image Generation Section */}
+                  <div className="p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border border-pink-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <input
+                        type="checkbox"
+                        id="generate-image"
+                        checked={generateImage}
+                        onChange={(e) => setGenerateImage(e.target.checked)}
+                        className="rounded"
+                      />
+                      <Label htmlFor="generate-image" className="cursor-pointer font-medium text-pink-800">
+                        🖼️ Generate Image for Post
+                      </Label>
+                    </div>
+                    {generateImage && (
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-sm">Your Logo URL (optional)</Label>
+                          <Input 
+                            placeholder="https://example.com/your-logo.png"
+                            value={logoUrl}
+                            onChange={(e) => setLogoUrl(e.target.value)}
+                            className="mt-1"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Logo will be placed in the corner of generated images
+                          </p>
+                        </div>
+                        <Alert className="bg-pink-100 border-pink-300">
+                          <AlertDescription className="text-pink-800 text-sm">
+                            ✨ AI will generate a themed image matching your niche and content style
+                          </AlertDescription>
+                        </Alert>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {platform === 'blog' && (
