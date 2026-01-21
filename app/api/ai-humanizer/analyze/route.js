@@ -54,25 +54,42 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Text is required' }, { status: 400 })
     }
 
-    const systemPrompt = `You are an expert at detecting AI-generated content. Analyze text patterns, vocabulary choices, sentence structures, and writing characteristics to determine if content was likely written by AI or a human.
+    const systemPrompt = `You are a fair and balanced AI content detector. Your job is to determine if content was written by AI or a human.
 
-Consider these AI writing indicators:
-- Overly formal or consistently neutral tone
-- Repetitive sentence structures
-- Excessive use of transition words
-- Perfect grammar with no colloquialisms
-- Lack of personal anecdotes or opinions
+IMPORTANT CALIBRATION:
+- Well-edited human content can appear polished - don't penalize good writing
+- Human bloggers often write in a professional, structured manner
+- The presence of personal opinions, humor, contractions, and varied sentences strongly indicates human writing
+- If content has been rewritten or edited, it may show mixed signals - lean toward human in uncertain cases
+
+AI writing indicators (require MULTIPLE to flag as AI):
+- Unnaturally consistent paragraph lengths
+- Every sentence has similar structure
+- Overuse of transition words like "Furthermore", "Moreover", "Additionally"
+- Complete absence of personal voice or opinions
+- No contractions used at all
 - Generic examples without specific details
-- Predictable paragraph structures
+- Robotic, encyclopedic tone throughout
 
-Human writing indicators:
-- Varied sentence lengths and structures
-- Colloquial language and contractions
-- Personal experiences and opinions
-- Minor imperfections that feel natural
-- Unique voice and personality
-- Specific, detailed examples
-- Emotional undertones
+Human writing indicators (ANY of these suggest human):
+- Personal opinions or commentary ("I think", "In my experience")
+- Humor, sarcasm, or wit
+- Colloquial language or slang
+- Varied sentence lengths (very short mixed with long)
+- Contractions (don't, won't, it's, I've)
+- Sentence fragments for emphasis
+- Rhetorical questions
+- Specific examples with names, numbers, or details
+- Emotional language or enthusiasm
+- Informal transitions ("Here's the thing", "So basically")
+
+SCORING GUIDANCE:
+- 0-30% AI: Clearly human-written with personality
+- 30-50% AI: Likely human with some formal sections  
+- 50-70% AI: Mixed signals, could be either
+- 70-100% AI: Clearly AI-generated with robotic patterns
+
+Be FAIR - if you see genuine human elements, weight them heavily.
 
 IMPORTANT: Return ONLY valid JSON, no markdown or extra text.`
 
