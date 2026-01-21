@@ -88,6 +88,7 @@ const navigation = [
     href: '/dashboard/viral-posts',
     icon: Sparkles,
     children: [
+      { name: '🎬 YouTube Creator', href: '/dashboard/tools/youtube-creator', icon: Video },
       { name: '✨ Content Humanizer', href: '/dashboard/tools/content-humanizer', icon: Edit3 },
       { name: '🧵 Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
       { name: '💬 Quotes', href: '/dashboard/tools/quotes', icon: Quote },
