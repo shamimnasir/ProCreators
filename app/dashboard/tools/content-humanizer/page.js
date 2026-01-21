@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
+import { saveToLibrary } from '@/lib/library-utils'
 
 // Humanization levels
 const HUMANIZATION_LEVELS = [
