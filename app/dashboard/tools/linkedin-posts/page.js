@@ -213,12 +213,8 @@ export default function SocialMediaPostCreator() {
   // Instagram theme page fields
   const [themePageNiche, setThemePageNiche] = useState('')
   const [instagramStyle, setInstagramStyle] = useState('motivational')
-  // Blog SEO fields
-  const [targetKeyword, setTargetKeyword] = useState('')
-  const [secondaryKeywords, setSecondaryKeywords] = useState('')
-  const [wordCountTarget, setWordCountTarget] = useState('1500')
-  const [writingStyle, setWritingStyle] = useState('conversational')
-  const [includeMetaDesc, setIncludeMetaDesc] = useState(true)
+  const [generateImage, setGenerateImage] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('')
 
   const handleGenerate = async () => {
     if (!topic) {
