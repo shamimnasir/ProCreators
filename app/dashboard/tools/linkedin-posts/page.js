@@ -252,12 +252,8 @@ export default function SocialMediaPostCreator() {
           // Instagram fields
           themePageNiche,
           instagramStyle,
-          // Blog SEO fields
-          targetKeyword,
-          secondaryKeywords,
-          wordCountTarget,
-          writingStyle,
-          includeMetaDesc
+          generateImage,
+          logoUrl
         })
       })
       
