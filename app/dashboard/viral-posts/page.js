@@ -81,15 +81,6 @@ const VIRAL_CATEGORIES = [
         badge: 'Hot'
       },
       {
-        id: 'youtube-creator',
-        name: 'YouTube Script Creator',
-        description: 'High-retention scripts, titles, hooks & descriptions',
-        icon: '🎬',
-        href: '/dashboard/tools/youtube-creator',
-        useCase: 'YouTube Videos',
-        badge: 'New'
-      },
-      {
         id: 'content-humanizer',
         name: 'AI Content Humanizer',
         description: 'Make AI text sound natural & bypass detection',
