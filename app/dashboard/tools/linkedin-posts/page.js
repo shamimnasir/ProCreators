@@ -320,7 +320,7 @@ export default function SocialMediaPostCreator() {
           <p className="text-muted-foreground mt-1">Create viral posts for any platform</p>
         </div>
         <Badge className="bg-purple-100 text-purple-800">
-          <TrendingUp className="h-3 w-3 mr-1" />8 Platforms
+          <TrendingUp className="h-3 w-3 mr-1" />7 Platforms
         </Badge>
       </div>
 
