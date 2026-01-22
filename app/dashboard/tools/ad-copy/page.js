@@ -221,7 +221,7 @@ export default function AdCopyPage() {
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/marketing-ads">
+          <Link href="/dashboard/business-ai">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
