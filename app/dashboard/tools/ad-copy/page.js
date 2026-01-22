@@ -839,7 +839,7 @@ export default function AdCopyPage() {
                 <p className="text-yellow-700 dark:text-yellow-300 text-xs">Combine AIDA structure with BAB story in Desire section</p>
               </div>
               <div>
-                <p className="font-medium text-yellow-800 dark:text-yellow-200">Benefits > Features</p>
+                <p className="font-medium text-yellow-800 dark:text-yellow-200">Benefits Over Features</p>
                 <p className="text-yellow-700 dark:text-yellow-300 text-xs">Focus on emotional and life-transforming impacts</p>
               </div>
               <div>
