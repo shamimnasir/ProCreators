@@ -125,15 +125,6 @@ const CAREER_CATEGORIES = [
         href: '/dashboard/tools/professional-email',
         useCase: 'Work communication',
         badge: 'Daily Use'
-      },
-      {
-        id: 'meeting-notes',
-        name: 'Meeting Notes Summarizer',
-        description: 'Turn meetings into actionable summaries',
-        icon: '📝',
-        href: '/dashboard/tools/meeting-notes',
-        useCase: 'Productivity',
-        badge: ''
       }
     ]
   }
