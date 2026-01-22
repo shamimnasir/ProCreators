@@ -122,7 +122,7 @@ const CAREER_CATEGORIES = [
         name: 'Professional Email Writer',
         description: 'Clear, professional emails in seconds',
         icon: '📧',
-        href: '/dashboard/tools/email-writer',
+        href: '/dashboard/tools/professional-email',
         useCase: 'Work communication',
         badge: 'Daily Use'
       },
