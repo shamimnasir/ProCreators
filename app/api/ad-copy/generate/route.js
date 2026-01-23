@@ -241,11 +241,9 @@ KEY PRINCIPLES:
 8. Match tone to target audience
 
 Always respond in valid JSON format.${isNonEnglish ? ` All text content must be in ${detectedLanguage}.` : ''}`
-8. Match tone to target audience
-
-Always respond with valid JSON.`
 
     const prompt = `Create ${variationCount} high-converting ad copy variations using the ${frameworkInfo.name} framework.
+${languageInstruction}
 
 **FRAMEWORK: ${frameworkInfo.name} (${frameworkInfo.full})**
 ${frameworkInfo.description}
@@ -273,20 +271,20 @@ ${socialProof || 'None provided - you may create realistic placeholder stats'}
 - Goal: ${goalInfo}
 - Tone: ${toneInfo}
 
-Generate the response in this exact JSON format:
+Generate the response in this exact JSON format${isNonEnglish ? ` (ALL text content MUST be in ${detectedLanguage})` : ''}:
 {
   "framework": "${frameworkInfo.name}",
   "platform": "${platform}",
   "ads": [
     {
       "version": 1,
-      "hook": "The attention-grabbing opening line (most important - test multiple)",
-      "headline": "Concise headline for the ad",
-      "primaryText": "The main ad copy following ${frameworkInfo.name} structure. Mark each section: [ATTENTION/PROBLEM/BEFORE/PICTURE/FEATURES] etc.",
-      "description": "Short supporting description",
-      "cta": "Call to action text",
-      "ctaButton": "Button text (Shop Now, Learn More, etc.)",
-      "hookAlternatives": ["Alt hook 1 for A/B testing", "Alt hook 2"],
+      "hook": "${isNonEnglish ? `The attention-grabbing opening line in ${detectedLanguage}` : 'The attention-grabbing opening line (most important - test multiple)'}",
+      "headline": "${isNonEnglish ? `Concise headline in ${detectedLanguage}` : 'Concise headline for the ad'}",
+      "primaryText": "${isNonEnglish ? `The main ad copy in ${detectedLanguage} following ${frameworkInfo.name} structure` : `The main ad copy following ${frameworkInfo.name} structure. Mark each section: [ATTENTION/PROBLEM/BEFORE/PICTURE/FEATURES] etc.`}",
+      "description": "${isNonEnglish ? `Short supporting description in ${detectedLanguage}` : 'Short supporting description'}",
+      "cta": "${isNonEnglish ? `Call to action text in ${detectedLanguage}` : 'Call to action text'}",
+      "ctaButton": "${isNonEnglish ? `Button text in ${detectedLanguage}` : 'Button text (Shop Now, Learn More, etc.)'}",
+      "hookAlternatives": ["${isNonEnglish ? `Alt hook 1 in ${detectedLanguage}` : 'Alt hook 1 for A/B testing'}", "${isNonEnglish ? `Alt hook 2 in ${detectedLanguage}` : 'Alt hook 2'}"],
       "emotionalTrigger": "Primary emotion this ad targets"
     }
   ],
