@@ -213,7 +213,255 @@ export default function MarketingStrategyPage() {
     a.download = `${businessName.replace(/\s+/g, '_')}_marketing_strategy.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast({ title: 'Strategy exported!' })
+    toast({ title: 'Strategy exported as JSON!' })
+  }
+
+  // Export to PDF
+  const exportToPDF = async () => {
+    if (!result) return
+    
+    // Create a printable HTML document
+    const printContent = generatePrintableHTML()
+    
+    // Open in new window for printing/saving as PDF
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+      printWindow.onload = () => {
+        printWindow.print()
+      }
+    }
+    toast({ title: 'PDF export opened! Use Print dialog to save as PDF' })
+  }
+
+  const generatePrintableHTML = () => {
+    const data = result.data
+    const meta = result.metadata
+    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${businessName} - Marketing Strategy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1a1a1a; padding: 40px; max-width: 900px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #3b82f6; }
+    .logo { font-size: 32px; margin-bottom: 10px; }
+    .title { font-size: 28px; font-weight: bold; color: #1e40af; }
+    .subtitle { color: #64748b; font-size: 14px; margin-top: 5px; }
+    .meta { display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 12px; color: #64748b; }
+    .meta span { background: #f1f5f9; padding: 4px 12px; border-radius: 4px; }
+    .section { margin-bottom: 30px; page-break-inside: avoid; }
+    .section-title { font-size: 18px; font-weight: bold; color: #1e40af; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; gap: 10px; }
+    .section-icon { font-size: 20px; }
+    .card { background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #3b82f6; }
+    .card-title { font-weight: bold; margin-bottom: 10px; color: #334155; }
+    .card-content { font-size: 14px; color: #475569; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .swot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .swot-item { padding: 15px; border-radius: 8px; }
+    .swot-strengths { background: #dcfce7; border-left: 4px solid #22c55e; }
+    .swot-weaknesses { background: #fee2e2; border-left: 4px solid #ef4444; }
+    .swot-opportunities { background: #dbeafe; border-left: 4px solid #3b82f6; }
+    .swot-threats { background: #fed7aa; border-left: 4px solid #f97316; }
+    .swot-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 5px; font-size: 13px; }
+    .highlight { background: #eff6ff; padding: 15px; border-radius: 8px; margin: 15px 0; font-style: italic; border-left: 4px solid #3b82f6; }
+    .badge { display: inline-block; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 12px; }
+    .timeline-item { display: flex; gap: 15px; margin-bottom: 15px; }
+    .timeline-marker { width: 30px; height: 30px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; flex-shrink: 0; }
+    .timeline-content { flex: 1; background: #f1f5f9; padding: 15px; border-radius: 8px; }
+    .kpi-item { background: #f0fdf4; padding: 12px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #22c55e; }
+    .kpi-metric { font-weight: bold; color: #166534; }
+    .kpi-target { color: #15803d; font-size: 13px; }
+    @media print { body { padding: 20px; } .section { page-break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">📊</div>
+    <div class="title">${businessName}</div>
+    <div class="subtitle">${meta?.framework || 'Marketing Strategy'}</div>
+    <div class="meta">
+      <span>📅 ${date}</span>
+      <span>🏢 ${meta?.industry || industry}</span>
+      <span>💰 ${meta?.budget || budget}</span>
+    </div>
+  </div>
+
+  ${data.executiveSummary ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">✨</span> Executive Summary</div>
+    <div class="card">
+      <div class="card-title">Mission</div>
+      <div class="card-content">${data.executiveSummary.mission || ''}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Vision</div>
+      <div class="card-content">${data.executiveSummary.vision || ''}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Marketing Objective</div>
+      <div class="card-content">${data.executiveSummary.marketingObjective || ''}</div>
+    </div>
+    ${data.executiveSummary.keyStrategies ? `
+    <div class="card">
+      <div class="card-title">Key Strategies</div>
+      <ul>
+        ${data.executiveSummary.keyStrategies.map(s => `<li>${s}</li>`).join('')}
+      </ul>
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  ${data.positioning ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📣</span> Brand Positioning</div>
+    <div class="highlight">${data.positioning.positioningStatement || ''}</div>
+    <div class="card">
+      <div class="card-title">Unique Value Proposition</div>
+      <div class="card-content">${data.positioning.uniqueValueProposition || ''}</div>
+    </div>
+    ${data.positioning.keyMessages ? `
+    <div class="card">
+      <div class="card-title">Key Messages</div>
+      <ul>
+        ${data.positioning.keyMessages.map(m => `<li>${m}</li>`).join('')}
+      </ul>
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  ${data.situationAnalysis?.swot ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🧠</span> SWOT Analysis</div>
+    <div class="swot-grid">
+      <div class="swot-item swot-strengths">
+        <div class="swot-title">💪 Strengths</div>
+        <ul>${data.situationAnalysis.swot.strengths?.map(s => `<li>${s}</li>`).join('') || ''}</ul>
+      </div>
+      <div class="swot-item swot-weaknesses">
+        <div class="swot-title">⚠️ Weaknesses</div>
+        <ul>${data.situationAnalysis.swot.weaknesses?.map(w => `<li>${w}</li>`).join('') || ''}</ul>
+      </div>
+      <div class="swot-item swot-opportunities">
+        <div class="swot-title">🚀 Opportunities</div>
+        <ul>${data.situationAnalysis.swot.opportunities?.map(o => `<li>${o}</li>`).join('') || ''}</ul>
+      </div>
+      <div class="swot-item swot-threats">
+        <div class="swot-title">🛡️ Threats</div>
+        <ul>${data.situationAnalysis.swot.threats?.map(t => `<li>${t}</li>`).join('') || ''}</ul>
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.targetAudience?.primaryPersona ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">👥</span> Target Audience</div>
+    <div class="card">
+      <div class="card-title">Primary Persona: ${data.targetAudience.primaryPersona.name || ''}</div>
+      <div class="card-content">
+        <p><strong>Demographics:</strong> ${data.targetAudience.primaryPersona.demographics || ''}</p>
+        <p><strong>Psychographics:</strong> ${data.targetAudience.primaryPersona.psychographics || ''}</p>
+        ${data.targetAudience.primaryPersona.painPoints ? `<p><strong>Pain Points:</strong> ${data.targetAudience.primaryPersona.painPoints.join(', ')}</p>` : ''}
+        ${data.targetAudience.primaryPersona.goals ? `<p><strong>Goals:</strong> ${data.targetAudience.primaryPersona.goals.join(', ')}</p>` : ''}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.smartGoals ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎯</span> SMART Goals</div>
+    ${data.smartGoals.map(g => `
+    <div class="card">
+      <div class="card-title">${g.goal}</div>
+      <div class="card-content">
+        <p><strong>Metric:</strong> ${g.metric}</p>
+        <p><strong>Target:</strong> ${g.target}</p>
+        <p><strong>Deadline:</strong> ${g.deadline}</p>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  ${data.implementationTimeline ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📅</span> Implementation Timeline</div>
+    ${['quarter1', 'quarter2', 'quarter3', 'quarter4'].map((q, i) => {
+      const qData = data.implementationTimeline[q]
+      if (!qData) return ''
+      return `
+      <div class="timeline-item">
+        <div class="timeline-marker">Q${i+1}</div>
+        <div class="timeline-content">
+          <div class="card-title">${qData.theme || ''}</div>
+          ${qData.priorities ? `<p><strong>Priorities:</strong> ${qData.priorities.join(', ')}</p>` : ''}
+          ${qData.milestones ? `<p><strong>Milestones:</strong> ${qData.milestones.join(', ')}</p>` : ''}
+        </div>
+      </div>
+      `
+    }).join('')}
+  </div>
+  ` : ''}
+
+  ${data.kpis ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📈</span> Key Performance Indicators</div>
+    <div class="grid">
+      <div>
+        <div class="card-title">Primary KPIs</div>
+        ${data.kpis.primary?.map(k => `
+        <div class="kpi-item">
+          <div class="kpi-metric">${k.metric}</div>
+          <div class="kpi-target">Target: ${k.target} | ${k.frequency}</div>
+        </div>
+        `).join('') || ''}
+      </div>
+      <div>
+        <div class="card-title">Secondary KPIs</div>
+        ${data.kpis.secondary?.map(k => `
+        <div class="kpi-item">
+          <div class="kpi-metric">${k.metric}</div>
+          <div class="kpi-target">Target: ${k.target} | ${k.frequency}</div>
+        </div>
+        `).join('') || ''}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.nextSteps ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚡</span> Immediate Next Steps</div>
+    ${data.nextSteps.map((s, i) => `
+    <div class="card">
+      <div class="card-content">
+        <span class="badge">${i + 1}</span>
+        <strong>${s.action}</strong>
+        <br><small>Deadline: ${s.deadline} | Owner: ${s.owner}</small>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  <div class="footer">
+    <p>Generated with Marketing Strategy AI</p>
+    <p>© ${new Date().getFullYear()} ${businessName}</p>
+  </div>
+</body>
+</html>
+    `
   }
 
   const selectedFramework = FRAMEWORKS.find(f => f.id === framework)
