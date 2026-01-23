@@ -515,37 +515,105 @@ export default function YouTubeCreatorPage() {
                 </CardContent>
               </Card>
 
-              {/* Script Structure Info */}
-              <Card className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border-red-200">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2 text-red-800 dark:text-red-200">
-                    <Target className="h-5 w-5" />
-                    High-Retention Script Structure (BENS)
+              {/* Script Structure Selection */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Target className="h-5 w-5 text-purple-500" />
+                    Script Structure
                   </CardTitle>
+                  <CardDescription>Choose your narrative framework</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-xs text-red-700 dark:text-red-300">
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-[10px]">0-15s</Badge>
-                      <span><strong>Hook:</strong> Grab attention immediately</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-[10px]">15-30s</Badge>
-                      <span><strong>Re-hook:</strong> Why they should keep watching</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-[10px]">Body</Badge>
-                      <span><strong>Story/Content:</strong> Deliver value with pattern interrupts</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-[10px]">Mid</Badge>
-                      <span><strong>Loop:</strong> Tease upcoming climax</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="text-[10px]">End</Badge>
-                      <span><strong>Payoff + CTA:</strong> Close the loop, call to action</span>
-                    </div>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-2">
+                    {SCRIPT_STRUCTURES.map((structure) => (
+                      <button
+                        key={structure.id}
+                        onClick={() => setScriptStructure(structure.id)}
+                        className={`p-3 rounded-lg border text-left transition-all ${
+                          scriptStructure === structure.id
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30'
+                            : 'border-muted hover:border-purple-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{structure.icon}</span>
+                            <div>
+                              <span className="font-medium">{structure.name}</span>
+                              <p className="text-[10px] text-muted-foreground">{structure.description}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-[9px]">{structure.bestFor}</Badge>
+                        </div>
+                      </button>
+                    ))}
                   </div>
+
+                  {/* Visual Structure Display */}
+                  {selectedStructure && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-lg border border-purple-200">
+                      <h4 className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center gap-2">
+                        {selectedStructure.icon} {selectedStructure.name} Structure
+                      </h4>
+                      
+                      {/* Conflict Arc Visual for storytelling */}
+                      {scriptStructure === 'conflict-arc' && (
+                        <div className="mb-4 p-3 bg-white dark:bg-gray-900 rounded-lg">
+                          <div className="relative h-20">
+                            {/* Arc visualization */}
+                            <svg viewBox="0 0 300 80" className="w-full h-full">
+                              {/* Path representing the arc */}
+                              <path 
+                                d="M 10 70 Q 50 60 80 30 Q 100 10 120 30 Q 140 60 160 50 Q 200 20 240 10 Q 280 5 290 15" 
+                                stroke="url(#arcGradient)" 
+                                strokeWidth="4" 
+                                fill="none"
+                                strokeLinecap="round"
+                              />
+                              <defs>
+                                <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                  <stop offset="0%" stopColor="#22c55e" />
+                                  <stop offset="25%" stopColor="#f97316" />
+                                  <stop offset="40%" stopColor="#ef4444" />
+                                  <stop offset="55%" stopColor="#14b8a6" />
+                                  <stop offset="75%" stopColor="#f97316" />
+                                  <stop offset="100%" stopColor="#a855f7" />
+                                </linearGradient>
+                              </defs>
+                              {/* Labels */}
+                              <text x="10" y="78" className="text-[8px] fill-green-600">Hook</text>
+                              <text x="55" y="50" className="text-[8px] fill-orange-600">Rising</text>
+                              <text x="100" y="20" className="text-[8px] fill-red-600">Conflict</text>
+                              <text x="140" y="65" className="text-[8px] fill-teal-600">Comeback</text>
+                              <text x="200" y="35" className="text-[8px] fill-orange-600">Rising</text>
+                              <text x="260" y="20" className="text-[8px] fill-purple-600">Payoff</text>
+                            </svg>
+                          </div>
+                          <p className="text-[10px] text-center text-muted-foreground mt-1">
+                            Intensity builds → peaks at conflict → dips for comeback → rises to payoff
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        {selectedStructure.sections.map((section, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-[10px] min-w-[50px] justify-center ${section.color || ''}`}
+                              style={section.color ? { backgroundColor: 'transparent' } : {}}
+                            >
+                              {section.time}
+                            </Badge>
+                            <span className="text-xs text-purple-700 dark:text-purple-300">
+                              <strong>{section.name}:</strong> {section.desc}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
