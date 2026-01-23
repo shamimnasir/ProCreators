@@ -180,6 +180,7 @@ export default function YouTubeCreatorPage() {
   const [videoLength, setVideoLength] = useState('medium')
   const [contentTone, setContentTone] = useState('conversational')
   const [hookType, setHookType] = useState('curiosity')
+  const [scriptStructure, setScriptStructure] = useState('bens')
   const [targetAudience, setTargetAudience] = useState('')
   const [mainKeyword, setMainKeyword] = useState('')
   const [keyPoints, setKeyPoints] = useState('')
