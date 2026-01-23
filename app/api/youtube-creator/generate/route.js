@@ -9,7 +9,106 @@ const HOOK_TEMPLATES = {
   audience: '"You\'re doing [common mistake], and it\'s costing you [pain]. Let\'s fix it."',
   'time-promise': '"In the next [X] minutes, you\'ll learn [specific outcome] so you can [benefit]."',
   stakes: '"If you don\'t fix [problem], you\'ll keep [bad outcome]. Here\'s the workaround."',
-  contrarian: '"Stop doing [popular advice]. Do this instead, and here\'s why."'
+  contrarian: '"Stop doing [popular advice]. Do this instead, and here\'s why."',
+  'conflict-tease': '"Everything was going perfectly... until [unexpected turn]. What happened next changed everything."',
+  transformation: '"[X time] ago, I was [bad state]. Today, I\'m [transformed state]. Here\'s the moment that changed it all."'
+}
+
+// Script structure definitions
+const SCRIPT_STRUCTURES = {
+  bens: {
+    name: 'BENS Structure',
+    sections: ['Hook (0-15s)', 'Re-hook (15-30s)', 'Main Content with pattern interrupts', 'Mid-video Loop', 'Payoff + CTA'],
+    prompt: `Use the BENS high-retention structure:
+1. HOOK (0-15 seconds): Immediately grab attention with the promised value
+2. RE-HOOK (15-30 seconds): Explain why they should keep watching - what they'll learn
+3. STORY/BODY: Deliver content with pattern interrupts every 5-10 seconds. Use [SCENE], [TEXT], [SOUND] markers
+4. LOOP (mid-video): Tease upcoming climax to prevent drop-off. Create an open loop.
+5. PAYOFF & CTA: Close the loop and call to action. Deliver on the hook's promise.`
+  },
+  'conflict-arc': {
+    name: 'Conflict Arc (Storytelling)',
+    sections: ['Hook', 'Rising Action', 'Conflict (Peak)', 'Comeback (Valley)', 'Rising Action 2', 'Payoff (Climax)'],
+    prompt: `Use the CONFLICT ARC storytelling structure for maximum emotional engagement:
+
+1. HOOK (Start with tension): Open at a moment of tension or tease the central conflict. Make viewers NEED to know what happens. Don't give context yet.
+
+2. RISING ACTION (Build the stakes): 
+   - Introduce the context/backstory
+   - Build up what's at stake
+   - Create emotional investment
+   - Show what could be lost or gained
+   - Intensity should gradually increase
+
+3. CONFLICT (The Peak - Highest Intensity):
+   - The main problem/challenge/crisis hits
+   - This is the darkest moment or biggest obstacle
+   - Make it feel impossible to overcome
+   - Maximum emotional tension
+   - Use dramatic language and pacing
+
+4. COMEBACK (The Valley - Turning Point):
+   - The moment of realization or discovery
+   - Finding unexpected hope or solution
+   - The pivot that changes everything
+   - Intensity dips but hope emerges
+   - This should feel like a breakthrough
+
+5. RISING ACTION 2 (Building to Resolution):
+   - Apply the solution/lesson
+   - Show the journey toward resolution
+   - Build anticipation for the payoff
+   - Intensity rises again but with hope
+
+6. PAYOFF (The Climax + CTA):
+   - Resolution and transformation revealed
+   - Emotional peak - satisfaction of completing the journey
+   - Share the lesson learned
+   - Strong call to action tied to the story's message
+   - Leave them inspired/motivated
+
+Key Storytelling Principles:
+- Every section should have emotional stakes
+- Use "But then..." and "And that's when..." transitions
+- Include specific details that make it real
+- Vary sentence length for rhythm
+- Use present tense for dramatic moments`
+  },
+  'hero-journey': {
+    name: 'Mini Hero Journey',
+    sections: ['The Call', 'Refusal/Doubt', 'The Challenge', 'Transformation', 'The Return'],
+    prompt: `Use the MINI HERO JOURNEY structure for transformation/success stories:
+
+1. THE CALL (Opening):
+   - Start with the problem that demanded action
+   - What was the inciting incident?
+   - Why couldn't you ignore it anymore?
+   - Set up what was at stake
+
+2. REFUSAL/DOUBT (Act 1):
+   - Initial hesitation, fear, or first failure
+   - Why it seemed impossible
+   - What others said/thought
+   - Build relatability through vulnerability
+
+3. THE CHALLENGE (Mid-point):
+   - The main obstacle or test
+   - Facing the fear head-on
+   - The struggle that defined the journey
+   - Make it visceral and specific
+
+4. TRANSFORMATION (Climax):
+   - The breakthrough moment
+   - What clicked/changed
+   - The skill/mindset/discovery that made the difference
+   - Show the internal shift
+
+5. THE RETURN (Resolution + CTA):
+   - Sharing the wisdom gained
+   - What life looks like now
+   - How they can start their journey
+   - Inspiring call to action`
+  }
 }
 
 // Video length word counts
