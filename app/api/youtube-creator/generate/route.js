@@ -218,20 +218,17 @@ The user has provided input in ${detectedLanguage}. You MUST generate ALL conten
 - Tags should be in ${detectedLanguage} (with some English keywords for SEO if appropriate)
 DO NOT translate to English. Write naturally in ${detectedLanguage}.` : ''}
 
-Your scripts follow the BENS (Big, Easy, New, Safe) high-retention structure:
-1. Hook (0-15 seconds): Immediately grab attention with the promised value
-2. Re-hook (15-30 seconds): Explain why they should keep watching
-3. Story/Body: Deliver content with pattern interrupts every 5-10 seconds
-4. Loop (mid-video): Tease upcoming climax to prevent drop-off
-5. Payoff & CTA: Close the loop and call to action
+**SCRIPT STRUCTURE TO USE: ${structureConfig.name}**
+${structureConfig.prompt}
 
 Key rules:
 - NO filler intros like "Hey guys, welcome back"
-- Start immediately with the topic
+- Start immediately with the topic or tension
 - Use conversational, simple language
-- Every sentence must provide value or bridge to the next point
+- Every sentence must provide value or emotional engagement
 - Include [SCENE], [TEXT], [SOUND] markers for editing cues
 - Create open loops to maintain engagement
+- For storytelling: use specific details, vary pacing, build emotional stakes
 
 For titles:
 - Front-load keywords in first 5 words
