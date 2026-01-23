@@ -335,7 +335,7 @@ export default function YouTubeCreatorPage() {
                     <Video className="h-5 w-5" />
                     Video Topic
                   </CardTitle>
-                  <CardDescription>What's your video about?</CardDescription>
+                  <CardDescription>What is your video about?</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Textarea
