@@ -240,6 +240,21 @@ export default function MarketingStrategyPage() {
     const meta = result.metadata
     const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     
+    // Helper function to safely render arrays
+    const renderList = (arr, emptyMsg = '') => {
+      if (!arr || !Array.isArray(arr) || arr.length === 0) return emptyMsg
+      return `<ul>${arr.map(item => `<li>${typeof item === 'object' ? JSON.stringify(item) : item}</li>`).join('')}</ul>`
+    }
+
+    // Helper to render object properties
+    const renderObjectProps = (obj) => {
+      if (!obj) return ''
+      return Object.entries(obj)
+        .filter(([k, v]) => v && k !== 'recommendations')
+        .map(([k, v]) => `<p><strong>${k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> ${Array.isArray(v) ? v.join(', ') : v}</p>`)
+        .join('')
+    }
+    
     return `
 <!DOCTYPE html>
 <html>
@@ -252,15 +267,25 @@ export default function MarketingStrategyPage() {
     .logo { font-size: 32px; margin-bottom: 10px; }
     .title { font-size: 28px; font-weight: bold; color: #1e40af; }
     .subtitle { color: #64748b; font-size: 14px; margin-top: 5px; }
-    .meta { display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 12px; color: #64748b; }
+    .meta { display: flex; justify-content: center; gap: 20px; margin-top: 15px; font-size: 12px; color: #64748b; flex-wrap: wrap; }
     .meta span { background: #f1f5f9; padding: 4px 12px; border-radius: 4px; }
     .section { margin-bottom: 30px; page-break-inside: avoid; }
     .section-title { font-size: 18px; font-weight: bold; color: #1e40af; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; gap: 10px; }
     .section-icon { font-size: 20px; }
     .card { background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #3b82f6; }
-    .card-title { font-weight: bold; margin-bottom: 10px; color: #334155; }
+    .card.green { border-left-color: #22c55e; }
+    .card.purple { border-left-color: #8b5cf6; }
+    .card.orange { border-left-color: #f97316; }
+    .card.pink { border-left-color: #ec4899; }
+    .card.teal { border-left-color: #14b8a6; }
+    .card.indigo { border-left-color: #6366f1; }
+    .card.red { border-left-color: #ef4444; }
+    .card-title { font-weight: bold; margin-bottom: 10px; color: #334155; font-size: 15px; }
     .card-content { font-size: 14px; color: #475569; }
+    .card-content p { margin-bottom: 8px; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .swot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .swot-item { padding: 15px; border-radius: 8px; }
     .swot-strengths { background: #dcfce7; border-left: 4px solid #22c55e; }
@@ -268,10 +293,14 @@ export default function MarketingStrategyPage() {
     .swot-opportunities { background: #dbeafe; border-left: 4px solid #3b82f6; }
     .swot-threats { background: #fed7aa; border-left: 4px solid #f97316; }
     .swot-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-    ul { padding-left: 20px; }
+    ul { padding-left: 20px; margin-top: 5px; }
     li { margin-bottom: 5px; font-size: 13px; }
     .highlight { background: #eff6ff; padding: 15px; border-radius: 8px; margin: 15px 0; font-style: italic; border-left: 4px solid #3b82f6; }
     .badge { display: inline-block; background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 5px; }
+    .badge.green { background: #22c55e; }
+    .badge.yellow { background: #eab308; }
+    .badge.red { background: #ef4444; }
+    .badge.purple { background: #8b5cf6; }
     .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b; font-size: 12px; }
     .timeline-item { display: flex; gap: 15px; margin-bottom: 15px; }
     .timeline-marker { width: 30px; height: 30px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; flex-shrink: 0; }
@@ -279,7 +308,18 @@ export default function MarketingStrategyPage() {
     .kpi-item { background: #f0fdf4; padding: 12px; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #22c55e; }
     .kpi-metric { font-weight: bold; color: #166534; }
     .kpi-target { color: #15803d; font-size: 13px; }
-    @media print { body { padding: 20px; } .section { page-break-inside: avoid; } }
+    .funnel-stage { padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid; }
+    .funnel-awareness { background: #f3e8ff; border-left-color: #8b5cf6; }
+    .funnel-consideration { background: #dbeafe; border-left-color: #3b82f6; }
+    .funnel-decision { background: #dcfce7; border-left-color: #22c55e; }
+    .funnel-retention { background: #fed7aa; border-left-color: #f97316; }
+    .funnel-advocacy { background: #fce7f3; border-left-color: #ec4899; }
+    .rec-item { background: #f0fdf4; padding: 8px 12px; border-radius: 4px; margin-bottom: 5px; font-size: 13px; border-left: 3px solid #22c55e; }
+    @media print { 
+      body { padding: 20px; } 
+      .section { page-break-inside: avoid; }
+      .card { page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -294,6 +334,7 @@ export default function MarketingStrategyPage() {
     </div>
   </div>
 
+  <!-- COMPLETE MARKETING PLAN SECTIONS -->
   ${data.executiveSummary ? `
   <div class="section">
     <div class="section-title"><span class="section-icon">✨</span> Executive Summary</div>
@@ -301,19 +342,19 @@ export default function MarketingStrategyPage() {
       <div class="card-title">Mission</div>
       <div class="card-content">${data.executiveSummary.mission || ''}</div>
     </div>
-    <div class="card">
+    <div class="card green">
       <div class="card-title">Vision</div>
       <div class="card-content">${data.executiveSummary.vision || ''}</div>
     </div>
-    <div class="card">
+    <div class="card purple">
       <div class="card-title">Marketing Objective</div>
       <div class="card-content">${data.executiveSummary.marketingObjective || ''}</div>
     </div>
     ${data.executiveSummary.keyStrategies ? `
-    <div class="card">
+    <div class="card orange">
       <div class="card-title">Key Strategies</div>
       <ul>
-        ${data.executiveSummary.keyStrategies.map(s => `<li>${s}</li>`).join('')}
+        ${data.executiveSummary.keyStrategies.map((s, i) => `<li><span class="badge">${i+1}</span> ${s}</li>`).join('')}
       </ul>
     </div>
     ` : ''}
@@ -323,17 +364,44 @@ export default function MarketingStrategyPage() {
   ${data.positioning ? `
   <div class="section">
     <div class="section-title"><span class="section-icon">📣</span> Brand Positioning</div>
-    <div class="highlight">${data.positioning.positioningStatement || ''}</div>
+    <div class="highlight">"${data.positioning.positioningStatement || ''}"</div>
     <div class="card">
       <div class="card-title">Unique Value Proposition</div>
       <div class="card-content">${data.positioning.uniqueValueProposition || ''}</div>
     </div>
+    ${data.positioning.brandVoice ? `
+    <div class="card purple">
+      <div class="card-title">Brand Voice</div>
+      <div class="card-content">${data.positioning.brandVoice}</div>
+    </div>
+    ` : ''}
     ${data.positioning.keyMessages ? `
-    <div class="card">
+    <div class="card green">
       <div class="card-title">Key Messages</div>
       <ul>
         ${data.positioning.keyMessages.map(m => `<li>${m}</li>`).join('')}
       </ul>
+    </div>
+    ` : ''}
+    ${data.positioning.pointsOfDifference ? `
+    <div class="grid">
+      <div class="card green">
+        <div class="card-title">Points of Difference</div>
+        <ul>${data.positioning.pointsOfDifference.map(p => `<li>✅ ${p}</li>`).join('')}</ul>
+      </div>
+      ${data.positioning.pointsOfParity ? `
+      <div class="card">
+        <div class="card-title">Points of Parity</div>
+        <ul>${data.positioning.pointsOfParity.map(p => `<li>➖ ${p}</li>`).join('')}</ul>
+      </div>
+      ` : ''}
+    </div>
+    ` : ''}
+    ${data.positioning.brandEssence ? `
+    <div class="card indigo">
+      <div class="card-title">Brand Essence</div>
+      <div class="card-content" style="font-size: 18px; font-weight: bold;">${data.positioning.brandEssence}</div>
+      ${data.positioning.brandPersonality ? `<p style="margin-top: 10px;">Personality: ${data.positioning.brandPersonality.join(', ')}</p>` : ''}
     </div>
     ` : ''}
   </div>
@@ -363,21 +431,413 @@ export default function MarketingStrategyPage() {
   </div>
   ` : ''}
 
+  ${data.situationAnalysis?.competitorAnalysis ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎯</span> Competitor Analysis</div>
+    ${data.situationAnalysis.competitorAnalysis.map(comp => `
+    <div class="card">
+      <div class="card-title">${comp.name}</div>
+      <div class="card-content">
+        <p><strong>Strengths:</strong> ${comp.strengths}</p>
+        <p><strong>Weaknesses:</strong> ${comp.weaknesses}</p>
+        <p><strong>How to Beat:</strong> ${comp.differentiator}</p>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
   ${data.targetAudience?.primaryPersona ? `
   <div class="section">
     <div class="section-title"><span class="section-icon">👥</span> Target Audience</div>
-    <div class="card">
-      <div class="card-title">Primary Persona: ${data.targetAudience.primaryPersona.name || ''}</div>
+    <div class="card green">
+      <div class="card-title">👤 Primary Persona: ${data.targetAudience.primaryPersona.name || ''}</div>
       <div class="card-content">
         <p><strong>Demographics:</strong> ${data.targetAudience.primaryPersona.demographics || ''}</p>
         <p><strong>Psychographics:</strong> ${data.targetAudience.primaryPersona.psychographics || ''}</p>
-        ${data.targetAudience.primaryPersona.painPoints ? `<p><strong>Pain Points:</strong> ${data.targetAudience.primaryPersona.painPoints.join(', ')}</p>` : ''}
-        ${data.targetAudience.primaryPersona.goals ? `<p><strong>Goals:</strong> ${data.targetAudience.primaryPersona.goals.join(', ')}</p>` : ''}
+        ${data.targetAudience.primaryPersona.painPoints ? `<p><strong>Pain Points:</strong> ${data.targetAudience.primaryPersona.painPoints.join(' | ')}</p>` : ''}
+        ${data.targetAudience.primaryPersona.goals ? `<p><strong>Goals:</strong> ${data.targetAudience.primaryPersona.goals.join(' | ')}</p>` : ''}
+        ${data.targetAudience.primaryPersona.preferredChannels ? `<p><strong>Preferred Channels:</strong> ${data.targetAudience.primaryPersona.preferredChannels.join(', ')}</p>` : ''}
+        ${data.targetAudience.primaryPersona.buyingBehavior ? `<p><strong>Buying Behavior:</strong> ${data.targetAudience.primaryPersona.buyingBehavior}</p>` : ''}
+      </div>
+    </div>
+    ${data.targetAudience.secondaryPersona ? `
+    <div class="card purple">
+      <div class="card-title">👥 Secondary Persona: ${data.targetAudience.secondaryPersona.name || ''}</div>
+      <div class="card-content">
+        <p><strong>Demographics:</strong> ${data.targetAudience.secondaryPersona.demographics || ''}</p>
+        <p><strong>Psychographics:</strong> ${data.targetAudience.secondaryPersona.psychographics || ''}</p>
+      </div>
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  <!-- 7 Ps MARKETING MIX SECTIONS -->
+  ${data.product ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📦</span> Marketing Mix (7 Ps)</div>
+    
+    <div class="card">
+      <div class="card-title">📦 Product</div>
+      <div class="card-content">
+        ${renderObjectProps(data.product)}
+        ${data.product.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.product.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+
+    ${data.price ? `
+    <div class="card green">
+      <div class="card-title">💰 Price</div>
+      <div class="card-content">
+        ${renderObjectProps(data.price)}
+        ${data.price.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.price.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${data.place ? `
+    <div class="card purple">
+      <div class="card-title">📍 Place</div>
+      <div class="card-content">
+        ${renderObjectProps(data.place)}
+        ${data.place.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.place.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${data.promotion ? `
+    <div class="card orange">
+      <div class="card-title">📣 Promotion</div>
+      <div class="card-content">
+        ${renderObjectProps(data.promotion)}
+        ${data.promotion.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.promotion.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${data.people ? `
+    <div class="card pink">
+      <div class="card-title">👥 People</div>
+      <div class="card-content">
+        ${renderObjectProps(data.people)}
+        ${data.people.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.people.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${data.process ? `
+    <div class="card teal">
+      <div class="card-title">⚙️ Process</div>
+      <div class="card-content">
+        ${renderObjectProps(data.process)}
+        ${data.process.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.process.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${data.physicalEvidence ? `
+    <div class="card indigo">
+      <div class="card-title">🏪 Physical Evidence</div>
+      <div class="card-content">
+        ${renderObjectProps(data.physicalEvidence)}
+        ${data.physicalEvidence.recommendations ? `
+        <div style="margin-top: 15px;">
+          <strong>Recommendations:</strong>
+          ${data.physicalEvidence.recommendations.map(r => `<div class="rec-item">✅ ${r}</div>`).join('')}
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  <!-- 7Ps ACTION PLAN -->
+  ${data.actionPlan ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚡</span> Action Plan</div>
+    ${data.actionPlan.map((item, i) => `
+    <div class="card ${item.priority === 'High' ? 'red' : item.priority === 'Medium' ? 'orange' : 'green'}">
+      <div class="card-content">
+        <span class="badge">${item.p}</span>
+        <span class="badge ${item.priority === 'High' ? 'red' : item.priority === 'Medium' ? 'yellow' : 'green'}">${item.priority}</span>
+        <strong>${item.action}</strong>
+        <br><small>Timeline: ${item.timeline}</small>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  <!-- STP MODEL SECTIONS -->
+  ${data.segmentation ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎪</span> Market Segmentation</div>
+    ${['demographic', 'geographic', 'psychographic', 'behavioral'].map(type => {
+      const segments = data.segmentation[type]
+      if (!segments?.length) return ''
+      const icons = { demographic: '👥', geographic: '🌍', psychographic: '🧠', behavioral: '🎯' }
+      return `
+      <div class="card">
+        <div class="card-title">${icons[type]} ${type.charAt(0).toUpperCase() + type.slice(1)} Segmentation</div>
+        <div class="card-content">
+          ${segments.map(seg => `
+          <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <strong>${seg.segment}</strong>
+            <p style="font-size: 13px; color: #64748b;">${seg.characteristics}</p>
+            <span class="badge">Size: ${seg.size}</span>
+            <span class="badge ${seg.potential === 'High' ? 'green' : 'yellow'}">${seg.potential} Potential</span>
+          </div>
+          `).join('')}
+        </div>
+      </div>
+      `
+    }).join('')}
+  </div>
+  ` : ''}
+
+  ${data.targeting ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎯</span> Targeting Strategy</div>
+    <div class="highlight">Strategy: <strong>${data.targeting.strategy}</strong></div>
+    ${data.targeting.primarySegment ? `
+    <div class="card green">
+      <div class="card-title">🎯 Primary Target: ${data.targeting.primarySegment.name}</div>
+      <div class="card-content">
+        <p><strong>Why:</strong> ${data.targeting.primarySegment.why}</p>
+        <p><strong>Size:</strong> ${data.targeting.primarySegment.size}</p>
+        <p><strong>Growth Potential:</strong> ${data.targeting.primarySegment.growthPotential}</p>
+        <p><strong>Accessibility:</strong> ${data.targeting.primarySegment.accessibility}</p>
+        <p><strong>Profitability:</strong> ${data.targeting.primarySegment.profitability}</p>
+      </div>
+    </div>
+    ` : ''}
+    ${data.targeting.secondarySegment ? `
+    <div class="card purple">
+      <div class="card-title">Secondary Target: ${data.targeting.secondarySegment.name}</div>
+      <div class="card-content">
+        <p>${data.targeting.secondarySegment.why}</p>
+        <p><strong>Approach:</strong> ${data.targeting.secondarySegment.approach || ''}</p>
+      </div>
+    </div>
+    ` : ''}
+    ${data.targeting.segmentsToAvoid ? `
+    <div class="card red">
+      <div class="card-title">⚠️ Segments to Avoid</div>
+      <ul>${data.targeting.segmentsToAvoid.map(s => `<li>${s}</li>`).join('')}</ul>
+    </div>
+    ` : ''}
+  </div>
+  ` : ''}
+
+  <!-- ANSOFF MATRIX SECTIONS -->
+  ${data.currentState ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📈</span> Ansoff Growth Matrix</div>
+    <div class="highlight">
+      <strong>Current State:</strong><br>
+      Products: ${data.currentState.products}<br>
+      Markets: ${data.currentState.markets}<br>
+      Revenue: ${data.currentState.revenue}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.marketPenetration ? `
+  <div class="section">
+    <div class="card green">
+      <div class="card-title">📈 Market Penetration <span class="badge green">Low Risk</span></div>
+      <div class="card-content">
+        <p><em>${data.marketPenetration.description}</em></p>
+        ${data.marketPenetration.strategies?.map(s => `
+        <div style="background: #f0fdf4; padding: 10px; border-radius: 6px; margin: 10px 0;">
+          <strong>${s.strategy}</strong>
+          <p>Expected Growth: ${s.expectedGrowth}</p>
+          ${s.tactics ? `<p>Tactics: ${s.tactics.join(', ')}</p>` : ''}
+        </div>
+        `).join('') || ''}
+        ${data.marketPenetration.quickWins ? `
+        <p><strong>Quick Wins:</strong></p>
+        <ul>${data.marketPenetration.quickWins.map(w => `<li>⚡ ${w}</li>`).join('')}</ul>
+        ` : ''}
       </div>
     </div>
   </div>
   ` : ''}
 
+  ${data.marketDevelopment ? `
+  <div class="section">
+    <div class="card">
+      <div class="card-title">🌍 Market Development <span class="badge yellow">Medium Risk</span></div>
+      <div class="card-content">
+        <p><em>${data.marketDevelopment.description}</em></p>
+        ${data.marketDevelopment.newMarkets?.map(m => `
+        <div style="background: #dbeafe; padding: 10px; border-radius: 6px; margin: 10px 0;">
+          <strong>${m.market}</strong>
+          <p>${m.opportunity}</p>
+          <p>Entry Strategy: ${m.entryStrategy}</p>
+        </div>
+        `).join('') || ''}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.productDevelopment ? `
+  <div class="section">
+    <div class="card purple">
+      <div class="card-title">🚀 Product Development <span class="badge yellow">Medium Risk</span></div>
+      <div class="card-content">
+        <p><em>${data.productDevelopment.description}</em></p>
+        ${data.productDevelopment.opportunities?.map(o => `
+        <div style="background: #f3e8ff; padding: 10px; border-radius: 6px; margin: 10px 0;">
+          <strong>${o.product}</strong>
+          <p>Target Need: ${o.targetNeed}</p>
+          <p>Timeline: ${o.timeline}</p>
+        </div>
+        `).join('') || ''}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.diversification ? `
+  <div class="section">
+    <div class="card red">
+      <div class="card-title">🎲 Diversification <span class="badge red">High Risk</span></div>
+      <div class="card-content">
+        <p><em>${data.diversification.description}</em></p>
+        <p><strong>Recommendation:</strong> ${data.diversification.recommendation}</p>
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.recommendedPath ? `
+  <div class="section">
+    <div class="card green">
+      <div class="card-title">✅ Recommended Growth Path</div>
+      <div class="card-content">
+        <p><span class="badge green">${data.recommendedPath.primaryStrategy}</span></p>
+        <p>${data.recommendedPath.rationale}</p>
+        ${data.recommendedPath.sequencing ? `
+        <p style="margin-top: 10px;"><strong>Sequencing:</strong></p>
+        <p>${data.recommendedPath.sequencing.map((s, i) => `${i+1}. ${s}`).join(' → ')}</p>
+        ` : ''}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- FULL-FUNNEL SECTIONS -->
+  ${data.funnelOverview ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🔽</span> Full-Funnel Marketing Strategy</div>
+    <div class="highlight">
+      <strong>Total Addressable Market:</strong> ${data.funnelOverview.totalAddressableMarket}<br>
+      <strong>Current Funnel Health:</strong> ${data.funnelOverview.currentFunnelHealth}<br>
+      ${data.funnelOverview.biggestLeaks ? `<strong>Biggest Leaks:</strong> ${data.funnelOverview.biggestLeaks.join(', ')}` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.awareness ? `
+  <div class="section">
+    <div class="funnel-stage funnel-awareness">
+      <div class="card-title">👁️ AWARENESS (Top of Funnel)</div>
+      <p><strong>Goal:</strong> ${data.awareness.goal || data.awareness.objective}</p>
+      ${data.awareness.channels ? `
+      <p><strong>Channels:</strong></p>
+      ${data.awareness.channels.slice(0, 3).map(c => `<div class="rec-item">${c.channel}: ${c.tactic}</div>`).join('')}
+      ` : ''}
+      ${data.awareness.content?.types ? `<p><strong>Content Types:</strong> ${data.awareness.content.types.join(', ')}</p>` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.consideration ? `
+  <div class="section">
+    <div class="funnel-stage funnel-consideration">
+      <div class="card-title">🤔 CONSIDERATION (Middle of Funnel)</div>
+      <p><strong>Goal:</strong> ${data.consideration.goal || data.consideration.objective}</p>
+      ${data.consideration.channels ? `
+      <p><strong>Channels:</strong></p>
+      ${data.consideration.channels.slice(0, 3).map(c => `<div class="rec-item">${c.channel}: ${c.tactic}</div>`).join('')}
+      ` : ''}
+      ${data.consideration.content?.leadMagnets ? `<p><strong>Lead Magnets:</strong> ${data.consideration.content.leadMagnets.join(', ')}</p>` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.decision ? `
+  <div class="section">
+    <div class="funnel-stage funnel-decision">
+      <div class="card-title">✅ DECISION (Bottom of Funnel)</div>
+      <p><strong>Goal:</strong> ${data.decision.goal || data.decision.objective}</p>
+      ${data.decision.channels ? `
+      <p><strong>Channels:</strong></p>
+      ${data.decision.channels.slice(0, 3).map(c => `<div class="rec-item">${c.channel}: ${c.tactic}</div>`).join('')}
+      ` : ''}
+      ${data.decision.content?.socialProof ? `<p><strong>Social Proof:</strong> ${data.decision.content.socialProof.join(', ')}</p>` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.retention ? `
+  <div class="section">
+    <div class="funnel-stage funnel-retention">
+      <div class="card-title">💎 RETENTION (Post-Purchase)</div>
+      <p><strong>Goal:</strong> ${data.retention.goal || data.retention.objective}</p>
+      ${data.retention.tactics ? `
+      <p><strong>Tactics:</strong></p>
+      ${data.retention.tactics.slice(0, 3).map(t => `<div class="rec-item">${t.tactic || t}: ${t.description || ''}</div>`).join('')}
+      ` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.advocacy ? `
+  <div class="section">
+    <div class="funnel-stage funnel-advocacy">
+      <div class="card-title">📣 ADVOCACY (Referral)</div>
+      <p><strong>Goal:</strong> ${data.advocacy.goal || data.advocacy.objective}</p>
+      ${data.advocacy.referralProgram ? `<p><strong>Referral Program:</strong> ${data.advocacy.referralProgram}</p>` : ''}
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- COMMON SECTIONS FOR ALL FRAMEWORKS -->
   ${data.smartGoals ? `
   <div class="section">
     <div class="section-title"><span class="section-icon">🎯</span> SMART Goals</div>
@@ -388,9 +848,64 @@ export default function MarketingStrategyPage() {
         <p><strong>Metric:</strong> ${g.metric}</p>
         <p><strong>Target:</strong> ${g.target}</p>
         <p><strong>Deadline:</strong> ${g.deadline}</p>
+        <p><strong>Owner:</strong> ${g.owner}</p>
       </div>
     </div>
     `).join('')}
+  </div>
+  ` : ''}
+
+  ${data.marketingMix ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🎯</span> Marketing Mix Strategy</div>
+    ${Object.entries(data.marketingMix).map(([key, value]) => {
+      const icons = { product: '📦', price: '💰', place: '📍', promotion: '📣', people: '👥', process: '⚙️', physicalEvidence: '🏪' }
+      return `
+      <div class="card">
+        <div class="card-title">${icons[key] || '•'} ${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</div>
+        <div class="card-content">${renderObjectProps(value)}</div>
+      </div>
+      `
+    }).join('')}
+  </div>
+  ` : ''}
+
+  ${data.channelStrategy ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📢</span> Channel Strategy</div>
+    ${['paid', 'owned', 'earned'].map(type => {
+      const d = data.channelStrategy[type]
+      if (!d) return ''
+      const icons = { paid: '💵', owned: '🏠', earned: '🌟' }
+      return `
+      <div class="card ${type === 'paid' ? 'green' : type === 'owned' ? '' : 'purple'}">
+        <div class="card-title">${icons[type]} ${type.charAt(0).toUpperCase() + type.slice(1)} Media</div>
+        <div class="card-content">
+          ${d.channels ? `<p><strong>Channels:</strong> ${d.channels.join(', ')}</p>` : ''}
+          ${d.strategy ? `<p><strong>Strategy:</strong> ${d.strategy}</p>` : ''}
+          ${d.budgetAllocation ? `<p><strong>Budget:</strong> ${d.budgetAllocation}</p>` : ''}
+        </div>
+      </div>
+      `
+    }).join('')}
+  </div>
+  ` : ''}
+
+  ${data.budgetAllocation?.breakdown ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">💰</span> Budget Allocation</div>
+    <p><strong>Total Budget:</strong> ${data.budgetAllocation.totalBudget}</p>
+    <div style="margin-top: 15px;">
+      ${data.budgetAllocation.breakdown.map(item => `
+      <div style="display: flex; align-items: center; margin-bottom: 10px;">
+        <div style="width: 150px; font-weight: bold;">${item.category}</div>
+        <div style="flex: 1; background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden;">
+          <div style="width: ${item.percentage}%; background: #3b82f6; height: 100%;"></div>
+        </div>
+        <div style="width: 50px; text-align: right; font-weight: bold;">${item.percentage}%</div>
+      </div>
+      `).join('')}
+    </div>
   </div>
   ` : ''}
 
@@ -411,6 +926,39 @@ export default function MarketingStrategyPage() {
       </div>
       `
     }).join('')}
+  </div>
+  ` : ''}
+
+  ${data.timeline ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📅</span> Growth Timeline</div>
+    ${data.timeline.shortTerm ? `
+    <div class="card green">
+      <div class="card-title">Short Term (0-6 months)</div>
+      <div class="card-content">
+        <p>${data.timeline.shortTerm.focus}</p>
+        ${data.timeline.shortTerm.goals ? `<ul>${data.timeline.shortTerm.goals.map(g => `<li>${g}</li>`).join('')}</ul>` : ''}
+      </div>
+    </div>
+    ` : ''}
+    ${data.timeline.mediumTerm ? `
+    <div class="card orange">
+      <div class="card-title">Medium Term (6-18 months)</div>
+      <div class="card-content">
+        <p>${data.timeline.mediumTerm.focus}</p>
+        ${data.timeline.mediumTerm.goals ? `<ul>${data.timeline.mediumTerm.goals.map(g => `<li>${g}</li>`).join('')}</ul>` : ''}
+      </div>
+    </div>
+    ` : ''}
+    ${data.timeline.longTerm ? `
+    <div class="card purple">
+      <div class="card-title">Long Term (18+ months)</div>
+      <div class="card-content">
+        <p>${data.timeline.longTerm.focus}</p>
+        ${data.timeline.longTerm.goals ? `<ul>${data.timeline.longTerm.goals.map(g => `<li>${g}</li>`).join('')}</ul>` : ''}
+      </div>
+    </div>
+    ` : ''}
   </div>
   ` : ''}
 
@@ -440,11 +988,43 @@ export default function MarketingStrategyPage() {
   </div>
   ` : ''}
 
+  ${data.techStack ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">🔧</span> Recommended Tech Stack</div>
+    <div class="grid-3">
+      ${data.techStack.map(tool => `
+      <div class="card">
+        <div class="card-title">${tool.tool}</div>
+        <div class="card-content">
+          <p>${tool.purpose}</p>
+          <span class="badge">${tool.funnelStage}</span>
+        </div>
+      </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  ${data.risksMitigation ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">⚠️</span> Risks & Mitigation</div>
+    ${data.risksMitigation.map(r => `
+    <div class="card ${r.impact === 'High' ? 'red' : r.impact === 'Medium' ? 'orange' : ''}">
+      <div class="card-content">
+        <span class="badge ${r.impact === 'High' ? 'red' : r.impact === 'Medium' ? 'yellow' : 'green'}">${r.impact} Impact</span>
+        <strong>${r.risk}</strong>
+        <p><strong>Mitigation:</strong> ${r.mitigation}</p>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
   ${data.nextSteps ? `
   <div class="section">
     <div class="section-title"><span class="section-icon">⚡</span> Immediate Next Steps</div>
     ${data.nextSteps.map((s, i) => `
-    <div class="card">
+    <div class="card ${i === 0 ? 'green' : ''}">
       <div class="card-content">
         <span class="badge">${i + 1}</span>
         <strong>${s.action}</strong>
@@ -455,9 +1035,24 @@ export default function MarketingStrategyPage() {
   </div>
   ` : ''}
 
+  ${data.implementation ? `
+  <div class="section">
+    <div class="section-title"><span class="section-icon">📋</span> Implementation Plan</div>
+    ${data.implementation.map(item => `
+    <div class="card">
+      <div class="card-content">
+        <span class="badge">${item.phase}</span>
+        <strong>${item.action}</strong>
+        <br><small>Timeline: ${item.timeline} | KPI: ${item.kpi}</small>
+      </div>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
   <div class="footer">
     <p>Generated with Marketing Strategy AI</p>
-    <p>© ${new Date().getFullYear()} ${businessName}</p>
+    <p>© ${new Date().getFullYear()} ${businessName} | All Rights Reserved</p>
   </div>
 </body>
 </html>
