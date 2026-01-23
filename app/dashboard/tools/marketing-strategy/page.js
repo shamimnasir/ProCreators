@@ -17,7 +17,7 @@ import {
   Lightbulb, Building2, DollarSign, Calendar, Layers,
   PieChart, ArrowUpRight, ArrowDownRight, Minus, Shield,
   Zap, Globe, Megaphone, Heart, Brain, CheckCircle2,
-  AlertTriangle, FileText, Download
+  AlertTriangle, FileText, Download, FileDown, Printer
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
