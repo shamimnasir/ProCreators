@@ -270,6 +270,7 @@ export default function YouTubeCreatorPage() {
 
   const selectedHook = HOOK_TYPES.find(h => h.id === hookType)
   const selectedLength = VIDEO_LENGTHS.find(l => l.id === videoLength)
+  const selectedStructure = SCRIPT_STRUCTURES.find(s => s.id === scriptStructure)
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
