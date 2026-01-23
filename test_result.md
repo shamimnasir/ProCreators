@@ -406,18 +406,46 @@ frontend:
           agent: "main"
           comment: "✅ TESTED: Direct API test with curl successful. Saved test tutorial content, returned success response with itemId. Verified tier-based expiration works correctly (free tier = 7 days). Library collection now has 7 items including the auto-saved tutorial."
 
+  - task: "Marketing Strategy Generate API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/marketing-strategy/generate/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "API endpoint generates comprehensive marketing strategies using 5 frameworks: Complete Marketing Plan, 7Ps Marketing Mix, STP Model, Ansoff Growth Matrix, Full-Funnel Strategy. Returns JSON with all relevant sections."
+        - working: "NA"
+          agent: "main"
+          comment: "User reported: PDF export only shows partial report (missing sections). FIXED: Updated generatePrintableHTML function to include all sections for all 5 frameworks."
+
+  - task: "Marketing Strategy PDF Export"
+    implemented: true
+    working: "NA"
+    file: "/app/app/dashboard/tools/marketing-strategy/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: PDF export only saves partial report. Full report visible on dashboard but PDF missing sections."
+        - working: "NA"
+          agent: "main"
+          comment: "FIXED: Replaced generatePrintableHTML function with comprehensive version that includes all sections for all 5 frameworks: 7Ps (Product, Price, Place, Promotion, People, Process, Physical Evidence), STP (Segmentation, Targeting, Positioning), Ansoff (Market Penetration, Market Development, Product Development, Diversification), Full-Funnel (Awareness, Consideration, Decision, Retention, Advocacy), Complete Plan (Executive Summary, SWOT, Audience, Strategy, etc)."
+
 metadata:
   created_by: "main_agent"
-  version: "3.0"
-  test_sequence: 3
+  version: "3.1"
+  test_sequence: 4
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Grammar Checker API"
-    - "AI Humanizer Analyze API"
-    - "AI Humanizer Rewrite API"
-    - "Blog Creator Generate API"
+    - "Marketing Strategy Generate API"
+    - "Marketing Strategy PDF Export"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
