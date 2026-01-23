@@ -464,30 +464,56 @@ export default function YouTubeCreatorPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-2">
-                    {HOOK_TYPES.map((hook) => (
+                    {HOOK_TYPES.slice(0, 6).map((hook) => (
                       <button
                         key={hook.id}
                         onClick={() => setHookType(hook.id)}
                         className={`p-3 rounded-lg border text-left transition-all ${
                           hookType === hook.id
-                            ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
-                            : 'border-muted hover:border-red-300'
+                            ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30'
+                            : 'border-muted hover:border-yellow-300'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-lg">{hook.icon}</span>
-                          <span className="text-sm font-medium">{hook.name}</span>
+                          <span className="text-xs font-medium">{hook.name}</span>
                         </div>
                         <p className="text-[10px] text-muted-foreground line-clamp-2">{hook.description}</p>
                       </button>
                     ))}
                   </div>
                   
+                  {/* Story-focused hooks */}
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-1">
+                      <BookOpen className="h-3 w-3" /> Storytelling Hooks
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {HOOK_TYPES.slice(6).map((hook) => (
+                        <button
+                          key={hook.id}
+                          onClick={() => setHookType(hook.id)}
+                          className={`p-3 rounded-lg border text-left transition-all ${
+                            hookType === hook.id
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30'
+                              : 'border-muted hover:border-purple-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">{hook.icon}</span>
+                            <span className="text-xs font-medium">{hook.name}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground line-clamp-2">{hook.description}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
                   {/* Selected Hook Preview */}
                   {selectedHook && (
-                    <div className="mt-4 p-3 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 rounded-lg border border-red-200">
-                      <p className="text-xs font-medium text-red-800 dark:text-red-200 mb-1">Template:</p>
-                      <p className="text-sm italic text-red-700 dark:text-red-300">{selectedHook.template}</p>
+                    <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 rounded-lg border border-yellow-200">
+                      <p className="text-xs font-medium text-yellow-800 dark:text-yellow-200 mb-1">Template:</p>
+                      <p className="text-sm italic text-yellow-700 dark:text-yellow-300">{selectedHook.template}</p>
                       <p className="text-xs text-muted-foreground mt-2">
                         <strong>Example:</strong> {selectedHook.example}
                       </p>
