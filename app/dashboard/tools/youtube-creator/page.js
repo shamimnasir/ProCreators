@@ -72,6 +72,69 @@ const HOOK_TYPES = [
     template: '"Stop doing [popular advice]. Do this instead, and here\'s why."',
     description: 'Challenge what people think they know',
     example: "Stop posting daily on YouTube. Post THIS way instead, and here's why it works better."
+  },
+  { 
+    id: 'conflict-tease', 
+    name: 'Conflict Tease', 
+    icon: '⚡',
+    template: '"Everything was going perfectly... until [unexpected turn]. What happened next changed everything."',
+    description: 'Tease the central conflict to hook viewers into the story',
+    example: "Everything was going perfectly with my business... until I got a call that changed everything. What happened next nearly broke me."
+  },
+  { 
+    id: 'transformation', 
+    name: 'Transformation Hook', 
+    icon: '🦋',
+    template: '"[X time] ago, I was [bad state]. Today, I\'m [transformed state]. Here\'s the moment that changed it all."',
+    description: 'Show the before/after to promise a transformation story',
+    example: "2 years ago, I was $100K in debt. Today, I'm financially free. Here's the moment that changed it all."
+  }
+]
+
+// Script Structure Options
+const SCRIPT_STRUCTURES = [
+  {
+    id: 'bens',
+    name: 'BENS Structure',
+    description: 'Hook → Re-hook → Content → Loop → Payoff',
+    icon: '📋',
+    bestFor: 'Tutorials, Educational, How-To',
+    sections: [
+      { name: 'Hook', time: '0-15s', desc: 'Grab attention immediately' },
+      { name: 'Re-hook', time: '15-30s', desc: 'Why they should keep watching' },
+      { name: 'Content', time: 'Body', desc: 'Deliver value with pattern interrupts' },
+      { name: 'Loop', time: 'Mid', desc: 'Tease upcoming climax' },
+      { name: 'Payoff + CTA', time: 'End', desc: 'Close the loop, call to action' }
+    ]
+  },
+  {
+    id: 'conflict-arc',
+    name: 'Conflict Arc',
+    description: 'Hook → Rising Action → Conflict → Comeback → Payoff',
+    icon: '🎭',
+    bestFor: 'Storytelling, Vlogs, Personal Stories',
+    sections: [
+      { name: 'Hook', time: '0-15s', desc: 'Start with tension or tease the conflict', color: 'bg-green-500' },
+      { name: 'Rising Action', time: 'Act 1', desc: 'Build context, introduce stakes', color: 'bg-orange-500' },
+      { name: 'Conflict', time: 'Peak 1', desc: 'The main problem/challenge hits', color: 'bg-red-500' },
+      { name: 'Comeback', time: 'Valley', desc: 'The turning point, finding hope', color: 'bg-teal-500' },
+      { name: 'Rising Action 2', time: 'Act 2', desc: 'Build toward resolution', color: 'bg-orange-500' },
+      { name: 'Payoff', time: 'Climax', desc: 'Resolution + emotional peak + CTA', color: 'bg-purple-500' }
+    ]
+  },
+  {
+    id: 'hero-journey',
+    name: 'Mini Hero Journey',
+    description: 'Call → Challenge → Transformation → Return',
+    icon: '🦸',
+    bestFor: 'Personal Development, Success Stories',
+    sections: [
+      { name: 'The Call', time: 'Opening', desc: 'The problem that demanded action', color: 'bg-blue-500' },
+      { name: 'Refusal/Doubt', time: 'Act 1', desc: 'Initial hesitation or failure', color: 'bg-gray-500' },
+      { name: 'The Challenge', time: 'Mid', desc: 'Facing the main obstacle', color: 'bg-red-500' },
+      { name: 'Transformation', time: 'Climax', desc: 'The breakthrough moment', color: 'bg-yellow-500' },
+      { name: 'The Return', time: 'End', desc: 'Sharing wisdom + CTA', color: 'bg-green-500' }
+    ]
   }
 ]
 
