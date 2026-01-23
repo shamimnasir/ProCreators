@@ -1,0 +1,1214 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { 
+  Target, Copy, Sparkles, Loader2, Wand2, RefreshCw,
+  Check, ArrowLeft, TrendingUp, Users, BarChart3,
+  Lightbulb, Building2, DollarSign, Calendar, Layers,
+  PieChart, ArrowUpRight, ArrowDownRight, Minus, Shield,
+  Zap, Globe, Megaphone, Heart, Brain, CheckCircle2,
+  AlertTriangle, FileText, Download
+} from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { saveToLibrary } from '@/lib/library-utils'
+import Link from 'next/link'
+
+// Marketing Frameworks
+const FRAMEWORKS = [
+  { 
+    id: 'complete', 
+    name: 'Complete Marketing Plan', 
+    description: 'Full 12-month plan with all components',
+    icon: '📋',
+    time: '~2 min',
+    bestFor: 'Comprehensive planning'
+  },
+  { 
+    id: '7ps', 
+    name: 'Marketing Mix (7 Ps)', 
+    description: 'Product, Price, Promotion, Place, People, Process, Physical Evidence',
+    icon: '🎯',
+    time: '~1 min',
+    bestFor: 'Strategic positioning'
+  },
+  { 
+    id: 'stp', 
+    name: 'STP Model', 
+    description: 'Segmentation, Targeting, Positioning',
+    icon: '🎪',
+    time: '~1 min',
+    bestFor: 'Market focus'
+  },
+  { 
+    id: 'ansoff', 
+    name: 'Ansoff Growth Matrix', 
+    description: 'Growth strategy options',
+    icon: '📈',
+    time: '~1 min',
+    bestFor: 'Growth planning'
+  },
+  { 
+    id: 'funnel', 
+    name: 'Full-Funnel Strategy', 
+    description: 'Awareness to Advocacy journey',
+    icon: '🔽',
+    time: '~1 min',
+    bestFor: 'Customer journey'
+  }
+]
+
+// Industries
+const INDUSTRIES = [
+  { id: 'saas', name: 'SaaS / Software' },
+  { id: 'ecommerce', name: 'E-commerce / Retail' },
+  { id: 'service', name: 'Professional Services' },
+  { id: 'health', name: 'Healthcare / Wellness' },
+  { id: 'finance', name: 'Finance / Fintech' },
+  { id: 'education', name: 'Education / EdTech' },
+  { id: 'food', name: 'Food & Beverage' },
+  { id: 'real-estate', name: 'Real Estate' },
+  { id: 'travel', name: 'Travel & Hospitality' },
+  { id: 'manufacturing', name: 'Manufacturing / B2B' },
+  { id: 'nonprofit', name: 'Nonprofit / NGO' },
+  { id: 'other', name: 'Other' }
+]
+
+// Business Stages
+const BUSINESS_STAGES = [
+  { id: 'startup', name: 'Startup (0-2 years)', icon: '🚀' },
+  { id: 'growth', name: 'Growth Stage (2-5 years)', icon: '📈' },
+  { id: 'established', name: 'Established (5+ years)', icon: '🏢' },
+  { id: 'enterprise', name: 'Enterprise / Corporation', icon: '🏛️' }
+]
+
+// Budget Ranges
+const BUDGET_RANGES = [
+  { id: 'micro', name: '$0 - $5K/month', icon: '💵' },
+  { id: 'small', name: '$5K - $20K/month', icon: '💰' },
+  { id: 'medium', name: '$20K - $100K/month', icon: '💎' },
+  { id: 'large', name: '$100K+/month', icon: '🏆' }
+]
+
+export default function MarketingStrategyPage() {
+  const [activeTab, setActiveTab] = useState('setup')
+  const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState({})
+  const { toast } = useToast()
+
+  // Form State
+  const [framework, setFramework] = useState('complete')
+  const [businessName, setBusinessName] = useState('')
+  const [businessDescription, setBusinessDescription] = useState('')
+  const [industry, setIndustry] = useState('saas')
+  const [businessStage, setBusinessStage] = useState('growth')
+  const [targetAudience, setTargetAudience] = useState('')
+  const [competitors, setCompetitors] = useState('')
+  const [currentChallenges, setCurrentChallenges] = useState('')
+  const [goals, setGoals] = useState('')
+  const [budget, setBudget] = useState('small')
+  const [timeline, setTimeline] = useState('12 months')
+  const [existingChannels, setExistingChannels] = useState('')
+  const [uniqueValue, setUniqueValue] = useState('')
+
+  // Results
+  const [result, setResult] = useState(null)
+  const [resultTab, setResultTab] = useState('overview')
+
+  const handleGenerate = async () => {
+    if (!businessName || !businessDescription) {
+      toast({ title: 'Missing Information', description: 'Please enter business name and description', variant: 'destructive' })
+      return
+    }
+
+    setGenerating(true)
+    setResult(null)
+
+    try {
+      const res = await fetch('/api/marketing-strategy/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName,
+          businessDescription,
+          industry,
+          businessStage,
+          targetAudience,
+          competitors,
+          currentChallenges,
+          goals,
+          budget,
+          timeline,
+          framework,
+          existingChannels,
+          uniqueValue
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        setResult(data)
+        setActiveTab('results')
+        setResultTab('overview')
+        
+        // Auto-save to library
+        try {
+          const saveResult = await saveToLibrary({
+            type: 'marketing-strategy',
+            category: 'text',
+            title: `Marketing Strategy: ${businessName.substring(0, 40)}`,
+            description: `${data.metadata.framework} for ${industry}`,
+            content: JSON.stringify(data.data),
+            metadata: {
+              framework: data.metadata.framework,
+              industry,
+              businessStage,
+              budget,
+              contentType: 'marketing-strategy'
+            }
+          })
+          if (saveResult.success) {
+            toast({ title: '📊 Marketing Strategy Generated!', description: '✅ Auto-saved to Library' })
+          } else {
+            toast({ title: '📊 Marketing Strategy Generated!' })
+          }
+        } catch (saveError) {
+          console.error('Failed to auto-save:', saveError)
+          toast({ title: '📊 Marketing Strategy Generated!' })
+        }
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (err) {
+      toast({ title: 'Generation Failed', description: err.message, variant: 'destructive' })
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleCopy = useCallback((text, key) => {
+    const textToCopy = typeof text === 'object' ? JSON.stringify(text, null, 2) : text
+    navigator.clipboard.writeText(textToCopy)
+    setCopied(prev => ({ ...prev, [key]: true }))
+    toast({ title: 'Copied to clipboard!' })
+    setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
+  }, [toast])
+
+  const exportStrategy = () => {
+    if (!result) return
+    const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${businessName.replace(/\s+/g, '_')}_marketing_strategy.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Strategy exported!' })
+  }
+
+  const selectedFramework = FRAMEWORKS.find(f => f.id === framework)
+
+  // Render SWOT Analysis
+  const renderSWOT = (swot) => {
+    if (!swot) return null
+    const items = [
+      { key: 'strengths', label: 'Strengths', icon: '💪', color: 'bg-green-100 dark:bg-green-900/30 border-green-500' },
+      { key: 'weaknesses', label: 'Weaknesses', icon: '⚠️', color: 'bg-red-100 dark:bg-red-900/30 border-red-500' },
+      { key: 'opportunities', label: 'Opportunities', icon: '🚀', color: 'bg-blue-100 dark:bg-blue-900/30 border-blue-500' },
+      { key: 'threats', label: 'Threats', icon: '🛡️', color: 'bg-orange-100 dark:bg-orange-900/30 border-orange-500' }
+    ]
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        {items.map(item => (
+          <div key={item.key} className={`p-4 rounded-lg border-l-4 ${item.color}`}>
+            <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+              <span>{item.icon}</span> {item.label}
+            </h4>
+            <ul className="space-y-1">
+              {swot[item.key]?.map((s, idx) => (
+                <li key={idx} className="text-sm flex items-start gap-2">
+                  <span className="text-muted-foreground">•</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Render Budget Breakdown
+  const renderBudgetBreakdown = (budgetData) => {
+    if (!budgetData?.breakdown) return null
+    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500']
+    return (
+      <div className="space-y-3">
+        {budgetData.breakdown.map((item, idx) => (
+          <div key={idx} className="space-y-1">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium">{item.category}</span>
+              <span className="text-muted-foreground">{item.percentage}%</span>
+            </div>
+            <Progress value={item.percentage} className={`h-2 ${colors[idx % colors.length]}`} />
+            <p className="text-xs text-muted-foreground">{item.notes}</p>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Render Timeline
+  const renderTimeline = (timelineData) => {
+    if (!timelineData) return null
+    const quarters = ['quarter1', 'quarter2', 'quarter3', 'quarter4']
+    const labels = ['Q1', 'Q2', 'Q3', 'Q4']
+    return (
+      <div className="space-y-4">
+        {quarters.map((q, idx) => {
+          const data = timelineData[q]
+          if (!data) return null
+          return (
+            <div key={q} className="relative pl-8 pb-4 border-l-2 border-blue-300 last:border-0">
+              <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">
+                {idx + 1}
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <Badge className="mb-2">{labels[idx]}: {data.theme}</Badge>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Priorities:</p>
+                    <ul className="text-sm">
+                      {data.priorities?.map((p, i) => (
+                        <li key={i} className="flex items-start gap-1">
+                          <CheckCircle2 className="h-3 w-3 mt-1 text-green-500" />
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {data.milestones && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground">Milestones:</p>
+                      <ul className="text-sm">
+                        {data.milestones.map((m, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <Target className="h-3 w-3 mt-1 text-blue-500" />
+                            <span>{m}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Render Funnel
+  const renderFunnel = (funnelData) => {
+    if (!funnelData) return null
+    const stages = [
+      { key: 'awareness', label: 'Awareness', icon: '👁️', color: 'bg-purple-100 dark:bg-purple-900/30', width: 'w-full' },
+      { key: 'consideration', label: 'Consideration', icon: '🤔', color: 'bg-blue-100 dark:bg-blue-900/30', width: 'w-[85%]' },
+      { key: 'decision', label: 'Decision', icon: '✅', color: 'bg-green-100 dark:bg-green-900/30', width: 'w-[70%]' },
+      { key: 'retention', label: 'Retention', icon: '💎', color: 'bg-orange-100 dark:bg-orange-900/30', width: 'w-[55%]' },
+      { key: 'advocacy', label: 'Advocacy', icon: '📣', color: 'bg-pink-100 dark:bg-pink-900/30', width: 'w-[40%]' }
+    ]
+    return (
+      <div className="space-y-3">
+        {stages.map(stage => {
+          const data = funnelData[stage.key]
+          if (!data) return null
+          return (
+            <div key={stage.key} className={`${stage.width} mx-auto`}>
+              <div className={`p-4 rounded-lg ${stage.color} border`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{stage.icon}</span>
+                  <h4 className="font-bold">{stage.label}</h4>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{data.objective || data.goal}</p>
+                {data.tactics && (
+                  <div className="flex flex-wrap gap-1">
+                    {data.tactics.slice(0, 3).map((t, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">{t}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard/business-ai">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <BarChart3 className="h-7 w-7 text-blue-500" />
+              Marketing Strategy AI
+            </h1>
+            <Badge className="bg-blue-500 text-white">Pro</Badge>
+          </div>
+          <p className="text-muted-foreground">Generate comprehensive marketing strategies and plans</p>
+        </div>
+      </div>
+
+      {/* Framework Banner */}
+      <Card className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border-0">
+        <CardContent className="py-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+            {FRAMEWORKS.map(f => (
+              <div key={f.id} className="cursor-pointer hover:bg-white/10 rounded-lg p-2 transition-all" onClick={() => setFramework(f.id)}>
+                <div className="text-2xl mb-1">{f.icon}</div>
+                <div className="text-xs font-medium">{f.name.split(' ')[0]}</div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 w-full max-w-md">
+          <TabsTrigger value="setup">📝 Setup</TabsTrigger>
+          <TabsTrigger value="results" disabled={!result}>📊 Results</TabsTrigger>
+        </TabsList>
+
+        {/* Setup Tab */}
+        <TabsContent value="setup" className="space-y-6">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-4">
+              {/* Framework Selection */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-blue-500" />
+                    Strategy Framework
+                  </CardTitle>
+                  <CardDescription>Choose your strategic approach</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {FRAMEWORKS.map(f => (
+                    <button
+                      key={f.id}
+                      onClick={() => setFramework(f.id)}
+                      className={`w-full p-3 rounded-lg border text-left transition-all ${
+                        framework === f.id
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+                          : 'border-muted hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{f.icon}</span>
+                          <div>
+                            <span className="font-medium text-sm">{f.name}</span>
+                            <p className="text-[10px] text-muted-foreground">{f.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline" className="text-[9px]">{f.time}</Badge>
+                          {framework === f.id && <Check className="h-4 w-4 text-blue-500 mt-1" />}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Business Info */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-purple-500" />
+                    Business Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Business Name *</Label>
+                    <Input
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="e.g., TechFlow Solutions"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Business Description *</Label>
+                    <Textarea
+                      value={businessDescription}
+                      onChange={(e) => setBusinessDescription(e.target.value)}
+                      placeholder="Describe your product/service, what you sell, and your value proposition..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Industry</Label>
+                      <Select value={industry} onValueChange={setIndustry}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {INDUSTRIES.map(i => (
+                            <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Business Stage</Label>
+                      <Select value={businessStage} onValueChange={setBusinessStage}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BUSINESS_STAGES.map(s => (
+                            <SelectItem key={s.id} value={s.id}>{s.icon} {s.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Unique Value Proposition</Label>
+                    <Input
+                      value={uniqueValue}
+                      onChange={(e) => setUniqueValue(e.target.value)}
+                      placeholder="What makes you different from competitors?"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4">
+              {/* Market & Audience */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Users className="h-5 w-5 text-green-500" />
+                    Market & Audience
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Target Audience</Label>
+                    <Textarea
+                      value={targetAudience}
+                      onChange={(e) => setTargetAudience(e.target.value)}
+                      placeholder="Describe your ideal customers: demographics, behaviors, pain points..."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Main Competitors</Label>
+                    <Textarea
+                      value={competitors}
+                      onChange={(e) => setCompetitors(e.target.value)}
+                      placeholder="List your main competitors (comma-separated)"
+                      className="min-h-[60px]"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Current Marketing Channels</Label>
+                    <Input
+                      value={existingChannels}
+                      onChange={(e) => setExistingChannels(e.target.value)}
+                      placeholder="e.g., Website, LinkedIn, Google Ads, Email..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Goals & Budget */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Target className="h-5 w-5 text-orange-500" />
+                    Goals & Resources
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Business Goals</Label>
+                    <Textarea
+                      value={goals}
+                      onChange={(e) => setGoals(e.target.value)}
+                      placeholder="What do you want to achieve? e.g., Increase revenue by 50%, acquire 1000 new customers..."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Current Challenges</Label>
+                    <Textarea
+                      value={currentChallenges}
+                      onChange={(e) => setCurrentChallenges(e.target.value)}
+                      placeholder="What marketing challenges are you facing?"
+                      className="min-h-[60px]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Marketing Budget</Label>
+                      <Select value={budget} onValueChange={setBudget}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BUDGET_RANGES.map(b => (
+                            <SelectItem key={b.id} value={b.id}>{b.icon} {b.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Timeline</Label>
+                      <Select value={timeline} onValueChange={setTimeline}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3 months">3 months</SelectItem>
+                          <SelectItem value="6 months">6 months</SelectItem>
+                          <SelectItem value="12 months">12 months</SelectItem>
+                          <SelectItem value="24 months">24 months</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Generate Button */}
+              <Button 
+                onClick={handleGenerate} 
+                disabled={generating || !businessName || !businessDescription}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                size="lg"
+              >
+                {generating ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating {selectedFramework?.name}...</>
+                ) : (
+                  <><Wand2 className="h-4 w-4 mr-2" /> Generate {selectedFramework?.name}</>  
+                )}
+              </Button>
+
+              {/* Framework Info */}
+              {selectedFramework && (
+                <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200">
+                  <CardContent className="py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-3xl">{selectedFramework.icon}</span>
+                      <div>
+                        <h4 className="font-medium text-blue-800 dark:text-blue-200">{selectedFramework.name}</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">{selectedFramework.description}</p>
+                        <Badge variant="outline" className="mt-2 text-xs">Best for: {selectedFramework.bestFor}</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Results Tab */}
+        <TabsContent value="results" className="space-y-6">
+          {result && result.data && (
+            <>
+              {/* Results Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    📊 {result.metadata?.framework || 'Marketing Strategy'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {businessName} • {result.metadata?.industry} • Generated {new Date().toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={exportStrategy}>
+                    <Download className="h-4 w-4 mr-2" /> Export
+                  </Button>
+                  <Button variant="outline" onClick={handleGenerate} disabled={generating}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Regenerate
+                  </Button>
+                </div>
+              </div>
+
+              {/* Results Tabs for Complete Plan */}
+              {framework === 'complete' && (
+                <>
+                  <div className="flex gap-2 flex-wrap">
+                    {['overview', 'analysis', 'audience', 'strategy', 'channels', 'funnel', 'budget', 'timeline', 'kpis'].map(tab => (
+                      <Button
+                        key={tab}
+                        variant={resultTab === tab ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setResultTab(tab)}
+                        className={resultTab === tab ? 'bg-blue-600' : ''}
+                      >
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Overview Tab */}
+                  {resultTab === 'overview' && result.data.executiveSummary && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-yellow-500" />
+                            Executive Summary
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Mission</Label>
+                            <p className="text-sm font-medium">{result.data.executiveSummary.mission}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Vision</Label>
+                            <p className="text-sm">{result.data.executiveSummary.vision}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Marketing Objective</Label>
+                            <p className="text-sm">{result.data.executiveSummary.marketingObjective}</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Target className="h-5 w-5 text-blue-500" />
+                            Key Strategies
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {result.data.executiveSummary.keyStrategies?.map((strategy, idx) => (
+                              <div key={idx} className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <Badge className="bg-blue-500">{idx + 1}</Badge>
+                                <span className="text-sm">{strategy}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Positioning */}
+                      {result.data.positioning && (
+                        <Card className="md:col-span-2">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Megaphone className="h-5 w-5 text-purple-500" />
+                              Brand Positioning
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
+                              <Label className="text-xs text-purple-600 dark:text-purple-400">Positioning Statement</Label>
+                              <p className="text-sm font-medium italic mt-1">{result.data.positioning.positioningStatement}</p>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Unique Value Proposition</Label>
+                                <p className="text-sm">{result.data.positioning.uniqueValueProposition}</p>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Brand Voice</Label>
+                                <p className="text-sm">{result.data.positioning.brandVoice}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Key Messages</Label>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {result.data.positioning.keyMessages?.map((msg, idx) => (
+                                  <Badge key={idx} variant="outline">{msg}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Analysis Tab */}
+                  {resultTab === 'analysis' && result.data.situationAnalysis && (
+                    <div className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Brain className="h-5 w-5 text-green-500" />
+                            SWOT Analysis
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {renderSWOT(result.data.situationAnalysis.swot)}
+                        </CardContent>
+                      </Card>
+
+                      {result.data.situationAnalysis.competitorAnalysis && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Users className="h-5 w-5 text-orange-500" />
+                              Competitor Analysis
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {result.data.situationAnalysis.competitorAnalysis.map((comp, idx) => (
+                                <div key={idx} className="p-4 border rounded-lg">
+                                  <h4 className="font-bold text-sm">{comp.name}</h4>
+                                  <div className="grid md:grid-cols-3 gap-2 mt-2 text-sm">
+                                    <div>
+                                      <span className="text-green-600 text-xs font-medium">Strengths:</span>
+                                      <p>{comp.strengths}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-red-600 text-xs font-medium">Weaknesses:</span>
+                                      <p>{comp.weaknesses}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-blue-600 text-xs font-medium">How to Beat:</span>
+                                      <p>{comp.differentiator}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {result.data.situationAnalysis.marketTrends && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <TrendingUp className="h-5 w-5 text-blue-500" />
+                              Market Trends
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                              {result.data.situationAnalysis.marketTrends.map((trend, idx) => (
+                                <Badge key={idx} variant="outline" className="py-2 px-3">
+                                  <TrendingUp className="h-3 w-3 mr-1" />
+                                  {trend}
+                                </Badge>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Audience Tab */}
+                  {resultTab === 'audience' && result.data.targetAudience && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {result.data.targetAudience.primaryPersona && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Users className="h-5 w-5 text-blue-500" />
+                              Primary Persona
+                              <Badge className="bg-blue-500">Primary</Badge>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                              <div className="text-4xl mb-2">👤</div>
+                              <h4 className="font-bold">{result.data.targetAudience.primaryPersona.name}</h4>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Demographics</Label>
+                              <p className="text-sm">{result.data.targetAudience.primaryPersona.demographics}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Psychographics</Label>
+                              <p className="text-sm">{result.data.targetAudience.primaryPersona.psychographics}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Pain Points</Label>
+                              <ul className="text-sm space-y-1">
+                                {result.data.targetAudience.primaryPersona.painPoints?.map((p, i) => (
+                                  <li key={i} className="flex items-start gap-1">
+                                    <AlertTriangle className="h-3 w-3 mt-1 text-orange-500" />
+                                    {p}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Goals</Label>
+                              <ul className="text-sm space-y-1">
+                                {result.data.targetAudience.primaryPersona.goals?.map((g, i) => (
+                                  <li key={i} className="flex items-start gap-1">
+                                    <Target className="h-3 w-3 mt-1 text-green-500" />
+                                    {g}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Preferred Channels</Label>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {result.data.targetAudience.primaryPersona.preferredChannels?.map((c, i) => (
+                                  <Badge key={i} variant="outline">{c}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {result.data.targetAudience.secondaryPersona && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Users className="h-5 w-5 text-purple-500" />
+                              Secondary Persona
+                              <Badge variant="outline">Secondary</Badge>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                              <div className="text-4xl mb-2">👥</div>
+                              <h4 className="font-bold">{result.data.targetAudience.secondaryPersona.name}</h4>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Demographics</Label>
+                              <p className="text-sm">{result.data.targetAudience.secondaryPersona.demographics}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Psychographics</Label>
+                              <p className="text-sm">{result.data.targetAudience.secondaryPersona.psychographics}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Strategy Tab (7Ps) */}
+                  {resultTab === 'strategy' && result.data.marketingMix && (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(result.data.marketingMix).map(([key, value]) => {
+                        const icons = {
+                          product: '📦', price: '💰', place: '📍', promotion: '📣',
+                          people: '👥', process: '⚙️', physicalEvidence: '🏪'
+                        }
+                        const colors = {
+                          product: 'border-blue-500 bg-blue-50 dark:bg-blue-900/20',
+                          price: 'border-green-500 bg-green-50 dark:bg-green-900/20',
+                          place: 'border-purple-500 bg-purple-50 dark:bg-purple-900/20',
+                          promotion: 'border-orange-500 bg-orange-50 dark:bg-orange-900/20',
+                          people: 'border-pink-500 bg-pink-50 dark:bg-pink-900/20',
+                          process: 'border-teal-500 bg-teal-50 dark:bg-teal-900/20',
+                          physicalEvidence: 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                        }
+                        return (
+                          <Card key={key} className={`border-l-4 ${colors[key]}`}>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">{icons[key]}</span>
+                                {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-sm space-y-2">
+                              {Object.entries(value).map(([k, v]) => (
+                                <div key={k}>
+                                  <span className="text-xs text-muted-foreground capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span>
+                                  <p className="text-sm">{Array.isArray(v) ? v.join(', ') : v}</p>
+                                </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Channels Tab */}
+                  {resultTab === 'channels' && result.data.channelStrategy && (
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {['paid', 'owned', 'earned'].map(type => {
+                        const data = result.data.channelStrategy[type]
+                        if (!data) return null
+                        const icons = { paid: '💵', owned: '🏠', earned: '🌟' }
+                        const colors = {
+                          paid: 'from-green-500 to-emerald-500',
+                          owned: 'from-blue-500 to-indigo-500',
+                          earned: 'from-purple-500 to-pink-500'
+                        }
+                        return (
+                          <Card key={type}>
+                            <CardHeader className={`bg-gradient-to-r ${colors[type]} text-white rounded-t-lg`}>
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">{icons[type]}</span>
+                                {type.charAt(0).toUpperCase() + type.slice(1)} Media
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Channels</Label>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {data.channels?.map((c, i) => (
+                                    <Badge key={i} variant="outline">{c}</Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Strategy</Label>
+                                <p className="text-sm">{data.strategy || data.budgetAllocation}</p>
+                              </div>
+                              {data.tactics && (
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Tactics</Label>
+                                  <ul className="text-sm">
+                                    {data.tactics.map((t, i) => (
+                                      <li key={i}>• {t}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Funnel Tab */}
+                  {resultTab === 'funnel' && result.data.funnelStrategy && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-purple-500" />
+                          Full-Funnel Strategy
+                        </CardTitle>
+                        <CardDescription>Customer journey from awareness to advocacy</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {renderFunnel(result.data.funnelStrategy)}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Budget Tab */}
+                  {resultTab === 'budget' && result.data.budgetAllocation && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-green-500" />
+                            Budget Allocation
+                          </CardTitle>
+                          <CardDescription>Total: {result.data.budgetAllocation.totalBudget}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {renderBudgetBreakdown(result.data.budgetAllocation)}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <PieChart className="h-5 w-5 text-blue-500" />
+                            Allocation Summary
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {result.data.budgetAllocation.breakdown?.map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                                <span className="text-sm font-medium">{item.category}</span>
+                                <span className="text-sm">{item.amount || `${item.percentage}%`}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Timeline Tab */}
+                  {resultTab === 'timeline' && result.data.implementationTimeline && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-blue-500" />
+                          Implementation Timeline
+                        </CardTitle>
+                        <CardDescription>12-month execution roadmap</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {renderTimeline(result.data.implementationTimeline)}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* KPIs Tab */}
+                  {resultTab === 'kpis' && result.data.kpis && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-green-500" />
+                            Primary KPIs
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {result.data.kpis.primary?.map((kpi, idx) => (
+                            <div key={idx} className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-sm">{kpi.metric}</span>
+                                <Badge className="bg-green-500">{kpi.target}</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">Measured: {kpi.frequency}</p>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5 text-blue-500" />
+                            Secondary KPIs
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {result.data.kpis.secondary?.map((kpi, idx) => (
+                            <div key={idx} className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-sm">{kpi.metric}</span>
+                                <Badge variant="outline">{kpi.target}</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">Measured: {kpi.frequency}</p>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      {/* Next Steps */}
+                      {result.data.nextSteps && (
+                        <Card className="md:col-span-2">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Zap className="h-5 w-5 text-orange-500" />
+                              Immediate Next Steps
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {result.data.nextSteps.map((step, idx) => (
+                                <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg">
+                                  <Badge className="bg-orange-500">{idx + 1}</Badge>
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">{step.action}</p>
+                                    <p className="text-xs text-muted-foreground">Deadline: {step.deadline} • Owner: {step.owner}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Non-complete frameworks */}
+              {framework !== 'complete' && (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-blue-500" />
+                        {result.metadata?.framework}
+                      </CardTitle>
+                      <Button variant="ghost" onClick={() => handleCopy(result.data, 'fullResult')}>
+                        {copied.fullResult ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[600px]">
+                      <pre className="text-sm whitespace-pre-wrap bg-muted/30 p-4 rounded-lg">
+                        {JSON.stringify(result.data, null, 2)}
+                      </pre>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Tips Section */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200">
+        <CardHeader>
+          <CardTitle className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" />
+            2026 Marketing Strategy Tips
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="font-medium text-blue-800 dark:text-blue-200">AI-First Marketing</p>
+              <p className="text-blue-700 dark:text-blue-300 text-xs">Leverage AI for personalization at scale</p>
+            </div>
+            <div>
+              <p className="font-medium text-blue-800 dark:text-blue-200">Privacy-Compliant</p>
+              <p className="text-blue-700 dark:text-blue-300 text-xs">Build first-party data strategies</p>
+            </div>
+            <div>
+              <p className="font-medium text-blue-800 dark:text-blue-200">Video-First Content</p>
+              <p className="text-blue-700 dark:text-blue-300 text-xs">Short-form video dominates all platforms</p>
+            </div>
+            <div>
+              <p className="font-medium text-blue-800 dark:text-blue-200">Community-Led Growth</p>
+              <p className="text-blue-700 dark:text-blue-300 text-xs">Build engaged communities for advocacy</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
