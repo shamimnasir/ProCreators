@@ -251,33 +251,44 @@ Video Type: ${videoCategory}
 Target Duration: ${lengthConfig.duration} (${lengthConfig.min}-${lengthConfig.max} words)
 Tone: ${contentTone}
 Hook Style: ${hookType} - Template: ${hookTemplate}
+Script Structure: ${structureConfig.name} (Sections: ${structureConfig.sections.join(' → ')})
 Target Audience: ${targetAudience || 'general audience'}
 Main Keyword: ${mainKeyword || videoTopic.split(' ').slice(0, 3).join(' ')}
 ${keyPoints ? `Key Points to Cover:\n${keyPoints}` : ''}
 ${languageInstruction}
+
+**IMPORTANT: Follow the ${structureConfig.name} structure exactly. ${scriptStructure === 'conflict-arc' ? 'Build emotional intensity following the Conflict Arc pattern: Hook → Rising Action → Conflict (Peak) → Comeback (Valley) → Rising Action → Payoff (Climax).' : ''} ${scriptStructure === 'hero-journey' ? 'Follow the Hero Journey pattern for transformation stories.' : ''}**
+
 Generate a complete response in this exact JSON format. ${isNonEnglish ? `Write everything in ${detectedLanguage}:` : ''}
 {
-  "script": "Full video script ${isNonEnglish ? `in ${detectedLanguage} ` : ''}with [SCENE], [TEXT], [SOUND] markers. Structure: Hook (0-15s), Re-hook (15-30s), Main Content with pattern interrupts, Mid-video Loop, Payoff, CTA. Write ${lengthConfig.min}-${lengthConfig.max} words.",
+  "script": "Full video script ${isNonEnglish ? `in ${detectedLanguage} ` : ''}following the ${structureConfig.name} with clear section markers [HOOK], [RISING ACTION], [CONFLICT], [COMEBACK], [PAYOFF] etc. Include [SCENE], [TEXT], [SOUND] markers for editing. Write ${lengthConfig.min}-${lengthConfig.max} words. ${scriptStructure === 'conflict-arc' ? 'Mark emotional intensity levels throughout. Use dramatic pacing for conflict sections.' : ''}",
   "titles": [
     "Title 1 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Front-loaded keyword, 40-60 chars, curiosity-driven",
     "Title 2 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Different angle, uses numbers if applicable",
     "Title 3 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Contrarian or question-based",
     "Title 4 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Benefit-focused",
-    "Title 5 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- Urgency/scarcity angle"
+    "Title 5 ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- ${scriptStructure === 'conflict-arc' ? 'Story/drama angle' : 'Urgency/scarcity angle'}"
   ],
   "hooks": [
-    "Curiosity hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- variation for first 15 seconds",
-    "Action hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- drop into the middle",
-    "Audience-centric hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- call out their problem",
+    "Curiosity hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- creates open loop",
+    "Action hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- drops into the middle of action",
+    "Audience-centric hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- calls out their problem",
     "Time-promise hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- what they'll learn",
+    "Conflict-tease hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- teases the central conflict/drama",
+    "Transformation hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- shows before/after transformation",
     "Stakes hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- consequences of not watching",
-    "Contrarian hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- challenge common belief"
+    "Contrarian hook ${isNonEnglish ? `in ${detectedLanguage} ` : ''}- challenges common belief"
   ],
-  "description": "Full YouTube description ${isNonEnglish ? `in ${detectedLanguage} ` : ''}with:\n- Compelling first 2 lines (shown in search)\n- Summary of video\n- Timestamps for key sections\n- Links placeholders\n- Social media links placeholders\n- Relevant hashtags\n- Call to action",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"]
+  "description": "Full YouTube description ${isNonEnglish ? `in ${detectedLanguage} ` : ''}with:\n- Compelling first 2 lines (shown in search)\n- Summary of video\n- Timestamps for key sections matching the ${structureConfig.name}\n- Links placeholders\n- Social media links placeholders\n- Relevant hashtags\n- Call to action",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"],
+  "structureBreakdown": {
+    "sections": [
+      {"name": "Section name", "timestamp": "0:00", "purpose": "What this section achieves", "emotionalIntensity": "low/medium/high"}
+    ]
+  }
 }
 
-Make the script engaging, valuable, and optimized for retention. Include specific [SCENE], [TEXT], and [SOUND] markers throughout.`
+Make the script engaging, valuable, and optimized for retention. Include specific [SCENE], [TEXT], and [SOUND] markers throughout. ${scriptStructure === 'conflict-arc' ? 'For Conflict Arc: ensure emotional intensity builds, peaks at conflict, dips at comeback, then rises to payoff. Use vivid storytelling techniques.' : ''}`
 
     const llmResponse = await callLLM(scriptPrompt, systemPrompt)
     
