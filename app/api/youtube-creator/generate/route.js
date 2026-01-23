@@ -164,6 +164,7 @@ export async function POST(request) {
       videoLength,
       contentTone,
       hookType,
+      scriptStructure = 'bens',
       targetAudience,
       mainKeyword,
       keyPoints
@@ -175,6 +176,7 @@ export async function POST(request) {
 
     const lengthConfig = LENGTH_WORDS[videoLength] || LENGTH_WORDS.medium
     const hookTemplate = HOOK_TEMPLATES[hookType] || HOOK_TEMPLATES.curiosity
+    const structureConfig = SCRIPT_STRUCTURES[scriptStructure] || SCRIPT_STRUCTURES.bens
 
     // Detect input language - check for non-ASCII characters that indicate Bengali/Hindi/etc.
     const detectLanguage = (text) => {
