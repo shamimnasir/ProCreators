@@ -288,20 +288,20 @@ Generate the response in this exact JSON format${isNonEnglish ? ` (ALL text cont
       "emotionalTrigger": "Primary emotion this ad targets"
     }
   ],
-  "platformSpecificTips": ["Tip 1 for ${platform}", "Tip 2", "Tip 3"],
+  "platformSpecificTips": ["${isNonEnglish ? `Tip 1 for ${platform} in ${detectedLanguage}` : `Tip 1 for ${platform}`}", "${isNonEnglish ? `Tip 2 in ${detectedLanguage}` : 'Tip 2'}", "${isNonEnglish ? `Tip 3 in ${detectedLanguage}` : 'Tip 3'}"],
   "abTestSuggestions": [
-    "What to A/B test suggestion 1",
-    "What to A/B test suggestion 2"
+    "${isNonEnglish ? `What to A/B test suggestion 1 in ${detectedLanguage}` : 'What to A/B test suggestion 1'}",
+    "${isNonEnglish ? `What to A/B test suggestion 2 in ${detectedLanguage}` : 'What to A/B test suggestion 2'}"
   ],
-  "targetingRecommendations": ["Audience targeting tip 1", "Tip 2"],
+  "targetingRecommendations": ["${isNonEnglish ? `Audience targeting tip 1 in ${detectedLanguage}` : 'Audience targeting tip 1'}", "${isNonEnglish ? `Tip 2 in ${detectedLanguage}` : 'Tip 2'}"],
   "bestPerformingElements": {
-    "hook": "Which hook style typically performs best",
-    "cta": "Recommended CTA approach",
-    "length": "Ideal copy length for this platform"
+    "hook": "${isNonEnglish ? `Which hook style typically performs best - in ${detectedLanguage}` : 'Which hook style typically performs best'}",
+    "cta": "${isNonEnglish ? `Recommended CTA approach - in ${detectedLanguage}` : 'Recommended CTA approach'}",
+    "length": "${isNonEnglish ? `Ideal copy length for this platform - in ${detectedLanguage}` : 'Ideal copy length for this platform'}"
   }
 }
 
-Generate ${variationCount} distinctly different ad variations. Each should have unique hooks, angles, and emotional appeals while maintaining the ${frameworkInfo.name} framework structure.`
+Generate ${variationCount} distinctly different ad variations. Each should have unique hooks, angles, and emotional appeals while maintaining the ${frameworkInfo.name} framework structure.${isNonEnglish ? ` REMEMBER: ALL content must be written in ${detectedLanguage}, not English.` : ''}`
 
     const llmResponse = await callLLM(prompt, systemPrompt)
     
