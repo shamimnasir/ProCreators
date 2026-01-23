@@ -703,11 +703,12 @@ export default function YouTubeCreatorPage() {
                         </Button>
                       </div>
                     </div>
+                    <CardDescription>Color-coded script with scene directions and editing cues</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ScrollArea className="h-[500px]">
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed p-4 bg-muted/30 rounded-lg">
-                        {result.script}
+                    <ScrollArea className="h-[600px]">
+                      <div className="space-y-4 p-2">
+                        {formatScript(result.script)}
                       </div>
                     </ScrollArea>
                   </CardContent>
