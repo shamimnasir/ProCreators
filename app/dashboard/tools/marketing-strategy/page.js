@@ -1154,26 +1154,541 @@ export default function MarketingStrategyPage() {
 
               {/* Non-complete frameworks */}
               {framework !== 'complete' && (
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                        {result.metadata?.framework}
-                      </CardTitle>
-                      <Button variant="ghost" onClick={() => handleCopy(result.data, 'fullResult')}>
-                        {copied.fullResult ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                      </Button>
+                <>
+                  {/* 7 Ps Framework */}
+                  {framework === '7ps' && result.data && (
+                    <div className="space-y-6">
+                      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
+                        <CardContent className="py-4">
+                          <p className="text-sm text-center text-muted-foreground">{result.data.businessContext}</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {['product', 'price', 'place', 'promotion', 'people', 'process', 'physicalEvidence'].map(key => {
+                          const data = result.data[key]
+                          if (!data) return null
+                          const icons = {
+                            product: '📦', price: '💰', place: '📍', promotion: '📣',
+                            people: '👥', process: '⚙️', physicalEvidence: '🏪'
+                          }
+                          const colors = {
+                            product: 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20',
+                            price: 'border-l-green-500 bg-green-50 dark:bg-green-900/20',
+                            place: 'border-l-purple-500 bg-purple-50 dark:bg-purple-900/20',
+                            promotion: 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20',
+                            people: 'border-l-pink-500 bg-pink-50 dark:bg-pink-900/20',
+                            process: 'border-l-teal-500 bg-teal-50 dark:bg-teal-900/20',
+                            physicalEvidence: 'border-l-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                          }
+                          return (
+                            <Card key={key} className={`border-l-4 ${colors[key]}`}>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                  <span className="text-xl">{icons[key]}</span>
+                                  {key === 'physicalEvidence' ? 'Physical Evidence' : key.charAt(0).toUpperCase() + key.slice(1)}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-3 text-sm">
+                                {Object.entries(data).filter(([k]) => k !== 'recommendations').map(([k, v]) => (
+                                  <div key={k}>
+                                    <p className="text-xs font-medium text-muted-foreground capitalize">{k.replace(/([A-Z])/g, ' $1')}</p>
+                                    <p>{Array.isArray(v) ? v.join(', ') : v}</p>
+                                  </div>
+                                ))}
+                                {data.recommendations && (
+                                  <div className="pt-2 border-t">
+                                    <p className="text-xs font-medium text-green-600 mb-1">Recommendations:</p>
+                                    <ul className="space-y-1">
+                                      {data.recommendations.map((r, i) => (
+                                        <li key={i} className="text-xs flex items-start gap-1">
+                                          <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
+                                          <span>{r}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
+                      </div>
+
+                      {/* Action Plan */}
+                      {result.data.actionPlan && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Zap className="h-5 w-5 text-orange-500" />
+                              Action Plan
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {result.data.actionPlan.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg">
+                                  <Badge variant="outline">{item.p}</Badge>
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm">{item.action}</p>
+                                    <p className="text-xs text-muted-foreground">Timeline: {item.timeline}</p>
+                                  </div>
+                                  <Badge className={item.priority === 'High' ? 'bg-red-500' : item.priority === 'Medium' ? 'bg-yellow-500' : 'bg-green-500'}>
+                                    {item.priority}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[600px]">
-                      <pre className="text-sm whitespace-pre-wrap bg-muted/30 p-4 rounded-lg">
-                        {JSON.stringify(result.data, null, 2)}
-                      </pre>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                  )}
+
+                  {/* STP Framework */}
+                  {framework === 'stp' && result.data && (
+                    <div className="space-y-6">
+                      {/* Segmentation */}
+                      {result.data.segmentation && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <PieChart className="h-5 w-5 text-blue-500" />
+                              Market Segmentation
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              {['demographic', 'geographic', 'psychographic', 'behavioral'].map(type => {
+                                const segments = result.data.segmentation[type]
+                                if (!segments?.length) return null
+                                const icons = { demographic: '👥', geographic: '🌍', psychographic: '🧠', behavioral: '🎯' }
+                                return (
+                                  <div key={type} className="p-4 border rounded-lg">
+                                    <h4 className="font-bold text-sm flex items-center gap-2 mb-3">
+                                      <span>{icons[type]}</span>
+                                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </h4>
+                                    <div className="space-y-2">
+                                      {segments.map((seg, idx) => (
+                                        <div key={idx} className="p-2 bg-muted/30 rounded text-sm">
+                                          <p className="font-medium">{seg.segment}</p>
+                                          <p className="text-xs text-muted-foreground">{seg.characteristics}</p>
+                                          <div className="flex gap-2 mt-1">
+                                            <Badge variant="outline" className="text-[10px]">Size: {seg.size}</Badge>
+                                            <Badge className={seg.potential === 'High' ? 'bg-green-500' : 'bg-yellow-500'} >
+                                              {seg.potential}
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Targeting */}
+                      {result.data.targeting && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Target className="h-5 w-5 text-green-500" />
+                              Targeting Strategy
+                            </CardTitle>
+                            <CardDescription>Strategy: {result.data.targeting.strategy}</CardDescription>
+                          </CardHeader>
+                          <CardContent className="grid md:grid-cols-2 gap-4">
+                            {result.data.targeting.primarySegment && (
+                              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200">
+                                <Badge className="bg-green-500 mb-2">Primary Target</Badge>
+                                <h4 className="font-bold">{result.data.targeting.primarySegment.name}</h4>
+                                <p className="text-sm text-muted-foreground mt-1">{result.data.targeting.primarySegment.why}</p>
+                                <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                                  <div><span className="text-muted-foreground">Size:</span> {result.data.targeting.primarySegment.size}</div>
+                                  <div><span className="text-muted-foreground">Growth:</span> {result.data.targeting.primarySegment.growthPotential}</div>
+                                </div>
+                              </div>
+                            )}
+                            {result.data.targeting.secondarySegment && (
+                              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200">
+                                <Badge variant="outline" className="mb-2">Secondary Target</Badge>
+                                <h4 className="font-bold">{result.data.targeting.secondarySegment.name}</h4>
+                                <p className="text-sm text-muted-foreground mt-1">{result.data.targeting.secondarySegment.why}</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Positioning */}
+                      {result.data.positioning && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Megaphone className="h-5 w-5 text-purple-500" />
+                              Brand Positioning
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
+                              <p className="text-xs text-purple-600 font-medium mb-1">Positioning Statement</p>
+                              <p className="font-medium italic">{result.data.positioning.positioningStatement}</p>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-xs text-muted-foreground font-medium mb-2">Points of Difference</p>
+                                <div className="space-y-1">
+                                  {result.data.positioning.pointsOfDifference?.map((p, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                      <ArrowUpRight className="h-4 w-4 text-green-500" />
+                                      {p}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground font-medium mb-2">Points of Parity</p>
+                                <div className="space-y-1">
+                                  {result.data.positioning.pointsOfParity?.map((p, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                      <Minus className="h-4 w-4 text-gray-500" />
+                                      {p}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-muted/30 rounded-lg">
+                              <p className="text-xs text-muted-foreground">Brand Essence</p>
+                              <p className="font-bold text-lg">{result.data.positioning.brandEssence}</p>
+                              {result.data.positioning.brandPersonality && (
+                                <div className="flex gap-1 mt-2">
+                                  {result.data.positioning.brandPersonality.map((t, i) => (
+                                    <Badge key={i} variant="outline">{t}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Ansoff Matrix */}
+                  {framework === 'ansoff' && result.data && (
+                    <div className="space-y-6">
+                      {/* Current State */}
+                      {result.data.currentState && (
+                        <Card className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/30 dark:to-slate-900/30">
+                          <CardContent className="py-4">
+                            <div className="grid md:grid-cols-3 gap-4 text-center">
+                              <div>
+                                <p className="text-xs text-muted-foreground">Current Products</p>
+                                <p className="font-medium text-sm">{result.data.currentState.products}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Current Markets</p>
+                                <p className="font-medium text-sm">{result.data.currentState.markets}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Revenue Model</p>
+                                <p className="font-medium text-sm">{result.data.currentState.revenue}</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Growth Matrix Grid */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {/* Market Penetration */}
+                        {result.data.marketPenetration && (
+                          <Card className="border-l-4 border-l-green-500">
+                            <CardHeader className="bg-green-50 dark:bg-green-900/20">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">📈</span>
+                                Market Penetration
+                                <Badge className="bg-green-500">Low Risk</Badge>
+                              </CardTitle>
+                              <CardDescription>{result.data.marketPenetration.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                              {result.data.marketPenetration.strategies?.map((s, i) => (
+                                <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                                  <p className="font-medium text-sm">{s.strategy}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">Expected: {s.expectedGrowth}</p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {s.tactics?.map((t, j) => (
+                                      <Badge key={j} variant="outline" className="text-[10px]">{t}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                              {result.data.marketPenetration.quickWins && (
+                                <div>
+                                  <p className="text-xs font-medium text-green-600">Quick Wins:</p>
+                                  <ul className="text-sm">
+                                    {result.data.marketPenetration.quickWins.map((w, i) => (
+                                      <li key={i}>• {w}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Market Development */}
+                        {result.data.marketDevelopment && (
+                          <Card className="border-l-4 border-l-blue-500">
+                            <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">🌍</span>
+                                Market Development
+                                <Badge className="bg-yellow-500">Medium Risk</Badge>
+                              </CardTitle>
+                              <CardDescription>{result.data.marketDevelopment.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                              {result.data.marketDevelopment.newMarkets?.map((m, i) => (
+                                <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                                  <p className="font-medium text-sm">{m.market}</p>
+                                  <p className="text-xs text-muted-foreground">{m.opportunity}</p>
+                                  <p className="text-xs mt-1">Entry: {m.entryStrategy}</p>
+                                </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Product Development */}
+                        {result.data.productDevelopment && (
+                          <Card className="border-l-4 border-l-purple-500">
+                            <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">🚀</span>
+                                Product Development
+                                <Badge className="bg-yellow-500">Medium Risk</Badge>
+                              </CardTitle>
+                              <CardDescription>{result.data.productDevelopment.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                              {result.data.productDevelopment.opportunities?.map((o, i) => (
+                                <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                                  <p className="font-medium text-sm">{o.product}</p>
+                                  <p className="text-xs text-muted-foreground">Need: {o.targetNeed}</p>
+                                  <p className="text-xs">Timeline: {o.timeline}</p>
+                                </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Diversification */}
+                        {result.data.diversification && (
+                          <Card className="border-l-4 border-l-red-500">
+                            <CardHeader className="bg-red-50 dark:bg-red-900/20">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <span className="text-xl">🎲</span>
+                                Diversification
+                                <Badge className="bg-red-500">High Risk</Badge>
+                              </CardTitle>
+                              <CardDescription>{result.data.diversification.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-3">
+                              <div className="p-3 bg-muted/30 rounded-lg">
+                                <p className="text-xs font-medium text-muted-foreground">Recommendation</p>
+                                <p className="text-sm">{result.data.diversification.recommendation}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+
+                      {/* Recommended Path */}
+                      {result.data.recommendedPath && (
+                        <Card className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Target className="h-5 w-5 text-green-500" />
+                              Recommended Growth Path
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                              <Badge className="bg-green-500 mb-2">{result.data.recommendedPath.primaryStrategy}</Badge>
+                              <p className="text-sm">{result.data.recommendedPath.rationale}</p>
+                            </div>
+                            {result.data.recommendedPath.sequencing && (
+                              <div>
+                                <p className="text-xs font-medium mb-2">Sequencing:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {result.data.recommendedPath.sequencing.map((s, i) => (
+                                    <div key={i} className="flex items-center gap-1">
+                                      <Badge variant="outline">{i + 1}. {s}</Badge>
+                                      {i < result.data.recommendedPath.sequencing.length - 1 && <span>→</span>}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Full-Funnel Strategy */}
+                  {framework === 'funnel' && result.data && (
+                    <div className="space-y-6">
+                      {/* Funnel Overview */}
+                      {result.data.funnelOverview && (
+                        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                          <CardContent className="py-4">
+                            <div className="grid md:grid-cols-3 gap-4">
+                              <div>
+                                <p className="text-xs text-muted-foreground">Total Addressable Market</p>
+                                <p className="font-bold">{result.data.funnelOverview.totalAddressableMarket}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Current Funnel Health</p>
+                                <p className="font-medium text-sm">{result.data.funnelOverview.currentFunnelHealth}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Biggest Leaks</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {result.data.funnelOverview.biggestLeaks?.map((l, i) => (
+                                    <Badge key={i} variant="outline" className="text-[10px] text-red-600">{l}</Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Visual Funnel */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Zap className="h-5 w-5 text-purple-500" />
+                            Full Marketing Funnel
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {renderFunnel(result.data)}
+                        </CardContent>
+                      </Card>
+
+                      {/* Detailed Stages */}
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {['awareness', 'consideration', 'decision', 'retention', 'advocacy'].map(stage => {
+                          const data = result.data[stage]
+                          if (!data) return null
+                          const icons = { awareness: '👁️', consideration: '🤔', decision: '✅', retention: '💎', advocacy: '📣' }
+                          const colors = {
+                            awareness: 'border-l-purple-500 bg-purple-50 dark:bg-purple-900/20',
+                            consideration: 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20',
+                            decision: 'border-l-green-500 bg-green-50 dark:bg-green-900/20',
+                            retention: 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20',
+                            advocacy: 'border-l-pink-500 bg-pink-50 dark:bg-pink-900/20'
+                          }
+                          return (
+                            <Card key={stage} className={`border-l-4 ${colors[stage]}`}>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                  <span className="text-xl">{icons[stage]}</span>
+                                  {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                                </CardTitle>
+                                <CardDescription>{data.stage}</CardDescription>
+                              </CardHeader>
+                              <CardContent className="space-y-3 text-sm">
+                                <div>
+                                  <p className="text-xs font-medium text-muted-foreground">Goal</p>
+                                  <p>{data.goal || data.objective}</p>
+                                </div>
+                                {data.channels && (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground">Channels</p>
+                                    <div className="space-y-1">
+                                      {data.channels.slice(0, 2).map((c, i) => (
+                                        <div key={i} className="text-xs p-2 bg-white dark:bg-gray-800 rounded">
+                                          <p className="font-medium">{c.channel}</p>
+                                          <p className="text-muted-foreground">{c.tactic}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {data.metrics?.primary && (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground">KPIs</p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {data.metrics.primary.map((m, i) => (
+                                        <Badge key={i} variant="outline" className="text-[10px]">{m}</Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )
+                        })}
+                      </div>
+
+                      {/* Budget Allocation */}
+                      {result.data.budgetAllocation && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <DollarSign className="h-5 w-5 text-green-500" />
+                              Budget Allocation by Funnel Stage
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid md:grid-cols-4 gap-4">
+                              {Object.entries(result.data.budgetAllocation).map(([stage, data]) => (
+                                <div key={stage} className="text-center p-4 bg-muted/30 rounded-lg">
+                                  <p className="text-2xl font-bold">{data.percentage}%</p>
+                                  <p className="text-sm font-medium capitalize">{stage}</p>
+                                  <p className="text-xs text-muted-foreground">{data.rationale}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Tech Stack */}
+                      {result.data.techStack && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Layers className="h-5 w-5 text-blue-500" />
+                              Recommended Tech Stack
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid md:grid-cols-3 gap-3">
+                              {result.data.techStack.map((tool, idx) => (
+                                <div key={idx} className="p-3 border rounded-lg">
+                                  <p className="font-medium text-sm">{tool.tool}</p>
+                                  <p className="text-xs text-muted-foreground">{tool.purpose}</p>
+                                  <Badge variant="outline" className="text-[10px] mt-1">{tool.funnelStage}</Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
