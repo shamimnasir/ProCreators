@@ -156,13 +156,73 @@ export async function POST(request) {
       )
     }
 
+    // Language detection - combine all text inputs
+    const allText = `${productName} ${productDescription || ''} ${targetAudience || ''} ${painPoints || ''} ${benefits || ''}`
+    
+    // Detect non-Latin scripts
+    const bengaliPattern = /[\u0980-\u09FF]/
+    const hindiPattern = /[\u0900-\u097F]/
+    const arabicPattern = /[\u0600-\u06FF]/
+    const chinesePattern = /[\u4E00-\u9FFF]/
+    const japanesePattern = /[\u3040-\u309F\u30A0-\u30FF]/
+    const koreanPattern = /[\uAC00-\uD7AF]/
+    const thaiPattern = /[\u0E00-\u0E7F]/
+    const tamilPattern = /[\u0B80-\u0BFF]/
+    const teluguPattern = /[\u0C00-\u0C7F]/
+    
+    let detectedLanguage = 'English'
+    let isNonEnglish = false
+    
+    if (bengaliPattern.test(allText)) {
+      detectedLanguage = 'Bengali (বাংলা)'
+      isNonEnglish = true
+    } else if (hindiPattern.test(allText)) {
+      detectedLanguage = 'Hindi (हिंदी)'
+      isNonEnglish = true
+    } else if (arabicPattern.test(allText)) {
+      detectedLanguage = 'Arabic (العربية)'
+      isNonEnglish = true
+    } else if (chinesePattern.test(allText)) {
+      detectedLanguage = 'Chinese (中文)'
+      isNonEnglish = true
+    } else if (japanesePattern.test(allText)) {
+      detectedLanguage = 'Japanese (日本語)'
+      isNonEnglish = true
+    } else if (koreanPattern.test(allText)) {
+      detectedLanguage = 'Korean (한국어)'
+      isNonEnglish = true
+    } else if (thaiPattern.test(allText)) {
+      detectedLanguage = 'Thai (ไทย)'
+      isNonEnglish = true
+    } else if (tamilPattern.test(allText)) {
+      detectedLanguage = 'Tamil (தமிழ்)'
+      isNonEnglish = true
+    } else if (teluguPattern.test(allText)) {
+      detectedLanguage = 'Telugu (తెలుగు)'
+      isNonEnglish = true
+    }
+
     const frameworkInfo = FRAMEWORKS[framework] || FRAMEWORKS.aida
     const platformInfo = PLATFORMS[platform] || PLATFORMS.facebook
     const goalInfo = GOALS[goal] || GOALS.sales
     const toneInfo = TONES[tone] || TONES.casual
 
-    const systemPrompt = `You are an elite performance marketer and ad copywriter with expertise in conversion optimization. You specialize in creating high-converting ad copy using proven frameworks.
+    // Language instruction for the prompt
+    const languageInstruction = isNonEnglish 
+      ? `\n\n**CRITICAL LANGUAGE REQUIREMENT:**
+You MUST generate ALL ad copy content in ${detectedLanguage}. This is extremely important.
+- All hooks MUST be in ${detectedLanguage}
+- All headlines MUST be in ${detectedLanguage}
+- All primary text MUST be in ${detectedLanguage}
+- All descriptions MUST be in ${detectedLanguage}
+- All CTAs MUST be in ${detectedLanguage}
+- All tips and recommendations should be in ${detectedLanguage}
+DO NOT translate to English. Write naturally and fluently in ${detectedLanguage}.
+The user's input language is ${detectedLanguage}, so respond entirely in that language.`
+      : ''
 
+    const systemPrompt = `You are an elite performance marketer and ad copywriter with expertise in conversion optimization. You specialize in creating high-converting ad copy using proven frameworks.
+${isNonEnglish ? `\n**IMPORTANT: The user is writing in ${detectedLanguage}. You MUST respond entirely in ${detectedLanguage}. Do not use English.**\n` : ''}
 YOUR EXPERTISE:
 - Deep understanding of copywriting frameworks (AIDA, PAS, BAB, 4Ps, FAB)
 - Platform-specific best practices for Facebook, Google, TikTok, LinkedIn, Instagram, YouTube
@@ -176,8 +236,11 @@ KEY PRINCIPLES:
 3. Benefits over features always
 4. Social proof increases trust
 5. Clear, single CTA per ad
-6. Use power words: "You", "Free", "New", "Because", "Instantly"
+6. Use power words: "You", "Free", "New", "Because", "Instantly" ${isNonEnglish ? `(use equivalent words in ${detectedLanguage})` : ''}
 7. Create urgency without being spammy
+8. Match tone to target audience
+
+Always respond in valid JSON format.${isNonEnglish ? ` All text content must be in ${detectedLanguage}.` : ''}`
 8. Match tone to target audience
 
 Always respond with valid JSON.`
