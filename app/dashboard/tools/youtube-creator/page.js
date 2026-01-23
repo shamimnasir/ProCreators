@@ -210,6 +210,7 @@ export default function YouTubeCreatorPage() {
           videoLength,
           contentTone,
           hookType,
+          scriptStructure,
           targetAudience,
           mainKeyword,
           keyPoints
