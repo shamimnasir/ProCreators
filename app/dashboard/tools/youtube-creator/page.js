@@ -268,6 +268,105 @@ export default function YouTubeCreatorPage() {
     setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
   }, [toast])
 
+  // Format script with visual sections and color-coded markers
+  const formatScript = useCallback((scriptText) => {
+    if (!scriptText) return null
+    
+    // Section patterns and their styles
+    const sectionPatterns = [
+      { pattern: /\[HOOK[^\]]*\]/gi, color: 'bg-green-100 dark:bg-green-900/40 border-green-500', icon: '🎣', label: 'HOOK' },
+      { pattern: /\[RISING ACTION[^\]]*\]/gi, color: 'bg-orange-100 dark:bg-orange-900/40 border-orange-500', icon: '📈', label: 'RISING ACTION' },
+      { pattern: /\[CONFLICT[^\]]*\]/gi, color: 'bg-red-100 dark:bg-red-900/40 border-red-500', icon: '⚡', label: 'CONFLICT' },
+      { pattern: /\[COMEBACK[^\]]*\]/gi, color: 'bg-teal-100 dark:bg-teal-900/40 border-teal-500', icon: '🔄', label: 'COMEBACK' },
+      { pattern: /\[PAYOFF[^\]]*\]/gi, color: 'bg-purple-100 dark:bg-purple-900/40 border-purple-500', icon: '🎯', label: 'PAYOFF' },
+      { pattern: /\[RE-HOOK[^\]]*\]/gi, color: 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-500', icon: '🪝', label: 'RE-HOOK' },
+      { pattern: /\[LOOP[^\]]*\]/gi, color: 'bg-blue-100 dark:bg-blue-900/40 border-blue-500', icon: '🔁', label: 'LOOP' },
+      { pattern: /\[CTA[^\]]*\]/gi, color: 'bg-pink-100 dark:bg-pink-900/40 border-pink-500', icon: '📢', label: 'CTA' },
+    ]
+    
+    // Split script into sections based on major markers
+    const sectionRegex = /(\[(?:HOOK|RISING ACTION|CONFLICT|COMEBACK|PAYOFF|RE-HOOK|LOOP|CTA)[^\]]*\])/gi
+    const parts = scriptText.split(sectionRegex).filter(Boolean)
+    
+    let currentSection = null
+    const sections = []
+    let currentContent = []
+    
+    parts.forEach((part) => {
+      const matchedSection = sectionPatterns.find(s => s.pattern.test(part))
+      if (matchedSection) {
+        if (currentSection && currentContent.length > 0) {
+          sections.push({ ...currentSection, content: currentContent.join('') })
+        }
+        currentSection = { ...matchedSection, header: part }
+        currentContent = []
+        matchedSection.pattern.lastIndex = 0 // Reset regex
+      } else {
+        currentContent.push(part)
+      }
+    })
+    
+    // Push last section
+    if (currentSection && currentContent.length > 0) {
+      sections.push({ ...currentSection, content: currentContent.join('') })
+    }
+    
+    // If no sections found, treat as single block
+    if (sections.length === 0) {
+      sections.push({ 
+        color: 'bg-gray-100 dark:bg-gray-800 border-gray-400', 
+        icon: '📝', 
+        label: 'SCRIPT',
+        header: '',
+        content: scriptText 
+      })
+    }
+    
+    // Format inline markers within content
+    const formatContent = (content) => {
+      if (!content) return null
+      
+      // Replace markers with styled spans
+      let formatted = content
+        // Scene markers
+        .replace(/\[SCENE[^\]]*\]/gi, (match) => `<span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 text-xs font-medium mr-1">🎬 ${match.replace(/[\[\]]/g, '')}</span>`)
+        // Text overlay markers
+        .replace(/\[TEXT[^\]]*\]/gi, (match) => `<span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-xs font-medium mr-1">📝 ${match.replace(/[\[\]]/g, '')}</span>`)
+        // Sound markers
+        .replace(/\[SOUND[^\]]*\]/gi, (match) => `<span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 text-xs font-medium mr-1">🔊 ${match.replace(/[\[\]]/g, '')}</span>`)
+        // Emotional intensity markers
+        .replace(/EMOTIONAL INTENSITY:\s*(HIGH|MEDIUM|LOW)[^\]]*\]?/gi, (match, level) => {
+          const colors = {
+            HIGH: 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200',
+            MEDIUM: 'bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200',
+            LOW: 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200'
+          }
+          return `<span class="inline-flex items-center px-2 py-0.5 rounded ${colors[level.toUpperCase()] || colors.MEDIUM} text-xs font-medium mr-1">🔥 ${level}</span>`
+        })
+        // Scene end
+        .replace(/\[SCENE END\]/gi, '<div class="border-t border-dashed border-gray-300 dark:border-gray-600 my-3 pt-2 text-xs text-muted-foreground">— End of Scene —</div>')
+        // Scene start
+        .replace(/\[SCENE START\]/gi, '<div class="border-t border-dashed border-gray-300 dark:border-gray-600 my-3 pt-2 text-xs text-muted-foreground">— Scene Start —</div>')
+      
+      return <div className="text-sm leading-relaxed whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: formatted }} />
+    }
+    
+    return sections.map((section, idx) => (
+      <div key={idx} className={`rounded-lg border-l-4 ${section.color} p-4 mb-4`}>
+        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-current/10">
+          <span className="text-xl">{section.icon}</span>
+          <span className="font-bold text-sm uppercase tracking-wide">{section.label}</span>
+          {section.header && section.header.includes('EMOTIONAL INTENSITY') && (
+            <Badge variant="outline" className="ml-auto text-[10px]">
+              {section.header.match(/EMOTIONAL INTENSITY:\s*(\w+)/i)?.[1] || ''}
+            </Badge>
+          )}
+        </div>
+        {formatContent(section.content)}
+      </div>
+    ))
+  }, [])
+
   const selectedHook = HOOK_TYPES.find(h => h.id === hookType)
   const selectedLength = VIDEO_LENGTHS.find(l => l.id === videoLength)
   const selectedStructure = SCRIPT_STRUCTURES.find(s => s.id === scriptStructure)
