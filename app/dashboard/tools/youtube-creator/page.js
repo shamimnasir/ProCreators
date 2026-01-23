@@ -298,11 +298,11 @@ export default function YouTubeCreatorPage() {
         <CardContent className="py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold">BENS</div>
-              <div className="text-xs text-red-100">Script Method</div>
+              <div className="text-2xl font-bold">3</div>
+              <div className="text-xs text-red-100">Script Structures</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">6</div>
+              <div className="text-2xl font-bold">8</div>
               <div className="text-xs text-red-100">Hook Types</div>
             </div>
             <div className="text-center">
