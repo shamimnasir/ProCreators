@@ -922,30 +922,40 @@ export default function LandingPageCopyPage() {
                       )}
 
                       {/* FAQ Section */}
-                      {activeSection === 'faq' && result.data.faqSection && (
+                      {activeSection === 'faq' && (
                         <div className="space-y-4">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Section Title</Label>
-                            <p className="text-xl font-bold mt-1">{result.data.faqSection.sectionTitle}</p>
-                          </div>
+                          {result.data.faqSection && result.data.faqSection.faqs?.length > 0 ? (
+                            <>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Section Title</Label>
+                                <p className="text-xl font-bold mt-1">{result.data.faqSection.sectionTitle}</p>
+                              </div>
                           
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Headline</Label>
-                            <p className="text-lg mt-1">{result.data.faqSection.headline}</p>
-                          </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Headline</Label>
+                                <p className="text-lg mt-1">{result.data.faqSection.headline}</p>
+                              </div>
                           
-                          <Accordion type="single" collapsible className="w-full">
-                            {result.data.faqSection.faqs?.map((faq, idx) => (
-                              <AccordionItem key={idx} value={`faq-${idx}`}>
-                                <AccordionTrigger className="text-left font-medium">
-                                  {faq.question}
-                                </AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                  {faq.answer}
-                                </AccordionContent>
-                              </AccordionItem>
-                            ))}
-                          </Accordion>
+                              <Accordion type="single" collapsible className="w-full">
+                                {result.data.faqSection.faqs?.map((faq, idx) => (
+                                  <AccordionItem key={idx} value={`faq-${idx}`}>
+                                    <AccordionTrigger className="text-left font-medium">
+                                      {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="text-muted-foreground">
+                                      {faq.answer}
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                ))}
+                              </Accordion>
+                            </>
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <HelpCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                              <p className="font-medium">FAQ section not generated</p>
+                              <p className="text-sm mt-1">Try clicking "Regenerate" to get FAQ content.</p>
+                            </div>
+                          )}
                         </div>
                       )}
 
