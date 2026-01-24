@@ -1280,6 +1280,70 @@ export default function MarketingStrategyPage() {
     )
   }
 
+  // AutoSave helper functions
+  const getCurrentData = useCallback(() => ({
+    title: businessName ? `Marketing Strategy: ${businessName.substring(0, 50)}` : 'Untitled Strategy',
+    businessName,
+    businessDescription,
+    industry,
+    businessStage,
+    targetAudience,
+    competitors,
+    currentChallenges,
+    goals,
+    budget,
+    timeline,
+    existingChannels,
+    uniqueValue,
+    framework,
+    logoUrl,
+    result
+  }), [businessName, businessDescription, industry, businessStage, targetAudience, competitors, currentChallenges, goals, budget, timeline, existingChannels, uniqueValue, framework, logoUrl, result])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.businessName) setBusinessName(data.businessName)
+    if (data.businessDescription) setBusinessDescription(data.businessDescription)
+    if (data.industry) setIndustry(data.industry)
+    if (data.businessStage) setBusinessStage(data.businessStage)
+    if (data.targetAudience) setTargetAudience(data.targetAudience)
+    if (data.competitors) setCompetitors(data.competitors)
+    if (data.currentChallenges) setCurrentChallenges(data.currentChallenges)
+    if (data.goals) setGoals(data.goals)
+    if (data.budget) setBudget(data.budget)
+    if (data.timeline) setTimeline(data.timeline)
+    if (data.existingChannels) setExistingChannels(data.existingChannels)
+    if (data.uniqueValue) setUniqueValue(data.uniqueValue)
+    if (data.framework) setFramework(data.framework)
+    if (data.logoUrl) {
+      setLogoUrl(data.logoUrl)
+      setLogoPreview(data.logoUrl)
+    }
+    if (data.result) {
+      setResult(data.result)
+      setActiveTab('results')
+    }
+  }, [])
+
+  const handleStartNew = useCallback(() => {
+    setBusinessName('')
+    setBusinessDescription('')
+    setIndustry('saas')
+    setBusinessStage('growth')
+    setTargetAudience('')
+    setCompetitors('')
+    setCurrentChallenges('')
+    setGoals('')
+    setBudget('small')
+    setTimeline('12 months')
+    setExistingChannels('')
+    setUniqueValue('')
+    setFramework('complete')
+    setLogoUrl('')
+    setLogoPreview(null)
+    setResult(null)
+    setActiveTab('setup')
+  }, [])
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
