@@ -114,6 +114,32 @@ export async function POST(request) {
 
 ${isNonEnglish ? `**IMPORTANT: Generate the email in ${detectedLanguage} as the user's input is in that language.**\n` : ''}
 
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+NEVER use these overused, cliché words that make writing sound AI-generated:
+- unlock, unleash, unveil
+- revolutionize, revolutionary
+- game-changer, game-changing
+- cutting-edge, groundbreaking
+- supercharge, turbocharge, skyrocket
+- seamless, seamlessly
+- harness, leverage (as verbs)
+- elevate, empower, transform (overused)
+- dive into, dive deep, deep dive
+- journey (customer experience context)
+- robust, scalable, synergy
+- paradigm shift, disrupt, disruptive
+- holistic, streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- world-class, state-of-the-art
+- next-generation, best-in-class
+- delve, delve into
+- foster, facilitate (overused)
+- comprehensive, cutting-edge
+
+Instead, use clear, direct, natural language that sounds human.
+
 KEY PRINCIPLES FOR PROFESSIONAL EMAILS:
 
 1. SUBJECT LINE:
@@ -142,6 +168,7 @@ KEY PRINCIPLES FOR PROFESSIONAL EMAILS:
    - Make action items clear and specific
    - Include deadlines when relevant
    - Keep total length under 200 words when possible
+   - Sound human, not robotic
 
 Always respond in valid JSON format.`
 
