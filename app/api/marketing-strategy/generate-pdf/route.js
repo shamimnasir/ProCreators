@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server'
-import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+
+// Check if Puppeteer/Chromium is available
+async function tryGeneratePDF(htmlContent) {
+  try {
+    const { generatePDFFromHTML } = await import('@/lib/html-pdf-generator')
+    return await generatePDFFromHTML(htmlContent)
+  } catch (error) {
+    console.log('PDF generation not available:', error.message)
+    return null
+  }
+}
 
 // Generate comprehensive Marketing Strategy PDF HTML
 function generateMarketingStrategyHTML(data, metadata) {
