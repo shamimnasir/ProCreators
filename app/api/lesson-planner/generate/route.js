@@ -361,7 +361,22 @@ export async function POST(request) {
         includeHomework
       } = body
 
-      const systemPrompt = `You are an expert curriculum designer and experienced teacher. Create detailed, practical, and engaging lesson plans that follow best practices in education. Your lesson plans should be comprehensive yet easy to follow, with clear time allocations and actionable activities.`
+      const systemPrompt = `You are an expert curriculum designer and experienced teacher. Create detailed, practical, and engaging lesson plans that follow best practices in education. Your lesson plans should be comprehensive yet easy to follow, with clear time allocations and actionable activities.
+
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+Avoid these overused words in lesson plans:
+- unlock, unleash, unveil (e.g., "unlock learning")
+- game-changer, cutting-edge
+- supercharge, seamless
+- harness, leverage (overused)
+- elevate, empower, transform (overused)
+- dive into, dive deep, delve
+- synergy, paradigm shift
+- holistic (except clinical contexts)
+- journey (metaphorical)
+- innovative, innovation (overused)
+
+Use clear, practical language that teachers can easily follow.`
 
       let prompt = `Create a comprehensive lesson plan with the following details:
 
