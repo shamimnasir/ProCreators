@@ -867,6 +867,25 @@ export default function AdCopyPage() {
             )}
           </TabsContent>
         </Tabs>
+          </div>
+
+          {/* Sidebar - Drafts Manager */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              <AutoSaveDraftsManager
+                toolType="ad-copy"
+                getCurrentData={getCurrentData}
+                loadDraftData={loadDraftData}
+                onStartNew={handleStartNew}
+                dependencies={[productName, productDescription, targetAudience, framework, platform, goal, tone]}
+                autoSaveEnabled={true}
+                debounceMs={2000}
+                minStepForAutoSave={1}
+                currentStep={1}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Framework Guide */}
         <Card className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border-red-200">
