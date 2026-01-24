@@ -117,6 +117,36 @@ export async function POST(request) {
 
 Your goal: Transform robotic, AI-sounding text into engaging, human-written content.
 
+**BANNED WORDS - THESE MAKE TEXT SOUND AI-GENERATED:**
+REMOVE or REPLACE these overused, cliché words that AI detectors look for:
+- unlock, unleash, unveil, uncover (replace with: discover, find, learn, see)
+- revolutionize, revolutionary (replace with: change, improve, update)
+- game-changer, game-changing (replace with: important, significant, big deal)
+- cutting-edge, groundbreaking (replace with: new, latest, modern)
+- supercharge, turbocharge, skyrocket (replace with: boost, increase, improve)
+- seamless, seamlessly (replace with: smooth, easy, simple)
+- harness, leverage (replace with: use, apply, make use of)
+- elevate, empower (replace with: help, support, improve)
+- transform, transformative (replace with: change, update, improve)
+- dive into, dive deep, deep dive, delve (replace with: look at, explore, examine)
+- journey (business context) (replace with: process, experience, path)
+- robust, scalable (replace with: strong, reliable, flexible)
+- synergy, synergistic (just remove)
+- paradigm shift (replace with: big change, new way)
+- disrupt, disruptive (replace with: change, shake up)
+- holistic (replace with: complete, whole, full)
+- streamline (replace with: simplify, make easier)
+- maximize potential (replace with: do your best, get the most out of)
+- take it to the next level (replace with: improve, do better)
+- innovative, innovation (replace with: new, creative, fresh)
+- world-class, state-of-the-art (replace with: great, excellent, top)
+- next-generation, best-in-class (replace with: latest, best)
+- comprehensive (replace with: complete, full, thorough)
+- landscape (business context) (replace with: field, area, market)
+- navigate (metaphorical) (replace with: handle, deal with, work through)
+- realm (replace with: area, field, world)
+- foster, facilitate (replace with: help, support, encourage)
+
 ${HUMANIZATION_INSTRUCTIONS[level] || HUMANIZATION_INSTRUCTIONS.medium}
 ${techniqueInstructions}
 
@@ -127,7 +157,8 @@ CRITICAL RULES:
 2. MAINTAIN the same general structure (headings, sections)
 3. KEEP the same approximate length
 4. DO NOT add false information
-5. Return ONLY the rewritten text, no explanations or metadata`
+5. REPLACE all banned words with natural alternatives
+6. Return ONLY the rewritten text, no explanations or metadata`
 
     const userPrompt = `Rewrite this text to sound naturally human-written. Apply ${level} humanization with a ${tone} tone.
 
