@@ -74,7 +74,28 @@ function generateMarketingStrategyHTML(data, metadata) {
       border-radius: 12px;
       page-break-after: always;
     }
-    .cover-logo { font-size: 64px; margin-bottom: 20px; }
+    .cover-logo { 
+      font-size: 64px; 
+      margin-bottom: 20px;
+    }
+    .cover-logo img {
+      max-width: 180px;
+      max-height: 120px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .cover-logo-placeholder {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
     .cover-title { font-size: 36px; font-weight: 700; color: #1e40af; margin-bottom: 10px; }
     .cover-subtitle { font-size: 18px; color: #64748b; margin-bottom: 40px; }
     .cover-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
