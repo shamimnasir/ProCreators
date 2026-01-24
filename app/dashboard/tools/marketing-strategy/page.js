@@ -161,31 +161,8 @@ export default function MarketingStrategyPage() {
         setActiveTab('results')
         setResultTab('overview')
         
-        // Auto-save to library
-        try {
-          const saveResult = await saveToLibrary({
-            type: 'marketing-strategy',
-            category: 'text',
-            title: `Marketing Strategy: ${businessName.substring(0, 40)}`,
-            description: `${data.metadata.framework} for ${industry}`,
-            content: JSON.stringify(data.data),
-            metadata: {
-              framework: data.metadata.framework,
-              industry,
-              businessStage,
-              budget,
-              contentType: 'marketing-strategy'
-            }
-          })
-          if (saveResult.success) {
-            toast({ title: '📊 Marketing Strategy Generated!', description: '✅ Auto-saved to Library' })
-          } else {
-            toast({ title: '📊 Marketing Strategy Generated!' })
-          }
-        } catch (saveError) {
-          console.error('Failed to auto-save:', saveError)
-          toast({ title: '📊 Marketing Strategy Generated!' })
-        }
+        // Don't auto-save text version - PDF will be saved on export
+        toast({ title: '📊 Marketing Strategy Generated!', description: 'Click "Export PDF" to save a formatted copy' })
       } else {
         throw new Error(data.error)
       }
@@ -216,7 +193,10 @@ export default function MarketingStrategyPage() {
     toast({ title: 'Strategy exported as JSON!' })
   }
 
-  // Export to PDF
+  // State for PDF export
+  const [exportingPDF, setExportingPDF] = useState(false)
+
+  // Export to PDF - Direct download
   const exportToPDF = async () => {
     if (!result) return
     
