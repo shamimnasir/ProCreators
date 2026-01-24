@@ -974,8 +974,15 @@ export async function POST(request) {
       })
     }
     
-    // Convert to base64
-    const pdfBase64 = pdfBuffer.toString('base64')
+    // Convert to base64 - handle both Buffer and Uint8Array
+    let pdfBase64
+    if (Buffer.isBuffer(pdfBuffer)) {
+      pdfBase64 = pdfBuffer.toString('base64')
+    } else if (pdfBuffer instanceof Uint8Array) {
+      pdfBase64 = Buffer.from(pdfBuffer).toString('base64')
+    } else {
+      pdfBase64 = Buffer.from(pdfBuffer).toString('base64')
+    }
     const pdfDataUrl = `data:application/pdf;base64,${pdfBase64}`
 
     // Save to library if requested
