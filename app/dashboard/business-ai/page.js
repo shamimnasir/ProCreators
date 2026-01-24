@@ -103,12 +103,12 @@ const BUSINESS_CATEGORIES = [
     tools: [
       {
         id: 'email-campaigns',
-        name: 'Email Campaign Writer',
+        name: 'Email Campaign & Newsletter',
         description: 'Complete email sequences and newsletters',
         icon: '📧',
         href: '/dashboard/tools/email-campaigns',
         useCase: 'Email marketing',
-        badge: 'Hot'
+        badge: 'New'
       },
       {
         id: 'subject-lines',
