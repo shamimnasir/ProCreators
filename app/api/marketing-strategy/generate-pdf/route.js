@@ -258,7 +258,12 @@ function generateMarketingStrategyHTML(data, metadata) {
 <body>
   <!-- Cover Page -->
   <div class="cover-page">
-    <div class="cover-logo">📊</div>
+    <div class="cover-logo">
+      ${metadata.logoUrl ? 
+        `<img src="${metadata.logoUrl}" alt="${escapeHTML(metadata.businessName)} logo" />` : 
+        `<div class="cover-logo-placeholder">🎯</div>`
+      }
+    </div>
     <h1 class="cover-title">${escapeHTML(metadata.businessName)}</h1>
     <p class="cover-subtitle">${escapeHTML(metadata.framework)}</p>
     <div class="cover-meta">
