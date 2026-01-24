@@ -950,53 +950,63 @@ export default function LandingPageCopyPage() {
                       )}
 
                       {/* Comparison Section */}
-                      {activeSection === 'comparison' && result.data.comparisonSection && (
+                      {activeSection === 'comparison' && (
                         <div className="space-y-4">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Section Title</Label>
-                            <p className="text-xl font-bold mt-1">{result.data.comparisonSection.sectionTitle}</p>
-                          </div>
+                          {result.data.comparisonSection && result.data.comparisonSection.categories?.length > 0 ? (
+                            <>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Section Title</Label>
+                                <p className="text-xl font-bold mt-1">{result.data.comparisonSection.sectionTitle}</p>
+                              </div>
                           
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Headline</Label>
-                            <p className="text-lg mt-1">{result.data.comparisonSection.headline}</p>
-                          </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Headline</Label>
+                                <p className="text-lg mt-1">{result.data.comparisonSection.headline}</p>
+                              </div>
                           
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
-                              <thead>
-                                <tr>
-                                  <th className="p-3 text-left bg-muted/50">Feature</th>
-                                  <th className="p-3 text-left bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300">Us ✓</th>
-                                  <th className="p-3 text-left bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300">Them ✗</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {result.data.comparisonSection.categories?.map((cat, idx) => (
-                                  <tr key={idx} className="border-t">
-                                    <td className="p-3 font-medium">{cat}</td>
-                                    <td className="p-3 bg-green-50/50 dark:bg-green-950/20">
-                                      <div className="flex items-center gap-2">
-                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                        {result.data.comparisonSection.yourProduct?.[idx]}
-                                      </div>
-                                    </td>
-                                    <td className="p-3 bg-red-50/50 dark:bg-red-950/20">
-                                      <div className="flex items-center gap-2">
-                                        <XCircle className="h-4 w-4 text-red-500" />
-                                        {result.data.comparisonSection.competitors?.[idx]}
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                  <thead>
+                                    <tr>
+                                      <th className="p-3 text-left bg-muted/50">Feature</th>
+                                      <th className="p-3 text-left bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300">Us ✓</th>
+                                      <th className="p-3 text-left bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300">Them ✗</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {result.data.comparisonSection.categories?.map((cat, idx) => (
+                                      <tr key={idx} className="border-t">
+                                        <td className="p-3 font-medium">{cat}</td>
+                                        <td className="p-3 bg-green-50/50 dark:bg-green-950/20">
+                                          <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                            {result.data.comparisonSection.yourProduct?.[idx]}
+                                          </div>
+                                        </td>
+                                        <td className="p-3 bg-red-50/50 dark:bg-red-950/20">
+                                          <div className="flex items-center gap-2">
+                                            <XCircle className="h-4 w-4 text-red-500" />
+                                            {result.data.comparisonSection.competitors?.[idx]}
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
                           
-                          <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                            <Label className="text-xs text-muted-foreground">Bottom Line</Label>
-                            <p className="font-medium mt-1">{result.data.comparisonSection.bottomLine}</p>
-                          </div>
+                              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                                <Label className="text-xs text-muted-foreground">Bottom Line</Label>
+                                <p className="font-medium mt-1">{result.data.comparisonSection.bottomLine}</p>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                              <p className="font-medium">Comparison section not generated</p>
+                              <p className="text-sm mt-1">Try clicking "Regenerate" to get a complete comparison table, or provide more details about your competitors in Pro Mode.</p>
+                            </div>
+                          )}
                         </div>
                       )}
 
