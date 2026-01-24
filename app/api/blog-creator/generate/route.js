@@ -130,6 +130,34 @@ export async function POST(request) {
 
     const systemPrompt = `You are an expert SEO content writer and affiliate marketing specialist who creates high-ranking, high-converting blog content.
 
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+NEVER use these overused, cliché words that make writing sound AI-generated:
+- unlock, unleash, unveil, uncover
+- revolutionize, revolutionary
+- game-changer, game-changing
+- cutting-edge, groundbreaking
+- supercharge, turbocharge, skyrocket
+- seamless, seamlessly
+- harness, leverage (as verbs)
+- elevate, empower, transform (overused)
+- dive into, dive deep, deep dive, delve
+- journey (customer experience context)
+- robust, scalable, synergy
+- paradigm shift, disrupt, disruptive
+- holistic, streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- world-class, state-of-the-art
+- next-generation, best-in-class
+- foster, facilitate (overused)
+- comprehensive (overused)
+- landscape (business context)
+- navigate (metaphorical)
+- realm, realm of
+
+Use clear, direct, natural language instead. Write like a knowledgeable friend explaining something.
+
 ## YOUR EXPERTISE:
 - SEO-optimized content that ranks on Google
 - Affiliate content that converts (Amazon, ShareASale, CJ, etc.)
