@@ -260,7 +260,7 @@ export default function MarketingStrategyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: result.data,
-          metadata: result.metadata,
+          metadata: { ...result.metadata, logoUrl },
           saveToLibrary: true
         })
       })
