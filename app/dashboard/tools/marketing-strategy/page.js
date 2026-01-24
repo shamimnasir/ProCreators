@@ -119,6 +119,56 @@ export default function MarketingStrategyPage() {
   const [timeline, setTimeline] = useState('12 months')
   const [existingChannels, setExistingChannels] = useState('')
   const [uniqueValue, setUniqueValue] = useState('')
+  
+  // Logo Upload State
+  const [logoUrl, setLogoUrl] = useState('')
+  const [logoPreview, setLogoPreview] = useState(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+
+  // Handle logo file upload
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Invalid file', description: 'Please upload an image file (PNG, JPG, SVG)', variant: 'destructive' })
+      return
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Logo must be smaller than 2MB', variant: 'destructive' })
+      return
+    }
+
+    setUploadingLogo(true)
+
+    try {
+      // Convert to base64 for preview and PDF embedding
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const base64 = event.target.result
+        setLogoPreview(base64)
+        setLogoUrl(base64)
+        toast({ title: 'Logo uploaded!', description: 'Your logo will appear in the PDF export' })
+      }
+      reader.onerror = () => {
+        toast({ title: 'Upload failed', description: 'Could not read the file', variant: 'destructive' })
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  // Remove logo
+  const removeLogo = () => {
+    setLogoUrl('')
+    setLogoPreview(null)
+  }
 
   // Results
   const [result, setResult] = useState(null)
