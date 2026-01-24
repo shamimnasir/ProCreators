@@ -2746,6 +2746,25 @@ export default function MarketingStrategyPage() {
           )}
         </TabsContent>
       </Tabs>
+        </div>
+
+        {/* Sidebar - Drafts Manager */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-4">
+            <AutoSaveDraftsManager
+              toolType="marketing-strategy"
+              getCurrentData={getCurrentData}
+              loadDraftData={loadDraftData}
+              onStartNew={handleStartNew}
+              dependencies={[businessName, businessDescription, industry, businessStage, targetAudience, framework]}
+              autoSaveEnabled={true}
+              debounceMs={2000}
+              minStepForAutoSave={1}
+              currentStep={1}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Tips Section */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200">
