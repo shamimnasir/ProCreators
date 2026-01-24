@@ -417,7 +417,7 @@ export default function LibraryPage() {
             Videos ({items.filter(i => i.category === 'video').length})
           </TabsTrigger>
           <TabsTrigger value="documents">
-            Documents ({items.filter(i => i.category === 'document' || (i.filePath && i.filePath.endsWith('.pdf'))).length})
+            Documents ({items.filter(i => i.category === 'document' || i.category === 'pdf' || i.category === 'html' || (i.filePath && i.filePath.endsWith('.pdf'))).length})
           </TabsTrigger>
           <TabsTrigger value="images">
             Images ({items.filter(i => i.category === 'image').length})
