@@ -476,7 +476,39 @@ Generate the response in this exact JSON format:
           'Test different headlines with A/B testing',
           'Add video testimonials for higher trust',
           'Reduce form fields to increase conversions'
-        ]
+        ],
+        socialProofSection: {
+          sectionTitle: 'Trusted by Industry Leaders',
+          headline: 'See what our customers are saying',
+          statistics: [
+            { number: '10,000+', label: 'Happy Customers' },
+            { number: '4.9/5', label: 'Average Rating' },
+            { number: '35%', label: 'Average ROI Increase' }
+          ],
+          testimonials: [
+            { quote: 'This product transformed our workflow', author: 'John D., CEO', result: '35% productivity increase' },
+            { quote: 'Best investment we made this year', author: 'Sarah M., Marketing Director', result: '2x revenue growth' }
+          ],
+          trustBadges: ['ISO Certified', 'SOC2 Compliant', 'GDPR Ready']
+        },
+        faqSection: {
+          sectionTitle: 'Frequently Asked Questions',
+          headline: 'Got questions? We\'ve got answers',
+          faqs: [
+            { question: 'How quickly can I get started?', answer: 'You can be up and running in less than 5 minutes with our easy setup wizard.' },
+            { question: 'Is there a free trial?', answer: 'Yes! We offer a 14-day free trial with full access to all features.' },
+            { question: 'What kind of support do you offer?', answer: 'We provide 24/7 email support and live chat during business hours.' },
+            { question: 'Can I cancel anytime?', answer: 'Absolutely. No contracts, no cancellation fees. Cancel with one click.' }
+          ]
+        },
+        comparisonSection: {
+          sectionTitle: 'Why Choose Us?',
+          headline: 'See how we compare to alternatives',
+          categories: ['Ease of Use', 'Customer Support', 'Pricing', 'Features'],
+          yourProduct: ['Intuitive UI', '24/7 Support', 'Flexible Plans', 'All-in-One'],
+          competitors: ['Complex Setup', 'Email Only', 'Expensive', 'Limited'],
+          bottomLine: 'Choose ' + productName + ' for a better experience at a better price.'
+        }
       }
     }
 
