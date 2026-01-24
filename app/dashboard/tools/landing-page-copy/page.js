@@ -1073,7 +1073,7 @@ export default function LandingPageCopyPage() {
                       <div className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 text-center">
                         <h1 className="text-3xl md:text-4xl font-bold mb-4">{result.data.heroSection.headline}</h1>
                         <p className="text-lg text-muted-foreground mb-6">{result.data.heroSection.subheadline}</p>
-                        <div className="flex justify-center gap-6 mb-6">
+                        <div className="flex justify-center gap-6 mb-6 flex-wrap">
                           {result.data.heroSection.bulletPoints?.map((point, idx) => (
                             <div key={idx} className="flex items-center gap-2 text-sm">
                               <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -1093,14 +1093,63 @@ export default function LandingPageCopyPage() {
                       <div className="p-8 bg-white dark:bg-gray-800">
                         <h2 className="text-2xl font-bold mb-4 text-center">{result.data.problemSection.sectionTitle}</h2>
                         <p className="text-lg text-center max-w-2xl mx-auto mb-4">{result.data.problemSection.problemStatement}</p>
-                        <p className="text-center text-red-600 dark:text-red-400 italic">{result.data.problemSection.agitation}</p>
+                        <p className="text-center text-red-600 dark:text-red-400 italic mb-4">{result.data.problemSection.agitation}</p>
+                        {result.data.problemSection.relateableStruggles && (
+                          <div className="max-w-xl mx-auto space-y-2">
+                            {result.data.problemSection.relateableStruggles.map((struggle, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <XCircle className="h-4 w-4 text-red-400" />
+                                <span>{struggle}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Solution Preview */}
+                    {result.data.solutionSection && (
+                      <div className="p-8 bg-gray-50 dark:bg-gray-900">
+                        <h2 className="text-2xl font-bold mb-2 text-center">{result.data.solutionSection.sectionTitle}</h2>
+                        <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">{result.data.solutionSection.introduction}</p>
+                        
+                        {/* How It Works */}
+                        {result.data.solutionSection.howItWorks && (
+                          <div className="grid md:grid-cols-3 gap-6 mb-8">
+                            {result.data.solutionSection.howItWorks.map((step, idx) => (
+                              <div key={idx} className="text-center p-4">
+                                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">
+                                  {step.step}
+                                </div>
+                                <h3 className="font-semibold mb-1">{step.title}</h3>
+                                <p className="text-sm text-muted-foreground">{step.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Key Benefits */}
+                        {result.data.solutionSection.keyBenefits && (
+                          <div className="grid md:grid-cols-3 gap-4">
+                            {result.data.solutionSection.keyBenefits.map((benefit, idx) => (
+                              <div key={idx} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                                <h3 className="font-semibold text-green-600 mb-1">{benefit.title}</h3>
+                                <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     
                     {/* Social Proof Preview */}
                     {result.data.socialProofSection && (
-                      <div className="p-8 bg-gray-50 dark:bg-gray-900">
-                        <div className="flex justify-center gap-8 flex-wrap">
+                      <div className="p-8 bg-white dark:bg-gray-800">
+                        <h2 className="text-2xl font-bold mb-2 text-center">{result.data.socialProofSection.sectionTitle}</h2>
+                        <p className="text-center text-muted-foreground mb-6">{result.data.socialProofSection.headline}</p>
+                        
+                        {/* Statistics */}
+                        <div className="flex justify-center gap-8 flex-wrap mb-8">
                           {result.data.socialProofSection.statistics?.map((stat, idx) => (
                             <div key={idx} className="text-center">
                               <p className="text-3xl font-bold text-blue-600">{stat.number}</p>
@@ -1108,6 +1157,74 @@ export default function LandingPageCopyPage() {
                             </div>
                           ))}
                         </div>
+                        
+                        {/* Testimonials */}
+                        {result.data.socialProofSection.testimonials && (
+                          <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                            {result.data.socialProofSection.testimonials.map((test, idx) => (
+                              <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                <p className="italic text-sm mb-2">"{test.quote}"</p>
+                                <p className="text-xs font-medium">— {test.author}</p>
+                                {test.result && <Badge className="mt-2 bg-green-500 text-xs">{test.result}</Badge>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* FAQ Preview */}
+                    {result.data.faqSection && result.data.faqSection.faqs && (
+                      <div className="p-8 bg-gray-50 dark:bg-gray-900">
+                        <h2 className="text-2xl font-bold mb-2 text-center">{result.data.faqSection.sectionTitle}</h2>
+                        <p className="text-center text-muted-foreground mb-6">{result.data.faqSection.headline}</p>
+                        <div className="max-w-2xl mx-auto space-y-4">
+                          {result.data.faqSection.faqs.slice(0, 4).map((faq, idx) => (
+                            <div key={idx} className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                              <p className="font-medium mb-1">{faq.question}</p>
+                              <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Comparison Preview */}
+                    {result.data.comparisonSection && (
+                      <div className="p-8 bg-white dark:bg-gray-800">
+                        <h2 className="text-2xl font-bold mb-2 text-center">{result.data.comparisonSection.sectionTitle}</h2>
+                        <p className="text-center text-muted-foreground mb-6">{result.data.comparisonSection.headline}</p>
+                        <div className="max-w-3xl mx-auto overflow-x-auto">
+                          <table className="w-full border-collapse text-sm">
+                            <thead>
+                              <tr>
+                                <th className="p-3 text-left bg-muted/50">Feature</th>
+                                <th className="p-3 text-left bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300">Us ✓</th>
+                                <th className="p-3 text-left bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300">Them ✗</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {result.data.comparisonSection.categories?.slice(0, 4).map((cat, idx) => (
+                                <tr key={idx} className="border-t">
+                                  <td className="p-3 font-medium">{cat}</td>
+                                  <td className="p-3 bg-green-50/50 dark:bg-green-950/20">
+                                    <div className="flex items-center gap-2">
+                                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                      <span className="text-xs">{result.data.comparisonSection.yourProduct?.[idx]}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-3 bg-red-50/50 dark:bg-red-950/20">
+                                    <div className="flex items-center gap-2">
+                                      <XCircle className="h-4 w-4 text-red-500" />
+                                      <span className="text-xs">{result.data.comparisonSection.competitors?.[idx]}</span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-center font-medium mt-4 text-blue-600">{result.data.comparisonSection.bottomLine}</p>
                       </div>
                     )}
                     
@@ -1116,15 +1233,24 @@ export default function LandingPageCopyPage() {
                       <div className="p-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
                         <h2 className="text-2xl md:text-3xl font-bold mb-2">{result.data.ctaSection.headline}</h2>
                         <p className="text-white/80 mb-6">{result.data.ctaSection.subheadline}</p>
-                        <div className="flex justify-center gap-4">
+                        <div className="flex justify-center gap-4 flex-wrap">
                           <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
                             {result.data.ctaSection.primaryCTA}
                           </Button>
-                          <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                            {result.data.ctaSection.secondaryCTA}
-                          </Button>
+                          {result.data.ctaSection.secondaryCTA && (
+                            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                              {result.data.ctaSection.secondaryCTA}
+                            </Button>
+                          )}
                         </div>
                         <p className="text-sm text-white/70 mt-4">{result.data.ctaSection.riskReversal}</p>
+                        {result.data.ctaSection.ctaTriggers && (
+                          <div className="flex justify-center gap-3 mt-2 flex-wrap">
+                            {result.data.ctaSection.ctaTriggers.map((trigger, idx) => (
+                              <span key={idx} className="text-xs text-white/60">{trigger}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
