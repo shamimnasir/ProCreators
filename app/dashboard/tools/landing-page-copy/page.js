@@ -436,12 +436,15 @@ export default function LandingPageCopyPage() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
-            <TabsTrigger value="setup">📝 Setup</TabsTrigger>
-            <TabsTrigger value="results" disabled={!result}>📄 Copy</TabsTrigger>
-            <TabsTrigger value="preview" disabled={!result}>👁️ Preview</TabsTrigger>
-            <TabsTrigger value="tips" disabled={!result}>💡 Tips</TabsTrigger>
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Main Content - 3 columns */}
+          <div className="lg:col-span-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-4 w-full max-w-lg">
+                <TabsTrigger value="setup">📝 Setup</TabsTrigger>
+                <TabsTrigger value="results" disabled={!result}>📄 Copy</TabsTrigger>
+                <TabsTrigger value="preview" disabled={!result}>👁️ Preview</TabsTrigger>
+                <TabsTrigger value="tips" disabled={!result}>💡 Tips</TabsTrigger>
           </TabsList>
 
           {/* Setup Tab */}
