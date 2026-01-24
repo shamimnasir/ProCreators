@@ -48,13 +48,13 @@ const BUSINESS_CATEGORIES = [
         badge: ''
       },
       {
-        id: 'landing-page',
+        id: 'landing-page-copy',
         name: 'Landing Page Copy',
         description: 'Persuasive copy that converts visitors',
-        icon: '💻',
-        href: '/dashboard/tools/landing-page',
+        icon: '📄',
+        href: '/dashboard/tools/landing-page-copy',
         useCase: 'Websites, funnels',
-        badge: ''
+        badge: 'New'
       }
     ]
   },
