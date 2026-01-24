@@ -112,6 +112,28 @@ export async function POST(request) {
 
 ${isNonEnglish ? `**IMPORTANT: Generate the message in ${detectedLanguage} as the user's input is in that language.**\n` : ''}
 
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING OR CLICHÉ WORDS:**
+Avoid these overused words that make messages sound AI-generated or fake:
+- unlock, unleash, unveil
+- game-changer, cutting-edge
+- supercharge, seamless
+- harness, leverage (overused)
+- elevate, empower, transform (overused)
+- dive into, dive deep, delve
+- synergy, paradigm shift
+- holistic, streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- reach out (overused - say "contact" or "message")
+- touch base (cliché)
+- pick your brain (overused)
+- circle back
+- moving forward
+- thought leader (cliché)
+
+Use natural, conversational language that sounds like a real person.
+
 KEY PRINCIPLES FOR NETWORKING MESSAGES:
 1. PERSONALIZATION: Reference specific details about the recipient (role, achievements, content)
 2. VALUE FIRST: Offer something helpful before asking for anything
