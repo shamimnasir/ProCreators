@@ -180,7 +180,20 @@ KEY PRINCIPLES FOR 2026:
 7. Voice search and conversational marketing
 8. Influencer and creator economy integration
 
-Always provide specific, actionable recommendations with clear metrics and timelines.
+**CRITICAL OUTPUT REQUIREMENTS:**
+1. BE EXTREMELY DETAILED AND COMPREHENSIVE - Each section should have 3-5 paragraphs of content minimum
+2. Include SPECIFIC numbers, percentages, timelines, and KPIs wherever possible
+3. Provide ACTIONABLE tactics with step-by-step implementation guidance
+4. Include REAL-WORLD examples and industry benchmarks
+5. Each strategy must include WHY it works, HOW to implement, and WHAT results to expect
+6. For recommendations, provide at least 5-7 detailed items per section
+7. Include specific tool/platform recommendations with alternatives
+8. Add budget estimates and resource requirements for each tactic
+9. Include risk factors and mitigation strategies
+10. Provide monthly/quarterly breakdown of activities
+
+DO NOT give generic or surface-level advice. The user needs a COMPLETE, EXECUTABLE strategy document they can immediately act upon.
+
 Respond in valid JSON format.`
 
     let prompt = ''
