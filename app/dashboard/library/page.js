@@ -130,6 +130,30 @@ export default function LibraryPage() {
       return
     }
     
+    // For inline PDF data URLs (marketing strategies, etc.)
+    if (item.category === 'pdf' && item.content && item.content.startsWith('data:application/pdf')) {
+      const a = document.createElement('a')
+      a.href = item.content
+      a.download = `${item.title || item.type}-${Date.now()}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      toast({ title: "Downloaded", description: "PDF saved successfully" })
+      return
+    }
+    
+    // For HTML content that can be printed as PDF
+    if (item.category === 'html' && item.content) {
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(item.content)
+        printWindow.document.close()
+        printWindow.onload = () => printWindow.print()
+      }
+      toast({ title: "Print Dialog", description: "Use Save as PDF to download" })
+      return
+    }
+    
     // For documents (PDFs - ebooks, journals, planners, worksheets, checklists)
     if (item.filePath && item.filePath.endsWith('.pdf')) {
       const a = document.createElement('a')
