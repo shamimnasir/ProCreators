@@ -196,23 +196,71 @@ export default function MarketingStrategyPage() {
   // State for PDF export
   const [exportingPDF, setExportingPDF] = useState(false)
 
-  // Export to PDF - Direct download
+  // Export to PDF - Direct download with auto-save to library
   const exportToPDF = async () => {
     if (!result) return
     
-    // Create a printable HTML document
-    const printContent = generatePrintableHTML()
+    setExportingPDF(true)
     
-    // Open in new window for printing/saving as PDF
-    const printWindow = window.open('', '_blank')
-    if (printWindow) {
-      printWindow.document.write(printContent)
-      printWindow.document.close()
-      printWindow.onload = () => {
-        printWindow.print()
+    try {
+      // Call the PDF generation API
+      const res = await fetch('/api/marketing-strategy/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: result.data,
+          metadata: result.metadata,
+          saveToLibrary: true
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        if (data.fallback) {
+          // Fallback: Open HTML in new window for browser print
+          const printWindow = window.open('', '_blank')
+          if (printWindow) {
+            printWindow.document.write(data.htmlContent)
+            printWindow.document.close()
+            printWindow.onload = () => {
+              printWindow.print()
+            }
+          }
+          toast({ title: 'Use browser Print dialog to save as PDF' })
+        } else {
+          // Direct PDF download
+          const link = document.createElement('a')
+          link.href = data.pdfDataUrl
+          link.download = data.fileName || `${businessName.replace(/\s+/g, '_')}_Marketing_Strategy.pdf`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          
+          toast({ 
+            title: '📥 PDF Downloaded!', 
+            description: data.libraryId ? '✅ Also saved to Library' : 'Strategy saved successfully'
+          })
+        }
+      } else {
+        throw new Error(data.error)
       }
+    } catch (err) {
+      console.error('PDF export error:', err)
+      // Fallback to browser print
+      const printContent = generatePrintableHTML()
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(printContent)
+        printWindow.document.close()
+        printWindow.onload = () => {
+          printWindow.print()
+        }
+      }
+      toast({ title: 'Use browser Print to save as PDF', description: 'Direct download unavailable' })
+    } finally {
+      setExportingPDF(false)
     }
-    toast({ title: 'PDF export opened! Use Print dialog to save as PDF' })
   }
 
   const generatePrintableHTML = () => {
