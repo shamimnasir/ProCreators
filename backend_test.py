@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, List
 
 # Base URL from environment
-BASE_URL = "https://marketai-suite-3.preview.emergentagent.com"
+BASE_URL = "https://markstratfix.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 def test_marketing_strategy_api():
