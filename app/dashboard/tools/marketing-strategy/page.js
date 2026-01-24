@@ -1525,11 +1525,20 @@ export default function MarketingStrategyPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={exportToPDF} className="bg-blue-50 hover:bg-blue-100 border-blue-200">
-                    <Printer className="h-4 w-4 mr-2" /> Export PDF
+                  <Button 
+                    variant="outline" 
+                    onClick={exportToPDF} 
+                    disabled={exportingPDF}
+                    className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                  >
+                    {exportingPDF ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating PDF...</>
+                    ) : (
+                      <><Download className="h-4 w-4 mr-2" /> Download PDF</>
+                    )}
                   </Button>
                   <Button variant="outline" onClick={exportStrategy}>
-                    <Download className="h-4 w-4 mr-2" /> JSON
+                    <FileDown className="h-4 w-4 mr-2" /> JSON
                   </Button>
                   <Button variant="outline" onClick={handleGenerate} disabled={generating}>
                     <RefreshCw className="h-4 w-4 mr-2" /> Regenerate
