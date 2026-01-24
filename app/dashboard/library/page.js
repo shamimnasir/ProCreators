@@ -222,14 +222,19 @@ export default function LibraryPage() {
     if (category === 'text') return items.filter(item => item.category === 'text')
     if (category === 'images') return items.filter(item => item.category === 'image')
     if (category === 'videos') return items.filter(item => item.category === 'video')
-    if (category === 'documents') return items.filter(item => item.category === 'document' || (item.filePath && item.filePath.endsWith('.pdf')))
+    if (category === 'documents') return items.filter(item => 
+      item.category === 'document' || 
+      item.category === 'pdf' || 
+      item.category === 'html' ||
+      (item.filePath && item.filePath.endsWith('.pdf'))
+    )
     return items
   }
 
   // Render item card based on view mode
   const renderItem = (item, isGridView = true) => {
     const isFeed = !isGridView
-    const isPDF = item.filePath && item.filePath.endsWith('.pdf')
+    const isPDF = item.category === 'pdf' || (item.filePath && item.filePath.endsWith('.pdf'))
     
     return (
       <Card key={item.id} className={isFeed ? 'max-w-lg mx-auto' : ''}>
