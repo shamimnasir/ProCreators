@@ -217,6 +217,63 @@ export default function AdCopyPage() {
   const selectedFramework = FRAMEWORKS.find(f => f.id === framework)
   const selectedPlatform = AD_PLATFORMS.find(p => p.id === platform)
 
+  // AutoSave helper functions
+  const getCurrentData = useCallback(() => ({
+    title: productName ? `Ad Copy: ${productName.substring(0, 50)}` : 'Untitled Ad Copy',
+    productName,
+    productDescription,
+    targetAudience,
+    uniqueSellingPoints,
+    painPoints,
+    benefits,
+    socialProof,
+    offer,
+    framework,
+    platform,
+    goal,
+    tone,
+    variationCount,
+    result
+  }), [productName, productDescription, targetAudience, uniqueSellingPoints, painPoints, benefits, socialProof, offer, framework, platform, goal, tone, variationCount, result])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.productName) setProductName(data.productName)
+    if (data.productDescription) setProductDescription(data.productDescription)
+    if (data.targetAudience) setTargetAudience(data.targetAudience)
+    if (data.uniqueSellingPoints) setUniqueSellingPoints(data.uniqueSellingPoints)
+    if (data.painPoints) setPainPoints(data.painPoints)
+    if (data.benefits) setBenefits(data.benefits)
+    if (data.socialProof) setSocialProof(data.socialProof)
+    if (data.offer) setOffer(data.offer)
+    if (data.framework) setFramework(data.framework)
+    if (data.platform) setPlatform(data.platform)
+    if (data.goal) setGoal(data.goal)
+    if (data.tone) setTone(data.tone)
+    if (data.variationCount) setVariationCount(data.variationCount)
+    if (data.result) {
+      setResult(data.result)
+      setActiveTab('results')
+    }
+  }, [])
+
+  const handleStartNew = useCallback(() => {
+    setProductName('')
+    setProductDescription('')
+    setTargetAudience('')
+    setUniqueSellingPoints('')
+    setPainPoints('')
+    setBenefits('')
+    setSocialProof('')
+    setOffer('')
+    setFramework('aida')
+    setPlatform('facebook')
+    setGoal('sales')
+    setTone('casual')
+    setVariationCount('3')
+    setResult(null)
+    setActiveTab('setup')
+  }, [])
+
   return (
     <TooltipProvider>
       <div className="space-y-6 max-w-7xl mx-auto">
