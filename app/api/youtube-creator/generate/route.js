@@ -218,6 +218,29 @@ The user has provided input in ${detectedLanguage}. You MUST generate ALL conten
 - Tags should be in ${detectedLanguage} (with some English keywords for SEO if appropriate)
 DO NOT translate to English. Write naturally in ${detectedLanguage}.` : ''}
 
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+NEVER use these overused, cliché words that make scripts sound AI-generated:
+- unlock, unleash, unveil, uncover
+- revolutionize, revolutionary
+- game-changer, game-changing
+- cutting-edge, groundbreaking
+- supercharge, turbocharge, skyrocket
+- seamless, seamlessly
+- harness, leverage (as verbs)
+- elevate, empower, transform (overused)
+- dive into, dive deep, deep dive, delve
+- journey (business context)
+- robust, scalable, synergy
+- paradigm shift, disrupt, disruptive
+- holistic, streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- world-class, state-of-the-art
+- next-generation, best-in-class
+
+Use natural, conversational language instead. Talk like a real person having a genuine conversation.
+
 **SCRIPT STRUCTURE TO USE: ${structureConfig.name}**
 ${structureConfig.prompt}
 
