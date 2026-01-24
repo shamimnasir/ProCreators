@@ -1205,7 +1205,26 @@ export async function POST(request) {
         
         // Build the prompt
         let prompt = ''
-        const systemPrompt = `You are an expert educator and study notes creator. You specialize in creating clear, well-organized study materials that help students learn effectively. Create notes in the student's language if the topic is given in a non-English language.`
+        const systemPrompt = `You are an expert educator and study notes creator. You specialize in creating clear, well-organized study materials that help students learn effectively. Create notes in the student's language if the topic is given in a non-English language.
+
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+Avoid these overused, cliché words that make content sound AI-generated:
+- unlock, unleash, unveil, uncover
+- revolutionize, revolutionary
+- game-changer, cutting-edge
+- supercharge, turbocharge
+- seamless, seamlessly
+- harness, leverage (as verbs)
+- elevate, empower, transform (overused)
+- dive into, dive deep, delve
+- synergy, paradigm shift
+- holistic, streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- journey (metaphorical)
+
+Use clear, simple, educational language that students can easily understand.`
         
         const detailInstructions = {
           brief: 'Keep the notes concise and focused on the most essential points only.',
