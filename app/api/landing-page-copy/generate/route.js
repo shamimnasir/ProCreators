@@ -185,12 +185,46 @@ export async function POST(request) {
       )
     }
 
+    // Language detection - check for Bengali and other non-English scripts
+    const allText = `${productName} ${productDescription || ''} ${targetAudience || ''} ${painPoints || ''}`
+    const bengaliPattern = /[\u0980-\u09FF]/
+    const hindiPattern = /[\u0900-\u097F]/
+    const arabicPattern = /[\u0600-\u06FF]/
+    
+    let detectedLanguage = 'English'
+    let isNonEnglish = false
+    let languageInstruction = ''
+    
+    if (bengaliPattern.test(allText)) {
+      detectedLanguage = 'Bengali (বাংলা)'
+      isNonEnglish = true
+    } else if (hindiPattern.test(allText)) {
+      detectedLanguage = 'Hindi (हिंदी)'
+      isNonEnglish = true
+    } else if (arabicPattern.test(allText)) {
+      detectedLanguage = 'Arabic (العربية)'
+      isNonEnglish = true
+    }
+    
+    if (isNonEnglish) {
+      languageInstruction = `
+
+**CRITICAL LANGUAGE REQUIREMENT:**
+The user has provided input in ${detectedLanguage}. You MUST generate ALL landing page copy content in ${detectedLanguage}.
+- ALL headlines, subheadlines, and body text MUST be in ${detectedLanguage}
+- ALL CTAs, button text, and micro-copy MUST be in ${detectedLanguage}
+- ALL FAQ questions and answers MUST be in ${detectedLanguage}
+- ALL testimonials and social proof MUST be in ${detectedLanguage}
+- ALL comparison table content MUST be in ${detectedLanguage}
+Write naturally and fluently in ${detectedLanguage}. Do NOT translate to English.`
+    }
+
     const frameworkInfo = FRAMEWORKS[framework] || FRAMEWORKS.pas
     const toneInfo = TONES[tone] || TONES.conversational
     const industryInfo = INDUSTRIES[industry] || 'General'
 
     const systemPrompt = `You are an elite landing page copywriter specializing in high-conversion copy for 2026. You combine the psychology of direct response copywriting with modern digital marketing best practices.
-
+${isNonEnglish ? `\n**IMPORTANT: The user is writing in ${detectedLanguage}. You MUST respond entirely in ${detectedLanguage}. Do not use English for the actual copy content.**\n` : ''}
 YOUR EXPERTISE:
 - Master of copywriting frameworks: PAS, HSO, BAB, QUEST, SPIN, AC Funnel
 - Deep understanding of consumer psychology and emotional triggers
@@ -216,9 +250,12 @@ WRITING RULES:
 - Short paragraphs, plenty of white space
 - Power words: You, Free, New, Because, Instantly, Proven, Guaranteed, Exclusive
 
-Always respond in valid JSON format.`
+**CRITICAL: You MUST generate ALL sections completely. Do not skip or leave any section empty. Every section must have meaningful content.**
+
+Always respond in valid JSON format.${isNonEnglish ? ` All text content must be in ${detectedLanguage}.` : ''}`
 
     const prompt = `Create high-converting landing page copy using the ${frameworkInfo.name} framework.
+${languageInstruction}
 
 **FRAMEWORK: ${frameworkInfo.name}**
 ${frameworkInfo.description}
