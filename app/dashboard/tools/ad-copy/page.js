@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import Link from 'next/link'
 
 // Copywriting Frameworks
