@@ -1380,6 +1380,56 @@ export default function MarketingStrategyPage() {
                       placeholder="e.g., TechFlow Solutions"
                     />
                   </div>
+                  
+                  {/* Logo Upload Section */}
+                  <div>
+                    <Label className="text-xs">Company Logo (for PDF export)</Label>
+                    <div className="mt-1">
+                      {logoPreview ? (
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                          <img 
+                            src={logoPreview} 
+                            alt="Company logo preview" 
+                            className="w-16 h-16 object-contain rounded bg-white p-1 border"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400">✓ Logo uploaded</p>
+                            <p className="text-xs text-muted-foreground">Will appear on PDF cover page</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={removeLogo}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                          <div className="w-16 h-16 flex items-center justify-center rounded bg-white dark:bg-gray-900 border">
+                            {uploadingLogo ? (
+                              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                            ) : (
+                              <Upload className="h-6 w-6 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">Upload your logo</p>
+                            <p className="text-xs text-muted-foreground">PNG, JPG or SVG (max 2MB)</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                            disabled={uploadingLogo}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div>
                     <Label className="text-xs">Business Description *</Label>
                     <Textarea
