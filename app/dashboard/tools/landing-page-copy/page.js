@@ -323,6 +323,70 @@ export default function LandingPageCopyPage() {
 
   const selectedFramework = FRAMEWORKS.find(f => f.id === framework)
 
+  // AutoSave helper functions
+  const getCurrentData = useCallback(() => ({
+    title: productName ? `Landing Page: ${productName.substring(0, 50)}` : 'Untitled Landing Page',
+    productName,
+    productDescription,
+    industry,
+    targetAudience,
+    framework,
+    tone,
+    painPoints,
+    desiredOutcome,
+    uniqueSellingPoints,
+    competitorWeaknesses,
+    socialProof,
+    specificResults,
+    pricing,
+    guarantee,
+    urgencyElement,
+    result
+  }), [productName, productDescription, industry, targetAudience, framework, tone, painPoints, desiredOutcome, uniqueSellingPoints, competitorWeaknesses, socialProof, specificResults, pricing, guarantee, urgencyElement, result])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.productName) setProductName(data.productName)
+    if (data.productDescription) setProductDescription(data.productDescription)
+    if (data.industry) setIndustry(data.industry)
+    if (data.targetAudience) setTargetAudience(data.targetAudience)
+    if (data.framework) setFramework(data.framework)
+    if (data.tone) setTone(data.tone)
+    if (data.painPoints) setPainPoints(data.painPoints)
+    if (data.desiredOutcome) setDesiredOutcome(data.desiredOutcome)
+    if (data.uniqueSellingPoints) setUniqueSellingPoints(data.uniqueSellingPoints)
+    if (data.competitorWeaknesses) setCompetitorWeaknesses(data.competitorWeaknesses)
+    if (data.socialProof) setSocialProof(data.socialProof)
+    if (data.specificResults) setSpecificResults(data.specificResults)
+    if (data.pricing) setPricing(data.pricing)
+    if (data.guarantee) setGuarantee(data.guarantee)
+    if (data.urgencyElement) setUrgencyElement(data.urgencyElement)
+    if (data.result) {
+      setResult(data.result)
+      setActiveTab('preview')
+    }
+  }, [])
+
+  const handleStartNew = useCallback(() => {
+    setProductName('')
+    setProductDescription('')
+    setIndustry('saas')
+    setTargetAudience('')
+    setFramework('pas')
+    setTone('conversational')
+    setPainPoints('')
+    setDesiredOutcome('')
+    setUniqueSellingPoints('')
+    setCompetitorWeaknesses('')
+    setSocialProof('')
+    setSpecificResults('')
+    setPricing('')
+    setGuarantee('')
+    setUrgencyElement('')
+    setResult(null)
+    setActiveTab('setup')
+    setMode('easy')
+  }, [])
+
   return (
     <TooltipProvider>
       <div className="space-y-6 max-w-7xl mx-auto">
