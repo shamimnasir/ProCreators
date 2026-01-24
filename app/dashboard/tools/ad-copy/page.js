@@ -323,12 +323,15 @@ export default function AdCopyPage() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="setup">📝 Setup</TabsTrigger>
-            <TabsTrigger value="results" disabled={!result}>🎯 Results</TabsTrigger>
-            <TabsTrigger value="tips" disabled={!result}>💡 Tips</TabsTrigger>
-          </TabsList>
+        <div className="grid lg:grid-cols-4 gap-6">
+          {/* Main Content - 3 columns */}
+          <div className="lg:col-span-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-3 w-full max-w-md">
+                <TabsTrigger value="setup">📝 Setup</TabsTrigger>
+                <TabsTrigger value="results" disabled={!result}>🎯 Results</TabsTrigger>
+                <TabsTrigger value="tips" disabled={!result}>💡 Tips</TabsTrigger>
+              </TabsList>
 
           {/* Setup Tab */}
           <TabsContent value="setup" className="space-y-6">
