@@ -1,324 +1,382 @@
 #!/usr/bin/env python3
 """
-Marketing Strategy API Backend Testing
-Tests all 5 frameworks and verifies PDF export content completeness
+Backend API Testing Script for Landing Page Copy Generator
+Tests all frameworks, validation, and response structure
 """
 
 import requests
 import json
 import sys
-from typing import Dict, Any, List
+import os
+from datetime import datetime
 
-# Base URL from environment
-BASE_URL = "https://markstratfix.preview.emergentagent.com"
-API_BASE = f"{BASE_URL}/api"
+# Get base URL from environment
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://markstratfix.preview.emergentagent.com')
+API_ENDPOINT = f"{BASE_URL}/api/landing-page-copy/generate"
 
-def test_marketing_strategy_api():
-    """Test all 5 marketing strategy frameworks"""
+def print_test_result(test_name, success, details=""):
+    """Print formatted test results"""
+    status = "✅ PASS" if success else "❌ FAIL"
+    print(f"{status} - {test_name}")
+    if details:
+        print(f"    {details}")
+    print()
+
+def test_basic_generation():
+    """Test 1: Basic Generation Test with minimal fields"""
+    print("🧪 TEST 1: Basic Generation Test")
     
-    print("🧪 Testing Marketing Strategy API - All 5 Frameworks")
-    print("=" * 60)
+    payload = {
+        "productName": "AI Content Writer",
+        "productDescription": "Tool that helps write blog posts faster"
+    }
     
-    # Test data for each framework
-    test_cases = [
-        {
-            "name": "7ps (Marketing Mix)",
-            "data": {
-                "framework": "7ps",
-                "businessName": "TestCorp Inc",
-                "businessDescription": "SaaS company providing AI-powered productivity tools",
-                "industry": "saas",
-                "budget": "small",
-                "timeline": "6 months",
-                "businessStage": "startup",
-                "targetAudience": "Small business owners aged 25-45",
-                "competitors": "Monday.com, Asana, Notion",
-                "existingChannels": "Website, LinkedIn, Google Ads",
-                "goals": "Increase revenue by 50%",
-                "currentChallenges": "Low brand awareness"
-            },
-            "expected_sections": ["product", "price", "place", "promotion", "people", "process", "physicalEvidence"]
-        },
-        {
-            "name": "stp (STP Model)",
-            "data": {
-                "framework": "stp",
-                "businessName": "STPTest Corp",
-                "businessDescription": "Online learning platform",
-                "industry": "education",
-                "businessStage": "growth",
-                "targetAudience": "Students and professionals seeking online courses"
-            },
-            "expected_sections": ["segmentation", "targeting", "positioning"]
-        },
-        {
-            "name": "ansoff (Ansoff Growth Matrix)",
-            "data": {
-                "framework": "ansoff",
-                "businessName": "AnsoffTest Corp",
-                "businessDescription": "E-commerce platform selling electronics",
-                "industry": "ecommerce",
-                "businessStage": "established",
-                "targetAudience": "Tech enthusiasts"
-            },
-            "expected_sections": ["marketPenetration", "marketDevelopment", "productDevelopment", "diversification", "recommendedPath"]
-        },
-        {
-            "name": "funnel (Full-Funnel Strategy)",
-            "data": {
-                "framework": "funnel",
-                "businessName": "FunnelTest Corp",
-                "businessDescription": "B2B consulting firm",
-                "industry": "service",
-                "businessStage": "startup",
-                "targetAudience": "Enterprise companies seeking digital transformation"
-            },
-            "expected_sections": ["funnelOverview", "awareness", "consideration", "decision", "retention", "advocacy"]
-        },
-        {
-            "name": "complete (Complete Marketing Plan)",
-            "data": {
-                "framework": "complete",
-                "businessName": "CompleteTest Corp",
-                "businessDescription": "Digital marketing agency",
-                "industry": "service",
-                "businessStage": "growth",
-                "targetAudience": "SMBs needing digital marketing",
-                "budget": "medium",
-                "timeline": "12 months"
-            },
-            "expected_sections": ["executiveSummary", "situationAnalysis", "targetAudience", "positioning", "smartGoals", "marketingMix", "channelStrategy", "funnelStrategy", "budgetAllocation", "implementationTimeline", "kpis", "risksMitigation", "nextSteps"]
+    try:
+        response = requests.post(API_ENDPOINT, json=payload, timeout=60)
+        
+        if response.status_code != 200:
+            print_test_result("Basic Generation", False, f"HTTP {response.status_code}: {response.text}")
+            return False
+            
+        data = response.json()
+        
+        # Check response structure
+        if not data.get('success'):
+            print_test_result("Basic Generation", False, f"API returned success=false: {data.get('error', 'Unknown error')}")
+            return False
+            
+        # Verify required sections exist
+        required_sections = ['heroSection', 'problemSection', 'solutionSection', 'ctaSection']
+        missing_sections = []
+        
+        for section in required_sections:
+            if section not in data.get('data', {}):
+                missing_sections.append(section)
+        
+        if missing_sections:
+            print_test_result("Basic Generation", False, f"Missing sections: {missing_sections}")
+            return False
+            
+        # Check hero section structure
+        hero = data['data']['heroSection']
+        hero_fields = ['headline', 'subheadline', 'bulletPoints', 'primaryCTA', 'ctaTrigger']
+        missing_hero_fields = [field for field in hero_fields if field not in hero]
+        
+        if missing_hero_fields:
+            print_test_result("Basic Generation", False, f"Missing hero fields: {missing_hero_fields}")
+            return False
+            
+        print_test_result("Basic Generation", True, f"Generated copy with framework: {data['data'].get('framework', 'Unknown')}")
+        return True
+        
+    except requests.exceptions.Timeout:
+        print_test_result("Basic Generation", False, "Request timeout (60s)")
+        return False
+    except Exception as e:
+        print_test_result("Basic Generation", False, f"Exception: {str(e)}")
+        return False
+
+def test_framework_selection():
+    """Test 2: Framework Selection Test - Test each framework"""
+    print("🧪 TEST 2: Framework Selection Test")
+    
+    frameworks = ['pas', 'hso', 'bab', 'quest', 'spin', 'acfunnel']
+    results = {}
+    
+    for framework in frameworks:
+        print(f"  Testing framework: {framework.upper()}")
+        
+        payload = {
+            "productName": "FlowState AI",
+            "productDescription": "AI project management tool",
+            "framework": framework
         }
-    ]
-    
-    results = []
-    
-    for test_case in test_cases:
-        print(f"\n🔍 Testing Framework: {test_case['name']}")
-        print("-" * 40)
         
         try:
-            # Make API request
-            response = requests.post(
-                f"{API_BASE}/marketing-strategy/generate",
-                headers={"Content-Type": "application/json"},
-                json=test_case["data"],
-                timeout=120  # 2 minutes timeout for LLM generation
-            )
+            response = requests.post(API_ENDPOINT, json=payload, timeout=60)
             
-            print(f"Status Code: {response.status_code}")
-            
-            if response.status_code == 200:
-                data = response.json()
+            if response.status_code != 200:
+                results[framework] = False
+                print(f"    ❌ {framework}: HTTP {response.status_code}")
+                continue
                 
-                if data.get("success"):
-                    print("✅ API Response: SUCCESS")
-                    
-                    # Verify response structure
-                    if "data" in data and "metadata" in data:
-                        print("✅ Response Structure: Valid (contains data and metadata)")
-                        
-                        # Check metadata
-                        metadata = data["metadata"]
-                        print(f"📊 Framework: {metadata.get('framework', 'N/A')}")
-                        print(f"🏢 Business: {metadata.get('businessName', 'N/A')}")
-                        print(f"🏭 Industry: {metadata.get('industry', 'N/A')}")
-                        
-                        # Verify expected sections exist
-                        strategy_data = data["data"]
-                        missing_sections = []
-                        present_sections = []
-                        
-                        for section in test_case["expected_sections"]:
-                            if section in strategy_data and strategy_data[section]:
-                                present_sections.append(section)
-                                print(f"✅ Section '{section}': Present")
-                            else:
-                                missing_sections.append(section)
-                                print(f"❌ Section '{section}': Missing or Empty")
-                        
-                        # Detailed content verification
-                        print(f"\n📋 Content Analysis:")
-                        print(f"   Present Sections: {len(present_sections)}/{len(test_case['expected_sections'])}")
-                        print(f"   Missing Sections: {missing_sections}")
-                        
-                        # Check for non-empty content in present sections
-                        content_quality = []
-                        for section in present_sections:
-                            section_data = strategy_data[section]
-                            if isinstance(section_data, dict):
-                                non_empty_fields = sum(1 for v in section_data.values() if v and str(v).strip())
-                                content_quality.append(f"{section}: {non_empty_fields} fields")
-                            elif isinstance(section_data, list):
-                                content_quality.append(f"{section}: {len(section_data)} items")
-                            else:
-                                content_quality.append(f"{section}: {type(section_data).__name__}")
-                        
-                        print(f"   Content Quality: {content_quality}")
-                        
-                        # Overall assessment
-                        completeness_score = len(present_sections) / len(test_case["expected_sections"]) * 100
-                        print(f"📈 Completeness Score: {completeness_score:.1f}%")
-                        
-                        results.append({
-                            "framework": test_case["name"],
-                            "status": "PASS" if completeness_score >= 80 else "PARTIAL",
-                            "completeness": completeness_score,
-                            "present_sections": present_sections,
-                            "missing_sections": missing_sections,
-                            "metadata": metadata
-                        })
-                        
-                    else:
-                        print("❌ Response Structure: Invalid (missing data or metadata)")
-                        results.append({
-                            "framework": test_case["name"],
-                            "status": "FAIL",
-                            "error": "Invalid response structure"
-                        })
-                        
-                else:
-                    error_msg = data.get("error", "Unknown error")
-                    print(f"❌ API Response: FAILED - {error_msg}")
-                    results.append({
-                        "framework": test_case["name"],
-                        "status": "FAIL",
-                        "error": error_msg
-                    })
-                    
+            data = response.json()
+            
+            if not data.get('success'):
+                results[framework] = False
+                print(f"    ❌ {framework}: {data.get('error', 'Unknown error')}")
+                continue
+                
+            # Verify framework is correctly applied
+            if data.get('metadata', {}).get('framework'):
+                results[framework] = True
+                print(f"    ✅ {framework}: {data['metadata']['framework']}")
             else:
-                print(f"❌ HTTP Error: {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print(f"Error Details: {error_data}")
-                except:
-                    print(f"Error Text: {response.text[:200]}")
+                results[framework] = False
+                print(f"    ❌ {framework}: Framework not in metadata")
                 
-                results.append({
-                    "framework": test_case["name"],
-                    "status": "FAIL",
-                    "error": f"HTTP {response.status_code}"
-                })
-                
-        except requests.exceptions.Timeout:
-            print("❌ Request Timeout (>2 minutes)")
-            results.append({
-                "framework": test_case["name"],
-                "status": "FAIL",
-                "error": "Request timeout"
-            })
-            
         except Exception as e:
-            print(f"❌ Exception: {str(e)}")
-            results.append({
-                "framework": test_case["name"],
-                "status": "FAIL",
-                "error": str(e)
-            })
+            results[framework] = False
+            print(f"    ❌ {framework}: Exception - {str(e)}")
     
-    # Summary Report
-    print("\n" + "=" * 60)
-    print("📊 MARKETING STRATEGY API TEST SUMMARY")
-    print("=" * 60)
+    success_count = sum(results.values())
+    total_count = len(frameworks)
     
-    passed = sum(1 for r in results if r["status"] == "PASS")
-    partial = sum(1 for r in results if r["status"] == "PARTIAL")
-    failed = sum(1 for r in results if r["status"] == "FAIL")
-    
-    print(f"✅ PASSED: {passed}/5 frameworks")
-    print(f"⚠️  PARTIAL: {partial}/5 frameworks")
-    print(f"❌ FAILED: {failed}/5 frameworks")
-    
-    print(f"\n📋 Detailed Results:")
-    for result in results:
-        status_icon = "✅" if result["status"] == "PASS" else "⚠️" if result["status"] == "PARTIAL" else "❌"
-        print(f"{status_icon} {result['framework']}: {result['status']}")
-        
-        if result["status"] in ["PASS", "PARTIAL"]:
-            print(f"   Completeness: {result.get('completeness', 0):.1f}%")
-            if result.get("missing_sections"):
-                print(f"   Missing: {result['missing_sections']}")
-        elif result.get("error"):
-            print(f"   Error: {result['error']}")
-    
-    # PDF Export Content Verification
-    print(f"\n📄 PDF Export Content Completeness:")
-    print("The generatePrintableHTML function has been updated to include all sections for all frameworks:")
-    print("✅ 7Ps: Product, Price, Place, Promotion, People, Process, Physical Evidence")
-    print("✅ STP: Segmentation, Targeting, Positioning")
-    print("✅ Ansoff: Market Penetration, Market Development, Product Development, Diversification")
-    print("✅ Full-Funnel: Awareness, Consideration, Decision, Retention, Advocacy")
-    print("✅ Complete Plan: All comprehensive sections included")
-    
-    # Overall Assessment
-    overall_success = passed + partial >= 4  # At least 4 out of 5 should work
-    print(f"\n🎯 OVERALL ASSESSMENT: {'PASS' if overall_success else 'FAIL'}")
-    
-    if overall_success:
-        print("✅ Marketing Strategy API is working correctly")
-        print("✅ All frameworks generate appropriate content structures")
-        print("✅ PDF export function includes all necessary sections")
+    if success_count == total_count:
+        print_test_result("Framework Selection", True, f"All {total_count} frameworks working")
+        return True
     else:
-        print("❌ Marketing Strategy API has significant issues")
-        print("❌ Multiple frameworks are failing or incomplete")
-    
-    return overall_success, results
+        print_test_result("Framework Selection", False, f"Only {success_count}/{total_count} frameworks working")
+        return False
 
-def test_api_error_handling():
-    """Test API error handling with invalid inputs"""
-    print(f"\n🔧 Testing API Error Handling")
-    print("-" * 30)
+def test_industry_selection():
+    """Test 3: Industry Selection Test"""
+    print("🧪 TEST 3: Industry Selection Test")
     
-    # Test missing required fields
-    try:
-        response = requests.post(
-            f"{API_BASE}/marketing-strategy/generate",
-            headers={"Content-Type": "application/json"},
-            json={"framework": "7ps"},  # Missing required fields
-            timeout=30
-        )
+    industries = ['saas', 'ecommerce', 'coaching', 'b2b']
+    results = {}
+    
+    for industry in industries:
+        print(f"  Testing industry: {industry}")
         
-        print(f"Status Code: {response.status_code}")
+        payload = {
+            "productName": "TestProduct",
+            "productDescription": "Test product for industry testing",
+            "industry": industry
+        }
+        
+        try:
+            response = requests.post(API_ENDPOINT, json=payload, timeout=60)
+            
+            if response.status_code != 200:
+                results[industry] = False
+                print(f"    ❌ {industry}: HTTP {response.status_code}")
+                continue
+                
+            data = response.json()
+            
+            if not data.get('success'):
+                results[industry] = False
+                print(f"    ❌ {industry}: {data.get('error', 'Unknown error')}")
+                continue
+                
+            # Verify industry is correctly applied
+            metadata_industry = data.get('metadata', {}).get('industry')
+            if metadata_industry:
+                results[industry] = True
+                print(f"    ✅ {industry}: {metadata_industry}")
+            else:
+                results[industry] = False
+                print(f"    ❌ {industry}: Industry not in metadata")
+                
+        except Exception as e:
+            results[industry] = False
+            print(f"    ❌ {industry}: Exception - {str(e)}")
+    
+    success_count = sum(results.values())
+    total_count = len(industries)
+    
+    if success_count == total_count:
+        print_test_result("Industry Selection", True, f"All {total_count} industries working")
+        return True
+    else:
+        print_test_result("Industry Selection", False, f"Only {success_count}/{total_count} industries working")
+        return False
+
+def test_full_pro_mode():
+    """Test 4: Full Pro Mode Test with all fields"""
+    print("🧪 TEST 4: Full Pro Mode Test")
+    
+    payload = {
+        "productName": "FlowState AI",
+        "productDescription": "AI project management tool",
+        "industry": "saas",
+        "targetAudience": "Busy entrepreneurs aged 25-45",
+        "framework": "pas",
+        "tone": "professional",
+        "painPoints": "Spending $5k/month on ads with only 1% conversion",
+        "desiredOutcome": "Close 30% more deals without extra tasks",
+        "uniqueSellingPoints": "Only AI-driven tool that automates lead scoring",
+        "socialProof": "10,000+ customers, 4.9 star rating",
+        "specificResults": "Helped Company X reduce churn by 22% in 90 days",
+        "pricing": "$97/month",
+        "guarantee": "30-day money-back guarantee",
+        "urgencyElement": "Beta pricing ends in 48 hours"
+    }
+    
+    try:
+        response = requests.post(API_ENDPOINT, json=payload, timeout=60)
+        
+        if response.status_code != 200:
+            print_test_result("Full Pro Mode", False, f"HTTP {response.status_code}: {response.text}")
+            return False
+            
+        data = response.json()
+        
+        if not data.get('success'):
+            print_test_result("Full Pro Mode", False, f"API returned success=false: {data.get('error', 'Unknown error')}")
+            return False
+            
+        # Check comprehensive sections exist
+        expected_sections = [
+            'heroSection', 'problemSection', 'solutionSection', 
+            'socialProofSection', 'faqSection', 'ctaSection'
+        ]
+        
+        missing_sections = []
+        for section in expected_sections:
+            if section not in data.get('data', {}):
+                missing_sections.append(section)
+        
+        if missing_sections:
+            print_test_result("Full Pro Mode", False, f"Missing sections: {missing_sections}")
+            return False
+            
+        # Verify metadata includes all provided info
+        metadata = data.get('metadata', {})
+        expected_metadata = ['framework', 'industry', 'tone', 'productName']
+        missing_metadata = [field for field in expected_metadata if field not in metadata]
+        
+        if missing_metadata:
+            print_test_result("Full Pro Mode", False, f"Missing metadata: {missing_metadata}")
+            return False
+            
+        print_test_result("Full Pro Mode", True, "All sections and metadata present")
+        return True
+        
+    except Exception as e:
+        print_test_result("Full Pro Mode", False, f"Exception: {str(e)}")
+        return False
+
+def test_validation():
+    """Test 5: Validation Test - Missing required field"""
+    print("🧪 TEST 5: Validation Test")
+    
+    # Test with missing productName
+    payload = {
+        "productDescription": "Tool that helps write blog posts faster"
+        # Missing productName
+    }
+    
+    try:
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
         
         if response.status_code == 400:
             data = response.json()
-            if not data.get("success") and "error" in data:
-                print("✅ Error Handling: Correctly returns 400 for missing required fields")
-                print(f"   Error Message: {data['error']}")
+            if not data.get('success') and 'required' in data.get('error', '').lower():
+                print_test_result("Validation Test", True, f"Correctly rejected missing productName: {data.get('error')}")
                 return True
             else:
-                print("❌ Error Handling: Invalid error response format")
+                print_test_result("Validation Test", False, f"Wrong error message: {data.get('error')}")
                 return False
         else:
-            print(f"❌ Error Handling: Expected 400, got {response.status_code}")
+            print_test_result("Validation Test", False, f"Expected 400 status, got {response.status_code}")
             return False
             
     except Exception as e:
-        print(f"❌ Error Handling Test Failed: {str(e)}")
+        print_test_result("Validation Test", False, f"Exception: {str(e)}")
         return False
 
-if __name__ == "__main__":
-    print("🚀 Starting Marketing Strategy API Backend Tests")
-    print(f"🌐 Base URL: {BASE_URL}")
-    print(f"🔗 API Base: {API_BASE}")
+def test_response_structure():
+    """Test 6: Response Structure Verification"""
+    print("🧪 TEST 6: Response Structure Verification")
     
-    # Test main functionality
-    success, results = test_marketing_strategy_api()
+    payload = {
+        "productName": "TestProduct",
+        "productDescription": "Test product for structure verification",
+        "framework": "hso"
+    }
     
-    # Test error handling
-    error_handling_ok = test_api_error_handling()
-    
-    # Final summary
-    print(f"\n" + "=" * 60)
-    print("🏁 FINAL TEST RESULTS")
+    try:
+        response = requests.post(API_ENDPOINT, json=payload, timeout=60)
+        
+        if response.status_code != 200:
+            print_test_result("Response Structure", False, f"HTTP {response.status_code}")
+            return False
+            
+        data = response.json()
+        
+        if not data.get('success'):
+            print_test_result("Response Structure", False, f"API error: {data.get('error')}")
+            return False
+            
+        # Check top-level structure
+        required_top_level = ['success', 'data', 'metadata']
+        missing_top_level = [field for field in required_top_level if field not in data]
+        
+        if missing_top_level:
+            print_test_result("Response Structure", False, f"Missing top-level fields: {missing_top_level}")
+            return False
+            
+        # Check data structure
+        data_obj = data['data']
+        required_data_sections = ['framework', 'heroSection', 'problemSection', 'solutionSection', 'ctaSection']
+        missing_data_sections = [section for section in required_data_sections if section not in data_obj]
+        
+        if missing_data_sections:
+            print_test_result("Response Structure", False, f"Missing data sections: {missing_data_sections}")
+            return False
+            
+        # Check heroSection structure
+        hero = data_obj['heroSection']
+        required_hero_fields = ['headline', 'subheadline', 'bulletPoints', 'primaryCTA', 'ctaTrigger']
+        missing_hero_fields = [field for field in required_hero_fields if field not in hero]
+        
+        if missing_hero_fields:
+            print_test_result("Response Structure", False, f"Missing hero fields: {missing_hero_fields}")
+            return False
+            
+        # Check metadata structure
+        metadata = data['metadata']
+        required_metadata_fields = ['framework', 'generatedAt']
+        missing_metadata_fields = [field for field in required_metadata_fields if field not in metadata]
+        
+        if missing_metadata_fields:
+            print_test_result("Response Structure", False, f"Missing metadata fields: {missing_metadata_fields}")
+            return False
+            
+        print_test_result("Response Structure", True, "All required structure elements present")
+        return True
+        
+    except Exception as e:
+        print_test_result("Response Structure", False, f"Exception: {str(e)}")
+        return False
+
+def main():
+    """Run all tests"""
+    print("🚀 LANDING PAGE COPY GENERATOR API TESTING")
     print("=" * 60)
-    print(f"✅ Main API Tests: {'PASS' if success else 'FAIL'}")
-    print(f"✅ Error Handling: {'PASS' if error_handling_ok else 'FAIL'}")
+    print(f"Testing endpoint: {API_ENDPOINT}")
+    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print()
     
-    overall_pass = success and error_handling_ok
-    print(f"\n🎯 OVERALL RESULT: {'✅ ALL TESTS PASSED' if overall_pass else '❌ SOME TESTS FAILED'}")
+    # Run all tests
+    test_results = []
     
-    if not overall_pass:
-        sys.exit(1)
+    test_results.append(test_basic_generation())
+    test_results.append(test_framework_selection())
+    test_results.append(test_industry_selection())
+    test_results.append(test_full_pro_mode())
+    test_results.append(test_validation())
+    test_results.append(test_response_structure())
+    
+    # Summary
+    print("=" * 60)
+    print("📊 TEST SUMMARY")
+    print("=" * 60)
+    
+    passed = sum(test_results)
+    total = len(test_results)
+    
+    print(f"Tests Passed: {passed}/{total}")
+    print(f"Success Rate: {(passed/total)*100:.1f}%")
+    
+    if passed == total:
+        print("\n🎉 ALL TESTS PASSED! Landing Page Copy Generator API is working correctly.")
+        return 0
     else:
-        print("🎉 Marketing Strategy API is fully functional!")
+        print(f"\n⚠️  {total-passed} TEST(S) FAILED. Please check the issues above.")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
