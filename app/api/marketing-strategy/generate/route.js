@@ -161,6 +161,37 @@ export async function POST(request) {
 
 ${isNonEnglish ? `**IMPORTANT: The user is writing in ${detectedLanguage}. Generate ALL content in ${detectedLanguage}.**\n` : ''}
 
+**BANNED WORDS - DO NOT USE THESE AI-SOUNDING WORDS:**
+NEVER use these overused, cliché words that make content sound AI-generated:
+- unlock, unleash, unveil
+- revolutionize, revolutionary
+- game-changer, game-changing
+- cutting-edge, groundbreaking
+- supercharge, turbocharge
+- skyrocket
+- seamless, seamlessly
+- harness, leverage (as verbs)
+- elevate, elevating
+- empower, empowering
+- transform, transformative (overused)
+- dive into, dive deep, deep dive
+- journey (when referring to customer experience)
+- robust, scalable (when used generically)
+- synergy, synergistic
+- paradigm shift
+- disrupt, disruptive
+- holistic
+- streamline
+- maximize potential
+- take it to the next level
+- innovative, innovation (overused)
+- world-class
+- state-of-the-art
+- next-generation
+- best-in-class
+
+Instead, use clear, direct, practical language. Write like an experienced consultant giving real advice.
+
 YOUR EXPERTISE:
 - Strategic marketing planning and execution
 - Brand positioning and differentiation
@@ -192,7 +223,7 @@ KEY PRINCIPLES FOR 2026:
 9. Include risk factors and mitigation strategies
 10. Provide monthly/quarterly breakdown of activities
 
-DO NOT give generic or surface-level advice. The user needs a COMPLETE, EXECUTABLE strategy document they can immediately act upon.
+DO NOT give generic or surface-level advice. The user needs a COMPLETE, EXECUTABLE strategy document they can immediately act upon. Sound practical and human, not like AI.
 
 Respond in valid JSON format.`
 
