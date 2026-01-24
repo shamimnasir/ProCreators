@@ -928,18 +928,49 @@ export async function POST(request) {
     // Generate HTML
     const htmlContent = generateMarketingStrategyHTML(data, metadata)
     
-    // Generate PDF
-    let pdfBuffer
-    try {
-      pdfBuffer = await generatePDFFromHTML(htmlContent)
-    } catch (pdfError) {
-      console.error('PDF generation failed:', pdfError)
+    // Try to generate PDF (may fail if Chromium not installed)
+    const pdfBuffer = await tryGeneratePDF(htmlContent)
+    
+    if (!pdfBuffer) {
       // Return HTML as fallback for browser-based PDF printing
+      // Also save HTML content to library for later viewing
+      let libraryId = null
+      if (shouldSaveToLibrary) {
+        try {
+          const collection = await getCollection('library')
+          const libraryItem = {
+            id: randomUUID(),
+            userId: 'anonymous',
+            type: 'marketing-strategy',
+            category: 'html',
+            title: `Marketing Strategy: ${metadata.businessName}`,
+            description: `${metadata.framework} - ${metadata.industry}`,
+            content: htmlContent,
+            metadata: {
+              framework: metadata.framework,
+              industry: metadata.industry,
+              businessStage: metadata.businessStage,
+              budget: metadata.budget,
+              contentType: 'marketing-strategy-html'
+            },
+            userTier: 'free',
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+          await collection.insertOne(libraryItem)
+          libraryId = libraryItem.id
+        } catch (saveError) {
+          console.error('Failed to save to library:', saveError)
+        }
+      }
+      
       return NextResponse.json({
         success: true,
         fallback: true,
         htmlContent,
-        message: 'PDF generation unavailable, use browser print to save as PDF'
+        libraryId,
+        message: 'Use browser print to save as PDF'
       })
     }
     
@@ -954,7 +985,7 @@ export async function POST(request) {
         const collection = await getCollection('library')
         const libraryItem = {
           id: randomUUID(),
-          userId: 'anonymous', // Replace with actual user ID when auth is implemented
+          userId: 'anonymous',
           type: 'marketing-strategy',
           category: 'pdf',
           title: `Marketing Strategy: ${metadata.businessName}`,
@@ -968,7 +999,7 @@ export async function POST(request) {
             contentType: 'marketing-strategy-pdf'
           },
           userTier: 'free',
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           createdAt: new Date(),
           updatedAt: new Date()
         }
