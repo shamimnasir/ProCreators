@@ -172,7 +172,7 @@ export default function LandingPageCopyPage() {
       
       if (data.success) {
         setResult(data)
-        setActiveTab('results')
+        setActiveTab('preview')
         setActiveSection('hero')
         
         // Auto-save to library
