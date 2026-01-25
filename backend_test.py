@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 
 # Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://markstratfix.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://marketingai-hub-5.preview.emergentagent.com')
 API_ENDPOINT = f"{BASE_URL}/api/landing-page-copy/generate"
 
 def print_test_result(test_name, success, details=""):
