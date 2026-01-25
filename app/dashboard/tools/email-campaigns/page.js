@@ -407,7 +407,9 @@ export default function EmailCampaignPage() {
                               key={campaign.id}
                               onClick={() => {
                                 setCampaignType(campaign.id)
-                                setEmailCount(String(campaign.emails))
+                                if (!campaign.customCount) {
+                                  setEmailCount(String(campaign.emails))
+                                }
                               }}
                               className={`p-3 rounded-lg border text-left transition-all ${
                                 campaignType === campaign.id
@@ -419,13 +421,46 @@ export default function EmailCampaignPage() {
                                 <Icon className="h-4 w-4" />
                                 <div>
                                   <div className="text-xs font-medium">{campaign.name}</div>
-                                  <div className="text-[10px] text-muted-foreground">{campaign.emails} emails</div>
+                                  <div className="text-[10px] text-muted-foreground">
+                                    {campaign.customCount ? 'Custom count' : `${campaign.emails} emails`}
+                                  </div>
                                 </div>
                               </div>
                             </button>
                           )
                         })}
                       </div>
+                      
+                      {/* Email Count Selector - shown for newsletter type */}
+                      {selectedCampaign?.customCount && (
+                        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
+                          <Label className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-2 block">
+                            How many emails in your {selectedCampaign.name.toLowerCase()}?
+                          </Label>
+                          <div className="flex items-center gap-2">
+                            <Select value={emailCount} onValueChange={setEmailCount}>
+                              <SelectTrigger className="w-[120px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                  <SelectItem key={num} value={String(num)}>
+                                    {num} email{num > 1 ? 's' : ''}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <span className="text-xs text-muted-foreground">
+                              {campaignType === 'newsletter' ? 'newsletters in sequence' : 'emails in sequence'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                            {campaignType === 'newsletter' 
+                              ? 'Generate a series of connected newsletters (weekly tips, monthly updates, etc.)'
+                              : 'Generate a sequence of nurture emails to guide prospects'}
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
