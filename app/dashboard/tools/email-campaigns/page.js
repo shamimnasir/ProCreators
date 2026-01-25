@@ -26,14 +26,14 @@ import Link from 'next/link'
 
 // Campaign Types
 const CAMPAIGN_TYPES = [
-  { id: 'welcome', name: 'Welcome Series', icon: UserPlus, description: 'Onboard new subscribers', color: 'green', emails: 3 },
-  { id: 'newsletter', name: 'Newsletter', icon: FileText, description: 'Regular updates & tips', color: 'blue', emails: 1 },
-  { id: 'promotional', name: 'Promotional', icon: Gift, description: 'Sales & special offers', color: 'red', emails: 3 },
-  { id: 'launch', name: 'Product Launch', icon: Megaphone, description: 'New product announcements', color: 'purple', emails: 4 },
-  { id: 'nurture', name: 'Lead Nurture', icon: Heart, description: 'Guide prospects to purchase', color: 'pink', emails: 5 },
-  { id: 'reengagement', name: 'Re-engagement', icon: RefreshCw, description: 'Win back inactive users', color: 'orange', emails: 3 },
-  { id: 'abandoned', name: 'Abandoned Cart', icon: ShoppingCart, description: 'Recover lost sales', color: 'yellow', emails: 3 },
-  { id: 'event', name: 'Event/Webinar', icon: Calendar, description: 'Promote & follow up', color: 'cyan', emails: 4 }
+  { id: 'welcome', name: 'Welcome Series', icon: UserPlus, description: 'Onboard new subscribers', color: 'green', emails: 3, customCount: false },
+  { id: 'newsletter', name: 'Newsletter Sequence', icon: FileText, description: 'Regular updates & tips', color: 'blue', emails: 1, customCount: true },
+  { id: 'promotional', name: 'Promotional', icon: Gift, description: 'Sales & special offers', color: 'red', emails: 3, customCount: false },
+  { id: 'launch', name: 'Product Launch', icon: Megaphone, description: 'New product announcements', color: 'purple', emails: 4, customCount: false },
+  { id: 'nurture', name: 'Lead Nurture', icon: Heart, description: 'Guide prospects to purchase', color: 'pink', emails: 5, customCount: true },
+  { id: 'reengagement', name: 'Re-engagement', icon: RefreshCw, description: 'Win back inactive users', color: 'orange', emails: 3, customCount: false },
+  { id: 'abandoned', name: 'Abandoned Cart', icon: ShoppingCart, description: 'Recover lost sales', color: 'yellow', emails: 3, customCount: false },
+  { id: 'event', name: 'Event/Webinar', icon: Calendar, description: 'Promote & follow up', color: 'cyan', emails: 4, customCount: false }
 ]
 
 // Industries
