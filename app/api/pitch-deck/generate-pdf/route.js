@@ -703,19 +703,6 @@ function generatePitchDeckHTML(data, metadata) {
         
         return html
       })() : ''}
-      
-      ${slide.speakerNotes ? `
-      <div class="speaker-notes">
-        <div class="speaker-notes-title">🎤 Speaker Notes</div>
-        <div class="speaker-notes-content">${escapeHTML(slide.speakerNotes)}</div>
-      </div>
-      ` : ''}
-      
-      ${slide.designTips ? `
-      <div class="design-tips">
-        <strong>💡 Design Tip:</strong> ${escapeHTML(slide.designTips)}
-      </div>
-      ` : ''}
     </div>
   </div>
   `).join('') : '<p>No slides generated</p>'}
