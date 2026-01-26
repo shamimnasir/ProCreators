@@ -196,17 +196,68 @@ export default function BusinessPlanPage() {
     setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
   }, [toast])
 
-  const downloadPlan = () => {
-    if (!result?.data) return
-    const text = JSON.stringify(result.data, null, 2)
-    const blob = new Blob([text], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `business-plan-${companyName.replace(/\s+/g, '-').toLowerCase()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    toast({ title: 'Downloaded!', description: 'Business plan saved' })
+  // PDF Export function
+  const exportToPDF = async () => {
+    if (!result) return
+    
+    setExportingPDF(true)
+    
+    try {
+      const selectedIndustry = INDUSTRIES.find(i => i.id === industry)?.name || industry
+      const selectedStage = STAGES.find(s => s.id === businessStage)?.name || businessStage
+      
+      const res = await fetch('/api/business-plan/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: result.data,
+          metadata: {
+            planType: selectedPlanType?.name || 'Business Plan',
+            companyName,
+            industry: selectedIndustry,
+            stage: selectedStage
+          },
+          saveToLibrary: true
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        if (data.fallback) {
+          // Fallback: Open HTML in new window for browser print
+          const printWindow = window.open('', '_blank')
+          if (printWindow) {
+            printWindow.document.write(data.htmlContent)
+            printWindow.document.close()
+            printWindow.onload = () => {
+              printWindow.print()
+            }
+          }
+          toast({ title: 'Use browser Print dialog to save as PDF' })
+        } else {
+          // Direct PDF download
+          const link = document.createElement('a')
+          link.href = data.pdfDataUrl
+          link.download = data.fileName || `${companyName.replace(/\s+/g, '_')}_Business_Plan.pdf`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          
+          toast({ 
+            title: '📥 PDF Downloaded!', 
+            description: data.libraryId ? '✅ Also saved to Library' : 'Business plan saved successfully'
+          })
+        }
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (err) {
+      console.error('PDF export error:', err)
+      toast({ title: 'PDF Export Failed', description: err.message, variant: 'destructive' })
+    } finally {
+      setExportingPDF(false)
+    }
   }
 
   const selectedPlanType = PLAN_TYPES.find(t => t.id === planType)
