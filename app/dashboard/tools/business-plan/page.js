@@ -859,8 +859,17 @@ export default function BusinessPlanPage() {
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={downloadPlan}>
-                            <Download className="h-4 w-4 mr-1" /> Download
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={exportToPDF}
+                            disabled={exportingPDF}
+                          >
+                            {exportingPDF ? (
+                              <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Exporting...</>
+                            ) : (
+                              <><Download className="h-4 w-4 mr-1" /> Export PDF</>
+                            )}
                           </Button>
                           <Button 
                             size="sm"
