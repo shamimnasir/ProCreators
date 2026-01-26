@@ -1,349 +1,472 @@
 #!/usr/bin/env python3
-"""
-Backend API Testing Script for Business Plan Generator
-Tests all API endpoints with comprehensive test cases
-"""
 
 import requests
 import json
-import time
 import sys
+import time
 from datetime import datetime
 
-# Get base URL from environment
+# Base URL from environment
 BASE_URL = "https://marketingai-hub-5.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
-def print_test_header(test_name):
-    """Print formatted test header"""
-    print(f"\n{'='*60}")
-    print(f"🧪 TESTING: {test_name}")
-    print(f"{'='*60}")
-
-def print_test_result(test_name, success, details=""):
-    """Print formatted test result"""
+def log_test_result(test_name, success, details="", response_time=None):
+    """Log test results with timestamp"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
     status = "✅ PASS" if success else "❌ FAIL"
-    print(f"{status} {test_name}")
+    time_info = f" ({response_time:.2f}s)" if response_time else ""
+    print(f"[{timestamp}] {status} - {test_name}{time_info}")
     if details:
-        print(f"   Details: {details}")
+        print(f"    Details: {details}")
+    print()
 
-def test_business_plan_api():
-    """Test Business Plan Generator API with all test cases"""
+def test_business_plan_pdf_export():
+    """Test Business Plan PDF Export API comprehensively"""
+    print("🧪 TESTING BUSINESS PLAN PDF EXPORT API")
+    print("=" * 60)
     
-    print_test_header("BUSINESS PLAN GENERATOR API")
-    
-    # Test Case 1: Basic Traditional Plan Test
-    print_test_header("Test Case 1: Basic Traditional Plan")
+    # Test 1: Traditional Plan PDF Export
+    print("📋 Test 1: Traditional Business Plan PDF Export")
     try:
-        payload = {
-            "companyName": "TestCorp",
-            "companyDescription": "A tech startup",
-            "planType": "traditional",
-            "industry": "technology",
-            "businessStage": "idea"
+        start_time = time.time()
+        
+        traditional_payload = {
+            "data": {
+                "planType": "Traditional Business Plan",
+                "companyName": "TestCorp",
+                "executiveSummary": {
+                    "overview": "TestCorp is an innovative tech startup focused on providing cutting-edge analytics solutions.",
+                    "missionStatement": "To provide excellent services that transform businesses through data-driven insights.",
+                    "businessDescription": "A SaaS company providing advanced analytics and business intelligence solutions."
+                },
+                "companyDescription": {
+                    "overview": "TestCorp was founded in 2024 with a vision to revolutionize business analytics.",
+                    "missionStatement": "Excellence in everything we do, powered by innovation and customer focus.",
+                    "coreValues": ["Innovation", "Integrity", "Customer Focus", "Excellence"]
+                },
+                "productsAndServices": {
+                    "overview": "We offer comprehensive analytics solutions for modern businesses.",
+                    "problemSolution": "Businesses struggle with data analysis - we provide intuitive tools to solve this.",
+                    "uniqueValueProposition": "AI-powered analytics with real-time insights and predictive capabilities."
+                },
+                "marketAnalysis": {
+                    "industryOverview": {
+                        "description": "The business analytics market is rapidly growing with increasing demand for data-driven decisions.",
+                        "size": "$50 billion globally",
+                        "growthRate": "15% annually"
+                    },
+                    "targetMarket": {
+                        "description": "Small to medium businesses looking to leverage data for growth.",
+                        "demographics": "Companies with 10-500 employees in tech, retail, and services sectors"
+                    }
+                }
+            },
+            "metadata": {
+                "planType": "Traditional Business Plan",
+                "companyName": "TestCorp",
+                "industry": "Technology",
+                "stage": "Startup"
+            },
+            "saveToLibrary": False
         }
         
         response = requests.post(
-            f"{API_BASE}/business-plan/generate",
-            json=payload,
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=traditional_payload,
             headers={"Content-Type": "application/json"},
             timeout=60
         )
         
-        print(f"Status Code: {response.status_code}")
+        response_time = time.time() - start_time
         
         if response.status_code == 200:
             data = response.json()
+            if data.get("success"):
+                # Check if we got PDF or HTML fallback
+                if data.get("pdfDataUrl"):
+                    log_test_result("Traditional Plan PDF Export", True, 
+                                  f"PDF generated successfully. Size: {len(data['pdfDataUrl'])} chars", response_time)
+                elif data.get("fallback") and data.get("htmlContent"):
+                    log_test_result("Traditional Plan PDF Export (HTML Fallback)", True, 
+                                  f"HTML fallback provided. Size: {len(data['htmlContent'])} chars", response_time)
+                else:
+                    log_test_result("Traditional Plan PDF Export", False, 
+                                  "No PDF or HTML content in response", response_time)
+            else:
+                log_test_result("Traditional Plan PDF Export", False, 
+                              f"API returned success=false: {data.get('error', 'Unknown error')}", response_time)
+        else:
+            log_test_result("Traditional Plan PDF Export", False, 
+                          f"HTTP {response.status_code}: {response.text[:200]}", response_time)
             
-            # Check response structure
-            has_success = data.get('success') == True
-            has_data = 'data' in data
-            
-            if has_success and has_data:
-                plan_data = data['data']
-                
-                # Check required sections for traditional plan
-                required_sections = [
-                    'executiveSummary', 'companyDescription', 'productsAndServices',
-                    'marketAnalysis', 'marketingPlan', 'operationsPlan', 
-                    'managementTeam', 'financialPlan'
+    except Exception as e:
+        log_test_result("Traditional Plan PDF Export", False, f"Exception: {str(e)}")
+
+    # Test 2: Pitch Deck PDF Export
+    print("🎯 Test 2: Investor Pitch Deck PDF Export")
+    try:
+        start_time = time.time()
+        
+        pitch_payload = {
+            "data": {
+                "planType": "Investor Pitch Deck",
+                "companyName": "PitchCo",
+                "slides": [
+                    {
+                        "slideNumber": 1,
+                        "title": "Title Slide",
+                        "content": {
+                            "companyName": "PitchCo",
+                            "tagline": "Revolutionizing analytics for modern businesses",
+                            "founderName": "John Smith"
+                        },
+                        "speakerNotes": "Welcome everyone to our pitch presentation"
+                    },
+                    {
+                        "slideNumber": 2,
+                        "title": "The Problem",
+                        "content": {
+                            "headline": "Analytics is too complex for most businesses",
+                            "problemStatements": [
+                                "Small businesses lack data expertise",
+                                "Existing tools are too expensive",
+                                "Complex setup and maintenance required"
+                            ]
+                        },
+                        "speakerNotes": "This is a $10B problem affecting millions of businesses"
+                    },
+                    {
+                        "slideNumber": 3,
+                        "title": "The Solution",
+                        "content": {
+                            "headline": "AI-powered analytics made simple",
+                            "solutionPoints": [
+                                "One-click setup and integration",
+                                "Automated insights and recommendations",
+                                "Affordable pricing for all business sizes"
+                            ]
+                        }
+                    }
                 ]
-                
-                missing_sections = []
-                for section in required_sections:
-                    if section not in plan_data:
-                        missing_sections.append(section)
-                
-                if not missing_sections:
-                    print_test_result("Basic Traditional Plan", True, 
-                                    f"All required sections present: {', '.join(required_sections)}")
-                else:
-                    print_test_result("Basic Traditional Plan", False, 
-                                    f"Missing sections: {', '.join(missing_sections)}")
-            else:
-                print_test_result("Basic Traditional Plan", False, 
-                                f"Invalid response structure. Success: {has_success}, Has data: {has_data}")
-        else:
-            print_test_result("Basic Traditional Plan", False, 
-                            f"HTTP {response.status_code}: {response.text[:200]}")
-            
-    except Exception as e:
-        print_test_result("Basic Traditional Plan", False, f"Exception: {str(e)}")
-    
-    # Test Case 2: Lean Canvas Test
-    print_test_header("Test Case 2: Lean Canvas")
-    try:
-        payload = {
-            "planType": "lean",
-            "companyName": "LeanStartup",
-            "companyDescription": "SaaS platform",
-            "productsServices": "AI-powered analytics",
-            "targetMarket": "SMBs",
-            "industry": "technology"
+            },
+            "metadata": {
+                "planType": "Investor Pitch Deck",
+                "companyName": "PitchCo",
+                "industry": "Technology",
+                "stage": "MVP"
+            },
+            "saveToLibrary": False
         }
         
         response = requests.post(
-            f"{API_BASE}/business-plan/generate",
-            json=payload,
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=pitch_payload,
             headers={"Content-Type": "application/json"},
             timeout=60
         )
         
-        print(f"Status Code: {response.status_code}")
+        response_time = time.time() - start_time
         
         if response.status_code == 200:
             data = response.json()
-            
-            if data.get('success') and 'data' in data:
-                plan_data = data['data']
-                
-                # Check for canvas structure
-                if 'canvas' in plan_data:
-                    canvas = plan_data['canvas']
-                    required_canvas_sections = [
-                        'problem', 'solution', 'uniqueValueProposition', 'unfairAdvantage',
-                        'customerSegments', 'keyMetrics', 'channels', 'costStructure', 'revenueStreams'
-                    ]
-                    
-                    missing_canvas_sections = []
-                    for section in required_canvas_sections:
-                        if section not in canvas:
-                            missing_canvas_sections.append(section)
-                    
-                    if not missing_canvas_sections:
-                        print_test_result("Lean Canvas", True, 
-                                        f"All canvas sections present: {', '.join(required_canvas_sections)}")
-                    else:
-                        print_test_result("Lean Canvas", False, 
-                                        f"Missing canvas sections: {', '.join(missing_canvas_sections)}")
+            if data.get("success"):
+                if data.get("pdfDataUrl"):
+                    log_test_result("Pitch Deck PDF Export", True, 
+                                  f"PDF generated successfully. Size: {len(data['pdfDataUrl'])} chars", response_time)
+                elif data.get("fallback") and data.get("htmlContent"):
+                    log_test_result("Pitch Deck PDF Export (HTML Fallback)", True, 
+                                  f"HTML fallback provided. Size: {len(data['htmlContent'])} chars", response_time)
                 else:
-                    print_test_result("Lean Canvas", False, "No canvas structure found in response")
+                    log_test_result("Pitch Deck PDF Export", False, 
+                                  "No PDF or HTML content in response", response_time)
             else:
-                print_test_result("Lean Canvas", False, "Invalid response structure")
+                log_test_result("Pitch Deck PDF Export", False, 
+                              f"API returned success=false: {data.get('error', 'Unknown error')}", response_time)
         else:
-            print_test_result("Lean Canvas", False, f"HTTP {response.status_code}: {response.text[:200]}")
+            log_test_result("Pitch Deck PDF Export", False, 
+                          f"HTTP {response.status_code}: {response.text[:200]}", response_time)
             
     except Exception as e:
-        print_test_result("Lean Canvas", False, f"Exception: {str(e)}")
-    
-    # Test Case 3: Pitch Deck Test
-    print_test_header("Test Case 3: Pitch Deck")
+        log_test_result("Pitch Deck PDF Export", False, f"Exception: {str(e)}")
+
+    # Test 3: Lean Canvas PDF Export
+    print("📊 Test 3: Lean Canvas PDF Export")
     try:
-        payload = {
-            "planType": "pitch",
-            "companyName": "PitchPro",
-            "industry": "finance",
-            "businessStage": "mvp",
-            "fundingNeeded": "$500,000",
-            "targetMarket": "Banks and credit unions"
-        }
+        start_time = time.time()
         
-        response = requests.post(
-            f"{API_BASE}/business-plan/generate",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=60
-        )
-        
-        print(f"Status Code: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            
-            if data.get('success') and 'data' in data:
-                plan_data = data['data']
-                
-                # Check for slides structure
-                if 'slides' in plan_data and isinstance(plan_data['slides'], list):
-                    slides = plan_data['slides']
-                    
-                    # Should have 12 slides
-                    if len(slides) == 12:
-                        expected_slide_titles = [
-                            "Title Slide", "The Problem", "The Solution", "Market Opportunity",
-                            "Business Model", "Traction", "Competition", "Go-to-Market Strategy",
-                            "The Team", "Financials", "The Ask", "Thank You"
+        lean_payload = {
+            "data": {
+                "planType": "Lean Startup Canvas",
+                "companyName": "LeanStartup",
+                "canvas": {
+                    "problem": {
+                        "topProblems": [
+                            "Small businesses can't afford enterprise analytics",
+                            "Existing solutions are too complex to implement",
+                            "No real-time insights available"
+                        ],
+                        "existingAlternatives": ["Excel spreadsheets", "Basic reporting tools", "Manual analysis"]
+                    },
+                    "solution": {
+                        "topFeatures": [
+                            "One-click data integration",
+                            "AI-powered insights",
+                            "Real-time dashboards",
+                            "Predictive analytics"
                         ]
-                        
-                        slide_titles = [slide.get('title', '') for slide in slides]
-                        missing_slides = []
-                        
-                        for expected_title in expected_slide_titles:
-                            if expected_title not in slide_titles:
-                                missing_slides.append(expected_title)
-                        
-                        if not missing_slides:
-                            print_test_result("Pitch Deck", True, 
-                                            f"All 12 slides present with correct titles")
-                        else:
-                            print_test_result("Pitch Deck", False, 
-                                            f"Missing slides: {', '.join(missing_slides)}")
-                    else:
-                        print_test_result("Pitch Deck", False, 
-                                        f"Expected 12 slides, got {len(slides)}")
-                else:
-                    print_test_result("Pitch Deck", False, "No slides array found in response")
-            else:
-                print_test_result("Pitch Deck", False, "Invalid response structure")
-        else:
-            print_test_result("Pitch Deck", False, f"HTTP {response.status_code}: {response.text[:200]}")
-            
-    except Exception as e:
-        print_test_result("Pitch Deck", False, f"Exception: {str(e)}")
-    
-    # Test Case 4: Validation Test
-    print_test_header("Test Case 4: Validation Test")
-    try:
-        payload = {
-            "planType": "traditional"
-            # Missing companyName intentionally
+                    },
+                    "uniqueValueProposition": {
+                        "statement": "Enterprise-grade analytics made simple and affordable for small businesses",
+                        "highLevelConcept": "Tableau for small businesses"
+                    },
+                    "unfairAdvantage": {
+                        "advantages": [
+                            "Proprietary AI algorithms",
+                            "10+ years of industry experience",
+                            "Strategic partnerships with data providers"
+                        ]
+                    },
+                    "customerSegments": {
+                        "targetCustomers": [
+                            "Small retail businesses (10-50 employees)",
+                            "Local service providers",
+                            "E-commerce startups"
+                        ],
+                        "earlyAdopters": "Tech-savvy small business owners looking for competitive advantage"
+                    },
+                    "keyMetrics": {
+                        "metrics": [
+                            "Monthly Active Users (MAU)",
+                            "Customer Acquisition Cost (CAC)",
+                            "Monthly Recurring Revenue (MRR)",
+                            "Customer Lifetime Value (LTV)"
+                        ]
+                    },
+                    "channels": {
+                        "pathToCustomers": [
+                            "Content marketing and SEO",
+                            "Social media advertising",
+                            "Partner referrals",
+                            "Direct sales outreach"
+                        ]
+                    },
+                    "costStructure": {
+                        "fixedCosts": ["Software development", "Infrastructure", "Team salaries"],
+                        "variableCosts": ["Customer acquisition", "Data processing", "Support"],
+                        "monthlyBurnRate": "$25,000"
+                    },
+                    "revenueStreams": {
+                        "streams": [
+                            "Monthly subscription fees",
+                            "Setup and onboarding services",
+                            "Premium support packages"
+                        ],
+                        "pricing": "Starting at $99/month",
+                        "lifetimeValue": "$2,400 average LTV"
+                    }
+                },
+                "hypotheses": [
+                    {
+                        "hypothesis": "Small businesses will pay $99/month for simple analytics",
+                        "test": "Landing page with pricing and email signup"
+                    },
+                    {
+                        "hypothesis": "One-click integration is the key differentiator",
+                        "test": "A/B test messaging focused on ease of setup"
+                    }
+                ],
+                "mvpPlan": {
+                    "description": "Basic dashboard with 3 key metrics and simple data integration",
+                    "features": [
+                        "Connect to 3 data sources",
+                        "Pre-built dashboard templates",
+                        "Basic reporting functionality"
+                    ],
+                    "timeline": "3 months to MVP",
+                    "budget": "$75,000"
+                }
+            },
+            "metadata": {
+                "planType": "Lean Startup Canvas",
+                "companyName": "LeanStartup",
+                "industry": "Technology",
+                "stage": "Idea"
+            },
+            "saveToLibrary": False
         }
         
         response = requests.post(
-            f"{API_BASE}/business-plan/generate",
-            json=payload,
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=lean_payload,
+            headers={"Content-Type": "application/json"},
+            timeout=60
+        )
+        
+        response_time = time.time() - start_time
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("success"):
+                if data.get("pdfDataUrl"):
+                    log_test_result("Lean Canvas PDF Export", True, 
+                                  f"PDF generated successfully. Size: {len(data['pdfDataUrl'])} chars", response_time)
+                elif data.get("fallback") and data.get("htmlContent"):
+                    log_test_result("Lean Canvas PDF Export (HTML Fallback)", True, 
+                                  f"HTML fallback provided. Size: {len(data['htmlContent'])} chars", response_time)
+                else:
+                    log_test_result("Lean Canvas PDF Export", False, 
+                                  "No PDF or HTML content in response", response_time)
+            else:
+                log_test_result("Lean Canvas PDF Export", False, 
+                              f"API returned success=false: {data.get('error', 'Unknown error')}", response_time)
+        else:
+            log_test_result("Lean Canvas PDF Export", False, 
+                          f"HTTP {response.status_code}: {response.text[:200]}", response_time)
+            
+    except Exception as e:
+        log_test_result("Lean Canvas PDF Export", False, f"Exception: {str(e)}")
+
+    # Test 4: Validation Test - Missing Data
+    print("⚠️ Test 4: Validation Test (Missing Required Data)")
+    try:
+        start_time = time.time()
+        
+        invalid_payload = {
+            "data": {
+                "planType": "Traditional Business Plan"
+                # Missing companyName and other required fields
+            },
+            "saveToLibrary": False
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=invalid_payload,
             headers={"Content-Type": "application/json"},
             timeout=30
         )
         
-        print(f"Status Code: {response.status_code}")
+        response_time = time.time() - start_time
         
         if response.status_code == 400:
             data = response.json()
-            error_message = data.get('error', '')
-            
-            if 'Company name is required' in error_message:
-                print_test_result("Validation Test", True, 
-                                f"Correctly rejected with error: {error_message}")
+            if not data.get("success") and data.get("error"):
+                log_test_result("Validation Test (Missing Data)", True, 
+                              f"Correctly rejected with 400: {data['error']}", response_time)
             else:
-                print_test_result("Validation Test", False, 
-                                f"Wrong error message: {error_message}")
+                log_test_result("Validation Test (Missing Data)", False, 
+                              "Expected error response but got success", response_time)
         else:
-            print_test_result("Validation Test", False, 
-                            f"Expected 400 status, got {response.status_code}")
+            log_test_result("Validation Test (Missing Data)", False, 
+                          f"Expected 400 but got {response.status_code}", response_time)
             
     except Exception as e:
-        print_test_result("Validation Test", False, f"Exception: {str(e)}")
-    
-    # Test Case 5: Full Payload Test (Traditional)
-    print_test_header("Test Case 5: Full Payload Test")
+        log_test_result("Validation Test (Missing Data)", False, f"Exception: {str(e)}")
+
+    # Test 5: Validation Test - Missing Metadata
+    print("⚠️ Test 5: Validation Test (Missing Metadata)")
     try:
-        payload = {
-            "planType": "traditional",
-            "companyName": "ComprehensiveTech Solutions",
-            "companyDescription": "A comprehensive technology solutions provider specializing in AI-powered business automation",
-            "industry": "technology",
-            "businessStage": "growth",
-            "legalStructure": "llc",
-            "foundingDate": "2023-01-15",
-            "location": "San Francisco, CA",
-            "missionStatement": "To empower businesses through innovative AI solutions that streamline operations and drive growth",
-            "visionStatement": "To become the leading provider of AI-powered business automation solutions globally",
-            "coreValues": "Innovation, Integrity, Customer Success, Continuous Learning",
-            "productsServices": "AI-powered workflow automation, predictive analytics, custom AI model development",
-            "problemSolved": "Manual business processes that are time-consuming and error-prone",
-            "uniqueValue": "Proprietary AI algorithms with 99.5% accuracy and seamless integration capabilities",
-            "pricingModel": "SaaS subscription with tiered pricing based on usage and features",
-            "targetMarket": "Mid-market companies with 100-1000 employees in manufacturing, finance, and healthcare",
-            "marketSize": "$50B total addressable market with 15% annual growth",
-            "competitors": "UiPath, Automation Anywhere, Microsoft Power Automate",
-            "competitiveAdvantage": "Superior AI accuracy, faster implementation, and industry-specific solutions",
-            "founders": "John Smith (CEO, 15 years tech experience), Jane Doe (CTO, AI PhD from Stanford)",
-            "keyTeam": "5 engineers, 2 sales professionals, 1 marketing specialist",
-            "advisors": "Former executives from Google, Microsoft, and Salesforce",
-            "hiringPlan": "Plan to hire 10 additional engineers and 3 sales reps in next 12 months",
-            "operationsDescription": "Cloud-based development with agile methodology and continuous deployment",
-            "suppliers": "AWS for cloud infrastructure, OpenAI for base models, various data providers",
-            "technologyStack": "Python, TensorFlow, React, Node.js, PostgreSQL, AWS",
-            "revenueModel": "Monthly recurring revenue from SaaS subscriptions plus professional services",
-            "startupCosts": "$2M for initial development, team, and infrastructure",
-            "fundingNeeded": "$5M Series A for scaling operations and market expansion",
-            "fundingUse": "60% engineering team, 25% sales & marketing, 15% operations",
-            "projectedRevenue": "Year 1: $1M, Year 2: $5M, Year 3: $15M",
-            "breakEvenTimeline": "Month 18 with current growth trajectory",
-            "shortTermGoals": "Launch enterprise product, acquire 50 customers, achieve $2M ARR",
-            "longTermGoals": "IPO in 5 years, expand internationally, achieve $100M ARR",
-            "milestones": "Q1: Product launch, Q2: 10 customers, Q3: Series A funding, Q4: 50 customers"
+        start_time = time.time()
+        
+        invalid_payload = {
+            "data": {
+                "planType": "Traditional Business Plan",
+                "companyName": "TestCorp",
+                "executiveSummary": {
+                    "overview": "Test overview"
+                }
+            }
+            # Missing metadata completely
         }
         
         response = requests.post(
-            f"{API_BASE}/business-plan/generate",
-            json=payload,
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=invalid_payload,
             headers={"Content-Type": "application/json"},
-            timeout=90  # Longer timeout for comprehensive plan
+            timeout=30
         )
         
-        print(f"Status Code: {response.status_code}")
+        response_time = time.time() - start_time
+        
+        if response.status_code == 400:
+            data = response.json()
+            if not data.get("success") and data.get("error"):
+                log_test_result("Validation Test (Missing Metadata)", True, 
+                              f"Correctly rejected with 400: {data['error']}", response_time)
+            else:
+                log_test_result("Validation Test (Missing Metadata)", False, 
+                              "Expected error response but got success", response_time)
+        else:
+            log_test_result("Validation Test (Missing Metadata)", False, 
+                          f"Expected 400 but got {response.status_code}", response_time)
+            
+    except Exception as e:
+        log_test_result("Validation Test (Missing Metadata)", False, f"Exception: {str(e)}")
+
+    # Test 6: Save to Library Test
+    print("💾 Test 6: Save to Library Test")
+    try:
+        start_time = time.time()
+        
+        save_payload = {
+            "data": {
+                "planType": "Traditional Business Plan",
+                "companyName": "LibraryTestCorp",
+                "executiveSummary": {
+                    "overview": "Test company for library save functionality.",
+                    "missionStatement": "To test the save to library feature."
+                }
+            },
+            "metadata": {
+                "planType": "Traditional Business Plan",
+                "companyName": "LibraryTestCorp",
+                "industry": "Technology",
+                "stage": "Testing"
+            },
+            "saveToLibrary": True  # Enable library save
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/business-plan/generate-pdf",
+            json=save_payload,
+            headers={"Content-Type": "application/json"},
+            timeout=60
+        )
+        
+        response_time = time.time() - start_time
         
         if response.status_code == 200:
             data = response.json()
-            
-            if data.get('success') and 'data' in data:
-                plan_data = data['data']
-                
-                # Check all sections are detailed and properly structured
-                required_sections = [
-                    'executiveSummary', 'companyDescription', 'productsAndServices',
-                    'marketAnalysis', 'marketingPlan', 'operationsPlan', 
-                    'managementTeam', 'financialPlan'
-                ]
-                
-                detailed_sections = []
-                for section in required_sections:
-                    if section in plan_data:
-                        section_data = plan_data[section]
-                        # Check if section has substantial content (not just empty structures)
-                        if isinstance(section_data, dict) and len(str(section_data)) > 100:
-                            detailed_sections.append(section)
-                
-                if len(detailed_sections) == len(required_sections):
-                    print_test_result("Full Payload Test", True, 
-                                    f"All sections detailed and comprehensive: {', '.join(detailed_sections)}")
+            if data.get("success"):
+                if data.get("libraryId"):
+                    log_test_result("Save to Library Test", True, 
+                                  f"Saved to library with ID: {data['libraryId']}", response_time)
                 else:
-                    missing_detail = set(required_sections) - set(detailed_sections)
-                    print_test_result("Full Payload Test", False, 
-                                    f"Sections lacking detail: {', '.join(missing_detail)}")
+                    log_test_result("Save to Library Test", False, 
+                                  "Success but no libraryId returned", response_time)
             else:
-                print_test_result("Full Payload Test", False, "Invalid response structure")
+                log_test_result("Save to Library Test", False, 
+                              f"API returned success=false: {data.get('error', 'Unknown error')}", response_time)
         else:
-            print_test_result("Full Payload Test", False, f"HTTP {response.status_code}: {response.text[:200]}")
+            log_test_result("Save to Library Test", False, 
+                          f"HTTP {response.status_code}: {response.text[:200]}", response_time)
             
     except Exception as e:
-        print_test_result("Full Payload Test", False, f"Exception: {str(e)}")
+        log_test_result("Save to Library Test", False, f"Exception: {str(e)}")
 
 def main():
-    """Main test execution"""
-    print(f"🚀 Starting Backend API Tests")
-    print(f"Base URL: {BASE_URL}")
-    print(f"API Base: {API_BASE}")
-    print(f"Timestamp: {datetime.now().isoformat()}")
+    """Run all Business Plan PDF Export API tests"""
+    print("🚀 BUSINESS PLAN PDF EXPORT API TESTING")
+    print(f"🌐 Base URL: {BASE_URL}")
+    print(f"📡 API Endpoint: {API_BASE}/business-plan/generate-pdf")
+    print(f"⏰ Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 80)
     
-    # Test Business Plan Generator API
-    test_business_plan_api()
+    test_business_plan_pdf_export()
     
-    print(f"\n{'='*60}")
-    print(f"🏁 Backend Testing Complete")
-    print(f"{'='*60}")
+    print("=" * 80)
+    print("🏁 BUSINESS PLAN PDF EXPORT API TESTING COMPLETED")
+    print(f"⏰ Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()
