@@ -179,11 +179,13 @@ export default function PitchDeckPage() {
     if (!result) return
     
     setExportingPDF(true)
+    toast({ title: 'Generating PDF...', description: 'Please wait, this may take a moment' })
     
     try {
       const selectedIndustry = INDUSTRIES.find(i => i.id === industry)?.name || industry
       const selectedStage = FUNDING_STAGES.find(s => s.id === fundingStage)?.name || fundingStage
       
+      // Get HTML content from API
       const res = await fetch('/api/pitch-deck/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,15 +204,84 @@ export default function PitchDeckPage() {
       const data = await res.json()
       
       if (data.success) {
-        if (data.fallback) {
-          const printWindow = window.open('', '_blank')
-          if (printWindow) {
-            printWindow.document.write(data.htmlContent)
-            printWindow.document.close()
-            printWindow.onload = () => printWindow.print()
+        if (data.fallback || data.htmlContent) {
+          // Use client-side PDF generation with jspdf + html2canvas
+          const { default: jsPDF } = await import('jspdf')
+          const { default: html2canvas } = await import('html2canvas')
+          
+          // Create hidden iframe to render HTML
+          const iframe = document.createElement('iframe')
+          iframe.style.position = 'absolute'
+          iframe.style.left = '-9999px'
+          iframe.style.width = '1000px'
+          iframe.style.height = '800px'
+          document.body.appendChild(iframe)
+          
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+          iframeDoc.open()
+          iframeDoc.write(data.htmlContent)
+          iframeDoc.close()
+          
+          // Wait for content to load
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          
+          // Get all slides from iframe
+          const slides = iframeDoc.querySelectorAll('.slide')
+          
+          if (slides.length === 0) {
+            // Fallback: capture entire page
+            const body = iframeDoc.body
+            const canvas = await html2canvas(body, { 
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#f8fafc'
+            })
+            
+            const pdf = new jsPDF('l', 'mm', 'a4')
+            const imgWidth = 297
+            const imgHeight = (canvas.height * imgWidth) / canvas.width
+            
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, imgWidth, imgHeight)
+            pdf.save(`${companyName.replace(/\s+/g, '_')}_Pitch_Deck.pdf`)
+          } else {
+            // Create PDF with each slide as a page
+            const pdf = new jsPDF('l', 'mm', 'a4')
+            const pageWidth = 297
+            const pageHeight = 210
+            
+            for (let i = 0; i < slides.length; i++) {
+              if (i > 0) pdf.addPage()
+              
+              const canvas = await html2canvas(slides[i], {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+              })
+              
+              const imgWidth = pageWidth - 10
+              const imgHeight = (canvas.height * imgWidth) / canvas.width
+              const yOffset = Math.max(0, (pageHeight - Math.min(imgHeight, pageHeight - 10)) / 2)
+              
+              pdf.addImage(
+                canvas.toDataURL('image/jpeg', 0.92), 
+                'JPEG', 
+                5, 
+                yOffset, 
+                imgWidth, 
+                Math.min(imgHeight, pageHeight - 10)
+              )
+            }
+            
+            pdf.save(`${companyName.replace(/\s+/g, '_')}_Pitch_Deck.pdf`)
           }
-          toast({ title: 'Use browser Print to save as PDF' })
-        } else {
+          
+          // Cleanup
+          document.body.removeChild(iframe)
+          toast({ title: '📥 PDF Downloaded!', description: '✅ Saved to Library' })
+        } else if (data.pdfDataUrl) {
+          // Direct PDF download
           const link = document.createElement('a')
           link.href = data.pdfDataUrl
           link.download = data.fileName || `${companyName.replace(/\s+/g, '_')}_Pitch_Deck.pdf`
@@ -223,6 +294,7 @@ export default function PitchDeckPage() {
         throw new Error(data.error)
       }
     } catch (err) {
+      console.error('PDF Export Error:', err)
       toast({ title: 'PDF Export Failed', description: err.message, variant: 'destructive' })
     } finally {
       setExportingPDF(false)
