@@ -1,345 +1,308 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for Pitch Deck Creator
-Tests the /api/pitch-deck/generate and /api/pitch-deck/generate-pdf endpoints
+Backend API Testing Script for SWOT Analysis Generator
+Tests the SWOT Analysis API endpoints as specified in the review request.
 """
 
 import requests
 import json
 import time
-import os
-from datetime import datetime
+import sys
+from typing import Dict, Any
 
-# Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://marketingai-hub-5.preview.emergentagent.com')
-API_BASE = f"{BASE_URL}/api"
+# Base URL from environment
+BASE_URL = "https://marketingai-hub-5.preview.emergentagent.com"
 
-def print_test_header(test_name):
-    print(f"\n{'='*60}")
-    print(f"🧪 {test_name}")
-    print(f"{'='*60}")
-
-def print_result(success, message, details=None):
-    status = "✅ PASS" if success else "❌ FAIL"
-    print(f"{status}: {message}")
-    if details:
+class SWOTAnalysisAPITester:
+    def __init__(self):
+        self.base_url = BASE_URL
+        self.results = []
+        
+    def log_result(self, test_name: str, success: bool, details: str, response_data: Dict = None):
+        """Log test results"""
+        result = {
+            "test": test_name,
+            "success": success,
+            "details": details,
+            "response_data": response_data
+        }
+        self.results.append(result)
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status}: {test_name}")
         print(f"   Details: {details}")
+        if response_data:
+            print(f"   Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'Not a dict'}")
+        print()
 
-def test_pitch_deck_generate():
-    """Test 1: Basic Pitch Deck Generation"""
-    print_test_header("Test 1: Basic Pitch Deck Generation")
-    
-    try:
-        url = f"{API_BASE}/pitch-deck/generate"
+    def test_basic_swot_analysis(self):
+        """Test Case 1: Basic SWOT Analysis Test"""
+        print("🧪 Testing Basic SWOT Analysis Generation...")
+        
         payload = {
-            "companyName": "TechFlow AI",
-            "tagline": "AI that works for you",
-            "companyDescription": "AI-powered productivity platform",
-            "industry": "ai",
-            "problemStatement": "Companies waste 20 hours per week on manual tasks",
-            "solution": "Automated AI assistant",
-            "deckStyle": "classic",
-            "fundingStage": "seed",
-            "fundingAmount": "$2M"
+            "subjectName": "TechCorp Inc",
+            "subjectDescription": "A mid-size software company",
+            "analysisType": "business",
+            "industry": "technology",
+            "objectives": "Strategic planning for 2026",
+            "analysisDepth": "standard"
         }
         
-        print(f"📡 POST {url}")
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}")
-        
-        start_time = time.time()
-        response = requests.post(url, json=payload, timeout=120)
-        end_time = time.time()
-        
-        print(f"⏱️  Response time: {end_time - start_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"📄 Response keys: {list(data.keys())}")
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/swot-analysis/generate",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=60
+            )
             
-            # Check response structure
-            if data.get('success') == True:
-                print_result(True, "API returned success=true")
+            if response.status_code == 200:
+                data = response.json()
                 
-                # Check data structure
-                if 'data' in data:
-                    pitch_data = data['data']
-                    print_result(True, f"Response contains 'data' field")
-                    
-                    # Check slides
-                    if 'slides' in pitch_data and isinstance(pitch_data['slides'], list):
-                        slides_count = len(pitch_data['slides'])
-                        print_result(True, f"Contains {slides_count} slides")
-                        
-                        if slides_count == 12:
-                            print_result(True, "Correct number of slides (12)")
-                        else:
-                            print_result(False, f"Expected 12 slides, got {slides_count}")
-                        
-                        # Check first few slide titles
-                        if slides_count > 0:
-                            slide_titles = [slide.get('title', 'No title') for slide in pitch_data['slides'][:3]]
-                            print(f"   First 3 slide titles: {slide_titles}")
+                # Check response structure
+                if not data.get("success"):
+                    self.log_result("Basic SWOT Analysis", False, f"Response success=false: {data}")
+                    return
+                
+                # Check required fields
+                response_data = data.get("data", {})
+                required_sections = ["strengths", "weaknesses", "opportunities", "threats"]
+                missing_sections = []
+                
+                for section in required_sections:
+                    if section not in response_data:
+                        missing_sections.append(section)
                     else:
-                        print_result(False, "Missing or invalid 'slides' array")
-                else:
-                    print_result(False, "Missing 'data' field in response")
+                        section_data = response_data[section]
+                        if not isinstance(section_data, dict) or "items" not in section_data:
+                            missing_sections.append(f"{section}.items")
                 
-                # Check metadata
-                if 'metadata' in data:
-                    metadata = data['metadata']
-                    print_result(True, f"Contains metadata: {list(metadata.keys())}")
+                if missing_sections:
+                    self.log_result("Basic SWOT Analysis", False, f"Missing sections: {missing_sections}", data)
                 else:
-                    print_result(False, "Missing 'metadata' field")
+                    # Check metadata
+                    metadata = data.get("metadata", {})
+                    expected_meta = ["analysisType", "subjectName", "industry", "generatedAt"]
+                    missing_meta = [m for m in expected_meta if m not in metadata]
                     
+                    if missing_meta:
+                        self.log_result("Basic SWOT Analysis", False, f"Missing metadata: {missing_meta}", data)
+                    else:
+                        self.log_result("Basic SWOT Analysis", True, 
+                                      f"Generated complete SWOT with {len(response_data.get('strengths', {}).get('items', []))} strengths, "
+                                      f"{len(response_data.get('weaknesses', {}).get('items', []))} weaknesses, "
+                                      f"{len(response_data.get('opportunities', {}).get('items', []))} opportunities, "
+                                      f"{len(response_data.get('threats', {}).get('items', []))} threats", data)
             else:
-                print_result(False, f"API returned success=false or missing success field")
-                if 'error' in data:
-                    print(f"   Error: {data['error']}")
-        else:
-            print_result(False, f"HTTP {response.status_code}")
-            try:
-                error_data = response.json()
-                print(f"   Error response: {error_data}")
-            except:
-                print(f"   Raw response: {response.text[:500]}")
+                self.log_result("Basic SWOT Analysis", False, f"HTTP {response.status_code}: {response.text}")
                 
-    except requests.exceptions.Timeout:
-        print_result(False, "Request timed out (>120s)")
-    except Exception as e:
-        print_result(False, f"Exception occurred: {str(e)}")
+        except requests.exceptions.Timeout:
+            self.log_result("Basic SWOT Analysis", False, "Request timeout (60s)")
+        except Exception as e:
+            self.log_result("Basic SWOT Analysis", False, f"Exception: {str(e)}")
 
-def test_pitch_deck_validation():
-    """Test 2: Validation Test - Empty Body"""
-    print_test_header("Test 2: Validation Test - Empty Body")
-    
-    try:
-        url = f"{API_BASE}/pitch-deck/generate"
-        payload = {}  # Empty payload
+    def test_validation_error(self):
+        """Test Case 2: Validation Test - Empty body should return 400 error"""
+        print("🧪 Testing Validation (Empty Body)...")
         
-        print(f"📡 POST {url}")
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}")
-        
-        start_time = time.time()
-        response = requests.post(url, json=payload, timeout=30)
-        end_time = time.time()
-        
-        print(f"⏱️  Response time: {end_time - start_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code == 400:
-            print_result(True, "Correctly returned 400 status code")
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/swot-analysis/generate",
+                json={},
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
             
-            try:
+            if response.status_code == 400:
                 data = response.json()
-                if 'error' in data and 'Company name is required' in data['error']:
-                    print_result(True, "Correct error message: 'Company name is required'")
+                if "Subject name is required" in data.get("error", ""):
+                    self.log_result("Validation Test", True, "Correctly rejected empty body with 400 error", data)
                 else:
-                    print_result(False, f"Unexpected error message: {data.get('error', 'No error field')}")
-            except:
-                print_result(False, "Could not parse error response as JSON")
-        else:
-            print_result(False, f"Expected 400 status code, got {response.status_code}")
-            try:
-                data = response.json()
-                print(f"   Response: {data}")
-            except:
-                print(f"   Raw response: {response.text[:500]}")
+                    self.log_result("Validation Test", False, f"Wrong error message: {data.get('error')}", data)
+            else:
+                self.log_result("Validation Test", False, f"Expected 400, got {response.status_code}: {response.text}")
                 
-    except Exception as e:
-        print_result(False, f"Exception occurred: {str(e)}")
+        except Exception as e:
+            self.log_result("Validation Test", False, f"Exception: {str(e)}")
 
-def test_pitch_deck_pdf_export():
-    """Test 3: PDF Export Test"""
-    print_test_header("Test 3: PDF Export Test")
-    
-    try:
-        url = f"{API_BASE}/pitch-deck/generate-pdf"
+    def test_pdf_export(self):
+        """Test Case 3: PDF Export Test"""
+        print("🧪 Testing PDF Export...")
+        
         payload = {
             "data": {
-                "companyName": "TestCo",
-                "slides": [
-                    {
-                        "slideNumber": 1,
-                        "title": "Title Slide",
-                        "slideType": "title",
-                        "content": {
-                            "companyName": "TestCo",
-                            "tagline": "Testing PDF"
+                "subjectName": "TestCo",
+                "executiveSummary": "Test summary",
+                "strengths": {
+                    "title": "Strengths",
+                    "items": [
+                        {
+                            "point": "Strong brand",
+                            "description": "Well known",
+                            "impact": "High"
                         }
-                    }
-                ]
+                    ]
+                },
+                "weaknesses": {
+                    "title": "Weaknesses",
+                    "items": [
+                        {
+                            "point": "Limited funding",
+                            "description": "Cash constrained",
+                            "impact": "Medium"
+                        }
+                    ]
+                },
+                "opportunities": {
+                    "title": "Opportunities",
+                    "items": [
+                        {
+                            "point": "Market growth",
+                            "description": "Expanding market",
+                            "impact": "High"
+                        }
+                    ]
+                },
+                "threats": {
+                    "title": "Threats",
+                    "items": [
+                        {
+                            "point": "Competition",
+                            "description": "New entrants",
+                            "impact": "High"
+                        }
+                    ]
+                }
             },
             "metadata": {
-                "companyName": "TestCo",
-                "deckStyle": "classic",
+                "subjectName": "TestCo",
+                "analysisType": "Business",
                 "industry": "Technology"
             }
         }
         
-        print(f"📡 POST {url}")
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}")
-        
-        start_time = time.time()
-        response = requests.post(url, json=payload, timeout=60)
-        end_time = time.time()
-        
-        print(f"⏱️  Response time: {end_time - start_time:.2f}s")
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"📄 Response keys: {list(data.keys())}")
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/swot-analysis/generate-pdf",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
             
-            if data.get('success') == True:
-                print_result(True, "API returned success=true")
+            if response.status_code == 200:
+                data = response.json()
                 
-                # Check for PDF data URL or HTML fallback
-                if 'pdfDataUrl' in data:
-                    pdf_url = data['pdfDataUrl']
-                    if pdf_url.startswith('data:application/pdf;base64,'):
-                        print_result(True, "Contains valid PDF data URL")
-                        pdf_size = len(pdf_url)
-                        print(f"   PDF data size: {pdf_size} characters")
-                    else:
-                        print_result(False, "Invalid PDF data URL format")
-                elif 'fallback' in data and data['fallback'] == True:
-                    print_result(True, "PDF generation fallback activated")
-                    if 'htmlContent' in data:
-                        html_size = len(data['htmlContent'])
-                        print_result(True, f"HTML fallback provided ({html_size} characters)")
-                    else:
-                        print_result(False, "Missing HTML content in fallback response")
+                if data.get("success") and "htmlContent" in data:
+                    html_length = len(data.get("htmlContent", ""))
+                    self.log_result("PDF Export Test", True, 
+                                  f"Generated HTML content ({html_length} chars) with fallback mechanism", data)
                 else:
-                    print_result(False, "Missing both pdfDataUrl and fallback response")
-                    
+                    self.log_result("PDF Export Test", False, f"Missing success or htmlContent: {data}")
             else:
-                print_result(False, "API returned success=false")
-                if 'error' in data:
-                    print(f"   Error: {data['error']}")
-        else:
-            print_result(False, f"HTTP {response.status_code}")
-            try:
-                error_data = response.json()
-                print(f"   Error response: {error_data}")
-            except:
-                print(f"   Raw response: {response.text[:500]}")
+                self.log_result("PDF Export Test", False, f"HTTP {response.status_code}: {response.text}")
                 
-    except Exception as e:
-        print_result(False, f"Exception occurred: {str(e)}")
+        except Exception as e:
+            self.log_result("PDF Export Test", False, f"Exception: {str(e)}")
 
-def test_pdf_validation_missing_data():
-    """Test 4: PDF Export Validation - Missing Data"""
-    print_test_header("Test 4: PDF Export Validation - Missing Data")
-    
-    try:
-        url = f"{API_BASE}/pitch-deck/generate-pdf"
+    def test_pdf_validation_missing_data(self):
+        """Test Case 4: PDF Validation - Missing data"""
+        print("🧪 Testing PDF Validation (Missing Data)...")
+        
         payload = {
             "metadata": {
-                "companyName": "TestCo",
-                "deckStyle": "classic"
+                "subjectName": "TestCo",
+                "analysisType": "Business"
             }
-            # Missing 'data' field
+            # Missing "data" field
         }
         
-        print(f"📡 POST {url}")
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}")
-        
-        response = requests.post(url, json=payload, timeout=30)
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code == 400:
-            print_result(True, "Correctly returned 400 status code")
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/swot-analysis/generate-pdf",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
             
-            try:
+            if response.status_code == 400:
                 data = response.json()
-                if 'error' in data and 'Missing data or metadata' in data['error']:
-                    print_result(True, "Correct error message: 'Missing data or metadata'")
+                if "Missing data or metadata" in data.get("error", ""):
+                    self.log_result("PDF Validation (Missing Data)", True, "Correctly rejected missing data with 400 error", data)
                 else:
-                    print_result(False, f"Unexpected error message: {data.get('error', 'No error field')}")
-            except:
-                print_result(False, "Could not parse error response as JSON")
-        else:
-            print_result(False, f"Expected 400 status code, got {response.status_code}")
+                    self.log_result("PDF Validation (Missing Data)", False, f"Wrong error message: {data.get('error')}", data)
+            else:
+                self.log_result("PDF Validation (Missing Data)", False, f"Expected 400, got {response.status_code}: {response.text}")
                 
-    except Exception as e:
-        print_result(False, f"Exception occurred: {str(e)}")
+        except Exception as e:
+            self.log_result("PDF Validation (Missing Data)", False, f"Exception: {str(e)}")
 
-def test_pdf_validation_missing_metadata():
-    """Test 5: PDF Export Validation - Missing Metadata"""
-    print_test_header("Test 5: PDF Export Validation - Missing Metadata")
-    
-    try:
-        url = f"{API_BASE}/pitch-deck/generate-pdf"
+    def test_pdf_validation_missing_metadata(self):
+        """Test Case 5: PDF Validation - Missing metadata"""
+        print("🧪 Testing PDF Validation (Missing Metadata)...")
+        
         payload = {
             "data": {
-                "companyName": "TestCo",
-                "slides": []
+                "subjectName": "TestCo",
+                "strengths": {"title": "Strengths", "items": []}
             }
-            # Missing 'metadata' field
+            # Missing "metadata" field
         }
         
-        print(f"📡 POST {url}")
-        print(f"📦 Payload: {json.dumps(payload, indent=2)}")
-        
-        response = requests.post(url, json=payload, timeout=30)
-        print(f"📊 Status Code: {response.status_code}")
-        
-        if response.status_code == 400:
-            print_result(True, "Correctly returned 400 status code")
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/swot-analysis/generate-pdf",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
             
-            try:
+            if response.status_code == 400:
                 data = response.json()
-                if 'error' in data and 'Missing data or metadata' in data['error']:
-                    print_result(True, "Correct error message: 'Missing data or metadata'")
+                if "Missing data or metadata" in data.get("error", ""):
+                    self.log_result("PDF Validation (Missing Metadata)", True, "Correctly rejected missing metadata with 400 error", data)
                 else:
-                    print_result(False, f"Unexpected error message: {data.get('error', 'No error field')}")
-            except:
-                print_result(False, "Could not parse error response as JSON")
-        else:
-            print_result(False, f"Expected 400 status code, got {response.status_code}")
+                    self.log_result("PDF Validation (Missing Metadata)", False, f"Wrong error message: {data.get('error')}", data)
+            else:
+                self.log_result("PDF Validation (Missing Metadata)", False, f"Expected 400, got {response.status_code}: {response.text}")
                 
-    except Exception as e:
-        print_result(False, f"Exception occurred: {str(e)}")
+        except Exception as e:
+            self.log_result("PDF Validation (Missing Metadata)", False, f"Exception: {str(e)}")
 
-def main():
-    """Run all tests"""
-    print("🚀 Starting Pitch Deck Creator API Backend Tests")
-    print(f"🌐 Base URL: {BASE_URL}")
-    print(f"📅 Test Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # Test results tracking
-    test_results = []
-    
-    try:
-        # Test 1: Basic pitch deck generation
-        print("\n" + "="*80)
-        test_pitch_deck_generate()
+    def run_all_tests(self):
+        """Run all SWOT Analysis API tests"""
+        print("🚀 Starting SWOT Analysis API Testing...")
+        print(f"Base URL: {self.base_url}")
+        print("=" * 60)
         
-        # Test 2: Validation test
-        print("\n" + "="*80)
-        test_pitch_deck_validation()
+        # Run all test cases
+        self.test_basic_swot_analysis()
+        self.test_validation_error()
+        self.test_pdf_export()
+        self.test_pdf_validation_missing_data()
+        self.test_pdf_validation_missing_metadata()
         
-        # Test 3: PDF export test
-        print("\n" + "="*80)
-        test_pitch_deck_pdf_export()
+        # Summary
+        print("=" * 60)
+        print("📊 TEST SUMMARY")
+        print("=" * 60)
         
-        # Test 4: PDF validation - missing data
-        print("\n" + "="*80)
-        test_pdf_validation_missing_data()
+        total_tests = len(self.results)
+        passed_tests = sum(1 for r in self.results if r["success"])
+        failed_tests = total_tests - passed_tests
         
-        # Test 5: PDF validation - missing metadata
-        print("\n" + "="*80)
-        test_pdf_validation_missing_metadata()
+        print(f"Total Tests: {total_tests}")
+        print(f"✅ Passed: {passed_tests}")
+        print(f"❌ Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
         
-    except KeyboardInterrupt:
-        print("\n\n⚠️  Tests interrupted by user")
-    except Exception as e:
-        print(f"\n\n❌ Unexpected error during testing: {str(e)}")
-    
-    print("\n" + "="*80)
-    print("🏁 Pitch Deck Creator API Testing Complete")
-    print("="*80)
+        if failed_tests > 0:
+            print("\n❌ FAILED TESTS:")
+            for result in self.results:
+                if not result["success"]:
+                    print(f"  - {result['test']}: {result['details']}")
+        
+        return passed_tests == total_tests
 
 if __name__ == "__main__":
-    main()
+    tester = SWOTAnalysisAPITester()
+    success = tester.run_all_tests()
+    sys.exit(0 if success else 1)
