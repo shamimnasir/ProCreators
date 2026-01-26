@@ -201,6 +201,7 @@ export default function BusinessPlanPage() {
     if (!result) return
     
     setExportingPDF(true)
+    toast({ title: 'Generating PDF...', description: 'Please wait, this may take a moment' })
     
     try {
       const selectedIndustry = INDUSTRIES.find(i => i.id === industry)?.name || industry
@@ -224,18 +225,106 @@ export default function BusinessPlanPage() {
       const data = await res.json()
       
       if (data.success) {
-        if (data.fallback) {
-          // Fallback: Open HTML in new window for browser print
-          const printWindow = window.open('', '_blank')
-          if (printWindow) {
-            printWindow.document.write(data.htmlContent)
-            printWindow.document.close()
-            printWindow.onload = () => {
-              printWindow.print()
+        if (data.fallback || data.htmlContent) {
+          // Use client-side PDF generation with jspdf + html2canvas
+          const { default: jsPDF } = await import('jspdf')
+          const { default: html2canvas } = await import('html2canvas')
+          
+          // Create hidden iframe to render HTML
+          const iframe = document.createElement('iframe')
+          iframe.style.position = 'absolute'
+          iframe.style.left = '-9999px'
+          iframe.style.width = '900px'
+          iframe.style.height = '1200px'
+          document.body.appendChild(iframe)
+          
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+          iframeDoc.open()
+          iframeDoc.write(data.htmlContent)
+          iframeDoc.close()
+          
+          // Wait for content to load
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          
+          // Get sections from iframe
+          const body = iframeDoc.body
+          const sections = iframeDoc.querySelectorAll('.section, .slide, .cover-page')
+          
+          // Create PDF in portrait A4
+          const pdf = new jsPDF('p', 'mm', 'a4')
+          const pageWidth = 210
+          const pageHeight = 297
+          
+          if (sections.length > 0) {
+            // Capture each section separately for better quality
+            let isFirstPage = true
+            
+            for (const section of sections) {
+              if (!isFirstPage) pdf.addPage()
+              isFirstPage = false
+              
+              const canvas = await html2canvas(section, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+              })
+              
+              const imgWidth = pageWidth - 20
+              const imgHeight = (canvas.height * imgWidth) / canvas.width
+              
+              pdf.addImage(
+                canvas.toDataURL('image/jpeg', 0.92),
+                'JPEG',
+                10,
+                10,
+                imgWidth,
+                Math.min(imgHeight, pageHeight - 20)
+              )
+            }
+          } else {
+            // Capture full page
+            const canvas = await html2canvas(body, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff',
+              windowHeight: body.scrollHeight
+            })
+            
+            const imgWidth = pageWidth - 20
+            const imgHeight = (canvas.height * imgWidth) / canvas.width
+            const pageCount = Math.ceil(imgHeight / (pageHeight - 20))
+            
+            for (let i = 0; i < pageCount; i++) {
+              if (i > 0) pdf.addPage()
+              
+              const srcY = i * ((canvas.height / imgHeight) * (pageHeight - 20))
+              const srcHeight = Math.min(
+                (canvas.height / imgHeight) * (pageHeight - 20),
+                canvas.height - srcY
+              )
+              
+              pdf.addImage(
+                canvas.toDataURL('image/jpeg', 0.92),
+                'JPEG',
+                10,
+                10 - (i * (pageHeight - 20)),
+                imgWidth,
+                imgHeight
+              )
             }
           }
-          toast({ title: 'Use browser Print dialog to save as PDF' })
-        } else {
+          
+          pdf.save(`${companyName.replace(/\s+/g, '_')}_Business_Plan.pdf`)
+          
+          // Cleanup
+          document.body.removeChild(iframe)
+          toast({ 
+            title: '📥 PDF Downloaded!', 
+            description: data.libraryId ? '✅ Also saved to Library' : 'Business plan saved successfully'
+          })
+        } else if (data.pdfDataUrl) {
           // Direct PDF download
           const link = document.createElement('a')
           link.href = data.pdfDataUrl
