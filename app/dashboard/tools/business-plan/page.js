@@ -70,6 +70,7 @@ export default function BusinessPlanPage() {
   const [activeTab, setActiveTab] = useState('setup')
   const [currentStep, setCurrentStep] = useState(1)
   const [generating, setGenerating] = useState(false)
+  const [exportingPDF, setExportingPDF] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
 
