@@ -707,42 +707,8 @@ function generatePitchDeckHTML(data, metadata) {
   </div>
   `).join('') : '<p>No slides generated</p>'}
   
-  ${data.pitchTips || data.tips ? `
-  <div class="slide">
-    <div class="slide-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-      <div class="slide-number">Tips</div>
-      <h1 class="slide-title">Pitch Tips</h1>
-    </div>
-    <div class="slide-content">
-      <div class="tips-section">
-        <ul>
-          ${(data.pitchTips || data.tips).map(tip => `<li style="margin-bottom: 15px; font-size: 16px;">${escapeHTML(tip)}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-  </div>
-  ` : ''}
-  
-  ${data.commonQuestions ? `
-  <div class="slide">
-    <div class="slide-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
-      <div class="slide-number">Q&A Prep</div>
-      <h1 class="slide-title">Common Investor Questions</h1>
-    </div>
-    <div class="slide-content">
-      ${data.commonQuestions.map(qa => `
-      <div class="qa-card">
-        <div class="qa-question">${escapeHTML(qa.question)}</div>
-        <div class="qa-answer">${escapeHTML(qa.suggestedAnswer)}</div>
-      </div>
-      `).join('')}
-    </div>
-  </div>
-  ` : ''}
-  
   <div class="footer">
     <p style="font-size: 16px; font-weight: 700; color: #1e40af; margin-bottom: 10px;">${escapeHTML(metadata.companyName)} Investor Pitch Deck</p>
-    <p>Generated with ProCreators Pitch Deck AI • ${date}</p>
     <p>© ${new Date().getFullYear()} ${escapeHTML(metadata.companyName)} • Confidential</p>
   </div>
 </body>
