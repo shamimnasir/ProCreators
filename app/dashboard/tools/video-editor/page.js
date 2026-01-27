@@ -744,35 +744,109 @@ export default function VideoEditorPage() {
               </CardContent>
             </Card>
             
-            {/* Features */}
-            <div className="grid md:grid-cols-3 gap-4 mt-6">
-              <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
-                <CardContent className="pt-6">
-                  <Layers className="h-8 w-8 text-purple-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Multi-Clip Merge</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Upload multiple clips and merge them automatically
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-pink-500/5 to-pink-500/10 border-pink-500/20">
-                <CardContent className="pt-6">
-                  <Waves className="h-8 w-8 text-pink-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Auto Transitions</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Fade, dissolve, wipe with whoosh sound effects
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-                <CardContent className="pt-6">
-                  <Mic className="h-8 w-8 text-green-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Smart Cleanup</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Auto remove "um", "uh", "like" and reduce noise
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Comprehensive Features Grid */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-500" />
+                Professional Features
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {/* Multi-Clip Merge */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 text-center hover:border-purple-500/40 transition-colors">
+                  <div className="p-2 bg-purple-500/20 rounded-lg mb-2">
+                    <Layers className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <span className="text-xs font-medium">Multi-Clip Merge</span>
+                </div>
+                
+                {/* Auto Transitions */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 text-center hover:border-pink-500/40 transition-colors">
+                  <div className="p-2 bg-pink-500/20 rounded-lg mb-2">
+                    <Waves className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <span className="text-xs font-medium">Auto Transitions</span>
+                </div>
+                
+                {/* Filler Removal */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 text-center hover:border-orange-500/40 transition-colors">
+                  <div className="p-2 bg-orange-500/20 rounded-lg mb-2">
+                    <Mic className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <span className="text-xs font-medium">Filler Removal</span>
+                </div>
+                
+                {/* Noise Reduction */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 text-center hover:border-green-500/40 transition-colors">
+                  <div className="p-2 bg-green-500/20 rounded-lg mb-2">
+                    <Volume2 className="h-5 w-5 text-green-500" />
+                  </div>
+                  <span className="text-xs font-medium">Noise Reduction</span>
+                </div>
+                
+                {/* Auto Captions */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-center hover:border-blue-500/40 transition-colors">
+                  <div className="p-2 bg-blue-500/20 rounded-lg mb-2">
+                    <Type className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <span className="text-xs font-medium">Auto Captions</span>
+                </div>
+                
+                {/* Color Grading */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20 text-center hover:border-amber-500/40 transition-colors">
+                  <div className="p-2 bg-amber-500/20 rounded-lg mb-2">
+                    <Palette className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <span className="text-xs font-medium">Color Grading</span>
+                </div>
+                
+                {/* Scene Detection */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 text-center hover:border-cyan-500/40 transition-colors">
+                  <div className="p-2 bg-cyan-500/20 rounded-lg mb-2">
+                    <Scissors className="h-5 w-5 text-cyan-500" />
+                  </div>
+                  <span className="text-xs font-medium">Scene Detection</span>
+                </div>
+                
+                {/* Beat Sync */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/20 text-center hover:border-violet-500/40 transition-colors">
+                  <div className="p-2 bg-violet-500/20 rounded-lg mb-2">
+                    <Music className="h-5 w-5 text-violet-500" />
+                  </div>
+                  <span className="text-xs font-medium">Beat Sync</span>
+                </div>
+                
+                {/* Sound Effects */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-rose-500/10 to-rose-500/5 border border-rose-500/20 text-center hover:border-rose-500/40 transition-colors">
+                  <div className="p-2 bg-rose-500/20 rounded-lg mb-2">
+                    <Zap className="h-5 w-5 text-rose-500" />
+                  </div>
+                  <span className="text-xs font-medium">Whoosh FX</span>
+                </div>
+                
+                {/* Silence Removal */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-500/20 text-center hover:border-teal-500/40 transition-colors">
+                  <div className="p-2 bg-teal-500/20 rounded-lg mb-2">
+                    <VolumeX className="h-5 w-5 text-teal-500" />
+                  </div>
+                  <span className="text-xs font-medium">Silence Removal</span>
+                </div>
+                
+                {/* AI Transcription */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-500/20 text-center hover:border-indigo-500/40 transition-colors">
+                  <div className="p-2 bg-indigo-500/20 rounded-lg mb-2">
+                    <FileText className="h-5 w-5 text-indigo-500" />
+                  </div>
+                  <span className="text-xs font-medium">AI Transcript</span>
+                </div>
+                
+                {/* Auto Save */}
+                <div className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 text-center hover:border-emerald-500/40 transition-colors">
+                  <div className="p-2 bg-emerald-500/20 rounded-lg mb-2">
+                    <Library className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <span className="text-xs font-medium">Auto Save</span>
+                </div>
+              </div>
             </div>
           </TabsContent>
           
