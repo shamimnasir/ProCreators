@@ -714,27 +714,78 @@ export default function VideoEditorPage() {
             addCaptions,
             captionStyle,
             transcript: addCaptions ? transcript : null,
-            backgroundMusic: selectedMusic?.filePath || null,
+            backgroundMusic: smartAudioDucking ? null : (selectedMusic?.filePath || null), // Don't add music here if ducking
             outputPreset
           })
         })
         
-        const result = await response.json()
+        let result = await response.json()
         
-        if (result.success) {
-          setProcessedVideoUrl(result.outputPath)
-          setActiveTab('export')
-          
-          // Auto-save to Library
-          await saveToLibrary(result.outputPath)
-          
-          toast({ 
-            title: 'Video Created!', 
-            description: `Merged ${clips.length} clips with ${transitionType} transitions.` 
-          })
-        } else {
+        if (!result.success) {
           throw new Error(result.error)
         }
+        
+        let currentOutputPath = result.outputPath
+        
+        // Apply AI Enhancements if enabled
+        const aiFeatures = []
+        if (removeSilences) aiFeatures.push('silence_removal')
+        if (removeFillerWords && transcript) aiFeatures.push('filler_removal')
+        if (smartAudioDucking && selectedMusic) aiFeatures.push('audio_ducking')
+        
+        if (aiFeatures.length > 0) {
+          setProcessingProgress({ 
+            step: `Applying AI enhancements (${aiFeatures.join(', ')})...`, 
+            progress: 70,
+            estimatedTime: estimatedTotalSeconds * 0.3,
+            elapsedTime: 0
+          })
+          
+          const enhanceResponse = await fetch('/api/video-editor/ai-enhance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filePath: currentOutputPath,
+              features: aiFeatures,
+              silenceAction,
+              transcript: transcript,
+              musicPath: selectedMusic?.filePath || null,
+              duckingRatio: 0.2
+            })
+          })
+          
+          const enhanceResult = await enhanceResponse.json()
+          
+          if (enhanceResult.success) {
+            currentOutputPath = enhanceResult.outputPath
+            
+            // Show enhancement results
+            const resultsMsg = []
+            if (enhanceResult.results?.silencesDetected) {
+              resultsMsg.push(`Removed ${enhanceResult.results.silencesDetected} silences`)
+            }
+            if (enhanceResult.results?.fillersDetected) {
+              resultsMsg.push(`Cut ${enhanceResult.results.fillersDetected} filler words`)
+            }
+            if (enhanceResult.results?.audioDuckingApplied) {
+              resultsMsg.push('Applied smart audio ducking')
+            }
+            if (resultsMsg.length > 0) {
+              toast({ title: 'AI Enhancement Complete', description: resultsMsg.join(', ') })
+            }
+          }
+        }
+        
+        setProcessedVideoUrl(currentOutputPath)
+        setActiveTab('export')
+        
+        // Auto-save to Library
+        await saveToLibrary(currentOutputPath)
+        
+        toast({ 
+          title: 'Video Created!', 
+          description: `Merged ${clips.length} clips with ${transitionType} transitions.` 
+        })
       }
       
       setProcessingProgress({ step: 'Complete!', progress: 100, estimatedTime: 0, elapsedTime: 0 })
