@@ -1647,6 +1647,221 @@ export default function VideoEditorPage() {
         onSelectMusic={setSelectedMusic}
         videoDuration={totalDuration || 30}
       />
+      
+      {/* Intro/Outro Creator Modal */}
+      <Dialog open={showIntroOutroCreator} onOpenChange={setShowIntroOutroCreator}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Film className="h-5 w-5 text-emerald-500" />
+              Create {creatorType === 'intro' ? 'Intro' : 'Outro'} Clip
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Text Settings */}
+            <div className="space-y-2">
+              <Label>Main Text</Label>
+              <Input
+                value={creatorSettings.text}
+                onChange={(e) => setCreatorSettings(prev => ({ ...prev, text: e.target.value }))}
+                placeholder={creatorType === 'intro' ? 'Your Video Title' : 'Thanks for watching!'}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Subtitle (optional)</Label>
+              <Input
+                value={creatorSettings.subtext}
+                onChange={(e) => setCreatorSettings(prev => ({ ...prev, subtext: e.target.value }))}
+                placeholder="Subscribe for more content"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Text Color</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={creatorSettings.textColor}
+                    onChange={(e) => setCreatorSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                    className="w-10 h-10 rounded cursor-pointer"
+                  />
+                  <Input
+                    value={creatorSettings.textColor}
+                    onChange={(e) => setCreatorSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Duration: {creatorSettings.duration}s</Label>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  step={0.5}
+                  value={creatorSettings.duration}
+                  onChange={(e) => setCreatorSettings(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                  className="w-full mt-2"
+                />
+              </div>
+            </div>
+            
+            {/* Background Type */}
+            <div className="space-y-2">
+              <Label>Background Style</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'solid', label: 'Solid', icon: '⬛' },
+                  { id: 'gradient', label: 'Gradient', icon: '🌈' },
+                  { id: 'animated', label: 'Animated', icon: '✨' },
+                  { id: 'particles', label: 'Stars', icon: '⭐' }
+                ].map(bg => (
+                  <Button
+                    key={bg.id}
+                    variant={creatorSettings.backgroundType === bg.id ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCreatorSettings(prev => ({ ...prev, backgroundType: bg.id }))}
+                    className="flex flex-col h-16"
+                  >
+                    <span className="text-xl">{bg.icon}</span>
+                    <span className="text-xs">{bg.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Background Color (for solid) */}
+            {creatorSettings.backgroundType === 'solid' && (
+              <div className="space-y-2">
+                <Label>Background Color</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={creatorSettings.backgroundColor}
+                    onChange={(e) => setCreatorSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                    className="w-10 h-10 rounded cursor-pointer"
+                  />
+                  <div className="flex gap-1">
+                    {['#000000', '#1a1a2e', '#16213e', '#0f3460', '#533483', '#e94560'].map(color => (
+                      <button
+                        key={color}
+                        className={`w-8 h-8 rounded ${creatorSettings.backgroundColor === color ? 'ring-2 ring-primary' : ''}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setCreatorSettings(prev => ({ ...prev, backgroundColor: color }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Gradient Colors */}
+            {creatorSettings.backgroundType === 'gradient' && (
+              <div className="space-y-2">
+                <Label>Gradient Colors</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={creatorSettings.gradientColors[0]}
+                    onChange={(e) => setCreatorSettings(prev => ({ ...prev, gradientColors: [e.target.value, prev.gradientColors[1]] }))}
+                    className="w-10 h-10 rounded cursor-pointer"
+                  />
+                  <span className="self-center">→</span>
+                  <input
+                    type="color"
+                    value={creatorSettings.gradientColors[1]}
+                    onChange={(e) => setCreatorSettings(prev => ({ ...prev, gradientColors: [prev.gradientColors[0], e.target.value] }))}
+                    className="w-10 h-10 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Animation Type */}
+            <div className="space-y-2">
+              <Label>Animation Style</Label>
+              <Select 
+                value={creatorSettings.animationType} 
+                onValueChange={(v) => setCreatorSettings(prev => ({ ...prev, animationType: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fade">Fade In/Out</SelectItem>
+                  <SelectItem value="zoom">Zoom In</SelectItem>
+                  <SelectItem value="slide">Slide In</SelectItem>
+                  <SelectItem value="typewriter">Typewriter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Preview Box */}
+            <div 
+              className="h-32 rounded-lg flex items-center justify-center relative overflow-hidden"
+              style={{ 
+                backgroundColor: creatorSettings.backgroundType === 'solid' ? creatorSettings.backgroundColor : '#1a1a2e',
+                background: creatorSettings.backgroundType === 'gradient' 
+                  ? `linear-gradient(to bottom, ${creatorSettings.gradientColors[0]}, ${creatorSettings.gradientColors[1]})`
+                  : undefined
+              }}
+            >
+              <div className="text-center">
+                <p style={{ color: creatorSettings.textColor, fontSize: '1.5rem', fontWeight: 'bold' }}>
+                  {creatorSettings.text || 'Preview Text'}
+                </p>
+                {creatorSettings.subtext && (
+                  <p style={{ color: creatorSettings.textColor, fontSize: '0.875rem', opacity: 0.8 }}>
+                    {creatorSettings.subtext}
+                  </p>
+                )}
+              </div>
+              {creatorSettings.backgroundType === 'particles' && (
+                <div className="absolute inset-0 opacity-30">
+                  {Array.from({length: 20}).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                      style={{ 
+                        left: `${Math.random() * 100}%`, 
+                        top: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 2}s`
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIntroOutroCreator(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={generateIntroOutro}
+              disabled={isGeneratingClip || !creatorSettings.text}
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
+              {isGeneratingClip ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Create {creatorType === 'intro' ? 'Intro' : 'Outro'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
