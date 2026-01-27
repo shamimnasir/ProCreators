@@ -186,6 +186,7 @@ export default function VideoEditorPage() {
       applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary, selectedMusic])
 
   const loadDraftData = useCallback((data) => {
+    console.log('Loading draft data:', data)
     if (data.name) setProjectName(data.name)
     if (data.transitionType) setTransitionType(data.transitionType)
     if (data.transitionDuration) setTransitionDuration(data.transitionDuration)
@@ -196,7 +197,41 @@ export default function VideoEditorPage() {
     if (data.addCaptions !== undefined) setAddCaptions(data.addCaptions)
     if (data.captionStyle) setCaptionStyle(data.captionStyle)
     if (data.processedVideoUrl) setProcessedVideoUrl(data.processedVideoUrl)
-  }, [])
+    
+    // Try to restore clips from saved clip data
+    if (data.clipData && Array.isArray(data.clipData) && data.clipData.length > 0) {
+      // Restore clips with their metadata (file needs to be re-uploaded or found in IndexedDB)
+      const restoredClips = data.clipData.map(clipInfo => ({
+        id: clipInfo.id || crypto.randomUUID(),
+        name: clipInfo.name || 'Restored Clip',
+        url: clipInfo.url || null,
+        filePath: clipInfo.filePath || null,
+        duration: clipInfo.duration || 0,
+        size: clipInfo.size || 0,
+        analyzed: false, // Reset analyzed state
+        isRestored: true // Mark as restored from draft
+      })).filter(c => c.filePath) // Only keep clips with file paths
+      
+      if (restoredClips.length > 0) {
+        setClips(restoredClips)
+        setActiveTab('edit')
+        toast({ title: 'Draft Loaded', description: `Restored ${restoredClips.length} clip(s). You may need to re-analyze.` })
+      } else {
+        toast({ title: 'Draft Loaded', description: 'Settings restored. Please re-upload your clips.' })
+        setActiveTab('upload')
+      }
+    } else if (data.clipNames && data.clipNames.length > 0) {
+      // Old draft format - just show names, user needs to re-upload
+      toast({ 
+        title: 'Draft Loaded', 
+        description: `Settings restored. Previous clips: ${data.clipNames.join(', ')}. Please re-upload.`,
+        duration: 5000
+      })
+      setActiveTab('upload')
+    } else {
+      setActiveTab('upload')
+    }
+  }, [toast])
 
   const handleStartNewProject = useCallback(() => {
     setProjectId(null)
