@@ -73,11 +73,24 @@ export default function VideoEditorPage() {
   const [transitionSound, setTransitionSound] = useState('whoosh')
   
   // Processing Settings
-  const [applyNoiseReduction, setApplyNoiseReduction] = useState(true)
-  const [removeFillerWords, setRemoveFillerWords] = useState(true)
+  const [applyNoiseReduction, setApplyNoiseReduction] = useState(false)
+  const [removeFillerWords, setRemoveFillerWords] = useState(false)
   const [colorGrade, setColorGrade] = useState('neutral')
-  const [addCaptions, setAddCaptions] = useState(true)
+  const [addCaptions, setAddCaptions] = useState(false)
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
+  const [outputPreset, setOutputPreset] = useState('youtube-hd')
+  
+  // Video size presets
+  const VIDEO_PRESETS = {
+    'youtube-hd': { label: 'YouTube HD (16:9)', icon: '📺' },
+    'instagram-reel': { label: 'Instagram Reel (9:16)', icon: '📱' },
+    'instagram-square': { label: 'Instagram Square (1:1)', icon: '⬜' },
+    'tiktok': { label: 'TikTok (9:16)', icon: '🎵' },
+    'facebook-square': { label: 'Facebook Square (1:1)', icon: '📘' },
+    'facebook-feed': { label: 'Facebook Feed (1.91:1)', icon: '📰' },
+    'twitter': { label: 'Twitter/X (16:9)', icon: '🐦' },
+    'original': { label: 'Keep Original', icon: '📁' }
+  }
   
   // Processing State
   const [isProcessing, setIsProcessing] = useState(false)
