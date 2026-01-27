@@ -535,6 +535,63 @@ export default function VideoEditorPage() {
     }
   }
 
+  // Generate intro or outro clip
+  const generateIntroOutro = async () => {
+    setIsGeneratingClip(true)
+    try {
+      const preset = VIDEO_PRESETS[outputPreset] || { width: 1920, height: 1080 }
+      
+      const response = await fetch('/api/video-editor/generate-clip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: creatorType,
+          duration: creatorSettings.duration,
+          text: creatorSettings.text,
+          subtext: creatorSettings.subtext,
+          textColor: creatorSettings.textColor,
+          fontSize: creatorSettings.fontSize,
+          backgroundType: creatorSettings.backgroundType,
+          backgroundColor: creatorSettings.backgroundColor,
+          gradientColors: creatorSettings.gradientColors,
+          animationType: creatorSettings.animationType,
+          width: preset.width || 1920,
+          height: preset.height || 1080
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        const newClip = {
+          id: result.jobId,
+          name: `${creatorType === 'intro' ? 'Intro' : 'Outro'}: ${creatorSettings.text || 'Custom'}`,
+          url: result.filePath,
+          filePath: result.filePath,
+          duration: creatorSettings.duration,
+          isGenerated: true,
+          type: creatorType
+        }
+        
+        if (creatorType === 'intro') {
+          setIntroClip(newClip)
+        } else {
+          setOutroClip(newClip)
+        }
+        
+        setShowIntroOutroCreator(false)
+        toast({ title: `${creatorType === 'intro' ? 'Intro' : 'Outro'} Created!`, description: 'Your clip has been generated successfully.' })
+      } else {
+        throw new Error(result.error)
+      }
+    } catch (error) {
+      console.error('Generate clip error:', error)
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
+    } finally {
+      setIsGeneratingClip(false)
+    }
+  }
+
   // Process and merge all clips
   const processClips = async () => {
     if (clips.length === 0) return
