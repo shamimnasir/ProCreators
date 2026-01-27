@@ -30,7 +30,19 @@ export async function POST(request) {
       silenceMinDuration = 0.5,  // Minimum silence duration to detect (seconds)
       silenceAction = 'remove',  // 'remove', 'speed_up', 'keep'
       speedUpFactor = 3,  // How much to speed up silences
-      fillerWords = ['um', 'uh', 'like', 'so', 'you know', 'basically', 'actually', 'literally'],
+      // Expanded filler words list including common sounds
+      fillerWords = [
+        // English fillers
+        'um', 'uh', 'uhh', 'umm', 'ummm', 'er', 'err', 'ah', 'ahh', 'aah',
+        'like', 'so', 'well', 'right', 'okay', 'ok',
+        'you know', 'i mean', 'basically', 'actually', 'literally',
+        'sort of', 'kind of', 'kinda', 'sorta',
+        // Hesitation sounds
+        'hmm', 'hm', 'mmm', 'mm', 'mhm',
+        'aam', 'amm', 'ammm', 'aaa', 'eee',
+        // Bengali/Hindi common fillers
+        'মানে', 'আসলে', 'তো', 'এই', 'ওই'
+      ],
       transcript = null,  // Whisper transcript with word timestamps
       musicPath = null,  // Background music for ducking
       duckingRatio = 0.2,  // Music volume when speech detected (0.2 = 20%)
