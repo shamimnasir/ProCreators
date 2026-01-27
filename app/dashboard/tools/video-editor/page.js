@@ -671,51 +671,30 @@ export default function VideoEditorPage() {
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex gap-6">
-          {/* Left Sidebar - AutoSaveDraftsManager */}
-          <div className="hidden lg:block w-80 flex-shrink-0">
-            <AutoSaveDraftsManager
-              toolType="video-editor"
-              currentData={getCurrentDraftData()}
-              onLoadDraft={loadDraftData}
-              onStartNew={handleStartNewProject}
-              autoSaveInterval={60000}
-            />
-            
-            {/* Saved to Library Badge */}
-            {savedToLibrary && (
-              <Alert className="mt-4 border-green-500/50 bg-green-500/10">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <AlertTitle className="text-green-600 text-sm">Saved to Library</AlertTitle>
-                <AlertDescription className="text-xs text-green-600">
-                  Your video is saved for 30 days.
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-          
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             {/* Project Name Input */}
-            <div className="mb-4">
+            <div className="mb-4 flex items-center gap-3">
               <Input
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Project Name"
-                className="text-lg font-semibold border-none bg-transparent p-0 h-auto focus-visible:ring-0"
+                className="text-xl font-bold border-none bg-transparent p-0 h-auto focus-visible:ring-0 max-w-md"
               />
+              {savedToLibrary && (
+                <Badge variant="outline" className="text-green-600 border-green-500">
+                  <CheckCircle className="h-3 w-3 mr-1" /> Saved to Library
+                </Badge>
+              )}
             </div>
             
-            {/* Storage Warning */}
+            {/* Storage Warning - Compact */}
             {showStorageWarning && (
-              <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+              <Alert className="mb-4 border-amber-500/50 bg-amber-500/10 py-2">
                 <ShieldAlert className="h-4 w-4 text-amber-500" />
-                <AlertTitle className="text-amber-600">Browser Storage Notice</AlertTitle>
-                <AlertDescription className="text-amber-700 dark:text-amber-300">
-                  <ul className="list-disc list-inside space-y-1 text-sm mt-2">
-                    <li><strong>Do NOT clear browser cache</strong> - This deletes your projects</li>
-                    <li><strong>Always download final videos</strong> - Browser storage is temporary</li>
-                  </ul>
-                  <Button variant="ghost" size="sm" className="mt-2 text-amber-600" onClick={() => setShowStorageWarning(false)}>
+                <AlertDescription className="text-amber-700 dark:text-amber-300 text-sm flex items-center justify-between">
+                  <span><strong>Browser Storage:</strong> Don't clear cache • Download final videos</span>
+                  <Button variant="ghost" size="sm" className="text-amber-600 h-6 px-2" onClick={() => setShowStorageWarning(false)}>
                     Dismiss
                   </Button>
                 </AlertDescription>
@@ -742,9 +721,9 @@ export default function VideoEditorPage() {
           <TabsContent value="upload">
             <Card className="border-2 border-dashed">
               <CardContent className="pt-6">
-                <div className="flex flex-col items-center justify-center py-12">
+                <div className="flex flex-col items-center justify-center py-8">
                   <div className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-4">
-                    <Upload className="h-12 w-12 text-purple-500" />
+                    <Upload className="h-10 w-10 text-purple-500" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Upload Your Clips</h3>
                   <p className="text-muted-foreground mb-2 text-center max-w-md">
