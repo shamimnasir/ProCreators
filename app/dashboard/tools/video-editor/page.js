@@ -667,22 +667,37 @@ export default function VideoEditorPage() {
         }
       } else {
         // Multi-clip merge with transitions
+        const totalClipsCount = (introClip ? 1 : 0) + clips.length + (outroClip ? 1 : 0)
         setProcessingProgress({ 
-          step: `Merging ${clips.length} clips (${VIDEO_PRESETS[outputPreset]?.label || outputPreset})...`, 
+          step: `Merging ${totalClipsCount} clips (${VIDEO_PRESETS[outputPreset]?.label || outputPreset})...`, 
           progress: 5,
           estimatedTime: estimatedTotalSeconds,
           elapsedTime: 0
         })
         
-        const clipData = clips.map(c => ({
-          filePath: c.filePath || `/video-editor/uploads/${c.id}.mp4`
-        }))
+        // Build clip array with intro/outro
+        const allClips = []
+        
+        // Add intro clip first
+        if (introClip) {
+          allClips.push({ filePath: introClip.filePath })
+        }
+        
+        // Add main clips
+        clips.forEach(c => {
+          allClips.push({ filePath: c.filePath || `/video-editor/uploads/${c.id}.mp4` })
+        })
+        
+        // Add outro clip last
+        if (outroClip) {
+          allClips.push({ filePath: outroClip.filePath })
+        }
         
         const response = await fetch('/api/video-editor/merge-clips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            clips: clipData,
+            clips: allClips,
             transition: transitionType,
             transitionDuration,
             applyNoiseReduction,
