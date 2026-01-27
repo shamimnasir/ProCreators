@@ -30,9 +30,11 @@ export default function VideoEditorPage() {
   
   // Project State
   const [projectId, setProjectId] = useState(null)
+  const [projectName, setProjectName] = useState('Untitled Video')
   const [projects, setProjects] = useState([])
   const [storageInfo, setStorageInfo] = useState({ usedMB: 0, quotaMB: 0, percentUsed: 0 })
   const [showStorageWarning, setShowStorageWarning] = useState(true)
+  const [savedToLibrary, setSavedToLibrary] = useState(false)
   
   // Multi-Clip State
   const [clips, setClips] = useState([]) // Array of { id, file, url, name, duration, analyzed }
