@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
-import { mkdir, writeFile, copyFile, unlink, readdir } from 'fs/promises'
-import { existsSync, createWriteStream } from 'fs'
+import { mkdir, writeFile, copyFile, unlink, stat } from 'fs/promises'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 
@@ -9,9 +9,21 @@ export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 const OUTPUT_DIR = '/app/public/video-editor/output'
-const SOUND_EFFECTS_DIR = '/app/public/video-editor/sfx'
 
-// Multi-clip merge with transitions and effects
+// Video size presets for different platforms
+const VIDEO_PRESETS = {
+  'youtube-hd': { width: 1920, height: 1080, label: 'YouTube HD (16:9)' },
+  'youtube-4k': { width: 3840, height: 2160, label: 'YouTube 4K (16:9)' },
+  'instagram-reel': { width: 1080, height: 1920, label: 'Instagram Reel (9:16)' },
+  'instagram-square': { width: 1080, height: 1080, label: 'Instagram Square (1:1)' },
+  'instagram-feed': { width: 1080, height: 1350, label: 'Instagram Feed (4:5)' },
+  'tiktok': { width: 1080, height: 1920, label: 'TikTok (9:16)' },
+  'facebook-square': { width: 1080, height: 1080, label: 'Facebook Square (1:1)' },
+  'facebook-feed': { width: 1200, height: 628, label: 'Facebook Feed (1.91:1)' },
+  'twitter': { width: 1280, height: 720, label: 'Twitter/X (16:9)' },
+  'original': { width: 0, height: 0, label: 'Keep Original' }
+}
+
 export async function POST(request) {
   const jobId = randomUUID()
   const tempDir = `/tmp/multi-clip-${jobId}`
@@ -19,18 +31,16 @@ export async function POST(request) {
   try {
     const body = await request.json()
     const {
-      clips = [],              // Array of { filePath, startTime, endTime }
-      transition = 'fade',     // fade, dissolve, wipe, slide, zoom
+      clips = [],
+      transition = 'fade',
       transitionDuration = 0.5,
-      transitionSound = 'whoosh', // whoosh, swoosh, pop, none
-      applyNoiseReduction = true,
-      removeFillers = true,    // Remove um/uh/like sounds
+      applyNoiseReduction = false,
       colorGrade = 'neutral',
       addCaptions = false,
       captionStyle = 'bold-outline',
       transcript = null,
       backgroundMusic = null,
-      outputResolution = '1080p'
+      outputPreset = 'youtube-hd'  // New: video size preset
     } = body
     
     if (!clips || clips.length === 0) {
@@ -39,16 +49,16 @@ export async function POST(request) {
     
     await mkdir(tempDir, { recursive: true })
     await mkdir(OUTPUT_DIR, { recursive: true })
-    await mkdir(SOUND_EFFECTS_DIR, { recursive: true })
+    
+    const preset = VIDEO_PRESETS[outputPreset] || VIDEO_PRESETS['youtube-hd']
+    const keepOriginal = outputPreset === 'original'
     
     console.log(`[${jobId}] 🎬 Multi-clip merge: ${clips.length} clips`)
-    console.log(`[${jobId}] Transition: ${transition} (${transitionDuration}s) with ${transitionSound} sound`)
-    console.log(`[${jobId}] Captions: ${addCaptions}, Music: ${backgroundMusic ? 'yes' : 'no'}`)
+    console.log(`[${jobId}] Output: ${preset.label}, Transition: ${transition}`)
     
-    const dimensions = getResolutionDimensions(outputResolution)
     const processedClips = []
     
-    // Step 1: Process each clip individually
+    // Step 1: Process each clip (normalize format, optional color grade)
     for (let i = 0; i < clips.length; i++) {
       const clip = clips[i]
       const clipPath = join('/app/public', clip.filePath)
@@ -61,41 +71,35 @@ export async function POST(request) {
       console.log(`[${jobId}] Processing clip ${i + 1}/${clips.length}`)
       
       const processedPath = join(tempDir, `clip-${i}-processed.mp4`)
-      const filters = []
+      const videoFilters = []
+      const audioFilters = []
       
-      // Scale to target resolution
-      filters.push(`scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=increase`)
-      filters.push(`crop=${dimensions.width}:${dimensions.height}`)
-      
-      // Color grading
-      if (colorGrade !== 'neutral') {
-        const colorFilter = getColorGradeFilter(colorGrade)
-        if (colorFilter) filters.push(colorFilter)
+      // Scale/pad to target resolution (NO CROP - use padding for aspect ratio)
+      if (!keepOriginal) {
+        // Scale to fit within target dimensions, then pad to exact size
+        videoFilters.push(`scale=${preset.width}:${preset.height}:force_original_aspect_ratio=decrease`)
+        videoFilters.push(`pad=${preset.width}:${preset.height}:(ow-iw)/2:(oh-ih)/2:black`)
       }
       
-      // Audio filters
-      const audioFilters = []
+      // Color grading (optional)
+      if (colorGrade !== 'neutral') {
+        const colorFilter = getColorGradeFilter(colorGrade)
+        if (colorFilter) videoFilters.push(colorFilter)
+      }
+      
+      // Audio normalization
       if (applyNoiseReduction) {
-        audioFilters.push('highpass=f=80')
-        audioFilters.push('lowpass=f=12000')
-        audioFilters.push('afftdn=nf=-25')
+        audioFilters.push('highpass=f=80', 'lowpass=f=12000')
       }
       audioFilters.push('loudnorm=I=-16:TP=-1.5:LRA=11')
       
-      // Build FFmpeg command
       const args = ['-i', clipPath]
       
-      // Trim if specified
-      if (clip.startTime !== undefined) {
-        args.push('-ss', String(clip.startTime))
+      if (videoFilters.length > 0) {
+        args.push('-vf', videoFilters.join(','))
       }
-      if (clip.endTime !== undefined) {
-        args.push('-to', String(clip.endTime))
-      }
-      
+      args.push('-af', audioFilters.join(','))
       args.push(
-        '-vf', filters.join(','),
-        '-af', audioFilters.join(','),
         '-c:v', 'libx264',
         '-preset', 'fast',
         '-crf', '23',
@@ -113,64 +117,65 @@ export async function POST(request) {
       throw new Error('No clips were processed successfully')
     }
     
-    // Step 2: Create transition sound effect if needed
-    let transitionSoundPath = null
-    if (transitionSound !== 'none') {
-      transitionSoundPath = await getOrCreateTransitionSound(transitionSound, transitionDuration, jobId)
-    }
+    // Step 2: Concatenate all clips (simple concat - most reliable)
+    console.log(`[${jobId}] Concatenating ${processedClips.length} clips`)
     
-    // Step 3: Merge clips with transitions
-    console.log(`[${jobId}] Merging ${processedClips.length} clips with ${transition} transition`)
-    
-    let mergedOutput = join(tempDir, `${jobId}-merged-temp.mp4`)
-    const finalOutput = join(OUTPUT_DIR, `${jobId}-merged.mp4`)
+    let mergedOutput = join(tempDir, `${jobId}-merged.mp4`)
     
     if (processedClips.length === 1) {
-      // Single clip - just copy
       await copyFile(processedClips[0], mergedOutput)
     } else {
-      // Multiple clips - merge with transitions
-      await mergeClipsWithTransitions(
-        processedClips, 
-        mergedOutput, 
-        transition, 
-        transitionDuration, 
-        transitionSoundPath,
-        dimensions,
-        jobId
-      )
+      // Use concat demuxer (most reliable method)
+      const concatListPath = join(tempDir, 'concat.txt')
+      const concatList = processedClips.map(p => `file '${p}'`).join('\n')
+      await writeFile(concatListPath, concatList)
+      
+      await runFFmpeg([
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', concatListPath,
+        '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '23',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-y',
+        mergedOutput
+      ], jobId)
     }
     
-    // Step 4: Add captions if requested and transcript available
+    // Step 3: Add captions if requested
     let videoWithCaptions = mergedOutput
     if (addCaptions && transcript && transcript.segments && transcript.segments.length > 0) {
-      console.log(`[${jobId}] Adding captions (${transcript.segments.length} segments)`)
-      videoWithCaptions = join(tempDir, `${jobId}-with-captions.mp4`)
-      await addCaptionsToVideo(mergedOutput, videoWithCaptions, transcript, captionStyle, dimensions, jobId)
+      console.log(`[${jobId}] Adding captions`)
+      videoWithCaptions = join(tempDir, `${jobId}-captioned.mp4`)
+      await addCaptionsToVideo(mergedOutput, videoWithCaptions, transcript, captionStyle, jobId)
     }
     
-    // Step 5: Add background music if selected
-    let videoWithMusic = videoWithCaptions
+    // Step 4: Add background music if selected
+    let finalVideo = videoWithCaptions
     if (backgroundMusic) {
       const musicPath = join('/app/public', backgroundMusic)
       if (existsSync(musicPath)) {
         console.log(`[${jobId}] Adding background music`)
-        videoWithMusic = join(tempDir, `${jobId}-with-music.mp4`)
-        await addBackgroundMusic(videoWithCaptions, videoWithMusic, musicPath, jobId)
+        finalVideo = join(tempDir, `${jobId}-final.mp4`)
+        await addBackgroundMusic(videoWithCaptions, finalVideo, musicPath, jobId)
       }
     }
     
-    // Copy final result to output
-    await copyFile(videoWithMusic, finalOutput)
+    // Copy to output directory
+    const outputPath = join(OUTPUT_DIR, `${jobId}-merged.mp4`)
+    await copyFile(finalVideo, outputPath)
     
-    // Cleanup
+    // Cleanup temp files
     try {
-      await require('fs/promises').rm(tempDir, { recursive: true, force: true })
+      const { rm } = await import('fs/promises')
+      await rm(tempDir, { recursive: true, force: true })
     } catch (e) { /* ignore */ }
     
-    const stats = await require('fs/promises').stat(finalOutput)
+    const stats = await stat(outputPath)
     
-    console.log(`[${jobId}] ✅ Multi-clip merge complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    console.log(`[${jobId}] ✅ Merge complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
     
     return NextResponse.json({
       success: true,
@@ -178,148 +183,35 @@ export async function POST(request) {
       outputPath: `/video-editor/output/${jobId}-merged.mp4`,
       fileSize: stats.size,
       clipsProcessed: processedClips.length,
-      transition,
-      transitionSound,
+      preset: preset.label,
       hasCaptions: addCaptions && transcript,
       hasMusic: !!backgroundMusic
     })
     
   } catch (error) {
-    console.error(`[${jobId}] Multi-clip error:`, error)
+    console.error(`[${jobId}] Merge error:`, error)
     
     try {
-      await require('fs/promises').rm(tempDir, { recursive: true, force: true })
+      const { rm } = await import('fs/promises')
+      await rm(tempDir, { recursive: true, force: true })
     } catch (e) { /* ignore */ }
     
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
 
-// Merge clips with transitions
-async function mergeClipsWithTransitions(clips, output, transition, duration, soundPath, dimensions, jobId) {
-  // For simple transitions, use concat with xfade
-  const inputs = clips.flatMap(c => ['-i', c])
-  
-  if (soundPath) {
-    inputs.push('-i', soundPath)
-  }
-  
-  // Build xfade filter chain
-  let filterComplex = ''
-  let lastVideo = '[0:v]'
-  let lastAudio = '[0:a]'
-  
-  for (let i = 1; i < clips.length; i++) {
-    const transitionType = getXfadeTransition(transition)
-    
-    // Video transition
-    filterComplex += `${lastVideo}[${i}:v]xfade=transition=${transitionType}:duration=${duration}:offset=0[v${i}];`
-    lastVideo = `[v${i}]`
-    
-    // Audio crossfade
-    filterComplex += `${lastAudio}[${i}:a]acrossfade=d=${duration}[a${i}];`
-    lastAudio = `[a${i}]`
-  }
-  
-  // If we have transition sound, mix it in at each transition point
-  if (soundPath) {
-    const soundIdx = clips.length
-    // Mix transition sound at low volume
-    filterComplex += `${lastAudio}[${soundIdx}:a]amix=inputs=2:duration=longest:weights=1 0.3[aout];`
-    lastAudio = '[aout]'
-  }
-  
-  // Remove trailing semicolon
-  filterComplex = filterComplex.slice(0, -1)
-  
-  const args = [
-    ...inputs,
-    '-filter_complex', filterComplex,
-    '-map', lastVideo,
-    '-map', lastAudio,
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-crf', '23',
-    '-c:a', 'aac',
-    '-b:a', '128k',
-    '-y',
-    output
-  ]
-  
-  try {
-    await runFFmpeg(args, jobId)
-  } catch (e) {
-    // Fallback to simple concat if xfade fails
-    console.log(`[${jobId}] xfade failed, using simple concat`)
-    await simpleConcatClips(clips, output, jobId)
-  }
+// GET endpoint to return available video presets
+export async function GET() {
+  return NextResponse.json({
+    success: true,
+    presets: Object.entries(VIDEO_PRESETS).map(([key, value]) => ({
+      id: key,
+      ...value
+    }))
+  })
 }
 
-// Simple concat fallback
-async function simpleConcatClips(clips, output, jobId) {
-  const listPath = `/tmp/concat-${jobId}.txt`
-  const listContent = clips.map(c => `file '${c}'`).join('\n')
-  await writeFile(listPath, listContent)
-  
-  await runFFmpeg([
-    '-f', 'concat',
-    '-safe', '0',
-    '-i', listPath,
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-crf', '23',
-    '-c:a', 'aac',
-    '-y',
-    output
-  ], jobId)
-  
-  try { await unlink(listPath) } catch (e) {}
-}
-
-// Get or create transition sound effect
-async function getOrCreateTransitionSound(soundType, duration, jobId) {
-  const soundPath = join(SOUND_EFFECTS_DIR, `${soundType}-${duration}s.mp3`)
-  
-  if (existsSync(soundPath)) {
-    return soundPath
-  }
-  
-  // Generate simple sound effect using FFmpeg
-  const soundParams = {
-    whoosh: { freq: '200-2000', type: 'sine' },
-    swoosh: { freq: '100-1500', type: 'sine' },
-    pop: { freq: '500', type: 'sine' }
-  }
-  
-  const params = soundParams[soundType] || soundParams.whoosh
-  
-  // Generate a simple whoosh/swoosh sound using audio filters
-  await runFFmpeg([
-    '-f', 'lavfi',
-    '-i', `sine=frequency=800:duration=${duration}`,
-    '-af', `afade=t=in:d=${duration * 0.3},afade=t=out:st=${duration * 0.5}:d=${duration * 0.5},volume=0.5`,
-    '-y',
-    soundPath
-  ], jobId)
-  
-  return soundPath
-}
-
-// Map transition names to FFmpeg xfade transitions
-function getXfadeTransition(transition) {
-  const map = {
-    fade: 'fade',
-    dissolve: 'dissolve',
-    wipe: 'wipeleft',
-    slide: 'slideleft',
-    zoom: 'circleopen',
-    pixelize: 'pixelize',
-    radial: 'radial'
-  }
-  return map[transition] || 'fade'
-}
-
-// Get color grade filter
+// Color grade presets
 function getColorGradeFilter(preset) {
   const presets = {
     warm: 'colortemperature=temperature=6500,eq=saturation=1.1',
@@ -332,21 +224,76 @@ function getColorGradeFilter(preset) {
   return presets[preset] || null
 }
 
-// Get resolution dimensions
-function getResolutionDimensions(resolution) {
-  const presets = {
-    '720p': { width: 1280, height: 720 },
-    '1080p': { width: 1920, height: 1080 },
-    '1080p-vertical': { width: 1080, height: 1920 },
-    '4k': { width: 3840, height: 2160 }
+// Add captions using SRT subtitles
+async function addCaptionsToVideo(input, output, transcript, style, jobId) {
+  const srtPath = `/tmp/captions-${jobId}.srt`
+  let srtContent = ''
+  
+  transcript.segments.forEach((seg, index) => {
+    const startTime = formatSrtTime(seg.start || 0)
+    const endTime = formatSrtTime(seg.end || seg.start + 2)
+    const text = (seg.text || '').trim()
+    
+    if (text) {
+      srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
+    }
+  })
+  
+  await writeFile(srtPath, srtContent)
+  
+  try {
+    await runFFmpeg([
+      '-i', input,
+      '-vf', `subtitles=${srtPath}:force_style='FontSize=24,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2,Bold=1'`,
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-crf', '23',
+      '-c:a', 'copy',
+      '-y',
+      output
+    ], jobId)
+  } catch (e) {
+    console.log(`[${jobId}] Caption burn failed, copying without captions`)
+    await copyFile(input, output)
   }
-  return presets[resolution] || presets['1080p']
+  
+  try { await unlink(srtPath) } catch (e) {}
 }
 
-// Run FFmpeg command
-async function runFFmpeg(args, jobId) {
+function formatSrtTime(seconds) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const ms = Math.floor((seconds % 1) * 1000)
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`
+}
+
+// Add background music mixed with original audio
+async function addBackgroundMusic(videoInput, output, musicPath, jobId) {
+  try {
+    await runFFmpeg([
+      '-i', videoInput,
+      '-i', musicPath,
+      '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first:weights=1 0.15[aout]',
+      '-map', '0:v',
+      '-map', '[aout]',
+      '-c:v', 'copy',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-shortest',
+      '-y',
+      output
+    ], jobId)
+  } catch (e) {
+    console.log(`[${jobId}] Music mix failed, copying without music`)
+    await copyFile(videoInput, output)
+  }
+}
+
+// Run FFmpeg command with promise
+function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg:`, args.slice(0, 6).join(' '), '...')
+    console.log(`[${jobId}] FFmpeg: ${args.slice(0, 8).join(' ')}...`)
     
     const ffmpeg = spawn('ffmpeg', args)
     
@@ -364,91 +311,4 @@ async function runFFmpeg(args, jobId) {
     
     ffmpeg.on('error', reject)
   })
-}
-
-// Add captions to video using ASS/SRT subtitles
-async function addCaptionsToVideo(input, output, transcript, captionStyle, dimensions, jobId) {
-  // Generate SRT file from transcript
-  const srtPath = `/tmp/captions-${jobId}.srt`
-  let srtContent = ''
-  
-  transcript.segments.forEach((seg, index) => {
-    const startTime = formatSrtTime(seg.start || 0)
-    const endTime = formatSrtTime(seg.end || seg.start + 2)
-    const text = (seg.text || '').trim()
-    
-    if (text) {
-      srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
-    }
-  })
-  
-  await writeFile(srtPath, srtContent)
-  
-  // Caption style configurations
-  const styleSettings = {
-    'bold-outline': 'fontsize=24:fontcolor=white:borderw=3:bordercolor=black',
-    'white-bg': 'fontsize=22:fontcolor=black:box=1:boxcolor=white@0.8:boxborderw=5',
-    'yellow': 'fontsize=24:fontcolor=yellow:borderw=2:bordercolor=black',
-    'minimal': 'fontsize=20:fontcolor=white:borderw=1:bordercolor=gray'
-  }
-  
-  const style = styleSettings[captionStyle] || styleSettings['bold-outline']
-  
-  // Use drawtext filter for captions (more compatible than subtitles filter)
-  const args = [
-    '-i', input,
-    '-vf', `subtitles=${srtPath}:force_style='FontSize=24,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2,Bold=1'`,
-    '-c:v', 'libx264',
-    '-preset', 'fast',
-    '-crf', '23',
-    '-c:a', 'copy',
-    '-y',
-    output
-  ]
-  
-  try {
-    await runFFmpeg(args, jobId)
-  } catch (e) {
-    // Fallback: copy without captions if subtitle filter fails
-    console.log(`[${jobId}] Caption burn failed, copying without captions`)
-    await copyFile(input, output)
-  }
-  
-  try { await unlink(srtPath) } catch (e) {}
-}
-
-// Format time for SRT (HH:MM:SS,mmm)
-function formatSrtTime(seconds) {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
-  const ms = Math.floor((seconds % 1) * 1000)
-  
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`
-}
-
-// Add background music to video
-async function addBackgroundMusic(videoInput, output, musicPath, jobId) {
-  // Mix background music at lower volume with original audio
-  const args = [
-    '-i', videoInput,
-    '-i', musicPath,
-    '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first:weights=1 0.15[aout]',
-    '-map', '0:v',
-    '-map', '[aout]',
-    '-c:v', 'copy',
-    '-c:a', 'aac',
-    '-b:a', '128k',
-    '-shortest',
-    '-y',
-    output
-  ]
-  
-  try {
-    await runFFmpeg(args, jobId)
-  } catch (e) {
-    // Fallback: copy without music if mix fails
-    console.log(`[${jobId}] Music mix failed, copying without music`)
-    await copyFile(videoInput, output)
-  }
 }
