@@ -1182,6 +1182,79 @@ export default function VideoEditorPage() {
                     </ScrollArea>
                   </CardContent>
                 </Card>
+                
+                {/* Intro & Outro Section */}
+                <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-teal-500/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Film className="h-4 w-4 text-emerald-500" />
+                      Intro & Outro
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Intro Clip */}
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-500">
+                          IN
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{introClip ? introClip.name : 'No Intro'}</p>
+                          {introClip && <p className="text-xs text-muted-foreground">{introClip.duration}s</p>}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {introClip && (
+                          <Button size="sm" variant="ghost" onClick={() => setIntroClip(null)}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setCreatorType('intro')
+                            setCreatorSettings(prev => ({ ...prev, text: projectName }))
+                            setShowIntroOutroCreator(true)
+                          }}
+                        >
+                          {introClip ? 'Edit' : '+ Add'}
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Outro Clip */}
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-teal-500/20 flex items-center justify-center text-xs font-bold text-teal-500">
+                          OUT
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{outroClip ? outroClip.name : 'No Outro'}</p>
+                          {outroClip && <p className="text-xs text-muted-foreground">{outroClip.duration}s</p>}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {outroClip && (
+                          <Button size="sm" variant="ghost" onClick={() => setOutroClip(null)}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setCreatorType('outro')
+                            setCreatorSettings(prev => ({ ...prev, text: 'Thanks for watching!' }))
+                            setShowIntroOutroCreator(true)
+                          }}
+                        >
+                          {outroClip ? 'Edit' : '+ Add'}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
               
               {/* Settings Panel */}
