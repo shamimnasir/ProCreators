@@ -143,7 +143,7 @@ export async function POST(request) {
     
     // Step 3: Add captions
     let finalVideo = mergedOutput
-    if (addCaptions && transcript?.segments?.length > 0) {
+    if (enableCaptions && transcript?.segments?.length > 0) {
       const captioned = join(tempDir, `captioned.mp4`)
       await addCaptionsToVideo(mergedOutput, captioned, transcript, jobId)
       finalVideo = captioned
