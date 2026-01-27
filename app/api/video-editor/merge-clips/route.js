@@ -35,7 +35,7 @@ export async function POST(request) {
       transitionSound = 'whoosh',
       applyNoiseReduction = false,
       colorGrade = 'neutral',
-      addCaptions = false,
+      addCaptions: enableCaptions = false,
       captionStyle = 'bold-outline',
       transcript = null,
       backgroundMusic = null,
