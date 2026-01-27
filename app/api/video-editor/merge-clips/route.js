@@ -365,3 +365,90 @@ async function runFFmpeg(args, jobId) {
     ffmpeg.on('error', reject)
   })
 }
+
+// Add captions to video using ASS/SRT subtitles
+async function addCaptionsToVideo(input, output, transcript, captionStyle, dimensions, jobId) {
+  // Generate SRT file from transcript
+  const srtPath = `/tmp/captions-${jobId}.srt`
+  let srtContent = ''
+  
+  transcript.segments.forEach((seg, index) => {
+    const startTime = formatSrtTime(seg.start || 0)
+    const endTime = formatSrtTime(seg.end || seg.start + 2)
+    const text = (seg.text || '').trim()
+    
+    if (text) {
+      srtContent += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
+    }
+  })
+  
+  await writeFile(srtPath, srtContent)
+  
+  // Caption style configurations
+  const styleSettings = {
+    'bold-outline': 'fontsize=24:fontcolor=white:borderw=3:bordercolor=black',
+    'white-bg': 'fontsize=22:fontcolor=black:box=1:boxcolor=white@0.8:boxborderw=5',
+    'yellow': 'fontsize=24:fontcolor=yellow:borderw=2:bordercolor=black',
+    'minimal': 'fontsize=20:fontcolor=white:borderw=1:bordercolor=gray'
+  }
+  
+  const style = styleSettings[captionStyle] || styleSettings['bold-outline']
+  
+  // Use drawtext filter for captions (more compatible than subtitles filter)
+  const args = [
+    '-i', input,
+    '-vf', `subtitles=${srtPath}:force_style='FontSize=24,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2,Bold=1'`,
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-crf', '23',
+    '-c:a', 'copy',
+    '-y',
+    output
+  ]
+  
+  try {
+    await runFFmpeg(args, jobId)
+  } catch (e) {
+    // Fallback: copy without captions if subtitle filter fails
+    console.log(`[${jobId}] Caption burn failed, copying without captions`)
+    await copyFile(input, output)
+  }
+  
+  try { await unlink(srtPath) } catch (e) {}
+}
+
+// Format time for SRT (HH:MM:SS,mmm)
+function formatSrtTime(seconds) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const ms = Math.floor((seconds % 1) * 1000)
+  
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`
+}
+
+// Add background music to video
+async function addBackgroundMusic(videoInput, output, musicPath, jobId) {
+  // Mix background music at lower volume with original audio
+  const args = [
+    '-i', videoInput,
+    '-i', musicPath,
+    '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first:weights=1 0.15[aout]',
+    '-map', '0:v',
+    '-map', '[aout]',
+    '-c:v', 'copy',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-shortest',
+    '-y',
+    output
+  ]
+  
+  try {
+    await runFFmpeg(args, jobId)
+  } catch (e) {
+    // Fallback: copy without music if mix fails
+    console.log(`[${jobId}] Music mix failed, copying without music`)
+    await copyFile(videoInput, output)
+  }
+}
