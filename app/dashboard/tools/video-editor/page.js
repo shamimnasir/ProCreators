@@ -46,6 +46,24 @@ export default function VideoEditorPage() {
   const [selectedClipIndex, setSelectedClipIndex] = useState(0)
   const [isMultiClipMode, setIsMultiClipMode] = useState(false)
   
+  // Intro/Outro State
+  const [introClip, setIntroClip] = useState(null)
+  const [outroClip, setOutroClip] = useState(null)
+  const [showIntroOutroCreator, setShowIntroOutroCreator] = useState(false)
+  const [creatorType, setCreatorType] = useState('intro') // 'intro' or 'outro'
+  const [creatorSettings, setCreatorSettings] = useState({
+    text: '',
+    subtext: '',
+    textColor: '#FFFFFF',
+    fontSize: 72,
+    backgroundType: 'solid',
+    backgroundColor: '#000000',
+    gradientColors: ['#667eea', '#764ba2'],
+    animationType: 'fade',
+    duration: 3
+  })
+  const [isGeneratingClip, setIsGeneratingClip] = useState(false)
+  
   // Video playback
   const videoRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
