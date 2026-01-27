@@ -593,7 +593,7 @@ export default function VideoEditorPage() {
       } else {
         // Multi-clip merge with transitions
         setProcessingProgress({ 
-          step: `Merging ${clips.length} clips with ${transitionType} transitions...`, 
+          step: `Merging ${clips.length} clips (${VIDEO_PRESETS[outputPreset]?.label || outputPreset})...`, 
           progress: 5,
           estimatedTime: estimatedTotalSeconds,
           elapsedTime: 0
@@ -610,15 +610,13 @@ export default function VideoEditorPage() {
             clips: clipData,
             transition: transitionType,
             transitionDuration,
-            transitionSound,
             applyNoiseReduction,
-            removeFillers: removeFillerWords,
             colorGrade,
             addCaptions,
             captionStyle,
             transcript: addCaptions ? transcript : null,
             backgroundMusic: selectedMusic?.filePath || null,
-            outputResolution: '1080p'
+            outputPreset
           })
         })
         
