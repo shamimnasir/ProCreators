@@ -247,20 +247,23 @@ export default function VideoEditorPage() {
       }
     }
     
-    // Old draft format or no clip data - prompt to re-upload
-    if (data.clipNames && data.clipNames.length > 0) {
-      toast({ 
-        title: 'Draft Settings Loaded', 
-        description: `Please re-upload these clips: ${data.clipNames.slice(0, 3).join(', ')}${data.clipNames.length > 3 ? '...' : ''}`,
-        duration: 8000
-      })
-    } else {
+    // If there's a processed video, show it in Export tab
+    if (data.processedVideoUrl) {
+      setActiveTab('export')
       toast({ 
         title: 'Draft Loaded', 
-        description: 'Settings restored. Upload your video clips to continue.'
+        description: 'Settings restored. Your previously processed video is ready for export.'
       })
+      return
     }
+    
+    // No clips - go to upload tab
     setActiveTab('upload')
+    toast({ 
+      title: 'Draft Settings Loaded', 
+      description: 'Upload your video clips to apply the saved settings.',
+      duration: 5000
+    })
   }, [toast])
 
   const handleStartNewProject = useCallback(() => {
