@@ -1425,9 +1425,19 @@ export default function VideoEditorPage() {
                         <>
                           <Wand2 className="h-4 w-4 mr-2" />
                           Analyze All Clips
+                          {(addCaptions || removeFillerWords) && !transcript && (
+                            <Badge variant="destructive" className="ml-2 text-[10px]">Required</Badge>
+                          )}
                         </>
                       )}
                     </Button>
+                    
+                    {/* Analysis Required Notice */}
+                    {(addCaptions || removeFillerWords) && !transcript && !isAnalyzing && (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                        ⚠️ Analysis required for {addCaptions && 'Auto Captions'}{addCaptions && removeFillerWords && ' & '}{removeFillerWords && 'Filler Removal'}
+                      </p>
+                    )}
                     
                     {isAnalyzing && (
                       <div className="mt-4 space-y-2">
