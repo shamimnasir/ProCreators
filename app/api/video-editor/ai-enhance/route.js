@@ -107,6 +107,22 @@ export async function POST(request) {
     if (features.includes('filler_removal') && transcript?.segments) {
       console.log(`[${jobId}] Detecting filler words...`)
       
+      // Log what's in the transcript for debugging
+      console.log(`[${jobId}] Transcript segments: ${transcript.segments.length}`)
+      const sampleWords = transcript.segments.slice(0, 3).map(s => s.text).join(' | ')
+      console.log(`[${jobId}] Sample transcript: ${sampleWords}`)
+      
+      const fillerSegments = detectFillerWords(transcript, fillerWords)
+      results.fillersDetected = fillerSegments.length
+      results.fillerDuration = fillerSegments.reduce((sum, s) => sum + (s.end - s.start), 0)
+      
+      // Log detected fillers
+      if (fillerSegments.length > 0) {
+        console.log(`[${jobId}] Found fillers: ${fillerSegments.map(f => f.word).join(', ')}`)
+      } else {
+        console.log(`[${jobId}] No fillers detected in transcript. Whisper may not have transcribed them.`)
+      }
+      
       const fillerSegments = detectFillerWords(transcript, fillerWords)
       results.fillersDetected = fillerSegments.length
       results.fillerDuration = fillerSegments.reduce((sum, s) => sum + (s.end - s.start), 0)
