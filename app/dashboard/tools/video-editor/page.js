@@ -168,6 +168,14 @@ export default function VideoEditorPage() {
     name: projectName,
     clipNames: clips.map(c => c.name),
     clipCount: clips.length,
+    // Save full clip data for restoration
+    clipData: clips.map(c => ({
+      id: c.id,
+      name: c.name,
+      filePath: c.filePath,
+      duration: c.duration,
+      size: c.size
+    })),
     totalDuration: clips.reduce((sum, c) => sum + (c.duration || 0), 0),
     transitionType,
     transitionDuration,
@@ -180,10 +188,17 @@ export default function VideoEditorPage() {
     processedVideoUrl,
     savedToLibrary,
     selectedMusic: selectedMusic?.name || null,
+    // AI Enhancement settings
+    removeSilences,
+    silenceAction,
+    smartAudioDucking,
+    outputPreset,
     // Include data field to pass content check
     data: { settings: true }
   }), [projectName, clips, transitionType, transitionDuration, transitionSound, 
-      applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary, selectedMusic])
+      applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, 
+      processedVideoUrl, savedToLibrary, selectedMusic, removeSilences, silenceAction, 
+      smartAudioDucking, outputPreset])
 
   const loadDraftData = useCallback((data) => {
     console.log('Loading draft data:', data)
