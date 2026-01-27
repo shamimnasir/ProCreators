@@ -11,7 +11,7 @@ import sys
 from typing import Dict, Any
 
 # Base URL from environment
-BASE_URL = "https://biz-ai-tools-1.preview.emergentagent.com"
+BASE_URL = "https://smartclips-14.preview.emergentagent.com"
 
 class SWOTAnalysisAPITester:
     def __init__(self):
