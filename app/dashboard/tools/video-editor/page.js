@@ -165,6 +165,7 @@ export default function VideoEditorPage() {
     setScenes([])
     setProcessedVideoUrl(null)
     setSavedToLibrary(false)
+    setSelectedMusic(null)
     setActiveTab('upload')
   }, [])
 
