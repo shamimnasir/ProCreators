@@ -17,6 +17,19 @@ else
     fi
 fi
 
+# Check for fonts with international support (Bengali, Hindi, etc.)
+if fc-list | grep -q "NotoSansBengali"; then
+    echo "✅ Noto fonts available"
+else
+    echo "📦 Installing Noto fonts for international text support..."
+    apt-get update -qq && apt-get install -y -qq fonts-noto fonts-noto-cjk > /dev/null 2>&1
+    if fc-list | grep -q "NotoSansBengali"; then
+        echo "✅ Noto fonts installed"
+    else
+        echo "⚠️  Font installation failed - some text may not render correctly"
+    fi
+fi
+
 # Check if chromium is installed (required for PDF generation)
 if command -v chromium &> /dev/null; then
     echo "✅ chromium available"
