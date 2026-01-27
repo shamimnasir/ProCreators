@@ -249,9 +249,9 @@ async function enhanceAudio(input, output, settings = {}, jobId) {
   if (highpass > 0) audioFilters.push(`highpass=f=${highpass}`)
   if (lowpass > 0) audioFilters.push(`lowpass=f=${lowpass}`)
   
-  // Remove clicks and pops
+  // Remove clicks and pops (using correct parameter name)
   if (removeClicks) {
-    audioFilters.push('adeclick=w=55:p=50')
+    audioFilters.push('adeclick=window=55')
   }
   
   // Normalize loudness
