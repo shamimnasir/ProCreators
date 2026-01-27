@@ -99,6 +99,14 @@ export default function VideoEditorPage() {
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [outputPreset, setOutputPreset] = useState('youtube-hd')
   
+  // AI Enhancement Settings
+  const [removeSilences, setRemoveSilences] = useState(false)
+  const [silenceAction, setSilenceAction] = useState('remove') // 'remove' or 'speed_up'
+  const [smartAudioDucking, setSmartAudioDucking] = useState(false)
+  const [enableBrollSuggestions, setEnableBrollSuggestions] = useState(false)
+  const [brollSuggestions, setBrollSuggestions] = useState([])
+  const [isEnhancing, setIsEnhancing] = useState(false)
+  
   // Video size presets
   const VIDEO_PRESETS = {
     'youtube-hd': { width: 1920, height: 1080, label: 'YouTube HD (16:9)', icon: '📺' },
