@@ -58,9 +58,10 @@ export async function POST(request) {
     const outputDir = `/tmp/whisper-${jobId}`
     await mkdir(outputDir, { recursive: true })
     
-    // Use whisper CLI with word-level timestamps
+    // Use whisper CLI with word-level timestamps (use full path to venv)
+    const whisperPath = '/root/.venv/bin/whisper'
     const whisperResult = await new Promise((resolve, reject) => {
-      const whisper = spawn('whisper', [
+      const whisper = spawn(whisperPath, [
         audioPath,
         '--model', 'base',  // Use 'base' model for balance of speed/accuracy
         '--language', language,
