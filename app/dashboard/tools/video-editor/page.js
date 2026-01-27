@@ -101,14 +101,14 @@ export default function VideoEditorPage() {
   
   // Video size presets
   const VIDEO_PRESETS = {
-    'youtube-hd': { label: 'YouTube HD (16:9)', icon: '📺' },
-    'instagram-reel': { label: 'Instagram Reel (9:16)', icon: '📱' },
-    'instagram-square': { label: 'Instagram Square (1:1)', icon: '⬜' },
-    'tiktok': { label: 'TikTok (9:16)', icon: '🎵' },
-    'facebook-square': { label: 'Facebook Square (1:1)', icon: '📘' },
-    'facebook-feed': { label: 'Facebook Feed (1.91:1)', icon: '📰' },
-    'twitter': { label: 'Twitter/X (16:9)', icon: '🐦' },
-    'original': { label: 'Keep Original', icon: '📁' }
+    'youtube-hd': { width: 1920, height: 1080, label: 'YouTube HD (16:9)', icon: '📺' },
+    'instagram-reel': { width: 1080, height: 1920, label: 'Instagram Reel (9:16)', icon: '📱' },
+    'instagram-square': { width: 1080, height: 1080, label: 'Instagram Square (1:1)', icon: '⬜' },
+    'tiktok': { width: 1080, height: 1920, label: 'TikTok (9:16)', icon: '🎵' },
+    'facebook-square': { width: 1080, height: 1080, label: 'Facebook Square (1:1)', icon: '📘' },
+    'facebook-feed': { width: 1200, height: 628, label: 'Facebook Feed (1.91:1)', icon: '📰' },
+    'twitter': { width: 1280, height: 720, label: 'Twitter/X (16:9)', icon: '🐦' },
+    'original': { width: 1920, height: 1080, label: 'Keep Original', icon: '📁' }
   }
   
   // Processing State
