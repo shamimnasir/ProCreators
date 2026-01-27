@@ -1430,6 +1430,14 @@ export default function VideoEditorPage() {
           </div>
         </div>
       </div>
+      
+      {/* Music Picker Modal */}
+      <MusicPicker
+        open={showMusicPicker}
+        onClose={() => setShowMusicPicker(false)}
+        onSelectMusic={setSelectedMusic}
+        videoDuration={totalDuration || 30}
+      />
     </div>
   )
 }
