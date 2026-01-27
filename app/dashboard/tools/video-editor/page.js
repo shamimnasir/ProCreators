@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,22 +13,33 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Video, Upload, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Scissors, Type, Wand2, Music, Palette, Download, Loader2, Check, X,
   Trash2, RefreshCw, Zap, Clock, FileText, Mic, AlertCircle, Settings,
-  ChevronRight, Eye, EyeOff, Maximize2, Sparkles, Film, ImagePlus, Search
+  ChevronRight, Eye, EyeOff, Sparkles, Film, ImagePlus, Search,
+  HardDrive, FolderOpen, Save, FilePlus, Cloud, Info, ShieldAlert
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { videoStorage } from '@/lib/video-storage'
 
 export default function VideoEditorPage() {
-  // State
+  const { toast } = useToast()
+  
+  // Project & Storage State
+  const [projectId, setProjectId] = useState(null)
+  const [projects, setProjects] = useState([])
+  const [storageInfo, setStorageInfo] = useState({ usedMB: 0, quotaMB: 0, percentUsed: 0 })
+  const [showStorageWarning, setShowStorageWarning] = useState(true)
+  
+  // Video State
   const [videoFile, setVideoFile] = useState(null)
   const [videoUrl, setVideoUrl] = useState(null)
-  const [fileId, setFileId] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
-  const [processingMode, setProcessingMode] = useState('fast')
+  const [processingMode, setProcessingMode] = useState('standard') // 'standard' (500MB), 'pro' (2GB)
   
   // Video playback
   const videoRef = useRef(null)
@@ -56,7 +67,7 @@ export default function VideoEditorPage() {
   })
   const [colorGrade, setColorGrade] = useState('neutral')
   
-  // PRO MODE - B-Roll & Music
+  // PRO MODE
   const [proModeEnabled, setProModeEnabled] = useState(false)
   const [addBroll, setAddBroll] = useState(false)
   const [brollKeywords, setBrollKeywords] = useState('')
@@ -75,82 +86,249 @@ export default function VideoEditorPage() {
   // UI State
   const [activeTab, setActiveTab] = useState('upload')
   const [showCaptions, setShowCaptions] = useState(true)
+  const [showProjectPanel, setShowProjectPanel] = useState(false)
   
-  // Upload handler with chunked upload support
+  // File size limits based on mode
+  const FILE_LIMITS = {
+    standard: { maxMB: 500, maxMin: 15, label: 'Standard (500MB / 15 min)' },
+    pro: { maxMB: 2048, maxMin: 60, label: 'Pro (2GB / 60 min)' }
+  }
+
+  // Initialize storage and load projects on mount
+  useEffect(() => {
+    const initStorage = async () => {
+      try {
+        await videoStorage.init()
+        const savedProjects = await videoStorage.getAllProjects()
+        setProjects(savedProjects)
+        
+        const usage = await videoStorage.getStorageUsage()
+        setStorageInfo(usage)
+        
+        // Cleanup old projects
+        await videoStorage.cleanupOldProjects()
+      } catch (error) {
+        console.error('Storage init error:', error)
+      }
+    }
+    initStorage()
+  }, [])
+
+  // Get current project data for saving
+  const getCurrentProjectData = useCallback(() => ({
+    name: videoFile?.name || 'Untitled Project',
+    transcript,
+    fillerWords,
+    silences,
+    scenes,
+    beats,
+    removedSegments,
+    captionStyle,
+    audioEnhancements,
+    colorGrade,
+    proModeEnabled,
+    addBroll,
+    brollKeywords,
+    brollStyle,
+    musicTrack,
+    removeFillers,
+    removeSilences,
+    showCaptions,
+    hasVideo: !!videoUrl,
+    hasProcessedVideo: !!processedVideoUrl
+  }), [transcript, fillerWords, silences, scenes, beats, removedSegments, captionStyle, 
+      audioEnhancements, colorGrade, proModeEnabled, addBroll, brollKeywords, brollStyle,
+      musicTrack, removeFillers, removeSilences, showCaptions, videoFile, videoUrl, processedVideoUrl])
+
+  // Save project to browser storage
+  const saveProject = async () => {
+    if (!projectId) {
+      const newId = crypto.randomUUID()
+      setProjectId(newId)
+      
+      const projectData = {
+        id: newId,
+        ...getCurrentProjectData()
+      }
+      
+      await videoStorage.saveProject(projectData)
+      
+      // Save video file if exists
+      if (videoFile) {
+        await videoStorage.saveVideo(newId, videoFile)
+      }
+      
+      const savedProjects = await videoStorage.getAllProjects()
+      setProjects(savedProjects)
+      
+      toast({ title: 'Project Saved', description: 'Your project has been saved to browser storage.' })
+    } else {
+      const projectData = {
+        id: projectId,
+        ...getCurrentProjectData()
+      }
+      
+      await videoStorage.saveProject(projectData)
+      
+      const savedProjects = await videoStorage.getAllProjects()
+      setProjects(savedProjects)
+      
+      toast({ title: 'Project Updated', description: 'Your changes have been saved.' })
+    }
+    
+    // Update storage info
+    const usage = await videoStorage.getStorageUsage()
+    setStorageInfo(usage)
+  }
+
+  // Load project from browser storage
+  const loadProject = async (project) => {
+    setProjectId(project.id)
+    
+    // Load project metadata
+    setTranscript(project.transcript || null)
+    setFillerWords(project.fillerWords || [])
+    setSilences(project.silences || [])
+    setScenes(project.scenes || [])
+    setBeats(project.beats || [])
+    setRemovedSegments(project.removedSegments || [])
+    setCaptionStyle(project.captionStyle || 'bold-outline')
+    setAudioEnhancements(project.audioEnhancements || { normalize: true, noiseReduction: true, volume: 1.0 })
+    setColorGrade(project.colorGrade || 'neutral')
+    setProModeEnabled(project.proModeEnabled || false)
+    setAddBroll(project.addBroll || false)
+    setBrollKeywords(project.brollKeywords || '')
+    setBrollStyle(project.brollStyle || 'intercut')
+    setMusicTrack(project.musicTrack || 'none')
+    setRemoveFillers(project.removeFillers || false)
+    setRemoveSilences(project.removeSilences || false)
+    setShowCaptions(project.showCaptions !== false)
+    
+    // Load video from storage
+    if (project.hasVideo) {
+      const videoResult = await videoStorage.loadVideo(project.id)
+      if (videoResult.success) {
+        setVideoUrl(videoResult.url)
+        setVideoFile({ name: videoResult.name, size: videoResult.size, type: videoResult.type })
+        setActiveTab('edit')
+      }
+    }
+    
+    // Load processed video if exists
+    if (project.hasProcessedVideo) {
+      const processedResult = await videoStorage.loadProcessedVideo(project.id)
+      if (processedResult.success) {
+        setProcessedVideoUrl(processedResult.url)
+      }
+    }
+    
+    setShowProjectPanel(false)
+    toast({ title: 'Project Loaded', description: `Loaded "${project.name}"` })
+  }
+
+  // Delete project
+  const deleteProject = async (id, e) => {
+    e.stopPropagation()
+    
+    await videoStorage.deleteProject(id)
+    
+    if (projectId === id) {
+      startNewProject()
+    }
+    
+    const savedProjects = await videoStorage.getAllProjects()
+    setProjects(savedProjects)
+    
+    const usage = await videoStorage.getStorageUsage()
+    setStorageInfo(usage)
+    
+    toast({ title: 'Project Deleted' })
+  }
+
+  // Start new project
+  const startNewProject = () => {
+    setProjectId(null)
+    setVideoFile(null)
+    setVideoUrl(null)
+    setTranscript(null)
+    setFillerWords([])
+    setSilences([])
+    setScenes([])
+    setBeats([])
+    setRemovedSegments([])
+    setProcessedVideoUrl(null)
+    setActiveTab('upload')
+    toast({ title: 'New Project', description: 'Started a new project.' })
+  }
+
+  // Handle file upload - stores in browser
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
     
     if (!file.type.startsWith('video/')) {
-      alert('Please upload a video file')
+      toast({ title: 'Invalid File', description: 'Please upload a video file.', variant: 'destructive' })
       return
     }
     
-    const maxSizes = { fast: 100, medium: 500 }
-    const maxMB = maxSizes[processingMode]
-    if (file.size > maxMB * 1024 * 1024) {
-      alert(`File too large for ${processingMode} mode. Max: ${maxMB}MB`)
+    const limits = FILE_LIMITS[processingMode]
+    if (file.size > limits.maxMB * 1024 * 1024) {
+      toast({ 
+        title: 'File Too Large', 
+        description: `Max file size for ${processingMode} mode is ${limits.maxMB}MB. Your file is ${Math.round(file.size / 1024 / 1024)}MB.`,
+        variant: 'destructive'
+      })
       return
     }
     
-    setVideoFile(file)
     setIsUploading(true)
     setUploadProgress(0)
     
-    const newFileId = crypto.randomUUID()
-    setFileId(newFileId)
-    
     try {
-      const CHUNK_SIZE = 5 * 1024 * 1024
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
+      // Create new project ID
+      const newProjectId = crypto.randomUUID()
+      setProjectId(newProjectId)
       
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * CHUNK_SIZE
-        const end = Math.min(start + CHUNK_SIZE, file.size)
-        const chunk = file.slice(start, end)
-        
-        const formData = new FormData()
-        formData.append('file', chunk)
-        formData.append('fileId', newFileId)
-        formData.append('fileName', file.name)
-        formData.append('chunkIndex', i.toString())
-        formData.append('totalChunks', totalChunks.toString())
-        formData.append('processingMode', processingMode)
-        
-        const response = await fetch('/api/video-editor/upload', {
-          method: 'POST',
-          body: formData
-        })
-        
-        const result = await response.json()
-        
-        if (!result.success) {
-          throw new Error(result.error || 'Upload failed')
-        }
-        
-        setUploadProgress(Math.round(((i + 1) / totalChunks) * 100))
-        
-        if (result.complete) {
-          setVideoUrl(result.filePath)
-          setActiveTab('edit')
-        }
+      // Create object URL for preview
+      const url = URL.createObjectURL(file)
+      setVideoUrl(url)
+      setVideoFile(file)
+      
+      // Simulate progress for UX
+      for (let i = 0; i <= 100; i += 10) {
+        setUploadProgress(i)
+        await new Promise(r => setTimeout(r, 50))
       }
+      
+      // Save to IndexedDB
+      await videoStorage.saveVideo(newProjectId, file, setUploadProgress)
+      
+      // Save project metadata
+      await videoStorage.saveProject({
+        id: newProjectId,
+        name: file.name,
+        hasVideo: true,
+        createdAt: new Date().toISOString()
+      })
+      
+      // Update projects list
+      const savedProjects = await videoStorage.getAllProjects()
+      setProjects(savedProjects)
+      
+      // Update storage info
+      const usage = await videoStorage.getStorageUsage()
+      setStorageInfo(usage)
+      
+      setActiveTab('edit')
+      toast({ title: 'Video Loaded', description: 'Your video is ready for editing.' })
+      
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Upload failed: ' + error.message)
+      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' })
     } finally {
       setIsUploading(false)
     }
   }
-  
-  // Create local preview URL
-  useEffect(() => {
-    if (videoFile && !videoUrl) {
-      const url = URL.createObjectURL(videoFile)
-      setVideoUrl(url)
-      return () => URL.revokeObjectURL(url)
-    }
-  }, [videoFile, videoUrl])
   
   // Video playback controls
   const togglePlay = () => {
@@ -189,22 +367,62 @@ export default function VideoEditorPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
-  // Analyze video
+  // Extract keywords from transcript
+  const extractKeywords = (text) => {
+    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'that', 'this', 'my', 'your', 'me', 'him', 'us', 'them']
+    
+    const words = text.toLowerCase()
+      .replace(/[^a-z\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 3 && !stopWords.includes(w))
+    
+    const wordCount = {}
+    words.forEach(w => { wordCount[w] = (wordCount[w] || 0) + 1 })
+    
+    return Object.entries(wordCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word]) => word)
+  }
+  
+  // Analyze video - now uploads to server for processing
   const analyzeVideo = async () => {
-    if (!fileId && !videoUrl) return
+    if (!videoFile) return
     
     setIsAnalyzing(true)
-    setAnalysisProgress({ step: 'Initializing...', progress: 0 })
+    setAnalysisProgress({ step: 'Preparing video for analysis...', progress: 0 })
     
     try {
-      setAnalysisProgress({ step: 'Transcribing audio with Whisper...', progress: 10 })
+      // Upload video to server temporarily for processing
+      setAnalysisProgress({ step: 'Uploading video for transcription...', progress: 10 })
+      
+      const formData = new FormData()
+      formData.append('file', videoFile)
+      formData.append('fileId', projectId)
+      formData.append('fileName', videoFile.name)
+      formData.append('chunkIndex', '0')
+      formData.append('totalChunks', '1')
+      formData.append('processingMode', processingMode)
+      
+      const uploadRes = await fetch('/api/video-editor/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const uploadResult = await uploadRes.json()
+      
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed')
+      }
+      
+      setAnalysisProgress({ step: 'Transcribing audio with Whisper AI...', progress: 30 })
       
       const transcribeRes = await fetch('/api/video-editor/transcribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          fileId,
-          filePath: videoUrl?.startsWith('/') ? videoUrl : null
+          fileId: projectId,
+          filePath: uploadResult.filePath
         })
       })
       
@@ -215,21 +433,20 @@ export default function VideoEditorPage() {
         setFillerWords(transcribeData.analysis?.fillerWords || [])
         setSilences(transcribeData.analysis?.silences || [])
         
-        // Auto-generate B-roll keywords from transcript
         if (transcribeData.transcript?.text) {
           const keywords = extractKeywords(transcribeData.transcript.text)
           setBrollKeywords(keywords.join(', '))
         }
       }
       
-      setAnalysisProgress({ step: 'Detecting scenes...', progress: 50 })
+      setAnalysisProgress({ step: 'Detecting scene changes...', progress: 60 })
       
       const scenesRes = await fetch('/api/video-editor/detect-scenes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          fileId,
-          filePath: videoUrl?.startsWith('/') ? videoUrl : null
+          fileId: projectId,
+          filePath: uploadResult.filePath
         })
       })
       
@@ -239,14 +456,14 @@ export default function VideoEditorPage() {
         setScenes(scenesData.scenes || [])
       }
       
-      setAnalysisProgress({ step: 'Analyzing audio for beats...', progress: 75 })
+      setAnalysisProgress({ step: 'Analyzing audio for beat detection...', progress: 80 })
       
       const audioRes = await fetch('/api/video-editor/analyze-audio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          fileId,
-          filePath: videoUrl?.startsWith('/') ? videoUrl : null,
+          fileId: projectId,
+          filePath: uploadResult.filePath,
           detectBeats: true,
           detectSilences: true
         })
@@ -263,43 +480,49 @@ export default function VideoEditorPage() {
       
       setAnalysisProgress({ step: 'Analysis complete!', progress: 100 })
       
+      // Auto-save project with analysis data
+      await saveProject()
+      
     } catch (error) {
       console.error('Analysis error:', error)
-      alert('Analysis failed: ' + error.message)
+      toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' })
     } finally {
       setTimeout(() => setIsAnalyzing(false), 1000)
     }
   }
   
-  // Extract keywords from transcript for B-roll
-  const extractKeywords = (text) => {
-    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'of', 'with', 'as', 'by', 'from', 'up', 'about', 'into', 'over', 'after', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there', 'then', 'once', 'that', 'this', 'these', 'those', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them']
-    
-    const words = text.toLowerCase()
-      .replace(/[^a-z\s]/g, '')
-      .split(/\s+/)
-      .filter(w => w.length > 3 && !stopWords.includes(w))
-    
-    const wordCount = {}
-    words.forEach(w => { wordCount[w] = (wordCount[w] || 0) + 1 })
-    
-    return Object.entries(wordCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([word]) => word)
-  }
-  
-  // Process video with PRO MODE
+  // Process video
   const processVideo = async () => {
-    if (!fileId && !videoUrl) return
+    if (!projectId || !videoFile) return
     
     setIsProcessing(true)
-    setProcessingStatus('Starting...')
+    setProcessingStatus('Starting processing...')
     
     try {
+      // Ensure video is uploaded to server
+      setProcessingStatus('Preparing video...')
+      
+      const formData = new FormData()
+      formData.append('file', videoFile)
+      formData.append('fileId', projectId)
+      formData.append('fileName', videoFile.name)
+      formData.append('chunkIndex', '0')
+      formData.append('totalChunks', '1')
+      formData.append('processingMode', processingMode)
+      
+      const uploadRes = await fetch('/api/video-editor/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const uploadResult = await uploadRes.json()
+      
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed')
+      }
+      
       if (proModeEnabled) {
-        // Use PRO MODE API
-        setProcessingStatus('Activating Pro Mode...')
+        setProcessingStatus('Activating Pro Mode transformation...')
         
         const keywords = brollKeywords.split(',').map(k => k.trim()).filter(k => k)
         
@@ -307,7 +530,7 @@ export default function VideoEditorPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            filePath: videoUrl?.startsWith('/') ? videoUrl : `/video-editor/uploads/${fileId}.mp4`,
+            filePath: uploadResult.filePath,
             transcript,
             brollKeywords: keywords,
             addBroll: addBroll && keywords.length > 0,
@@ -332,50 +555,39 @@ export default function VideoEditorPage() {
           setProcessedVideoUrl(result.outputPath)
           setActiveTab('export')
           setProcessingStatus('Pro Mode complete!')
+          
+          // Update project
+          await saveProject()
         } else {
           throw new Error(result.error || 'Processing failed')
         }
       } else {
-        // Use standard processing
-        setProcessingStatus('Processing video...')
+        setProcessingStatus('Applying edits...')
         
         const operations = []
         
         if (removedSegments.length > 0) {
-          operations.push({
-            type: 'remove_segments',
-            segments: removedSegments
-          })
+          operations.push({ type: 'remove_segments', segments: removedSegments })
         }
         
         if (showCaptions && transcript) {
-          operations.push({
-            type: 'add_captions',
-            transcript,
-            style: { preset: captionStyle }
-          })
+          operations.push({ type: 'add_captions', transcript, style: { preset: captionStyle } })
         }
         
         if (audioEnhancements.normalize || audioEnhancements.noiseReduction) {
-          operations.push({
-            type: 'enhance_audio',
-            settings: audioEnhancements
-          })
+          operations.push({ type: 'enhance_audio', settings: audioEnhancements })
         }
         
         if (colorGrade !== 'neutral') {
-          operations.push({
-            type: 'color_grade',
-            preset: colorGrade
-          })
+          operations.push({ type: 'color_grade', preset: colorGrade })
         }
         
         const response = await fetch('/api/video-editor/process', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            fileId,
-            filePath: videoUrl?.startsWith('/') ? videoUrl : null,
+            fileId: projectId,
+            filePath: uploadResult.filePath,
             operations
           })
         })
@@ -385,6 +597,8 @@ export default function VideoEditorPage() {
         if (result.success) {
           setProcessedVideoUrl(result.outputPath)
           setActiveTab('export')
+          
+          await saveProject()
         } else {
           throw new Error(result.error || 'Processing failed')
         }
@@ -392,7 +606,7 @@ export default function VideoEditorPage() {
       
     } catch (error) {
       console.error('Processing error:', error)
-      alert('Processing failed: ' + error.message)
+      toast({ title: 'Processing Failed', description: error.message, variant: 'destructive' })
     } finally {
       setIsProcessing(false)
       setProcessingStatus('')
@@ -425,28 +639,20 @@ export default function VideoEditorPage() {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+        
+        toast({ title: 'Download Started', description: 'Your video is being downloaded.' })
       } else {
         throw new Error(result.error || 'Export failed')
       }
       
     } catch (error) {
       console.error('Export error:', error)
-      alert('Export failed: ' + error.message)
+      toast({ title: 'Export Failed', description: error.message, variant: 'destructive' })
     } finally {
       setIsProcessing(false)
     }
   }
-  
-  // Toggle segment removal
-  const toggleSegmentRemoval = (segment) => {
-    const exists = removedSegments.find(s => s.start === segment.start && s.end === segment.end)
-    if (exists) {
-      setRemovedSegments(removedSegments.filter(s => s.start !== segment.start || s.end !== segment.end))
-    } else {
-      setRemovedSegments([...removedSegments, segment])
-    }
-  }
-  
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -465,8 +671,25 @@ export default function VideoEditorPage() {
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* Pro Mode Toggle */}
+            <div className="flex items-center gap-3">
+              {/* Storage Info */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-muted text-sm">
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                <span>{storageInfo.usedMB}MB / {storageInfo.quotaMB}MB</span>
+              </div>
+              
+              {/* Project Management */}
+              <Button variant="outline" size="sm" onClick={() => setShowProjectPanel(!showProjectPanel)}>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Projects ({projects.length})
+              </Button>
+              
+              <Button variant="outline" size="sm" onClick={saveProject}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+              
+              {/* Pro Mode */}
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
                 <Sparkles className="h-4 w-4 text-purple-500" />
                 <Label className="text-sm font-medium">Pro Mode</Label>
@@ -475,20 +698,20 @@ export default function VideoEditorPage() {
               
               {/* Processing Mode */}
               <Select value={processingMode} onValueChange={setProcessingMode}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fast">
+                  <SelectItem value="standard">
                     <div className="flex items-center gap-2">
                       <Zap className="h-4 w-4 text-yellow-500" />
-                      Fast (100MB)
+                      Standard (500MB)
                     </div>
                   </SelectItem>
-                  <SelectItem value="medium">
+                  <SelectItem value="pro">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                      Medium (500MB)
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                      Pro (2GB)
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -499,6 +722,102 @@ export default function VideoEditorPage() {
       </div>
       
       <div className="container mx-auto px-4 py-6">
+        {/* Browser Storage Warning */}
+        {showStorageWarning && (
+          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+            <ShieldAlert className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-amber-600">Important: Browser Storage Notice</AlertTitle>
+            <AlertDescription className="text-amber-700 dark:text-amber-300">
+              <p className="mb-2">
+                Your videos are stored locally in your browser for privacy and faster processing. To keep your projects safe:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li><strong>Do NOT clear browser cache/data</strong> - This will delete all your video projects</li>
+                <li><strong>Use the same browser</strong> - Projects are not synced across browsers</li>
+                <li><strong>Download final videos</strong> - Always export and save your finished videos</li>
+                <li><strong>Projects auto-delete after 30 days</strong> of inactivity</li>
+              </ul>
+              <Button variant="ghost" size="sm" className="mt-2 text-amber-600" onClick={() => setShowStorageWarning(false)}>
+                Got it, don't show again
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Projects Panel */}
+        {showProjectPanel && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FolderOpen className="h-5 w-5" />
+                  My Projects
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={startNewProject}>
+                    <FilePlus className="h-4 w-4 mr-1" />
+                    New
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setShowProjectPanel(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {projects.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No saved projects yet. Upload a video to get started!
+                </p>
+              ) : (
+                <div className="grid gap-2 max-h-[300px] overflow-y-auto">
+                  {projects.map((project) => (
+                    <div
+                      key={project.id}
+                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors ${
+                        projectId === project.id ? 'border-primary bg-accent' : ''
+                      }`}
+                      onClick={() => loadProject(project)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Video className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium truncate">{project.name}</span>
+                          {projectId === project.id && (
+                            <Badge variant="secondary" className="text-xs">Current</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(project.updatedAt).toLocaleDateString()}
+                          {project.transcript && <Badge variant="outline" className="text-xs">Analyzed</Badge>}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        onClick={(e) => deleteProject(project.id, e)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Storage Usage */}
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-muted-foreground">Browser Storage Used</span>
+                  <span className="font-medium">{storageInfo.usedMB}MB / {storageInfo.quotaMB}MB</span>
+                </div>
+                <Progress value={storageInfo.percentUsed} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="upload" className="flex items-center gap-2">
@@ -524,8 +843,11 @@ export default function VideoEditorPage() {
                     <Upload className="h-12 w-12 text-purple-500" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Upload Your Raw Video</h3>
-                  <p className="text-muted-foreground mb-6 text-center max-w-md">
-                    Upload any video and transform it into professional content with AI-powered editing
+                  <p className="text-muted-foreground mb-2 text-center max-w-md">
+                    Videos are stored locally in your browser - no server upload needed!
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Max: {FILE_LIMITS[processingMode].maxMB}MB / {FILE_LIMITS[processingMode].maxMin} minutes ({processingMode} mode)
                   </p>
                   
                   <Input
@@ -540,7 +862,7 @@ export default function VideoEditorPage() {
                     <div className="mt-6 w-full max-w-xs">
                       <Progress value={uploadProgress} className="mb-2" />
                       <p className="text-sm text-center text-muted-foreground">
-                        Uploading... {uploadProgress}%
+                        Saving to browser... {uploadProgress}%
                       </p>
                     </div>
                   )}
@@ -597,10 +919,10 @@ export default function VideoEditorPage() {
               </Card>
               <Card className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border-cyan-500/20">
                 <CardContent className="pt-6">
-                  <Scissors className="h-8 w-8 text-cyan-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Scene Detection</h4>
+                  <HardDrive className="h-8 w-8 text-cyan-500 mb-3" />
+                  <h4 className="font-semibold mb-1">Local Storage</h4>
                   <p className="text-sm text-muted-foreground">
-                    Auto-detect scenes for smart editing
+                    Videos stored in browser - no server uploads
                   </p>
                 </CardContent>
               </Card>
@@ -614,12 +936,11 @@ export default function VideoEditorPage() {
               <div className="lg:col-span-2 space-y-4">
                 <Card>
                   <CardContent className="pt-6">
-                    {/* Video Player */}
                     <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
                       {videoUrl ? (
                         <video
                           ref={videoRef}
-                          src={videoUrl.startsWith('/') ? videoUrl : videoUrl}
+                          src={videoUrl}
                           className="w-full h-full object-contain"
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
@@ -645,7 +966,6 @@ export default function VideoEditorPage() {
                           className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
                         />
                         
-                        {/* Markers */}
                         <div className="absolute top-0 left-0 right-0 h-2 pointer-events-none">
                           {scenes.map((scene, i) => (
                             <div
@@ -673,18 +993,16 @@ export default function VideoEditorPage() {
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              setIsMuted(!isMuted)
-                              if (videoRef.current) videoRef.current.muted = !isMuted
-                            }}
-                          >
-                            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            setIsMuted(!isMuted)
+                            if (videoRef.current) videoRef.current.muted = !isMuted
+                          }}
+                        >
+                          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -784,7 +1102,6 @@ export default function VideoEditorPage() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* B-Roll */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label className="flex items-center gap-2">
@@ -818,7 +1135,6 @@ export default function VideoEditorPage() {
                       
                       <Separator />
                       
-                      {/* Music */}
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2">
                           <Music className="h-4 w-4" />
@@ -840,7 +1156,6 @@ export default function VideoEditorPage() {
                       
                       <Separator />
                       
-                      {/* Auto-cleanup */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label className="text-sm">Remove Fillers ({fillerWords.length})</Label>
@@ -1035,6 +1350,13 @@ export default function VideoEditorPage() {
                       </>
                     )}
                   </Button>
+                  
+                  <Alert className="mt-4">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      <strong>Tip:</strong> Always download and save your final video. Browser storage is temporary and can be cleared.
+                    </AlertDescription>
+                  </Alert>
                 </CardContent>
               </Card>
             </div>
