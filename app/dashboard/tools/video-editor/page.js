@@ -1503,6 +1503,82 @@ export default function VideoEditorPage() {
                   </CardContent>
                 </Card>
                 
+                {/* AI Enhancement Card - NEW */}
+                <Card className="border-pink-500/30 bg-gradient-to-br from-pink-500/5 to-rose-500/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-pink-500" />
+                      AI Enhancement
+                      <Badge variant="outline" className="ml-auto text-xs">Pro</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Silence Removal */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">Remove Silences</Label>
+                        <p className="text-xs text-muted-foreground">Auto-cut dead air & pauses</p>
+                      </div>
+                      <Switch checked={removeSilences} onCheckedChange={setRemoveSilences} />
+                    </div>
+                    
+                    {removeSilences && (
+                      <Select value={silenceAction} onValueChange={setSilenceAction}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="remove">Cut silences completely</SelectItem>
+                          <SelectItem value="speed_up">Speed up silences (3x)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                    
+                    {/* Filler Word Removal */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">Remove Fillers</Label>
+                        <p className="text-xs text-muted-foreground">Cut um, uh, like, so...</p>
+                      </div>
+                      <Switch checked={removeFillerWords} onCheckedChange={setRemoveFillerWords} />
+                    </div>
+                    
+                    {/* Smart Audio Ducking */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">Smart Audio Ducking</Label>
+                        <p className="text-xs text-muted-foreground">Auto-lower music during speech</p>
+                      </div>
+                      <Switch 
+                        checked={smartAudioDucking} 
+                        onCheckedChange={setSmartAudioDucking}
+                        disabled={!selectedMusic}
+                      />
+                    </div>
+                    
+                    {/* B-Roll Suggestions */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">AI B-Roll Suggestions</Label>
+                        <p className="text-xs text-muted-foreground">Get stock video ideas</p>
+                      </div>
+                      <Switch checked={enableBrollSuggestions} onCheckedChange={setEnableBrollSuggestions} />
+                    </div>
+                    
+                    {brollSuggestions.length > 0 && (
+                      <div className="p-2 bg-muted rounded-lg space-y-2">
+                        <p className="text-xs font-medium">B-Roll Opportunities:</p>
+                        {brollSuggestions.slice(0, 3).map((sug, i) => (
+                          <div key={i} className="text-xs flex items-center gap-2">
+                            <Badge variant="secondary" className="text-[10px]">{Math.floor(sug.timestamp)}s</Badge>
+                            <span className="truncate">{sug.searchKeywords[0]}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                
                 {/* Process Button with Progress */}
                 <Card className={isProcessing ? 'border-green-500/50' : ''}>
                   <CardContent className="pt-6">
