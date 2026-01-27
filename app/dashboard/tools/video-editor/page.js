@@ -757,27 +757,63 @@ export default function VideoEditorPage() {
           
           {/* UPLOAD TAB */}
           <TabsContent value="upload">
-            <Card className="border-2 border-dashed">
+            <Card 
+              ref={dropZoneRef}
+              className={`border-2 border-dashed transition-all duration-200 ${
+                isDragging 
+                  ? 'border-purple-500 bg-purple-500/10 scale-[1.02]' 
+                  : 'border-muted-foreground/25 hover:border-purple-500/50'
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center justify-center py-8">
-                  <div className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-4">
-                    <Upload className="h-10 w-10 text-purple-500" />
+                  <div className={`p-4 rounded-full mb-4 transition-all duration-200 ${
+                    isDragging 
+                      ? 'bg-purple-500/30 scale-110' 
+                      : 'bg-gradient-to-br from-purple-500/20 to-pink-500/20'
+                  }`}>
+                    <Upload className={`h-10 w-10 transition-colors ${
+                      isDragging ? 'text-purple-600' : 'text-purple-500'
+                    }`} />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Upload Your Clips</h3>
-                  <p className="text-muted-foreground mb-2 text-center max-w-md">
-                    Upload multiple clips to automatically merge with transitions
-                  </p>
+                  
+                  {isDragging ? (
+                    <>
+                      <h3 className="text-xl font-semibold mb-2 text-purple-600">Drop Your Videos Here!</h3>
+                      <p className="text-purple-500 mb-2">Release to add clips</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold mb-2">Drag & Drop Your Clips</h3>
+                      <p className="text-muted-foreground mb-2 text-center max-w-md">
+                        Or click to browse • Multiple clips supported
+                      </p>
+                    </>
+                  )}
+                  
                   <p className="text-sm text-muted-foreground mb-6">
-                    Max: {FILE_LIMITS[processingMode].maxMB}MB per clip
+                    Max: {FILE_LIMITS[processingMode].maxMB}MB per clip • MP4, MOV, WebM
                   </p>
                   
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="max-w-xs"
-                  />
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <Button variant="outline" className="gap-2" asChild>
+                      <span>
+                        <FolderOpen className="h-4 w-4" />
+                        Browse Files
+                      </span>
+                    </Button>
+                  </label>
                 </div>
               </CardContent>
             </Card>
