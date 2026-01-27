@@ -113,6 +113,94 @@ export default function VideoEditorPage() {
     initStorage()
   }, [])
 
+  // AutoSaveDraftsManager callbacks
+  const getCurrentDraftData = useCallback(() => ({
+    name: projectName,
+    clipNames: clips.map(c => c.name),
+    clipCount: clips.length,
+    totalDuration,
+    transitionType,
+    transitionDuration,
+    transitionSound,
+    applyNoiseReduction,
+    removeFillerWords,
+    colorGrade,
+    addCaptions,
+    captionStyle,
+    processedVideoUrl,
+    savedToLibrary
+  }), [projectName, clips, totalDuration, transitionType, transitionDuration, transitionSound, 
+      applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary])
+
+  const loadDraftData = useCallback((data) => {
+    if (data.name) setProjectName(data.name)
+    if (data.transitionType) setTransitionType(data.transitionType)
+    if (data.transitionDuration) setTransitionDuration(data.transitionDuration)
+    if (data.transitionSound) setTransitionSound(data.transitionSound)
+    if (data.applyNoiseReduction !== undefined) setApplyNoiseReduction(data.applyNoiseReduction)
+    if (data.removeFillerWords !== undefined) setRemoveFillerWords(data.removeFillerWords)
+    if (data.colorGrade) setColorGrade(data.colorGrade)
+    if (data.addCaptions !== undefined) setAddCaptions(data.addCaptions)
+    if (data.captionStyle) setCaptionStyle(data.captionStyle)
+    if (data.processedVideoUrl) setProcessedVideoUrl(data.processedVideoUrl)
+  }, [])
+
+  const handleStartNewProject = useCallback(() => {
+    setProjectId(null)
+    setProjectName('Untitled Video')
+    setClips([])
+    setSelectedClipIndex(0)
+    setTranscript(null)
+    setFillerWords([])
+    setSilences([])
+    setScenes([])
+    setProcessedVideoUrl(null)
+    setSavedToLibrary(false)
+    setActiveTab('upload')
+  }, [])
+
+  // Save to Library function
+  const saveToLibrary = async (videoPath) => {
+    try {
+      const response = await fetch('/api/library/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'video',
+          title: projectName || 'Edited Video',
+          description: `${clips.length} clips merged with ${transitionType} transitions`,
+          filePath: videoPath,
+          videoUrl: videoPath,
+          metadata: {
+            clipCount: clips.length,
+            transition: transitionType,
+            colorGrade,
+            features: {
+              noiseReduction: applyNoiseReduction,
+              fillerRemoval: removeFillerWords,
+              captions: addCaptions
+            }
+          }
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setSavedToLibrary(true)
+        toast({ 
+          title: '✅ Saved to Library!', 
+          description: 'Your video has been saved to the Library for 30 days.' 
+        })
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Library save error:', error)
+      return false
+    }
+  }
+
   // Handle multi-file upload
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || [])
