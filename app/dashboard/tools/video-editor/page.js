@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import {
   Video, Upload, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Scissors, Type, Wand2, Music, Palette, Download, Loader2, Check, X,
