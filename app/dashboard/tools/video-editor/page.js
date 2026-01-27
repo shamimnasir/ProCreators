@@ -670,22 +670,57 @@ export default function VideoEditorPage() {
       </div>
       
       <div className="container mx-auto px-4 py-6">
-        {/* Storage Warning */}
-        {showStorageWarning && (
-          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
-            <ShieldAlert className="h-4 w-4 text-amber-500" />
-            <AlertTitle className="text-amber-600">Browser Storage Notice</AlertTitle>
-            <AlertDescription className="text-amber-700 dark:text-amber-300">
-              <ul className="list-disc list-inside space-y-1 text-sm mt-2">
-                <li><strong>Do NOT clear browser cache</strong> - This deletes your projects</li>
-                <li><strong>Always download final videos</strong> - Browser storage is temporary</li>
-              </ul>
-              <Button variant="ghost" size="sm" className="mt-2 text-amber-600" onClick={() => setShowStorageWarning(false)}>
-                Dismiss
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+        <div className="flex gap-6">
+          {/* Left Sidebar - AutoSaveDraftsManager */}
+          <div className="hidden lg:block w-80 flex-shrink-0">
+            <AutoSaveDraftsManager
+              toolType="video-editor"
+              currentData={getCurrentDraftData()}
+              onLoadDraft={loadDraftData}
+              onStartNew={handleStartNewProject}
+              autoSaveInterval={60000}
+            />
+            
+            {/* Saved to Library Badge */}
+            {savedToLibrary && (
+              <Alert className="mt-4 border-green-500/50 bg-green-500/10">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <AlertTitle className="text-green-600 text-sm">Saved to Library</AlertTitle>
+                <AlertDescription className="text-xs text-green-600">
+                  Your video is saved for 30 days.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+          
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Project Name Input */}
+            <div className="mb-4">
+              <Input
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Project Name"
+                className="text-lg font-semibold border-none bg-transparent p-0 h-auto focus-visible:ring-0"
+              />
+            </div>
+            
+            {/* Storage Warning */}
+            {showStorageWarning && (
+              <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-600">Browser Storage Notice</AlertTitle>
+                <AlertDescription className="text-amber-700 dark:text-amber-300">
+                  <ul className="list-disc list-inside space-y-1 text-sm mt-2">
+                    <li><strong>Do NOT clear browser cache</strong> - This deletes your projects</li>
+                    <li><strong>Always download final videos</strong> - Browser storage is temporary</li>
+                  </ul>
+                  <Button variant="ghost" size="sm" className="mt-2 text-amber-600" onClick={() => setShowStorageWarning(false)}>
+                    Dismiss
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">
