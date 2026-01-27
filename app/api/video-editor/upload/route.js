@@ -24,6 +24,11 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 })
     }
     
+    // Check if file is a Blob/File object
+    if (typeof file === 'string' || !(file instanceof Blob)) {
+      return NextResponse.json({ success: false, error: 'Invalid file type - expected file upload' }, { status: 400 })
+    }
+    
     // Validate file size based on processing mode
     const maxSizes = {
       fast: 100 * 1024 * 1024,    // 100MB
