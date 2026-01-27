@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -18,9 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Video, Upload, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Scissors, Type, Wand2, Music, Palette, Download, Loader2, Check, X,
-  Trash2, RefreshCw, Zap, Clock, FileText, Mic, AlertCircle, Settings,
-  ChevronRight, Eye, EyeOff, Sparkles, Film, ImagePlus, Search,
-  HardDrive, FolderOpen, Save, FilePlus, Cloud, Info, ShieldAlert
+  Trash2, Zap, Clock, FileText, Mic, Settings, Sparkles, Film, Plus,
+  HardDrive, FolderOpen, Save, FilePlus, Info, ShieldAlert, Layers,
+  MoveUp, MoveDown, GripVertical, Timer, Waves
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { videoStorage } from '@/lib/video-storage'
@@ -28,18 +27,16 @@ import { videoStorage } from '@/lib/video-storage'
 export default function VideoEditorPage() {
   const { toast } = useToast()
   
-  // Project & Storage State
+  // Project State
   const [projectId, setProjectId] = useState(null)
   const [projects, setProjects] = useState([])
   const [storageInfo, setStorageInfo] = useState({ usedMB: 0, quotaMB: 0, percentUsed: 0 })
   const [showStorageWarning, setShowStorageWarning] = useState(true)
   
-  // Video State
-  const [videoFile, setVideoFile] = useState(null)
-  const [videoUrl, setVideoUrl] = useState(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [isUploading, setIsUploading] = useState(false)
-  const [processingMode, setProcessingMode] = useState('standard') // 'standard' (500MB), 'pro' (2GB)
+  // Multi-Clip State
+  const [clips, setClips] = useState([]) // Array of { id, file, url, name, duration, analyzed }
+  const [selectedClipIndex, setSelectedClipIndex] = useState(0)
+  const [isMultiClipMode, setIsMultiClipMode] = useState(false)
   
   // Video playback
   const videoRef = useRef(null)
@@ -48,64 +45,57 @@ export default function VideoEditorPage() {
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   
-  // Transcript & Analysis
+  // Analysis State with Real-time Progress
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState({ 
+    step: '', 
+    progress: 0, 
+    estimatedTime: 0,
+    currentClip: 0,
+    totalClips: 0
+  })
   const [transcript, setTranscript] = useState(null)
   const [fillerWords, setFillerWords] = useState([])
   const [silences, setSilences] = useState([])
   const [scenes, setScenes] = useState([])
-  const [beats, setBeats] = useState([])
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisProgress, setAnalysisProgress] = useState({ step: '', progress: 0 })
   
-  // Editing Options
-  const [removedSegments, setRemovedSegments] = useState([])
-  const [captionStyle, setCaptionStyle] = useState('bold-outline')
-  const [audioEnhancements, setAudioEnhancements] = useState({
-    normalize: true,
-    noiseReduction: true,
-    volume: 1.0
-  })
+  // Transition Settings (for multi-clip)
+  const [transitionType, setTransitionType] = useState('fade')
+  const [transitionDuration, setTransitionDuration] = useState(0.5)
+  const [transitionSound, setTransitionSound] = useState('whoosh')
+  
+  // Processing Settings
+  const [applyNoiseReduction, setApplyNoiseReduction] = useState(true)
+  const [removeFillerWords, setRemoveFillerWords] = useState(true)
   const [colorGrade, setColorGrade] = useState('neutral')
+  const [addCaptions, setAddCaptions] = useState(true)
+  const [captionStyle, setCaptionStyle] = useState('bold-outline')
   
-  // PRO MODE
-  const [proModeEnabled, setProModeEnabled] = useState(false)
-  const [addBroll, setAddBroll] = useState(false)
-  const [brollKeywords, setBrollKeywords] = useState('')
-  const [brollStyle, setBrollStyle] = useState('intercut')
-  const [musicTrack, setMusicTrack] = useState('none')
-  const [removeFillers, setRemoveFillers] = useState(false)
-  const [removeSilences, setRemoveSilences] = useState(false)
-  
-  // Processing & Export
+  // Processing State
   const [isProcessing, setIsProcessing] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState({ step: '', progress: 0 })
   const [processedVideoUrl, setProcessedVideoUrl] = useState(null)
   const [exportFormat, setExportFormat] = useState('mp4')
-  const [exportQuality, setExportQuality] = useState('high')
-  const [processingStatus, setProcessingStatus] = useState('')
   
   // UI State
   const [activeTab, setActiveTab] = useState('upload')
-  const [showCaptions, setShowCaptions] = useState(true)
+  const [processingMode, setProcessingMode] = useState('standard')
   const [showProjectPanel, setShowProjectPanel] = useState(false)
   
-  // File size limits based on mode
   const FILE_LIMITS = {
-    standard: { maxMB: 500, maxMin: 15, label: 'Standard (500MB / 15 min)' },
-    pro: { maxMB: 2048, maxMin: 60, label: 'Pro (2GB / 60 min)' }
+    standard: { maxMB: 500, maxMin: 15 },
+    pro: { maxMB: 2048, maxMin: 60 }
   }
 
-  // Initialize storage and load projects on mount
+  // Initialize storage
   useEffect(() => {
     const initStorage = async () => {
       try {
         await videoStorage.init()
         const savedProjects = await videoStorage.getAllProjects()
         setProjects(savedProjects)
-        
         const usage = await videoStorage.getStorageUsage()
         setStorageInfo(usage)
-        
-        // Cleanup old projects
         await videoStorage.cleanupOldProjects()
       } catch (error) {
         console.error('Storage init error:', error)
@@ -114,222 +104,94 @@ export default function VideoEditorPage() {
     initStorage()
   }, [])
 
-  // Get current project data for saving
-  const getCurrentProjectData = useCallback(() => ({
-    name: videoFile?.name || 'Untitled Project',
-    transcript,
-    fillerWords,
-    silences,
-    scenes,
-    beats,
-    removedSegments,
-    captionStyle,
-    audioEnhancements,
-    colorGrade,
-    proModeEnabled,
-    addBroll,
-    brollKeywords,
-    brollStyle,
-    musicTrack,
-    removeFillers,
-    removeSilences,
-    showCaptions,
-    hasVideo: !!videoUrl,
-    hasProcessedVideo: !!processedVideoUrl
-  }), [transcript, fillerWords, silences, scenes, beats, removedSegments, captionStyle, 
-      audioEnhancements, colorGrade, proModeEnabled, addBroll, brollKeywords, brollStyle,
-      musicTrack, removeFillers, removeSilences, showCaptions, videoFile, videoUrl, processedVideoUrl])
-
-  // Save project to browser storage
-  const saveProject = async () => {
-    if (!projectId) {
-      const newId = crypto.randomUUID()
-      setProjectId(newId)
-      
-      const projectData = {
-        id: newId,
-        ...getCurrentProjectData()
-      }
-      
-      await videoStorage.saveProject(projectData)
-      
-      // Save video file if exists
-      if (videoFile) {
-        await videoStorage.saveVideo(newId, videoFile)
-      }
-      
-      const savedProjects = await videoStorage.getAllProjects()
-      setProjects(savedProjects)
-      
-      toast({ title: 'Project Saved', description: 'Your project has been saved to browser storage.' })
-    } else {
-      const projectData = {
-        id: projectId,
-        ...getCurrentProjectData()
-      }
-      
-      await videoStorage.saveProject(projectData)
-      
-      const savedProjects = await videoStorage.getAllProjects()
-      setProjects(savedProjects)
-      
-      toast({ title: 'Project Updated', description: 'Your changes have been saved.' })
-    }
-    
-    // Update storage info
-    const usage = await videoStorage.getStorageUsage()
-    setStorageInfo(usage)
-  }
-
-  // Load project from browser storage
-  const loadProject = async (project) => {
-    setProjectId(project.id)
-    
-    // Load project metadata
-    setTranscript(project.transcript || null)
-    setFillerWords(project.fillerWords || [])
-    setSilences(project.silences || [])
-    setScenes(project.scenes || [])
-    setBeats(project.beats || [])
-    setRemovedSegments(project.removedSegments || [])
-    setCaptionStyle(project.captionStyle || 'bold-outline')
-    setAudioEnhancements(project.audioEnhancements || { normalize: true, noiseReduction: true, volume: 1.0 })
-    setColorGrade(project.colorGrade || 'neutral')
-    setProModeEnabled(project.proModeEnabled || false)
-    setAddBroll(project.addBroll || false)
-    setBrollKeywords(project.brollKeywords || '')
-    setBrollStyle(project.brollStyle || 'intercut')
-    setMusicTrack(project.musicTrack || 'none')
-    setRemoveFillers(project.removeFillers || false)
-    setRemoveSilences(project.removeSilences || false)
-    setShowCaptions(project.showCaptions !== false)
-    
-    // Load video from storage
-    if (project.hasVideo) {
-      const videoResult = await videoStorage.loadVideo(project.id)
-      if (videoResult.success) {
-        setVideoUrl(videoResult.url)
-        setVideoFile({ name: videoResult.name, size: videoResult.size, type: videoResult.type })
-        setActiveTab('edit')
-      }
-    }
-    
-    // Load processed video if exists
-    if (project.hasProcessedVideo) {
-      const processedResult = await videoStorage.loadProcessedVideo(project.id)
-      if (processedResult.success) {
-        setProcessedVideoUrl(processedResult.url)
-      }
-    }
-    
-    setShowProjectPanel(false)
-    toast({ title: 'Project Loaded', description: `Loaded "${project.name}"` })
-  }
-
-  // Delete project
-  const deleteProject = async (id, e) => {
-    e.stopPropagation()
-    
-    await videoStorage.deleteProject(id)
-    
-    if (projectId === id) {
-      startNewProject()
-    }
-    
-    const savedProjects = await videoStorage.getAllProjects()
-    setProjects(savedProjects)
-    
-    const usage = await videoStorage.getStorageUsage()
-    setStorageInfo(usage)
-    
-    toast({ title: 'Project Deleted' })
-  }
-
-  // Start new project
-  const startNewProject = () => {
-    setProjectId(null)
-    setVideoFile(null)
-    setVideoUrl(null)
-    setTranscript(null)
-    setFillerWords([])
-    setSilences([])
-    setScenes([])
-    setBeats([])
-    setRemovedSegments([])
-    setProcessedVideoUrl(null)
-    setActiveTab('upload')
-    toast({ title: 'New Project', description: 'Started a new project.' })
-  }
-
-  // Handle file upload - stores in browser
+  // Handle multi-file upload
   const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
     
-    if (!file.type.startsWith('video/')) {
-      toast({ title: 'Invalid File', description: 'Please upload a video file.', variant: 'destructive' })
+    const videoFiles = files.filter(f => f.type.startsWith('video/'))
+    if (videoFiles.length === 0) {
+      toast({ title: 'Invalid Files', description: 'Please upload video files.', variant: 'destructive' })
       return
+    }
+    
+    // Check if multiple files - enable multi-clip mode
+    if (videoFiles.length > 1) {
+      setIsMultiClipMode(true)
     }
     
     const limits = FILE_LIMITS[processingMode]
-    if (file.size > limits.maxMB * 1024 * 1024) {
-      toast({ 
-        title: 'File Too Large', 
-        description: `Max file size for ${processingMode} mode is ${limits.maxMB}MB. Your file is ${Math.round(file.size / 1024 / 1024)}MB.`,
-        variant: 'destructive'
-      })
-      return
-    }
+    const newClips = []
     
-    setIsUploading(true)
-    setUploadProgress(0)
-    
-    try {
-      // Create new project ID
-      const newProjectId = crypto.randomUUID()
-      setProjectId(newProjectId)
-      
-      // Create object URL for preview
-      const url = URL.createObjectURL(file)
-      setVideoUrl(url)
-      setVideoFile(file)
-      
-      // Simulate progress for UX
-      for (let i = 0; i <= 100; i += 10) {
-        setUploadProgress(i)
-        await new Promise(r => setTimeout(r, 50))
+    for (const file of videoFiles) {
+      if (file.size > limits.maxMB * 1024 * 1024) {
+        toast({ 
+          title: 'File Too Large', 
+          description: `${file.name} exceeds ${limits.maxMB}MB limit.`,
+          variant: 'destructive'
+        })
+        continue
       }
       
-      // Save to IndexedDB
-      await videoStorage.saveVideo(newProjectId, file, setUploadProgress)
+      const clipId = crypto.randomUUID()
+      const url = URL.createObjectURL(file)
       
-      // Save project metadata
-      await videoStorage.saveProject({
-        id: newProjectId,
+      newClips.push({
+        id: clipId,
+        file,
+        url,
         name: file.name,
-        hasVideo: true,
-        createdAt: new Date().toISOString()
+        size: file.size,
+        duration: 0,
+        analyzed: false
       })
-      
-      // Update projects list
-      const savedProjects = await videoStorage.getAllProjects()
-      setProjects(savedProjects)
-      
-      // Update storage info
-      const usage = await videoStorage.getStorageUsage()
-      setStorageInfo(usage)
-      
+    }
+    
+    if (newClips.length > 0) {
+      setClips(prev => [...prev, ...newClips])
+      if (!projectId) {
+        setProjectId(crypto.randomUUID())
+      }
       setActiveTab('edit')
-      toast({ title: 'Video Loaded', description: 'Your video is ready for editing.' })
-      
-    } catch (error) {
-      console.error('Upload error:', error)
-      toast({ title: 'Upload Failed', description: error.message, variant: 'destructive' })
-    } finally {
-      setIsUploading(false)
+      toast({ title: `${newClips.length} clip(s) added`, description: 'Ready for editing!' })
     }
   }
-  
+
+  // Get duration when video loads
+  const handleVideoLoaded = (clipId, videoDuration) => {
+    setClips(prev => prev.map(c => 
+      c.id === clipId ? { ...c, duration: videoDuration } : c
+    ))
+  }
+
+  // Remove clip
+  const removeClip = (clipId) => {
+    setClips(prev => {
+      const newClips = prev.filter(c => c.id !== clipId)
+      if (selectedClipIndex >= newClips.length) {
+        setSelectedClipIndex(Math.max(0, newClips.length - 1))
+      }
+      return newClips
+    })
+  }
+
+  // Move clip up/down
+  const moveClip = (index, direction) => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1
+    if (newIndex < 0 || newIndex >= clips.length) return
+    
+    setClips(prev => {
+      const newClips = [...prev]
+      const temp = newClips[index]
+      newClips[index] = newClips[newIndex]
+      newClips[newIndex] = temp
+      return newClips
+    })
+  }
+
+  // Current clip
+  const currentClip = clips[selectedClipIndex]
+
   // Video playback controls
   const togglePlay = () => {
     if (videoRef.current) {
@@ -341,241 +203,182 @@ export default function VideoEditorPage() {
       setIsPlaying(!isPlaying)
     }
   }
-  
+
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime)
     }
   }
-  
+
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
-      setDuration(videoRef.current.duration)
+      const dur = videoRef.current.duration
+      setDuration(dur)
+      if (currentClip) {
+        handleVideoLoaded(currentClip.id, dur)
+      }
     }
   }
-  
+
   const seekTo = (time) => {
     if (videoRef.current) {
       videoRef.current.currentTime = time
       setCurrentTime(time)
     }
   }
-  
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
-  
-  // Extract keywords from transcript
-  const extractKeywords = (text) => {
-    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'that', 'this', 'my', 'your', 'me', 'him', 'us', 'them']
-    
-    const words = text.toLowerCase()
-      .replace(/[^a-z\s]/g, '')
-      .split(/\s+/)
-      .filter(w => w.length > 3 && !stopWords.includes(w))
-    
-    const wordCount = {}
-    words.forEach(w => { wordCount[w] = (wordCount[w] || 0) + 1 })
-    
-    return Object.entries(wordCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([word]) => word)
-  }
-  
-  // Analyze video - now uploads to server for processing
-  const analyzeVideo = async () => {
-    if (!videoFile) return
+
+  // Analyze all clips with real-time progress
+  const analyzeClips = async () => {
+    if (clips.length === 0) return
     
     setIsAnalyzing(true)
-    setAnalysisProgress({ step: 'Preparing video for analysis...', progress: 0 })
+    const totalClips = clips.length
+    let allFillers = []
+    let allSilences = []
+    let allScenes = []
+    let fullTranscript = { segments: [], text: '' }
     
     try {
-      // Upload video to server temporarily for processing
-      setAnalysisProgress({ step: 'Uploading video for transcription...', progress: 10 })
-      
-      const formData = new FormData()
-      formData.append('file', videoFile)
-      formData.append('fileId', projectId)
-      formData.append('fileName', videoFile.name)
-      formData.append('chunkIndex', '0')
-      formData.append('totalChunks', '1')
-      formData.append('processingMode', processingMode)
-      
-      const uploadRes = await fetch('/api/video-editor/upload', {
-        method: 'POST',
-        body: formData
-      })
-      
-      const uploadResult = await uploadRes.json()
-      
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || 'Upload failed')
-      }
-      
-      setAnalysisProgress({ step: 'Transcribing audio with Whisper AI...', progress: 30 })
-      
-      const transcribeRes = await fetch('/api/video-editor/transcribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          fileId: projectId,
-          filePath: uploadResult.filePath
-        })
-      })
-      
-      const transcribeData = await transcribeRes.json()
-      
-      if (transcribeData.success) {
-        setTranscript(transcribeData.transcript)
-        setFillerWords(transcribeData.analysis?.fillerWords || [])
-        setSilences(transcribeData.analysis?.silences || [])
+      for (let i = 0; i < clips.length; i++) {
+        const clip = clips[i]
+        const clipNum = i + 1
         
-        if (transcribeData.transcript?.text) {
-          const keywords = extractKeywords(transcribeData.transcript.text)
-          setBrollKeywords(keywords.join(', '))
+        // Estimate time based on clip duration
+        const estimatedSeconds = Math.max(10, Math.ceil((clip.duration || 30) * 0.5))
+        
+        setAnalysisProgress({
+          step: `Uploading clip ${clipNum}/${totalClips}...`,
+          progress: (i / totalClips) * 100,
+          estimatedTime: estimatedSeconds,
+          currentClip: clipNum,
+          totalClips
+        })
+        
+        // Upload clip
+        const formData = new FormData()
+        formData.append('file', clip.file)
+        formData.append('fileId', clip.id)
+        formData.append('fileName', clip.name)
+        formData.append('chunkIndex', '0')
+        formData.append('totalChunks', '1')
+        formData.append('processingMode', processingMode)
+        
+        const uploadRes = await fetch('/api/video-editor/upload', {
+          method: 'POST',
+          body: formData
+        })
+        
+        const uploadResult = await uploadRes.json()
+        if (!uploadResult.success) {
+          console.error(`Upload failed for clip ${clipNum}:`, uploadResult.error)
+          continue
         }
+        
+        // Transcribe
+        setAnalysisProgress({
+          step: `Transcribing clip ${clipNum}/${totalClips}...`,
+          progress: ((i + 0.3) / totalClips) * 100,
+          estimatedTime: Math.ceil(estimatedSeconds * 0.7),
+          currentClip: clipNum,
+          totalClips
+        })
+        
+        const transcribeRes = await fetch('/api/video-editor/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileId: clip.id, filePath: uploadResult.filePath })
+        })
+        
+        const transcribeData = await transcribeRes.json()
+        if (transcribeData.success) {
+          if (transcribeData.transcript?.segments) {
+            fullTranscript.segments.push(...transcribeData.transcript.segments)
+            fullTranscript.text += ' ' + (transcribeData.transcript.text || '')
+          }
+          if (transcribeData.analysis?.fillerWords) {
+            allFillers.push(...transcribeData.analysis.fillerWords)
+          }
+          if (transcribeData.analysis?.silences) {
+            allSilences.push(...transcribeData.analysis.silences)
+          }
+        }
+        
+        // Fast scene detection with timeout
+        setAnalysisProgress({
+          step: `Detecting scenes in clip ${clipNum}/${totalClips}...`,
+          progress: ((i + 0.7) / totalClips) * 100,
+          estimatedTime: 5,
+          currentClip: clipNum,
+          totalClips
+        })
+        
+        // Use fast-analyze endpoint
+        const sceneRes = await fetch('/api/video-editor/fast-analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileId: clip.id, filePath: uploadResult.filePath, skipThumbnails: true })
+        })
+        
+        const sceneData = await sceneRes.json()
+        if (sceneData.success && sceneData.scenes) {
+          allScenes.push(...sceneData.scenes.map(s => ({ ...s, clipId: clip.id })))
+        }
+        
+        // Mark clip as analyzed
+        setClips(prev => prev.map(c => 
+          c.id === clip.id ? { ...c, analyzed: true, filePath: uploadResult.filePath } : c
+        ))
       }
       
-      setAnalysisProgress({ step: 'Detecting scene changes...', progress: 60 })
+      setTranscript(fullTranscript)
+      setFillerWords(allFillers)
+      setSilences(allSilences)
+      setScenes(allScenes)
       
-      const scenesRes = await fetch('/api/video-editor/detect-scenes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          fileId: projectId,
-          filePath: uploadResult.filePath
-        })
+      setAnalysisProgress({
+        step: 'Analysis complete!',
+        progress: 100,
+        estimatedTime: 0,
+        currentClip: totalClips,
+        totalClips
       })
       
-      const scenesData = await scenesRes.json()
-      
-      if (scenesData.success) {
-        setScenes(scenesData.scenes || [])
-      }
-      
-      setAnalysisProgress({ step: 'Analyzing audio for beat detection...', progress: 80 })
-      
-      const audioRes = await fetch('/api/video-editor/analyze-audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          fileId: projectId,
-          filePath: uploadResult.filePath,
-          detectBeats: true,
-          detectSilences: true
-        })
-      })
-      
-      const audioData = await audioRes.json()
-      
-      if (audioData.success) {
-        setBeats(audioData.beats || [])
-        if (audioData.silences?.length > silences.length) {
-          setSilences(audioData.silences)
-        }
-      }
-      
-      setAnalysisProgress({ step: 'Analysis complete!', progress: 100 })
-      
-      // Auto-save project with analysis data
-      await saveProject()
+      toast({ title: 'Analysis Complete', description: `Analyzed ${totalClips} clip(s) successfully!` })
       
     } catch (error) {
       console.error('Analysis error:', error)
-      toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' })
+      toast({ title: 'Analysis Error', description: error.message, variant: 'destructive' })
     } finally {
       setTimeout(() => setIsAnalyzing(false), 1000)
     }
   }
-  
-  // Process video
-  const processVideo = async () => {
-    if (!projectId || !videoFile) return
+
+  // Process and merge all clips
+  const processClips = async () => {
+    if (clips.length === 0) return
     
     setIsProcessing(true)
-    setProcessingStatus('Starting processing...')
     
     try {
-      // Ensure video is uploaded to server
-      setProcessingStatus('Preparing video...')
-      
-      const formData = new FormData()
-      formData.append('file', videoFile)
-      formData.append('fileId', projectId)
-      formData.append('fileName', videoFile.name)
-      formData.append('chunkIndex', '0')
-      formData.append('totalChunks', '1')
-      formData.append('processingMode', processingMode)
-      
-      const uploadRes = await fetch('/api/video-editor/upload', {
-        method: 'POST',
-        body: formData
-      })
-      
-      const uploadResult = await uploadRes.json()
-      
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || 'Upload failed')
-      }
-      
-      if (proModeEnabled) {
-        setProcessingStatus('Activating Pro Mode transformation...')
+      if (clips.length === 1) {
+        // Single clip processing
+        setProcessingProgress({ step: 'Processing single clip...', progress: 20 })
         
-        const keywords = brollKeywords.split(',').map(k => k.trim()).filter(k => k)
-        
-        const response = await fetch('/api/video-editor/pro-mode', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filePath: uploadResult.filePath,
-            transcript,
-            brollKeywords: keywords,
-            addBroll: addBroll && keywords.length > 0,
-            brollStyle,
-            musicTrack,
-            captionStyle: showCaptions ? captionStyle : null,
-            colorGrade,
-            audioEnhance: audioEnhancements.normalize || audioEnhancements.noiseReduction,
-            removeFillers,
-            removeSilences,
-            fillerWords,
-            silences,
-            beats,
-            scenes,
-            resolution: '1080p'
-          })
-        })
-        
-        const result = await response.json()
-        
-        if (result.success) {
-          setProcessedVideoUrl(result.outputPath)
-          setActiveTab('export')
-          setProcessingStatus('Pro Mode complete!')
-          
-          // Update project
-          await saveProject()
-        } else {
-          throw new Error(result.error || 'Processing failed')
-        }
-      } else {
-        setProcessingStatus('Applying edits...')
-        
+        const clip = clips[0]
         const operations = []
         
-        if (removedSegments.length > 0) {
-          operations.push({ type: 'remove_segments', segments: removedSegments })
-        }
-        
-        if (showCaptions && transcript) {
+        if (addCaptions && transcript) {
           operations.push({ type: 'add_captions', transcript, style: { preset: captionStyle } })
         }
         
-        if (audioEnhancements.normalize || audioEnhancements.noiseReduction) {
-          operations.push({ type: 'enhance_audio', settings: audioEnhancements })
+        if (applyNoiseReduction) {
+          operations.push({ type: 'enhance_audio', settings: { normalize: true, noiseReduction: true } })
         }
         
         if (colorGrade !== 'neutral') {
@@ -586,8 +389,8 @@ export default function VideoEditorPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            fileId: projectId,
-            filePath: uploadResult.filePath,
+            fileId: clip.id,
+            filePath: clip.filePath,
             operations
           })
         })
@@ -597,23 +400,58 @@ export default function VideoEditorPage() {
         if (result.success) {
           setProcessedVideoUrl(result.outputPath)
           setActiveTab('export')
-          
-          await saveProject()
         } else {
-          throw new Error(result.error || 'Processing failed')
+          throw new Error(result.error)
+        }
+      } else {
+        // Multi-clip merge with transitions
+        setProcessingProgress({ step: 'Merging clips with transitions...', progress: 30 })
+        
+        const clipData = clips.map(c => ({
+          filePath: c.filePath || `/video-editor/uploads/${c.id}.mp4`
+        }))
+        
+        const response = await fetch('/api/video-editor/merge-clips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clips: clipData,
+            transition: transitionType,
+            transitionDuration,
+            transitionSound,
+            applyNoiseReduction,
+            removeFillers: removeFillerWords,
+            colorGrade,
+            addCaptions,
+            outputResolution: '1080p'
+          })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+          setProcessedVideoUrl(result.outputPath)
+          setActiveTab('export')
+          toast({ 
+            title: 'Video Created!', 
+            description: `Merged ${clips.length} clips with ${transitionType} transitions.` 
+          })
+        } else {
+          throw new Error(result.error)
         }
       }
+      
+      setProcessingProgress({ step: 'Complete!', progress: 100 })
       
     } catch (error) {
       console.error('Processing error:', error)
       toast({ title: 'Processing Failed', description: error.message, variant: 'destructive' })
     } finally {
       setIsProcessing(false)
-      setProcessingStatus('')
     }
   }
-  
-  // Export video
+
+  // Export
   const exportVideo = async () => {
     if (!processedVideoUrl) return
     
@@ -626,7 +464,7 @@ export default function VideoEditorPage() {
         body: JSON.stringify({
           filePath: processedVideoUrl,
           format: exportFormat,
-          quality: exportQuality
+          quality: 'high'
         })
       })
       
@@ -635,23 +473,21 @@ export default function VideoEditorPage() {
       if (result.success) {
         const link = document.createElement('a')
         link.href = result.downloadUrl
-        link.download = `edited-video.${exportFormat}`
+        link.download = `final-video.${exportFormat}`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
-        toast({ title: 'Download Started', description: 'Your video is being downloaded.' })
-      } else {
-        throw new Error(result.error || 'Export failed')
+        toast({ title: 'Download Started!' })
       }
-      
     } catch (error) {
-      console.error('Export error:', error)
       toast({ title: 'Export Failed', description: error.message, variant: 'destructive' })
     } finally {
       setIsProcessing(false)
     }
   }
+
+  // Calculate total duration
+  const totalDuration = clips.reduce((sum, c) => sum + (c.duration || 0), 0)
 
   return (
     <div className="min-h-screen bg-background">
@@ -666,54 +502,27 @@ export default function VideoEditorPage() {
               <div>
                 <h1 className="text-2xl font-bold">AI Video Editor</h1>
                 <p className="text-sm text-muted-foreground">
-                  Transform raw footage into professional videos
+                  Multi-clip editing with auto transitions
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
-              {/* Storage Info */}
               <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-muted text-sm">
-                <HardDrive className="h-4 w-4 text-muted-foreground" />
-                <span>{storageInfo.usedMB}MB / {storageInfo.quotaMB}MB</span>
+                <Layers className="h-4 w-4" />
+                <span>{clips.length} clips</span>
+                {totalDuration > 0 && (
+                  <span className="text-muted-foreground">• {formatTime(totalDuration)}</span>
+                )}
               </div>
               
-              {/* Project Management */}
-              <Button variant="outline" size="sm" onClick={() => setShowProjectPanel(!showProjectPanel)}>
-                <FolderOpen className="h-4 w-4 mr-2" />
-                Projects ({projects.length})
-              </Button>
-              
-              <Button variant="outline" size="sm" onClick={saveProject}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </Button>
-              
-              {/* Pro Mode */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                <Label className="text-sm font-medium">Pro Mode</Label>
-                <Switch checked={proModeEnabled} onCheckedChange={setProModeEnabled} />
-              </div>
-              
-              {/* Processing Mode */}
               <Select value={processingMode} onValueChange={setProcessingMode}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[140px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-yellow-500" />
-                      Standard (500MB)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="pro">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-purple-500" />
-                      Pro (2GB)
-                    </div>
-                  </SelectItem>
+                  <SelectItem value="standard">Standard (500MB)</SelectItem>
+                  <SelectItem value="pro">Pro (2GB)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -722,100 +531,21 @@ export default function VideoEditorPage() {
       </div>
       
       <div className="container mx-auto px-4 py-6">
-        {/* Browser Storage Warning */}
+        {/* Storage Warning */}
         {showStorageWarning && (
           <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
             <ShieldAlert className="h-4 w-4 text-amber-500" />
-            <AlertTitle className="text-amber-600">Important: Browser Storage Notice</AlertTitle>
+            <AlertTitle className="text-amber-600">Browser Storage Notice</AlertTitle>
             <AlertDescription className="text-amber-700 dark:text-amber-300">
-              <p className="mb-2">
-                Your videos are stored locally in your browser for privacy and faster processing. To keep your projects safe:
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li><strong>Do NOT clear browser cache/data</strong> - This will delete all your video projects</li>
-                <li><strong>Use the same browser</strong> - Projects are not synced across browsers</li>
-                <li><strong>Download final videos</strong> - Always export and save your finished videos</li>
-                <li><strong>Projects auto-delete after 30 days</strong> of inactivity</li>
+              <ul className="list-disc list-inside space-y-1 text-sm mt-2">
+                <li><strong>Do NOT clear browser cache</strong> - This deletes your projects</li>
+                <li><strong>Always download final videos</strong> - Browser storage is temporary</li>
               </ul>
               <Button variant="ghost" size="sm" className="mt-2 text-amber-600" onClick={() => setShowStorageWarning(false)}>
-                Got it, don't show again
+                Dismiss
               </Button>
             </AlertDescription>
           </Alert>
-        )}
-        
-        {/* Projects Panel */}
-        {showProjectPanel && (
-          <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5" />
-                  My Projects
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={startNewProject}>
-                    <FilePlus className="h-4 w-4 mr-1" />
-                    New
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setShowProjectPanel(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No saved projects yet. Upload a video to get started!
-                </p>
-              ) : (
-                <div className="grid gap-2 max-h-[300px] overflow-y-auto">
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors ${
-                        projectId === project.id ? 'border-primary bg-accent' : ''
-                      }`}
-                      onClick={() => loadProject(project)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <Video className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium truncate">{project.name}</span>
-                          {projectId === project.id && (
-                            <Badge variant="secondary" className="text-xs">Current</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(project.updatedAt).toLocaleDateString()}
-                          {project.transcript && <Badge variant="outline" className="text-xs">Analyzed</Badge>}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        onClick={(e) => deleteProject(project.id, e)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {/* Storage Usage */}
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Browser Storage Used</span>
-                  <span className="font-medium">{storageInfo.usedMB}MB / {storageInfo.quotaMB}MB</span>
-                </div>
-                <Progress value={storageInfo.percentUsed} className="h-2" />
-              </div>
-            </CardContent>
-          </Card>
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -824,7 +554,7 @@ export default function VideoEditorPage() {
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
-            <TabsTrigger value="edit" disabled={!videoUrl} className="flex items-center gap-2">
+            <TabsTrigger value="edit" disabled={clips.length === 0} className="flex items-center gap-2">
               <Scissors className="h-4 w-4" />
               Edit
             </TabsTrigger>
@@ -842,42 +572,42 @@ export default function VideoEditorPage() {
                   <div className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full mb-4">
                     <Upload className="h-12 w-12 text-purple-500" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Upload Your Raw Video</h3>
+                  <h3 className="text-xl font-semibold mb-2">Upload Your Clips</h3>
                   <p className="text-muted-foreground mb-2 text-center max-w-md">
-                    Videos are stored locally in your browser - no server upload needed!
+                    Upload multiple clips to automatically merge with transitions
                   </p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Max: {FILE_LIMITS[processingMode].maxMB}MB / {FILE_LIMITS[processingMode].maxMin} minutes ({processingMode} mode)
+                    Max: {FILE_LIMITS[processingMode].maxMB}MB per clip
                   </p>
                   
                   <Input
                     type="file"
                     accept="video/*"
+                    multiple
                     onChange={handleFileUpload}
-                    disabled={isUploading}
                     className="max-w-xs"
                   />
-                  
-                  {isUploading && (
-                    <div className="mt-6 w-full max-w-xs">
-                      <Progress value={uploadProgress} className="mb-2" />
-                      <p className="text-sm text-center text-muted-foreground">
-                        Saving to browser... {uploadProgress}%
-                      </p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
             
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-              <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+            {/* Features */}
+            <div className="grid md:grid-cols-3 gap-4 mt-6">
+              <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
                 <CardContent className="pt-6">
-                  <Type className="h-8 w-8 text-blue-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Auto-Captions</h4>
+                  <Layers className="h-8 w-8 text-purple-500 mb-3" />
+                  <h4 className="font-semibold mb-1">Multi-Clip Merge</h4>
                   <p className="text-sm text-muted-foreground">
-                    AI transcription with multiple caption styles
+                    Upload multiple clips and merge them automatically
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-pink-500/5 to-pink-500/10 border-pink-500/20">
+                <CardContent className="pt-6">
+                  <Waves className="h-8 w-8 text-pink-500 mb-3" />
+                  <h4 className="font-semibold mb-1">Auto Transitions</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Fade, dissolve, wipe with whoosh sound effects
                   </p>
                 </CardContent>
               </Card>
@@ -886,43 +616,7 @@ export default function VideoEditorPage() {
                   <Mic className="h-8 w-8 text-green-500 mb-3" />
                   <h4 className="font-semibold mb-1">Smart Cleanup</h4>
                   <p className="text-sm text-muted-foreground">
-                    Remove filler words, silences & enhance audio
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
-                <CardContent className="pt-6">
-                  <Film className="h-8 w-8 text-purple-500 mb-3" />
-                  <h4 className="font-semibold mb-1">B-Roll Integration</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Auto-insert stock footage at scene changes
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-pink-500/5 to-pink-500/10 border-pink-500/20">
-                <CardContent className="pt-6">
-                  <Music className="h-8 w-8 text-pink-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Background Music</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Add royalty-free music with auto-fade
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-orange-500/5 to-orange-500/10 border-orange-500/20">
-                <CardContent className="pt-6">
-                  <Palette className="h-8 w-8 text-orange-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Color Grading</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Cinematic presets: warm, cool, vintage & more
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/10 border-cyan-500/20">
-                <CardContent className="pt-6">
-                  <HardDrive className="h-8 w-8 text-cyan-500 mb-3" />
-                  <h4 className="font-semibold mb-1">Local Storage</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Videos stored in browser - no server uploads
+                    Auto remove "um", "uh", "like" and reduce noise
                   </p>
                 </CardContent>
               </Card>
@@ -932,15 +626,16 @@ export default function VideoEditorPage() {
           {/* EDIT TAB */}
           <TabsContent value="edit">
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Video Preview */}
+              {/* Video Preview & Clips List */}
               <div className="lg:col-span-2 space-y-4">
+                {/* Video Preview */}
                 <Card>
                   <CardContent className="pt-6">
                     <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
-                      {videoUrl ? (
+                      {currentClip ? (
                         <video
                           ref={videoRef}
-                          src={videoUrl}
+                          src={currentClip.url}
                           className="w-full h-full object-contain"
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
@@ -948,34 +643,22 @@ export default function VideoEditorPage() {
                           onPause={() => setIsPlaying(false)}
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <p className="text-muted-foreground">No video loaded</p>
+                        <div className="flex items-center justify-center h-full text-muted-foreground">
+                          No clip selected
                         </div>
                       )}
                     </div>
                     
                     {/* Playback Controls */}
                     <div className="mt-4 space-y-3">
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min={0}
-                          max={duration || 100}
-                          value={currentTime}
-                          onChange={(e) => seekTo(parseFloat(e.target.value))}
-                          className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
-                        />
-                        
-                        <div className="absolute top-0 left-0 right-0 h-2 pointer-events-none">
-                          {scenes.map((scene, i) => (
-                            <div
-                              key={`scene-${i}`}
-                              className="absolute top-0 w-0.5 h-full bg-blue-500 opacity-50"
-                              style={{ left: `${(scene.start / duration) * 100}%` }}
-                            />
-                          ))}
-                        </div>
-                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={duration || 100}
+                        value={currentTime}
+                        onChange={(e) => seekTo(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                      />
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -993,14 +676,10 @@ export default function VideoEditorPage() {
                           </span>
                         </div>
                         
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => {
-                            setIsMuted(!isMuted)
-                            if (videoRef.current) videoRef.current.muted = !isMuted
-                          }}
-                        >
+                        <Button variant="outline" size="icon" onClick={() => {
+                          setIsMuted(!isMuted)
+                          if (videoRef.current) videoRef.current.muted = !isMuted
+                        }}>
                           {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                         </Button>
                       </div>
@@ -1008,54 +687,98 @@ export default function VideoEditorPage() {
                   </CardContent>
                 </Card>
                 
-                {/* Transcript */}
-                {transcript && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <FileText className="h-5 w-5" />
-                          Transcript
-                        </CardTitle>
-                        <Badge variant="secondary">{transcript.segments?.length || 0} segments</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-48">
-                        <div className="space-y-2">
-                          {transcript.segments?.map((seg, i) => (
-                            <div
-                              key={i}
-                              className={`p-2 rounded cursor-pointer transition-colors ${
-                                currentTime >= seg.start && currentTime <= seg.end
-                                  ? 'bg-primary/20 border-l-2 border-primary'
-                                  : 'hover:bg-muted'
-                              }`}
-                              onClick={() => seekTo(seg.start)}
-                            >
-                              <span className="text-xs text-muted-foreground mr-2">
-                                {formatTime(seg.start)}
-                              </span>
-                              {seg.text}
+                {/* Clips Timeline */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Layers className="h-5 w-5" />
+                        Clips Timeline
+                      </CardTitle>
+                      <label>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          multiple
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <Button variant="outline" size="sm" asChild>
+                          <span><Plus className="h-4 w-4 mr-1" /> Add Clips</span>
+                        </Button>
+                      </label>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="max-h-[300px]">
+                      <div className="space-y-2">
+                        {clips.map((clip, index) => (
+                          <div
+                            key={clip.id}
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                              selectedClipIndex === index ? 'border-primary bg-primary/10' : 'hover:bg-muted'
+                            }`}
+                            onClick={() => setSelectedClipIndex(index)}
+                          >
+                            <div className="flex flex-col gap-1">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveClip(index, 'up') }} disabled={index === 0}>
+                                <MoveUp className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveClip(index, 'down') }} disabled={index === clips.length - 1}>
+                                <MoveDown className="h-3 w-3" />
+                              </Button>
                             </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-                )}
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="text-xs">{index + 1}</Badge>
+                                <span className="font-medium truncate">{clip.name}</span>
+                                {clip.analyzed && (
+                                  <Badge variant="outline" className="text-xs text-green-600">
+                                    <Check className="h-3 w-3 mr-1" /> Analyzed
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                <Timer className="h-3 w-3" />
+                                {clip.duration > 0 ? formatTime(clip.duration) : 'Loading...'}
+                                <span>•</span>
+                                {Math.round(clip.size / 1024 / 1024)}MB
+                              </div>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                              onClick={(e) => { e.stopPropagation(); removeClip(clip.id) }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        
+                        {clips.length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No clips added yet. Upload videos to get started.
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
               </div>
               
-              {/* Tools Panel */}
+              {/* Settings Panel */}
               <div className="space-y-4">
-                {/* Analyze Button */}
+                {/* Analyze Button with Progress */}
                 <Card>
                   <CardContent className="pt-6">
                     <Button
                       className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
                       size="lg"
-                      onClick={analyzeVideo}
-                      disabled={isAnalyzing || !videoUrl}
+                      onClick={analyzeClips}
+                      disabled={isAnalyzing || clips.length === 0}
                     >
                       {isAnalyzing ? (
                         <>
@@ -1065,26 +788,32 @@ export default function VideoEditorPage() {
                       ) : (
                         <>
                           <Wand2 className="h-4 w-4 mr-2" />
-                          Analyze Video
+                          Analyze All Clips
                         </>
                       )}
                     </Button>
+                    
                     {isAnalyzing && (
-                      <Progress value={analysisProgress.progress} className="mt-3" />
+                      <div className="mt-4 space-y-2">
+                        <Progress value={analysisProgress.progress} className="h-2" />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Clip {analysisProgress.currentClip}/{analysisProgress.totalClips}</span>
+                          {analysisProgress.estimatedTime > 0 && (
+                            <span>~{analysisProgress.estimatedTime}s remaining</span>
+                          )}
+                        </div>
+                      </div>
                     )}
                     
+                    {/* Analysis Stats */}
                     {transcript && (
-                      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-center">
                         <div className="p-2 bg-muted rounded">
-                          <div className="text-lg font-bold">{fillerWords.length}</div>
-                          <div className="text-xs text-muted-foreground">Fillers</div>
+                          <div className="text-lg font-bold text-orange-500">{fillerWords.length}</div>
+                          <div className="text-xs text-muted-foreground">Fillers Found</div>
                         </div>
                         <div className="p-2 bg-muted rounded">
-                          <div className="text-lg font-bold">{silences.length}</div>
-                          <div className="text-xs text-muted-foreground">Silences</div>
-                        </div>
-                        <div className="p-2 bg-muted rounded">
-                          <div className="text-lg font-bold">{scenes.length}</div>
+                          <div className="text-lg font-bold text-blue-500">{scenes.length}</div>
                           <div className="text-xs text-muted-foreground">Scenes</div>
                         </div>
                       </div>
@@ -1092,181 +821,133 @@ export default function VideoEditorPage() {
                   </CardContent>
                 </Card>
                 
-                {/* PRO MODE Panel */}
-                {proModeEnabled && (
+                {/* Transition Settings (for multi-clip) */}
+                {clips.length > 1 && (
                   <Card className="border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-pink-500/5">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-purple-500" />
-                        Pro Mode Features
+                        <Waves className="h-4 w-4 text-purple-500" />
+                        Transitions
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="flex items-center gap-2">
-                            <Film className="h-4 w-4" />
-                            Add B-Roll
-                          </Label>
-                          <Switch checked={addBroll} onCheckedChange={setAddBroll} />
-                        </div>
-                        {addBroll && (
-                          <>
-                            <Textarea
-                              placeholder="Keywords for stock videos (comma-separated)"
-                              value={brollKeywords}
-                              onChange={(e) => setBrollKeywords(e.target.value)}
-                              className="text-sm"
-                              rows={2}
-                            />
-                            <Select value={brollStyle} onValueChange={setBrollStyle}>
-                              <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="B-Roll Style" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="intercut">Intercut (at scene changes)</SelectItem>
-                                <SelectItem value="overlay">Overlay (picture-in-picture)</SelectItem>
-                                <SelectItem value="beat-sync">Beat Sync (on music beats)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </>
-                        )}
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <Music className="h-4 w-4" />
-                          Background Music
-                        </Label>
-                        <Select value={musicTrack} onValueChange={setMusicTrack}>
+                        <Label>Transition Type</Label>
+                        <Select value={transitionType} onValueChange={setTransitionType}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">No Music</SelectItem>
-                            <SelectItem value="upbeat">Upbeat</SelectItem>
-                            <SelectItem value="calm">Calm</SelectItem>
-                            <SelectItem value="epic">Epic</SelectItem>
-                            <SelectItem value="emotional">Emotional</SelectItem>
+                            <SelectItem value="fade">Fade</SelectItem>
+                            <SelectItem value="dissolve">Dissolve</SelectItem>
+                            <SelectItem value="wipe">Wipe</SelectItem>
+                            <SelectItem value="slide">Slide</SelectItem>
+                            <SelectItem value="zoom">Zoom</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       
-                      <Separator />
+                      <div className="space-y-2">
+                        <Label>Duration: {transitionDuration}s</Label>
+                        <input
+                          type="range"
+                          min={0.2}
+                          max={2}
+                          step={0.1}
+                          value={transitionDuration}
+                          onChange={(e) => setTransitionDuration(parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
                       
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">Remove Fillers ({fillerWords.length})</Label>
-                          <Switch checked={removeFillers} onCheckedChange={setRemoveFillers} />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm">Remove Silences ({silences.length})</Label>
-                          <Switch checked={removeSilences} onCheckedChange={setRemoveSilences} />
-                        </div>
+                        <Label>Sound Effect</Label>
+                        <Select value={transitionSound} onValueChange={setTransitionSound}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="whoosh">Whoosh</SelectItem>
+                            <SelectItem value="swoosh">Swoosh</SelectItem>
+                            <SelectItem value="pop">Pop</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </CardContent>
                   </Card>
                 )}
                 
-                {/* Captions */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Type className="h-4 w-4" />
-                        Captions
-                      </CardTitle>
-                      <Switch checked={showCaptions} onCheckedChange={setShowCaptions} />
-                    </div>
-                  </CardHeader>
-                  {showCaptions && (
-                    <CardContent>
-                      <Select value={captionStyle} onValueChange={setCaptionStyle}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Caption Style" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bold-outline">Bold Outline</SelectItem>
-                          <SelectItem value="neon-glow">Neon Glow</SelectItem>
-                          <SelectItem value="yellow-highlight">Yellow Highlight</SelectItem>
-                          <SelectItem value="tiktok-style">TikTok Style</SelectItem>
-                          <SelectItem value="minimal-clean">Minimal Clean</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </CardContent>
-                  )}
-                </Card>
-                
-                {/* Audio */}
+                {/* Auto Processing Settings */}
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Volume2 className="h-4 w-4" />
-                      Audio Enhancement
+                      <Settings className="h-4 w-4" />
+                      Auto Processing
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label>Normalize Audio</Label>
-                      <Switch
-                        checked={audioEnhancements.normalize}
-                        onCheckedChange={(v) => setAudioEnhancements({ ...audioEnhancements, normalize: v })}
-                      />
+                      <Label className="flex items-center gap-2">
+                        <Volume2 className="h-4 w-4" />
+                        Noise Reduction
+                      </Label>
+                      <Switch checked={applyNoiseReduction} onCheckedChange={setApplyNoiseReduction} />
                     </div>
+                    
                     <div className="flex items-center justify-between">
-                      <Label>Noise Reduction</Label>
-                      <Switch
-                        checked={audioEnhancements.noiseReduction}
-                        onCheckedChange={(v) => setAudioEnhancements({ ...audioEnhancements, noiseReduction: v })}
-                      />
+                      <Label className="flex items-center gap-2">
+                        <Mic className="h-4 w-4" />
+                        Remove "um/uh/like"
+                      </Label>
+                      <Switch checked={removeFillerWords} onCheckedChange={setRemoveFillerWords} />
                     </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Color Grading */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Palette className="h-4 w-4" />
-                      Color Grading
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Select value={colorGrade} onValueChange={setColorGrade}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="neutral">Neutral (None)</SelectItem>
-                        <SelectItem value="warm">Warm</SelectItem>
-                        <SelectItem value="cool">Cool</SelectItem>
-                        <SelectItem value="cinematic">Cinematic</SelectItem>
-                        <SelectItem value="vibrant">Vibrant</SelectItem>
-                        <SelectItem value="vintage">Vintage</SelectItem>
-                        <SelectItem value="bw">Black & White</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <Type className="h-4 w-4" />
+                        Add Captions
+                      </Label>
+                      <Switch checked={addCaptions} onCheckedChange={setAddCaptions} />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <Label>Color Grade</Label>
+                      <Select value={colorGrade} onValueChange={setColorGrade}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="neutral">Neutral</SelectItem>
+                          <SelectItem value="warm">Warm</SelectItem>
+                          <SelectItem value="cool">Cool</SelectItem>
+                          <SelectItem value="cinematic">Cinematic</SelectItem>
+                          <SelectItem value="vibrant">Vibrant</SelectItem>
+                          <SelectItem value="vintage">Vintage</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </CardContent>
                 </Card>
                 
                 {/* Process Button */}
                 <Button
-                  className={`w-full ${proModeEnabled ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : ''}`}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                   size="lg"
-                  onClick={processVideo}
-                  disabled={isProcessing || !transcript}
+                  onClick={processClips}
+                  disabled={isProcessing || clips.length === 0 || !clips.some(c => c.analyzed)}
                 >
                   {isProcessing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {processingStatus || 'Processing...'}
+                      {processingProgress.step || 'Processing...'}
                     </>
                   ) : (
                     <>
-                      {proModeEnabled ? <Sparkles className="h-4 w-4 mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
-                      {proModeEnabled ? 'Create Pro Video' : 'Apply Changes'}
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      {clips.length > 1 ? `Merge ${clips.length} Clips` : 'Process Video'}
                     </>
                   )}
                 </Button>
@@ -1286,11 +967,7 @@ export default function VideoEditorPage() {
                 </CardHeader>
                 <CardContent>
                   {processedVideoUrl && (
-                    <video
-                      src={processedVideoUrl}
-                      controls
-                      className="w-full rounded-lg"
-                    />
+                    <video src={processedVideoUrl} controls className="w-full rounded-lg" />
                   )}
                 </CardContent>
               </Card>
@@ -1298,7 +975,6 @@ export default function VideoEditorPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Export Settings</CardTitle>
-                  <CardDescription>Choose format and quality for your final video</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
@@ -1311,32 +987,15 @@ export default function VideoEditorPage() {
                         <SelectItem value="mp4">MP4 (Recommended)</SelectItem>
                         <SelectItem value="webm">WebM</SelectItem>
                         <SelectItem value="mov">MOV</SelectItem>
-                        <SelectItem value="gif">GIF (No Audio)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Quality</Label>
-                    <Select value={exportQuality} onValueChange={setExportQuality}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low (Smaller file)</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High (Best quality)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <Separator />
                   
                   <Button
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500"
                     size="lg"
                     onClick={exportVideo}
-                    disabled={isProcessing || !processedVideoUrl}
+                    disabled={isProcessing}
                   >
                     {isProcessing ? (
                       <>
@@ -1351,10 +1010,10 @@ export default function VideoEditorPage() {
                     )}
                   </Button>
                   
-                  <Alert className="mt-4">
+                  <Alert>
                     <Info className="h-4 w-4" />
                     <AlertDescription className="text-sm">
-                      <strong>Tip:</strong> Always download and save your final video. Browser storage is temporary and can be cleared.
+                      Always download your final video. Browser storage is temporary.
                     </AlertDescription>
                   </Alert>
                 </CardContent>
