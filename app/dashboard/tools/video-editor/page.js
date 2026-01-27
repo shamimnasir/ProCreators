@@ -223,28 +223,86 @@ export default function VideoEditorPage() {
     
     // Try to restore clips from saved clip data (new format)
     if (data.clipData && Array.isArray(data.clipData) && data.clipData.length > 0) {
-      const restoredClips = data.clipData
-        .filter(c => c.filePath) // Only keep clips with file paths
-        .map(clipInfo => ({
-          id: clipInfo.id || crypto.randomUUID(),
-          name: clipInfo.name || 'Restored Clip',
-          url: clipInfo.filePath ? clipInfo.filePath : null,
-          filePath: clipInfo.filePath || null,
-          duration: clipInfo.duration || 0,
-          size: clipInfo.size || 0,
-          analyzed: false,
-          isRestored: true
-        }))
-      
-      if (restoredClips.length > 0) {
-        setClips(restoredClips)
-        setActiveTab('edit')
-        toast({ 
-          title: 'Draft Loaded ✓', 
-          description: `Restored ${restoredClips.length} clip(s) with all settings.`
-        })
-        return
+      // Verify files exist on server before restoring
+      const verifyClips = async () => {
+        const verifiedClips = []
+        const missingClips = []
+        
+        for (const clipInfo of data.clipData) {
+          if (!clipInfo.filePath) continue
+          
+          try {
+            // Check if file exists
+            const response = await fetch(clipInfo.filePath, { method: 'HEAD' })
+            if (response.ok) {
+              verifiedClips.push({
+                id: clipInfo.id || crypto.randomUUID(),
+                name: clipInfo.name || 'Restored Clip',
+                url: clipInfo.filePath,
+                filePath: clipInfo.filePath,
+                duration: clipInfo.duration || 0,
+                size: clipInfo.size || 0,
+                analyzed: false,
+                isRestored: true
+              })
+            } else {
+              missingClips.push(clipInfo.name)
+            }
+          } catch (e) {
+            missingClips.push(clipInfo.name)
+          }
+        }
+        
+        if (verifiedClips.length > 0) {
+          setClips(verifiedClips)
+          setActiveTab('edit')
+          if (missingClips.length > 0) {
+            toast({ 
+              title: 'Draft Partially Loaded', 
+              description: `Restored ${verifiedClips.length} clip(s). Missing files: ${missingClips.join(', ')}`,
+              duration: 6000
+            })
+          } else {
+            toast({ 
+              title: 'Draft Loaded ✓', 
+              description: `Restored ${verifiedClips.length} clip(s) with all settings.`
+            })
+          }
+        } else if (data.processedVideoUrl) {
+          // Check if processed video exists
+          try {
+            const res = await fetch(data.processedVideoUrl, { method: 'HEAD' })
+            if (res.ok) {
+              setActiveTab('export')
+              toast({ 
+                title: 'Draft Loaded', 
+                description: 'Original clips deleted. Your processed video is still available for export.'
+              })
+              return
+            }
+          } catch (e) {}
+          
+          // Nothing exists
+          setActiveTab('upload')
+          toast({ 
+            title: 'Files Not Found', 
+            description: `Please re-upload: ${missingClips.slice(0, 3).join(', ')}${missingClips.length > 3 ? '...' : ''}`,
+            variant: 'destructive',
+            duration: 8000
+          })
+        } else {
+          setActiveTab('upload')
+          toast({ 
+            title: 'Files Not Found', 
+            description: `Video files were deleted. Please re-upload your clips.`,
+            variant: 'destructive',
+            duration: 8000
+          })
+        }
       }
+      
+      verifyClips()
+      return
     }
     
     // If there's a processed video, show it in Export tab
