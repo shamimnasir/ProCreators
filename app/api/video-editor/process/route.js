@@ -260,17 +260,36 @@ async function enhanceAudio(input, output, settings = {}, jobId) {
   ], jobId)
 }
 
-// Apply color grading preset
+// Apply color grading preset - improved professional looks
 async function applyColorGrade(input, output, preset = 'neutral', jobId) {
   const presets = {
     neutral: 'eq=brightness=0:contrast=1:saturation=1',
-    warm: 'colortemperature=temperature=6500,eq=saturation=1.1',
-    cool: 'colortemperature=temperature=7500,eq=saturation=0.95',
-    cinematic: 'eq=contrast=1.1:saturation=0.9:brightness=-0.05,curves=preset=vintage',
-    vibrant: 'eq=saturation=1.3:contrast=1.05',
-    bw: 'hue=s=0',
-    vintage: 'curves=preset=vintage,eq=saturation=0.8',
-    highcontrast: 'eq=contrast=1.3:brightness=0.05'
+    
+    // Warm tones - golden/orange glow
+    warm: 'colortemperature=temperature=6000,eq=saturation=1.15:contrast=1.05:brightness=0.03',
+    
+    // Cool tones - blue/teal tint
+    cool: 'colortemperature=temperature=8000,eq=saturation=1.05:contrast=1.03:brightness=-0.01',
+    
+    // Cinematic - teal & orange look with lifted blacks
+    cinematic: 'colorbalance=rs=0.1:gs=-0.05:bs=-0.1:rm=0.05:gm=0:bm=0.05:rh=-0.05:gh=0:bh=0.1,eq=contrast=1.15:saturation=1.1:brightness=0.02:gamma=1.1',
+    
+    // Vibrant - punchy colors
+    vibrant: 'eq=saturation=1.4:contrast=1.1:brightness=0.02,unsharp=5:5:0.8',
+    
+    // Vintage/retro - faded with warm tint
+    vintage: 'colorlevels=rimin=0.1:gimin=0.1:bimin=0.1:rimax=0.9:gimax=0.85:bimax=0.8,eq=saturation=0.85:contrast=0.95',
+    
+    // Black & white - high contrast mono
+    bw: 'hue=s=0,eq=contrast=1.2:brightness=0.02',
+    
+    // Film look - subtle grain and color
+    film: 'colorbalance=rs=0.05:bs=-0.05,eq=saturation=0.95:contrast=1.08,noise=alls=5:allf=t',
+    
+    // HDR-style - expanded dynamic range look
+    hdr: 'eq=contrast=1.2:saturation=1.2:brightness=0.03:gamma=0.95,unsharp=5:5:1.0',
+    
+    highcontrast: 'eq=contrast=1.3:brightness=0.05:saturation=1.1'
   }
   
   const filter = presets[preset] || presets.neutral
