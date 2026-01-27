@@ -124,6 +124,7 @@ export default function VideoEditorPage() {
 
   // AutoSaveDraftsManager callbacks
   const getCurrentDraftData = useCallback(() => ({
+    title: projectName,  // Required by AutoSaveDraftsManager
     name: projectName,
     clipNames: clips.map(c => c.name),
     clipCount: clips.length,
@@ -137,9 +138,12 @@ export default function VideoEditorPage() {
     addCaptions,
     captionStyle,
     processedVideoUrl,
-    savedToLibrary
+    savedToLibrary,
+    selectedMusic: selectedMusic?.name || null,
+    // Include data field to pass content check
+    data: { settings: true }
   }), [projectName, clips, transitionType, transitionDuration, transitionSound, 
-      applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary])
+      applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary, selectedMusic])
 
   const loadDraftData = useCallback((data) => {
     if (data.name) setProjectName(data.name)
