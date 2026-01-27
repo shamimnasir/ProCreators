@@ -205,18 +205,14 @@ export default function VideoEditorPage() {
     }
   }
 
-  // Handle multi-file upload
-  const handleFileUpload = async (e) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
-    
+  // Process video files (shared by upload and drag-drop)
+  const processVideoFiles = async (files) => {
     const videoFiles = files.filter(f => f.type.startsWith('video/'))
     if (videoFiles.length === 0) {
       toast({ title: 'Invalid Files', description: 'Please upload video files.', variant: 'destructive' })
       return
     }
     
-    // Check if multiple files - enable multi-clip mode
     if (videoFiles.length > 1) {
       setIsMultiClipMode(true)
     }
@@ -255,6 +251,44 @@ export default function VideoEditorPage() {
       }
       setActiveTab('edit')
       toast({ title: `${newClips.length} clip(s) added`, description: 'Ready for editing!' })
+    }
+  }
+
+  // Handle file input upload
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    await processVideoFiles(files)
+  }
+
+  // Drag and Drop Handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only set to false if leaving the dropzone entirely
+    if (e.currentTarget.contains(e.relatedTarget)) return
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    
+    const files = Array.from(e.dataTransfer.files || [])
+    if (files.length > 0) {
+      await processVideoFiles(files)
     }
   }
 
