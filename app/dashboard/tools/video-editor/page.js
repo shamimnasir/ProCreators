@@ -36,6 +36,10 @@ export default function VideoEditorPage() {
   const [showStorageWarning, setShowStorageWarning] = useState(true)
   const [savedToLibrary, setSavedToLibrary] = useState(false)
   
+  // Drag and Drop State
+  const [isDragging, setIsDragging] = useState(false)
+  const dropZoneRef = useRef(null)
+  
   // Multi-Clip State
   const [clips, setClips] = useState([]) // Array of { id, file, url, name, duration, analyzed }
   const [selectedClipIndex, setSelectedClipIndex] = useState(0)
