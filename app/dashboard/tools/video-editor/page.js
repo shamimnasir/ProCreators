@@ -371,10 +371,36 @@ export default function VideoEditorPage() {
     
     setIsProcessing(true)
     
+    // Calculate estimated time based on total duration and number of clips
+    // Roughly: 5 seconds per clip for processing + 10 seconds per clip for encoding
+    const estimatedTotalSeconds = Math.max(30, clips.length * 15 + (totalDuration * 0.5))
+    let startTime = Date.now()
+    
+    // Start progress timer
+    const updateProgress = () => {
+      const elapsed = (Date.now() - startTime) / 1000
+      const estimatedProgress = Math.min(95, (elapsed / estimatedTotalSeconds) * 100)
+      const remainingTime = Math.max(0, Math.ceil(estimatedTotalSeconds - elapsed))
+      
+      setProcessingProgress(prev => ({
+        ...prev,
+        progress: Math.max(prev.progress, estimatedProgress),
+        elapsedTime: Math.floor(elapsed),
+        estimatedTime: remainingTime
+      }))
+    }
+    
+    processingTimerRef.current = setInterval(updateProgress, 500)
+    
     try {
       if (clips.length === 1) {
         // Single clip processing
-        setProcessingProgress({ step: 'Processing single clip...', progress: 20 })
+        setProcessingProgress({ 
+          step: 'Processing video...', 
+          progress: 5,
+          estimatedTime: estimatedTotalSeconds,
+          elapsedTime: 0
+        })
         
         const clip = clips[0]
         const operations = []
@@ -411,7 +437,12 @@ export default function VideoEditorPage() {
         }
       } else {
         // Multi-clip merge with transitions
-        setProcessingProgress({ step: 'Merging clips with transitions...', progress: 30 })
+        setProcessingProgress({ 
+          step: `Merging ${clips.length} clips with ${transitionType} transitions...`, 
+          progress: 5,
+          estimatedTime: estimatedTotalSeconds,
+          elapsedTime: 0
+        })
         
         const clipData = clips.map(c => ({
           filePath: c.filePath || `/video-editor/uploads/${c.id}.mp4`
@@ -447,12 +478,16 @@ export default function VideoEditorPage() {
         }
       }
       
-      setProcessingProgress({ step: 'Complete!', progress: 100 })
+      setProcessingProgress({ step: 'Complete!', progress: 100, estimatedTime: 0, elapsedTime: 0 })
       
     } catch (error) {
       console.error('Processing error:', error)
       toast({ title: 'Processing Failed', description: error.message, variant: 'destructive' })
     } finally {
+      if (processingTimerRef.current) {
+        clearInterval(processingTimerRef.current)
+        processingTimerRef.current = null
+      }
       setIsProcessing(false)
     }
   }
