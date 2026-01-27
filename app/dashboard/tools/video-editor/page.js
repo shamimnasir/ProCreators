@@ -973,25 +973,66 @@ export default function VideoEditorPage() {
                   </CardContent>
                 </Card>
                 
-                {/* Process Button */}
-                <Button
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                  size="lg"
-                  onClick={processClips}
-                  disabled={isProcessing || clips.length === 0 || !clips.some(c => c.analyzed)}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {processingProgress.step || 'Processing...'}
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      {clips.length > 1 ? `Merge ${clips.length} Clips` : 'Process Video'}
-                    </>
-                  )}
-                </Button>
+                {/* Process Button with Progress */}
+                <Card className={isProcessing ? 'border-green-500/50' : ''}>
+                  <CardContent className="pt-6">
+                    <Button
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                      size="lg"
+                      onClick={processClips}
+                      disabled={isProcessing || clips.length === 0 || !clips.some(c => c.analyzed)}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          {clips.length > 1 ? `Merge ${clips.length} Clips` : 'Process Video'}
+                        </>
+                      )}
+                    </Button>
+                    
+                    {/* Progress Display */}
+                    {isProcessing && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{processingProgress.step}</span>
+                          <span className="font-mono text-green-600">
+                            {Math.round(processingProgress.progress)}%
+                          </span>
+                        </div>
+                        
+                        <Progress value={processingProgress.progress} className="h-3" />
+                        
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Timer className="h-3 w-3" />
+                            <span>Elapsed: {Math.floor(processingProgress.elapsedTime / 60)}:{String(processingProgress.elapsedTime % 60).padStart(2, '0')}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>~{Math.floor(processingProgress.estimatedTime / 60)}:{String(processingProgress.estimatedTime % 60).padStart(2, '0')} remaining</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 flex-wrap">
+                          {clips.map((clip, i) => (
+                            <Badge 
+                              key={clip.id} 
+                              variant={processingProgress.progress > (i / clips.length) * 80 ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              Clip {i + 1}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>
