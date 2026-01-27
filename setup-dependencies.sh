@@ -1,14 +1,20 @@
 #!/bin/bash
 # Automated dependency setup script for Story Video Reels
-# This script checks system dependencies (install separately if needed)
+# This script checks and INSTALLS system dependencies automatically
 
 echo "🔧 Checking system dependencies..."
 
-# Check if ffmpeg is installed
+# Check if ffmpeg is installed - INSTALL IF MISSING
 if command -v ffmpeg &> /dev/null; then
     echo "✅ ffmpeg available (version $(ffmpeg -version | head -n 1 | awk '{print $3}'))"
 else
-    echo "⚠️  ffmpeg not found - some video features may not work"
+    echo "📦 Installing ffmpeg..."
+    apt-get update -qq && apt-get install -y -qq ffmpeg > /dev/null 2>&1
+    if command -v ffmpeg &> /dev/null; then
+        echo "✅ ffmpeg installed successfully"
+    else
+        echo "⚠️  ffmpeg installation failed - some video features may not work"
+    fi
 fi
 
 # Check if chromium is installed (required for PDF generation)
@@ -18,7 +24,7 @@ else
     echo "⚠️  chromium not found - PDF generation may not work"
 fi
 
-# Check if ffprobe is available
+# Check if ffprobe is available (comes with ffmpeg)
 if command -v ffprobe &> /dev/null; then
     echo "✅ ffprobe available"
 else
