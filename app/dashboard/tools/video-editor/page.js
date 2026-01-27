@@ -1379,10 +1379,12 @@ export default function VideoEditorPage() {
             <div className="sticky top-6">
               <AutoSaveDraftsManager
                 toolType="video-editor"
-                currentData={getCurrentDraftData()}
-                onLoadDraft={loadDraftData}
+                getCurrentData={getCurrentDraftData}
+                loadDraftData={loadDraftData}
                 onStartNew={handleStartNewProject}
-                autoSaveInterval={60000}
+                autoSaveEnabled={true}
+                debounceMs={5000}
+                dependencies={[projectName, clips.length, transitionType, transitionDuration, colorGrade, addCaptions, selectedMusic]}
               />
             </div>
           </div>
