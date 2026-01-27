@@ -122,16 +122,17 @@ export async function POST(request) {
     // Step 3: Merge clips with transitions
     console.log(`[${jobId}] Merging ${processedClips.length} clips with ${transition} transition`)
     
+    let mergedOutput = join(tempDir, `${jobId}-merged-temp.mp4`)
     const finalOutput = join(OUTPUT_DIR, `${jobId}-merged.mp4`)
     
     if (processedClips.length === 1) {
       // Single clip - just copy
-      await copyFile(processedClips[0], finalOutput)
+      await copyFile(processedClips[0], mergedOutput)
     } else {
       // Multiple clips - merge with transitions
       await mergeClipsWithTransitions(
         processedClips, 
-        finalOutput, 
+        mergedOutput, 
         transition, 
         transitionDuration, 
         transitionSoundPath,
@@ -139,6 +140,28 @@ export async function POST(request) {
         jobId
       )
     }
+    
+    // Step 4: Add captions if requested and transcript available
+    let videoWithCaptions = mergedOutput
+    if (addCaptions && transcript && transcript.segments && transcript.segments.length > 0) {
+      console.log(`[${jobId}] Adding captions (${transcript.segments.length} segments)`)
+      videoWithCaptions = join(tempDir, `${jobId}-with-captions.mp4`)
+      await addCaptionsToVideo(mergedOutput, videoWithCaptions, transcript, captionStyle, dimensions, jobId)
+    }
+    
+    // Step 5: Add background music if selected
+    let videoWithMusic = videoWithCaptions
+    if (backgroundMusic) {
+      const musicPath = join('/app/public', backgroundMusic)
+      if (existsSync(musicPath)) {
+        console.log(`[${jobId}] Adding background music`)
+        videoWithMusic = join(tempDir, `${jobId}-with-music.mp4`)
+        await addBackgroundMusic(videoWithCaptions, videoWithMusic, musicPath, jobId)
+      }
+    }
+    
+    // Copy final result to output
+    await copyFile(videoWithMusic, finalOutput)
     
     // Cleanup
     try {
@@ -156,7 +179,9 @@ export async function POST(request) {
       fileSize: stats.size,
       clipsProcessed: processedClips.length,
       transition,
-      transitionSound
+      transitionSound,
+      hasCaptions: addCaptions && transcript,
+      hasMusic: !!backgroundMusic
     })
     
   } catch (error) {
