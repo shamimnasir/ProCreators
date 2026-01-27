@@ -1290,6 +1290,19 @@ export default function VideoEditorPage() {
           </TabsContent>
         </Tabs>
           </div>
+          
+          {/* Right Sidebar - AutoSaveDraftsManager */}
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <div className="sticky top-6">
+              <AutoSaveDraftsManager
+                toolType="video-editor"
+                currentData={getCurrentDraftData()}
+                onLoadDraft={loadDraftData}
+                onStartNew={handleStartNewProject}
+                autoSaveInterval={60000}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
