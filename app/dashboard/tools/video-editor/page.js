@@ -202,6 +202,8 @@ export default function VideoEditorPage() {
 
   const loadDraftData = useCallback((data) => {
     console.log('Loading draft data:', data)
+    
+    // Restore settings
     if (data.name) setProjectName(data.name)
     if (data.transitionType) setTransitionType(data.transitionType)
     if (data.transitionDuration) setTransitionDuration(data.transitionDuration)
@@ -219,39 +221,46 @@ export default function VideoEditorPage() {
     if (data.silenceAction) setSilenceAction(data.silenceAction)
     if (data.smartAudioDucking !== undefined) setSmartAudioDucking(data.smartAudioDucking)
     
-    // Try to restore clips from saved clip data
+    // Try to restore clips from saved clip data (new format)
     if (data.clipData && Array.isArray(data.clipData) && data.clipData.length > 0) {
-      // Restore clips with their metadata (file needs to be re-uploaded or found in IndexedDB)
-      const restoredClips = data.clipData.map(clipInfo => ({
-        id: clipInfo.id || crypto.randomUUID(),
-        name: clipInfo.name || 'Restored Clip',
-        url: clipInfo.url || null,
-        filePath: clipInfo.filePath || null,
-        duration: clipInfo.duration || 0,
-        size: clipInfo.size || 0,
-        analyzed: false, // Reset analyzed state
-        isRestored: true // Mark as restored from draft
-      })).filter(c => c.filePath) // Only keep clips with file paths
+      const restoredClips = data.clipData
+        .filter(c => c.filePath) // Only keep clips with file paths
+        .map(clipInfo => ({
+          id: clipInfo.id || crypto.randomUUID(),
+          name: clipInfo.name || 'Restored Clip',
+          url: clipInfo.filePath ? clipInfo.filePath : null,
+          filePath: clipInfo.filePath || null,
+          duration: clipInfo.duration || 0,
+          size: clipInfo.size || 0,
+          analyzed: false,
+          isRestored: true
+        }))
       
       if (restoredClips.length > 0) {
         setClips(restoredClips)
         setActiveTab('edit')
-        toast({ title: 'Draft Loaded', description: `Restored ${restoredClips.length} clip(s). You may need to re-analyze.` })
-      } else {
-        toast({ title: 'Draft Loaded', description: 'Settings restored. Please re-upload your clips.' })
-        setActiveTab('upload')
+        toast({ 
+          title: 'Draft Loaded ✓', 
+          description: `Restored ${restoredClips.length} clip(s) with all settings.`
+        })
+        return
       }
-    } else if (data.clipNames && data.clipNames.length > 0) {
-      // Old draft format - just show names, user needs to re-upload
+    }
+    
+    // Old draft format or no clip data - prompt to re-upload
+    if (data.clipNames && data.clipNames.length > 0) {
+      toast({ 
+        title: 'Draft Settings Loaded', 
+        description: `Please re-upload these clips: ${data.clipNames.slice(0, 3).join(', ')}${data.clipNames.length > 3 ? '...' : ''}`,
+        duration: 8000
+      })
+    } else {
       toast({ 
         title: 'Draft Loaded', 
-        description: `Settings restored. Previous clips: ${data.clipNames.join(', ')}. Please re-upload.`,
-        duration: 5000
+        description: 'Settings restored. Upload your video clips to continue.'
       })
-      setActiveTab('upload')
-    } else {
-      setActiveTab('upload')
     }
+    setActiveTab('upload')
   }, [toast])
 
   const handleStartNewProject = useCallback(() => {
