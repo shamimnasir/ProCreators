@@ -232,17 +232,32 @@ async function enhanceAudio(input, output, settings = {}, jobId) {
   const {
     normalize = true,
     noiseReduction = true,
+    removeClicks = true,
     volume = 1.0,
-    highpass = 80,
-    lowpass = 12000
+    highpass = 60,
+    lowpass = 13000
   } = settings
   
   const audioFilters = []
   
+  // Apply noise reduction first
+  if (noiseReduction) {
+    audioFilters.push('afftdn=nf=-25:nr=10:nt=w')  // FFT-based adaptive noise reduction
+  }
+  
+  // Remove low rumble and high hiss
   if (highpass > 0) audioFilters.push(`highpass=f=${highpass}`)
   if (lowpass > 0) audioFilters.push(`lowpass=f=${lowpass}`)
-  if (noiseReduction) audioFilters.push('afftdn=nf=-25')
+  
+  // Remove clicks and pops
+  if (removeClicks) {
+    audioFilters.push('adeclick=w=55:p=50')
+  }
+  
+  // Normalize loudness
   if (normalize) audioFilters.push('loudnorm=I=-16:TP=-1.5:LRA=11')
+  
+  // Adjust volume
   if (volume !== 1.0) audioFilters.push(`volume=${volume}`)
   
   const filterString = audioFilters.length > 0 ? audioFilters.join(',') : 'anull'
