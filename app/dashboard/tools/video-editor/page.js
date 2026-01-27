@@ -19,11 +19,12 @@ import {
   Scissors, Type, Wand2, Music, Palette, Download, Loader2, Check, X,
   Trash2, Zap, Clock, FileText, Mic, Settings, Sparkles, Film, Plus,
   HardDrive, FolderOpen, Save, FilePlus, Info, ShieldAlert, Layers,
-  MoveUp, MoveDown, Timer, Waves, Library, CheckCircle
+  MoveUp, MoveDown, Timer, Waves, Library, CheckCircle, Search
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { videoStorage } from '@/lib/video-storage'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
+import MusicPicker from '@/app/dashboard/tools/story-reels/MusicPicker'
 
 export default function VideoEditorPage() {
   const { toast } = useToast()
