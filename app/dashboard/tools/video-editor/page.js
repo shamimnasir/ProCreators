@@ -1164,10 +1164,11 @@ export default function VideoEditorPage() {
                             </div>
                             
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
+                              variant="destructive"
+                              size="sm"
+                              className="h-8 px-2"
                               onClick={(e) => { e.stopPropagation(); removeClip(clip.id) }}
+                              title="Remove clip"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
