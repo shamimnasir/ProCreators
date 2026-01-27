@@ -384,7 +384,7 @@ function getColorGradeFilter(g) {
 }
 
 // Add captions
-async function addCaptions(input, output, transcript, jobId) {
+async function addCaptionsToVideo(input, output, transcript, jobId) {
   const srtPath = `/tmp/captions-${jobId}.srt`
   let srt = ''
   transcript.segments.forEach((s, i) => {
