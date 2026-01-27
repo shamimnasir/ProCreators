@@ -212,6 +212,12 @@ export default function VideoEditorPage() {
     if (data.addCaptions !== undefined) setAddCaptions(data.addCaptions)
     if (data.captionStyle) setCaptionStyle(data.captionStyle)
     if (data.processedVideoUrl) setProcessedVideoUrl(data.processedVideoUrl)
+    if (data.outputPreset) setOutputPreset(data.outputPreset)
+    
+    // Restore AI Enhancement settings
+    if (data.removeSilences !== undefined) setRemoveSilences(data.removeSilences)
+    if (data.silenceAction) setSilenceAction(data.silenceAction)
+    if (data.smartAudioDucking !== undefined) setSmartAudioDucking(data.smartAudioDucking)
     
     // Try to restore clips from saved clip data
     if (data.clipData && Array.isArray(data.clipData) && data.clipData.length > 0) {
