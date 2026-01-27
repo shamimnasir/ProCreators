@@ -1165,6 +1165,28 @@ export default function VideoEditorPage() {
           
           {/* EDIT TAB */}
           <TabsContent value="edit">
+            {/* Workflow Guide */}
+            <Alert className="mb-6 border-blue-500/30 bg-blue-500/5">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertTitle className="text-blue-700 dark:text-blue-300">Workflow Guide</AlertTitle>
+              <AlertDescription className="text-sm">
+                <div className="flex flex-wrap gap-4 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-500 text-white">1</Badge>
+                    <span>Apply Settings (transitions, color, AI features)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-500 text-white">2</Badge>
+                    <span><strong>Analyze Clips</strong> (required for captions & filler removal)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-500 text-white">3</Badge>
+                    <span>Click "Merge Clips" to process</span>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+            
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Video Preview & Clips List */}
               <div className="lg:col-span-2 space-y-4">
