@@ -1205,6 +1205,36 @@ export default function VideoEditorPage() {
                   </Card>
                 )}
                 
+                {/* Video Size / Aspect Ratio Selector */}
+                <Card className="border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-cyan-500/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Film className="h-4 w-4 text-blue-500" />
+                      Video Size
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Select value={outputPreset} onValueChange={setOutputPreset}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="youtube-hd">📺 YouTube HD (16:9)</SelectItem>
+                        <SelectItem value="instagram-reel">📱 Instagram Reel (9:16)</SelectItem>
+                        <SelectItem value="instagram-square">⬜ Instagram Square (1:1)</SelectItem>
+                        <SelectItem value="tiktok">🎵 TikTok (9:16)</SelectItem>
+                        <SelectItem value="facebook-square">📘 Facebook Square (1:1)</SelectItem>
+                        <SelectItem value="facebook-feed">📰 Facebook Feed (1.91:1)</SelectItem>
+                        <SelectItem value="twitter">🐦 Twitter/X (16:9)</SelectItem>
+                        <SelectItem value="original">📁 Keep Original</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Videos will be scaled to fit (with letterboxing if needed)
+                    </p>
+                  </CardContent>
+                </Card>
+                
                 {/* Auto Processing Settings */}
                 <Card>
                   <CardHeader className="pb-3">
