@@ -478,9 +478,15 @@ export async function GET() {
     success: true,
     features: [
       { id: 'silence_removal', name: 'Remove Silences', description: 'Auto-detect and remove dead air' },
-      { id: 'filler_removal', name: 'Remove Fillers', description: 'Cut um, uh, like, etc.' },
+      { id: 'filler_removal', name: 'Remove Fillers', description: 'Cut um, uh, like, amm, etc.' },
       { id: 'audio_ducking', name: 'Smart Music Ducking', description: 'Auto-lower music during speech' }
     ],
-    fillerWords: ['um', 'uh', 'like', 'so', 'you know', 'basically', 'actually', 'literally', 'right', 'okay']
+    fillerWords: [
+      'um', 'uh', 'uhh', 'umm', 'ummm', 'er', 'err', 'ah', 'ahh', 'aah',
+      'like', 'so', 'well', 'right', 'okay', 'ok',
+      'you know', 'i mean', 'basically', 'actually', 'literally',
+      'hmm', 'hm', 'mmm', 'mm', 'mhm', 'aam', 'amm', 'ammm', 'aaa', 'eee'
+    ],
+    patterns: ['u+[mh]+', 'a+[hm]+', 'e+r+', 'm+h*m*', 'h+m+']
   })
 }
