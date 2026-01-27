@@ -1236,6 +1236,8 @@ export default function VideoEditorPage() {
             </div>
           </TabsContent>
         </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   )
