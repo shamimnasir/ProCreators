@@ -298,19 +298,44 @@ function detectFillerWords(transcript, fillerWords) {
   const fillerSegments = []
   const fillerSet = new Set(fillerWords.map(f => f.toLowerCase()))
   
+  // Also detect by patterns (catches "ummm", "uhhh", etc.)
+  const fillerPatterns = [
+    /^u+[mh]+$/i,        // um, umm, ummm, uh, uhh, uhhh
+    /^a+[hm]+$/i,        // ah, ahh, am, amm, ammm
+    /^e+r+$/i,           // er, err, errr
+    /^m+h*m*$/i,         // mm, mmm, mhm, hmm
+    /^h+m+$/i,           // hm, hmm, hmmm
+    /^o+[hk]+$/i,        // oh, ohh, ok, okk
+  ]
+  
   if (!transcript.segments) return fillerSegments
   
   for (const segment of transcript.segments) {
     // Check if segment has word-level timestamps
     if (segment.words) {
       for (const word of segment.words) {
-        const cleanWord = word.word.toLowerCase().replace(/[^a-z]/g, '')
+        const cleanWord = word.word.toLowerCase().replace(/[^a-z\u0980-\u09FF]/g, '')
+        
+        // Check exact match
         if (fillerSet.has(cleanWord)) {
           fillerSegments.push({
             start: word.start,
             end: word.end,
             word: word.word
           })
+          continue
+        }
+        
+        // Check pattern match (catches variations like "ummm", "uhhh")
+        for (const pattern of fillerPatterns) {
+          if (pattern.test(cleanWord)) {
+            fillerSegments.push({
+              start: word.start,
+              end: word.end,
+              word: word.word
+            })
+            break
+          }
         }
       }
     } else {
