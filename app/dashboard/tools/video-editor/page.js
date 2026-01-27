@@ -598,6 +598,9 @@ export default function VideoEditorPage() {
             removeFillers: removeFillerWords,
             colorGrade,
             addCaptions,
+            captionStyle,
+            transcript: addCaptions ? transcript : null,
+            backgroundMusic: selectedMusic?.filePath || null,
             outputResolution: '1080p'
           })
         })
