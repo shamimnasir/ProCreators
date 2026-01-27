@@ -73,9 +73,15 @@ export default function VideoEditorPage() {
   
   // Processing State
   const [isProcessing, setIsProcessing] = useState(false)
-  const [processingProgress, setProcessingProgress] = useState({ step: '', progress: 0 })
+  const [processingProgress, setProcessingProgress] = useState({ 
+    step: '', 
+    progress: 0, 
+    estimatedTime: 0,
+    elapsedTime: 0 
+  })
   const [processedVideoUrl, setProcessedVideoUrl] = useState(null)
   const [exportFormat, setExportFormat] = useState('mp4')
+  const processingTimerRef = useRef(null)
   
   // UI State
   const [activeTab, setActiveTab] = useState('upload')
