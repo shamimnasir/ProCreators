@@ -1440,12 +1440,15 @@ export default function VideoEditorPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="neutral">Neutral</SelectItem>
-                          <SelectItem value="warm">Warm</SelectItem>
-                          <SelectItem value="cool">Cool</SelectItem>
-                          <SelectItem value="cinematic">Cinematic</SelectItem>
-                          <SelectItem value="vibrant">Vibrant</SelectItem>
-                          <SelectItem value="vintage">Vintage</SelectItem>
+                          <SelectItem value="neutral">🎨 Neutral (Original)</SelectItem>
+                          <SelectItem value="warm">🌅 Warm (Golden)</SelectItem>
+                          <SelectItem value="cool">❄️ Cool (Blue/Teal)</SelectItem>
+                          <SelectItem value="cinematic">🎬 Cinematic (Teal & Orange)</SelectItem>
+                          <SelectItem value="vibrant">✨ Vibrant (Punchy)</SelectItem>
+                          <SelectItem value="vintage">📼 Vintage (Retro)</SelectItem>
+                          <SelectItem value="film">🎞️ Film Look</SelectItem>
+                          <SelectItem value="hdr">🔆 HDR Style</SelectItem>
+                          <SelectItem value="bw">⬛ Black & White</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
