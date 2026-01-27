@@ -98,9 +98,15 @@ export async function POST(request) {
       
       // Audio filters
       const audioFilters = []
+      
+      // Noise reduction using FFmpeg's afftdn filter
       if (applyNoiseReduction) {
-        audioFilters.push('highpass=f=80', 'lowpass=f=12000')
+        audioFilters.push('afftdn=nf=-25:nr=10:nt=w')  // Adaptive FFT denoising
+        audioFilters.push('highpass=f=60')  // Remove low rumble
+        audioFilters.push('lowpass=f=13000')  // Remove high hiss
+        audioFilters.push('adeclick=w=55:p=50')  // Remove clicks/pops
       }
+      
       audioFilters.push('aresample=44100')  // Normalize audio sample rate
       audioFilters.push('loudnorm=I=-16:TP=-1.5:LRA=11')
       
