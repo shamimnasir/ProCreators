@@ -118,7 +118,7 @@ export default function VideoEditorPage() {
     name: projectName,
     clipNames: clips.map(c => c.name),
     clipCount: clips.length,
-    totalDuration,
+    totalDuration: clips.reduce((sum, c) => sum + (c.duration || 0), 0),
     transitionType,
     transitionDuration,
     transitionSound,
@@ -129,7 +129,7 @@ export default function VideoEditorPage() {
     captionStyle,
     processedVideoUrl,
     savedToLibrary
-  }), [projectName, clips, totalDuration, transitionType, transitionDuration, transitionSound, 
+  }), [projectName, clips, transitionType, transitionDuration, transitionSound, 
       applyNoiseReduction, removeFillerWords, colorGrade, addCaptions, captionStyle, processedVideoUrl, savedToLibrary])
 
   const loadDraftData = useCallback((data) => {
