@@ -30,18 +30,33 @@ export async function POST(request) {
       silenceMinDuration = 0.5,  // Minimum silence duration to detect (seconds)
       silenceAction = 'remove',  // 'remove', 'speed_up', 'keep'
       speedUpFactor = 3,  // How much to speed up silences
-      // Expanded filler words list including common sounds
+      // Comprehensive filler words list based on user guidelines
       fillerWords = [
-        // English fillers
-        'um', 'uh', 'uhh', 'umm', 'ummm', 'er', 'err', 'ah', 'ahh', 'aah',
-        'like', 'so', 'well', 'right', 'okay', 'ok',
-        'you know', 'i mean', 'basically', 'actually', 'literally',
+        // Basic filler sounds
+        'um', 'uh', 'uhh', 'umm', 'ummm', 'oh', 'er', 'err', 'ah', 'ahh', 'aah', 'aaa',
+        'mmm', 'mm', 'hmm', 'hm', 'mhm',
+        
+        // Extended sounds (with variations)
+        'then', 'thenn', 'thennnn',
+        'so', 'soo', 'sooo',
+        'well', 'welll',
+        
+        // Adverbs of intensity (often unnecessary)
+        'very', 'really', 'highly',
+        
+        // Common filler words
+        'like', 'just', 'actually', 'basically', 'literally', 'seriously', 'totally',
+        
+        // Phrases (will check these separately)
+        'you know', 'you see', 'right',
+        'i mean', 'i guess', 'i suppose',
         'sort of', 'kind of', 'kinda', 'sorta',
-        // Hesitation sounds
-        'hmm', 'hm', 'mmm', 'mm', 'mhm',
-        'aam', 'amm', 'ammm', 'aaa', 'eee',
-        // Bengali/Hindi common fillers
-        'মানে', 'আসলে', 'তো', 'এই', 'ওই'
+        
+        // Hesitation/hedge words
+        'okay', 'ok', 'yeah', 'yep', 'nah',
+        
+        // Bengali common fillers
+        'মানে', 'আসলে', 'তো', 'এই', 'ওই', 'আচ্ছা', 'হ্যাঁ'
       ],
       transcript = null,  // Whisper transcript with word timestamps
       musicPath = null,  // Background music for ducking
