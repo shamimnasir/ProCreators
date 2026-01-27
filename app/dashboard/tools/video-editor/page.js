@@ -1242,6 +1242,46 @@ export default function VideoEditorPage() {
                   </CardContent>
                 </Card>
                 
+                {/* Background Music Card */}
+                <Card className="border-violet-500/30 bg-gradient-to-br from-violet-500/5 to-purple-500/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Music className="h-4 w-4 text-violet-500" />
+                      Background Music
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {selectedMusic ? (
+                      <div className="p-3 bg-muted rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{selectedMusic.name}</p>
+                            <p className="text-xs text-muted-foreground">Selected</p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setSelectedMusic(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No music selected</p>
+                    )}
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowMusicPicker(true)}
+                      disabled={clips.length === 0}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      {selectedMusic ? 'Change Music' : 'Browse Music Library'}
+                    </Button>
+                  </CardContent>
+                </Card>
+                
                 {/* Process Button with Progress */}
                 <Card className={isProcessing ? 'border-green-500/50' : ''}>
                   <CardContent className="pt-6">
