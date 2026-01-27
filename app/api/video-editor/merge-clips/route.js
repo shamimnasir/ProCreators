@@ -27,6 +27,9 @@ export async function POST(request) {
       removeFillers = true,    // Remove um/uh/like sounds
       colorGrade = 'neutral',
       addCaptions = false,
+      captionStyle = 'bold-outline',
+      transcript = null,
+      backgroundMusic = null,
       outputResolution = '1080p'
     } = body
     
@@ -40,6 +43,7 @@ export async function POST(request) {
     
     console.log(`[${jobId}] 🎬 Multi-clip merge: ${clips.length} clips`)
     console.log(`[${jobId}] Transition: ${transition} (${transitionDuration}s) with ${transitionSound} sound`)
+    console.log(`[${jobId}] Captions: ${addCaptions}, Music: ${backgroundMusic ? 'yes' : 'no'}`)
     
     const dimensions = getResolutionDimensions(outputResolution)
     const processedClips = []
