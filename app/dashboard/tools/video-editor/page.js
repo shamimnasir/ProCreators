@@ -523,6 +523,9 @@ export default function VideoEditorPage() {
         if (result.success) {
           setProcessedVideoUrl(result.outputPath)
           setActiveTab('export')
+          
+          // Auto-save to Library
+          await saveToLibrary(result.outputPath)
         } else {
           throw new Error(result.error)
         }
@@ -560,6 +563,10 @@ export default function VideoEditorPage() {
         if (result.success) {
           setProcessedVideoUrl(result.outputPath)
           setActiveTab('export')
+          
+          // Auto-save to Library
+          await saveToLibrary(result.outputPath)
+          
           toast({ 
             title: 'Video Created!', 
             description: `Merged ${clips.length} clips with ${transitionType} transitions.` 
