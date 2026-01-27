@@ -96,6 +96,10 @@ export default function VideoEditorPage() {
   const [processingMode, setProcessingMode] = useState('standard')
   const [showProjectPanel, setShowProjectPanel] = useState(false)
   
+  // Music State
+  const [showMusicPicker, setShowMusicPicker] = useState(false)
+  const [selectedMusic, setSelectedMusic] = useState(null)
+  
   const FILE_LIMITS = {
     standard: { maxMB: 500, maxMin: 15 },
     pro: { maxMB: 2048, maxMin: 60 }
