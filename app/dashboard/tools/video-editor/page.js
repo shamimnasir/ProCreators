@@ -604,7 +604,11 @@ export default function VideoEditorPage() {
         const transcribeRes = await fetch('/api/video-editor/transcribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileId: clip.id, filePath: uploadResult.filePath })
+          body: JSON.stringify({ 
+            fileId: clip.id, 
+            filePath: uploadResult.filePath,
+            language: captionLanguage  // Pass selected language
+          })
         })
         
         const transcribeData = await transcribeRes.json()
