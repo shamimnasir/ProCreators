@@ -178,17 +178,6 @@ const navigation = [
       { name: '💕 Love Letter Generator', href: '/dashboard/tools/love-letter', icon: Heart },
     ]
   },
-  {
-    name: '🎬 Media Editing',
-    href: '/dashboard/media-editing',
-    icon: Edit3,
-    children: [
-      { name: '🖼️ Image Editor', href: '/dashboard/tools/image-editor', icon: ImageIcon },
-      { name: '🎬 Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
-      { name: '📝 Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
-      { name: '🖼️ Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
-    ]
-  },
   { name: 'Library', href: '/dashboard/library', icon: Library },
   { name: 'Profile', href: '/dashboard/profile', icon: User },
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
