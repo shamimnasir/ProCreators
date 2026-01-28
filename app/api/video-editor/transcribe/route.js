@@ -184,7 +184,7 @@ export async function POST(request) {
     const allFillerWords = [...englishFillers, ...bengaliFillers]
     const fillerSet = new Set(allFillerWords.map(f => f.toLowerCase().trim()))
     
-    // Also detect by sound patterns
+    // Also detect by sound patterns (common hesitation sounds)
     const fillerSoundPatterns = [
       /^u+[mh]+$/i,      // um, umm, uh, uhh
       /^a+[hm]*$/i,      // ah, ahh, aaa, am
@@ -194,10 +194,20 @@ export async function POST(request) {
       /^o+[hk]*$/i,      // oh, ohh, ok
     ]
     
+    // Bengali specific patterns (Unicode ranges for Bengali script hesitations)
+    const bengaliSoundPatterns = [
+      /^[আঅউএও]+$/,      // Bengali vowel sounds
+      /^হু+ম*$/,          // হুম patterns
+      /^[আ-ঔ]$/,         // Single Bengali vowel
+    ]
+    
     const fillerWords = []
     
     for (const word of words) {
       const cleanWord = word.word.toLowerCase().trim()
+      
+      // Skip empty words
+      if (!cleanWord) continue
       
       // Check exact match
       if (fillerSet.has(cleanWord)) {
@@ -207,10 +217,12 @@ export async function POST(request) {
           end: word.end,
           type: 'filler'
         })
+        console.log(`[${jobId}] Found filler (exact): "${word.word}"`)
         continue
       }
       
-      // Check sound patterns
+      // Check sound patterns (English)
+      let matched = false
       for (const pattern of fillerSoundPatterns) {
         if (pattern.test(cleanWord)) {
           fillerWords.push({
@@ -219,10 +231,29 @@ export async function POST(request) {
             end: word.end,
             type: 'filler_sound'
           })
+          console.log(`[${jobId}] Found filler (sound pattern): "${word.word}"`)
+          matched = true
+          break
+        }
+      }
+      if (matched) continue
+      
+      // Check Bengali patterns
+      for (const pattern of bengaliSoundPatterns) {
+        if (pattern.test(word.word)) {  // Use original word for Bengali script match
+          fillerWords.push({
+            word: word.word,
+            start: word.start,
+            end: word.end,
+            type: 'filler_bengali'
+          })
+          console.log(`[${jobId}] Found filler (Bengali pattern): "${word.word}"`)
           break
         }
       }
     }
+    
+    console.log(`[${jobId}] Total fillers found: ${fillerWords.length}`)
     
     // Detect silences (gaps > 0.5s between words)
     const silences = []
