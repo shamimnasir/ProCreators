@@ -81,9 +81,9 @@ const navigation = [
     children: []
   },
   {
-    name: '🎨 Image Generation',
-    href: '/dashboard/image-generation',
-    icon: ImageIcon,
+    name: '🎬 Media Editing',
+    href: '/dashboard/media-editing',
+    icon: Edit3,
     badge: '',
     children: []
   },
