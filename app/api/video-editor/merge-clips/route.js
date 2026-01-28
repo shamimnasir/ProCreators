@@ -383,7 +383,7 @@ function getColorGradeFilter(g) {
   return map[g]
 }
 
-// Add captions
+// Add captions with proper font support for Bengali and other languages
 async function addCaptionsToVideo(input, output, transcript, jobId) {
   const srtPath = `/tmp/captions-${jobId}.srt`
   let srt = ''
@@ -394,17 +394,37 @@ async function addCaptionsToVideo(input, output, transcript, jobId) {
       srt += `${i + 1}\n${start} --> ${end}\n${s.text.trim()}\n\n`
     }
   })
-  await writeFile(srtPath, srt)
+  
+  // Write SRT file with UTF-8 BOM for proper encoding
+  const bom = Buffer.from([0xEF, 0xBB, 0xBF])
+  await writeFile(srtPath, Buffer.concat([bom, Buffer.from(srt, 'utf8')]))
+  
+  console.log(`[${jobId}] Writing captions with ${transcript.segments.length} segments`)
   
   try {
+    // Use Noto Sans Bengali UI for better international character support
+    // The font name must match what fc-list shows
     await runFFmpeg([
       '-i', input,
-      '-vf', `subtitles=${srtPath}:force_style='FontSize=24,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2'`,
+      '-vf', `subtitles=${srtPath}:force_style='FontName=Noto Sans Bengali UI,FontSize=26,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2,BackColour=&H80000000,Shadow=1,MarginV=30'`,
       '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
       '-c:a', 'copy', '-y', output
     ], jobId)
+    console.log(`[${jobId}] Captions added successfully`)
   } catch (e) {
-    await copyFile(input, output)
+    console.log(`[${jobId}] Caption error: ${e.message}, trying fallback...`)
+    // Fallback: try with default Noto Sans (supports more scripts)
+    try {
+      await runFFmpeg([
+        '-i', input,
+        '-vf', `subtitles=${srtPath}:force_style='FontName=Noto Sans,FontSize=26,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2'`,
+        '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
+        '-c:a', 'copy', '-y', output
+      ], jobId)
+    } catch (e2) {
+      console.log(`[${jobId}] Fallback caption also failed, copying original`)
+      await copyFile(input, output)
+    }
   }
   await unlink(srtPath).catch(() => {})
 }
