@@ -117,16 +117,14 @@ const navigation = [
     ]
   },
   {
-    name: '🖼️ Image Generation',
-    href: '/dashboard/image-generation',
-    icon: Camera,
+    name: '🎬 Media Editing',
+    href: '/dashboard/media-editing',
+    icon: Edit3,
     children: [
-      { name: '📸 AI Product Photos', href: '/dashboard/tools/ai-product-photos', icon: Camera },
-      { name: '👤 AI Headshot Generator', href: '/dashboard/tools/ai-headshots', icon: User },
-      { name: '🎨 Logo Generator', href: '/dashboard/tools/logo-generator', icon: PenTool },
-      { name: '🖼️ Background Remover', href: '/dashboard/tools/bg-remover', icon: ImageIcon },
-      { name: '🎭 AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: Smile },
-      { name: '📐 Image Editor', href: '/dashboard/tools/image-editor', icon: Edit3 },
+      { name: '✨ AI Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
+      { name: '🎬 Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
+      { name: '📝 Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
+      { name: '🖼️ Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
     ]
   },
   {
