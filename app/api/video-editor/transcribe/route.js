@@ -63,15 +63,26 @@ export async function POST(request) {
     
     // Use whisper CLI with word-level timestamps (use full path to venv)
     const whisperPath = '/root/.venv/bin/whisper'
+    
+    // Build Whisper arguments - auto-detect language if not specified
+    const whisperArgs = [
+      audioPath,
+      '--model', 'base',
+      '--output_format', 'json',
+      '--output_dir', outputDir,
+      '--word_timestamps', 'True'
+    ]
+    
+    // Only add language if explicitly specified (not auto)
+    if (detectedLanguage) {
+      whisperArgs.push('--language', detectedLanguage)
+    }
+    // If auto, Whisper will detect language automatically
+    
+    console.log(`[${jobId}] Whisper args: ${whisperArgs.slice(0, 5).join(' ')}... (lang: ${detectedLanguage || 'auto-detect'})`)
+    
     const whisperResult = await new Promise((resolve, reject) => {
-      const whisper = spawn(whisperPath, [
-        audioPath,
-        '--model', 'base',  // Use 'base' model for balance of speed/accuracy
-        '--language', language,
-        '--output_format', 'json',
-        '--output_dir', outputDir,
-        '--word_timestamps', 'True'
-      ])
+      const whisper = spawn(whisperPath, whisperArgs)
       
       let stdout = ''
       let stderr = ''
