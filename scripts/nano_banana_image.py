@@ -15,12 +15,12 @@ import io
 import google.generativeai as genai
 from PIL import Image
 
-# Model mappings
+# Model mappings - using official Gemini image generation models
 MODELS = {
-    "nano-banana": "gemini-2.0-flash-preview-image-generation",
-    "nano-banana-pro": "gemini-2.0-flash-preview-image-generation",  # Using same model, but could be different
-    "gemini-2.5-flash-image": "gemini-2.0-flash-preview-image-generation",
-    "gemini-3-pro-image-preview": "gemini-2.0-flash-preview-image-generation",
+    "nano-banana": "gemini-2.0-flash-exp-image-generation",  # Fast image generation
+    "nano-banana-pro": "gemini-2.5-flash-image",  # Higher quality
+    "gemini-2.5-flash-image": "gemini-2.5-flash-image",
+    "gemini-3-pro-image-preview": "gemini-3-pro-image-preview",
 }
 
 def configure_genai():
