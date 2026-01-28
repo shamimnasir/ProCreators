@@ -200,14 +200,23 @@ def fuse_images(images_base64, fusion_prompt, model_name="nano-banana-pro"):
 def main():
     """Main entry point"""
     try:
-        if len(sys.argv) < 2:
+        input_data = None
+        
+        # Check for --input-file argument (for large payloads)
+        if len(sys.argv) >= 3 and sys.argv[1] == '--input-file':
+            input_file = sys.argv[2]
+            with open(input_file, 'r') as f:
+                input_data = json.load(f)
+        elif len(sys.argv) >= 2:
+            # Direct JSON argument (for small payloads)
+            input_data = json.loads(sys.argv[1])
+        else:
             print(json.dumps({
                 "success": False,
                 "error": "No input provided"
             }))
             sys.exit(1)
         
-        input_data = json.loads(sys.argv[1])
         action = input_data.get('action', 'generate')
         model = input_data.get('model', 'nano-banana')
         
