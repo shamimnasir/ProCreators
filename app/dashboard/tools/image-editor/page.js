@@ -252,7 +252,11 @@ export default function ImageEditorPage() {
           { id: Date.now(), url: data.imageUrl, prompt: fusionPrompt, type: 'fused' },
           ...prev.slice(0, 19)
         ])
-        toast.success('Images fused successfully!')
+        if (data.savedToLibrary) {
+          toast.success('Images fused and saved to Library!')
+        } else {
+          toast.success('Images fused successfully!')
+        }
       } else {
         toast.error(data.error || 'Failed to fuse images')
       }
