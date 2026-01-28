@@ -73,43 +73,58 @@ const STYLE_PRESETS = {
 
 // Execute Python script for image operations
 async function executeNanoBanana(inputData) {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), 'scripts', 'nano_banana_image.py')
-    const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, JSON.stringify(inputData)], {
-      env: { ...process.env }
-    })
+  const fs = await import('fs/promises')
+  const tempInputPath = `/tmp/nano-input-${Date.now()}.json`
+  
+  try {
+    // Write input to temp file to avoid command line length limits
+    await fs.writeFile(tempInputPath, JSON.stringify(inputData), 'utf8')
     
-    let stdout = ''
-    let stderr = ''
-    
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString()
-    })
-    
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString()
-    })
-    
-    pythonProcess.on('close', (code) => {
-      if (code !== 0) {
-        console.error('Python script error:', stderr)
-        reject(new Error(stderr || 'Failed to process image'))
-        return
-      }
+    return new Promise((resolve, reject) => {
+      const scriptPath = path.join(process.cwd(), 'scripts', 'nano_banana_image.py')
+      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath, '--input-file', tempInputPath], {
+        env: { ...process.env }
+      })
       
-      try {
-        const result = JSON.parse(stdout)
-        resolve(result)
-      } catch (error) {
-        console.error('Error parsing Python response:', error, stdout)
-        reject(new Error('Failed to parse response'))
-      }
+      let stdout = ''
+      let stderr = ''
+      
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString()
+      })
+      
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString()
+      })
+      
+      pythonProcess.on('close', async (code) => {
+        // Clean up temp file
+        await fs.unlink(tempInputPath).catch(() => {})
+        
+        if (code !== 0) {
+          console.error('Python script error:', stderr)
+          reject(new Error(stderr || 'Failed to process image'))
+          return
+        }
+        
+        try {
+          const result = JSON.parse(stdout)
+          resolve(result)
+        } catch (error) {
+          console.error('Error parsing Python response:', error, stdout)
+          reject(new Error('Failed to parse response'))
+        }
+      })
+      
+      pythonProcess.on('error', async (error) => {
+        await fs.unlink(tempInputPath).catch(() => {})
+        reject(error)
+      })
     })
-    
-    pythonProcess.on('error', (error) => {
-      reject(error)
-    })
-  })
+  } catch (error) {
+    await fs.unlink(tempInputPath).catch(() => {})
+    throw error
+  }
 }
 
 // POST - Generate, Edit, or Fuse images
