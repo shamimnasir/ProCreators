@@ -95,7 +95,13 @@ def generate_image(prompt, model_name="nano-banana", style=None, aspect_ratio="1
             if aspect_ratio in aspect_map:
                 enhanced_prompt = f"{enhanced_prompt}. {aspect_map[aspect_ratio]}"
         
-        response = model.generate_content(enhanced_prompt)
+        # Generate with response modalities passed to generate_content
+        response = model.generate_content(
+            enhanced_prompt,
+            generation_config={
+                "response_modalities": ["TEXT", "IMAGE"]
+            }
+        )
         
         result = extract_image_from_response(response)
         if result:
