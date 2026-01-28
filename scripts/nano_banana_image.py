@@ -130,27 +130,60 @@ def edit_image(image_base64, edit_prompt, model_name="nano-banana", mime_type="i
         
         image_bytes = base64.b64decode(image_base64)
         
+        # Create PIL Image to verify it's valid
+        try:
+            pil_image = Image.open(io.BytesIO(image_bytes))
+            # Convert to RGB if necessary (for RGBA images)
+            if pil_image.mode == 'RGBA':
+                # Create white background for transparent images
+                background = Image.new('RGB', pil_image.size, (255, 255, 255))
+                background.paste(pil_image, mask=pil_image.split()[3])
+                pil_image = background
+            elif pil_image.mode != 'RGB':
+                pil_image = pil_image.convert('RGB')
+            
+            # Save to bytes
+            img_buffer = io.BytesIO()
+            pil_image.save(img_buffer, format='PNG')
+            image_bytes = img_buffer.getvalue()
+            mime_type = 'image/png'
+        except Exception as img_err:
+            print(f"Image processing warning: {img_err}", file=sys.stderr)
+        
         # Create content with image and edit instruction
+        # Use a more explicit edit prompt
+        full_prompt = f"Edit this image according to these instructions: {edit_prompt}. Return the edited image."
+        
         content = [
             {
                 "mime_type": mime_type,
                 "data": image_bytes
             },
-            f"Edit this image: {edit_prompt}"
+            full_prompt
         ]
         
-        response = model.generate_content(content)
+        response = model.generate_content(
+            content,
+            generation_config={
+                "response_modalities": ["TEXT", "IMAGE"]
+            }
+        )
         
         result = extract_image_from_response(response)
         if result:
             return result
         
+        # If no image returned, log what we got
+        if hasattr(response, 'text'):
+            print(f"Response text (no image): {response.text[:200]}", file=sys.stderr)
+        
         return {
             "success": False,
-            "error": "Failed to edit image. Try a clearer instruction."
+            "error": "Failed to edit image. The AI couldn't process this edit request. Try a different instruction."
         }
         
     except Exception as e:
+        print(f"Edit error details: {str(e)}", file=sys.stderr)
         return {
             "success": False,
             "error": str(e)
