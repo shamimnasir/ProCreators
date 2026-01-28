@@ -151,18 +151,63 @@ export async function POST(request) {
       }
     }
     
-    // Detect filler words
-    const fillerPatterns = /\b(um|uh|uhm|hmm|ah|er|like|you know|basically|actually|literally|so|well|i mean)\b/gi
+    // Detect filler words - comprehensive list including Bengali and English
+    const englishFillers = [
+      'um', 'uh', 'uhh', 'umm', 'ummm', 'uhm', 'hmm', 'hm', 'mmm', 'mm',
+      'ah', 'ahh', 'aah', 'aaa', 'er', 'err', 'oh', 'ohh',
+      'like', 'so', 'well', 'right', 'okay', 'ok', 'yeah', 'yep',
+      'you know', 'i mean', 'basically', 'actually', 'literally', 'seriously', 'totally',
+      'sort of', 'kind of', 'i guess', 'i suppose'
+    ]
+    
+    // Bengali/Hindi fillers (in romanized and native script)
+    const bengaliFillers = [
+      'মানে', 'আসলে', 'তো', 'এই', 'ওই', 'আচ্ছা', 'হ্যাঁ', 'না', 'কি', 'যে',
+      'mane', 'asole', 'to', 'ei', 'oi', 'accha', 'haan', 'na', 'ki', 'je',
+      'তাহলে', 'সেটা', 'এটা', 'ওটা', 'একটু', 'বলতে', 'বুঝলে',
+      'tahle', 'seta', 'eta', 'ota', 'ektu', 'bolte', 'bujhle'
+    ]
+    
+    const allFillerWords = [...englishFillers, ...bengaliFillers]
+    const fillerSet = new Set(allFillerWords.map(f => f.toLowerCase()))
+    
+    // Also detect by sound patterns
+    const fillerSoundPatterns = [
+      /^u+[mh]+$/i,      // um, umm, uh, uhh
+      /^a+[hm]*$/i,      // ah, ahh, aaa, am
+      /^e+r+$/i,         // er, err
+      /^m+h*m*$/i,       // mm, mmm, mhm, hmm
+      /^h+m+$/i,         // hm, hmm
+      /^o+[hk]*$/i,      // oh, ohh, ok
+    ]
+    
     const fillerWords = []
     
     for (const word of words) {
-      if (fillerPatterns.test(word.word.toLowerCase())) {
+      const cleanWord = word.word.toLowerCase().trim()
+      
+      // Check exact match
+      if (fillerSet.has(cleanWord)) {
         fillerWords.push({
           word: word.word,
           start: word.start,
           end: word.end,
           type: 'filler'
         })
+        continue
+      }
+      
+      // Check sound patterns
+      for (const pattern of fillerSoundPatterns) {
+        if (pattern.test(cleanWord)) {
+          fillerWords.push({
+            word: word.word,
+            start: word.start,
+            end: word.end,
+            type: 'filler_sound'
+          })
+          break
+        }
       }
     }
     
