@@ -150,7 +150,11 @@ export default function ImageEditorPage() {
           { id: Date.now(), url: data.imageUrl, prompt, type: 'generated', style: selectedStyle },
           ...prev.slice(0, 19)
         ])
-        toast.success('Image generated successfully!')
+        if (data.savedToLibrary) {
+          toast.success('Image generated and saved to Library!')
+        } else {
+          toast.success('Image generated successfully!')
+        }
       } else {
         toast.error(data.error || 'Failed to generate image')
       }
