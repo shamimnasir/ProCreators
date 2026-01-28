@@ -1,102 +1,97 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
 import { 
-  Wand2, 
-  Upload, 
-  Download, 
-  Sparkles, 
-  Image as ImageIcon, 
-  Palette,
-  Layers,
-  Trash2,
-  Copy,
-  RefreshCw,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Lightbulb,
-  ArrowRight,
-  Plus,
-  X,
-  Camera,
-  Pencil,
-  Combine,
-  ChevronDown,
-  Check
+  Wand2, Upload, Download, Sparkles, Image as ImageIcon, Palette,
+  Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,
+  Pencil, Combine, Zap, User, ShoppingBag, Film, Smile, Target,
+  ChevronRight, Check, Star, Heart
 } from 'lucide-react'
 
-// Style presets with icons
+// Style presets with detailed info
 const STYLE_PRESETS = [
-  { id: 'none', name: 'No Style', icon: '🎯', description: 'Use your prompt as-is' },
-  { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting' },
-  { id: 'product', name: 'Product', icon: '🛍️', description: 'E-commerce ready, clean background' },
-  { id: 'illustration', name: 'Illustration', icon: '🎨', description: 'Digital art, vibrant colors' },
-  { id: 'portrait', name: 'Portrait', icon: '👤', description: 'Professional headshots' },
-  { id: 'cinematic', name: 'Cinematic', icon: '🎬', description: 'Movie poster style, dramatic' },
-  { id: 'minimalist', name: 'Minimalist', icon: '⬜', description: 'Clean, simple, white space' },
-  { id: 'vintage', name: 'Vintage', icon: '📷', description: 'Retro, film grain, warm tones' },
-  { id: '3d', name: '3D Render', icon: '🎮', description: 'High quality 3D graphics' },
-  { id: 'watercolor', name: 'Watercolor', icon: '🖌️', description: 'Soft, artistic painting' },
-  { id: 'pixel-art', name: 'Pixel Art', icon: '👾', description: '16-bit retro game style' },
-  { id: 'comic', name: 'Comic', icon: '💥', description: 'Bold lines, high contrast' },
-  { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization' }
+  { id: 'none', name: 'None', icon: '🎯', description: 'Use your prompt as-is', category: 'basic' },
+  { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting', category: 'photo' },
+  { id: 'product', name: 'Product Shot', icon: '🛍️', description: 'E-commerce ready, clean background', category: 'product' },
+  { id: 'portrait', name: 'Portrait', icon: '👤', description: 'Professional headshots', category: 'photo' },
+  { id: 'cinematic', name: 'Cinematic', icon: '🎬', description: 'Movie poster style, dramatic', category: 'creative' },
+  { id: 'minimalist', name: 'Minimalist', icon: '⬜', description: 'Clean, simple, white space', category: 'design' },
+  { id: 'vintage', name: 'Vintage', icon: '📷', description: 'Retro, film grain, warm tones', category: 'creative' },
+  { id: '3d', name: '3D Render', icon: '🎮', description: 'High quality 3D graphics', category: 'creative' },
+  { id: 'illustration', name: 'Illustration', icon: '🎨', description: 'Digital art, vibrant colors', category: 'creative' },
+  { id: 'watercolor', name: 'Watercolor', icon: '🖌️', description: 'Soft, artistic painting', category: 'creative' },
+  { id: 'pixel-art', name: 'Pixel Art', icon: '👾', description: '16-bit retro game style', category: 'creative' },
+  { id: 'comic', name: 'Comic', icon: '💥', description: 'Bold lines, high contrast', category: 'creative' },
+  { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization', category: 'design' },
+  { id: 'logo', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logos', category: 'design' },
 ]
 
 // Aspect ratio options
 const ASPECT_RATIOS = [
-  { id: '1:1', name: 'Square', icon: '⬜', description: 'Instagram, Profile' },
-  { id: '16:9', name: 'Landscape', icon: '🖼️', description: 'YouTube, Desktop' },
-  { id: '9:16', name: 'Portrait', icon: '📱', description: 'Stories, Reels, TikTok' },
-  { id: '4:3', name: 'Standard', icon: '🖥️', description: 'Presentations' },
-  { id: '3:4', name: 'Portrait 3:4', icon: '📋', description: 'Pinterest' }
+  { id: '1:1', name: 'Square', icon: '⬜', use: 'Instagram, Profile' },
+  { id: '16:9', name: 'Landscape', icon: '🖼️', use: 'YouTube, Desktop' },
+  { id: '9:16', name: 'Portrait', icon: '📱', use: 'Stories, Reels' },
+  { id: '4:3', name: 'Standard', icon: '🖥️', use: 'Presentations' },
+  { id: '3:4', name: 'Portrait 3:4', icon: '📋', use: 'Pinterest' },
 ]
 
-// Prompt suggestions by category
-const PROMPT_SUGGESTIONS = {
+// Quick action templates
+const QUICK_ACTIONS = [
+  { id: 'product', name: 'Product Photo', icon: '📦', prompt: 'Professional product photography, clean white background, soft studio lighting, e-commerce ready' },
+  { id: 'headshot', name: 'AI Headshot', icon: '👔', prompt: 'Professional corporate headshot, neutral gray background, soft lighting, LinkedIn ready' },
+  { id: 'logo', name: 'Logo Design', icon: '🎯', prompt: 'Modern minimalist logo design, clean lines, scalable vector style' },
+  { id: 'avatar', name: 'AI Avatar', icon: '🎭', prompt: 'Stylized cartoon avatar, friendly expression, colorful background' },
+  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', prompt: 'Eye-catching YouTube thumbnail, bold text, vibrant colors, high contrast' },
+  { id: 'social', name: 'Social Post', icon: '📱', prompt: 'Instagram-worthy photo, aesthetic composition, trending style' },
+]
+
+// Prompt suggestions by use case
+const PROMPT_LIBRARY = {
   product: [
-    'Premium wireless earbuds on marble surface, soft studio lighting',
-    'Luxury watch on black reflective surface, dramatic lighting',
-    'Skincare bottle on sandy beach, golden hour, lifestyle shot'
+    'Luxury skincare bottle on marble surface, soft diffused lighting, premium feel',
+    'Wireless earbuds floating on gradient background, tech product photography',
+    'Handmade jewelry on velvet cloth, macro shot, bokeh background',
+    'Coffee mug with steam, cozy morning setting, lifestyle product shot',
   ],
   portrait: [
-    'Professional headshot, neutral background, soft key light',
+    'Professional business headshot, confident expression, studio lighting',
     'Creative portrait with colorful gel lights, artistic composition',
-    'Natural outdoor portrait, golden hour backlight, shallow depth of field'
+    'Natural outdoor portrait, golden hour, shallow depth of field',
+    'Executive portrait, power pose, corporate environment',
   ],
-  illustration: [
-    'Whimsical forest with glowing mushrooms, fantasy art style',
-    'Futuristic cityscape with flying cars, neon lights, cyberpunk',
-    'Cute animal characters having tea party, children book illustration'
-  ],
-  general: [
-    'Cozy coffee shop interior, warm lighting, hygge aesthetic',
+  creative: [
+    'Surreal floating islands in the sky, fantasy art, magical atmosphere',
+    'Cyberpunk city at night, neon lights, rain reflections',
+    'Enchanted forest with glowing mushrooms, fairy tale aesthetic',
     'Abstract geometric patterns, vibrant gradients, modern art',
-    'Serene mountain lake at sunrise, misty atmosphere, nature photography'
-  ]
+  ],
+  design: [
+    'Modern tech company logo, clean typography, blue and white',
+    'Vintage coffee shop logo, hand-drawn style, warm colors',
+    'Minimalist app icon, flat design, single color',
+    'Luxury brand logo, gold accents, elegant serif font',
+  ],
 }
 
 // Edit suggestions
 const EDIT_SUGGESTIONS = [
-  'Change background to a modern city skyline',
-  'Make the lighting warmer and more dramatic',
-  'Remove all background distractions',
-  'Convert to black and white with high contrast',
-  'Add a soft bokeh effect to the background',
-  'Change the color scheme to blue and orange tones',
-  'Make it look like a vintage film photograph',
-  'Add subtle lens flare effect'
+  { text: 'Remove background', icon: '✂️' },
+  { text: 'Change to sunset lighting', icon: '🌅' },
+  { text: 'Make it more vibrant', icon: '🌈' },
+  { text: 'Add bokeh effect', icon: '✨' },
+  { text: 'Convert to black and white', icon: '🖤' },
+  { text: 'Change background to city', icon: '🌆' },
+  { text: 'Make it look vintage', icon: '📷' },
+  { text: 'Add soft glow effect', icon: '💫' },
 ]
 
 export default function ImageEditorPage() {
@@ -108,6 +103,7 @@ export default function ImageEditorPage() {
   const [selectedStyle, setSelectedStyle] = useState('none')
   const [selectedModel, setSelectedModel] = useState('nano-banana')
   const [aspectRatio, setAspectRatio] = useState('1:1')
+  const [showAllStyles, setShowAllStyles] = useState(false)
   
   // Edit state
   const [editPrompt, setEditPrompt] = useState('')
@@ -120,6 +116,7 @@ export default function ImageEditorPage() {
   // Output state
   const [generatedImage, setGeneratedImage] = useState(null)
   const [imageHistory, setImageHistory] = useState([])
+  const [isFavorite, setIsFavorite] = useState(false)
   
   const fileInputRef = useRef(null)
   const fusionInputRef = useRef(null)
@@ -150,7 +147,7 @@ export default function ImageEditorPage() {
       if (data.success) {
         setGeneratedImage(data.imageUrl)
         setImageHistory(prev => [
-          { id: Date.now(), url: data.imageUrl, prompt, type: 'generated' },
+          { id: Date.now(), url: data.imageUrl, prompt, type: 'generated', style: selectedStyle },
           ...prev.slice(0, 19)
         ])
         toast.success('Image generated successfully!')
@@ -259,36 +256,28 @@ export default function ImageEditorPage() {
     }
   }
 
-  // Handle file upload for editing
+  // File upload handlers
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file')
       return
     }
-    
     const reader = new FileReader()
-    reader.onload = (event) => {
-      setUploadedImage(event.target.result)
-    }
+    reader.onload = (event) => setUploadedImage(event.target.result)
     reader.readAsDataURL(file)
   }
 
-  // Handle fusion image upload
   const handleFusionUpload = (e) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
-    
     if (fusionImages.length + files.length > 14) {
       toast.error('Maximum 14 images allowed')
       return
     }
-    
     files.forEach(file => {
       if (!file.type.startsWith('image/')) return
-      
       const reader = new FileReader()
       reader.onload = (event) => {
         setFusionImages(prev => [
@@ -300,15 +289,11 @@ export default function ImageEditorPage() {
     })
   }
 
-  // Remove fusion image
-  const removeFusionImage = (id) => {
-    setFusionImages(prev => prev.filter(img => img.id !== id))
-  }
-
-  // Download image
+  // Utility functions
+  const removeFusionImage = (id) => setFusionImages(prev => prev.filter(img => img.id !== id))
+  
   const downloadImage = () => {
     if (!generatedImage) return
-    
     const link = document.createElement('a')
     link.href = generatedImage
     link.download = `ai-image-${Date.now()}.png`
@@ -316,23 +301,18 @@ export default function ImageEditorPage() {
     toast.success('Image downloaded!')
   }
 
-  // Copy image to clipboard
   const copyImage = async () => {
     if (!generatedImage) return
-    
     try {
       const response = await fetch(generatedImage)
       const blob = await response.blob()
-      await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type]: blob })
-      ])
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
       toast.success('Image copied to clipboard!')
     } catch (error) {
       toast.error('Failed to copy image')
     }
   }
 
-  // Use generated image for editing
   const useForEditing = () => {
     if (!generatedImage) return
     setUploadedImage(generatedImage)
@@ -340,118 +320,154 @@ export default function ImageEditorPage() {
     toast.info('Image loaded for editing')
   }
 
+  const applyQuickAction = (action) => {
+    setPrompt(action.prompt)
+    toast.success(`${action.name} template applied!`)
+  }
+
+  const applyPromptSuggestion = (suggestion) => {
+    setPrompt(suggestion)
+    toast.success('Prompt applied!')
+  }
+
   return (
     <div className="space-y-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 p-6 text-white">
-        <div className="absolute inset-0 bg-black/10" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-8 text-white">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-white/20 rounded-lg backdrop-blur">
-              <Wand2 className="h-6 w-6" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <Camera className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">AI Image Studio</h1>
+                <p className="text-white/80">Create, edit & transform images with Nano Banana AI</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">AI Image Editor</h1>
-              <p className="text-white/80 text-sm">Generate, edit & combine images with Nano Banana AI</p>
+            
+            {/* Model Selector */}
+            <div className="hidden md:flex gap-2 bg-white/10 backdrop-blur rounded-xl p-1">
+              <button
+                onClick={() => setSelectedModel('nano-banana')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedModel === 'nano-banana' ? 'bg-white text-purple-600' : 'hover:bg-white/10'
+                }`}
+              >
+                <Zap className="h-4 w-4 inline mr-1" />
+                Fast
+              </button>
+              <button
+                onClick={() => setSelectedModel('nano-banana-pro')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedModel === 'nano-banana-pro' ? 'bg-white text-purple-600' : 'hover:bg-white/10'
+                }`}
+              >
+                <Sparkles className="h-4 w-4 inline mr-1" />
+                Pro HD
+              </button>
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Badge className="bg-white/20 hover:bg-white/30">✨ Text-to-Image</Badge>
-            <Badge className="bg-white/20 hover:bg-white/30">🎨 Style Presets</Badge>
-            <Badge className="bg-white/20 hover:bg-white/30">✏️ Natural Language Editing</Badge>
-            <Badge className="bg-white/20 hover:bg-white/30">🔀 Multi-Image Fusion</Badge>
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-2">
+            {QUICK_ACTIONS.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => applyQuickAction(action)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-all flex items-center gap-2"
+              >
+                <span>{action.icon}</span>
+                <span>{action.name}</span>
+              </button>
+            ))}
           </div>
         </div>
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 -mb-16 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Left Panel - Controls */}
-        <div className="space-y-4">
-          {/* Model Selection */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                AI Model
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Button
-                  variant={selectedModel === 'nano-banana' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedModel('nano-banana')}
-                  className="flex-1"
-                >
-                  <Wand2 className="h-4 w-4 mr-2" />
-                  Nano Banana
-                </Button>
-                <Button
-                  variant={selectedModel === 'nano-banana-pro' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedModel('nano-banana-pro')}
-                  className="flex-1"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Pro
-                  <Badge className="ml-2 text-[10px]" variant="secondary">HD</Badge>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
+      <div className="grid lg:grid-cols-5 gap-6">
+        {/* Left Panel - Controls (3 cols) */}
+        <div className="lg:col-span-3 space-y-4">
           {/* Main Tabs */}
-          <Card>
+          <Card className="overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <CardHeader className="pb-0">
-                <TabsList className="grid grid-cols-3 w-full">
-                  <TabsTrigger value="generate" className="text-xs">
-                    <Camera className="h-3 w-3 mr-1" />
+              <div className="border-b bg-muted/30">
+                <TabsList className="w-full justify-start rounded-none border-0 bg-transparent h-auto p-0">
+                  <TabsTrigger 
+                    value="generate" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                  >
+                    <Wand2 className="h-4 w-4 mr-2" />
                     Generate
                   </TabsTrigger>
-                  <TabsTrigger value="edit" className="text-xs">
-                    <Pencil className="h-3 w-3 mr-1" />
+                  <TabsTrigger 
+                    value="edit" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
                     Edit
                   </TabsTrigger>
-                  <TabsTrigger value="fuse" className="text-xs">
-                    <Combine className="h-3 w-3 mr-1" />
+                  <TabsTrigger 
+                    value="fuse" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                  >
+                    <Combine className="h-4 w-4 mr-2" />
                     Fuse
                   </TabsTrigger>
                 </TabsList>
-              </CardHeader>
+              </div>
               
-              <CardContent className="pt-4">
+              <CardContent className="p-6">
                 {/* Generate Tab */}
-                <TabsContent value="generate" className="mt-0 space-y-4">
+                <TabsContent value="generate" className="mt-0 space-y-6">
+                  {/* Prompt Input */}
                   <div>
-                    <Label className="text-sm font-medium">Prompt</Label>
+                    <Label className="text-base font-semibold mb-2 block">Describe your image</Label>
                     <Textarea
-                      placeholder="Describe the image you want to create..."
+                      placeholder="A professional product photo of wireless earbuds on a marble surface, soft studio lighting, clean white background..."
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      className="mt-1.5 min-h-[100px]"
+                      className="min-h-[120px] text-base resize-none"
                     />
+                    <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                      <span>Be specific for better results</span>
+                      <span>{prompt.length} characters</span>
+                    </div>
                   </div>
                   
                   {/* Style Presets */}
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Style Preset</Label>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                      {STYLE_PRESETS.slice(0, 12).map((style) => (
+                    <div className="flex items-center justify-between mb-3">
+                      <Label className="text-base font-semibold">Style</Label>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setShowAllStyles(!showAllStyles)}
+                        className="text-xs"
+                      >
+                        {showAllStyles ? 'Show Less' : 'Show All'}
+                        <ChevronRight className={`h-3 w-3 ml-1 transition-transform ${showAllStyles ? 'rotate-90' : ''}`} />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                      {(showAllStyles ? STYLE_PRESETS : STYLE_PRESETS.slice(0, 7)).map((style) => (
                         <button
                           key={style.id}
                           onClick={() => setSelectedStyle(style.id)}
-                          className={`p-2 rounded-lg border text-center transition-all hover:scale-105 ${
+                          className={`p-3 rounded-xl border-2 text-center transition-all hover:scale-105 ${
                             selectedStyle === style.id 
-                              ? 'border-primary bg-primary/10 ring-2 ring-primary' 
+                              ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
                               : 'border-border hover:border-primary/50'
                           }`}
                           title={style.description}
                         >
-                          <span className="text-lg">{style.icon}</span>
-                          <p className="text-[10px] mt-1 truncate">{style.name}</p>
+                          <span className="text-2xl block mb-1">{style.icon}</span>
+                          <span className="text-[10px] font-medium truncate block">{style.name}</span>
                         </button>
                       ))}
                     </div>
@@ -459,18 +475,21 @@ export default function ImageEditorPage() {
                   
                   {/* Aspect Ratio */}
                   <div>
-                    <Label className="text-sm font-medium mb-2 block">Aspect Ratio</Label>
+                    <Label className="text-base font-semibold mb-3 block">Aspect Ratio</Label>
                     <div className="flex gap-2 flex-wrap">
                       {ASPECT_RATIOS.map((ar) => (
-                        <Button
+                        <button
                           key={ar.id}
-                          variant={aspectRatio === ar.id ? 'default' : 'outline'}
-                          size="sm"
                           onClick={() => setAspectRatio(ar.id)}
-                          title={ar.description}
+                          className={`px-4 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${
+                            aspectRatio === ar.id 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-border hover:border-primary/50'
+                          }`}
                         >
-                          {ar.icon} {ar.name}
-                        </Button>
+                          <span>{ar.icon}</span>
+                          <span className="text-sm font-medium">{ar.name}</span>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -478,37 +497,38 @@ export default function ImageEditorPage() {
                   {/* Prompt Suggestions */}
                   <div>
                     <Label className="text-sm font-medium mb-2 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4" />
-                      Quick Ideas
+                      <Lightbulb className="h-4 w-4 text-yellow-500" />
+                      Need inspiration?
                     </Label>
-                    <div className="flex flex-wrap gap-2">
-                      {PROMPT_SUGGESTIONS.general.map((suggestion, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="cursor-pointer hover:bg-primary/10"
-                          onClick={() => setPrompt(suggestion)}
-                        >
-                          {suggestion.slice(0, 30)}...
-                        </Badge>
-                      ))}
-                    </div>
+                    <ScrollArea className="w-full">
+                      <div className="flex gap-2 pb-2">
+                        {PROMPT_LIBRARY.product.slice(0, 3).map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => applyPromptSuggestion(suggestion)}
+                            className="shrink-0 px-3 py-2 bg-muted rounded-lg text-xs text-left hover:bg-muted/80 transition-colors max-w-[200px]"
+                          >
+                            {suggestion.slice(0, 60)}...
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   </div>
                   
                   <Button 
                     onClick={handleGenerate} 
                     disabled={isLoading || !prompt.trim()}
-                    className="w-full"
+                    className="w-full h-12 text-lg"
                     size="lg"
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
                         Generating...
                       </>
                     ) : (
                       <>
-                        <Wand2 className="h-4 w-4 mr-2" />
+                        <Wand2 className="h-5 w-5 mr-2" />
                         Generate Image
                       </>
                     )}
@@ -516,25 +536,27 @@ export default function ImageEditorPage() {
                 </TabsContent>
                 
                 {/* Edit Tab */}
-                <TabsContent value="edit" className="mt-0 space-y-4">
+                <TabsContent value="edit" className="mt-0 space-y-6">
                   {/* Upload Area */}
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                      uploadedImage ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                      uploadedImage 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
                     }`}
                   >
                     {uploadedImage ? (
-                      <div className="relative">
+                      <div className="relative inline-block">
                         <img 
                           src={uploadedImage} 
                           alt="Uploaded" 
-                          className="max-h-48 mx-auto rounded-lg"
+                          className="max-h-48 rounded-lg shadow-lg"
                         />
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="absolute top-2 right-2 h-8 w-8"
+                          className="absolute -top-2 -right-2 h-8 w-8 rounded-full"
                           onClick={(e) => {
                             e.stopPropagation()
                             setUploadedImage(null)
@@ -544,11 +566,13 @@ export default function ImageEditorPage() {
                         </Button>
                       </div>
                     ) : (
-                      <>
-                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm font-medium">Click to upload image</p>
-                        <p className="text-xs text-muted-foreground">PNG, JPG, WebP supported</p>
-                      </>
+                      <div className="py-4">
+                        <div className="w-16 h-16 mx-auto bg-muted rounded-2xl flex items-center justify-center mb-4">
+                          <Upload className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <p className="text-lg font-medium">Upload an image to edit</p>
+                        <p className="text-sm text-muted-foreground mt-1">PNG, JPG, WebP supported</p>
+                      </div>
                     )}
                     <input
                       ref={fileInputRef}
@@ -560,43 +584,48 @@ export default function ImageEditorPage() {
                   </div>
                   
                   <div>
-                    <Label className="text-sm font-medium">Edit Instructions</Label>
+                    <Label className="text-base font-semibold mb-2 block">Edit Instructions</Label>
                     <Textarea
-                      placeholder="Describe how you want to edit the image..."
+                      placeholder="Remove the background and replace with a sunset sky..."
                       value={editPrompt}
                       onChange={(e) => setEditPrompt(e.target.value)}
-                      className="mt-1.5 min-h-[80px]"
+                      className="min-h-[100px] resize-none"
                     />
                   </div>
                   
-                  {/* Edit Suggestions */}
-                  <div className="flex flex-wrap gap-2">
-                    {EDIT_SUGGESTIONS.slice(0, 4).map((suggestion, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-primary/10 text-xs"
-                        onClick={() => setEditPrompt(suggestion)}
-                      >
-                        {suggestion.slice(0, 25)}...
-                      </Badge>
-                    ))}
+                  {/* Quick Edit Buttons */}
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Quick Edits</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {EDIT_SUGGESTIONS.map((suggestion, idx) => (
+                        <Button
+                          key={idx}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditPrompt(suggestion.text)}
+                          className="text-xs"
+                        >
+                          <span className="mr-1">{suggestion.icon}</span>
+                          {suggestion.text}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                   
                   <Button 
                     onClick={handleEdit} 
                     disabled={isLoading || !uploadedImage || !editPrompt.trim()}
-                    className="w-full"
+                    className="w-full h-12 text-lg"
                     size="lg"
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
                         Editing...
                       </>
                     ) : (
                       <>
-                        <Pencil className="h-4 w-4 mr-2" />
+                        <Pencil className="h-5 w-5 mr-2" />
                         Apply Edit
                       </>
                     )}
@@ -604,27 +633,34 @@ export default function ImageEditorPage() {
                 </TabsContent>
                 
                 {/* Fuse Tab */}
-                <TabsContent value="fuse" className="mt-0 space-y-4">
-                  <div className="bg-violet-50 dark:bg-violet-950/30 rounded-lg p-3 text-sm">
-                    <p className="font-medium text-violet-800 dark:text-violet-200">Multi-Image Fusion</p>
-                    <p className="text-xs text-violet-600 dark:text-violet-300">
-                      Upload 2-14 images and describe how to combine them
-                    </p>
+                <TabsContent value="fuse" className="mt-0 space-y-6">
+                  <div className="bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 rounded-xl p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-violet-500 text-white rounded-lg">
+                        <Combine className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-violet-800 dark:text-violet-200">Multi-Image Fusion</p>
+                        <p className="text-xs text-violet-600 dark:text-violet-300">
+                          Upload 2-14 images and describe how to combine them
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Fusion Images Grid */}
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                     {fusionImages.map((img) => (
-                      <div key={img.id} className="relative aspect-square">
+                      <div key={img.id} className="relative aspect-square group">
                         <img 
                           src={img.data} 
                           alt="Fusion" 
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-cover rounded-xl"
                         />
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="absolute -top-1 -right-1 h-5 w-5"
+                          className="absolute -top-1 -right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => removeFusionImage(img.id)}
                         >
                           <X className="h-3 w-3" />
@@ -635,9 +671,10 @@ export default function ImageEditorPage() {
                     {fusionImages.length < 14 && (
                       <button
                         onClick={() => fusionInputRef.current?.click()}
-                        className="aspect-square border-2 border-dashed border-border rounded-lg flex items-center justify-center hover:border-primary/50 transition-colors"
+                        className="aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center hover:border-primary/50 hover:bg-muted/50 transition-all"
                       >
                         <Plus className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground mt-1">Add</span>
                       </button>
                     )}
                   </div>
@@ -652,29 +689,29 @@ export default function ImageEditorPage() {
                   />
                   
                   <div>
-                    <Label className="text-sm font-medium">Fusion Instructions</Label>
+                    <Label className="text-base font-semibold mb-2 block">Fusion Instructions</Label>
                     <Textarea
-                      placeholder="Describe how to combine these images..."
+                      placeholder="Combine these images into a seamless collage with a gradient transition..."
                       value={fusionPrompt}
                       onChange={(e) => setFusionPrompt(e.target.value)}
-                      className="mt-1.5 min-h-[80px]"
+                      className="min-h-[100px] resize-none"
                     />
                   </div>
                   
                   <Button 
                     onClick={handleFuse} 
                     disabled={isLoading || fusionImages.length < 2 || !fusionPrompt.trim()}
-                    className="w-full"
+                    className="w-full h-12 text-lg"
                     size="lg"
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
                         Fusing...
                       </>
                     ) : (
                       <>
-                        <Combine className="h-4 w-4 mr-2" />
+                        <Combine className="h-5 w-5 mr-2" />
                         Fuse Images ({fusionImages.length}/14)
                       </>
                     )}
@@ -685,44 +722,47 @@ export default function ImageEditorPage() {
           </Card>
         </div>
 
-        {/* Right Panel - Output */}
-        <div className="space-y-4">
+        {/* Right Panel - Output (2 cols) */}
+        <div className="lg:col-span-2 space-y-4">
           {/* Generated Image Display */}
-          <Card className="min-h-[400px]">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4" />
-                  Result
-                </span>
-                {generatedImage && (
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={downloadImage}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyImage}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={useForEditing}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Result
               </CardTitle>
+              {generatedImage && (
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsFavorite(!isFavorite)}>
+                    <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={downloadImage}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyImage}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={useForEditing}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {generatedImage ? (
-                <div className="relative">
+                <div className="relative rounded-xl overflow-hidden bg-muted/30">
                   <img 
                     src={generatedImage} 
                     alt="Generated" 
-                    className="w-full rounded-lg shadow-lg"
+                    className="w-full"
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-                  <ImageIcon className="h-16 w-16 mb-4 opacity-20" />
-                  <p className="text-sm">Your generated image will appear here</p>
+                <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground bg-muted/30 rounded-xl">
+                  <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mb-4">
+                    <ImageIcon className="h-10 w-10 opacity-50" />
+                  </div>
+                  <p className="font-medium">Your image will appear here</p>
                   <p className="text-xs mt-1">Enter a prompt and click Generate</p>
                 </div>
               )}
@@ -733,9 +773,12 @@ export default function ImageEditorPage() {
           {imageHistory.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  Recent ({imageHistory.length})
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    History
+                  </span>
+                  <Badge variant="secondary">{imageHistory.length}</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -744,7 +787,7 @@ export default function ImageEditorPage() {
                     <button
                       key={item.id}
                       onClick={() => setGeneratedImage(item.url)}
-                      className="aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-colors"
+                      className="aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-all hover:scale-105"
                     >
                       <img 
                         src={item.url} 
@@ -759,18 +802,18 @@ export default function ImageEditorPage() {
           )}
 
           {/* Tips Card */}
-          <Card className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 border-violet-200 dark:border-violet-800">
+          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2 text-violet-800 dark:text-violet-200">
+              <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
                 <Lightbulb className="h-4 w-4" />
                 Pro Tips
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-xs space-y-2 text-violet-700 dark:text-violet-300">
+            <CardContent className="text-xs space-y-2 text-amber-700 dark:text-amber-300">
               <p>• <strong>Be specific</strong> about subjects, lighting, and composition</p>
               <p>• <strong>Use style presets</strong> for consistent results</p>
-              <p>• <strong>For editing</strong>, give clear instructions like "remove", "add", "change"</p>
-              <p>• <strong>Pro model</strong> works best for complex multi-image fusion</p>
+              <p>• <strong>For editing</strong>, use commands like "remove", "add", "change"</p>
+              <p>• <strong>Pro model</strong> gives higher quality for detailed work</p>
             </CardContent>
           </Card>
         </div>
