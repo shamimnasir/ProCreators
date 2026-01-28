@@ -3,9 +3,68 @@ import { spawn } from 'child_process'
 import path from 'path'
 import { writeFile, mkdir } from 'fs/promises'
 import { randomUUID } from 'crypto'
+import { getCollection } from '@/lib/mongodb'
 
 export const maxDuration = 120
 export const dynamic = 'force-dynamic'
+
+// Helper to save image to library
+async function saveToLibrary(imageUrl, prompt, action, style = null) {
+  try {
+    // Extract base64 data
+    const base64Data = imageUrl.split('base64,')[1]
+    if (!base64Data) return null
+    
+    // Create directory for images
+    const imageDir = path.join(process.cwd(), 'public', 'library', 'images')
+    await mkdir(imageDir, { recursive: true })
+    
+    // Generate filename
+    const imageId = randomUUID()
+    const filename = `${imageId}.png`
+    const filePath = path.join(imageDir, filename)
+    const publicPath = `/library/images/${filename}`
+    
+    // Write image file
+    const buffer = Buffer.from(base64Data, 'base64')
+    await writeFile(filePath, buffer)
+    
+    // Save to MongoDB library
+    const libraryCollection = await getCollection('library')
+    
+    // Calculate expiration: 30 days
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 30)
+    
+    // Determine title based on action
+    let title = 'AI Generated Image'
+    if (action === 'edit') title = 'Edited Image'
+    if (action === 'fuse') title = 'Fused Image'
+    
+    const document = {
+      id: imageId,
+      userId: 'default-user',
+      content: '',
+      filePath: publicPath,
+      fileSize: buffer.length,
+      type: 'image-generator',
+      category: 'image',
+      title,
+      description: prompt.slice(0, 200),
+      metadata: { action, style, prompt },
+      createdAt: new Date(),
+      expiresAt
+    }
+    
+    await libraryCollection.insertOne(document)
+    console.log(`[Image Editor] Saved to library: ${imageId}`)
+    
+    return { id: imageId, filePath: publicPath }
+  } catch (error) {
+    console.error('[Image Editor] Library save error:', error)
+    return null
+  }
+}
 
 // Style presets
 const STYLE_PRESETS = {
