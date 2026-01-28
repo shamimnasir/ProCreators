@@ -98,6 +98,7 @@ export default function VideoEditorPage() {
   const [addCaptions, setAddCaptions] = useState(false)
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [outputPreset, setOutputPreset] = useState('youtube-hd')
+  const [captionLanguage, setCaptionLanguage] = useState('auto') // Auto-detect by default
   
   // AI Enhancement Settings
   const [removeSilences, setRemoveSilences] = useState(false)
