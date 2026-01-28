@@ -277,10 +277,22 @@ export async function POST(request) {
       )
     }
     
+    // Auto-save to library
+    let libraryInfo = null
+    const promptText = body.prompt || body.editPrompt || body.fusionPrompt || ''
+    try {
+      libraryInfo = await saveToLibrary(result.imageUrl, promptText, action, body.style)
+    } catch (saveError) {
+      console.error('[Image Editor] Auto-save failed:', saveError)
+    }
+    
     return NextResponse.json({
       success: true,
       imageUrl: result.imageUrl,
-      mimeType: result.mimeType || 'image/png'
+      mimeType: result.mimeType || 'image/png',
+      savedToLibrary: !!libraryInfo,
+      libraryId: libraryInfo?.id || null,
+      filePath: libraryInfo?.filePath || null
     })
     
   } catch (error) {
