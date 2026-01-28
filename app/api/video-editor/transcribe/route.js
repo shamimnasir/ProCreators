@@ -13,7 +13,10 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
-    const { fileId, filePath, language = 'en' } = await request.json()
+    const { fileId, filePath, language = 'auto' } = await request.json()
+    
+    // Auto-detect language if not specified
+    const detectedLanguage = language === 'auto' ? null : language
     
     if (!fileId && !filePath) {
       return NextResponse.json({ success: false, error: 'fileId or filePath required' }, { status: 400 })
