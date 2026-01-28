@@ -35,19 +35,7 @@ def get_model(model_name="nano-banana"):
     """Get the appropriate model instance"""
     model_id = MODELS.get(model_name, MODELS["nano-banana"])
     
-    # Configure for image generation - use correct response_modalities format
-    generation_config = genai.GenerationConfig(
-        temperature=1,
-        top_p=0.95,
-        top_k=40,
-        max_output_tokens=8192,
-        response_modalities=["TEXT", "IMAGE"],
-    )
-    
-    return genai.GenerativeModel(
-        model_name=model_id,
-        generation_config=generation_config
-    )
+    return genai.GenerativeModel(model_name=model_id)
 
 def extract_image_from_response(response):
     """Extract image data from Gemini response"""
