@@ -1653,6 +1653,31 @@ export default function VideoEditorPage() {
                       <Switch checked={addCaptions} onCheckedChange={setAddCaptions} />
                     </div>
                     
+                    {/* Language Selector for Captions */}
+                    {addCaptions && (
+                      <div className="space-y-2 pl-6 border-l-2 border-primary/20">
+                        <Label className="text-sm">Caption Language</Label>
+                        <Select value={captionLanguage} onValueChange={setCaptionLanguage}>
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="auto">🌐 Auto-Detect</SelectItem>
+                            <SelectItem value="bn">🇧🇩 Bengali (বাংলা)</SelectItem>
+                            <SelectItem value="en">🇺🇸 English</SelectItem>
+                            <SelectItem value="hi">🇮🇳 Hindi (हिंदी)</SelectItem>
+                            <SelectItem value="es">🇪🇸 Spanish</SelectItem>
+                            <SelectItem value="fr">🇫🇷 French</SelectItem>
+                            <SelectItem value="ar">🇸🇦 Arabic</SelectItem>
+                            <SelectItem value="zh">🇨🇳 Chinese</SelectItem>
+                            <SelectItem value="ja">🇯🇵 Japanese</SelectItem>
+                            <SelectItem value="ko">🇰🇷 Korean</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">Select video language for accurate captions</p>
+                      </div>
+                    )}
+                    
                     <Separator />
                     
                     <div className="space-y-2">
