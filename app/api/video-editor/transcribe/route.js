@@ -125,6 +125,10 @@ export async function POST(request) {
     const words = []
     let fullText = ''
     
+    // Track detected language from whisper result
+    const detectedLang = whisperResult.language || detectedLanguage || 'en'
+    console.log(`[${jobId}] Whisper detected language: ${detectedLang}`)
+    
     if (whisperResult.segments) {
       for (const seg of whisperResult.segments) {
         segments.push({
@@ -151,6 +155,9 @@ export async function POST(request) {
       }
     }
     
+    console.log(`[${jobId}] Transcript: ${fullText.slice(0, 200)}...`)
+    console.log(`[${jobId}] Words extracted: ${words.length}`)
+    
     // Detect filler words - comprehensive list including Bengali and English
     const englishFillers = [
       'um', 'uh', 'uhh', 'umm', 'ummm', 'uhm', 'hmm', 'hm', 'mmm', 'mm',
@@ -161,15 +168,21 @@ export async function POST(request) {
     ]
     
     // Bengali/Hindi fillers (in romanized and native script)
+    // These are common hesitation sounds and filler words in Bengali
     const bengaliFillers = [
+      // Bengali script filler words
       'মানে', 'আসলে', 'তো', 'এই', 'ওই', 'আচ্ছা', 'হ্যাঁ', 'না', 'কি', 'যে',
+      'তাহলে', 'সেটা', 'এটা', 'ওটা', 'একটু', 'বলতে', 'বুঝলে', 'আর', 'এবং',
+      // Common hesitation sounds (Whisper may transcribe these differently)
+      'আ', 'অ', 'এঁ', 'হুম', 'হ্যা', 'উম', 'আম', 'এম', 'ওম',
+      // Romanized versions (if Whisper outputs romanized)
       'mane', 'asole', 'to', 'ei', 'oi', 'accha', 'haan', 'na', 'ki', 'je',
-      'তাহলে', 'সেটা', 'এটা', 'ওটা', 'একটু', 'বলতে', 'বুঝলে',
-      'tahle', 'seta', 'eta', 'ota', 'ektu', 'bolte', 'bujhle'
+      'tahle', 'seta', 'eta', 'ota', 'ektu', 'bolte', 'bujhle', 'ar', 'ebong',
+      'aa', 'a', 'um', 'hum', 'hya', 'am', 'em', 'om'
     ]
     
     const allFillerWords = [...englishFillers, ...bengaliFillers]
-    const fillerSet = new Set(allFillerWords.map(f => f.toLowerCase()))
+    const fillerSet = new Set(allFillerWords.map(f => f.toLowerCase().trim()))
     
     // Also detect by sound patterns
     const fillerSoundPatterns = [
