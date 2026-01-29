@@ -433,10 +433,10 @@ export default function ImageEditorPage() {
                     </div>
                   </div>
                   
-                  {/* Style Presets */}
+                  {/* Templates & Styles - Unified Section */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <Label className="text-base font-semibold">Style</Label>
+                      <Label className="text-base font-semibold">Templates & Styles</Label>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -447,22 +447,58 @@ export default function ImageEditorPage() {
                         <ChevronRight className={`h-3 w-3 ml-1 transition-transform ${showAllStyles ? 'rotate-90' : ''}`} />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                      {(showAllStyles ? STYLE_PRESETS : STYLE_PRESETS.slice(0, 7)).map((style) => (
-                        <button
-                          key={style.id}
-                          onClick={() => setSelectedStyle(style.id)}
-                          className={`p-3 rounded-xl border-2 text-center transition-all hover:scale-105 ${
-                            selectedStyle === style.id 
-                              ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                          title={style.description}
-                        >
-                          <span className="text-2xl block mb-1">{style.icon}</span>
-                          <span className="text-[10px] font-medium truncate block">{style.name}</span>
-                        </button>
-                      ))}
+                    
+                    {/* Quick Templates - Always Show */}
+                    <div className="mb-4">
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">🚀 Quick Templates</p>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        {STYLE_PRESETS.filter(s => s.category === 'template').map((style) => (
+                          <button
+                            key={style.id}
+                            onClick={() => {
+                              setSelectedStyle(style.id)
+                              if (style.prompt) {
+                                setPrompt(style.prompt)
+                                toast.success(`${style.name} template applied!`)
+                              }
+                            }}
+                            className={`p-3 rounded-xl border-2 text-center transition-all hover:scale-105 ${
+                              selectedStyle === style.id 
+                                ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/30 shadow-lg shadow-violet-500/20' 
+                                : 'border-border hover:border-violet-300 bg-gradient-to-b from-violet-50/50 to-transparent dark:from-violet-950/20'
+                            }`}
+                            title={style.description}
+                          >
+                            <span className="text-2xl block mb-1">{style.icon}</span>
+                            <span className="text-[10px] font-medium truncate block">{style.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Style Presets */}
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2 font-medium">🎨 Style Presets</p>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        {(showAllStyles 
+                          ? STYLE_PRESETS.filter(s => s.category === 'style')
+                          : STYLE_PRESETS.filter(s => s.category === 'style').slice(0, 6)
+                        ).map((style) => (
+                          <button
+                            key={style.id}
+                            onClick={() => setSelectedStyle(style.id)}
+                            className={`p-2.5 rounded-xl border-2 text-center transition-all hover:scale-105 ${
+                              selectedStyle === style.id 
+                                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                            title={style.description}
+                          >
+                            <span className="text-xl block mb-0.5">{style.icon}</span>
+                            <span className="text-[9px] font-medium truncate block">{style.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   
