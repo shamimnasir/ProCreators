@@ -50,16 +50,6 @@ const ASPECT_RATIOS = [
   { id: '3:4', name: 'Portrait 3:4', icon: '📋', use: 'Pinterest' },
 ]
 
-// Quick action templates
-const QUICK_ACTIONS = [
-  { id: 'product', name: 'Product Photo', icon: '📦', prompt: 'Professional product photography, clean white background, soft studio lighting, e-commerce ready' },
-  { id: 'headshot', name: 'AI Headshot', icon: '👔', prompt: 'Professional corporate headshot, neutral gray background, soft lighting, LinkedIn ready' },
-  { id: 'logo', name: 'Logo Design', icon: '🎯', prompt: 'Modern minimalist logo design, clean lines, scalable vector style' },
-  { id: 'avatar', name: 'AI Avatar', icon: '🎭', prompt: 'Stylized cartoon avatar, friendly expression, colorful background' },
-  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', prompt: 'Eye-catching YouTube thumbnail, bold text, vibrant colors, high contrast' },
-  { id: 'social', name: 'Social Post', icon: '📱', prompt: 'Instagram-worthy photo, aesthetic composition, trending style' },
-]
-
 // Prompt suggestions by use case
 const PROMPT_LIBRARY = {
   product: [
