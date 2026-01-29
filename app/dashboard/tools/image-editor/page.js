@@ -340,18 +340,18 @@ export default function ImageEditorPage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-8 text-white">
+      {/* Hero Header - Simplified */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 p-6 text-white">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
                 <Camera className="h-8 w-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">AI Image Studio</h1>
-                <p className="text-white/80">Create, edit & transform images with Nano Banana AI</p>
+                <h1 className="text-2xl font-bold">AI Image Studio</h1>
+                <p className="text-white/80 text-sm">Create, edit & transform images with Nano Banana AI</p>
               </div>
             </div>
             
@@ -377,25 +377,10 @@ export default function ImageEditorPage() {
               </button>
             </div>
           </div>
-          
-          {/* Quick Actions */}
-          <div className="flex flex-wrap gap-2">
-            {QUICK_ACTIONS.map((action) => (
-              <button
-                key={action.id}
-                onClick={() => applyQuickAction(action)}
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-all flex items-center gap-2"
-              >
-                <span>{action.icon}</span>
-                <span>{action.name}</span>
-              </button>
-            ))}
-          </div>
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -mb-16 w-48 h-48 bg-pink-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6">
