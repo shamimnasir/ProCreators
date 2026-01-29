@@ -328,11 +328,6 @@ export default function ImageEditorPage() {
     toast.info('Image loaded for editing')
   }
 
-  const applyQuickAction = (action) => {
-    setPrompt(action.prompt)
-    toast.success(`${action.name} template applied!`)
-  }
-
   const applyPromptSuggestion = (suggestion) => {
     setPrompt(suggestion)
     toast.success('Prompt applied!')
