@@ -17,22 +17,28 @@ import {
   ChevronRight, Check, Star, Heart
 } from 'lucide-react'
 
-// Style presets with detailed info
+// Style presets with detailed info - Combined with Quick Actions
 const STYLE_PRESETS = [
-  { id: 'none', name: 'None', icon: '🎯', description: 'Use your prompt as-is', category: 'basic' },
-  { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting', category: 'photo' },
-  { id: 'product', name: 'Product Shot', icon: '🛍️', description: 'E-commerce ready, clean background', category: 'product' },
-  { id: 'portrait', name: 'Portrait', icon: '👤', description: 'Professional headshots', category: 'photo' },
-  { id: 'cinematic', name: 'Cinematic', icon: '🎬', description: 'Movie poster style, dramatic', category: 'creative' },
-  { id: 'minimalist', name: 'Minimalist', icon: '⬜', description: 'Clean, simple, white space', category: 'design' },
-  { id: 'vintage', name: 'Vintage', icon: '📷', description: 'Retro, film grain, warm tones', category: 'creative' },
-  { id: '3d', name: '3D Render', icon: '🎮', description: 'High quality 3D graphics', category: 'creative' },
-  { id: 'illustration', name: 'Illustration', icon: '🎨', description: 'Digital art, vibrant colors', category: 'creative' },
-  { id: 'watercolor', name: 'Watercolor', icon: '🖌️', description: 'Soft, artistic painting', category: 'creative' },
-  { id: 'pixel-art', name: 'Pixel Art', icon: '👾', description: '16-bit retro game style', category: 'creative' },
-  { id: 'comic', name: 'Comic', icon: '💥', description: 'Bold lines, high contrast', category: 'creative' },
-  { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization', category: 'design' },
-  { id: 'logo', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logos', category: 'design' },
+  // Quick Templates (Popular Use Cases)
+  { id: 'product-photo', name: 'Product Photo', icon: '📦', description: 'E-commerce ready product shots', category: 'template', prompt: 'Professional product photography, clean white background, soft studio lighting, e-commerce ready' },
+  { id: 'headshot', name: 'AI Headshot', icon: '👔', description: 'Professional corporate portraits', category: 'template', prompt: 'Professional corporate headshot, neutral gray background, soft lighting, LinkedIn ready' },
+  { id: 'logo-design', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logo designs', category: 'template', prompt: 'Modern minimalist logo design, clean lines, scalable vector style' },
+  { id: 'avatar', name: 'AI Avatar', icon: '🎭', description: 'Stylized cartoon avatars', category: 'template', prompt: 'Stylized cartoon avatar, friendly expression, colorful background' },
+  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', description: 'Eye-catching video thumbnails', category: 'template', prompt: 'Eye-catching YouTube thumbnail, bold text, vibrant colors, high contrast' },
+  { id: 'social-post', name: 'Social Post', icon: '📱', description: 'Instagram-worthy images', category: 'template', prompt: 'Instagram-worthy photo, aesthetic composition, trending style' },
+  // Style Presets
+  { id: 'none', name: 'No Style', icon: '✨', description: 'Use your prompt as-is', category: 'style' },
+  { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting', category: 'style' },
+  { id: 'portrait', name: 'Portrait', icon: '👤', description: 'Professional headshots', category: 'style' },
+  { id: 'cinematic', name: 'Cinematic', icon: '🎬', description: 'Movie poster style, dramatic', category: 'style' },
+  { id: 'minimalist', name: 'Minimalist', icon: '⬜', description: 'Clean, simple, white space', category: 'style' },
+  { id: 'vintage', name: 'Vintage', icon: '📷', description: 'Retro, film grain, warm tones', category: 'style' },
+  { id: '3d', name: '3D Render', icon: '🎮', description: 'High quality 3D graphics', category: 'style' },
+  { id: 'illustration', name: 'Illustration', icon: '🎨', description: 'Digital art, vibrant colors', category: 'style' },
+  { id: 'watercolor', name: 'Watercolor', icon: '🖌️', description: 'Soft, artistic painting', category: 'style' },
+  { id: 'pixel-art', name: 'Pixel Art', icon: '👾', description: '16-bit retro game style', category: 'style' },
+  { id: 'comic', name: 'Comic', icon: '💥', description: 'Bold lines, high contrast', category: 'style' },
+  { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization', category: 'style' },
 ]
 
 // Aspect ratio options
