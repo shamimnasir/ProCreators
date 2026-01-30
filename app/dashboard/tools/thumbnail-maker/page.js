@@ -370,10 +370,19 @@ export default function ThumbnailMakerPage() {
     setIsLoading(true)
     try {
       const styleConfig = THUMBNAIL_STYLES.find(s => s.id === selectedStyle)
+      
+      // Detect language in overlay text
+      const langInfo = overlayText ? detectLanguage(overlayText) : { hasNonLatin: false }
+      
       let editPrompt = `Transform this image into a high-CTR thumbnail. Apply ${styleConfig?.promptModifier || 'vibrant colors and high contrast'}. Make it attention-grabbing for ${currentPlatform.name}.`
       
       if (overlayText) {
-        editPrompt += ` The thumbnail should visually suggest: "${overlayText}"`
+        if (langInfo.hasNonLatin) {
+          // For non-Latin text, use visual storytelling approach
+          editPrompt += ` The thumbnail should visually represent the concept: "${overlayText}" - Use visual elements, arrows, icons rather than attempting to render ${langInfo.primaryLanguage} text which may appear garbled.`
+        } else {
+          editPrompt += ` The thumbnail should visually suggest: "${overlayText}"`
+        }
       }
       
       const response = await fetch('/api/image-editor', {
