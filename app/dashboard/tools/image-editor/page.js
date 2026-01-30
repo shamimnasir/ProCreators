@@ -22,10 +22,10 @@ const STYLE_PRESETS = [
   // Quick Templates (Popular Use Cases)
   { id: 'product-photo', name: 'Product Photo', icon: '📦', description: 'E-commerce ready product shots', category: 'template', prompt: 'Professional product photography, clean white background, soft studio lighting, e-commerce ready' },
   { id: 'headshot', name: 'AI Headshot', icon: '👔', description: 'Professional corporate portraits', category: 'template', prompt: 'Professional corporate headshot, neutral gray background, soft lighting, LinkedIn ready' },
-  { id: 'logo-design', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logo designs', category: 'template', prompt: 'Modern minimalist logo design, clean lines, scalable vector style' },
-  { id: 'avatar', name: 'AI Avatar', icon: '🎭', description: 'Stylized cartoon avatars', category: 'template', prompt: 'Stylized cartoon avatar, friendly expression, colorful background' },
-  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', description: 'Eye-catching video thumbnails', category: 'template', prompt: 'Eye-catching YouTube thumbnail, bold text, vibrant colors, high contrast' },
-  { id: 'social-post', name: 'Social Post', icon: '📱', description: 'Instagram-worthy images', category: 'template', prompt: 'Instagram-worthy photo, aesthetic composition, trending style' },
+  { id: 'logo-design', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logo designs', category: 'template', prompt: 'Modern minimalist logo design, clean lines, scalable vector style, no text' },
+  { id: 'avatar', name: 'AI Avatar', icon: '🎭', description: 'Stylized cartoon avatars', category: 'template', prompt: 'Stylized cartoon avatar, friendly expression, colorful gradient background' },
+  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', description: 'High-CTR video thumbnails', category: 'template', isThumbnail: true },
+  { id: 'social-post', name: 'Social Post', icon: '📱', description: 'Instagram-worthy images', category: 'template', prompt: 'Instagram-worthy photo, aesthetic composition, trending style, warm golden hour lighting' },
   // Style Presets
   { id: 'none', name: 'No Style', icon: '✨', description: 'Use your prompt as-is', category: 'style' },
   { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting', category: 'style' },
@@ -41,13 +41,81 @@ const STYLE_PRESETS = [
   { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization', category: 'style' },
 ]
 
-// Aspect ratio options
+// Platform-specific thumbnail configurations
+const THUMBNAIL_PLATFORMS = [
+  { 
+    id: 'youtube', 
+    name: 'YouTube', 
+    icon: '📺', 
+    aspectRatio: '16:9',
+    resolution: '1280x720',
+    description: 'YouTube videos & Shorts'
+  },
+  { 
+    id: 'instagram-post', 
+    name: 'Instagram Post', 
+    icon: '📸', 
+    aspectRatio: '1:1',
+    resolution: '1080x1080',
+    description: 'Instagram feed posts'
+  },
+  { 
+    id: 'instagram-story', 
+    name: 'Story/Reels', 
+    icon: '📱', 
+    aspectRatio: '9:16',
+    resolution: '1080x1920',
+    description: 'Stories, Reels, TikTok'
+  },
+  { 
+    id: 'facebook', 
+    name: 'Facebook', 
+    icon: '👤', 
+    aspectRatio: '16:9',
+    resolution: '1200x628',
+    description: 'Facebook posts & ads'
+  },
+  { 
+    id: 'twitter', 
+    name: 'X/Twitter', 
+    icon: '🐦', 
+    aspectRatio: '16:9',
+    resolution: '1600x900',
+    description: 'Twitter/X posts'
+  },
+  { 
+    id: 'linkedin', 
+    name: 'LinkedIn', 
+    icon: '💼', 
+    aspectRatio: '1.91:1',
+    resolution: '1200x627',
+    description: 'LinkedIn posts'
+  },
+]
+
+// High-CTR Thumbnail prompt generator
+const generateThumbnailPrompt = (topic, platform, language = 'en') => {
+  const basePrompt = `High-CTR thumbnail design for ${platform}. 
+COMPOSITION: Single dominant focal point using Rule of Thirds, close-up human face with exaggerated expression (surprise/excitement/shock) making direct eye contact with camera.
+COLORS: High-contrast vibrant color palette (red/blue or yellow/purple or orange/teal), colors that pop against white/dark backgrounds.
+TYPOGRAPHY: Maximum 3 bold power words in thick sans-serif font (like Impact/Montserrat) with drop shadow and outline for mobile readability. Avoid bottom-right corner for text (timestamp area).
+STYLE: Professional, attention-grabbing, creates curiosity gap, tells micro-story in one frame.
+BACKGROUND: Dynamic gradient or blurred action scene, not plain solid colors.`
+  
+  if (topic) {
+    return `${basePrompt}\nTOPIC/SUBJECT: ${topic}`
+  }
+  return basePrompt
+}
+
+// Aspect ratio options - Extended for thumbnails
 const ASPECT_RATIOS = [
   { id: '1:1', name: 'Square', icon: '⬜', use: 'Instagram, Profile' },
   { id: '16:9', name: 'Landscape', icon: '🖼️', use: 'YouTube, Desktop' },
-  { id: '9:16', name: 'Portrait', icon: '📱', use: 'Stories, Reels' },
+  { id: '9:16', name: 'Portrait', icon: '📱', use: 'Stories, Reels, TikTok' },
   { id: '4:3', name: 'Standard', icon: '🖥️', use: 'Presentations' },
   { id: '3:4', name: 'Portrait 3:4', icon: '📋', use: 'Pinterest' },
+  { id: '1.91:1', name: 'LinkedIn', icon: '💼', use: 'LinkedIn, Facebook Ads' },
 ]
 
 // Prompt suggestions by use case
