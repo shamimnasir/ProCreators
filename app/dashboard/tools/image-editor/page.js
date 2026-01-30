@@ -186,12 +186,15 @@ export default function ImageEditorPage() {
     
     setIsLoading(true)
     try {
+      // Enhance prompt for language support
+      const enhancedPrompt = enhancePromptForLanguage(prompt.trim())
+      
       const response = await fetch('/api/image-editor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'generate',
-          prompt: prompt.trim(),
+          prompt: enhancedPrompt,
           model: selectedModel,
           style: selectedStyle,
           aspectRatio
