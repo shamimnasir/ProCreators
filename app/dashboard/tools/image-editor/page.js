@@ -453,10 +453,7 @@ export default function ImageEditorPage() {
                             key={style.id}
                             onClick={() => {
                               setSelectedStyle(style.id)
-                              if (style.isThumbnail) {
-                                // Open thumbnail creator modal
-                                setShowThumbnailCreator(true)
-                              } else if (style.prompt) {
+                              if (style.prompt) {
                                 setPrompt(style.prompt)
                                 toast.success(`${style.name} template applied!`)
                               }
