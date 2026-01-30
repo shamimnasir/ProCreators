@@ -99,33 +99,93 @@ const PLATFORMS = [
   },
 ]
 
-// High-CTR Style presets - Professional YouTube Thumbnail Styles
+// High-CTR Style presets - MrBeast & Top YouTuber Inspired Styles
 const THUMBNAIL_STYLES = [
   { 
-    id: 'high-ctr', 
-    name: 'High CTR', 
-    icon: '🎯',
-    description: 'MrBeast style - Maximum clicks',
-    colors: 'Bold gradients, clean',
-    promptModifier: 'clean professional gradient background transitioning from deep blue to vibrant purple, smooth color transition, studio-quality lighting, no clutter, no random icons or emojis, minimal clean design with focus on the subject'
+    id: 'mrbeast-blue', 
+    name: 'MrBeast Blue', 
+    icon: '🔵',
+    description: 'Signature MrBeast electric blue',
+    colors: 'Electric Blue, Cyan, White',
+    promptModifier: `MRBEAST STYLE THUMBNAIL:
+- Background: ELECTRIC BLUE (#0066FF) to CYAN (#00FFFF) radial gradient burst emanating from center
+- LIGHT RAYS: Bold white/cyan light rays radiating outward from behind the subject like a starburst explosion
+- Add subtle SPARKLE effects and lens flares
+- Colors must be EXTREMELY SATURATED and VIBRANT - nothing muted
+- Professional studio rim lighting with blue/cyan colored gels on edges
+- Clean composition, no clutter, focus on dramatic visual impact`
   },
   { 
-    id: 'drama', 
-    name: 'Drama', 
-    icon: '🔥',
-    description: 'Cinematic dramatic style',
-    colors: 'Orange, Red, Cinematic',
-    promptModifier: 'cinematic warm gradient background from deep red to orange, professional movie poster style lighting, dramatic shadows, clean composition without clutter, no random icons, sophisticated professional look'
+    id: 'mrbeast-red', 
+    name: 'MrBeast Red', 
+    icon: '🔴',
+    description: 'Intense red/orange explosion',
+    colors: 'Red, Orange, Yellow burst',
+    promptModifier: `MRBEAST STYLE THUMBNAIL:
+- Background: FIERY RED (#FF0000) to ORANGE (#FF6600) to YELLOW (#FFFF00) radial gradient explosion
+- LIGHT RAYS: Intense golden/orange light rays bursting outward like a sun explosion
+- Add FIRE EFFECTS, sparks, and energy particles
+- Colors must be EXTREMELY HOT and SATURATED - like an explosion
+- Dramatic rim lighting with warm orange/red colored gels
+- Epic cinematic feel, like something amazing is happening`
   },
   { 
-    id: 'news', 
-    name: 'News/Info', 
-    icon: '📰',
-    description: 'Clean professional info style',
-    colors: 'Blue, White, Professional',
-    promptModifier: 'clean professional blue gradient background, corporate broadcast quality, sharp clean lines, no clutter or random elements, news anchor style lighting, sophisticated minimal design'
+    id: 'mrbeast-money', 
+    name: 'Money/Challenge', 
+    icon: '💰',
+    description: 'Green money/success theme',
+    colors: 'Green, Gold, Money',
+    promptModifier: `MRBEAST MONEY/CHALLENGE STYLE:
+- Background: RICH GREEN (#00FF00) to GOLD (#FFD700) gradient with money/success energy
+- LIGHT RAYS: Golden light burst effect radiating from center
+- Add subtle SPARKLE and SHINE effects suggesting wealth/success
+- Colors: Vibrant greens and golds - prosperity and excitement
+- Professional lighting with green/gold rim lights
+- Epic "big win" energy, celebratory feeling`
   },
   { 
+    id: 'mrbeast-purple', 
+    name: 'Epic Purple', 
+    icon: '🟣',
+    description: 'Dramatic purple/pink energy',
+    colors: 'Purple, Pink, Magenta',
+    promptModifier: `MRBEAST STYLE THUMBNAIL:
+- Background: DEEP PURPLE (#8B00FF) to HOT PINK (#FF00FF) to MAGENTA radial gradient
+- LIGHT RAYS: Vibrant pink/purple light rays with cosmic energy feel
+- Add ENERGY EFFECTS, plasma-like glows, and sparkles
+- Colors must be NEON SATURATED - electric and eye-catching
+- Dramatic colored rim lighting in purple/pink
+- Mysterious yet exciting energy, like something incredible`
+  },
+  { 
+    id: 'mrbeast-yellow', 
+    name: 'Shock Yellow', 
+    icon: '🟡',
+    description: 'Attention-grabbing yellow burst',
+    colors: 'Yellow, Orange, White',
+    promptModifier: `MRBEAST SHOCK STYLE:
+- Background: BRIGHT YELLOW (#FFFF00) to ORANGE (#FF8800) sunburst pattern
+- LIGHT RAYS: Intense white and yellow rays exploding outward - maximum attention
+- Add ELECTRIC EFFECTS, lightning bolts, shock waves
+- Colors: MAXIMUM BRIGHTNESS - impossible to ignore
+- High-key lighting with warm yellow/orange tones
+- "SHOCKING" energy - like breaking news or big reveal`
+  },
+  { 
+    id: 'contrast-split', 
+    name: 'Split Drama', 
+    icon: '⚡',
+    description: 'Before/After or VS style',
+    colors: 'Blue vs Red, Split design',
+    promptModifier: `DRAMATIC SPLIT/VS STYLE:
+- Background: DIAGONAL SPLIT - left side BLUE (#0066FF), right side RED (#FF0000)
+- Add LIGHTNING or ENERGY CRACK effect down the middle dividing line
+- Each side has its own light rays emanating outward
+- Colors: High contrast opposing colors creating tension
+- Dramatic lighting from both sides
+- Perfect for comparisons, challenges, or transformations`
+  },
+] 
     id: 'educational', 
     name: 'Educational', 
     icon: '📚',
@@ -1346,129 +1406,4 @@ export default function ThumbnailMakerPage() {
                         onClick={exportWithText}
                         disabled={textLayers.length === 0}
                         className="w-full h-12 text-lg bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
-                        size="lg"
-                      >
-                        <Download className="h-5 w-5 mr-2" />
-                        Export with Text
-                      </Button>
-                    </>
-                  )}
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
-        </div>
-
-        {/* Right Panel - Result */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Result
-                {generatedThumbnail && (
-                  <Badge variant="secondary" className="text-[10px]">
-                    {currentPlatform.aspectRatio}
-                  </Badge>
-                )}
-              </CardTitle>
-              {generatedThumbnail && (
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={downloadThumbnail}>
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyToClipboard}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </CardHeader>
-            <CardContent>
-              {generatedThumbnail ? (
-                <div className="space-y-3">
-                  <div className={`relative rounded-xl overflow-hidden bg-muted ${
-                    currentPlatform.aspectRatio === '16:9' ? 'aspect-video' :
-                    currentPlatform.aspectRatio === '1:1' ? 'aspect-square' :
-                    currentPlatform.aspectRatio === '9:16' ? 'aspect-[9/16]' :
-                    'aspect-video'
-                  }`}>
-                    <img 
-                      src={generatedThumbnail} 
-                      alt="Generated thumbnail" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs">
-                      {currentPlatform.name}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {currentPlatform.resolution}
-                    </Badge>
-                    <Badge className="text-xs bg-green-500">
-                      CTR Optimized
-                    </Badge>
-                  </div>
-                  {/* Add Text Button */}
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => loadImageToEditor(generatedThumbnail)}
-                  >
-                    <Type className="h-4 w-4 mr-2" />
-                    Add Text Overlay
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-[280px] text-muted-foreground bg-muted/30 rounded-xl">
-                  <Target className="h-12 w-12 opacity-30 mb-3" />
-                  <p className="font-medium">Your thumbnail will appear here</p>
-                  <p className="text-xs">Optimized for high click-through rates</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* History */}
-          {thumbnailHistory.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Recent</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-2">
-                  {thumbnailHistory.slice(0, 6).map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setGeneratedThumbnail(item.url)}
-                      className="aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-red-500 transition-all"
-                    >
-                      <img src={item.url} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* CTR Tips Card */}
-          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
-                <Target className="h-4 w-4" />
-                CTR Best Practices
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs space-y-1.5 text-amber-700 dark:text-amber-300">
-              <p>• <strong>Faces with expressions</strong> get 921K+ more views</p>
-              <p>• <strong>3 words maximum</strong> - power words like NEVER, STOP</p>
-              <p>• <strong>High contrast colors</strong> - red/blue, yellow/purple</p>
-              <p>• <strong>Avoid bottom-right</strong> - timestamp covers it</p>
-              <p>• <strong>Mobile-first</strong> - 70% views are mobile</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
-}
+               
