@@ -1409,6 +1409,15 @@ export default function ThumbnailMakerPage() {
                       CTR Optimized
                     </Badge>
                   </div>
+                  {/* Add Text Button */}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => loadImageToEditor(generatedThumbnail)}
+                  >
+                    <Type className="h-4 w-4 mr-2" />
+                    Add Text Overlay
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-[280px] text-muted-foreground bg-muted/30 rounded-xl">
