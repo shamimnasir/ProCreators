@@ -169,6 +169,11 @@ export default function ImageEditorPage() {
   const [aspectRatio, setAspectRatio] = useState('1:1')
   const [showAllStyles, setShowAllStyles] = useState(false)
   
+  // Thumbnail Creator state
+  const [showThumbnailCreator, setShowThumbnailCreator] = useState(false)
+  const [thumbnailPlatform, setThumbnailPlatform] = useState('youtube')
+  const [thumbnailTopic, setThumbnailTopic] = useState('')
+  
   // Edit state
   const [editPrompt, setEditPrompt] = useState('')
   const [uploadedImage, setUploadedImage] = useState(null)
