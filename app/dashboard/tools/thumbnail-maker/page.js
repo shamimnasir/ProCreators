@@ -225,7 +225,16 @@ const generateThumbnailPrompt = (topic, platform, style, includesFace = true) =>
   const platformConfig = PLATFORMS.find(p => p.id === platform)
   const styleConfig = THUMBNAIL_STYLES.find(s => s.id === style)
   
+  // Detect language in topic
+  const langInfo = detectLanguage(topic)
+  const languageInstructions = getLanguageTextInstructions(langInfo, topic)
+  
   let basePrompt = `Create a high click-through rate thumbnail for ${platformConfig?.name || 'YouTube'}.`
+  
+  // Add language-specific instructions if non-Latin text detected
+  if (languageInstructions) {
+    basePrompt += languageInstructions
+  }
   
   // CTR best practices
   basePrompt += `
@@ -236,13 +245,28 @@ COMPOSITION: Single dominant focal point using Rule of Thirds.`
   }
   
   basePrompt += `
-COLORS: High-contrast vibrant color palette that pops against white/dark backgrounds. ${styleConfig?.promptModifier || 'Use red/blue or yellow/purple or orange/teal color combinations.'}
-TYPOGRAPHY: If text needed, use maximum 3 bold power words in thick sans-serif font with drop shadow for mobile readability. Never place text in bottom-right corner (timestamp area).
+COLORS: High-contrast vibrant color palette that pops against white/dark backgrounds. ${styleConfig?.promptModifier || 'Use red/blue or yellow/purple or orange/teal color combinations.'}`
+  
+  // Modified typography instructions based on language
+  if (langInfo.hasNonLatin) {
+    basePrompt += `
+TYPOGRAPHY: Focus on VISUAL STORYTELLING rather than text. Use icons, arrows, emojis, or visual cues. If any text is used, use ONLY simple English words (3 max). DO NOT attempt to render ${langInfo.primaryLanguage} script.`
+  } else {
+    basePrompt += `
+TYPOGRAPHY: If text needed, use maximum 3 bold power words in thick sans-serif font with drop shadow for mobile readability. Never place text in bottom-right corner (timestamp area).`
+  }
+  
+  basePrompt += `
 BACKGROUND: Dynamic gradient or contextual scene, NOT plain solid colors.
 QUALITY: Sharp, professional, 4K quality, perfect for ${platformConfig?.resolution || '1280x720'} resolution.`
   
+  // For non-Latin content, emphasize visual concept
   if (topic) {
-    basePrompt += `\nTOPIC: ${topic}`
+    if (langInfo.hasNonLatin) {
+      basePrompt += `\nCONCEPT/THEME: Create a thumbnail that visually represents: "${topic}" - Focus on emotions, actions, and visual metaphors instead of text.`
+    } else {
+      basePrompt += `\nTOPIC: ${topic}`
+    }
   }
   
   return basePrompt
