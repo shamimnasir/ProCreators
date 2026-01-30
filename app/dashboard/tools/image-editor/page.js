@@ -91,6 +91,65 @@ const EDIT_SUGGESTIONS = [
   { text: 'Add soft glow effect', icon: '💫' },
 ]
 
+// Language detection for non-Latin scripts
+const detectLanguage = (text) => {
+  if (!text) return { hasNonLatin: false, languages: [], primaryLanguage: 'English' }
+  
+  // Bengali Unicode range: \u0980-\u09FF
+  const bengaliRegex = /[\u0980-\u09FF]/
+  // Hindi/Devanagari Unicode range: \u0900-\u097F
+  const hindiRegex = /[\u0900-\u097F]/
+  // Arabic Unicode range: \u0600-\u06FF
+  const arabicRegex = /[\u0600-\u06FF]/
+  // Chinese Unicode range
+  const chineseRegex = /[\u4e00-\u9fff]/
+  // Japanese Unicode ranges (Hiragana, Katakana)
+  const japaneseRegex = /[\u3040-\u309f\u30a0-\u30ff]/
+  // Korean Unicode range
+  const koreanRegex = /[\uac00-\ud7af\u1100-\u11ff]/
+  // Thai Unicode range
+  const thaiRegex = /[\u0e00-\u0e7f]/
+  
+  const detectedLanguages = []
+  
+  if (bengaliRegex.test(text)) detectedLanguages.push('Bengali')
+  if (hindiRegex.test(text)) detectedLanguages.push('Hindi')
+  if (arabicRegex.test(text)) detectedLanguages.push('Arabic')
+  if (chineseRegex.test(text)) detectedLanguages.push('Chinese')
+  if (japaneseRegex.test(text)) detectedLanguages.push('Japanese')
+  if (koreanRegex.test(text)) detectedLanguages.push('Korean')
+  if (thaiRegex.test(text)) detectedLanguages.push('Thai')
+  
+  return {
+    hasNonLatin: detectedLanguages.length > 0,
+    languages: detectedLanguages,
+    primaryLanguage: detectedLanguages[0] || 'English'
+  }
+}
+
+// Generate language-aware prompt enhancement
+const enhancePromptForLanguage = (originalPrompt) => {
+  const langInfo = detectLanguage(originalPrompt)
+  
+  if (!langInfo.hasNonLatin) return originalPrompt
+  
+  // Add language-specific instructions
+  let enhancedPrompt = originalPrompt
+  
+  const langWarning = `
+IMPORTANT: The prompt contains ${langInfo.primaryLanguage} text. DO NOT attempt to render ${langInfo.primaryLanguage} script directly in the image as it will appear garbled. Instead:
+- Focus on visual representation of the concept
+- Use imagery, icons, and visual metaphors
+- If text is absolutely needed, use simple English words only
+- Create clean areas where text can be overlaid later
+
+VISUAL CONCEPT: `
+  
+  enhancedPrompt = langWarning + enhancedPrompt
+  
+  return enhancedPrompt
+}
+
 export default function ImageEditorPage() {
   const [activeTab, setActiveTab] = useState('generate')
   const [isLoading, setIsLoading] = useState(false)
