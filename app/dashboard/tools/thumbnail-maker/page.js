@@ -1082,6 +1082,278 @@ export default function ThumbnailMakerPage() {
                     )}
                   </Button>
                 </TabsContent>
+
+                {/* Text Editor Tab */}
+                <TabsContent value="text-editor" className="mt-0 space-y-5">
+                  {/* Info Banner */}
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Type className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">Add Bengali/Custom Text</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400">Add text overlays with proper font rendering</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Image Upload/Load */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Base Image</Label>
+                    {editorImage ? (
+                      <div className="relative">
+                        <div className="relative rounded-lg overflow-hidden border-2 border-border">
+                          <img src={editorImage} alt="Editor" className="w-full" />
+                          {/* Text Layer Preview */}
+                          {textLayers.map(layer => {
+                            const font = TEXT_FONTS.find(f => f.id === layer.fontFamily)
+                            return (
+                              <div
+                                key={layer.id}
+                                onClick={() => setSelectedLayerId(layer.id)}
+                                className={`absolute cursor-pointer transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-blue-500' : ''}`}
+                                style={{
+                                  left: `${layer.x}%`,
+                                  top: `${layer.y}%`,
+                                  transform: 'translate(-50%, -50%)',
+                                  fontSize: `${layer.fontSize}px`,
+                                  fontFamily: font?.css || 'Impact',
+                                  fontWeight: layer.bold ? 'bold' : 'normal',
+                                  color: layer.color,
+                                  textShadow: `
+                                    -${layer.outlineWidth}px -${layer.outlineWidth}px 0 ${layer.outlineColor},
+                                    ${layer.outlineWidth}px -${layer.outlineWidth}px 0 ${layer.outlineColor},
+                                    -${layer.outlineWidth}px ${layer.outlineWidth}px 0 ${layer.outlineColor},
+                                    ${layer.outlineWidth}px ${layer.outlineWidth}px 0 ${layer.outlineColor}
+                                  `,
+                                  textAlign: layer.align,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {layer.text}
+                              </div>
+                            )
+                          })}
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => setEditorImage(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div
+                          onClick={() => editorInputRef.current?.click()}
+                          className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition-all"
+                        >
+                          <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm font-medium">Upload image to add text</p>
+                          <p className="text-xs text-muted-foreground">Or use generated thumbnail</p>
+                        </div>
+                        {generatedThumbnail && (
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setEditorImage(generatedThumbnail)}
+                          >
+                            <ImageIcon className="h-4 w-4 mr-2" />
+                            Use Generated Thumbnail
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                    <input
+                      ref={editorInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditorImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Text Layers */}
+                  {editorImage && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-semibold">Text Layers</Label>
+                        <Button size="sm" onClick={addTextLayer}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Text
+                        </Button>
+                      </div>
+
+                      {/* Layer List */}
+                      <div className="space-y-2">
+                        {textLayers.map(layer => (
+                          <div
+                            key={layer.id}
+                            onClick={() => setSelectedLayerId(layer.id)}
+                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                              selectedLayerId === layer.id 
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
+                                : 'border-border hover:border-blue-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium truncate flex-1">{layer.text}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  deleteTextLayer(layer.id)
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {textLayers.length === 0 && (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            Click Add Text to create a text layer
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Selected Layer Editor */}
+                      {selectedLayerId && (
+                        <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                          <Label className="text-sm font-semibold">Edit Selected Text</Label>
+                          
+                          {/* Text Input */}
+                          <Input
+                            value={textLayers.find(l => l.id === selectedLayerId)?.text || ''}
+                            onChange={(e) => updateTextLayer(selectedLayerId, { text: e.target.value })}
+                            placeholder="Enter your text..."
+                            className="text-lg"
+                          />
+
+                          {/* Font Selection */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs mb-1 block">Font</Label>
+                              <Select
+                                value={textLayers.find(l => l.id === selectedLayerId)?.fontFamily}
+                                onValueChange={(v) => updateTextLayer(selectedLayerId, { fontFamily: v })}
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TEXT_FONTS.map(font => (
+                                    <SelectItem key={font.id} value={font.id}>
+                                      <span style={{ fontFamily: font.css }}>{font.name}</span>
+                                      <span className="text-xs text-muted-foreground ml-2">({font.style})</span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Size: {textLayers.find(l => l.id === selectedLayerId)?.fontSize}px</Label>
+                              <Slider
+                                value={[textLayers.find(l => l.id === selectedLayerId)?.fontSize || 48]}
+                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { fontSize: v })}
+                                min={16}
+                                max={120}
+                                step={2}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Color Presets */}
+                          <div>
+                            <Label className="text-xs mb-2 block">Color Presets</Label>
+                            <div className="flex gap-2 flex-wrap">
+                              {TEXT_PRESETS.map(preset => (
+                                <button
+                                  key={preset.id}
+                                  onClick={() => applyPreset(preset)}
+                                  className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 border-border hover:scale-105 transition-transform"
+                                  style={{
+                                    color: preset.color,
+                                    textShadow: `1px 1px 0 ${preset.outline}, -1px -1px 0 ${preset.outline}, 1px -1px 0 ${preset.outline}, -1px 1px 0 ${preset.outline}`,
+                                  }}
+                                >
+                                  {preset.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Position */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs mb-1 block">X Position: {textLayers.find(l => l.id === selectedLayerId)?.x}%</Label>
+                              <Slider
+                                value={[textLayers.find(l => l.id === selectedLayerId)?.x || 50]}
+                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { x: v })}
+                                min={0}
+                                max={100}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Y Position: {textLayers.find(l => l.id === selectedLayerId)?.y}%</Label>
+                              <Slider
+                                value={[textLayers.find(l => l.id === selectedLayerId)?.y || 50]}
+                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { y: v })}
+                                min={0}
+                                max={100}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Custom Colors */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <Label className="text-xs mb-1 block">Fill Color</Label>
+                              <input
+                                type="color"
+                                value={textLayers.find(l => l.id === selectedLayerId)?.color || '#FFFF00'}
+                                onChange={(e) => updateTextLayer(selectedLayerId, { color: e.target.value })}
+                                className="w-full h-9 rounded cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Outline Color</Label>
+                              <input
+                                type="color"
+                                value={textLayers.find(l => l.id === selectedLayerId)?.outlineColor || '#000000'}
+                                onChange={(e) => updateTextLayer(selectedLayerId, { outlineColor: e.target.value })}
+                                className="w-full h-9 rounded cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Outline: {textLayers.find(l => l.id === selectedLayerId)?.outlineWidth}px</Label>
+                              <Slider
+                                value={[textLayers.find(l => l.id === selectedLayerId)?.outlineWidth || 4]}
+                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { outlineWidth: v })}
+                                min={0}
+                                max={10}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Export Button */}
+                      <Button 
+                        onClick={exportWithText}
+                        disabled={textLayers.length === 0}
+                        className="w-full h-12 text-lg bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+                        size="lg"
+                      >
+                        <Download className="h-5 w-5 mr-2" />
+                        Export with Text
+                      </Button>
+                    </>
+                  )}
+                </TabsContent>
               </CardContent>
             </Tabs>
           </Card>
