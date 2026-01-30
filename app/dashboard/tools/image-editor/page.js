@@ -905,7 +905,7 @@ export default function ImageEditorPage() {
             <CardContent className="text-xs space-y-2 text-amber-700 dark:text-amber-300">
               <p>• <strong>Be specific</strong> about subjects, lighting, and composition</p>
               <p>• <strong>Use style presets</strong> for consistent results</p>
-              <p>• <strong>For editing</strong>, use commands like "remove", "add", "change"</p>
+              <p>• <strong>For editing</strong>, use commands like remove, add, change</p>
               <p>• <strong>Pro model</strong> gives higher quality for detailed work</p>
             </CardContent>
           </Card>
