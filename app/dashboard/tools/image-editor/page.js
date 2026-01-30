@@ -295,13 +295,16 @@ export default function ImageEditorPage() {
         mimeType: img.mimeType || 'image/png'
       }))
       
+      // Enhance fusion prompt for language support
+      const enhancedFusionPrompt = enhancePromptForLanguage(fusionPrompt.trim())
+      
       const response = await fetch('/api/image-editor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'fuse',
           images,
-          fusionPrompt: fusionPrompt.trim(),
+          fusionPrompt: enhancedFusionPrompt,
           model: 'nano-banana-pro'
         })
       })
