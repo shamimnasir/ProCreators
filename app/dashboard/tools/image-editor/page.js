@@ -525,7 +525,10 @@ export default function ImageEditorPage() {
                             key={style.id}
                             onClick={() => {
                               setSelectedStyle(style.id)
-                              if (style.prompt) {
+                              if (style.isThumbnail) {
+                                // Open thumbnail creator modal
+                                setShowThumbnailCreator(true)
+                              } else if (style.prompt) {
                                 setPrompt(style.prompt)
                                 toast.success(`${style.name} template applied!`)
                               }
@@ -543,6 +546,96 @@ export default function ImageEditorPage() {
                         ))}
                       </div>
                     </div>
+                    
+                    {/* Thumbnail Creator Panel */}
+                    {showThumbnailCreator && (
+                      <div className="mb-4 p-4 rounded-xl border-2 border-violet-300 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-violet-800 dark:text-violet-200 flex items-center gap-2">
+                            🖼️ High-CTR Thumbnail Creator
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowThumbnailCreator(false)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <p className="text-xs text-violet-600 dark:text-violet-300 mb-3">
+                          Create thumbnails optimized for high click-through rates with proper composition, colors, and typography.
+                        </p>
+                        
+                        {/* Platform Selection */}
+                        <div className="mb-3">
+                          <Label className="text-xs font-medium mb-2 block">Platform</Label>
+                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            {THUMBNAIL_PLATFORMS.map((platform) => (
+                              <button
+                                key={platform.id}
+                                onClick={() => {
+                                  setThumbnailPlatform(platform.id)
+                                  // Set aspect ratio based on platform
+                                  const arMap = {
+                                    'youtube': '16:9',
+                                    'instagram-post': '1:1',
+                                    'instagram-story': '9:16',
+                                    'facebook': '16:9',
+                                    'twitter': '16:9',
+                                    'linkedin': '16:9'
+                                  }
+                                  setAspectRatio(arMap[platform.id] || '16:9')
+                                }}
+                                className={`p-2 rounded-lg border text-center transition-all ${
+                                  thumbnailPlatform === platform.id 
+                                    ? 'border-violet-500 bg-violet-100 dark:bg-violet-900/50' 
+                                    : 'border-border hover:border-violet-300'
+                                }`}
+                              >
+                                <span className="text-lg block">{platform.icon}</span>
+                                <span className="text-[9px] font-medium block">{platform.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Topic Input */}
+                        <div className="mb-3">
+                          <Label className="text-xs font-medium mb-1 block">Video Topic / Title</Label>
+                          <Textarea
+                            placeholder="e.g., How to Learn Programming in 30 Days, Best Gaming Setup 2024, Cook Restaurant Quality Pasta..."
+                            value={thumbnailTopic}
+                            onChange={(e) => setThumbnailTopic(e.target.value)}
+                            className="min-h-[60px] text-sm resize-none"
+                          />
+                        </div>
+                        
+                        {/* Apply Button */}
+                        <Button
+                          onClick={() => {
+                            const platform = THUMBNAIL_PLATFORMS.find(p => p.id === thumbnailPlatform)
+                            const thumbnailPrompt = generateThumbnailPrompt(thumbnailTopic, platform?.name || 'YouTube')
+                            setPrompt(thumbnailPrompt)
+                            setShowThumbnailCreator(false)
+                            toast.success(`${platform?.name || 'YouTube'} thumbnail template applied!`)
+                          }}
+                          className="w-full bg-violet-600 hover:bg-violet-700"
+                          size="sm"
+                        >
+                          <Wand2 className="h-4 w-4 mr-2" />
+                          Apply High-CTR Template
+                        </Button>
+                        
+                        {/* Tips */}
+                        <div className="mt-3 p-2 bg-white/50 dark:bg-black/20 rounded-lg">
+                          <p className="text-[10px] text-violet-700 dark:text-violet-300">
+                            <strong>Pro Tips:</strong> Thumbnails with faces get 921K+ more views. Use 3 words max. High contrast colors (red/blue, yellow/purple). Direct eye contact. Avoid text in bottom-right corner.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Style Presets */}
                     <div>
