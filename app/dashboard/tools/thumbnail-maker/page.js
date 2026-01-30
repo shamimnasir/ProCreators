@@ -665,15 +665,15 @@ export default function ThumbnailMakerPage() {
                     
                     {/* Language Detection Warning */}
                     {topicLangInfo.hasNonLatin && (
-                      <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <div className="flex items-start gap-2">
-                          <span className="text-amber-600 text-lg">🌐</span>
+                          <span className="text-blue-600 text-lg">💡</span>
                           <div className="text-xs">
-                            <p className="font-semibold text-amber-800 dark:text-amber-200">
-                              {topicLangInfo.primaryLanguage} text detected
+                            <p className="font-semibold text-blue-800 dark:text-blue-200">
+                              {topicLangInfo.primaryLanguage} detected - Using English text
                             </p>
-                            <p className="text-amber-700 dark:text-amber-300 mt-0.5">
-                              AI will generate a visual concept instead of text. You can add {topicLangInfo.primaryLanguage} text using an editor later for best results.
+                            <p className="text-blue-700 dark:text-blue-300 mt-0.5">
+                              AI will use ENGLISH power words (from your title) for better rendering. You can replace with {topicLangInfo.primaryLanguage} text in an editor afterward.
                             </p>
                           </div>
                         </div>
