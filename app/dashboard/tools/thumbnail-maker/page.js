@@ -1411,10 +1411,10 @@ export default function ThumbnailMakerPage() {
                 </CardTitle>
                 {generatedThumbnail && (
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={handleDownload}>
+                    <Button variant="ghost" size="icon" onClick={downloadThumbnail}>
                       <Download className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={handleCopy}>
+                    <Button variant="ghost" size="icon" onClick={copyToClipboard}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
