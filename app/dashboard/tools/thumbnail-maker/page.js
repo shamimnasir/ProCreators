@@ -761,17 +761,24 @@ export default function ThumbnailMakerPage() {
                 <TabsList className="w-full justify-start rounded-none border-0 bg-transparent h-auto p-0">
                   <TabsTrigger 
                     value="generate" 
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-6"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-4"
                   >
                     <Wand2 className="h-4 w-4 mr-2" />
                     AI Generate
                   </TabsTrigger>
                   <TabsTrigger 
+                    value="text-editor" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-4"
+                  >
+                    <Type className="h-4 w-4 mr-2" />
+                    Text Editor
+                  </TabsTrigger>
+                  <TabsTrigger 
                     value="upload" 
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-6"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-4"
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload & Edit
+                    Upload
                   </TabsTrigger>
                 </TabsList>
               </div>
