@@ -6,391 +6,714 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Upload, Download, ImageIcon, Type, Sparkles, Wand2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Slider } from '@/components/ui/slider'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import Image from 'next/image'
+import { toast } from 'sonner'
+import { 
+  Wand2, Upload, Download, ImageIcon, Type, Sparkles, RefreshCw,
+  Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,
+  Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay
+} from 'lucide-react'
+
+// Platform configurations with CTR-optimized settings
+const PLATFORMS = [
+  { 
+    id: 'youtube', 
+    name: 'YouTube', 
+    icon: '📺',
+    aspectRatio: '16:9',
+    resolution: '1280x720',
+    description: 'YouTube videos & Shorts',
+    tips: 'Use surprised face, 3 words max, avoid bottom-right'
+  },
+  { 
+    id: 'instagram-post', 
+    name: 'Instagram', 
+    icon: '📸',
+    aspectRatio: '1:1',
+    resolution: '1080x1080',
+    description: 'Instagram feed posts',
+    tips: 'Clean composition, vibrant colors'
+  },
+  { 
+    id: 'instagram-story', 
+    name: 'Stories/Reels', 
+    icon: '📱',
+    aspectRatio: '9:16',
+    resolution: '1080x1920',
+    description: 'Stories, Reels, TikTok',
+    tips: 'Vertical focus, text in safe zones'
+  },
+  { 
+    id: 'facebook', 
+    name: 'Facebook', 
+    icon: '👤',
+    aspectRatio: '16:9',
+    resolution: '1200x628',
+    description: 'Facebook posts & ads',
+    tips: 'Engaging imagery, minimal text'
+  },
+  { 
+    id: 'twitter', 
+    name: 'X/Twitter', 
+    icon: '🐦',
+    aspectRatio: '16:9',
+    resolution: '1600x900',
+    description: 'Twitter/X posts',
+    tips: 'Bold visuals, high contrast'
+  },
+  { 
+    id: 'linkedin', 
+    name: 'LinkedIn', 
+    icon: '💼',
+    aspectRatio: '1.91:1',
+    resolution: '1200x627',
+    description: 'LinkedIn posts',
+    tips: 'Professional look, clear message'
+  },
+]
+
+// High-CTR Style presets
+const THUMBNAIL_STYLES = [
+  { 
+    id: 'high-ctr', 
+    name: 'High CTR', 
+    icon: '🎯',
+    description: 'Optimized for maximum clicks',
+    colors: 'High contrast, vibrant',
+    promptModifier: 'dramatic lighting, high contrast colors, attention-grabbing composition'
+  },
+  { 
+    id: 'drama', 
+    name: 'Drama', 
+    icon: '🔥',
+    description: 'Red/Orange dramatic style',
+    colors: 'Red, Orange, High contrast',
+    promptModifier: 'dramatic red and orange gradient background, intense lighting, cinematic'
+  },
+  { 
+    id: 'news', 
+    name: 'News/Info', 
+    icon: '📰',
+    description: 'Professional news style',
+    colors: 'Blue, White, Clean',
+    promptModifier: 'professional blue and white color scheme, clean layout, news broadcast style'
+  },
+  { 
+    id: 'educational', 
+    name: 'Educational', 
+    icon: '📚',
+    description: 'Clean learning style',
+    colors: 'Light, Minimal, Clear',
+    promptModifier: 'clean minimalist design, educational look, clear visual hierarchy'
+  },
+  { 
+    id: 'gaming', 
+    name: 'Gaming', 
+    icon: '🎮',
+    description: 'Bold gaming aesthetic',
+    colors: 'Neon, Dark, Electric',
+    promptModifier: 'neon colors, dark background, gaming aesthetic, electric blue and purple'
+  },
+  { 
+    id: 'lifestyle', 
+    name: 'Lifestyle', 
+    icon: '✨',
+    description: 'Warm aesthetic style',
+    colors: 'Warm, Golden, Soft',
+    promptModifier: 'warm golden tones, lifestyle aesthetic, soft lighting, Instagram-worthy'
+  },
+]
+
+// Niche-specific CTR tips
+const NICHE_TIPS = {
+  gaming: ['Show gameplay moment', 'Use neon colors', 'Add reaction face'],
+  finance: ['Use graphs/charts', 'Green = gains', 'Professional headshot'],
+  education: ['Before/After', 'Step numbers', 'Clean background'],
+  vlog: ['Authentic expression', 'Location hint', 'Personal connection'],
+  tech: ['Product close-up', 'Futuristic feel', 'Clean minimal'],
+}
+
+// Generate high-CTR prompt
+const generateThumbnailPrompt = (topic, platform, style, includesFace = true) => {
+  const platformConfig = PLATFORMS.find(p => p.id === platform)
+  const styleConfig = THUMBNAIL_STYLES.find(s => s.id === style)
+  
+  let basePrompt = `Create a high click-through rate thumbnail for ${platformConfig?.name || 'YouTube'}.`
+  
+  // CTR best practices
+  basePrompt += `
+COMPOSITION: Single dominant focal point using Rule of Thirds.`
+  
+  if (includesFace) {
+    basePrompt += ` Close-up human face with exaggerated expression (surprise/excitement/shock) making direct eye contact with camera - faces get 921K+ more views.`
+  }
+  
+  basePrompt += `
+COLORS: High-contrast vibrant color palette that pops against white/dark backgrounds. ${styleConfig?.promptModifier || 'Use red/blue or yellow/purple or orange/teal color combinations.'}
+TYPOGRAPHY: If text needed, use maximum 3 bold power words in thick sans-serif font with drop shadow for mobile readability. Never place text in bottom-right corner (timestamp area).
+BACKGROUND: Dynamic gradient or contextual scene, NOT plain solid colors.
+QUALITY: Sharp, professional, 4K quality, perfect for ${platformConfig?.resolution || '1280x720'} resolution.`
+  
+  if (topic) {
+    basePrompt += `\nTOPIC: ${topic}`
+  }
+  
+  return basePrompt
+}
 
 export default function ThumbnailMakerPage() {
-  const [uploadType, setUploadType] = useState('image')
-  const [file, setFile] = useState(null)
-  const [fileUrl, setFileUrl] = useState('')
-  const [thumbnailStyle, setThumbnailStyle] = useState('drama')
+  const [activeTab, setActiveTab] = useState('generate')
+  const [isLoading, setIsLoading] = useState(false)
+  
+  // AI Generation state
+  const [topic, setTopic] = useState('')
+  const [selectedPlatform, setSelectedPlatform] = useState('youtube')
+  const [selectedStyle, setSelectedStyle] = useState('high-ctr')
+  const [includeFace, setIncludeFace] = useState(true)
+  const [selectedModel, setSelectedModel] = useState('nano-banana')
+  
+  // Upload/Edit state
+  const [uploadedImage, setUploadedImage] = useState(null)
   const [overlayText, setOverlayText] = useState('')
   const [textPosition, setTextPosition] = useState('center')
-  const [outputFormat, setOutputFormat] = useState('16:9')
-  const [faceEnhance, setFaceEnhance] = useState(true)
-  const [aiUpscale, setAiUpscale] = useState(true)
-  const [loading, setLoading] = useState(false)
+  
+  // Output state
   const [generatedThumbnail, setGeneratedThumbnail] = useState(null)
+  const [thumbnailHistory, setThumbnailHistory] = useState([])
+  
   const fileInputRef = useRef(null)
-  const { toast } = useToast()
 
-  const thumbnailStyles = [
-    { value: 'drama', label: 'Drama', colors: 'Red/Orange with high contrast' },
-    { value: 'news', label: 'News', colors: 'Professional blue/white' },
-    { value: 'educational', label: 'Educational', colors: 'Clean, minimal design' },
-    { value: 'meme', label: 'Meme', colors: 'Bold yellow text with impact' },
-  ]
+  // Get current platform config
+  const currentPlatform = PLATFORMS.find(p => p.id === selectedPlatform) || PLATFORMS[0]
 
-  const outputFormats = [
-    { value: '16:9', label: '16:9 (YouTube)', dimensions: '1280x720' },
-    { value: '1:1', label: '1:1 (Instagram)', dimensions: '1080x1080' },
-    { value: '9:16', label: '9:16 (Stories)', dimensions: '1080x1920' },
-  ]
-
-  const handleFileUpload = (e) => {
-    const uploadedFile = e.target.files[0]
-    if (uploadedFile) {
-      const isVideo = uploadedFile.type.startsWith('video/')
-      const isImage = uploadedFile.type.startsWith('image/')
-      
-      if ((uploadType === 'video' && !isVideo) || (uploadType === 'image' && !isImage)) {
-        toast({
-          title: "Error",
-          description: `Please upload a valid ${uploadType} file`,
-          variant: "destructive"
-        })
-        return
-      }
-
-      setFile(uploadedFile)
-      const url = URL.createObjectURL(uploadedFile)
-      setFileUrl(url)
-      toast({
-        title: "File uploaded",
-        description: `${uploadedFile.name} ready for processing`
-      })
-    }
-  }
-
-  const handleGenerateThumbnail = async () => {
-    if (!file) {
-      toast({
-        title: "Error",
-        description: "Please upload an image or video first",
-        variant: "destructive"
-      })
+  // Handle AI thumbnail generation
+  const handleGenerate = async () => {
+    if (!topic.trim()) {
+      toast.error('Please enter a video topic or title')
       return
     }
-
-    setLoading(true)
+    
+    setIsLoading(true)
     try {
-      // Simulate thumbnail generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // In production, this would:
-      // 1. Extract key frame (for videos)
-      // 2. AI upscale the image
-      // 3. Apply face enhancement
-      // 4. Add text overlays with styling
-      // 5. Apply the selected style preset
-      // 6. Format to selected aspect ratio
+      const prompt = generateThumbnailPrompt(topic, selectedPlatform, selectedStyle, includeFace)
       
-      setGeneratedThumbnail({
-        url: fileUrl, // In production, this would be the processed thumbnail
-        format: outputFormat,
-        style: thumbnailStyle
+      const response = await fetch('/api/image-editor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate',
+          prompt,
+          model: selectedModel,
+          style: selectedStyle,
+          aspectRatio: currentPlatform.aspectRatio
+        })
       })
-
-      toast({
-        title: "Success",
-        description: "Thumbnail generated successfully!"
-      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setGeneratedThumbnail(data.imageUrl)
+        setThumbnailHistory(prev => [
+          { id: Date.now(), url: data.imageUrl, topic, platform: selectedPlatform },
+          ...prev.slice(0, 9)
+        ])
+        if (data.savedToLibrary) {
+          toast.success('Thumbnail generated and saved to Library!')
+        } else {
+          toast.success('Thumbnail generated successfully!')
+        }
+      } else {
+        toast.error(data.error || 'Failed to generate thumbnail')
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      })
+      console.error('Generation error:', error)
+      toast.error('Failed to generate thumbnail')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const handleDownload = (format) => {
-    toast({
-      title: "Download started",
-      description: `Downloading ${format} thumbnail...`
-    })
+  // Handle image upload for editing
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setUploadedImage(event.target.result)
+      toast.success('Image uploaded!')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Handle image editing
+  const handleEditImage = async () => {
+    if (!uploadedImage) {
+      toast.error('Please upload an image first')
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const styleConfig = THUMBNAIL_STYLES.find(s => s.id === selectedStyle)
+      let editPrompt = `Transform this image into a high-CTR thumbnail. Apply ${styleConfig?.promptModifier || 'vibrant colors and high contrast'}. Make it attention-grabbing for ${currentPlatform.name}.`
+      
+      if (overlayText) {
+        editPrompt += ` The thumbnail should visually suggest: "${overlayText}"`
+      }
+      
+      const response = await fetch('/api/image-editor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'edit',
+          imageBase64: uploadedImage,
+          editPrompt,
+          model: selectedModel
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setGeneratedThumbnail(data.imageUrl)
+        toast.success('Thumbnail enhanced!')
+      } else {
+        toast.error(data.error || 'Failed to enhance thumbnail')
+      }
+    } catch (error) {
+      toast.error('Failed to enhance thumbnail')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Download thumbnail
+  const downloadThumbnail = () => {
+    if (!generatedThumbnail) return
+    const link = document.createElement('a')
+    link.href = generatedThumbnail
+    link.download = `thumbnail-${selectedPlatform}-${Date.now()}.png`
+    link.click()
+    toast.success('Thumbnail downloaded!')
+  }
+
+  // Copy to clipboard
+  const copyToClipboard = async () => {
+    if (!generatedThumbnail) return
+    try {
+      const response = await fetch(generatedThumbnail)
+      const blob = await response.blob()
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
+      toast.success('Copied to clipboard!')
+    } catch {
+      toast.error('Failed to copy')
+    }
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">AI Thumbnail Maker</h1>
-        <p className="text-muted-foreground mt-1">
-          Create eye-catching thumbnails with AI enhancement and text overlays
-        </p>
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 p-6 text-white">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <Target className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  High-CTR Thumbnail Maker
+                  <Badge className="bg-yellow-400 text-yellow-900 text-xs">CTR Booster</Badge>
+                </h1>
+                <p className="text-white/80 text-sm">Create thumbnails that get clicks with AI</p>
+              </div>
+            </div>
+            
+            {/* Model Toggle */}
+            <div className="hidden md:flex gap-2 bg-white/10 backdrop-blur rounded-xl p-1">
+              <button
+                onClick={() => setSelectedModel('nano-banana')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedModel === 'nano-banana' ? 'bg-white text-red-600' : 'hover:bg-white/10'
+                }`}
+              >
+                <Zap className="h-4 w-4 inline mr-1" />
+                Fast
+              </button>
+              <button
+                onClick={() => setSelectedModel('nano-banana-pro')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedModel === 'nano-banana-pro' ? 'bg-white text-red-600' : 'hover:bg-white/10'
+                }`}
+              >
+                <Sparkles className="h-4 w-4 inline mr-1" />
+                Pro HD
+              </button>
+            </div>
+          </div>
+          
+          {/* CTR Stats */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            <div className="px-3 py-1.5 bg-white/10 rounded-lg text-xs flex items-center gap-2">
+              <Eye className="h-3 w-3" />
+              Faces = +921K views
+            </div>
+            <div className="px-3 py-1.5 bg-white/10 rounded-lg text-xs flex items-center gap-2">
+              <Type className="h-3 w-3" />
+              3 words max
+            </div>
+            <div className="px-3 py-1.5 bg-white/10 rounded-lg text-xs flex items-center gap-2">
+              <Palette className="h-3 w-3" />
+              High contrast colors
+            </div>
+            <div className="px-3 py-1.5 bg-white/10 rounded-lg text-xs flex items-center gap-2">
+              <Layout className="h-3 w-3" />
+              Rule of Thirds
+            </div>
+          </div>
+        </div>
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input & Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload & Settings</CardTitle>
-            <CardDescription>Configure your thumbnail settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Upload Type */}
-            <div className="space-y-2">
-              <Label>Upload Type</Label>
-              <Tabs value={uploadType} onValueChange={setUploadType}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="image">Image</TabsTrigger>
-                  <TabsTrigger value="video">Video</TabsTrigger>
+      <div className="grid lg:grid-cols-5 gap-6">
+        {/* Left Panel - Controls */}
+        <div className="lg:col-span-3 space-y-4">
+          <Card>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <div className="border-b bg-muted/30">
+                <TabsList className="w-full justify-start rounded-none border-0 bg-transparent h-auto p-0">
+                  <TabsTrigger 
+                    value="generate" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-6"
+                  >
+                    <Wand2 className="h-4 w-4 mr-2" />
+                    AI Generate
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="upload" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:bg-transparent py-3 px-6"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload & Edit
+                  </TabsTrigger>
                 </TabsList>
-              </Tabs>
-            </div>
-
-            {/* File Upload */}
-            <div className="space-y-2">
-              <Label>Upload File</Label>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept={uploadType === 'image' ? 'image/*' : 'video/*'}
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                {file ? file.name : `Choose ${uploadType === 'image' ? 'Image' : 'Video'}`}
-              </Button>
-            </div>
-
-            {/* Style Preset */}
-            <div className="space-y-2">
-              <Label>Thumbnail Style</Label>
-              <Select value={thumbnailStyle} onValueChange={setThumbnailStyle}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {thumbnailStyles.map(style => (
-                    <SelectItem key={style.value} value={style.value}>
-                      {style.label} - {style.colors}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Text Overlay */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Type className="h-4 w-4" />
-                Text Overlay
-              </Label>
-              <Textarea
-                placeholder="Enter thumbnail text..."
-                value={overlayText}
-                onChange={(e) => setOverlayText(e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            {/* Text Position */}
-            <div className="space-y-2">
-              <Label>Text Position</Label>
-              <Select value={textPosition} onValueChange={setTextPosition}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="top">Top</SelectItem>
-                  <SelectItem value="center">Center</SelectItem>
-                  <SelectItem value="bottom">Bottom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Output Format */}
-            <div className="space-y-2">
-              <Label>Output Format</Label>
-              <Select value={outputFormat} onValueChange={setOutputFormat}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {outputFormats.map(format => (
-                    <SelectItem key={format.value} value={format.value}>
-                      {format.label} ({format.dimensions})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* AI Enhancements */}
-            <div className="space-y-3 pt-2 border-t">
-              <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  AI Face Enhancement
-                </Label>
-                <Switch
-                  checked={faceEnhance}
-                  onCheckedChange={setFaceEnhance}
-                />
               </div>
-              <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2">
-                  <Wand2 className="h-4 w-4" />
-                  AI Upscale (4K)
-                </Label>
-                <Switch
-                  checked={aiUpscale}
-                  onCheckedChange={setAiUpscale}
-                />
-              </div>
-            </div>
-
-            {/* Generate Button */}
-            <Button
-              onClick={handleGenerateThumbnail}
-              disabled={!file || loading}
-              className="w-full"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <ImageIcon className="mr-2 h-4 w-4" />
-              Generate Thumbnail
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-            <CardDescription>Your thumbnail preview</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {generatedThumbnail ? (
-              <div className="space-y-4">
-                {/* Thumbnail Preview */}
-                <div className={`relative rounded-lg overflow-hidden border ${
-                  outputFormat === '16:9' ? 'aspect-video' :
-                  outputFormat === '1:1' ? 'aspect-square' :
-                  'aspect-[9/16]'
-                }`}>
-                  {fileUrl && (
-                    uploadType === 'image' ? (
-                      <Image
-                        src={fileUrl}
-                        alt="Thumbnail preview"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={fileUrl}
-                        className="w-full h-full object-cover"
-                      />
-                    )
-                  )}
+              
+              <CardContent className="p-6">
+                {/* AI Generate Tab */}
+                <TabsContent value="generate" className="mt-0 space-y-5">
+                  {/* Platform Selection */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-3 block">Platform</Label>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {PLATFORMS.map((platform) => (
+                        <button
+                          key={platform.id}
+                          onClick={() => setSelectedPlatform(platform.id)}
+                          className={`p-3 rounded-xl border-2 text-center transition-all hover:scale-105 ${
+                            selectedPlatform === platform.id 
+                              ? 'border-red-500 bg-red-50 dark:bg-red-950/30 shadow-lg' 
+                              : 'border-border hover:border-red-300'
+                          }`}
+                        >
+                          <span className="text-2xl block mb-1">{platform.icon}</span>
+                          <span className="text-[10px] font-medium block">{platform.name}</span>
+                          <span className="text-[8px] text-muted-foreground">{platform.aspectRatio}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   
-                  {/* Text Overlay Preview */}
-                  {overlayText && (
-                    <div className={`absolute inset-0 flex items-${textPosition === 'top' ? 'start' : textPosition === 'bottom' ? 'end' : 'center'} justify-center p-8`}>
-                      <div className={`
-                        text-4xl font-black text-center px-6 py-3 rounded-lg
-                        ${thumbnailStyle === 'drama' ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white' : ''}
-                        ${thumbnailStyle === 'news' ? 'bg-blue-600 text-white' : ''}
-                        ${thumbnailStyle === 'educational' ? 'bg-white text-black' : ''}
-                        ${thumbnailStyle === 'meme' ? 'bg-yellow-400 text-black border-4 border-black' : ''}
-                      `}>
-                        {overlayText}
+                  {/* Topic Input */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Video Topic / Title</Label>
+                    <Textarea
+                      placeholder="e.g., How I Made $10K in One Month, Ultimate Gaming Setup Tour 2024, Learn Python in 24 Hours..."
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value)}
+                      className="min-h-[80px] resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tip: {currentPlatform.tips}
+                    </p>
+                  </div>
+                  
+                  {/* Style Selection */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-3 block">Thumbnail Style</Label>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {THUMBNAIL_STYLES.map((style) => (
+                        <button
+                          key={style.id}
+                          onClick={() => setSelectedStyle(style.id)}
+                          className={`p-2.5 rounded-xl border-2 text-center transition-all hover:scale-105 ${
+                            selectedStyle === style.id 
+                              ? 'border-red-500 bg-red-50 dark:bg-red-950/30' 
+                              : 'border-border hover:border-red-300'
+                          }`}
+                        >
+                          <span className="text-xl block mb-0.5">{style.icon}</span>
+                          <span className="text-[9px] font-medium block">{style.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Options */}
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">Include human face (gets +921K views)</span>
+                    </div>
+                    <Switch
+                      checked={includeFace}
+                      onCheckedChange={setIncludeFace}
+                    />
+                  </div>
+                  
+                  {/* Generate Button */}
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={isLoading || !topic.trim()}
+                    className="w-full h-12 text-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-5 w-5 mr-2" />
+                        Generate High-CTR Thumbnail
+                      </>
+                    )}
+                  </Button>
+                </TabsContent>
+                
+                {/* Upload Tab */}
+                <TabsContent value="upload" className="mt-0 space-y-5">
+                  {/* Upload Area */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                      uploadedImage 
+                        ? 'border-red-500 bg-red-50 dark:bg-red-950/20' 
+                        : 'border-border hover:border-red-300'
+                    }`}
+                  >
+                    {uploadedImage ? (
+                      <div className="relative inline-block">
+                        <img 
+                          src={uploadedImage} 
+                          alt="Uploaded" 
+                          className="max-h-40 rounded-lg shadow"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setUploadedImage(null)
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                      <>
+                        <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="font-medium">Upload image to enhance</p>
+                        <p className="text-xs text-muted-foreground">PNG, JPG, WebP</p>
+                      </>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                  
+                  {/* Platform for upload */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Target Platform</Label>
+                    <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORMS.map(p => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.icon} {p.name} ({p.aspectRatio})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Style for upload */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Enhancement Style</Label>
+                    <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {THUMBNAIL_STYLES.map(s => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.icon} {s.name} - {s.colors}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Optional text hint */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Text/Theme (Optional)</Label>
+                    <Input
+                      placeholder="e.g., SHOCKING RESULTS, HOW TO..."
+                      value={overlayText}
+                      onChange={(e) => setOverlayText(e.target.value)}
+                    />
+                  </div>
+                  
+                  <Button 
+                    onClick={handleEditImage} 
+                    disabled={isLoading || !uploadedImage}
+                    className="w-full h-12 text-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                        Enhancing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5 mr-2" />
+                        Enhance to High-CTR
+                      </>
+                    )}
+                  </Button>
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
+        </div>
 
-                {/* Enhancement Badges */}
-                <div className="flex gap-2">
-                  {faceEnhance && (
-                    <div className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-medium">
-                      Face Enhanced
-                    </div>
-                  )}
-                  {aiUpscale && (
-                    <div className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium">
-                      AI Upscaled 4K
-                    </div>
-                  )}
+        {/* Right Panel - Result */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card>
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Result
+                {generatedThumbnail && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {currentPlatform.aspectRatio}
+                  </Badge>
+                )}
+              </CardTitle>
+              {generatedThumbnail && (
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={downloadThumbnail}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyToClipboard}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
-
-                {/* Download Options */}
-                <div className="space-y-2">
-                  <Label>Download Formats</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {outputFormats.map(format => (
-                      <Button
-                        key={format.value}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(format.value)}
-                      >
-                        <Download className="mr-1 h-3 w-3" />
-                        {format.label}
-                      </Button>
-                    ))}
+              )}
+            </CardHeader>
+            <CardContent>
+              {generatedThumbnail ? (
+                <div className="space-y-3">
+                  <div className={`relative rounded-xl overflow-hidden bg-muted ${
+                    currentPlatform.aspectRatio === '16:9' ? 'aspect-video' :
+                    currentPlatform.aspectRatio === '1:1' ? 'aspect-square' :
+                    currentPlatform.aspectRatio === '9:16' ? 'aspect-[9/16]' :
+                    'aspect-video'
+                  }`}>
+                    <img 
+                      src={generatedThumbnail} 
+                      alt="Generated thumbnail" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      {currentPlatform.name}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {currentPlatform.resolution}
+                    </Badge>
+                    <Badge className="text-xs bg-green-500">
+                      CTR Optimized
+                    </Badge>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex h-96 items-center justify-center rounded-lg border-2 border-dashed">
-                <div className="text-center">
-                  <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {file ? 'Click "Generate Thumbnail" to create' : 'Upload a file to get started'}
-                  </p>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-[280px] text-muted-foreground bg-muted/30 rounded-xl">
+                  <Target className="h-12 w-12 opacity-30 mb-3" />
+                  <p className="font-medium">Your thumbnail will appear here</p>
+                  <p className="text-xs">Optimized for high click-through rates</p>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              )}
+            </CardContent>
+          </Card>
 
-      {/* Style Examples */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Style Presets</CardTitle>
-          <CardDescription>Preview of available thumbnail styles</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {thumbnailStyles.map(style => (
-              <div
-                key={style.value}
-                className={`cursor-pointer rounded-lg border-2 transition-all ${
-                  thumbnailStyle === style.value ? 'border-primary' : 'border-transparent'
-                }`}
-                onClick={() => setThumbnailStyle(style.value)}
-              >
-                <div className={`aspect-video rounded-t-lg flex items-center justify-center text-2xl font-black
-                  ${style.value === 'drama' ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white' : ''}
-                  ${style.value === 'news' ? 'bg-blue-600 text-white' : ''}
-                  ${style.value === 'educational' ? 'bg-white text-black' : ''}
-                  ${style.value === 'meme' ? 'bg-yellow-400 text-black' : ''}
-                `}>
-                  {style.label}
+          {/* History */}
+          {thumbnailHistory.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Recent</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2">
+                  {thumbnailHistory.slice(0, 6).map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setGeneratedThumbnail(item.url)}
+                      className="aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-red-500 transition-all"
+                    >
+                      <img src={item.url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
                 </div>
-                <div className="p-2 text-center">
-                  <p className="text-xs text-muted-foreground">{style.colors}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* CTR Tips Card */}
+          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <Target className="h-4 w-4" />
+                CTR Best Practices
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs space-y-1.5 text-amber-700 dark:text-amber-300">
+              <p>• <strong>Faces with expressions</strong> get 921K+ more views</p>
+              <p>• <strong>3 words maximum</strong> - power words like "NEVER", "STOP"</p>
+              <p>• <strong>High contrast colors</strong> - red/blue, yellow/purple</p>
+              <p>• <strong>Avoid bottom-right</strong> - timestamp covers it</p>
+              <p>• <strong>Mobile-first</strong> - 70% views are mobile</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }
