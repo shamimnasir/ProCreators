@@ -280,6 +280,11 @@ export default function ThumbnailMakerPage() {
   const [includeFace, setIncludeFace] = useState(true)
   const [selectedModel, setSelectedModel] = useState('nano-banana')
   
+  // Custom face upload state
+  const [customFace, setCustomFace] = useState(null)
+  const [useCustomFace, setUseCustomFace] = useState(false)
+  const customFaceInputRef = useRef(null)
+  
   // Upload/Edit state
   const [uploadedImage, setUploadedImage] = useState(null)
   const [overlayText, setOverlayText] = useState('')
@@ -297,6 +302,24 @@ export default function ThumbnailMakerPage() {
   // Detect language in topic for UI feedback
   const topicLangInfo = detectLanguage(topic)
 
+  // Handle custom face upload
+  const handleCustomFaceUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setCustomFace(event.target.result)
+      setUseCustomFace(true)
+      setIncludeFace(true)
+      toast.success('Your face image uploaded! It will be used in the thumbnail.')
+    }
+    reader.readAsDataURL(file)
+  }
+
   // Handle AI thumbnail generation
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -306,35 +329,91 @@ export default function ThumbnailMakerPage() {
     
     setIsLoading(true)
     try {
-      const prompt = generateThumbnailPrompt(topic, selectedPlatform, selectedStyle, includeFace)
+      const hasCustomFaceImage = useCustomFace && customFace
+      const prompt = generateThumbnailPrompt(topic, selectedPlatform, selectedStyle, includeFace, hasCustomFaceImage)
       
-      const response = await fetch('/api/image-editor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generate',
-          prompt,
-          model: selectedModel,
-          style: selectedStyle,
-          aspectRatio: currentPlatform.aspectRatio
+      // If using custom face, send as edit request to blend face with generated background
+      if (hasCustomFaceImage) {
+        // First generate the background/scene
+        const bgPrompt = generateThumbnailPrompt(topic, selectedPlatform, selectedStyle, false, false) + '\nCreate this as a BACKGROUND SCENE only, with empty space on the right side for a person to be added.'
+        
+        const bgResponse = await fetch('/api/image-editor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generate',
+            prompt: bgPrompt,
+            model: selectedModel,
+            style: selectedStyle,
+            aspectRatio: currentPlatform.aspectRatio
+          })
         })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setGeneratedThumbnail(data.imageUrl)
-        setThumbnailHistory(prev => [
-          { id: Date.now(), url: data.imageUrl, topic, platform: selectedPlatform },
-          ...prev.slice(0, 9)
-        ])
-        if (data.savedToLibrary) {
-          toast.success('Thumbnail generated and saved to Library!')
+        
+        const bgData = await bgResponse.json()
+        
+        if (bgData.success) {
+          // Now fuse the custom face with the background
+          const fuseResponse = await fetch('/api/image-editor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'fuse',
+              images: [
+                { data: bgData.imageUrl, mimeType: 'image/png' },
+                { data: customFace, mimeType: 'image/png' }
+              ],
+              fusionPrompt: `Combine these images into a professional YouTube thumbnail. Place the person from the second image on the right side of the first image (the background). Make sure the person is well-lit and blends naturally with the vibrant background. Apply dramatic rim lighting to the person. The person should occupy about 40-50% of the frame. Professional composite result.`,
+              model: 'nano-banana-pro'
+            })
+          })
+          
+          const fuseData = await fuseResponse.json()
+          
+          if (fuseData.success) {
+            setGeneratedThumbnail(fuseData.imageUrl)
+            setThumbnailHistory(prev => [
+              { id: Date.now(), url: fuseData.imageUrl, topic, platform: selectedPlatform },
+              ...prev.slice(0, 9)
+            ])
+            toast.success('Thumbnail with your face generated!')
+          } else {
+            // Fallback to just the background
+            setGeneratedThumbnail(bgData.imageUrl)
+            toast.warning('Could not blend face - showing background. Try the Upload & Edit tab.')
+          }
         } else {
-          toast.success('Thumbnail generated successfully!')
+          toast.error(bgData.error || 'Failed to generate thumbnail')
         }
       } else {
-        toast.error(data.error || 'Failed to generate thumbnail')
+        // Standard generation without custom face
+        const response = await fetch('/api/image-editor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'generate',
+            prompt,
+            model: selectedModel,
+            style: selectedStyle,
+            aspectRatio: currentPlatform.aspectRatio
+          })
+        })
+        
+        const data = await response.json()
+        
+        if (data.success) {
+          setGeneratedThumbnail(data.imageUrl)
+          setThumbnailHistory(prev => [
+            { id: Date.now(), url: data.imageUrl, topic, platform: selectedPlatform },
+            ...prev.slice(0, 9)
+          ])
+          if (data.savedToLibrary) {
+            toast.success('Thumbnail generated and saved to Library!')
+          } else {
+            toast.success('Thumbnail generated successfully!')
+          }
+        } else {
+          toast.error(data.error || 'Failed to generate thumbnail')
+        }
       }
     } catch (error) {
       console.error('Generation error:', error)
