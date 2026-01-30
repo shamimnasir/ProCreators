@@ -11,7 +11,7 @@ import sys
 from typing import Dict, Any
 
 # Base URL from environment
-BASE_URL = "https://editgenius-34.preview.emergentagent.com"
+BASE_URL = "https://fusion-creator-3.preview.emergentagent.com"
 
 class SWOTAnalysisAPITester:
     def __init__(self):
