@@ -41,74 +41,7 @@ const STYLE_PRESETS = [
   { id: 'infographic', name: 'Infographic', icon: '📊', description: 'Data visualization', category: 'style' },
 ]
 
-// Platform-specific thumbnail configurations
-const THUMBNAIL_PLATFORMS = [
-  { 
-    id: 'youtube', 
-    name: 'YouTube', 
-    icon: '📺', 
-    aspectRatio: '16:9',
-    resolution: '1280x720',
-    description: 'YouTube videos & Shorts'
-  },
-  { 
-    id: 'instagram-post', 
-    name: 'Instagram Post', 
-    icon: '📸', 
-    aspectRatio: '1:1',
-    resolution: '1080x1080',
-    description: 'Instagram feed posts'
-  },
-  { 
-    id: 'instagram-story', 
-    name: 'Story/Reels', 
-    icon: '📱', 
-    aspectRatio: '9:16',
-    resolution: '1080x1920',
-    description: 'Stories, Reels, TikTok'
-  },
-  { 
-    id: 'facebook', 
-    name: 'Facebook', 
-    icon: '👤', 
-    aspectRatio: '16:9',
-    resolution: '1200x628',
-    description: 'Facebook posts & ads'
-  },
-  { 
-    id: 'twitter', 
-    name: 'X/Twitter', 
-    icon: '🐦', 
-    aspectRatio: '16:9',
-    resolution: '1600x900',
-    description: 'Twitter/X posts'
-  },
-  { 
-    id: 'linkedin', 
-    name: 'LinkedIn', 
-    icon: '💼', 
-    aspectRatio: '1.91:1',
-    resolution: '1200x627',
-    description: 'LinkedIn posts'
-  },
-]
-
-// High-CTR Thumbnail prompt generator
-const generateThumbnailPrompt = (topic, platform, language = 'en') => {
-  const basePrompt = `High-CTR thumbnail design for ${platform}. 
-COMPOSITION: Single dominant focal point using Rule of Thirds, close-up human face with exaggerated expression (surprise/excitement/shock) making direct eye contact with camera.
-COLORS: High-contrast vibrant color palette (red/blue or yellow/purple or orange/teal), colors that pop against white/dark backgrounds.
-TYPOGRAPHY: Maximum 3 bold power words in thick sans-serif font (like Impact/Montserrat) with drop shadow and outline for mobile readability. Avoid bottom-right corner for text (timestamp area).
-STYLE: Professional, attention-grabbing, creates curiosity gap, tells micro-story in one frame.
-BACKGROUND: Dynamic gradient or blurred action scene, not plain solid colors.`
-  
-  if (topic) {
-    return `${basePrompt}\nTOPIC/SUBJECT: ${topic}`
-  }
-  return basePrompt
-}
-
-// Aspect ratio options - Extended for thumbnails
+// Aspect ratio options
 const ASPECT_RATIOS = [
   { id: '1:1', name: 'Square', icon: '⬜', use: 'Instagram, Profile' },
   { id: '16:9', name: 'Landscape', icon: '🖼️', use: 'YouTube, Desktop' },
