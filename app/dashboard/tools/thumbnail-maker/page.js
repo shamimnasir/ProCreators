@@ -176,23 +176,36 @@ const getLanguageTextInstructions = (langInfo, topic) => {
   if (!langInfo.hasNonLatin) return ''
   
   // Extract any English words/numbers from the topic
-  const englishWords = topic.match(/[a-zA-Z0-9]+/g) || []
+  const englishWords = topic.match(/[a-zA-Z]+/g) || []
   const numbers = topic.match(/\d+/g) || []
   
+  let textSuggestions = ''
+  if (englishWords.length > 0) {
+    textSuggestions = englishWords.slice(0, 3).map(w => w.toUpperCase()).join(' ')
+  }
+  if (numbers.length > 0) {
+    textSuggestions = numbers[0] + (textSuggestions ? ' ' + textSuggestions : '')
+  }
+  if (!textSuggestions) {
+    textSuggestions = 'WOW or AMAZING or NEW'
+  }
+  
   return `
-IMPORTANT - NON-LATIN TEXT HANDLING:
-The topic contains ${langInfo.primaryLanguage} script which cannot be rendered properly by AI.
-DO NOT attempt to render any ${langInfo.primaryLanguage} characters - they will appear garbled.
 
-INSTEAD: Use these ENGLISH elements that AI CAN render correctly:
-${englishWords.length > 0 ? `- English words from topic: ${englishWords.slice(0, 3).join(', ')}` : '- Use simple English power words like: WOW, AMAZING, NEW, HOW, WHY, BEST, TOP'}
-${numbers.length > 0 ? `- Numbers from topic: ${numbers.join(', ')}` : ''}
-- Add bold ENGLISH text (3-5 words max) that captures the essence of the topic
-- Yellow text with black outline OR white text with black outline for maximum contrast
+⚠️ NON-LATIN TEXT HANDLING:
+The topic contains ${langInfo.primaryLanguage} characters which CANNOT be rendered by AI image generation.
+DO NOT render any ${langInfo.primaryLanguage} script - it will appear as garbage/broken characters.
+
+INSTEAD - ADD ENGLISH TEXT:
+- Use bold ENGLISH words: ${textSuggestions}
+- Maximum 3-5 English words or under 20 characters
+- BRIGHT YELLOW text with thick BLACK outline (most visible)
+- Large bold Impact or Arial Black style font
+- Position in upper-left area (avoid bottom-right timestamp zone)
 `
 }
 
-// Generate high-CTR prompt - MrBeast/Top YouTuber Inspired
+// Generate high-CTR prompt - Professional YouTube Thumbnail
 const generateThumbnailPrompt = (topic, platform, style, includesFace = true, hasCustomFace = false) => {
   const platformConfig = PLATFORMS.find(p => p.id === platform)
   const styleConfig = THUMBNAIL_STYLES.find(s => s.id === style)
@@ -201,71 +214,79 @@ const generateThumbnailPrompt = (topic, platform, style, includesFace = true, ha
   const langInfo = detectLanguage(topic)
   const languageInstructions = getLanguageTextInstructions(langInfo, topic)
   
-  // Start with MrBeast-style base prompt
-  let basePrompt = `Create an ULTRA HIGH CLICK-THROUGH RATE YouTube thumbnail inspired by MrBeast, Mark Rober, and top viral channels.
+  // Professional thumbnail prompt
+  let basePrompt = `Create a PROFESSIONAL high click-through rate YouTube thumbnail.
 
-STYLE REQUIREMENTS:
-- ${styleConfig?.promptModifier || 'ULTRA VIBRANT saturated colors, electric blue and hot pink and bright yellow color explosion, dramatic rim lighting'}
-- EXTREMELY SATURATED and BOLD colors - nothing subtle, everything POP
-- Professional studio quality, 4K sharp, perfect for ${platformConfig?.resolution || '1280x720'}
-- Dynamic diagonal composition with strong visual flow`
+CRITICAL RULES - READ CAREFULLY:
+1. NO random icons, emojis, or scattered graphics - keep it CLEAN and PROFESSIONAL
+2. NO childish cartoon elements or clip art
+3. Background should be a smooth, clean gradient - NOT cluttered with random objects
+4. Focus on: clean composition, professional lighting, bold but tasteful colors
 
-  // Add language-specific instructions if non-Latin text detected
+BACKGROUND STYLE:
+${styleConfig?.promptModifier || 'clean professional gradient background, smooth color transition, no clutter'}
+
+QUALITY:
+- Professional studio photography quality
+- Sharp, 4K resolution, perfect for ${platformConfig?.resolution || '1280x720'}
+- Clean, uncluttered composition`
+
+  // TEXT GUIDELINES - Following user's best practices
   if (languageInstructions) {
     basePrompt += languageInstructions
   } else {
-    // For English content, allow minimal bold text
     basePrompt += `
-TEXT: Maximum 2-3 BOLD power words only. Large thick sans-serif font with strong drop shadow. Place text in upper-left or center, NEVER bottom-right.`
+
+TEXT REQUIREMENTS (IMPORTANT):
+- Add 3-5 bold power words (under 20 characters total)
+- Use LARGE, BOLD sans-serif font (Impact, Arial Black style)
+- HIGH CONTRAST: Yellow text with black outline OR white text with black outline
+- Position text in upper-left or center area
+- NEVER place text in bottom-right corner (YouTube timestamp covers it)
+- Text should complement the visual, not repeat the full title
+- Use emotional or numbered words for curiosity (e.g., "5 TIPS", "SHOCKING", "NEW")`
   }
   
   // Handle face requirements
   if (hasCustomFace) {
     basePrompt += `
 
-FACE/PERSON: The user has provided their own face image. Integrate this person as the main subject with:
-- Professional studio lighting on face
-- Dramatic colored rim lighting (matching the style colors)
-- Eye-catching expression enhancement
-- Person should occupy 40-60% of frame on the right side`
+PERSON/FACE:
+- User's face will be composited - create clean space on right side
+- Background should complement a person positioned on the right
+- Professional lighting setup for face integration`
   } else if (includesFace) {
     basePrompt += `
 
-FACE/PERSON: Include a human face as the main subject:
-- EXAGGERATED shocked/surprised/excited expression with wide eyes and open mouth
-- Direct eye contact with camera (breaks fourth wall)
-- Close-up occupying 40-60% of frame, positioned on right side
-- Professional makeup and lighting
-- Dramatic colored rim lighting matching the style`
+PERSON/FACE:
+- Include ONE person with expressive face (surprised, excited, or shocked expression)
+- Face should be well-lit with professional studio lighting
+- Person positioned on RIGHT side of frame, occupying 40-50% of image
+- Direct eye contact with camera
+- Clean cutout-ready edges around person`
   }
   
-  // Background and composition
+  // Background specifics
   basePrompt += `
 
-BACKGROUND:
-- NEVER plain solid colors - always dynamic gradients, patterns, or scenes
-- Bold color gradients (red-to-yellow, blue-to-purple, pink-to-orange)
-- Can include: burst effects, light rays, sparkles, energy effects
-- Depth with bokeh or motion blur on background elements
-
 COMPOSITION:
-- Rule of thirds with main subject on right
-- Clear visual hierarchy
-- High contrast between subject and background
-- Professional thumbnail that looks like it cost $10,000 to make`
+- Clean gradient background (NO scattered icons or random elements)
+- Smooth color transitions
+- Professional depth with subtle bokeh if needed
+- Rule of thirds composition
+- High contrast between text/subject and background
+- This should look like a $10,000 professional thumbnail, NOT a cheap amateur one`
   
   // Topic context
   if (topic) {
-    if (langInfo.hasNonLatin) {
-      basePrompt += `
+    const cleanTopic = langInfo.hasNonLatin ? 
+      (topic.match(/[a-zA-Z0-9\s]+/g) || []).join(' ').trim() || 'engaging content' : 
+      topic
+    
+    basePrompt += `
 
-VISUAL CONCEPT (NO TEXT): The thumbnail should visually represent this concept through imagery, expressions, and visual metaphors: "${topic}"
-Use icons, arrows, visual cues - but ABSOLUTELY NO TEXT of any kind.`
-    } else {
-      basePrompt += `
-
-TOPIC: ${topic}`
-    }
+TOPIC/THEME: "${cleanTopic}"
+Create visuals that represent this concept professionally.`
   }
   
   return basePrompt
