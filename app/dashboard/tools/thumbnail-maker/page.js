@@ -136,6 +136,90 @@ const NICHE_TIPS = {
   tech: ['Product close-up', 'Futuristic feel', 'Clean minimal'],
 }
 
+// Language detection for non-Latin scripts
+const detectLanguage = (text) => {
+  // Bengali Unicode range: \u0980-\u09FF
+  const bengaliRegex = /[\u0980-\u09FF]/
+  // Hindi/Devanagari Unicode range: \u0900-\u097F
+  const hindiRegex = /[\u0900-\u097F]/
+  // Arabic Unicode range: \u0600-\u06FF
+  const arabicRegex = /[\u0600-\u06FF]/
+  // Chinese Unicode range
+  const chineseRegex = /[\u4e00-\u9fff]/
+  // Japanese Unicode ranges (Hiragana, Katakana)
+  const japaneseRegex = /[\u3040-\u309f\u30a0-\u30ff]/
+  // Korean Unicode range
+  const koreanRegex = /[\uac00-\ud7af\u1100-\u11ff]/
+  // Thai Unicode range
+  const thaiRegex = /[\u0e00-\u0e7f]/
+  
+  const detectedLanguages = []
+  
+  if (bengaliRegex.test(text)) detectedLanguages.push('Bengali')
+  if (hindiRegex.test(text)) detectedLanguages.push('Hindi')
+  if (arabicRegex.test(text)) detectedLanguages.push('Arabic')
+  if (chineseRegex.test(text)) detectedLanguages.push('Chinese')
+  if (japaneseRegex.test(text)) detectedLanguages.push('Japanese')
+  if (koreanRegex.test(text)) detectedLanguages.push('Korean')
+  if (thaiRegex.test(text)) detectedLanguages.push('Thai')
+  
+  return {
+    hasNonLatin: detectedLanguages.length > 0,
+    languages: detectedLanguages,
+    primaryLanguage: detectedLanguages[0] || 'English'
+  }
+}
+
+// Language-specific text rendering instructions
+const getLanguageTextInstructions = (langInfo, text) => {
+  if (!langInfo.hasNonLatin) return ''
+  
+  const langInstructions = {
+    Bengali: `
+TEXT RENDERING CRITICAL:
+- The title contains Bengali (বাংলা) text: "${text}"
+- DO NOT attempt to render Bengali text inside the image as it will appear garbled
+- Instead, create a visually appealing thumbnail with strong imagery and composition
+- Leave clean space where text overlay can be added later
+- Use visual elements (arrows, icons, emoji-style graphics) to convey the message
+- If text is essential, use only ENGLISH power words (1-3 words max)`,
+    Hindi: `
+TEXT RENDERING CRITICAL:
+- The title contains Hindi (हिंदी) text
+- DO NOT render Hindi/Devanagari text inside the image
+- Create strong visual composition with clean text areas
+- Use visual elements to convey the message instead of text
+- If text is essential, use only ENGLISH power words`,
+    Arabic: `
+TEXT RENDERING CRITICAL:
+- The title contains Arabic (العربية) text
+- DO NOT render Arabic text inside the image
+- Create strong visual composition with clean areas for text overlay
+- Use visual elements to convey the message`,
+    Chinese: `
+TEXT RENDERING CRITICAL:
+- The title contains Chinese (中文) text
+- Be extremely careful with Chinese character rendering
+- Use simple, bold Chinese characters if needed
+- Prefer visual communication over text`,
+    Japanese: `
+TEXT RENDERING CRITICAL:
+- The title contains Japanese (日本語) text
+- Be careful with Japanese character rendering
+- Use simple characters if text is necessary`,
+    Korean: `
+TEXT RENDERING CRITICAL:
+- The title contains Korean (한국어) text
+- Be careful with Korean character rendering`,
+    Thai: `
+TEXT RENDERING CRITICAL:
+- The title contains Thai (ไทย) text
+- DO NOT render Thai text inside the image`
+  }
+  
+  return langInstructions[langInfo.primaryLanguage] || ''
+}
+
 // Generate high-CTR prompt
 const generateThumbnailPrompt = (topic, platform, style, includesFace = true) => {
   const platformConfig = PLATFORMS.find(p => p.id === platform)
