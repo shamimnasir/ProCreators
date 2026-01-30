@@ -170,54 +170,24 @@ const detectLanguage = (text) => {
   }
 }
 
-// Language-specific text rendering instructions
+// Language-specific text rendering instructions - AGGRESSIVE NO TEXT POLICY
 const getLanguageTextInstructions = (langInfo, text) => {
   if (!langInfo.hasNonLatin) return ''
   
-  const langInstructions = {
-    Bengali: `
-TEXT RENDERING CRITICAL:
-- The title contains Bengali (বাংলা) text: "${text}"
-- DO NOT attempt to render Bengali text inside the image as it will appear garbled
-- Instead, create a visually appealing thumbnail with strong imagery and composition
-- Leave clean space where text overlay can be added later
-- Use visual elements (arrows, icons, emoji-style graphics) to convey the message
-- If text is essential, use only ENGLISH power words (1-3 words max)`,
-    Hindi: `
-TEXT RENDERING CRITICAL:
-- The title contains Hindi (हिंदी) text
-- DO NOT render Hindi/Devanagari text inside the image
-- Create strong visual composition with clean text areas
-- Use visual elements to convey the message instead of text
-- If text is essential, use only ENGLISH power words`,
-    Arabic: `
-TEXT RENDERING CRITICAL:
-- The title contains Arabic (العربية) text
-- DO NOT render Arabic text inside the image
-- Create strong visual composition with clean areas for text overlay
-- Use visual elements to convey the message`,
-    Chinese: `
-TEXT RENDERING CRITICAL:
-- The title contains Chinese (中文) text
-- Be extremely careful with Chinese character rendering
-- Use simple, bold Chinese characters if needed
-- Prefer visual communication over text`,
-    Japanese: `
-TEXT RENDERING CRITICAL:
-- The title contains Japanese (日本語) text
-- Be careful with Japanese character rendering
-- Use simple characters if text is necessary`,
-    Korean: `
-TEXT RENDERING CRITICAL:
-- The title contains Korean (한국어) text
-- Be careful with Korean character rendering`,
-    Thai: `
-TEXT RENDERING CRITICAL:
-- The title contains Thai (ไทย) text
-- DO NOT render Thai text inside the image`
-  }
-  
-  return langInstructions[langInfo.primaryLanguage] || ''
+  // Universal aggressive no-text instruction for all non-Latin scripts
+  return `
+
+⚠️ CRITICAL TEXT PROHIBITION ⚠️
+The user's topic contains ${langInfo.primaryLanguage} script which CANNOT be rendered by AI.
+YOU MUST NOT RENDER ANY TEXT IN THIS IMAGE - NO LETTERS, NO WORDS, NO CHARACTERS.
+- DO NOT write any ${langInfo.primaryLanguage} text - it will look like garbage
+- DO NOT write any English text either - keep the image TEXT-FREE
+- Create a PURELY VISUAL thumbnail with NO TEXT WHATSOEVER
+- Focus 100% on: dramatic faces, vivid colors, visual icons, arrows, emojis, graphics
+- Leave clean space where the user can add their own text later using proper fonts
+
+THIS IS A TEXT-FREE THUMBNAIL. ZERO TEXT. ONLY VISUALS.
+`
 }
 
 // Generate high-CTR prompt
