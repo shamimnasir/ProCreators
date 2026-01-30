@@ -1382,4 +1382,135 @@ export default function ThumbnailMakerPage() {
                         onClick={exportWithText}
                         disabled={textLayers.length === 0}
                         className="w-full h-12 text-lg bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+                        size="lg"
+                      >
+                        <Download className="h-5 w-5 mr-2" />
+                        Export with Text
+                      </Button>
+                    </>
+                  )}
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
+        </div>
+
+        {/* Right Panel - Result */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5" />
+                  Result
+                  {generatedThumbnail && (
+                    <Badge variant="outline" className="ml-2">
+                      {currentPlatform.aspectRatio}
+                    </Badge>
+                  )}
+                </CardTitle>
+                {generatedThumbnail && (
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={handleDownload}>
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={handleCopy}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`relative rounded-xl overflow-hidden bg-muted ${
+                currentPlatform.aspectRatio === '16:9' ? 'aspect-video' :
+                currentPlatform.aspectRatio === '1:1' ? 'aspect-square' :
+                currentPlatform.aspectRatio === '9:16' ? 'aspect-[9/16]' :
+                'aspect-video'
+              }`}>
+                {generatedThumbnail ? (
+                  <img 
+                    src={generatedThumbnail} 
+                    alt="Generated thumbnail"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                    <div className="w-16 h-16 rounded-full bg-muted-foreground/10 flex items-center justify-center mb-3">
+                      <ImageIcon className="h-8 w-8 opacity-50" />
+                    </div>
+                    <p className="text-sm font-medium">Your thumbnail will appear here</p>
+                    <p className="text-xs opacity-70">Optimized for high click-through rates</p>
+                  </div>
+                )}
+              </div>
+              {generatedThumbnail && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      {currentPlatform.name}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {currentPlatform.resolution}
+                    </Badge>
+                    <Badge className="text-xs bg-green-500">
+                      CTR Optimized
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => loadImageToEditor(generatedThumbnail)}
+                  >
+                    <Type className="h-4 w-4 mr-2" />
+                    Add Text Overlay
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* History */}
+          {thumbnailHistory.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Recent</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2">
+                  {thumbnailHistory.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setGeneratedThumbnail(item.url)}
+                      className="aspect-video rounded-lg overflow-hidden hover:ring-2 ring-primary transition-all"
+                    >
+                      <img src={item.url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* CTR Tips Card */}
+          <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <Target className="h-4 w-4" />
+                CTR Best Practices
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs space-y-1.5 text-amber-700 dark:text-amber-300">
+              <p>• <strong>Faces with expressions</strong> get 921K+ more views</p>
+              <p>• <strong>3 words maximum</strong> - power words like NEVER, STOP</p>
+              <p>• <strong>High contrast colors</strong> - red/blue, yellow/purple</p>
+              <p>• <strong>Avoid bottom-right</strong> - timestamp covers it</p>
+              <p>• <strong>Mobile-first</strong> - 70% views are mobile</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
                
