@@ -170,23 +170,25 @@ const detectLanguage = (text) => {
   }
 }
 
-// Language-specific text rendering instructions - AGGRESSIVE NO TEXT POLICY
-const getLanguageTextInstructions = (langInfo, text) => {
+// Language-specific text rendering instructions
+// For non-Latin scripts: Use ENGLISH power words instead (AI can render English properly)
+const getLanguageTextInstructions = (langInfo, topic) => {
   if (!langInfo.hasNonLatin) return ''
   
-  // Universal aggressive no-text instruction for all non-Latin scripts
+  // Extract any English words/numbers from the topic
+  const englishWords = topic.match(/[a-zA-Z0-9]+/g) || []
+  const numbers = topic.match(/\d+/g) || []
+  
   return `
+IMPORTANT - NON-LATIN TEXT HANDLING:
+The topic contains ${langInfo.primaryLanguage} script which cannot be rendered properly by AI.
+DO NOT attempt to render any ${langInfo.primaryLanguage} characters - they will appear garbled.
 
-⚠️ CRITICAL TEXT PROHIBITION ⚠️
-The user's topic contains ${langInfo.primaryLanguage} script which CANNOT be rendered by AI.
-YOU MUST NOT RENDER ANY TEXT IN THIS IMAGE - NO LETTERS, NO WORDS, NO CHARACTERS.
-- DO NOT write any ${langInfo.primaryLanguage} text - it will look like garbage
-- DO NOT write any English text either - keep the image TEXT-FREE
-- Create a PURELY VISUAL thumbnail with NO TEXT WHATSOEVER
-- Focus 100% on: dramatic faces, vivid colors, visual icons, arrows, emojis, graphics
-- Leave clean space where the user can add their own text later using proper fonts
-
-THIS IS A TEXT-FREE THUMBNAIL. ZERO TEXT. ONLY VISUALS.
+INSTEAD: Use these ENGLISH elements that AI CAN render correctly:
+${englishWords.length > 0 ? `- English words from topic: ${englishWords.slice(0, 3).join(', ')}` : '- Use simple English power words like: WOW, AMAZING, NEW, HOW, WHY, BEST, TOP'}
+${numbers.length > 0 ? `- Numbers from topic: ${numbers.join(', ')}` : ''}
+- Add bold ENGLISH text (3-5 words max) that captures the essence of the topic
+- Yellow text with black outline OR white text with black outline for maximum contrast
 `
 }
 
