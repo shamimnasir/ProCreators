@@ -24,8 +24,8 @@ const STYLE_PRESETS = [
   { id: 'headshot', name: 'AI Headshot', icon: '👔', description: 'Professional corporate portraits', category: 'template', prompt: 'Professional corporate headshot, neutral gray background, soft lighting, LinkedIn ready' },
   { id: 'logo-design', name: 'Logo Design', icon: '🎯', description: 'Clean, scalable logo designs', category: 'template', prompt: 'Modern minimalist logo design, clean lines, scalable vector style, no text' },
   { id: 'avatar', name: 'AI Avatar', icon: '🎭', description: 'Stylized cartoon avatars', category: 'template', prompt: 'Stylized cartoon avatar, friendly expression, colorful gradient background' },
-  { id: 'thumbnail', name: 'Thumbnail', icon: '🖼️', description: 'High-CTR video thumbnails', category: 'template', isThumbnail: true },
   { id: 'social-post', name: 'Social Post', icon: '📱', description: 'Instagram-worthy images', category: 'template', prompt: 'Instagram-worthy photo, aesthetic composition, trending style, warm golden hour lighting' },
+  { id: 'banner', name: 'Banner', icon: '🖼️', description: 'Social media banners', category: 'template', prompt: 'Professional social media banner, clean design, modern typography placeholder area, gradient background' },
   // Style Presets
   { id: 'none', name: 'No Style', icon: '✨', description: 'Use your prompt as-is', category: 'style' },
   { id: 'realistic', name: 'Realistic', icon: '📸', description: 'Photorealistic, natural lighting', category: 'style' },
