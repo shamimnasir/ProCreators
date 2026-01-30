@@ -341,6 +341,13 @@ export default function ThumbnailMakerPage() {
   const [generatedThumbnail, setGeneratedThumbnail] = useState(null)
   const [thumbnailHistory, setThumbnailHistory] = useState([])
   
+  // Text Overlay Editor state
+  const [textLayers, setTextLayers] = useState([])
+  const [selectedLayerId, setSelectedLayerId] = useState(null)
+  const [editorImage, setEditorImage] = useState(null)
+  const canvasRef = useRef(null)
+  const editorInputRef = useRef(null)
+  
   const fileInputRef = useRef(null)
 
   // Get current platform config
@@ -348,6 +355,126 @@ export default function ThumbnailMakerPage() {
   
   // Detect language in topic for UI feedback
   const topicLangInfo = detectLanguage(topic)
+
+  // Add new text layer
+  const addTextLayer = () => {
+    const newLayer = {
+      id: Date.now(),
+      text: 'Your Text Here',
+      x: 50,
+      y: 50,
+      fontSize: 48,
+      fontFamily: 'impact',
+      color: '#FFFF00',
+      outlineColor: '#000000',
+      outlineWidth: 4,
+      align: 'center',
+      bold: true,
+    }
+    setTextLayers(prev => [...prev, newLayer])
+    setSelectedLayerId(newLayer.id)
+  }
+
+  // Update text layer
+  const updateTextLayer = (id, updates) => {
+    setTextLayers(prev => prev.map(layer => 
+      layer.id === id ? { ...layer, ...updates } : layer
+    ))
+  }
+
+  // Delete text layer
+  const deleteTextLayer = (id) => {
+    setTextLayers(prev => prev.filter(layer => layer.id !== id))
+    if (selectedLayerId === id) {
+      setSelectedLayerId(null)
+    }
+  }
+
+  // Apply preset to selected layer
+  const applyPreset = (preset) => {
+    if (!selectedLayerId) return
+    updateTextLayer(selectedLayerId, {
+      color: preset.color,
+      outlineColor: preset.outline,
+      outlineWidth: preset.outlineWidth,
+    })
+  }
+
+  // Load image into editor
+  const loadImageToEditor = (imageUrl) => {
+    setEditorImage(imageUrl)
+    setActiveTab('text-editor')
+    toast.success('Image loaded into Text Editor!')
+  }
+
+  // Handle editor image upload
+  const handleEditorImageUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setEditorImage(event.target.result)
+      toast.success('Image loaded!')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Export canvas with text overlays
+  const exportWithText = useCallback(() => {
+    if (!editorImage) {
+      toast.error('Please load an image first')
+      return
+    }
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    
+    img.onload = () => {
+      canvas.width = img.width
+      canvas.height = img.height
+      
+      // Draw base image
+      ctx.drawImage(img, 0, 0)
+      
+      // Draw text layers
+      textLayers.forEach(layer => {
+        const font = TEXT_FONTS.find(f => f.id === layer.fontFamily)
+        ctx.font = `${layer.bold ? 'bold' : 'normal'} ${layer.fontSize * (img.width / 400)}px ${font?.css || 'Impact'}`
+        ctx.textAlign = layer.align
+        ctx.textBaseline = 'middle'
+        
+        const x = (layer.x / 100) * img.width
+        const y = (layer.y / 100) * img.height
+        
+        // Draw outline
+        if (layer.outlineWidth > 0) {
+          ctx.strokeStyle = layer.outlineColor
+          ctx.lineWidth = layer.outlineWidth * (img.width / 400)
+          ctx.lineJoin = 'round'
+          ctx.strokeText(layer.text, x, y)
+        }
+        
+        // Draw fill
+        ctx.fillStyle = layer.color
+        ctx.fillText(layer.text, x, y)
+      })
+      
+      // Download
+      const link = document.createElement('a')
+      link.download = `thumbnail-with-text-${Date.now()}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+      toast.success('Thumbnail exported with text!')
+    }
+    
+    img.src = editorImage
+  }, [editorImage, textLayers])
 
   // Handle custom face upload
   const handleCustomFaceUpload = (e) => {
