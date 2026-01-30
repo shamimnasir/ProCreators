@@ -190,8 +190,8 @@ THIS IS A TEXT-FREE THUMBNAIL. ZERO TEXT. ONLY VISUALS.
 `
 }
 
-// Generate high-CTR prompt
-const generateThumbnailPrompt = (topic, platform, style, includesFace = true) => {
+// Generate high-CTR prompt - MrBeast/Top YouTuber Inspired
+const generateThumbnailPrompt = (topic, platform, style, includesFace = true, hasCustomFace = false) => {
   const platformConfig = PLATFORMS.find(p => p.id === platform)
   const styleConfig = THUMBNAIL_STYLES.find(s => s.id === style)
   
@@ -199,43 +199,70 @@ const generateThumbnailPrompt = (topic, platform, style, includesFace = true) =>
   const langInfo = detectLanguage(topic)
   const languageInstructions = getLanguageTextInstructions(langInfo, topic)
   
-  let basePrompt = `Create a high click-through rate thumbnail for ${platformConfig?.name || 'YouTube'}.`
-  
+  // Start with MrBeast-style base prompt
+  let basePrompt = `Create an ULTRA HIGH CLICK-THROUGH RATE YouTube thumbnail inspired by MrBeast, Mark Rober, and top viral channels.
+
+STYLE REQUIREMENTS:
+- ${styleConfig?.promptModifier || 'ULTRA VIBRANT saturated colors, electric blue and hot pink and bright yellow color explosion, dramatic rim lighting'}
+- EXTREMELY SATURATED and BOLD colors - nothing subtle, everything POP
+- Professional studio quality, 4K sharp, perfect for ${platformConfig?.resolution || '1280x720'}
+- Dynamic diagonal composition with strong visual flow`
+
   // Add language-specific instructions if non-Latin text detected
   if (languageInstructions) {
     basePrompt += languageInstructions
-  }
-  
-  // CTR best practices
-  basePrompt += `
-COMPOSITION: Single dominant focal point using Rule of Thirds.`
-  
-  if (includesFace) {
-    basePrompt += ` Close-up human face with exaggerated expression (surprise/excitement/shock) making direct eye contact with camera - faces get 921K+ more views.`
-  }
-  
-  basePrompt += `
-COLORS: High-contrast vibrant color palette that pops against white/dark backgrounds. ${styleConfig?.promptModifier || 'Use red/blue or yellow/purple or orange/teal color combinations.'}`
-  
-  // Modified typography instructions based on language
-  if (langInfo.hasNonLatin) {
-    basePrompt += `
-TYPOGRAPHY: Focus on VISUAL STORYTELLING rather than text. Use icons, arrows, emojis, or visual cues. If any text is used, use ONLY simple English words (3 max). DO NOT attempt to render ${langInfo.primaryLanguage} script.`
   } else {
+    // For English content, allow minimal bold text
     basePrompt += `
-TYPOGRAPHY: If text needed, use maximum 3 bold power words in thick sans-serif font with drop shadow for mobile readability. Never place text in bottom-right corner (timestamp area).`
+TEXT: Maximum 2-3 BOLD power words only. Large thick sans-serif font with strong drop shadow. Place text in upper-left or center, NEVER bottom-right.`
   }
   
-  basePrompt += `
-BACKGROUND: Dynamic gradient or contextual scene, NOT plain solid colors.
-QUALITY: Sharp, professional, 4K quality, perfect for ${platformConfig?.resolution || '1280x720'} resolution.`
+  // Handle face requirements
+  if (hasCustomFace) {
+    basePrompt += `
+
+FACE/PERSON: The user has provided their own face image. Integrate this person as the main subject with:
+- Professional studio lighting on face
+- Dramatic colored rim lighting (matching the style colors)
+- Eye-catching expression enhancement
+- Person should occupy 40-60% of frame on the right side`
+  } else if (includesFace) {
+    basePrompt += `
+
+FACE/PERSON: Include a human face as the main subject:
+- EXAGGERATED shocked/surprised/excited expression with wide eyes and open mouth
+- Direct eye contact with camera (breaks fourth wall)
+- Close-up occupying 40-60% of frame, positioned on right side
+- Professional makeup and lighting
+- Dramatic colored rim lighting matching the style`
+  }
   
-  // For non-Latin content, emphasize visual concept
+  // Background and composition
+  basePrompt += `
+
+BACKGROUND:
+- NEVER plain solid colors - always dynamic gradients, patterns, or scenes
+- Bold color gradients (red-to-yellow, blue-to-purple, pink-to-orange)
+- Can include: burst effects, light rays, sparkles, energy effects
+- Depth with bokeh or motion blur on background elements
+
+COMPOSITION:
+- Rule of thirds with main subject on right
+- Clear visual hierarchy
+- High contrast between subject and background
+- Professional thumbnail that looks like it cost $10,000 to make`
+  
+  // Topic context
   if (topic) {
     if (langInfo.hasNonLatin) {
-      basePrompt += `\nCONCEPT/THEME: Create a thumbnail that visually represents: "${topic}" - Focus on emotions, actions, and visual metaphors instead of text.`
+      basePrompt += `
+
+VISUAL CONCEPT (NO TEXT): The thumbnail should visually represent this concept through imagery, expressions, and visual metaphors: "${topic}"
+Use icons, arrows, visual cues - but ABSOLUTELY NO TEXT of any kind.`
     } else {
-      basePrompt += `\nTOPIC: ${topic}`
+      basePrompt += `
+
+TOPIC: ${topic}`
     }
   }
   
