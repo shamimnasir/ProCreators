@@ -296,6 +296,9 @@ export default function ThumbnailMakerPage() {
 
   // Get current platform config
   const currentPlatform = PLATFORMS.find(p => p.id === selectedPlatform) || PLATFORMS[0]
+  
+  // Detect language in topic for UI feedback
+  const topicLangInfo = detectLanguage(topic)
 
   // Handle AI thumbnail generation
   const handleGenerate = async () => {
