@@ -185,30 +185,6 @@ const THUMBNAIL_STYLES = [
 - Dramatic lighting from both sides
 - Perfect for comparisons, challenges, or transformations`
   },
-] 
-    id: 'educational', 
-    name: 'Educational', 
-    icon: '📚',
-    description: 'Clean learning style',
-    colors: 'Teal, Clean, Bright',
-    promptModifier: 'clean bright gradient from teal to light blue, professional educational look, well-lit clean background, no cartoon elements or random icons, sophisticated minimal design suitable for professional courses'
-  },
-  { 
-    id: 'gaming', 
-    name: 'Gaming', 
-    icon: '🎮',
-    description: 'Professional gaming aesthetic',
-    colors: 'Purple, Blue, Neon accents',
-    promptModifier: 'sleek dark purple to blue gradient background, subtle neon accent lighting, professional esports style, clean composition, no random gaming icons scattered around, sophisticated modern gaming aesthetic'
-  },
-  { 
-    id: 'lifestyle', 
-    name: 'Lifestyle', 
-    icon: '✨',
-    description: 'Elegant lifestyle style',
-    colors: 'Pink, Gold, Elegant',
-    promptModifier: 'elegant gradient from soft pink to rose gold, luxurious sophisticated look, beautiful soft lighting, clean minimal composition, no random sparkles or icons, high-end fashion magazine quality'
-  },
 ]
 
 // Niche-specific CTR tips
