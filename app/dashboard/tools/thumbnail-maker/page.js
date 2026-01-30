@@ -679,16 +679,96 @@ export default function ThumbnailMakerPage() {
                     </div>
                   </div>
                   
-                  {/* Options */}
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Include human face (gets +921K views)</span>
+                  {/* Face Options - Enhanced */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold block">Face in Thumbnail</Label>
+                    
+                    {/* Include face toggle */}
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">Include human face (gets +921K views)</span>
+                      </div>
+                      <Switch
+                        checked={includeFace}
+                        onCheckedChange={(checked) => {
+                          setIncludeFace(checked)
+                          if (!checked) {
+                            setUseCustomFace(false)
+                          }
+                        }}
+                      />
                     </div>
-                    <Switch
-                      checked={includeFace}
-                      onCheckedChange={setIncludeFace}
-                    />
+                    
+                    {/* Custom face upload - only show when face is included */}
+                    {includeFace && (
+                      <div className="p-3 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="relative">
+                              {customFace ? (
+                                <div className="relative">
+                                  <img 
+                                    src={customFace} 
+                                    alt="Your face" 
+                                    className="w-12 h-12 rounded-full object-cover border-2 border-violet-400"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      setCustomFace(null)
+                                      setUseCustomFace(false)
+                                    }}
+                                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-violet-200 dark:bg-violet-800 flex items-center justify-center">
+                                  <Camera className="h-5 w-5 text-violet-600 dark:text-violet-300" />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-violet-800 dark:text-violet-200">
+                                {customFace ? 'Your Face Uploaded' : 'Use Your Own Face'}
+                              </p>
+                              <p className="text-xs text-violet-600 dark:text-violet-400">
+                                {customFace ? 'Will be used in thumbnail' : 'Upload a photo of yourself'}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant={customFace ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => customFaceInputRef.current?.click()}
+                            className={customFace ? '' : 'bg-violet-600 hover:bg-violet-700'}
+                          >
+                            <Upload className="h-4 w-4 mr-1" />
+                            {customFace ? 'Change' : 'Upload'}
+                          </Button>
+                        </div>
+                        <input
+                          ref={customFaceInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCustomFaceUpload}
+                          className="hidden"
+                        />
+                        {customFace && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <Switch
+                              checked={useCustomFace}
+                              onCheckedChange={setUseCustomFace}
+                              className="data-[state=checked]:bg-violet-600"
+                            />
+                            <span className="text-xs text-violet-700 dark:text-violet-300">
+                              Use my face instead of AI-generated face
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   {/* Generate Button */}
