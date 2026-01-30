@@ -843,7 +843,7 @@ export default function ThumbnailMakerPage() {
             </CardHeader>
             <CardContent className="text-xs space-y-1.5 text-amber-700 dark:text-amber-300">
               <p>• <strong>Faces with expressions</strong> get 921K+ more views</p>
-              <p>• <strong>3 words maximum</strong> - power words like "NEVER", "STOP"</p>
+              <p>• <strong>3 words maximum</strong> - power words like NEVER, STOP</p>
               <p>• <strong>High contrast colors</strong> - red/blue, yellow/purple</p>
               <p>• <strong>Avoid bottom-right</strong> - timestamp covers it</p>
               <p>• <strong>Mobile-first</strong> - 70% views are mobile</p>
