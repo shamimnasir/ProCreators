@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,12 +10,36 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
 import { 
   Wand2, Upload, Download, ImageIcon, Type, Sparkles, RefreshCw,
   Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,
-  Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay
+  Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay,
+  Plus, Trash2, Move, Bold, AlignLeft, AlignCenter, AlignRight
 } from 'lucide-react'
+
+// Bengali-friendly fonts available in most systems
+const TEXT_FONTS = [
+  { id: 'impact', name: 'Impact', css: 'Impact, sans-serif', style: 'Bold YouTube' },
+  { id: 'arial-black', name: 'Arial Black', css: '"Arial Black", sans-serif', style: 'Bold Clean' },
+  { id: 'noto-sans-bengali', name: 'Noto Sans Bengali', css: '"Noto Sans Bengali", sans-serif', style: 'Bengali' },
+  { id: 'hind-siliguri', name: 'Hind Siliguri', css: '"Hind Siliguri", sans-serif', style: 'Bengali' },
+  { id: 'kalpurush', name: 'Kalpurush', css: 'Kalpurush, "Noto Sans Bengali", sans-serif', style: 'Bengali' },
+  { id: 'roboto', name: 'Roboto', css: 'Roboto, sans-serif', style: 'Modern' },
+  { id: 'oswald', name: 'Oswald', css: 'Oswald, sans-serif', style: 'Condensed' },
+  { id: 'bebas', name: 'Bebas Neue', css: '"Bebas Neue", sans-serif', style: 'Display' },
+]
+
+// Preset text styles
+const TEXT_PRESETS = [
+  { id: 'youtube-yellow', name: 'YouTube Yellow', color: '#FFFF00', outline: '#000000', outlineWidth: 4 },
+  { id: 'youtube-white', name: 'YouTube White', color: '#FFFFFF', outline: '#000000', outlineWidth: 4 },
+  { id: 'youtube-red', name: 'YouTube Red', color: '#FF0000', outline: '#FFFFFF', outlineWidth: 3 },
+  { id: 'gold-gradient', name: 'Gold', color: '#FFD700', outline: '#8B4513', outlineWidth: 3 },
+  { id: 'neon-blue', name: 'Neon Blue', color: '#00FFFF', outline: '#000080', outlineWidth: 3 },
+  { id: 'fire-orange', name: 'Fire Orange', color: '#FF6600', outline: '#000000', outlineWidth: 4 },
+]
 
 // Platform configurations with CTR-optimized settings
 const PLATFORMS = [
