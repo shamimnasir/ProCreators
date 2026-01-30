@@ -75,55 +75,55 @@ const PLATFORMS = [
   },
 ]
 
-// High-CTR Style presets - Inspired by top YouTubers (MrBeast, Mark Rober, BlackPink)
+// High-CTR Style presets - Professional YouTube Thumbnail Styles
 const THUMBNAIL_STYLES = [
   { 
     id: 'high-ctr', 
     name: 'High CTR', 
     icon: '🎯',
     description: 'MrBeast style - Maximum clicks',
-    colors: 'Bold, Saturated, Electric',
-    promptModifier: 'ULTRA VIBRANT saturated colors, electric blue and hot pink and bright yellow color explosion, dramatic rim lighting with colored gels, bold visual impact like MrBeast thumbnails, dynamic diagonal composition, eye-popping contrast, glossy professional finish'
+    colors: 'Bold gradients, clean',
+    promptModifier: 'clean professional gradient background transitioning from deep blue to vibrant purple, smooth color transition, studio-quality lighting, no clutter, no random icons or emojis, minimal clean design with focus on the subject'
   },
   { 
     id: 'drama', 
     name: 'Drama', 
     icon: '🔥',
-    description: 'Mark Rober style - Explosive drama',
-    colors: 'Fire, Orange, Explosion',
-    promptModifier: 'EXPLOSIVE dramatic background with fire orange and red gradients, cinematic lighting, sparks and energy effects, bold dramatic shadows, intense visual storytelling like Mark Rober science thumbnails, dynamic action composition'
+    description: 'Cinematic dramatic style',
+    colors: 'Orange, Red, Cinematic',
+    promptModifier: 'cinematic warm gradient background from deep red to orange, professional movie poster style lighting, dramatic shadows, clean composition without clutter, no random icons, sophisticated professional look'
   },
   { 
     id: 'news', 
     name: 'News/Info', 
     icon: '📰',
-    description: 'Clean professional breaking news',
-    colors: 'Red, White, Bold',
-    promptModifier: 'BOLD red and white color scheme, clean professional layout, breaking news energy, spotlight effect, strong visual hierarchy, sharp shadows, modern broadcast style'
+    description: 'Clean professional info style',
+    colors: 'Blue, White, Professional',
+    promptModifier: 'clean professional blue gradient background, corporate broadcast quality, sharp clean lines, no clutter or random elements, news anchor style lighting, sophisticated minimal design'
   },
   { 
     id: 'educational', 
     name: 'Educational', 
     icon: '📚',
-    description: 'Bright engaging learning style',
-    colors: 'Bright, Colorful, Fun',
-    promptModifier: 'BRIGHT cheerful colors with teal and orange and purple accents, fun engaging educational style, clean bold composition, friendly professional look, colorful gradient backgrounds like top education channels'
+    description: 'Clean learning style',
+    colors: 'Teal, Clean, Bright',
+    promptModifier: 'clean bright gradient from teal to light blue, professional educational look, well-lit clean background, no cartoon elements or random icons, sophisticated minimal design suitable for professional courses'
   },
   { 
     id: 'gaming', 
     name: 'Gaming', 
     icon: '🎮',
-    description: 'Neon cyberpunk gaming aesthetic',
-    colors: 'Neon Pink, Electric Blue, Purple',
-    promptModifier: 'NEON CYBERPUNK aesthetic with electric blue and hot pink and purple glow effects, dark background with dramatic colored lighting, gaming energy, RGB light trails, bold futuristic style'
+    description: 'Professional gaming aesthetic',
+    colors: 'Purple, Blue, Neon accents',
+    promptModifier: 'sleek dark purple to blue gradient background, subtle neon accent lighting, professional esports style, clean composition, no random gaming icons scattered around, sophisticated modern gaming aesthetic'
   },
   { 
     id: 'lifestyle', 
     name: 'Lifestyle', 
     icon: '✨',
-    description: 'BlackPink K-pop style glamour',
-    colors: 'Pink, Gold, Glamorous',
-    promptModifier: 'GLAMOROUS K-pop aesthetic with hot pink and rose gold and black color scheme, sparkle effects, luxury fashion style, beautiful lighting, BlackPink music video inspired, stunning visual impact'
+    description: 'Elegant lifestyle style',
+    colors: 'Pink, Gold, Elegant',
+    promptModifier: 'elegant gradient from soft pink to rose gold, luxurious sophisticated look, beautiful soft lighting, clean minimal composition, no random sparkles or icons, high-end fashion magazine quality'
   },
 ]
 
