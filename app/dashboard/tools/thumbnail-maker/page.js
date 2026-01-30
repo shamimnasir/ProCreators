@@ -563,6 +563,23 @@ export default function ThumbnailMakerPage() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Tip: {currentPlatform.tips}
                     </p>
+                    
+                    {/* Language Detection Warning */}
+                    {topicLangInfo.hasNonLatin && (
+                      <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="text-amber-600 text-lg">🌐</span>
+                          <div className="text-xs">
+                            <p className="font-semibold text-amber-800 dark:text-amber-200">
+                              {topicLangInfo.primaryLanguage} text detected
+                            </p>
+                            <p className="text-amber-700 dark:text-amber-300 mt-0.5">
+                              AI will generate a visual concept instead of text. You can add {topicLangInfo.primaryLanguage} text using an editor later for best results.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Style Selection */}
