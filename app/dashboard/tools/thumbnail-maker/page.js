@@ -75,55 +75,55 @@ const PLATFORMS = [
   },
 ]
 
-// High-CTR Style presets
+// High-CTR Style presets - Inspired by top YouTubers (MrBeast, Mark Rober, BlackPink)
 const THUMBNAIL_STYLES = [
   { 
     id: 'high-ctr', 
     name: 'High CTR', 
     icon: '🎯',
-    description: 'Optimized for maximum clicks',
-    colors: 'High contrast, vibrant',
-    promptModifier: 'dramatic lighting, high contrast colors, attention-grabbing composition'
+    description: 'MrBeast style - Maximum clicks',
+    colors: 'Bold, Saturated, Electric',
+    promptModifier: 'ULTRA VIBRANT saturated colors, electric blue and hot pink and bright yellow color explosion, dramatic rim lighting with colored gels, bold visual impact like MrBeast thumbnails, dynamic diagonal composition, eye-popping contrast, glossy professional finish'
   },
   { 
     id: 'drama', 
     name: 'Drama', 
     icon: '🔥',
-    description: 'Red/Orange dramatic style',
-    colors: 'Red, Orange, High contrast',
-    promptModifier: 'dramatic red and orange gradient background, intense lighting, cinematic'
+    description: 'Mark Rober style - Explosive drama',
+    colors: 'Fire, Orange, Explosion',
+    promptModifier: 'EXPLOSIVE dramatic background with fire orange and red gradients, cinematic lighting, sparks and energy effects, bold dramatic shadows, intense visual storytelling like Mark Rober science thumbnails, dynamic action composition'
   },
   { 
     id: 'news', 
     name: 'News/Info', 
     icon: '📰',
-    description: 'Professional news style',
-    colors: 'Blue, White, Clean',
-    promptModifier: 'professional blue and white color scheme, clean layout, news broadcast style'
+    description: 'Clean professional breaking news',
+    colors: 'Red, White, Bold',
+    promptModifier: 'BOLD red and white color scheme, clean professional layout, breaking news energy, spotlight effect, strong visual hierarchy, sharp shadows, modern broadcast style'
   },
   { 
     id: 'educational', 
     name: 'Educational', 
     icon: '📚',
-    description: 'Clean learning style',
-    colors: 'Light, Minimal, Clear',
-    promptModifier: 'clean minimalist design, educational look, clear visual hierarchy'
+    description: 'Bright engaging learning style',
+    colors: 'Bright, Colorful, Fun',
+    promptModifier: 'BRIGHT cheerful colors with teal and orange and purple accents, fun engaging educational style, clean bold composition, friendly professional look, colorful gradient backgrounds like top education channels'
   },
   { 
     id: 'gaming', 
     name: 'Gaming', 
     icon: '🎮',
-    description: 'Bold gaming aesthetic',
-    colors: 'Neon, Dark, Electric',
-    promptModifier: 'neon colors, dark background, gaming aesthetic, electric blue and purple'
+    description: 'Neon cyberpunk gaming aesthetic',
+    colors: 'Neon Pink, Electric Blue, Purple',
+    promptModifier: 'NEON CYBERPUNK aesthetic with electric blue and hot pink and purple glow effects, dark background with dramatic colored lighting, gaming energy, RGB light trails, bold futuristic style'
   },
   { 
     id: 'lifestyle', 
     name: 'Lifestyle', 
     icon: '✨',
-    description: 'Warm aesthetic style',
-    colors: 'Warm, Golden, Soft',
-    promptModifier: 'warm golden tones, lifestyle aesthetic, soft lighting, Instagram-worthy'
+    description: 'BlackPink K-pop style glamour',
+    colors: 'Pink, Gold, Glamorous',
+    promptModifier: 'GLAMOROUS K-pop aesthetic with hot pink and rose gold and black color scheme, sparkle effects, luxury fashion style, beautiful lighting, BlackPink music video inspired, stunning visual impact'
   },
 ]
 
