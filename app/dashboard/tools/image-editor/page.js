@@ -238,13 +238,16 @@ export default function ImageEditorPage() {
     
     setIsLoading(true)
     try {
+      // Enhance edit prompt for language support
+      const enhancedEditPrompt = enhancePromptForLanguage(editPrompt.trim())
+      
       const response = await fetch('/api/image-editor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'edit',
           imageBase64: uploadedImage,
-          editPrompt: editPrompt.trim(),
+          editPrompt: enhancedEditPrompt,
           model: selectedModel,
           mimeType: 'image/png'
         })
