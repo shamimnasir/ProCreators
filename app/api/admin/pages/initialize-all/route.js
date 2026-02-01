@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
+import { connectToDatabase } from '@/lib/mongodb'
 import { getDefaultPageTemplate } from '@/lib/pageSchema'
 import { v4 as uuidv4 } from 'uuid'
 import { DIGITAL_PRODUCT_CATEGORIES } from '@/config/digital-products'
 
-const DB_NAME = 'procreators'
 const COLLECTION_NAME = 'tool_pages'
 
 // All tools in the system
@@ -51,8 +50,7 @@ const ALL_TOOLS = [
 // POST - Initialize all tool pages
 export async function POST(request) {
   try {
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     const results = {
@@ -94,8 +92,7 @@ export async function POST(request) {
 // GET - Get status of all tool pages
 export async function GET() {
   try {
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     const existingPages = await collection.find({}).toArray()
