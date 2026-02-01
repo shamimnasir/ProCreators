@@ -1453,14 +1453,17 @@ export default function ThumbnailMakerPage() {
                       CTR Optimized
                     </Badge>
                   </div>
+                  {/* Prominent Add Text Overlay Button */}
                   <Button
-                    variant="outline"
-                    className="w-full"
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all"
                     onClick={() => loadImageToEditor(generatedThumbnail)}
                   >
-                    <Type className="h-4 w-4 mr-2" />
-                    Add Text Overlay
+                    <Type className="h-5 w-5 mr-2" />
+                    Add Bengali/Custom Text
                   </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Add properly rendered Bengali or custom text overlay
+                  </p>
                 </div>
               )}
             </CardContent>
