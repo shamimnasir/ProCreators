@@ -824,6 +824,22 @@ export default function ImageEditorPage() {
                     )}
                   </Button>
                 </TabsContent>
+                
+                {/* Upscale Tab */}
+                <TabsContent value="upscale" className="mt-0 space-y-6">
+                  <UpscaleSection onUpscaleComplete={(url) => {
+                    setGeneratedImage(url)
+                    toast.success('Image upscaled successfully!')
+                  }} />
+                </TabsContent>
+                
+                {/* Compress Tab */}
+                <TabsContent value="compress" className="mt-0 space-y-6">
+                  <CompressSection onCompressComplete={(url) => {
+                    setGeneratedImage(url)
+                    toast.success('Image compressed successfully!')
+                  }} />
+                </TabsContent>
               </CardContent>
             </Tabs>
           </Card>
