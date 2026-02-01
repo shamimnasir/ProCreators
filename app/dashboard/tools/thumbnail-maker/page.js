@@ -355,7 +355,7 @@ export default function ThumbnailMakerPage() {
   // AI Generation state
   const [topic, setTopic] = useState('')
   const [selectedPlatform, setSelectedPlatform] = useState('youtube')
-  const [selectedStyle, setSelectedStyle] = useState('high-ctr')
+  const [selectedStyle, setSelectedStyle] = useState('blue-orange')
   const [includeFace, setIncludeFace] = useState(true)
   const [selectedModel, setSelectedModel] = useState('nano-banana')
   
