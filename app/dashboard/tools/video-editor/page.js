@@ -26,6 +26,488 @@ import { useToast } from '@/hooks/use-toast'
 import { videoStorage } from '@/lib/video-storage'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import MusicPicker from '@/app/dashboard/tools/story-reels/MusicPicker'
+import { Slider } from '@/components/ui/slider'
+
+// ==================== TRIM SECTION COMPONENT ====================
+function TrimSection({ onTrimComplete }) {
+  const [videoFile, setVideoFile] = useState(null)
+  const [videoUrl, setVideoUrl] = useState(null)
+  const [videoInfo, setVideoInfo] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [trimStart, setTrimStart] = useState(0)
+  const [trimEnd, setTrimEnd] = useState(100)
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [processedVideoUrl, setProcessedVideoUrl] = useState(null)
+  
+  const videoRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const { toast } = useToast()
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('video/')) {
+      toast({ title: 'Invalid file', description: 'Please upload a video file', variant: 'destructive' })
+      return
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 100MB', variant: 'destructive' })
+      return
+    }
+    setVideoFile(file)
+    setVideoUrl(URL.createObjectURL(file))
+    setProcessedVideoUrl(null)
+    setTrimStart(0)
+    setTrimEnd(100)
+    
+    // Get video info
+    const formData = new FormData()
+    formData.append('action', 'info')
+    formData.append('video', file)
+    try {
+      const res = await fetch('/api/video-tools', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setVideoInfo(data)
+        setDuration(data.duration)
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime)
+    const handleEnded = () => setIsPlaying(false)
+    const handleLoadedMetadata = () => setDuration(video.duration)
+    video.addEventListener('timeupdate', handleTimeUpdate)
+    video.addEventListener('ended', handleEnded)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+      video.removeEventListener('ended', handleEnded)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+    }
+  }, [videoUrl])
+
+  const togglePlay = () => {
+    if (!videoRef.current) return
+    isPlaying ? videoRef.current.pause() : videoRef.current.play()
+    setIsPlaying(!isPlaying)
+  }
+
+  const handleSeek = (value) => {
+    if (!videoRef.current) return
+    const time = (value[0] / 100) * duration
+    videoRef.current.currentTime = time
+    setCurrentTime(time)
+  }
+
+  const handleTrim = async () => {
+    if (!videoFile) return
+    setIsLoading(true)
+    setProgress(0)
+    try {
+      const formData = new FormData()
+      formData.append('action', 'trim')
+      formData.append('video', videoFile)
+      formData.append('startTime', ((trimStart / 100) * duration).toString())
+      formData.append('endTime', ((trimEnd / 100) * duration).toString())
+      
+      const interval = setInterval(() => setProgress(p => Math.min(p + 5, 90)), 1000)
+      const res = await fetch('/api/video-tools', { method: 'POST', body: formData })
+      clearInterval(interval)
+      setProgress(100)
+      
+      const data = await res.json()
+      if (data.success) {
+        setProcessedVideoUrl(data.videoUrl)
+        toast({ title: 'Video trimmed!', description: data.message })
+      } else {
+        toast({ title: 'Error', description: data.error, variant: 'destructive' })
+      }
+    } catch (e) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' })
+    } finally {
+      setIsLoading(false)
+      setProgress(0)
+    }
+  }
+
+  const downloadVideo = () => {
+    if (!processedVideoUrl) return
+    const link = document.createElement('a')
+    link.href = processedVideoUrl
+    link.download = `trimmed-${Date.now()}.mp4`
+    link.click()
+  }
+
+  return (
+    <div className="grid lg:grid-cols-5 gap-6">
+      <div className="lg:col-span-3 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Scissors className="h-5 w-5 text-rose-500" />
+              Quick Trim
+            </CardTitle>
+            <CardDescription>Upload a video and trim it to the perfect length</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Upload */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                videoFile ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/20' : 'border-muted-foreground/25 hover:border-rose-300'
+              }`}
+            >
+              {videoFile ? (
+                <div className="flex items-center justify-center gap-4">
+                  <Film className="h-10 w-10 text-rose-600" />
+                  <div className="text-left">
+                    <p className="font-medium">{videoFile.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {videoInfo ? `${formatTime(videoInfo.duration)} • ${(videoInfo.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Loading...'}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setVideoFile(null); setVideoUrl(null); }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                  <p className="font-medium">Upload video to trim</p>
+                  <p className="text-xs text-muted-foreground">MP4, MOV, AVI, WebM (max 100MB)</p>
+                </>
+              )}
+              <input ref={fileInputRef} type="file" accept="video/*" onChange={handleFileUpload} className="hidden" />
+            </div>
+
+            {/* Video Preview */}
+            {videoUrl && (
+              <div className="space-y-4">
+                <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
+                  <video ref={videoRef} src={videoUrl} className="w-full h-full" onClick={togglePlay} />
+                  {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer" onClick={togglePlay}>
+                      <div className="p-4 bg-white/90 rounded-full">
+                        <Play className="h-8 w-8 text-rose-600 fill-rose-600" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Timeline */}
+                <div className="space-y-2">
+                  <Slider
+                    value={[duration > 0 ? (currentTime / duration) * 100 : 0]}
+                    onValueChange={handleSeek}
+                    max={100}
+                    step={0.1}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                </div>
+
+                {/* Trim Controls */}
+                <div className="p-4 bg-muted/50 rounded-xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-semibold">Trim Range</Label>
+                    <span className="text-sm text-muted-foreground">
+                      Duration: {formatTime(((trimEnd - trimStart) / 100) * duration)}
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm w-12">Start:</span>
+                      <span className="text-sm font-mono w-14">{formatTime((trimStart / 100) * duration)}</span>
+                      <Slider value={[trimStart]} onValueChange={([v]) => setTrimStart(Math.min(v, trimEnd - 1))} max={100} step={0.1} className="flex-1" />
+                      <Button variant="outline" size="sm" onClick={() => setTrimStart((currentTime / duration) * 100)}>Set</Button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm w-12">End:</span>
+                      <span className="text-sm font-mono w-14">{formatTime((trimEnd / 100) * duration)}</span>
+                      <Slider value={[trimEnd]} onValueChange={([v]) => setTrimEnd(Math.max(v, trimStart + 1))} max={100} step={0.1} className="flex-1" />
+                      <Button variant="outline" size="sm" onClick={() => setTrimEnd((currentTime / duration) * 100)}>Set</Button>
+                    </div>
+                  </div>
+                  <Button onClick={handleTrim} disabled={isLoading || !videoFile} className="w-full bg-rose-600 hover:bg-rose-700">
+                    {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : <><Scissors className="h-4 w-4 mr-2" /> Trim Video</>}
+                  </Button>
+                </div>
+                {isLoading && <Progress value={progress} className="h-2" />}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Result Panel */}
+      <div className="lg:col-span-2 space-y-4">
+        {processedVideoUrl && (
+          <Card>
+            <CardHeader><CardTitle className="text-base">Trimmed Video</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <video src={processedVideoUrl} controls className="w-full rounded-lg" />
+              <div className="flex gap-2">
+                <Button onClick={downloadVideo} className="flex-1 bg-rose-600 hover:bg-rose-700">
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+                <Button variant="outline" onClick={() => onTrimComplete(processedVideoUrl)}>
+                  Use in Editor →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        <Card className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30 border-rose-200 dark:border-rose-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-rose-800 dark:text-rose-200">
+              <Zap className="h-4 w-4" /> Tips
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs space-y-1 text-rose-700 dark:text-rose-300">
+            <p>• Click "Set" to mark current playback position</p>
+            <p>• Drag sliders for precise control</p>
+            <p>• Use "Use in Editor" to continue editing</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// ==================== MERGE SECTION COMPONENT ====================
+function MergeSection({ onMergeComplete }) {
+  const [videos, setVideos] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [mergedVideoUrl, setMergedVideoUrl] = useState(null)
+  const [mergedInfo, setMergedInfo] = useState(null)
+  
+  const fileInputRef = useRef(null)
+  const { toast } = useToast()
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const formatSize = (bytes) => {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`
+  }
+
+  const handleFilesUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    const videoFiles = files.filter(f => f.type.startsWith('video/'))
+    if (videoFiles.length === 0) {
+      toast({ title: 'Invalid files', description: 'Please upload video files', variant: 'destructive' })
+      return
+    }
+    const totalSize = videoFiles.reduce((acc, f) => acc + f.size, 0)
+    if (totalSize > 200 * 1024 * 1024) {
+      toast({ title: 'Files too large', description: 'Total max 200MB', variant: 'destructive' })
+      return
+    }
+    
+    const newVideos = []
+    for (const file of videoFiles) {
+      const url = URL.createObjectURL(file)
+      const duration = await new Promise((resolve) => {
+        const video = document.createElement('video')
+        video.preload = 'metadata'
+        video.onloadedmetadata = () => resolve(video.duration)
+        video.onerror = () => resolve(0)
+        video.src = url
+      })
+      newVideos.push({ id: Date.now() + Math.random(), file, url, name: file.name, size: file.size, duration })
+    }
+    
+    setVideos(prev => [...prev, ...newVideos])
+    setMergedVideoUrl(null)
+    toast({ title: `Added ${videoFiles.length} video(s)` })
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const removeVideo = (id) => setVideos(prev => prev.filter(v => v.id !== id))
+
+  const moveVideo = (index, direction) => {
+    const newIndex = index + direction
+    if (newIndex < 0 || newIndex >= videos.length) return
+    const newVideos = [...videos];
+    [newVideos[index], newVideos[newIndex]] = [newVideos[newIndex], newVideos[index]]
+    setVideos(newVideos)
+  }
+
+  const handleMerge = async () => {
+    if (videos.length < 2) {
+      toast({ title: 'Need more videos', description: 'Add at least 2 videos', variant: 'destructive' })
+      return
+    }
+    setIsLoading(true)
+    setProgress(0)
+    try {
+      const formData = new FormData()
+      formData.append('action', 'merge')
+      videos.forEach(v => formData.append('video', v.file))
+      
+      const interval = setInterval(() => setProgress(p => Math.min(p + 2, 90)), 1000)
+      const res = await fetch('/api/video-tools', { method: 'POST', body: formData })
+      clearInterval(interval)
+      setProgress(100)
+      
+      const data = await res.json()
+      if (data.success) {
+        setMergedVideoUrl(data.videoUrl)
+        setMergedInfo(data)
+        toast({ title: 'Videos merged!', description: data.message })
+      } else {
+        toast({ title: 'Error', description: data.error, variant: 'destructive' })
+      }
+    } catch (e) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' })
+    } finally {
+      setIsLoading(false)
+      setProgress(0)
+    }
+  }
+
+  const downloadVideo = () => {
+    if (!mergedVideoUrl) return
+    const link = document.createElement('a')
+    link.href = mergedVideoUrl
+    link.download = `merged-${Date.now()}.mp4`
+    link.click()
+  }
+
+  const totalDuration = videos.reduce((acc, v) => acc + (v.duration || 0), 0)
+  const totalSize = videos.reduce((acc, v) => acc + v.size, 0)
+
+  return (
+    <div className="grid lg:grid-cols-5 gap-6">
+      <div className="lg:col-span-3 space-y-4">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-indigo-500" />
+                  Quick Merge
+                </CardTitle>
+                <CardDescription>Combine multiple videos into one</CardDescription>
+              </div>
+              <Button onClick={() => fileInputRef.current?.click()} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-1" /> Add Videos
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <input ref={fileInputRef} type="file" accept="video/*" multiple onChange={handleFilesUpload} className="hidden" />
+
+            {videos.length === 0 ? (
+              <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-indigo-300 transition-all">
+                <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <p className="font-medium text-lg">Add videos to merge</p>
+                <p className="text-sm text-muted-foreground mt-1">MP4, MOV, AVI, WebM (total max 200MB)</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {videos.map((video, index) => (
+                  <div key={video.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl border">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index === 0} onClick={() => moveVideo(index, -1)}>
+                        <MoveUp className="h-3 w-3" />
+                      </Button>
+                      <span className="text-lg font-bold text-muted-foreground">{index + 1}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index === videos.length - 1} onClick={() => moveVideo(index, 1)}>
+                        <MoveDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="w-24 h-16 rounded-lg overflow-hidden bg-black flex-shrink-0">
+                      <video src={video.url} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{video.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatTime(video.duration)} • {formatSize(video.size)}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeVideo(video.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {videos.length > 0 && (
+              <div className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl">
+                <div className="text-sm">
+                  <span className="font-medium">{videos.length} video{videos.length !== 1 ? 's' : ''}</span>
+                  <span className="text-muted-foreground"> • {formatTime(totalDuration)} total • {formatSize(totalSize)}</span>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => setVideos([])}>Clear All</Button>
+              </div>
+            )}
+
+            {videos.length >= 2 && (
+              <Button onClick={handleMerge} disabled={isLoading} className="w-full h-12 text-lg bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600">
+                {isLoading ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Merging...</> : <><Layers className="h-5 w-5 mr-2" /> Merge {videos.length} Videos</>}
+              </Button>
+            )}
+            {isLoading && <Progress value={progress} className="h-2" />}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Result Panel */}
+      <div className="lg:col-span-2 space-y-4">
+        {mergedVideoUrl && (
+          <Card>
+            <CardHeader><CardTitle className="text-base">Merged Video</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <video src={mergedVideoUrl} controls className="w-full rounded-lg" />
+              {mergedInfo && <p className="text-sm text-muted-foreground">{formatTime(mergedInfo.duration)} • {formatSize(mergedInfo.fileSize)}</p>}
+              <div className="flex gap-2">
+                <Button onClick={downloadVideo} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Download className="h-4 w-4 mr-2" /> Download
+                </Button>
+                <Button variant="outline" onClick={() => onMergeComplete(mergedVideoUrl)}>
+                  Use in Editor →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        <Card className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 border-indigo-200 dark:border-indigo-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-indigo-800 dark:text-indigo-200">
+              <Zap className="h-4 w-4" /> How It Works
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs space-y-1 text-indigo-700 dark:text-indigo-300">
+            <p>• Add multiple videos in any order</p>
+            <p>• Reorder using up/down arrows</p>
+            <p>• Videos are auto-scaled to 1080p</p>
+            <p>• Use "Use in Editor" to continue editing</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
 
 export default function VideoEditorPage() {
   const { toast } = useToast()
