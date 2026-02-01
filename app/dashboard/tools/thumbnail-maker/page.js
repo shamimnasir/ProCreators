@@ -99,91 +99,86 @@ const PLATFORMS = [
   },
 ]
 
-// High-CTR Style presets - MrBeast & Top YouTuber Inspired Styles
+// High-CTR Style presets - 2025/2026 YouTube Best Practices with Color Psychology
 const THUMBNAIL_STYLES = [
   { 
-    id: 'mrbeast-blue', 
-    name: 'MrBeast Blue', 
+    id: 'blue-orange', 
+    name: 'Tech/Education', 
     icon: '🔵',
-    description: 'Signature MrBeast electric blue',
-    colors: 'Electric Blue, Cyan, White',
-    promptModifier: `MRBEAST STYLE THUMBNAIL:
-- Background: ELECTRIC BLUE (#0066FF) to CYAN (#00FFFF) radial gradient burst emanating from center
-- LIGHT RAYS: Bold white/cyan light rays radiating outward from behind the subject like a starburst explosion
-- Add subtle SPARKLE effects and lens flares
-- Colors must be EXTREMELY SATURATED and VIBRANT - nothing muted
-- Professional studio rim lighting with blue/cyan colored gels on edges
-- Clean composition, no clutter, focus on dramatic visual impact`
+    description: 'Blue + Orange complementary pair',
+    colors: 'Blue, Orange, White',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Blue+Orange Complementary):
+BACKGROUND: Deep DARK BLUE (#001133) to BLACK gradient as base. Add GLOWING ORANGE (#FF6600) accent elements in foreground.
+LIGHTING: Dramatic orange rim light on subject from one side, cool blue fill light from other side.
+EFFECTS: Subtle blue and orange lens flares, soft glow around bright elements.
+COLORS: Limit to 3 colors - dark blue background, vibrant orange accents, white highlights.
+STYLE: High-contrast, dark moody background with bright glowing foreground elements. Professional tech/education feel.`
   },
   { 
-    id: 'mrbeast-red', 
-    name: 'MrBeast Red', 
-    icon: '🔴',
-    description: 'Intense red/orange explosion',
-    colors: 'Red, Orange, Yellow burst',
-    promptModifier: `MRBEAST STYLE THUMBNAIL:
-- Background: FIERY RED (#FF0000) to ORANGE (#FF6600) to YELLOW (#FFFF00) radial gradient explosion
-- LIGHT RAYS: Intense golden/orange light rays bursting outward like a sun explosion
-- Add FIRE EFFECTS, sparks, and energy particles
-- Colors must be EXTREMELY HOT and SATURATED - like an explosion
-- Dramatic rim lighting with warm orange/red colored gels
-- Epic cinematic feel, like something amazing is happening`
-  },
-  { 
-    id: 'mrbeast-money', 
-    name: 'Money/Challenge', 
-    icon: '💰',
-    description: 'Green money/success theme',
-    colors: 'Green, Gold, Money',
-    promptModifier: `MRBEAST MONEY/CHALLENGE STYLE:
-- Background: RICH GREEN (#00FF00) to GOLD (#FFD700) gradient with money/success energy
-- LIGHT RAYS: Golden light burst effect radiating from center
-- Add subtle SPARKLE and SHINE effects suggesting wealth/success
-- Colors: Vibrant greens and golds - prosperity and excitement
-- Professional lighting with green/gold rim lights
-- Epic "big win" energy, celebratory feeling`
-  },
-  { 
-    id: 'mrbeast-purple', 
-    name: 'Epic Purple', 
+    id: 'purple-yellow', 
+    name: 'Creative/Fun', 
     icon: '🟣',
-    description: 'Dramatic purple/pink energy',
-    colors: 'Purple, Pink, Magenta',
-    promptModifier: `MRBEAST STYLE THUMBNAIL:
-- Background: DEEP PURPLE (#8B00FF) to HOT PINK (#FF00FF) to MAGENTA radial gradient
-- LIGHT RAYS: Vibrant pink/purple light rays with cosmic energy feel
-- Add ENERGY EFFECTS, plasma-like glows, and sparkles
-- Colors must be NEON SATURATED - electric and eye-catching
-- Dramatic colored rim lighting in purple/pink
-- Mysterious yet exciting energy, like something incredible`
+    description: 'Purple + Yellow complementary pair',
+    colors: 'Purple, Yellow, White',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Purple+Yellow Complementary):
+BACKGROUND: Deep DARK PURPLE (#1a0033) to BLACK gradient as base. Add GLOWING YELLOW (#FFD700) accent elements.
+LIGHTING: Dramatic yellow rim light creating glow effect, purple ambient fill.
+EFFECTS: Sparkles, subtle magic/creative energy particles, soft glow halos.
+COLORS: Limit to 3 colors - dark purple background, bright yellow accents, white text.
+STYLE: High-contrast, mysterious dark background with eye-catching yellow highlights. Creative/educational feel.`
   },
   { 
-    id: 'mrbeast-yellow', 
-    name: 'Shock Yellow', 
-    icon: '🟡',
-    description: 'Attention-grabbing yellow burst',
-    colors: 'Yellow, Orange, White',
-    promptModifier: `MRBEAST SHOCK STYLE:
-- Background: BRIGHT YELLOW (#FFFF00) to ORANGE (#FF8800) sunburst pattern
-- LIGHT RAYS: Intense white and yellow rays exploding outward - maximum attention
-- Add ELECTRIC EFFECTS, lightning bolts, shock waves
-- Colors: MAXIMUM BRIGHTNESS - impossible to ignore
-- High-key lighting with warm yellow/orange tones
-- "SHOCKING" energy - like breaking news or big reveal`
+    id: 'red-urgency', 
+    name: 'Urgency/Action', 
+    icon: '🔴',
+    description: 'Warm colors for excitement',
+    colors: 'Red, Orange, Yellow',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Warm Urgency Colors):
+BACKGROUND: Deep DARK RED (#330000) to BLACK gradient as base. Add GLOWING ORANGE and YELLOW accent elements.
+LIGHTING: Dramatic warm rim lighting (orange/red glow) creating urgency and excitement.
+EFFECTS: Subtle fire-like glow, energy particles, dramatic shadows.
+COLORS: Limit to 3 warm colors - dark red/black background, orange mid-tones, yellow highlights.
+STYLE: High-contrast, dark dramatic background with hot glowing elements. Creates urgency and excitement.`
   },
   { 
-    id: 'contrast-split', 
-    name: 'Split Drama', 
+    id: 'green-trust', 
+    name: 'Money/Success', 
+    icon: '💰',
+    description: 'Green + Gold for trust & success',
+    colors: 'Green, Gold, Black',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Trust & Success Colors):
+BACKGROUND: Deep DARK GREEN (#002200) to BLACK gradient as base. Add GLOWING GOLD (#FFD700) accent elements.
+LIGHTING: Golden rim light suggesting wealth/success, green ambient glow.
+EFFECTS: Subtle sparkle effects, luxurious shine, professional polish.
+COLORS: Limit to 3 colors - dark green/black background, gold accents, white highlights.
+STYLE: High-contrast, sophisticated dark background with premium gold highlights. Finance/success feel.`
+  },
+  { 
+    id: 'cyan-magenta', 
+    name: 'Gaming/Neon', 
+    icon: '🎮',
+    description: 'Cyan + Magenta neon aesthetic',
+    colors: 'Cyan, Magenta, Black',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Neon Gaming Aesthetic):
+BACKGROUND: Pure BLACK (#000000) as base. Add GLOWING CYAN (#00FFFF) and MAGENTA (#FF00FF) neon accents.
+LIGHTING: Dramatic neon rim lighting - cyan on one side, magenta on other.
+EFFECTS: Neon glow trails, RGB light effects, cyberpunk energy.
+COLORS: Limit to 3 colors - pure black background, neon cyan and magenta.
+STYLE: High-contrast, dark black background with vibrant neon glowing elements. Gaming/tech aesthetic.`
+  },
+  { 
+    id: 'split-compare', 
+    name: 'Before/After', 
     icon: '⚡',
-    description: 'Before/After or VS style',
-    colors: 'Blue vs Red, Split design',
-    promptModifier: `DRAMATIC SPLIT/VS STYLE:
-- Background: DIAGONAL SPLIT - left side BLUE (#0066FF), right side RED (#FF0000)
-- Add LIGHTNING or ENERGY CRACK effect down the middle dividing line
-- Each side has its own light rays emanating outward
-- Colors: High contrast opposing colors creating tension
-- Dramatic lighting from both sides
-- Perfect for comparisons, challenges, or transformations`
+    description: 'Split comparison style',
+    colors: 'Blue vs Red split',
+    promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Before/After Split):
+BACKGROUND: DIAGONAL SPLIT - left side DARK BLUE (#001144), right side DARK RED (#330000).
+DIVIDER: Glowing white/yellow lightning bolt or energy crack down the middle.
+LIGHTING: Blue-tinted lighting on left, red/warm lighting on right - clear contrast.
+EFFECTS: Each side has subtle glow emanating from center divide.
+COLORS: Blue tones on left, red/warm tones on right, white divider.
+STYLE: High-contrast split screen for dramatic comparisons or transformations.`
   },
 ]
 
