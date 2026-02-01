@@ -1890,6 +1890,28 @@ export default function VideoEditorPage() {
             </div>
           </TabsContent>
           
+          {/* TRIM TAB */}
+          <TabsContent value="trim">
+            <TrimSection 
+              onTrimComplete={(videoUrl) => {
+                setProcessedVideoUrl(videoUrl)
+                setActiveTab('export')
+                toast({ title: 'Video Trimmed!', description: 'Your video is ready for export.' })
+              }}
+            />
+          </TabsContent>
+          
+          {/* MERGE TAB */}
+          <TabsContent value="merge">
+            <MergeSection 
+              onMergeComplete={(videoUrl) => {
+                setProcessedVideoUrl(videoUrl)
+                setActiveTab('export')
+                toast({ title: 'Videos Merged!', description: 'Your merged video is ready for export.' })
+              }}
+            />
+          </TabsContent>
+          
           {/* EXPORT TAB */}
           <TabsContent value="export">
             <div className="grid md:grid-cols-2 gap-6">
