@@ -125,6 +125,8 @@ const navigation = [
     children: [
       { name: '✨ AI Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
       { name: '🎬 Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
+      { name: '✂️ Video Trimmer', href: '/dashboard/tools/video-trimmer', icon: Scissors },
+      { name: '🔗 Video Merger', href: '/dashboard/tools/video-merger', icon: Layers },
       { name: '📝 Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
       { name: '🖼️ Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
       { name: '🖼️ Cover Image Creator', href: '/dashboard/tools/cover-image-creator', icon: ImageIcon },
