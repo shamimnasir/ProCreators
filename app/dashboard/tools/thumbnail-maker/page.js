@@ -301,7 +301,8 @@ TEXT REQUIREMENTS (IMPORTANT):
 - Add 3-5 bold power words (under 20 characters total)
 - Use LARGE, BOLD sans-serif font (Impact, Arial Black style)
 - HIGH CONTRAST: Yellow text with black outline OR white text with black outline
-- Position text in upper-left or center area
+- Position text in CENTER-LEFT or LOWER-LEFT area of the frame (NOT top-left, looks amateur)
+- Text should be vertically centered or slightly below center on the LEFT side
 - NEVER place text in bottom-right corner (YouTube timestamp covers it)
 - Text should complement the visual, not repeat the full title
 - Use emotional or numbered words for curiosity (e.g., "5 TIPS", "SHOCKING", "NEW")`
