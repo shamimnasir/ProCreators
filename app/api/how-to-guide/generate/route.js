@@ -280,8 +280,8 @@ export async function POST(request) {
     }
     
     // Chapter entries
-    for (let i = 0; i < chapters.length; i++) {
-      const chapter = chapters[i]
+    for (let i = 0; i < validChapters.length; i++) {
+      const chapter = validChapters[i]
       const cleanChapterTitle = sanitizeText(chapter.title)
       
       tocPage.drawText(`Chapter ${i + 1}: ${cleanChapterTitle}`, {
