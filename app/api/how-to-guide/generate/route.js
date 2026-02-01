@@ -360,8 +360,8 @@ export async function POST(request) {
     }
     
     // ========== CHAPTER PAGES ==========
-    for (let chapterIdx = 0; chapterIdx < chapters.length; chapterIdx++) {
-      const chapter = chapters[chapterIdx]
+    for (let chapterIdx = 0; chapterIdx < validChapters.length; chapterIdx++) {
+      const chapter = validChapters[chapterIdx]
       const cleanChapterTitle = sanitizeText(chapter.title)
       
       // Chapter title page
