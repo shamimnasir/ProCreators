@@ -125,6 +125,8 @@ const navigation = [
       { name: '🎬 Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
       { name: '📝 Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
       { name: '🖼️ Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
+      { name: '🖼️ Cover Image Creator', href: '/dashboard/tools/cover-image-creator', icon: ImageIcon },
+      { name: '🎧 Podcast Cover Maker', href: '/dashboard/tools/podcast-cover-maker', icon: Mic },
     ]
   },
   {
