@@ -200,8 +200,8 @@ export default function MediaEditingPage() {
               <Edit3 className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Media Editing Studio</h1>
-              <p className="text-white/80">Professional editing tools powered by AI</p>
+              <h1 className="text-3xl font-bold">Media Editor</h1>
+              <p className="text-white/80">Image, Audio & Video editing tools powered by AI</p>
             </div>
           </div>
           
