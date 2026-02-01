@@ -454,27 +454,41 @@ export default function ImageEditorPage() {
           <Card className="overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="border-b bg-muted/30">
-                <TabsList className="w-full justify-start rounded-none border-0 bg-transparent h-auto p-0">
+                <TabsList className="w-full justify-start rounded-none border-0 bg-transparent h-auto p-0 flex-wrap">
                   <TabsTrigger 
                     value="generate" 
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
                   >
                     <Wand2 className="h-4 w-4 mr-2" />
                     Generate
                   </TabsTrigger>
                   <TabsTrigger 
                     value="edit" 
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
                   >
                     <Pencil className="h-4 w-4 mr-2" />
                     Edit
                   </TabsTrigger>
                   <TabsTrigger 
                     value="fuse" 
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-6"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
                   >
                     <Combine className="h-4 w-4 mr-2" />
                     Fuse
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="upscale" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Upscale
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="compress" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
+                  >
+                    <Layers className="h-4 w-4 mr-2" />
+                    Compress
                   </TabsTrigger>
                 </TabsList>
               </div>
