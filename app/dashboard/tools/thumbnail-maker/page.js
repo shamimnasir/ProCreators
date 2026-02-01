@@ -1384,26 +1384,15 @@ export default function ThumbnailMakerPage() {
                             </div>
                           </div>
 
-                          {/* Position */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <Label className="text-xs mb-1 block">X Position: {textLayers.find(l => l.id === selectedLayerId)?.x}%</Label>
-                              <Slider
-                                value={[textLayers.find(l => l.id === selectedLayerId)?.x || 50]}
-                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { x: v })}
-                                min={0}
-                                max={100}
-                              />
+                          {/* Position - Drag instruction */}
+                          <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                              <Move className="h-4 w-4" />
+                              <span className="text-sm font-medium">Drag text on image to position</span>
                             </div>
-                            <div>
-                              <Label className="text-xs mb-1 block">Y Position: {textLayers.find(l => l.id === selectedLayerId)?.y}%</Label>
-                              <Slider
-                                value={[textLayers.find(l => l.id === selectedLayerId)?.y || 50]}
-                                onValueChange={([v]) => updateTextLayer(selectedLayerId, { y: v })}
-                                min={0}
-                                max={100}
-                              />
-                            </div>
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                              Click and drag the text layer directly on the image above
+                            </p>
                           </div>
 
                           {/* Custom Colors */}
