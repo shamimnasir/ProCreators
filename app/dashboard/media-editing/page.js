@@ -46,24 +46,6 @@ const MEDIA_CATEGORIES = [
         href: '/dashboard/tools/auto-subtitles',
         useCase: 'Accessibility, reach',
         badge: 'Popular'
-      },
-      {
-        id: 'video-trimmer',
-        name: 'Video Trimmer',
-        description: 'Cut and trim videos quickly',
-        icon: '✂️',
-        href: '/dashboard/tools/video-trimmer',
-        useCase: 'Quick edits',
-        badge: ''
-      },
-      {
-        id: 'video-merger',
-        name: 'Video Merger',
-        description: 'Combine multiple clips into one',
-        icon: '🔗',
-        href: '/dashboard/tools/video-merger',
-        useCase: 'Compilations',
-        badge: ''
       }
     ]
   },
@@ -76,12 +58,12 @@ const MEDIA_CATEGORIES = [
     tools: [
       {
         id: 'image-editor',
-        name: 'AI Image Editor',
-        description: 'Professional image editing with AI tools',
+        name: 'AI Image Studio',
+        description: 'Generate, edit, upscale & compress images',
         icon: '🖼️',
         href: '/dashboard/tools/image-editor',
-        useCase: 'Photo editing',
-        badge: 'Essential'
+        useCase: 'Complete image editing',
+        badge: 'All-in-One'
       },
       {
         id: 'bg-remover',
@@ -91,24 +73,6 @@ const MEDIA_CATEGORIES = [
         href: '/dashboard/tools/bg-remover',
         useCase: 'Product photos, portraits',
         badge: 'Hot'
-      },
-      {
-        id: 'image-upscaler',
-        name: 'Image Upscaler',
-        description: 'Enhance resolution up to 4x with AI',
-        icon: '🔍',
-        href: '/dashboard/tools/image-upscaler',
-        useCase: 'Print, high-res',
-        badge: ''
-      },
-      {
-        id: 'image-compressor',
-        name: 'Image Compressor',
-        description: 'Reduce file size without losing quality',
-        icon: '📦',
-        href: '/dashboard/tools/image-compressor',
-        useCase: 'Web optimization',
-        badge: ''
       }
     ]
   },
