@@ -278,7 +278,7 @@ export default function JokeGeneratorPage() {
             </div>
             <div>
               <p className="font-medium text-yellow-800 dark:text-yellow-200">Know Your Audience</p>
-              <p className="text-yellow-700 dark:text-yellow-300">Tailor jokes to who you're sharing with</p>
+              <p className="text-yellow-700 dark:text-yellow-300">Tailor jokes to who you are sharing with</p>
             </div>
             <div>
               <p className="font-medium text-yellow-800 dark:text-yellow-200">Less is More</p>
