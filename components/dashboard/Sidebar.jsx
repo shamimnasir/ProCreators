@@ -52,7 +52,8 @@ import {
   Music,
   Volume2,
   Scissors,
-  Layers
+  Layers,
+  Shield
 } from 'lucide-react'
 
 const navigation = [
