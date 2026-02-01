@@ -1968,7 +1968,7 @@ async function generateActivityPages(body) {
     console.log(`Generating ${pageCount} activity pages for ${themeToUse} theme, age group: ${ageGroup}`)
     console.log(`Using activities: ${activities.join(', ')}`)
     
-    const pages = []
+    const generatedPages = []
     
     // Distribute activities across pages
     for (let i = 0; i < pageCount; i++) {
@@ -1980,7 +1980,7 @@ async function generateActivityPages(body) {
         // Use await since some generators are async (AI-powered)
         const content = await generator(themeToUse, difficulty, ageGroup)
         
-        validPages.push({
+        generatedPages.push({
           title: getActivityTitle(activityId, themeToUse, i + 1),
           activityType: activityId,
           description: content.instructions || 'Complete this fun activity!',
@@ -1988,7 +1988,7 @@ async function generateActivityPages(body) {
           content
         })
       } else {
-        validPages.push({
+        generatedPages.push({
           title: `Activity ${i + 1}`,
           activityType: 'puzzle',
           description: 'Complete this fun activity!',
@@ -2000,8 +2000,8 @@ async function generateActivityPages(body) {
     
     return NextResponse.json({
       success: true,
-      pages,
-      pageCount: validPages.length
+      pages: generatedPages,
+      pageCount: generatedPages.length
     })
   } catch (error) {
     console.error('Error generating activity pages:', error)
