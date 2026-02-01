@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,13 +9,436 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Slider } from '@/components/ui/slider'
+import { Progress } from '@/components/ui/progress'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { 
   Wand2, Upload, Download, Sparkles, Image as ImageIcon, Palette,
   Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,
   Pencil, Combine, Zap, User, ShoppingBag, Film, Smile, Target,
-  ChevronRight, Check, Star, Heart
+  ChevronRight, Check, Star, Heart, Loader2, ArrowUpRight, ArrowDownRight
 } from 'lucide-react'
+
+// ==================== UPSCALE SECTION COMPONENT ====================
+function UpscaleSection({ onUpscaleComplete }) {
+  const [imageFile, setImageFile] = useState(null)
+  const [imageUrl, setImageUrl] = useState(null)
+  const [imageInfo, setImageInfo] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [scale, setScale] = useState(2)
+  const [method, setMethod] = useState('lanczos3')
+  const [processedImageUrl, setProcessedImageUrl] = useState(null)
+  const [processedInfo, setProcessedInfo] = useState(null)
+  
+  const fileInputRef = useRef(null)
+
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+    setImageFile(file)
+    setImageUrl(URL.createObjectURL(file))
+    setProcessedImageUrl(null)
+    setProcessedInfo(null)
+    
+    // Get image info
+    const formData = new FormData()
+    formData.append('action', 'info')
+    formData.append('image', file)
+    try {
+      const res = await fetch('/api/image-tools', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setImageInfo(data)
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const handleUpscale = async () => {
+    if (!imageFile) return
+    setIsLoading(true)
+    setProgress(0)
+    try {
+      const formData = new FormData()
+      formData.append('action', 'upscale')
+      formData.append('image', imageFile)
+      formData.append('scale', scale.toString())
+      formData.append('method', method)
+      
+      const interval = setInterval(() => setProgress(p => Math.min(p + 10, 90)), 500)
+      const res = await fetch('/api/image-tools', { method: 'POST', body: formData })
+      clearInterval(interval)
+      setProgress(100)
+      
+      const data = await res.json()
+      if (data.success) {
+        setProcessedImageUrl(data.imageUrl)
+        setProcessedInfo(data)
+        toast.success(data.message)
+      } else {
+        toast.error(data.error)
+      }
+    } catch (e) {
+      toast.error(e.message)
+    } finally {
+      setIsLoading(false)
+      setProgress(0)
+    }
+  }
+
+  const downloadImage = () => {
+    if (!processedImageUrl) return
+    const link = document.createElement('a')
+    link.href = processedImageUrl
+    link.download = `upscaled-${scale}x-${Date.now()}.png`
+    link.click()
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Upload */}
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+          imageFile ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-muted-foreground/25 hover:border-green-300'
+        }`}
+      >
+        {imageFile ? (
+          <div className="flex items-center justify-center gap-4">
+            <img src={imageUrl} alt="Preview" className="h-16 w-16 object-cover rounded-lg" />
+            <div className="text-left">
+              <p className="font-medium">{imageFile.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {imageInfo ? `${imageInfo.width}x${imageInfo.height} • ${formatBytes(imageInfo.fileSize)}` : 'Loading...'}
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setImageFile(null); setImageUrl(null); setProcessedImageUrl(null); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+            <p className="font-medium">Upload image to upscale</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG, WebP</p>
+          </>
+        )}
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+      </div>
+
+      {imageFile && (
+        <>
+          {/* Scale Selection */}
+          <div>
+            <Label className="text-sm font-semibold mb-3 block">Scale Factor</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {[1.5, 2, 3, 4].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScale(s)}
+                  className={`p-3 rounded-lg border-2 text-center transition-all ${
+                    scale === s ? 'border-green-500 bg-green-50 dark:bg-green-950/30' : 'border-border hover:border-green-300'
+                  }`}
+                >
+                  <span className="text-lg font-bold">{s}x</span>
+                  {imageInfo && (
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {Math.round(imageInfo.width * s)}x{Math.round(imageInfo.height * s)}
+                    </p>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Method Selection */}
+          <div>
+            <Label className="text-sm font-semibold mb-2 block">Quality Method</Label>
+            <Select value={method} onValueChange={setMethod}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="lanczos3">Lanczos3 (Best Quality)</SelectItem>
+                <SelectItem value="lanczos2">Lanczos2 (High Quality)</SelectItem>
+                <SelectItem value="mitchell">Mitchell (Balanced)</SelectItem>
+                <SelectItem value="cubic">Cubic (Fast)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Upscale Button */}
+          <Button onClick={handleUpscale} disabled={isLoading} className="w-full h-12 bg-green-600 hover:bg-green-700">
+            {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : <><ArrowUpRight className="h-4 w-4 mr-2" /> Upscale to {scale}x</>}
+          </Button>
+          {isLoading && <Progress value={progress} className="h-2" />}
+        </>
+      )}
+
+      {/* Result */}
+      {processedImageUrl && (
+        <div className="p-4 bg-muted/50 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-green-600 flex items-center gap-2">
+              <Check className="h-4 w-4" /> Upscaled Successfully
+            </span>
+            {processedInfo && (
+              <span className="text-xs text-muted-foreground">
+                {processedInfo.originalWidth}x{processedInfo.originalHeight} → {processedInfo.newWidth}x{processedInfo.newHeight}
+              </span>
+            )}
+          </div>
+          <img src={processedImageUrl} alt="Upscaled" className="w-full rounded-lg" />
+          <div className="flex gap-2">
+            <Button onClick={downloadImage} className="flex-1 bg-green-600 hover:bg-green-700">
+              <Download className="h-4 w-4 mr-2" /> Download
+            </Button>
+            <Button variant="outline" onClick={() => onUpscaleComplete(processedImageUrl)}>
+              Use →
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ==================== COMPRESS SECTION COMPONENT ====================
+function CompressSection({ onCompressComplete }) {
+  const [imageFile, setImageFile] = useState(null)
+  const [imageUrl, setImageUrl] = useState(null)
+  const [imageInfo, setImageInfo] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [quality, setQuality] = useState(80)
+  const [format, setFormat] = useState('jpeg')
+  const [maxWidth, setMaxWidth] = useState(0)
+  const [processedImageUrl, setProcessedImageUrl] = useState(null)
+  const [processedInfo, setProcessedInfo] = useState(null)
+  
+  const fileInputRef = useRef(null)
+
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+    setImageFile(file)
+    setImageUrl(URL.createObjectURL(file))
+    setProcessedImageUrl(null)
+    setProcessedInfo(null)
+    
+    // Get image info
+    const formData = new FormData()
+    formData.append('action', 'info')
+    formData.append('image', file)
+    try {
+      const res = await fetch('/api/image-tools', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setImageInfo(data)
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const handleCompress = async () => {
+    if (!imageFile) return
+    setIsLoading(true)
+    setProgress(0)
+    try {
+      const formData = new FormData()
+      formData.append('action', 'compress')
+      formData.append('image', imageFile)
+      formData.append('quality', quality.toString())
+      formData.append('format', format)
+      if (maxWidth > 0) formData.append('maxWidth', maxWidth.toString())
+      
+      const interval = setInterval(() => setProgress(p => Math.min(p + 10, 90)), 500)
+      const res = await fetch('/api/image-tools', { method: 'POST', body: formData })
+      clearInterval(interval)
+      setProgress(100)
+      
+      const data = await res.json()
+      if (data.success) {
+        setProcessedImageUrl(data.imageUrl)
+        setProcessedInfo(data)
+        toast.success(data.message)
+      } else {
+        toast.error(data.error)
+      }
+    } catch (e) {
+      toast.error(e.message)
+    } finally {
+      setIsLoading(false)
+      setProgress(0)
+    }
+  }
+
+  const downloadImage = () => {
+    if (!processedImageUrl) return
+    const link = document.createElement('a')
+    link.href = processedImageUrl
+    link.download = `compressed-${quality}q-${Date.now()}.${format}`
+    link.click()
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Upload */}
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+          imageFile ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' : 'border-muted-foreground/25 hover:border-blue-300'
+        }`}
+      >
+        {imageFile ? (
+          <div className="flex items-center justify-center gap-4">
+            <img src={imageUrl} alt="Preview" className="h-16 w-16 object-cover rounded-lg" />
+            <div className="text-left">
+              <p className="font-medium">{imageFile.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {imageInfo ? `${imageInfo.width}x${imageInfo.height} • ${formatBytes(imageInfo.fileSize)}` : 'Loading...'}
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setImageFile(null); setImageUrl(null); setProcessedImageUrl(null); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+            <p className="font-medium">Upload image to compress</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG, WebP</p>
+          </>
+        )}
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+      </div>
+
+      {imageFile && (
+        <>
+          {/* Quality Slider */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-semibold">Quality: {quality}%</Label>
+              <span className="text-xs text-muted-foreground">
+                {quality < 50 ? 'Small file' : quality < 80 ? 'Balanced' : 'High quality'}
+              </span>
+            </div>
+            <Slider value={[quality]} onValueChange={([v]) => setQuality(v)} min={10} max={100} step={5} />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Smallest</span>
+              <span>Best Quality</span>
+            </div>
+          </div>
+
+          {/* Format Selection */}
+          <div>
+            <Label className="text-sm font-semibold mb-3 block">Output Format</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { id: 'jpeg', name: 'JPEG', desc: 'Smallest' },
+                { id: 'png', name: 'PNG', desc: 'Lossless' },
+                { id: 'webp', name: 'WebP', desc: 'Modern' },
+                { id: 'avif', name: 'AVIF', desc: 'Best' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setFormat(f.id)}
+                  className={`p-2 rounded-lg border-2 text-center transition-all ${
+                    format === f.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border hover:border-blue-300'
+                  }`}
+                >
+                  <span className="text-sm font-bold">{f.name}</span>
+                  <p className="text-[10px] text-muted-foreground">{f.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Resize Option */}
+          <div>
+            <Label className="text-sm font-semibold mb-2 block">Max Width (optional)</Label>
+            <div className="grid grid-cols-5 gap-2">
+              {[0, 800, 1200, 1920, 2560].map((w) => (
+                <button
+                  key={w}
+                  onClick={() => setMaxWidth(w)}
+                  className={`p-2 rounded-lg border-2 text-center transition-all text-xs ${
+                    maxWidth === w ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border hover:border-blue-300'
+                  }`}
+                >
+                  {w === 0 ? 'Original' : `${w}px`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Compress Button */}
+          <Button onClick={handleCompress} disabled={isLoading} className="w-full h-12 bg-blue-600 hover:bg-blue-700">
+            {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : <><ArrowDownRight className="h-4 w-4 mr-2" /> Compress Image</>}
+          </Button>
+          {isLoading && <Progress value={progress} className="h-2" />}
+        </>
+      )}
+
+      {/* Result */}
+      {processedImageUrl && (
+        <div className="p-4 bg-muted/50 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-blue-600 flex items-center gap-2">
+              <Check className="h-4 w-4" /> Compressed Successfully
+            </span>
+            {processedInfo && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                -{processedInfo.savedPercent}% smaller
+              </Badge>
+            )}
+          </div>
+          {processedInfo && (
+            <div className="text-xs text-muted-foreground">
+              {formatBytes(processedInfo.originalSize)} → {formatBytes(processedInfo.compressedSize)}
+              {processedInfo.newWidth !== processedInfo.originalWidth && (
+                <span> • {processedInfo.originalWidth}x{processedInfo.originalHeight} → {processedInfo.newWidth}x{processedInfo.newHeight}</span>
+              )}
+            </div>
+          )}
+          <img src={processedImageUrl} alt="Compressed" className="w-full rounded-lg" />
+          <div className="flex gap-2">
+            <Button onClick={downloadImage} className="flex-1 bg-blue-600 hover:bg-blue-700">
+              <Download className="h-4 w-4 mr-2" /> Download
+            </Button>
+            <Button variant="outline" onClick={() => onCompressComplete(processedImageUrl)}>
+              Use →
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Style presets with detailed info - Combined with Quick Actions
 const STYLE_PRESETS = [
