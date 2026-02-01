@@ -162,7 +162,7 @@ const navigation = [
     ]
   },
   {
-    name: '🏢 Business with AI',
+    name: '🏢 Business & Marketing',
     href: '/dashboard/business-ai',
     icon: TrendingUp,
     children: [
