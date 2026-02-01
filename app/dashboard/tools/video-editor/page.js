@@ -1045,14 +1045,22 @@ export default function VideoEditorPage() {
             )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-5">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
             <TabsTrigger value="edit" disabled={clips.length === 0} className="flex items-center gap-2">
-              <Scissors className="h-4 w-4" />
+              <Wand2 className="h-4 w-4" />
               Edit
+            </TabsTrigger>
+            <TabsTrigger value="trim" className="flex items-center gap-2">
+              <Scissors className="h-4 w-4" />
+              Trim
+            </TabsTrigger>
+            <TabsTrigger value="merge" className="flex items-center gap-2">
+              <Layers className="h-4 w-4" />
+              Merge
             </TabsTrigger>
             <TabsTrigger value="export" disabled={!processedVideoUrl} className="flex items-center gap-2">
               <Download className="h-4 w-4" />
