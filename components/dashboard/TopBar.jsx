@@ -19,6 +19,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useRouter } from 'next/navigation'
 import { MobileSidebar } from './MobileSidebar'
+import { CreditBalance } from '@/components/CreditBalance'
 
 export function TopBar() {
   const { theme, setTheme } = useTheme()
@@ -51,7 +52,12 @@ export function TopBar() {
       </div>
 
       {/* Right side actions */}
-      <div className="flex items-center gap-1 md:gap-2">
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Credit Balance - hidden on very small screens */}
+        <div className="hidden sm:block">
+          <CreditBalance compact />
+        </div>
+        
         <Button
           variant="ghost"
           size="icon"
@@ -74,7 +80,7 @@ export function TopBar() {
               Profile
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/dashboard/billing')}>
-              Billing
+              Billing & Credits
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/login')}>
               Logout

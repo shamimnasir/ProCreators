@@ -1,19 +1,21 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CreditCard, Loader2 } from 'lucide-react'
+import { CreditCard, Loader2, Coins } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
-export function CreditBalance({ userId }) {
+// Default demo user ID for development
+const DEMO_USER_ID = 'demo-user-001'
+
+export function CreditBalance({ userId = DEMO_USER_ID, compact = false }) {
   const [credits, setCredits] = useState(null)
+  const [plan, setPlan] = useState('free')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (userId) {
-      fetchCredits()
-    }
+    fetchCredits()
   }, [userId])
 
   const fetchCredits = async () => {
@@ -22,9 +24,13 @@ export function CreditBalance({ userId }) {
       const data = await res.json()
       if (data.success) {
         setCredits(data.credits)
+        setPlan(data.plan || 'free')
       }
     } catch (error) {
       console.error('Error fetching credits:', error)
+      // Set default values on error
+      setCredits(50)
+      setPlan('free')
     } finally {
       setLoading(false)
     }
@@ -34,17 +40,28 @@ export function CreditBalance({ userId }) {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Loading...</span>
+        {!compact && <span className="text-sm">Loading...</span>}
       </div>
+    )
+  }
+
+  if (compact) {
+    return (
+      <Link href="/dashboard/billing">
+        <Badge variant="outline" className="gap-1.5 px-3 py-1.5 cursor-pointer hover:bg-muted transition-colors">
+          <Coins className="h-3.5 w-3.5 text-yellow-500" />
+          <span className="font-bold">{credits?.toLocaleString() || 0}</span>
+        </Badge>
+      </Link>
     )
   }
 
   return (
     <Link href="/dashboard/billing">
-      <Button variant="outline" size="sm" className="gap-2">
-        <CreditCard className="h-4 w-4" />
+      <Button variant="outline" size="sm" className="gap-2 h-9">
+        <Coins className="h-4 w-4 text-yellow-500" />
         <span className="font-bold">{credits?.toLocaleString() || 0}</span>
-        <span className="text-muted-foreground">credits</span>
+        <span className="text-muted-foreground text-xs">credits</span>
       </Button>
     </Link>
   )
@@ -74,27 +91,25 @@ export function CreditCost({ toolId, params = {} }) {
   }
 
   if (loading) {
-    return <span className="text-xs text-muted-foreground">Calculating cost...</span>
+    return <span className="text-xs text-muted-foreground">...</span>
   }
 
   return (
-    <Badge variant="outline" className="text-xs">
-      <CreditCard className="h-3 w-3 mr-1" />
+    <Badge variant="outline" className="text-xs gap-1">
+      <Coins className="h-3 w-3 text-yellow-500" />
       {cost} credits
     </Badge>
   )
 }
 
 // Hook for managing credits in tool pages
-export function useCredits(userId) {
+export function useCredits(userId = DEMO_USER_ID) {
   const [credits, setCredits] = useState(0)
   const [plan, setPlan] = useState('free')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (userId) {
-      fetchCredits()
-    }
+    fetchCredits()
   }, [userId])
 
   const fetchCredits = async () => {
@@ -102,8 +117,8 @@ export function useCredits(userId) {
       const res = await fetch(`/api/credits?userId=${userId}`)
       const data = await res.json()
       if (data.success) {
-        setCredits(data.credits)
-        setPlan(data.plan)
+        setCredits(data.credits || 0)
+        setPlan(data.plan || 'free')
       }
     } catch (error) {
       console.error('Error fetching credits:', error)
@@ -126,7 +141,8 @@ export function useCredits(userId) {
         return {
           success: false,
           error: `Insufficient credits. You need ${checkData.cost} credits but only have ${checkData.currentBalance}.`,
-          shortfall: checkData.shortfall
+          shortfall: checkData.shortfall,
+          needsUpgrade: true
         }
       }
 
@@ -196,6 +212,7 @@ export function useCredits(userId) {
     credits,
     plan,
     loading,
+    userId,
     checkAndDeduct,
     refund,
     complete,
