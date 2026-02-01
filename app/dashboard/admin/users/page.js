@@ -198,12 +198,12 @@ export default function AdminUsersPage() {
             </div>
             <div className="w-40">
               <Label>Plan</Label>
-              <Select value={planFilter} onValueChange={setPlanFilter}>
+              <Select value={planFilter || 'all'} onValueChange={(v) => setPlanFilter(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Plans" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Plans</SelectItem>
+                  <SelectItem value="all">All Plans</SelectItem>
                   <SelectItem value="free">Free</SelectItem>
                   <SelectItem value="creator">Creator</SelectItem>
                   <SelectItem value="pro">Pro</SelectItem>
@@ -213,12 +213,12 @@ export default function AdminUsersPage() {
             </div>
             <div className="w-40">
               <Label>Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="suspended">Suspended</SelectItem>
                   <SelectItem value="banned">Banned</SelectItem>
