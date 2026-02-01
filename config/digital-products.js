@@ -226,7 +226,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/name-tracing',
         sellPrice: '$3-$8',
         platforms: ['Etsy'],
-        badge: 'Easy'
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   },
