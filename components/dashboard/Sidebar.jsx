@@ -48,7 +48,9 @@ import {
   Smile,
   Heart,
   Star,
-  Award
+  Award,
+  Music,
+  Volume2
 } from 'lucide-react'
 
 const navigation = [
