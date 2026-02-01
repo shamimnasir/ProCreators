@@ -11,7 +11,7 @@ import sys
 from typing import Dict, Any
 
 # Base URL from environment
-BASE_URL = "https://thumbnail-text-craft.preview.emergentagent.com"
+BASE_URL = "https://unified-media-hub-1.preview.emergentagent.com"
 
 class SWOTAnalysisAPITester:
     def __init__(self):
