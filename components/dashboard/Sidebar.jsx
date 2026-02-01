@@ -194,17 +194,10 @@ const navigation = [
     name: 'Admin',
     icon: Settings,
     children: [
-      { name: 'System Prompts (Viral Tools)', href: '/dashboard/admin/system-prompts', icon: Type },
-      { name: 'System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
-      { name: 'System Prompts (AI Video Studio)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
-    ]
-  },
-  {
-    name: 'Admin',
-    href: '/dashboard/admin/pages',
-    icon: Settings,
-    children: [
-      { name: 'Page Manager', href: '/dashboard/admin/pages', icon: FileText }
+      { name: '📄 Page Manager', href: '/dashboard/admin/pages', icon: FileText },
+      { name: '⚙️ System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
+      { name: '🎬 System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
+      { name: '🎥 System Prompts (AI Video)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
     ]
   },
 ]
