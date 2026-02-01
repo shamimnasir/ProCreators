@@ -52,7 +52,8 @@ const FUN_CATEGORIES = [
         icon: '🔥',
         href: '/dashboard/tools/roast-generator',
         useCase: 'Fun with friends',
-        badge: 'Spicy'
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   },
@@ -79,7 +80,8 @@ const FUN_CATEGORIES = [
         icon: '🧙',
         href: '/dashboard/tools/character-creator',
         useCase: 'Stories, games, art',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'pet-avatar',
@@ -88,7 +90,8 @@ const FUN_CATEGORIES = [
         icon: '🐶',
         href: '/dashboard/tools/pet-avatar',
         useCase: 'Pet lovers',
-        badge: 'Cute'
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   },
