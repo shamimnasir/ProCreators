@@ -166,7 +166,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/course-creator',
         sellPrice: '$50-$500',
         platforms: ['Teachable', 'Thinkific', 'Gumroad'],
-        badge: 'High Value'
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'flashcard-maker',
