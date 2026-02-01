@@ -292,21 +292,49 @@ export default function MemeGeneratorPage() {
       </Tabs>
 
       {/* Generated Meme Preview */}
-      {generatedMeme && (
+      {generatedMeme && generatedMeme.variations && (
         <Card>
           <CardHeader>
-            <CardTitle>🎉 Your Meme is Ready!</CardTitle>
+            <CardTitle>🎉 Your Meme Text is Ready!</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="aspect-square max-w-md mx-auto bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground">Meme Preview</p>
-            </div>
+          <CardContent className="space-y-4">
+            {generatedMeme.variations.map((variation, index) => (
+              <div key={index} className="p-4 bg-muted rounded-lg">
+                <div className="max-w-md mx-auto bg-black rounded-lg overflow-hidden">
+                  <div className="p-4 text-center">
+                    <p className="text-white font-bold text-xl uppercase tracking-wide" style={{textShadow: '2px 2px 0 #000'}}>
+                      {variation.topText}
+                    </p>
+                    <div className="py-8">
+                      <Smile className="h-16 w-16 mx-auto text-white/30" />
+                      <p className="text-white/50 text-sm mt-2">Your meme image here</p>
+                    </div>
+                    <p className="text-white font-bold text-xl uppercase tracking-wide" style={{textShadow: '2px 2px 0 #000'}}>
+                      {variation.bottomText}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2 text-center italic">{variation.explanation}</p>
+              </div>
+            ))}
+            {generatedMeme.hashtags && (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Suggested hashtags:</p>
+                <p className="text-primary">{generatedMeme.hashtags.map(h => `#${h}`).join(' ')}</p>
+              </div>
+            )}
             <div className="flex gap-3 mt-4 justify-center">
-              <Button>
-                <Download className="mr-2 h-4 w-4" /> Download
+              <Button onClick={() => {
+                const text = `${topText}\\n${bottomText}`
+                navigator.clipboard.writeText(text)
+                toast({ title: 'Copied!', description: 'Meme text copied to clipboard' })
+              }}>
+                <Copy className="mr-2 h-4 w-4" /> Copy Text
               </Button>
-              <Button variant="outline">
-                Share to Social
+              <Button variant="outline" onClick={() => setGeneratedMeme(null)}>
+                <RefreshCw className="mr-2 h-4 w-4" /> New Meme
+              </Button>
+            </div>
               </Button>
             </div>
           </CardContent>
