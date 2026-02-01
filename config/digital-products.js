@@ -125,7 +125,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/social-templates',
         sellPrice: '$15-$50',
         platforms: ['Etsy', 'Creative Market'],
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'resume-templates',
@@ -135,7 +136,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/resume-templates',
         sellPrice: '$10-$25',
         platforms: ['Etsy', 'Creative Market'],
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'presentation-templates',
