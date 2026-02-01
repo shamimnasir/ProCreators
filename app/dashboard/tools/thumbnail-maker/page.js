@@ -1182,16 +1182,25 @@ export default function ThumbnailMakerPage() {
                     <Label className="text-sm font-semibold mb-2 block">Base Image</Label>
                     {editorImage ? (
                       <div className="relative">
-                        <div className="relative rounded-lg overflow-hidden border-2 border-border">
-                          <img src={editorImage} alt="Editor" className="w-full" />
-                          {/* Text Layer Preview */}
+                        <div 
+                          ref={imageContainerRef}
+                          className="relative rounded-lg overflow-hidden border-2 border-border select-none"
+                          style={{ cursor: isDragging ? 'grabbing' : 'default' }}
+                        >
+                          <img src={editorImage} alt="Editor" className="w-full pointer-events-none" draggable={false} />
+                          {/* Text Layer Preview - Draggable */}
                           {textLayers.map(layer => {
                             const font = TEXT_FONTS.find(f => f.id === layer.fontFamily)
+                            const isSelected = selectedLayerId === layer.id
+                            const isBeingDragged = dragLayerId === layer.id
                             return (
                               <div
                                 key={layer.id}
-                                onClick={() => setSelectedLayerId(layer.id)}
-                                className={`absolute cursor-pointer transition-all ${selectedLayerId === layer.id ? 'ring-2 ring-blue-500' : ''}`}
+                                onMouseDown={(e) => handleDragStart(e, layer.id)}
+                                onTouchStart={(e) => handleDragStart(e, layer.id)}
+                                className={`absolute select-none transition-shadow ${
+                                  isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                                } ${isBeingDragged ? 'scale-105' : ''}`}
                                 style={{
                                   left: `${layer.x}%`,
                                   top: `${layer.y}%`,
@@ -1208,9 +1217,17 @@ export default function ThumbnailMakerPage() {
                                   `,
                                   textAlign: layer.align,
                                   whiteSpace: 'nowrap',
+                                  cursor: isDragging ? 'grabbing' : 'grab',
+                                  userSelect: 'none',
+                                  zIndex: isSelected ? 10 : 1,
                                 }}
                               >
                                 {layer.text}
+                                {isSelected && !isDragging && (
+                                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded whitespace-nowrap">
+                                    Drag to move
+                                  </div>
+                                )}
                               </div>
                             )
                           })}
