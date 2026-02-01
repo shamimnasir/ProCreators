@@ -118,7 +118,8 @@ const FUN_CATEGORIES = [
         icon: '🌹',
         href: '/dashboard/tools/poem-generator',
         useCase: 'Special occasions',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'song-lyrics',
@@ -127,7 +128,8 @@ const FUN_CATEGORIES = [
         icon: '🎵',
         href: '/dashboard/tools/song-lyrics',
         useCase: 'Musicians, karaoke',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   },
@@ -154,7 +156,8 @@ const FUN_CATEGORIES = [
         icon: '😉',
         href: '/dashboard/tools/pickup-lines',
         useCase: 'Dating, fun',
-        badge: 'Smooth'
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'apology-letter',
@@ -163,7 +166,8 @@ const FUN_CATEGORIES = [
         icon: '🙏',
         href: '/dashboard/tools/apology-letter',
         useCase: 'Making amends',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   },
