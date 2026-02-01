@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Get base URL from environment
-BASE_URL = "https://unified-media-hub-1.preview.emergentagent.com/api"
+BASE_URL = "https://user-mgmt-panel.preview.emergentagent.com/api"
 
 class DigitalProductsTestSuite:
     def __init__(self):
