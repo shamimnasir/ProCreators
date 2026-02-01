@@ -194,7 +194,8 @@ const FUN_CATEGORIES = [
         icon: '❓',
         href: '/dashboard/tools/trivia-generator',
         useCase: 'Game nights, parties',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'would-you-rather',
@@ -203,7 +204,8 @@ const FUN_CATEGORIES = [
         icon: '🤔',
         href: '/dashboard/tools/would-you-rather',
         useCase: 'Parties, ice breakers',
-        badge: 'Party'
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   }
