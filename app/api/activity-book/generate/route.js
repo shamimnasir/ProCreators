@@ -2068,11 +2068,14 @@ async function generateActivityPDF(body) {
     ageGroup
   } = body
   
+  // Ensure pages is an array
+  const validPages = Array.isArray(body.pages) ? body.pages : []
+  
   const cleanTitle = stripEmojis(title) || 'Activity Book'
   const cleanAuthor = stripEmojis(authorName) || ''
   const cleanTheme = stripEmojis(customTheme || theme) || 'Fun'
   
-  console.log(`Creating Activity Book PDF: ${cleanTitle}, ${pages.length} pages`)
+  console.log(`Creating Activity Book PDF: ${cleanTitle}, ${validPages.length} pages`)
   
   // Create PDF
   const pdfDoc = await PDFDocument.create()
