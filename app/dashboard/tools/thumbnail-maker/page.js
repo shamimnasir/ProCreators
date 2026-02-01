@@ -261,7 +261,7 @@ INSTEAD - ADD ENGLISH TEXT:
 - Maximum 3-5 English words or under 20 characters
 - BRIGHT YELLOW text with thick BLACK outline (most visible)
 - Large bold Impact or Arial Black style font
-- Position in upper-left area (avoid bottom-right timestamp zone)
+- Position text in CENTER-LEFT or LOWER-LEFT area (NOT top-left, looks amateur)
 `
 }
 
