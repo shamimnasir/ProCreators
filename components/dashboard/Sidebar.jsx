@@ -199,6 +199,14 @@ const navigation = [
       { name: 'System Prompts (AI Video Studio)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
     ]
   },
+  {
+    name: 'Admin',
+    href: '/dashboard/admin/pages',
+    icon: Settings,
+    children: [
+      { name: 'Page Manager', href: '/dashboard/admin/pages', icon: FileText }
+    ]
+  },
 ]
 
 export function Sidebar() {
