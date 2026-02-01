@@ -118,28 +118,6 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         badge: 'Hot'
       },
       {
-        id: 'social-templates',
-        name: 'Social Media Templates',
-        description: 'Instagram, TikTok, Pinterest templates',
-        icon: '📱',
-        href: '/dashboard/tools/social-templates',
-        sellPrice: '$15-$50',
-        platforms: ['Etsy', 'Creative Market'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'resume-templates',
-        name: 'Resume & CV Templates',
-        description: 'Professional resume designs',
-        icon: '💼',
-        href: '/dashboard/tools/resume-templates',
-        sellPrice: '$10-$25',
-        platforms: ['Etsy', 'Creative Market'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
         id: 'presentation-templates',
         name: 'Presentation Templates',
         description: 'PowerPoint, Keynote, Google Slides',
@@ -158,17 +136,6 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
     icon: '🎓',
     color: 'from-green-500 to-emerald-500',
     tools: [
-      {
-        id: 'course-creator',
-        name: 'Mini Course Creator',
-        description: 'Create sellable online courses',
-        icon: '🎬',
-        href: '/dashboard/tools/course-creator',
-        sellPrice: '$50-$500',
-        platforms: ['Teachable', 'Thinkific', 'Gumroad'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
       {
         id: 'flashcard-maker',
         name: 'Flashcard Pack Creator',
@@ -217,59 +184,6 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         sellPrice: '$8-$20',
         platforms: ['Amazon KDP', 'Etsy'],
         badge: ''
-      },
-      {
-        id: 'name-tracing',
-        name: 'Name Tracing Worksheets',
-        description: 'Personalized name practice sheets',
-        icon: '✏️',
-        href: '/dashboard/tools/name-tracing',
-        sellPrice: '$3-$8',
-        platforms: ['Etsy'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      }
-    ]
-  },
-  {
-    id: 'business',
-    name: 'Business & Marketing',
-    description: 'Business-focused digital products',
-    icon: '💼',
-    color: 'from-indigo-500 to-purple-500',
-    tools: [
-      {
-        id: 'media-kit',
-        name: 'Media Kit Creator',
-        description: 'Professional media kits for influencers',
-        icon: '📊',
-        href: '/dashboard/tools/media-kit',
-        sellPrice: '$20-$50',
-        platforms: ['Gumroad', 'Etsy'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'invoice-maker',
-        name: 'Invoice Templates',
-        description: 'Professional invoice designs',
-        icon: '🧾',
-        href: '/dashboard/tools/invoice-maker',
-        sellPrice: '$10-$25',
-        platforms: ['Etsy', 'Creative Market'],
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'contract-maker',
-        name: 'Contract Templates',
-        description: 'Business contract templates',
-        icon: '📜',
-        href: '/dashboard/tools/contract-maker',
-        sellPrice: '$15-$50',
-        platforms: ['Etsy', 'Gumroad'],
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   }
