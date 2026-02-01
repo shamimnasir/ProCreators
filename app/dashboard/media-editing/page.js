@@ -162,7 +162,8 @@ const MEDIA_CATEGORIES = [
         icon: '🎬',
         href: '/dashboard/tools/video-converter',
         useCase: 'MP4, MOV, WebM',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'audio-converter',
@@ -171,7 +172,8 @@ const MEDIA_CATEGORIES = [
         icon: '🎥',
         href: '/dashboard/tools/audio-converter',
         useCase: 'MP3, WAV, AAC',
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'gif-maker',
@@ -180,7 +182,8 @@ const MEDIA_CATEGORIES = [
         icon: '🎞️',
         href: '/dashboard/tools/gif-maker',
         useCase: 'Memes, reactions',
-        badge: 'Fun'
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   }
