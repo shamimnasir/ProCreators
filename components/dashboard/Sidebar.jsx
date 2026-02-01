@@ -121,7 +121,7 @@ const navigation = [
     ]
   },
   {
-    name: '🎬 Media Editing',
+    name: '🎬 Media Editor',
     href: '/dashboard/media-editing',
     icon: Edit3,
     children: [
