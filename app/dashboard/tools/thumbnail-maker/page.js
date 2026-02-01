@@ -425,6 +425,52 @@ export default function ThumbnailMakerPage() {
     }
   }
 
+  // Drag handlers for text positioning
+  const handleDragStart = (e, layerId) => {
+    e.preventDefault()
+    setIsDragging(true)
+    setDragLayerId(layerId)
+    setSelectedLayerId(layerId)
+  }
+
+  const handleDragMove = useCallback((e) => {
+    if (!isDragging || !dragLayerId || !imageContainerRef.current) return
+    
+    const container = imageContainerRef.current
+    const rect = container.getBoundingClientRect()
+    
+    // Get mouse/touch position
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    
+    // Calculate percentage position
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100))
+    const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100))
+    
+    updateTextLayer(dragLayerId, { x, y })
+  }, [isDragging, dragLayerId])
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false)
+    setDragLayerId(null)
+  }, [])
+
+  // Add global mouse/touch event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDragMove)
+      window.addEventListener('mouseup', handleDragEnd)
+      window.addEventListener('touchmove', handleDragMove)
+      window.addEventListener('touchend', handleDragEnd)
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDragMove)
+      window.removeEventListener('mouseup', handleDragEnd)
+      window.removeEventListener('touchmove', handleDragMove)
+      window.removeEventListener('touchend', handleDragEnd)
+    }
+  }, [isDragging, handleDragMove, handleDragEnd])
+
   // Apply preset to selected layer
   const applyPreset = (preset) => {
     if (!selectedLayerId) return
