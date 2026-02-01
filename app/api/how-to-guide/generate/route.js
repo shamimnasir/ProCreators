@@ -104,7 +104,7 @@ export async function POST(request) {
       subtitle,
       authorName,
       introduction,
-      chapters,
+      chapters = [],
       chapterCount,
       difficulty,
       colorScheme,
@@ -115,6 +115,17 @@ export async function POST(request) {
       includeTips,
       paperSize
     } = await request.json()
+    
+    // Validate required fields
+    if (!title) {
+      return NextResponse.json({
+        success: false,
+        error: 'Title is required'
+      }, { status: 400 })
+    }
+    
+    // Ensure chapters is an array
+    const validChapters = Array.isArray(chapters) ? chapters : []
     
     console.log(`Generating How-To Guide: "${title}"...`)
     
