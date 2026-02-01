@@ -141,7 +141,7 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         name: 'Flashcard Pack Creator',
         description: 'Study flashcards and quiz cards',
         icon: '🃏',
-        href: '/dashboard/tools/learning-cards',
+        href: '/dashboard/tools/flashcards',
         sellPrice: '$5-$15',
         platforms: ['Teachers Pay Teachers', 'Etsy'],
         badge: ''
