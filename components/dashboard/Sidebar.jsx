@@ -195,6 +195,8 @@ const navigation = [
     icon: Settings,
     children: [
       { name: '📄 Page Manager', href: '/dashboard/admin/pages', icon: FileText },
+      { name: '👥 User Management', href: '/dashboard/admin/users', icon: Users },
+      { name: '🔒 Kill Switches', href: '/dashboard/admin/controls', icon: Shield },
       { name: '⚙️ System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
       { name: '🎬 System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
       { name: '🎥 System Prompts (AI Video)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
