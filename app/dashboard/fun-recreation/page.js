@@ -421,6 +421,6 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </CardWrapper>
   )
 }
