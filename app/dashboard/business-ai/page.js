@@ -209,7 +209,7 @@ export default function BusinessAIPage() {
               <TrendingUp className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Business with AI</h1>
+              <h1 className="text-3xl font-bold">Business & Marketing</h1>
               <p className="text-white/80">Scale your business with AI-powered tools</p>
             </div>
           </div>
