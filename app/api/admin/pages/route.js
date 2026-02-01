@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
+import { connectToDatabase } from '@/lib/mongodb'
 import { getDefaultPageTemplate, BLOCK_TYPES, BLOCK_TEMPLATES } from '@/lib/pageSchema'
 import { v4 as uuidv4 } from 'uuid'
 
-const DB_NAME = 'procreators'
 const COLLECTION_NAME = 'tool_pages'
 
 // GET - List all tool pages or get specific page
@@ -12,8 +11,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('toolId')
     
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     if (toolId) {
@@ -41,8 +39,7 @@ export async function POST(request) {
     const body = await request.json()
     const { toolId, toolName, action } = body
     
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     if (action === 'initialize') {
@@ -87,8 +84,7 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'toolId is required' }, { status: 400 })
     }
     
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     const updateData = {
@@ -127,8 +123,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'toolId is required' }, { status: 400 })
     }
     
-    const client = await clientPromise
-    const db = client.db(DB_NAME)
+    const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
     
     const result = await collection.deleteOne({ toolId })
