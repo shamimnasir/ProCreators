@@ -50,7 +50,9 @@ import {
   Star,
   Award,
   Music,
-  Volume2
+  Volume2,
+  Scissors,
+  Layers
 } from 'lucide-react'
 
 const navigation = [
