@@ -50,12 +50,31 @@ export default function MemeGeneratorPage() {
   const handleGenerate = async () => {
     setGenerating(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast({
-        title: '😂 Meme Generated!',
-        description: 'Your meme is ready to download and share!'
+      const response = await fetch('/api/fun-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolType: 'meme-text',
+          template,
+          topic,
+          context: ideaPrompt,
+          style: mode === 'ai' ? 'relatable' : 'custom'
+        })
       })
-      setGeneratedMeme('/generated-meme.png')
+      
+      const data = await response.json()
+      if (data.success && data.data.variations) {
+        const firstVariation = data.data.variations[0]
+        setTopText(firstVariation.topText || topText)
+        setBottomText(firstVariation.bottomText || bottomText)
+        toast({
+          title: '😂 Meme Text Generated!',
+          description: 'Your meme text is ready!'
+        })
+        setGeneratedMeme(data.data)
+      } else if (!data.success) {
+        throw new Error(data.error)
+      }
     } catch (error) {
       toast({
         title: 'Generation Failed',
@@ -70,17 +89,33 @@ export default function MemeGeneratorPage() {
   const handleAIIdea = async () => {
     setGenerating(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      // Simulate AI generating meme text
-      const ideas = {
-        work: { top: 'When the meeting could have been an email', bottom: 'But your calendar is full anyway' },
-        tech: { top: 'Programmer: It works on my machine', bottom: 'Also programmer: *Deploys to production*' },
-        relationships: { top: 'Me: I\'m going to sleep early tonight', bottom: 'Also me at 3am: *watching meme compilations*' },
+      const response = await fetch('/api/fun-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toolType: 'meme-text',
+          template,
+          topic,
+          context: '',
+          style: 'relatable'
+        })
+      })
+      
+      const data = await response.json()
+      if (data.success && data.data.variations) {
+        const firstVariation = data.data.variations[0]
+        setTopText(firstVariation.topText || '')
+        setBottomText(firstVariation.bottomText || '')
+        toast({ title: '💡 AI Generated Idea!' })
+      } else {
+        throw new Error(data.error || 'Failed to generate idea')
       }
-      const idea = ideas[topic] || ideas.work
-      setTopText(idea.top)
-      setBottomText(idea.bottom)
-      toast({ title: '💡 AI Generated Idea!' })
+    } catch (error) {
+      toast({
+        title: 'Idea Generation Failed',
+        description: error.message,
+        variant: 'destructive'
+      })
     } finally {
       setGenerating(false)
     }
