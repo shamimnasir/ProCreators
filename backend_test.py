@@ -1,308 +1,448 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for SWOT Analysis Generator
-Tests the SWOT Analysis API endpoints as specified in the review request.
+Comprehensive Backend Testing for Digital Products Suite (ProCreators)
+Tests all 14 Digital Product tools APIs systematically
 """
 
 import requests
 import json
 import time
 import sys
-from typing import Dict, Any
+from datetime import datetime
 
-# Base URL from environment
-BASE_URL = "https://unified-media-hub-1.preview.emergentagent.com"
+# Get base URL from environment
+BASE_URL = "https://unified-media-hub-1.preview.emergentagent.com/api"
 
-class SWOTAnalysisAPITester:
+class DigitalProductsTestSuite:
     def __init__(self):
-        self.base_url = BASE_URL
         self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
         
-    def log_result(self, test_name: str, success: bool, details: str, response_data: Dict = None):
-        """Log test results"""
-        result = {
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "response_data": response_data
-        }
-        self.results.append(result)
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status}: {test_name}")
-        print(f"   Details: {details}")
-        if response_data:
-            print(f"   Response keys: {list(response_data.keys()) if isinstance(response_data, dict) else 'Not a dict'}")
-        print()
-
-    def test_basic_swot_analysis(self):
-        """Test Case 1: Basic SWOT Analysis Test"""
-        print("🧪 Testing Basic SWOT Analysis Generation...")
+    def log(self, message, level="INFO"):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"[{timestamp}] {level}: {message}")
         
-        payload = {
-            "subjectName": "TechCorp Inc",
-            "subjectDescription": "A mid-size software company",
-            "analysisType": "business",
-            "industry": "technology",
-            "objectives": "Strategic planning for 2026",
-            "analysisDepth": "standard"
-        }
+    def test_endpoint(self, tool_name, endpoint, payload, expected_fields=None):
+        """Test a single API endpoint"""
+        self.total_tests += 1
+        self.log(f"Testing {tool_name}...")
         
         try:
-            response = requests.post(
-                f"{self.base_url}/api/swot-analysis/generate",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=60
-            )
+            url = f"{BASE_URL}{endpoint}"
+            self.log(f"POST {url}")
+            self.log(f"Payload: {json.dumps(payload, indent=2)}")
             
+            response = requests.post(url, json=payload, timeout=60)
+            response_data = response.json()
+            
+            # Check HTTP status
             if response.status_code == 200:
-                data = response.json()
-                
                 # Check response structure
-                if not data.get("success"):
-                    self.log_result("Basic SWOT Analysis", False, f"Response success=false: {data}")
-                    return
-                
-                # Check required fields
-                response_data = data.get("data", {})
-                required_sections = ["strengths", "weaknesses", "opportunities", "threats"]
-                missing_sections = []
-                
-                for section in required_sections:
-                    if section not in response_data:
-                        missing_sections.append(section)
-                    else:
-                        section_data = response_data[section]
-                        if not isinstance(section_data, dict) or "items" not in section_data:
-                            missing_sections.append(f"{section}.items")
-                
-                if missing_sections:
-                    self.log_result("Basic SWOT Analysis", False, f"Missing sections: {missing_sections}", data)
-                else:
-                    # Check metadata
-                    metadata = data.get("metadata", {})
-                    expected_meta = ["analysisType", "subjectName", "industry", "generatedAt"]
-                    missing_meta = [m for m in expected_meta if m not in metadata]
+                if response_data.get('success'):
+                    # Validate expected fields
+                    missing_fields = []
+                    if expected_fields:
+                        for field in expected_fields:
+                            if field not in response_data:
+                                missing_fields.append(field)
                     
-                    if missing_meta:
-                        self.log_result("Basic SWOT Analysis", False, f"Missing metadata: {missing_meta}", data)
+                    if not missing_fields:
+                        self.passed_tests += 1
+                        self.log(f"✅ {tool_name} - WORKING", "SUCCESS")
+                        result = {
+                            'tool': tool_name,
+                            'endpoint': endpoint,
+                            'status': 'WORKING',
+                            'response_fields': list(response_data.keys()),
+                            'content_summary': self._get_content_summary(response_data)
+                        }
                     else:
-                        self.log_result("Basic SWOT Analysis", True, 
-                                      f"Generated complete SWOT with {len(response_data.get('strengths', {}).get('items', []))} strengths, "
-                                      f"{len(response_data.get('weaknesses', {}).get('items', []))} weaknesses, "
-                                      f"{len(response_data.get('opportunities', {}).get('items', []))} opportunities, "
-                                      f"{len(response_data.get('threats', {}).get('items', []))} threats", data)
+                        self.failed_tests += 1
+                        self.log(f"❌ {tool_name} - Missing fields: {missing_fields}", "ERROR")
+                        result = {
+                            'tool': tool_name,
+                            'endpoint': endpoint,
+                            'status': 'NOT WORKING',
+                            'error': f'Missing response fields: {missing_fields}',
+                            'response_fields': list(response_data.keys())
+                        }
+                else:
+                    self.failed_tests += 1
+                    error_msg = response_data.get('error', 'Unknown error')
+                    self.log(f"❌ {tool_name} - API Error: {error_msg}", "ERROR")
+                    result = {
+                        'tool': tool_name,
+                        'endpoint': endpoint,
+                        'status': 'NOT WORKING',
+                        'error': f'API returned success=false: {error_msg}'
+                    }
+            elif response.status_code == 400:
+                # Validation error - this might be expected for some test cases
+                error_msg = response_data.get('error', 'Validation error')
+                if 'required' in error_msg.lower():
+                    self.log(f"⚠️  {tool_name} - Expected validation error: {error_msg}", "WARN")
+                    # Test with minimal required fields
+                    return self._test_minimal_payload(tool_name, endpoint)
+                else:
+                    self.failed_tests += 1
+                    self.log(f"❌ {tool_name} - Validation Error: {error_msg}", "ERROR")
+                    result = {
+                        'tool': tool_name,
+                        'endpoint': endpoint,
+                        'status': 'NOT WORKING',
+                        'error': f'400 Validation Error: {error_msg}'
+                    }
             else:
-                self.log_result("Basic SWOT Analysis", False, f"HTTP {response.status_code}: {response.text}")
+                self.failed_tests += 1
+                self.log(f"❌ {tool_name} - HTTP {response.status_code}: {response.text[:200]}", "ERROR")
+                result = {
+                    'tool': tool_name,
+                    'endpoint': endpoint,
+                    'status': 'NOT WORKING',
+                    'error': f'HTTP {response.status_code}: {response.text[:200]}'
+                }
                 
         except requests.exceptions.Timeout:
-            self.log_result("Basic SWOT Analysis", False, "Request timeout (60s)")
-        except Exception as e:
-            self.log_result("Basic SWOT Analysis", False, f"Exception: {str(e)}")
-
-    def test_validation_error(self):
-        """Test Case 2: Validation Test - Empty body should return 400 error"""
-        print("🧪 Testing Validation (Empty Body)...")
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/swot-analysis/generate",
-                json={},
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
-            
-            if response.status_code == 400:
-                data = response.json()
-                if "Subject name is required" in data.get("error", ""):
-                    self.log_result("Validation Test", True, "Correctly rejected empty body with 400 error", data)
-                else:
-                    self.log_result("Validation Test", False, f"Wrong error message: {data.get('error')}", data)
-            else:
-                self.log_result("Validation Test", False, f"Expected 400, got {response.status_code}: {response.text}")
-                
-        except Exception as e:
-            self.log_result("Validation Test", False, f"Exception: {str(e)}")
-
-    def test_pdf_export(self):
-        """Test Case 3: PDF Export Test"""
-        print("🧪 Testing PDF Export...")
-        
-        payload = {
-            "data": {
-                "subjectName": "TestCo",
-                "executiveSummary": "Test summary",
-                "strengths": {
-                    "title": "Strengths",
-                    "items": [
-                        {
-                            "point": "Strong brand",
-                            "description": "Well known",
-                            "impact": "High"
-                        }
-                    ]
-                },
-                "weaknesses": {
-                    "title": "Weaknesses",
-                    "items": [
-                        {
-                            "point": "Limited funding",
-                            "description": "Cash constrained",
-                            "impact": "Medium"
-                        }
-                    ]
-                },
-                "opportunities": {
-                    "title": "Opportunities",
-                    "items": [
-                        {
-                            "point": "Market growth",
-                            "description": "Expanding market",
-                            "impact": "High"
-                        }
-                    ]
-                },
-                "threats": {
-                    "title": "Threats",
-                    "items": [
-                        {
-                            "point": "Competition",
-                            "description": "New entrants",
-                            "impact": "High"
-                        }
-                    ]
-                }
-            },
-            "metadata": {
-                "subjectName": "TestCo",
-                "analysisType": "Business",
-                "industry": "Technology"
+            self.failed_tests += 1
+            self.log(f"❌ {tool_name} - Request timeout (60s)", "ERROR")
+            result = {
+                'tool': tool_name,
+                'endpoint': endpoint,
+                'status': 'NOT WORKING',
+                'error': 'Request timeout after 60 seconds'
             }
+        except Exception as e:
+            self.failed_tests += 1
+            self.log(f"❌ {tool_name} - Exception: {str(e)}", "ERROR")
+            result = {
+                'tool': tool_name,
+                'endpoint': endpoint,
+                'status': 'NOT WORKING',
+                'error': f'Exception: {str(e)}'
+            }
+        
+        self.results.append(result)
+        return result
+        
+    def _test_minimal_payload(self, tool_name, endpoint):
+        """Try minimal payload for tools that failed validation"""
+        minimal_payloads = {
+            '/planner-maker/generate': {'plannerType': 'daily'},
+            '/worksheet-maker/generate': {'topic': 'Math Practice'},
+            '/coloring-book/generate': {'theme': 'animals'},
+            '/journal-maker/generate': {'journalType': 'daily'},
+            '/checklist-maker/generate': {'checklistType': 'daily'},
+            '/ebook-maker/generate': {'topic': 'Test Topic'},
+            '/recipe-book/generate': {'theme': 'healthy'},
+            '/how-to-guide/generate': {'topic': 'Test Guide'},
+            '/notion-templates/generate': {'templateType': 'productivity'},
+            '/slides-maker/generate': {'topic': 'Test Presentation'},
+            '/learning-cards/generate': {'topic': 'Math'},
+            '/quiz-maker/generate': {'topic': 'General Knowledge'},
+            '/storybook-maker/generate': {'theme': 'adventure'},
+            '/activity-book/generate': {'theme': 'kids'}
         }
         
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/swot-analysis/generate-pdf",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                if data.get("success") and "htmlContent" in data:
-                    html_length = len(data.get("htmlContent", ""))
-                    self.log_result("PDF Export Test", True, 
-                                  f"Generated HTML content ({html_length} chars) with fallback mechanism", data)
-                else:
-                    self.log_result("PDF Export Test", False, f"Missing success or htmlContent: {data}")
-            else:
-                self.log_result("PDF Export Test", False, f"HTTP {response.status_code}: {response.text}")
-                
-        except Exception as e:
-            self.log_result("PDF Export Test", False, f"Exception: {str(e)}")
-
-    def test_pdf_validation_missing_data(self):
-        """Test Case 4: PDF Validation - Missing data"""
-        print("🧪 Testing PDF Validation (Missing Data)...")
-        
-        payload = {
-            "metadata": {
-                "subjectName": "TestCo",
-                "analysisType": "Business"
+        minimal = minimal_payloads.get(endpoint)
+        if minimal:
+            self.log(f"Retrying {tool_name} with minimal payload: {minimal}")
+            return self.test_endpoint(f"{tool_name} (minimal)", endpoint, minimal)
+        else:
+            return {
+                'tool': tool_name,
+                'endpoint': endpoint,
+                'status': 'NOT WORKING',
+                'error': 'Could not determine minimal required fields'
             }
-            # Missing "data" field
-        }
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/swot-analysis/generate-pdf",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
-            
-            if response.status_code == 400:
-                data = response.json()
-                if "Missing data or metadata" in data.get("error", ""):
-                    self.log_result("PDF Validation (Missing Data)", True, "Correctly rejected missing data with 400 error", data)
-                else:
-                    self.log_result("PDF Validation (Missing Data)", False, f"Wrong error message: {data.get('error')}", data)
-            else:
-                self.log_result("PDF Validation (Missing Data)", False, f"Expected 400, got {response.status_code}: {response.text}")
-                
-        except Exception as e:
-            self.log_result("PDF Validation (Missing Data)", False, f"Exception: {str(e)}")
-
-    def test_pdf_validation_missing_metadata(self):
-        """Test Case 5: PDF Validation - Missing metadata"""
-        print("🧪 Testing PDF Validation (Missing Metadata)...")
-        
-        payload = {
-            "data": {
-                "subjectName": "TestCo",
-                "strengths": {"title": "Strengths", "items": []}
-            }
-            # Missing "metadata" field
-        }
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/swot-analysis/generate-pdf",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=30
-            )
-            
-            if response.status_code == 400:
-                data = response.json()
-                if "Missing data or metadata" in data.get("error", ""):
-                    self.log_result("PDF Validation (Missing Metadata)", True, "Correctly rejected missing metadata with 400 error", data)
-                else:
-                    self.log_result("PDF Validation (Missing Metadata)", False, f"Wrong error message: {data.get('error')}", data)
-            else:
-                self.log_result("PDF Validation (Missing Metadata)", False, f"Expected 400, got {response.status_code}: {response.text}")
-                
-        except Exception as e:
-            self.log_result("PDF Validation (Missing Metadata)", False, f"Exception: {str(e)}")
-
+    
+    def _get_content_summary(self, response_data):
+        """Extract key information from successful response"""
+        summary = {}
+        if 'title' in response_data:
+            summary['title'] = response_data['title']
+        if 'pageCount' in response_data:
+            summary['pageCount'] = response_data['pageCount']
+        if 'downloadUrl' in response_data:
+            summary['hasDownloadUrl'] = True
+        if 'libraryId' in response_data:
+            summary['savedToLibrary'] = True
+        return summary
+    
     def run_all_tests(self):
-        """Run all SWOT Analysis API tests"""
-        print("🚀 Starting SWOT Analysis API Testing...")
-        print(f"Base URL: {self.base_url}")
-        print("=" * 60)
+        """Run comprehensive tests for all 14 Digital Products"""
+        self.log("Starting Comprehensive Digital Products Test Suite")
+        self.log("=" * 60)
         
-        # Run all test cases
-        self.test_basic_swot_analysis()
-        self.test_validation_error()
-        self.test_pdf_export()
-        self.test_pdf_validation_missing_data()
-        self.test_pdf_validation_missing_metadata()
+        # Test all 14 digital products
+        tests = [
+            # Category 1: Printables & Planners
+            {
+                'name': 'Planner Maker',
+                'endpoint': '/planner-maker/generate',
+                'payload': {
+                    'plannerType': 'daily',
+                    'colorScheme': 'rose-gold',
+                    'coverStyle': 'elegant', 
+                    'paperSize': 'letter',
+                    'pageCount': 12,
+                    'customTitle': 'My Test Planner',
+                    'customInstructions': 'Create a productivity-focused planner'
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount']
+            },
+            {
+                'name': 'Worksheet Maker',
+                'endpoint': '/worksheet-maker/generate', 
+                'payload': {
+                    'worksheetType': 'math',
+                    'gradeLevel': '3rd',
+                    'topic': 'Addition and Subtraction',
+                    'questionCount': 10,
+                    'includeAnswerKey': True
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount', 'questionCount']
+            },
+            {
+                'name': 'Coloring Book',
+                'endpoint': '/coloring-book/generate',
+                'payload': {
+                    'theme': 'animals',
+                    'difficulty': 'medium',
+                    'pageCount': 12,
+                    'title': 'Animal Adventures Coloring Book',
+                    'generateImages': False,  # Skip image generation for speed
+                    'generateCover': False
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount', 'pages']
+            },
+            {
+                'name': 'Journal Maker',
+                'endpoint': '/journal-maker/generate',
+                'payload': {
+                    'journalType': 'daily',
+                    'pageCount': 30,
+                    'customTitle': 'My Daily Journal',
+                    'includePrompts': True
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount']
+            },
+            {
+                'name': 'Checklist Maker', 
+                'endpoint': '/checklist-maker/generate',
+                'payload': {
+                    'checklistType': 'daily',
+                    'title': 'Daily Task Checklist',
+                    'customItems': ['Wake up early', 'Exercise', 'Read book', 'Plan tomorrow'],
+                    'pageCount': 7
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            
+            # Category 2: Ebooks & Guides
+            {
+                'name': 'Ebook Maker',
+                'endpoint': '/ebook-maker/generate',
+                'payload': {
+                    'topic': 'Digital Marketing Basics',
+                    'targetAudience': 'beginners',
+                    'chapterCount': 5,
+                    'tone': 'friendly',
+                    'includeImages': False
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Recipe Book',
+                'endpoint': '/recipe-book/generate',
+                'payload': {
+                    'theme': 'healthy',
+                    'cuisineType': 'mediterranean',
+                    'recipeCount': 15,
+                    'dietaryRestrictions': ['vegetarian'],
+                    'includeNutrition': True
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Guide Maker',
+                'endpoint': '/how-to-guide/generate',
+                'payload': {
+                    'topic': 'How to Start a Small Business',
+                    'targetAudience': 'entrepreneurs',
+                    'difficulty': 'beginner',
+                    'includeImages': False,
+                    'stepCount': 10
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            
+            # Category 3: Templates
+            {
+                'name': 'Notion Templates',
+                'endpoint': '/notion-templates/generate',
+                'payload': {
+                    'templateType': 'productivity',
+                    'category': 'personal',
+                    'features': ['task-tracking', 'habit-tracker', 'goal-setting'],
+                    'customization': 'beginner-friendly'
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Slides Maker',
+                'endpoint': '/slides-maker/generate',
+                'payload': {
+                    'topic': 'Introduction to AI',
+                    'slideCount': 10,
+                    'style': 'professional',
+                    'targetAudience': 'business',
+                    'includeImages': False
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            
+            # Category 4: Education  
+            {
+                'name': 'Quiz Maker',
+                'endpoint': '/quiz-maker/generate',
+                'payload': {
+                    'topic': 'General Knowledge',
+                    'difficulty': 'medium',
+                    'questionCount': 20,
+                    'questionTypes': ['multiple-choice', 'true-false'],
+                    'includeAnswers': True
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Storybook Maker',
+                'endpoint': '/storybook-maker/generate',
+                'payload': {
+                    'theme': 'adventure',
+                    'ageGroup': '6-10',
+                    'mainCharacter': 'brave little mouse',
+                    'setting': 'magical forest',
+                    'pageCount': 16,
+                    'generateImages': False
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Activity Book',
+                'endpoint': '/activity-book/generate',
+                'payload': {
+                    'theme': 'kids',
+                    'ageGroup': '5-8',
+                    'activityTypes': ['puzzles', 'coloring', 'games'],
+                    'pageCount': 20,
+                    'difficulty': 'easy'
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            }
+        ]
         
-        # Summary
-        print("=" * 60)
-        print("📊 TEST SUMMARY")
-        print("=" * 60)
+        # Check for Learning Cards separately as it might have different endpoint
+        learning_cards_tests = [
+            {
+                'name': 'Learning Cards',
+                'endpoint': '/learning-cards/generate',
+                'payload': {
+                    'topic': 'Math Facts',
+                    'cardCount': 20,
+                    'difficulty': 'beginner',
+                    'cardType': 'flashcards'
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            },
+            {
+                'name': 'Learning Cards (alt)',
+                'endpoint': '/flashcards/generate', 
+                'payload': {
+                    'topic': 'Math Facts',
+                    'cardCount': 20,
+                    'difficulty': 'beginner'
+                },
+                'expected_fields': ['success', 'title', 'downloadUrl']
+            }
+        ]
         
-        total_tests = len(self.results)
-        passed_tests = sum(1 for r in self.results if r["success"])
-        failed_tests = total_tests - passed_tests
+        # Run main tests
+        for test in tests:
+            self.test_endpoint(test['name'], test['endpoint'], test['payload'], test['expected_fields'])
+            time.sleep(1)  # Brief pause between tests
+            
+        # Try Learning Cards with both possible endpoints
+        learning_cards_found = False
+        for test in learning_cards_tests:
+            try:
+                result = self.test_endpoint(test['name'], test['endpoint'], test['payload'], test['expected_fields'])
+                if result['status'] == 'WORKING':
+                    learning_cards_found = True
+                    break
+            except:
+                continue
+                
+        if not learning_cards_found:
+            self.results.append({
+                'tool': 'Learning Cards',
+                'endpoint': '/learning-cards/generate OR /flashcards/generate',
+                'status': 'NOT WORKING',
+                'error': 'Neither /learning-cards/generate nor /flashcards/generate endpoints found'
+            })
         
-        print(f"Total Tests: {total_tests}")
-        print(f"✅ Passed: {passed_tests}")
-        print(f"❌ Failed: {failed_tests}")
-        print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+        # Generate summary
+        self.generate_summary()
         
-        if failed_tests > 0:
-            print("\n❌ FAILED TESTS:")
-            for result in self.results:
-                if not result["success"]:
-                    print(f"  - {result['test']}: {result['details']}")
+    def generate_summary(self):
+        """Generate comprehensive test summary"""
+        self.log("=" * 60)
+        self.log("DIGITAL PRODUCTS TEST SUMMARY")
+        self.log("=" * 60)
         
-        return passed_tests == total_tests
+        working_tools = []
+        not_working_tools = []
+        
+        for result in self.results:
+            if result['status'] == 'WORKING':
+                working_tools.append(result)
+            else:
+                not_working_tools.append(result)
+                
+        self.log(f"Total Tests: {self.total_tests}")
+        self.log(f"✅ Working: {len(working_tools)}")
+        self.log(f"❌ Not Working: {len(not_working_tools)}")
+        self.log(f"Success Rate: {(len(working_tools)/self.total_tests)*100:.1f}%")
+        
+        if working_tools:
+            self.log("\n✅ WORKING TOOLS:")
+            for tool in working_tools:
+                endpoint = tool['endpoint']
+                summary = tool.get('content_summary', {})
+                summary_text = f" - {summary}" if summary else ""
+                self.log(f"  • {tool['tool']} ({endpoint}){summary_text}")
+                
+        if not_working_tools:
+            self.log("\n❌ NOT WORKING TOOLS:")
+            for tool in not_working_tools:
+                endpoint = tool['endpoint'] 
+                error = tool.get('error', 'Unknown error')
+                self.log(f"  • {tool['tool']} ({endpoint})")
+                self.log(f"    Error: {error}")
+                
+        self.log("=" * 60)
+        return {
+            'total_tests': self.total_tests,
+            'working_tools': working_tools,
+            'not_working_tools': not_working_tools,
+            'success_rate': (len(working_tools)/self.total_tests)*100 if self.total_tests > 0 else 0
+        }
 
 if __name__ == "__main__":
-    tester = SWOTAnalysisAPITester()
-    success = tester.run_all_tests()
-    sys.exit(0 if success else 1)
+    # Run the comprehensive test suite
+    test_suite = DigitalProductsTestSuite()
+    test_suite.run_all_tests()
+    
+    # Exit with proper code
+    sys.exit(0 if test_suite.failed_tests == 0 else 1)
