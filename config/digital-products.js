@@ -246,7 +246,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/media-kit',
         sellPrice: '$20-$50',
         platforms: ['Gumroad', 'Etsy'],
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'invoice-maker',
@@ -256,7 +257,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/invoice-maker',
         sellPrice: '$10-$25',
         platforms: ['Etsy', 'Creative Market'],
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       },
       {
         id: 'contract-maker',
@@ -266,7 +268,8 @@ export const DIGITAL_PRODUCT_CATEGORIES = [
         href: '/dashboard/tools/contract-maker',
         sellPrice: '$15-$50',
         platforms: ['Etsy', 'Gumroad'],
-        badge: ''
+        badge: 'Coming Soon',
+        comingSoon: true
       }
     ]
   }
