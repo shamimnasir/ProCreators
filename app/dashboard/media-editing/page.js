@@ -133,18 +133,18 @@ const MEDIA_CATEGORIES = [
         name: 'Cover Image Creator',
         description: 'Social media covers and banners',
         icon: '🖼️',
-        href: '/dashboard/tools/cover-maker',
+        href: '/dashboard/tools/cover-image-creator',
         useCase: 'Profiles, pages',
-        badge: ''
+        badge: 'New'
       },
       {
         id: 'podcast-cover',
         name: 'Podcast Cover Maker',
         description: 'Professional podcast artwork',
         icon: '🎧',
-        href: '/dashboard/tools/podcast-cover',
+        href: '/dashboard/tools/podcast-cover-maker',
         useCase: 'Spotify, Apple Podcasts',
-        badge: ''
+        badge: 'New'
       }
     ]
   },
