@@ -1980,7 +1980,7 @@ async function generateActivityPages(body) {
         // Use await since some generators are async (AI-powered)
         const content = await generator(themeToUse, difficulty, ageGroup)
         
-        pages.push({
+        validPages.push({
           title: getActivityTitle(activityId, themeToUse, i + 1),
           activityType: activityId,
           description: content.instructions || 'Complete this fun activity!',
@@ -1988,7 +1988,7 @@ async function generateActivityPages(body) {
           content
         })
       } else {
-        pages.push({
+        validPages.push({
           title: `Activity ${i + 1}`,
           activityType: 'puzzle',
           description: 'Complete this fun activity!',
@@ -2001,7 +2001,7 @@ async function generateActivityPages(body) {
     return NextResponse.json({
       success: true,
       pages,
-      pageCount: pages.length
+      pageCount: validPages.length
     })
   } catch (error) {
     console.error('Error generating activity pages:', error)
@@ -2175,15 +2175,15 @@ async function generateActivityPDF(body) {
       }
     } catch (imgError) {
       console.error('Failed to embed cover image:', imgError.message)
-      drawTextCover(page, pageWidth, pageHeight, cleanTitle, pages.length, cleanAuthor, pColor, sColor, boldFont, font)
+      drawTextCover(page, pageWidth, pageHeight, cleanTitle, validPages.length, cleanAuthor, pColor, sColor, boldFont, font)
     }
   } else {
-    drawTextCover(page, pageWidth, pageHeight, cleanTitle, pages.length, cleanAuthor, pColor, sColor, boldFont, font)
+    drawTextCover(page, pageWidth, pageHeight, cleanTitle, validPages.length, cleanAuthor, pColor, sColor, boldFont, font)
   }
   
   // ===== ACTIVITY PAGES =====
-  for (let i = 0; i < pages.length; i++) {
-    const pageData = pages[i]
+  for (let i = 0; i < validPages.length; i++) {
+    const pageData = validPages[i]
     console.log(`Drawing page ${i + 1}: title="${pageData.title}", activityType="${pageData.activityType}", contentType="${pageData.content?.type}"`)
     
     page = pdfDoc.addPage([pageWidth, pageHeight])
@@ -2294,8 +2294,8 @@ async function generateActivityPDF(body) {
     let currentColumn = 0
     let columnStartY = answerY
     
-    for (let i = 0; i < pages.length; i++) {
-      const pageData = pages[i]
+    for (let i = 0; i < validPages.length; i++) {
+      const pageData = validPages[i]
       const content = pageData.content || {}
       const pageNum = i + 2 // Page 1 is cover
       
@@ -2561,17 +2561,17 @@ async function generateActivityPDF(body) {
     type: 'activity-book',
     category: 'document',
     title: cleanTitle,
-    description: `${pages.length} page activity book - ${cleanTheme} theme`,
+    description: `${validPages.length} page activity book - ${cleanTheme} theme`,
     filePath: `/activity-books/${fileName}`,
     fileSize: pdfBytes.length,
     tool: 'activity-book',
     metadata: {
       theme: cleanTheme,
-      pageCount: pages.length,
+      pageCount: validPages.length,
       primaryColor,
       secondaryColor,
       paperSize: paperSize?.name || '8.5" × 11"',
-      kdpCompliant: pages.length >= 24,
+      kdpCompliant: validPages.length >= 24,
       hasAnswerKey: includeAnswers,
       ageGroup
     },
@@ -2585,7 +2585,7 @@ async function generateActivityPDF(body) {
     success: true,
     title: cleanTitle,
     downloadUrl: `/activity-books/${fileName}`,
-    pageCount: pages.length + (includeAnswers ? 1 : 0) + 1, // +1 for cover, +1 for answers if enabled
+    pageCount: validPages.length + (includeAnswers ? 1 : 0) + 1, // +1 for cover, +1 for answers if enabled
     libraryId: documentId
   })
 }
