@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sparkles, Loader2, Moon, Star, Sun, Heart, Briefcase, Coins } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const CATEGORIES = [
   { id: 'love', name: 'Love & Relationships', icon: '💕', lucideIcon: Heart },
