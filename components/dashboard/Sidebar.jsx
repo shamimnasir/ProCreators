@@ -53,7 +53,8 @@ import {
   Volume2,
   Scissors,
   Layers,
-  Shield
+  Shield,
+  Settings2
 } from 'lucide-react'
 
 const navigation = [
