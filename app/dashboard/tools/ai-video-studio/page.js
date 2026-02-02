@@ -279,6 +279,9 @@ export default function AIVideoStudioPage() {
     }
   }
 
+  // Get credit hooks
+  const { checkAndDeduct, refund, complete } = useCredits()
+
   // Generate video
   const handleGenerate = async () => {
     // Validation based on input type
@@ -291,6 +294,17 @@ export default function AIVideoStudioPage() {
     
     if (['prompt', 'script', 'story-script', 'quote', 'topic', 'facts', 'chat'].includes(inputType) && !prompt.trim()) {
       toast({ title: 'Input Required', description: 'Please enter your content', variant: 'destructive' })
+      return
+    }
+    
+    // Deduct credits first (video is expensive)
+    const creditResult = await checkAndDeduct('ai-video-studio', { duration })
+    if (!creditResult.success) {
+      toast({
+        title: 'Insufficient Credits',
+        description: creditResult.error || 'Video generation requires more credits.',
+        variant: 'destructive'
+      })
       return
     }
     
