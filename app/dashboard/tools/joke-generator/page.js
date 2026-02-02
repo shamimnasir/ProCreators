@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Laugh, Sparkles, Loader2, Copy, RefreshCw, Share2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const JOKE_TYPES = [
   { id: 'one-liner', name: 'One-Liner', icon: '💬' },
