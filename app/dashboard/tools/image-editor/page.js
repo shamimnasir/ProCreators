@@ -1058,24 +1058,27 @@ export default function ImageEditorPage() {
                     </ScrollArea>
                   </div>
                   
-                  <Button 
-                    onClick={handleGenerate} 
-                    disabled={isLoading || !prompt.trim()}
-                    className="w-full h-12 text-lg"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="h-5 w-5 mr-2" />
-                        Generate Image
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <CreditCostBadge toolId="image-editor" />
+                    <Button 
+                      onClick={handleGenerate} 
+                      disabled={isLoading || !prompt.trim()}
+                      className="flex-1 h-12 text-lg"
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-5 w-5 mr-2" />
+                          Generate Image
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </TabsContent>
                 
                 {/* Edit Tab */}
