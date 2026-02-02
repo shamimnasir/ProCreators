@@ -326,7 +326,7 @@ export default function CoverLetterPage() {
               tone,
               length,
               theme,
-              applicantName: yourName || '',
+              applicantName: fullName || '',
               contentType: 'cover-letter'
             }
           })
