@@ -1652,10 +1652,14 @@ export default function MarketingStrategyPage() {
               </Card>
 
               {/* Generate Button */}
-              <Button 
+              <div className="flex items-center gap-3">
+
+                <CreditCostBadge toolId="marketing-strategy" />
+
+                <Button 
                 onClick={handleGenerate} 
                 disabled={generating || !businessName || !businessDescription}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 size="lg"
               >
                 {generating ? (
@@ -1664,6 +1668,8 @@ export default function MarketingStrategyPage() {
                   <><Wand2 className="h-4 w-4 mr-2" /> Generate {selectedFramework?.name}</>  
                 )}
               </Button>
+
+              </div>
 
               {/* Framework Info */}
               {selectedFramework && (

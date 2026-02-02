@@ -1037,10 +1037,14 @@ export default function ThumbnailMakerPage() {
                   </div>
                   
                   {/* Generate Button */}
-                  <Button 
+                  <div className="flex items-center gap-3">
+
+                    <CreditCostBadge toolId="thumbnail-maker" />
+
+                    <Button 
                     onClick={handleGenerate} 
                     disabled={isLoading || !topic.trim()}
-                    className="w-full h-12 text-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                    className="flex-1 h-12 text-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
                     size="lg"
                   >
                     {isLoading ? (
@@ -1055,6 +1059,8 @@ export default function ThumbnailMakerPage() {
                       </>
                     )}
                   </Button>
+
+                  </div>
                 </TabsContent>
                 
                 {/* Upload Tab */}

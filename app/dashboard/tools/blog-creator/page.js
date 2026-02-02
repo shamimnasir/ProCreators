@@ -610,9 +610,15 @@ export default function BlogCreatorPage() {
           </div>
 
           {/* Generate Button */}
-          <Button size="lg" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || !topic}>
+          <div className="flex items-center gap-3">
+
+            <CreditCostBadge toolId="blog-creator" />
+
+            <Button size="lg" className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || !topic}>
             {generating ? (<><Loader2 className="mr-2 h-6 w-6 animate-spin" />Generating {selectedType?.name}...</>) : (<><Sparkles className="mr-2 h-6 w-6" />Generate Blog Post</>)}
           </Button>
+
+          </div>
         </>
       ) : (
         /* Results View */

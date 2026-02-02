@@ -613,9 +613,15 @@ export default function InterviewPrepPage() {
             </Card>
           </div>
 
-          <Button 
+          <div className="flex items-center gap-3">
+
+
+            <CreditCostBadge toolId="interview-prep" />
+
+
+            <Button 
             size="lg" 
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 h-14 text-lg"
+            className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 h-14 text-lg"
             onClick={handleGenerate}
             disabled={generating || !jobTitle}
           >
@@ -625,6 +631,9 @@ export default function InterviewPrepPage() {
               <><Sparkles className="mr-2 h-6 w-6" />Generate Interview Questions</>
             )}
           </Button>
+
+
+          </div>
 
           {/* Quick Tips */}
           <Card className="bg-amber-50 border-amber-200">

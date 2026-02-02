@@ -508,9 +508,13 @@ export default function PlannerMakerPage() {
                   </Card>
 
                   {/* Generate Button */}
-                  <Button 
+                  <div className="flex items-center gap-3">
+
+                    <CreditCostBadge toolId="planner-maker" />
+
+                    <Button 
                     size="lg" 
-                    className="w-full" 
+                    className="flex-1" 
                     onClick={handleGenerate} 
                     disabled={generating}
                   >
@@ -520,6 +524,8 @@ export default function PlannerMakerPage() {
                       <><Sparkles className="mr-2 h-4 w-4" /> Generate Planner</>
                     )}
                   </Button>
+
+                  </div>
 
                   {/* Download Result */}
                   {generatedPDF && (

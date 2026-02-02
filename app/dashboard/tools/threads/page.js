@@ -200,15 +200,21 @@ export default function ThreadsToolPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button 
+            <div className="flex items-center gap-3">
+
+              <CreditCostBadge toolId="threads" />
+
+              <Button 
               onClick={handleGenerate} 
               disabled={loading || !topic.trim()}
-              className="w-full"
+              className="flex-1"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Sparkles className="mr-2 h-4 w-4" />
               Generate Thread
             </Button>
+
+            </div>
           </CardContent>
         </Card>
 

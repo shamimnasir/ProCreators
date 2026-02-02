@@ -168,11 +168,17 @@ export default function QuotesPage() {
                 rows={4}
               />
             </div>
-            <Button onClick={handleGenerate} disabled={loading} className="w-full">
+            <div className="flex items-center gap-3">
+
+              <CreditCostBadge toolId="quotes" />
+
+              <Button onClick={handleGenerate} disabled={loading} className="flex-1">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Quote className="mr-2 h-4 w-4" />
               Generate Quote
             </Button>
+
+            </div>
           </CardContent>
         </Card>
         <Card>

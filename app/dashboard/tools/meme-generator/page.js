@@ -213,13 +213,22 @@ export default function MemeGeneratorPage() {
             </Card>
           </div>
 
-          <Button size="lg" className="w-full" onClick={handleGenerate} disabled={generating || (!topText && !bottomText)}>
+          <div className="flex items-center gap-3">
+
+
+            <CreditCostBadge toolId="meme-generator" />
+
+
+            <Button size="lg" className="flex-1" onClick={handleGenerate} disabled={generating || (!topText && !bottomText)}>
             {generating ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Meme...</>
             ) : (
               <><Sparkles className="mr-2 h-4 w-4" /> Generate Meme</>
             )}
           </Button>
+
+
+          </div>
         </TabsContent>
 
         {/* AI Mode - Let AI Generate Everything */}

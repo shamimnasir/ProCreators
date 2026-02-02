@@ -221,9 +221,15 @@ export default function LoveLetterPage() {
               </Select>
             </div>
 
-            <Button 
+            <div className="flex items-center gap-3">
+
+
+              <CreditCostBadge toolId="love-letter" />
+
+
+              <Button 
               size="lg" 
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600" 
+              className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600" 
               onClick={handleGenerate} 
               disabled={generating}
             >
@@ -233,6 +239,9 @@ export default function LoveLetterPage() {
                 <><Sparkles className="mr-2 h-4 w-4" /> Generate Love Letter</>  
               )}
             </Button>
+
+
+            </div>
           </CardContent>
         </Card>
 

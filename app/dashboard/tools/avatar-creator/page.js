@@ -235,9 +235,15 @@ export default function AvatarCreatorPage() {
               />
             </div>
 
-            <Button 
+            <div className="flex items-center gap-3">
+
+
+              <CreditCostBadge toolId="avatar-creator" />
+
+
+              <Button 
               size="lg" 
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" 
+              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" 
               onClick={handleGenerate} 
               disabled={generating}
             >
@@ -247,6 +253,9 @@ export default function AvatarCreatorPage() {
                 <><Sparkles className="mr-2 h-4 w-4" /> Generate Avatar Concept</>  
               )}
             </Button>
+
+
+            </div>
           </CardContent>
         </Card>
 

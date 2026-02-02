@@ -232,9 +232,15 @@ export default function StoryWriterPage() {
               />
             </div>
 
-            <Button 
+            <div className="flex items-center gap-3">
+
+
+              <CreditCostBadge toolId="story-writer" />
+
+
+              <Button 
               size="lg" 
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" 
+              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" 
               onClick={handleGenerate} 
               disabled={generating}
             >
@@ -244,6 +250,9 @@ export default function StoryWriterPage() {
                 <><Sparkles className="mr-2 h-4 w-4" /> Generate Story</>  
               )}
             </Button>
+
+
+            </div>
           </CardContent>
         </Card>
 

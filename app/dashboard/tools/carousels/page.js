@@ -656,15 +656,21 @@ export default function CarouselsToolPage() {
                 {loading ? 'Creating Content Map...' : 'Step 1: Generate Content Map'}
               </Button>
             ) : (
-              <Button 
+              <div className="flex items-center gap-3">
+
+                <CreditCostBadge toolId="carousels" />
+
+                <Button 
                 onClick={handleGenerate} 
                 disabled={loading}
-                className="w-full"
+                className="flex-1"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <ImageIcon className="mr-2 h-4 w-4" />
                 {loading ? 'Generating Images...' : 'Generate Carousel Images'}
               </Button>
+
+              </div>
             )}
             {loading && (
               <p className="text-xs text-muted-foreground text-center">

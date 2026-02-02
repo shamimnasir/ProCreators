@@ -741,10 +741,14 @@ export default function EmailCampaignPage() {
                   </Card>
 
                   {/* Generate Button */}
-                  <Button 
+                  <div className="flex items-center gap-3">
+
+                    <CreditCostBadge toolId="email-campaigns" />
+
+                    <Button 
                     onClick={handleGenerate} 
                     disabled={generating || !brandName}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                     size="lg"
                   >
                     {generating ? (
@@ -753,6 +757,8 @@ export default function EmailCampaignPage() {
                       <><Wand2 className="h-4 w-4 mr-2" /> Generate Email Campaign</>
                     )}
                   </Button>
+
+                  </div>
                 </div>
               </div>
             </TabsContent>

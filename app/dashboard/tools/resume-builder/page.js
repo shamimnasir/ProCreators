@@ -931,9 +931,18 @@ Senior Software Engineer at Google (2020 - Present)
             </div>
           )}
 
-          <Button size="lg" className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || (!rawInfo && !personalInfo.name)}>
+          <div className="flex items-center gap-3">
+
+
+            <CreditCostBadge toolId="resume-builder" />
+
+
+            <Button size="lg" className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || (!rawInfo && !personalInfo.name)}>
             {generating ? <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating Resume...</> : <><Sparkles className="mr-2 h-6 w-6" />Generate Professional Resume</>}
           </Button>
+
+
+          </div>
         </>
       ) : (
         <div className="space-y-6">

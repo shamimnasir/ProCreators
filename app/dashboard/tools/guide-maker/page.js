@@ -1244,9 +1244,13 @@ Welcome to this guide...
               </Card>
 
               {/* Generate Button */}
-              <Button 
+              <div className="flex items-center gap-3">
+
+                <CreditCostBadge toolId="guide-maker" />
+
+                <Button 
                 size="lg" 
-                className="w-full h-14 text-lg" 
+                className="flex-1 h-14 text-lg" 
                 onClick={handleGenerate} 
                 disabled={loading || chapters.length === 0}
               >
@@ -1255,6 +1259,8 @@ Welcome to this guide...
                 ) : (
                   <><Sparkles className="mr-2 h-5 w-5" /> Generate How-To Guide</>                )}
               </Button>
+
+              </div>
               
               {chapters.length === 0 && (
                 <p className="text-center text-sm text-destructive">

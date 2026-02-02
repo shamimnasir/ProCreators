@@ -685,9 +685,13 @@ export default function CoverLetterPage() {
           )}
 
           {/* Generate Button */}
-          <Button 
+          <div className="flex items-center gap-3">
+
+            <CreditCostBadge toolId="cover-letter" />
+
+            <Button 
             size="lg" 
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 h-14 text-lg"
+            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 h-14 text-lg"
             onClick={handleGenerate}
             disabled={generating || !fullName || !jobTitle || !companyName}
           >
@@ -697,6 +701,8 @@ export default function CoverLetterPage() {
               <><Sparkles className="mr-2 h-6 w-6" />Generate Cover Letter</>
             )}
           </Button>
+
+          </div>
         </>
       ) : (
         /* Results View */

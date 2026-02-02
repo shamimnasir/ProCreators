@@ -210,15 +210,24 @@ export default function ListsPage() {
               />
             </div>
 
-            <Button 
+            <div className="flex items-center gap-3">
+
+
+              <CreditCostBadge toolId="lists" />
+
+
+              <Button 
               onClick={handleGenerate} 
               disabled={loading || !topic.trim()}
-              className="w-full"
+              className="flex-1"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Sparkles className="mr-2 h-4 w-4" />
               Generate List
             </Button>
+
+
+            </div>
           </CardContent>
         </Card>
 
