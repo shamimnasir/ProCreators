@@ -66,6 +66,7 @@
         "input-otp": "^1.4.2",
         "jspdf": "^4.0.0",
         "lucide-react": "^0.516.0",
+        "mailgun.js": "^12.7.0",
         "mongodb": "^6.6.0",
         "natural": "^8.1.0",
         "next": "^16.1.2",
