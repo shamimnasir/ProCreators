@@ -1,114 +1,367 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CreditCard, Calendar, TrendingUp } from 'lucide-react'
-import Link from 'next/link'
+import { 
+  CreditCard, Calendar, TrendingUp, Coins, Sparkles, 
+  Loader2, Check, Zap, Crown, Building2, Star 
+} from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { useSearchParams } from 'next/navigation'
+
+const DEMO_USER_ID = 'demo-user-001'
 
 export default function BillingPage() {
-  const currentPlan = {
-    name: 'Free',
-    price: 0,
-    features: ['10 AI generations/month', 'Basic tools', 'Community support']
+  const [credits, setCredits] = useState(null)
+  const [plan, setPlan] = useState('free')
+  const [packages, setPackages] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [purchasing, setPurchasing] = useState(null)
+  const [transactions, setTransactions] = useState([])
+  const { toast } = useToast()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    fetchCredits()
+    fetchPackages()
+    fetchTransactions()
+    
+    // Check for payment success/cancel
+    const sessionId = searchParams.get('session_id')
+    const success = searchParams.get('success')
+    const canceled = searchParams.get('canceled')
+    
+    if (sessionId && success) {
+      pollPaymentStatus(sessionId)
+    } else if (canceled) {
+      toast({
+        title: 'Payment Canceled',
+        description: 'Your payment was canceled. You were not charged.',
+        variant: 'default'
+      })
+    }
+  }, [])
+
+  const fetchCredits = async () => {
+    try {
+      const res = await fetch(`/api/credits?userId=${DEMO_USER_ID}`)
+      const data = await res.json()
+      if (data.success) {
+        setCredits(data.credits)
+        setPlan(data.plan)
+      }
+    } catch (error) {
+      console.error('Error fetching credits:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const invoices = []
+  const fetchPackages = async () => {
+    try {
+      const res = await fetch('/api/stripe/checkout')
+      const data = await res.json()
+      if (data.success) {
+        setPackages(data.packages)
+      }
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+    }
+  }
+
+  const fetchTransactions = async () => {
+    try {
+      const res = await fetch('/api/credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'history', userId: DEMO_USER_ID })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setTransactions(data.history?.slice(0, 10) || [])
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error)
+    }
+  }
+
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+    const maxAttempts = 5
+    
+    if (attempts >= maxAttempts) {
+      toast({
+        title: 'Status Check Timeout',
+        description: 'Please refresh the page to see your updated balance.',
+        variant: 'default'
+      })
+      return
+    }
+    
+    try {
+      const res = await fetch(`/api/stripe/status?session_id=${sessionId}`)
+      const data = await res.json()
+      
+      if (data.paymentStatus === 'paid') {
+        toast({
+          title: '🎉 Payment Successful!',
+          description: `${data.credits} credits have been added to your account.`,
+        })
+        fetchCredits()
+        fetchTransactions()
+        return
+      } else if (data.status === 'expired') {
+        toast({
+          title: 'Session Expired',
+          description: 'The payment session has expired.',
+          variant: 'destructive'
+        })
+        return
+      }
+      
+      // Continue polling
+      setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000)
+    } catch (error) {
+      console.error('Error polling status:', error)
+    }
+  }
+
+  const handlePurchase = async (packageId) => {
+    setPurchasing(packageId)
+    
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packageId,
+          userId: DEMO_USER_ID,
+          originUrl: window.location.origin
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
+    } catch (error) {
+      toast({
+        title: 'Purchase Failed',
+        description: error.message,
+        variant: 'destructive'
+      })
+    } finally {
+      setPurchasing(null)
+    }
+  }
+
+  const getPackageIcon = (id) => {
+    switch (id) {
+      case 'starter': return <Zap className="h-6 w-6" />
+      case 'creator': return <Star className="h-6 w-6" />
+      case 'pro': return <Crown className="h-6 w-6" />
+      case 'business': return <Building2 className="h-6 w-6" />
+      default: return <Coins className="h-6 w-6" />
+    }
+  }
+
+  const getPackageColor = (id) => {
+    switch (id) {
+      case 'starter': return 'from-blue-500 to-cyan-500'
+      case 'creator': return 'from-purple-500 to-pink-500'
+      case 'pro': return 'from-orange-500 to-red-500'
+      case 'business': return 'from-green-500 to-teal-500'
+      default: return 'from-gray-500 to-gray-600'
+    }
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Credits & Billing</h1>
         <p className="text-muted-foreground mt-1">
-          Manage your subscription and billing information
+          Purchase credits and manage your account
         </p>
       </div>
 
-      {/* Current Plan */}
-      <Card>
-        <CardHeader>
+      {/* Current Balance */}
+      <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 border-yellow-200 dark:border-yellow-800">
+        <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Current Plan</CardTitle>
-              <CardDescription>Your active subscription</CardDescription>
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Current Balance</p>
+              <div className="flex items-center gap-3 mt-2">
+                <Coins className="h-10 w-10 text-yellow-500" />
+                {loading ? (
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                ) : (
+                  <span className="text-5xl font-bold text-yellow-900 dark:text-yellow-100">
+                    {credits?.toLocaleString() || 0}
+                  </span>
+                )}
+                <span className="text-2xl text-yellow-700 dark:text-yellow-300">credits</span>
+              </div>
             </div>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
-              {currentPlan.name}
+            <Badge className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 px-4 py-2 text-lg capitalize">
+              {plan} Plan
             </Badge>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <p className="text-3xl font-bold">${currentPlan.price}<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-            </div>
-            <div className="space-y-2">
-              {currentPlan.features.map((feature, i) => (
-                <div key={i} className="flex items-center">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary mr-2" />
-                  <span className="text-sm">{feature}</span>
+        </CardContent>
+      </Card>
+
+      {/* Credit Packages */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          <Sparkles className="h-6 w-6 text-yellow-500" />
+          Buy Credits
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {packages.map((pack) => (
+            <Card 
+              key={pack.id} 
+              className={`relative overflow-hidden ${pack.popular ? 'ring-2 ring-purple-500' : ''}`}
+            >
+              {pack.popular && (
+                <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs px-3 py-1 rounded-bl-lg font-medium">
+                  POPULAR
                 </div>
-              ))}
-            </div>
-            <Link href="/pricing">
-              <Button>
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Upgrade Plan
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+              )}
+              <CardHeader className="pb-2">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getPackageColor(pack.id)} flex items-center justify-center text-white mb-2`}>
+                  {getPackageIcon(pack.id)}
+                </div>
+                <CardTitle>{pack.name}</CardTitle>
+                <CardDescription>{pack.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <span className="text-4xl font-bold">{pack.credits.toLocaleString()}</span>
+                  <span className="text-muted-foreground ml-2">credits</span>
+                </div>
+                <div className="mb-4">
+                  <span className="text-2xl font-bold">${pack.price}</span>
+                  <span className="text-muted-foreground ml-1">USD</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  ${(pack.price / pack.credits * 100).toFixed(1)}¢ per credit
+                </p>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handlePurchase(pack.id)}
+                  disabled={purchasing === pack.id}
+                >
+                  {purchasing === pack.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Buy Now
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
-      {/* Payment Method */}
+      {/* Credit History */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment Method</CardTitle>
-          <CardDescription>Manage your payment methods</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Recent Activity
+          </CardTitle>
+          <CardDescription>Your credit transaction history</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <CreditCard className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mb-4">
-              No payment method added
-            </p>
-            <Button variant="outline">
-              Add Payment Method
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Billing History */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Billing History</CardTitle>
-          <CardDescription>Your past invoices and payments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {invoices.length === 0 ? (
+          {transactions.length === 0 ? (
             <div className="rounded-lg border border-dashed p-8 text-center">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <Coins className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                No billing history yet
+                No transactions yet. Start creating to use your credits!
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              {invoices.map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between rounded-lg border p-4">
-                  <div>
-                    <p className="font-medium">{invoice.description}</p>
-                    <p className="text-sm text-muted-foreground">{invoice.date}</p>
+              {transactions.map((tx, idx) => (
+                <div key={tx._id || idx} className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      tx.amount > 0 
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600' 
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-600'
+                    }`}>
+                      {tx.amount > 0 ? '+' : '-'}
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {tx.type === 'free_credits' ? 'Welcome Bonus' : 
+                         tx.type === 'credit_add' ? 'Credit Purchase' :
+                         tx.toolId || 'Generation'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-semibold">${invoice.amount}</span>
-                    <Button variant="outline" size="sm">Download</Button>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={tx.status === 'completed' ? 'default' : tx.status === 'refunded' ? 'secondary' : 'outline'}>
+                      {tx.status}
+                    </Badge>
+                    <span className={`font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {tx.amount > 0 ? '+' : ''}{tx.amount}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* What Credits Get You */}
+      <Card>
+        <CardHeader>
+          <CardTitle>What Can You Create?</CardTitle>
+          <CardDescription>Approximate credit costs per generation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-lg bg-muted/50">
+              <h3 className="font-semibold mb-2">💬 Text Content</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>• Jokes, Quotes: 8 credits</li>
+                <li>• Stories, Letters: 10-15 credits</li>
+                <li>• Blog Posts: 20 credits</li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <h3 className="font-semibold mb-2">📄 Documents</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>• Worksheets, Planners: 25 credits</li>
+                <li>• Ebooks, Storybooks: 35-40 credits</li>
+                <li>• Business Plans: 35 credits</li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <h3 className="font-semibold mb-2">🎬 Video & Media</h3>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>• Image Editing: 35 credits</li>
+                <li>• Quick Reels: 60-70 credits</li>
+                <li>• AI Video Studio: 80 credits</li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
