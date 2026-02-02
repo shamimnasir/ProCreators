@@ -18,6 +18,7 @@ export default function ThreadsToolPage() {
   const [loading, setLoading] = useState(false)
   const [generatedThread, setGeneratedThread] = useState('')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -69,6 +70,7 @@ export default function ThreadsToolPage() {
           description: `Thread generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate')
       }
     } catch (error) {
@@ -105,6 +107,7 @@ export default function ThreadsToolPage() {
       const data = await response.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "Thread saved to library successfully!"

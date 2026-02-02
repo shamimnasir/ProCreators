@@ -381,6 +381,7 @@ export default function ThumbnailMakerPage() {
   const [editorImage, setEditorImage] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragLayerId, setDragLayerId] = useState(null)
+  const { checkAndDeduct, refund, complete } = useCredits()
   const imageContainerRef = useRef(null)
   const canvasRef = useRef(null)
   const editorInputRef = useRef(null)

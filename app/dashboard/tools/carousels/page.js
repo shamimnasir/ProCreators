@@ -35,6 +35,7 @@ export default function CarouselsToolPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const logoInputRef = useRef(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Platform size configurations
   const platformSizes = {
@@ -123,6 +124,7 @@ export default function CarouselsToolPage() {
           description: "Review your carousel structure below"
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate content map')
       }
     } catch (error) {
@@ -287,6 +289,7 @@ export default function CarouselsToolPage() {
       const data = await response.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "Carousel saved to library successfully!"

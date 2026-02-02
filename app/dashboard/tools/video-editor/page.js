@@ -47,6 +47,7 @@ function TrimSection({ onTrimComplete }) {
   const videoRef = useRef(null)
   const fileInputRef = useRef(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -133,11 +134,13 @@ function TrimSection({ onTrimComplete }) {
       const data = await res.json()
       if (data.success) {
         setProcessedVideoUrl(data.videoUrl)
+        await complete(creditResult.transactionId)
         toast({ title: 'Video trimmed!', description: data.message })
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
     } catch (e) {
+      await refund(creditResult.transactionId, e.message)
       toast({ title: 'Error', description: e.message, variant: 'destructive' })
     } finally {
       setIsLoading(false)

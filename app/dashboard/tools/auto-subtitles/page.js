@@ -26,6 +26,7 @@ export default function AutoSubtitlesPage() {
   const videoRef = useRef(null)
   const fileInputRef = useRef(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const captionStyles = [
     { value: 'bold', label: 'Bold White', preview: 'bg-black text-white font-bold text-2xl' },
@@ -86,6 +87,7 @@ export default function AutoSubtitlesPage() {
         description: `Captions generated in ${language === 'bengali' ? 'Bengali' : 'English'}!`
       })
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({
         title: "Error",
         description: error.message,

@@ -115,6 +115,7 @@ export default function LandingPageCopyPage() {
   const [generating, setGenerating] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form State
   const [framework, setFramework] = useState('pas')
@@ -203,6 +204,7 @@ export default function LandingPageCopyPage() {
           toast({ title: '🎯 Landing Page Copy Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

@@ -77,6 +77,7 @@ export default function AIHumanizerPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Input state
   const [inputText, setInputText] = useState('')
@@ -159,6 +160,7 @@ export default function AIHumanizerPage() {
         setInputText(data.text)
         toast({ title: 'File uploaded successfully!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to extract text')
       }
     } catch (error) {

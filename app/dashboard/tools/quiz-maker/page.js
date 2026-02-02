@@ -123,6 +123,7 @@ export default function QuizMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Quiz Setup
   const [quizTitle, setQuizTitle] = useState('')
@@ -294,6 +295,7 @@ export default function QuizMakerPage() {
       setStep(2)
       toast({ title: "Questions Generated!", description: `${data.quiz?.questions?.length || questionCount} questions created. Edit them below!` })
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

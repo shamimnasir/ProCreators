@@ -68,6 +68,7 @@ export default function EmailCampaignPage() {
   const [generating, setGenerating] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form State
   const [campaignType, setCampaignType] = useState('newsletter')
@@ -175,6 +176,7 @@ export default function EmailCampaignPage() {
           toast({ title: '📧 Email Campaign Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

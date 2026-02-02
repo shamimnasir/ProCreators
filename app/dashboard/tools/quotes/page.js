@@ -17,9 +17,18 @@ export default function QuotesPage() {
   const [loading, setLoading] = useState(false)
   const [generatedQuote, setGeneratedQuote] = useState('')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     if (!topic.trim()) return
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('quotes')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setLoading(true)
     try {
       const languageText = language === 'bengali' ? 'in Bengali language' : 'in English language'
@@ -85,11 +94,13 @@ export default function QuotesPage() {
       const data = await response.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "Quote saved to library successfully!"
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

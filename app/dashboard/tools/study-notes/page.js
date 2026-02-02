@@ -104,6 +104,7 @@ export default function StudyNotesPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   const fileInputRef = useRef(null)
 
   // Step 1: Input Source
@@ -281,11 +282,13 @@ export default function StudyNotesPage() {
       if (data.success) {
         setGeneratedNotes(data.notes)
         setStep(3)
+        await complete(creditResult.transactionId)
         toast({
           title: "Notes Generated!",
           description: "Review and customize your study notes."
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate notes')
       }
     } catch (error) {

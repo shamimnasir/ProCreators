@@ -165,6 +165,7 @@ export default function FlashcardMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   const [isHydrated, setIsHydrated] = useState(false)
 
   // Drafts
@@ -326,6 +327,7 @@ export default function FlashcardMakerPage() {
         toast({ title: "Draft Saved!", description: `"${draftTitle}" saved.` })
       }
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({ title: "Save Failed", variant: "destructive" })
     }
   }
@@ -505,7 +507,8 @@ export default function FlashcardMakerPage() {
 
       setResult(data)
       setStep(4)
-      toast({ title: "PDF Generated!", description: "Your KDP-ready flashcard book is ready" })
+      await complete(creditResult.transactionId)
+        toast({ title: "PDF Generated!", description: "Your KDP-ready flashcard book is ready" })
     } catch (error) {
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {

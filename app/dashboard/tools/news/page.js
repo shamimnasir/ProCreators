@@ -22,6 +22,7 @@ export default function NewsPage() {
   const [generatedNews, setGeneratedNews] = useState('')
   const [urlContext, setUrlContext] = useState('')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleFetchContext = async () => {
     if (!contextUrl.trim()) {
@@ -44,11 +45,13 @@ export default function NewsPage() {
       const data = await response.json()
       if (data.success) {
         setUrlContext(data.content)
+        await complete(creditResult.transactionId)
         toast({
           title: "Success",
           description: "URL content fetched successfully!"
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to fetch URL')
       }
     } catch (error) {

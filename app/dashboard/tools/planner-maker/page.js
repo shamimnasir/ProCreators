@@ -86,6 +86,7 @@ export default function PlannerMakerPage() {
   const [currentDraftId, setCurrentDraftId] = useState(null)
   
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Load drafts on mount
   useEffect(() => {
@@ -161,6 +162,14 @@ export default function PlannerMakerPage() {
   const isTrackerType = ['habit', 'fitness', 'goals'].includes(plannerType)
 
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('planner-maker')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setGenerating(true)
     setGeneratedPDF(null)
     try {
@@ -198,6 +207,7 @@ export default function PlannerMakerPage() {
       setGeneratedPDF(data.downloadUrl)
     } catch (error) {
       console.error('Generation error:', error)
+      await refund(creditResult.transactionId, error.message)
       toast({
         title: 'Generation Failed',
         description: error.message || 'Something went wrong',

@@ -51,8 +51,17 @@ export default function StoryWriterPage() {
   const [story, setStory] = useState(null)
   const [expandedChapter, setExpandedChapter] = useState(0)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('story-writer')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setGenerating(true)
     try {
       const response = await fetch('/api/fun-tools', {
@@ -74,11 +83,13 @@ export default function StoryWriterPage() {
       if (data.success) {
         setStory(data.data)
         setExpandedChapter(0)
+        await complete(creditResult.transactionId)
         toast({
           title: '📖 Story Created!',
           description: 'Your unique tale has been written'
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

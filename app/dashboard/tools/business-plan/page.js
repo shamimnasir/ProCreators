@@ -75,6 +75,7 @@ export default function BusinessPlanPage() {
   const [exportingPDF, setExportingPDF] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Plan Type
   const [planType, setPlanType] = useState('traditional')
@@ -182,6 +183,7 @@ export default function BusinessPlanPage() {
           toast({ title: '📋 Business Plan Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

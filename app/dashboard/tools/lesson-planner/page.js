@@ -129,6 +129,7 @@ export default function LessonPlannerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Basic Info
   const [lessonTitle, setLessonTitle] = useState('')
@@ -294,11 +295,13 @@ export default function LessonPlannerPage() {
         setLessonPlan(data.lessonPlan)
         setObjectives(data.lessonPlan.objectives || [])
         setStep(4)
+        await complete(creditResult.transactionId)
         toast({
           title: "Lesson Plan Generated!",
           description: "Review and customize your lesson plan.",
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate lesson plan')
       }
     } catch (error) {

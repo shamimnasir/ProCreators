@@ -255,6 +255,7 @@ export default function CoverImageCreatorPage() {
   // Upload state
   const [uploadedImage, setUploadedImage] = useState(null)
   const [editPrompt, setEditPrompt] = useState('')
+  const { checkAndDeduct, refund, complete } = useCredits()
   const fileInputRef = useRef(null)
 
   // Get current platform config

@@ -105,6 +105,7 @@ export default function JournalMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Basic info
   const [journalType, setJournalType] = useState('gratitude')
@@ -245,6 +246,7 @@ export default function JournalMakerPage() {
       setStep(2)
       toast({ title: "Structure Generated!", description: "Review and customize your journal." })
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

@@ -57,8 +57,17 @@ export default function AvatarCreatorPage() {
   const [generating, setGenerating] = useState(false)
   const [avatar, setAvatar] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('avatar-creator')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setGenerating(true)
     try {
       const response = await fetch('/api/fun-tools', {
@@ -78,11 +87,13 @@ export default function AvatarCreatorPage() {
       const data = await response.json()
       if (data.success) {
         setAvatar(data.data)
+        await complete(creditResult.transactionId)
         toast({
           title: '🎭 Avatar Concept Created!',
           description: 'Your unique avatar description is ready'
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

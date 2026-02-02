@@ -62,6 +62,7 @@ export default function WorksheetMakerPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1 - Topic & Language
   const [subject, setSubject] = useState('math')
@@ -201,6 +202,7 @@ export default function WorksheetMakerPage() {
       setStep(2)
       toast({ title: "Worksheet Generated!", description: "Review and customize your questions." })
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

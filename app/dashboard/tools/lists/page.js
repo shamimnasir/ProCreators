@@ -18,6 +18,7 @@ export default function ListsPage() {
   const [loading, setLoading] = useState(false)
   const [generatedList, setGeneratedList] = useState('')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -77,6 +78,7 @@ export default function ListsPage() {
           description: `List generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate')
       }
     } catch (error) {
@@ -113,6 +115,7 @@ export default function ListsPage() {
       const data = await response.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "List saved to library successfully!"

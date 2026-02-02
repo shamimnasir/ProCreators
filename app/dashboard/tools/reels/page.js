@@ -31,6 +31,7 @@ export default function ReelsPage() {
   const [videoData, setVideoData] = useState(null)
   const [progress, setProgress] = useState(0)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   const objectFileRef = useRef(null)
 
@@ -83,11 +84,13 @@ export default function ReelsPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedScript(data.script)
+        await complete(creditResult.transactionId)
         toast({
           title: "Success",
           description: data.scriptType || "Viral script generated!"
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

@@ -51,8 +51,17 @@ export default function LoveLetterPage() {
   const [generating, setGenerating] = useState(false)
   const [letter, setLetter] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('love-letter')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setGenerating(true)
     try {
       const response = await fetch('/api/fun-tools', {
@@ -72,11 +81,13 @@ export default function LoveLetterPage() {
       const data = await response.json()
       if (data.success) {
         setLetter(data.data)
+        await complete(creditResult.transactionId)
         toast({
           title: '💕 Love Letter Created!',
           description: 'A heartfelt letter crafted just for you'
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

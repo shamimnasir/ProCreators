@@ -279,6 +279,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [videoData, setVideoData] = useState(null)
   
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   const audioFileRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
@@ -518,6 +519,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {
@@ -1032,6 +1034,7 @@ Product URL: ${scrapeData.product.url}`
       if (data.success) {
         setPreviewData(data)
         setShowPreview(true)
+        await complete(creditResult.transactionId)
         toast({
           title: "Preview Ready!",
           description: "Make your adjustments and generate the final video"

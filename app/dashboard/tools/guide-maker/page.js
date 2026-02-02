@@ -109,6 +109,7 @@ export default function TutorialsPage() {
   const [lastSaved, setLastSaved] = useState(null)
   
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   const selectedType = GUIDE_TYPES.find(t => t.id === guideType)
 
@@ -211,6 +212,7 @@ export default function TutorialsPage() {
         }
       }
     } catch (e) {
+      await refund(creditResult.transactionId, e.message)
       toast({ title: "Save failed", description: e.message, variant: "destructive" })
     } finally {
       setIsSaving(false)
@@ -321,6 +323,14 @@ export default function TutorialsPage() {
 
   // Generate PDF
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('guide-maker')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setLoading(true)
     setGenerated(null)
     

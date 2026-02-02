@@ -208,6 +208,7 @@ export default function SocialMediaPostCreator() {
   const [copied, setCopied] = useState({})
   const [activeVariation, setActiveVariation] = useState(0)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
   const [platform, setPlatform] = useState('linkedin')
@@ -310,6 +311,7 @@ export default function SocialMediaPostCreator() {
         
         toast({ title: '✨ Posts Generated!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

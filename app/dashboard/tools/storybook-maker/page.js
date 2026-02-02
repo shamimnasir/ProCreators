@@ -74,6 +74,7 @@ export default function StorybookMakerPage() {
   const [loading, setLoading] = useState(false)
   const [generatingIllustrations, setGeneratingIllustrations] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Story Setup
   const [title, setTitle] = useState('')
@@ -197,6 +198,7 @@ export default function StorybookMakerPage() {
       
       toast({ title: "Story Generated!", description: `Created ${data.story?.pages?.length || pageCount} pages. Edit them below!` })
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

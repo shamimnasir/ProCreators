@@ -79,6 +79,7 @@ export default function VoiceEnhancerPage() {
   // Output state
   const [processedAudioUrl, setProcessedAudioUrl] = useState(null)
   const [isComparing, setIsComparing] = useState(false)
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   const audioRef = useRef(null)
   const processedAudioRef = useRef(null)

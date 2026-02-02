@@ -169,6 +169,7 @@ export default function ExamPrepPage() {
   const [loading, setLoading] = useState(false)
   const [searchingExam, setSearchingExam] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Exam Selection
   const [examCategory, setExamCategory] = useState('')
@@ -344,6 +345,7 @@ export default function ExamPrepPage() {
           description: `${data.questions.length} AI-generated practice questions ready`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate questions')
       }
     } catch (error) {
@@ -458,6 +460,7 @@ export default function ExamPrepPage() {
       const data = await response.json()
       if (data.success) {
         setPdfUrl(data.pdfUrl)
+        await complete(creditResult.transactionId)
         toast({
           title: 'PDF Ready!',
           description: 'Your practice paper is ready for download'

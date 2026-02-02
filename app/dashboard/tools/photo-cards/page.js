@@ -32,6 +32,7 @@ export default function PhotoCardsPage() {
   const fileInputRef = useRef(null)
   const logoInputRef = useRef(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0]

@@ -63,6 +63,7 @@ export default function SwotAnalysisPage() {
   const [exportingPDF, setExportingPDF] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form State
   const [analysisType, setAnalysisType] = useState('business')
@@ -127,6 +128,7 @@ export default function SwotAnalysisPage() {
           toast({ title: '📊 SWOT Analysis Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

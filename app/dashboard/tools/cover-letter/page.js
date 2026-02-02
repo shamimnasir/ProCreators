@@ -230,6 +230,7 @@ export default function CoverLetterPage() {
   const [copied, setCopied] = useState(false)
   const [prefilledFrom, setPrefilledFrom] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
   const [fullName, setFullName] = useState('')
@@ -336,6 +337,7 @@ export default function CoverLetterPage() {
         
         toast({ title: '✉️ Cover Letter Generated!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

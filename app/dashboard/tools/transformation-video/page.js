@@ -100,6 +100,7 @@ const CAPTION_STYLES = [
 
 export default function TransformationVideoPage() {
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Step management
   const [currentStep, setCurrentStep] = useState(1) // 1: Theme, 2: Scenes, 3: Generate
@@ -305,6 +306,7 @@ export default function TransformationVideoPage() {
         // Auto-generate images for all scenes
         generateSceneImages(data.scenes)
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate scenes')
       }
     } catch (error) {

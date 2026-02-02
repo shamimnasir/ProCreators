@@ -70,6 +70,7 @@ export default function AudioEditorPage() {
   
   // Output state
   const [processedAudioUrl, setProcessedAudioUrl] = useState(null)
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   const audioRef = useRef(null)
   const fileInputRef = useRef(null)

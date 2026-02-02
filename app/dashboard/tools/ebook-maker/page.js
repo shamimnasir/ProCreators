@@ -321,6 +321,7 @@ export default function EbookMakerPage() {
   const [loading, setLoading] = useState(false)
   const [generatingChapter, setGeneratingChapter] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   const [isHydrated, setIsHydrated] = useState(false)
 
   // Drafts management
@@ -499,6 +500,7 @@ export default function EbookMakerPage() {
       }
     } catch (error) {
       console.error('Failed to save draft:', error)
+      await refund(creditResult.transactionId, error.message)
       toast({ 
         title: "Save Failed", 
         description: "Could not save draft. Please try again.",

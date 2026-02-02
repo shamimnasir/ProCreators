@@ -24,6 +24,7 @@ export default function ScriptToAdPage() {
   const [selectedScript, setSelectedScript] = useState(0)
   const [generatingVideo, setGeneratingVideo] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const scriptTypes = [
     { type: 'ugc', label: 'UGC Style', icon: '🗣️', description: 'User-generated content feel, authentic and relatable' },
@@ -96,6 +97,7 @@ For each script include:
         })
       }
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({
         title: "Error",
         description: error.message,

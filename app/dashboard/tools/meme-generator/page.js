@@ -48,8 +48,17 @@ export default function MemeGeneratorPage() {
   const [generating, setGenerating] = useState(false)
   const [generatedMeme, setGeneratedMeme] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('meme-generator')
+    if (!creditResult.success) {
+      toast({ title: 'Insufficient Credits', description: creditResult.error || 'You need more credits.', variant: 'destructive' })
+      return
+    }
+    
     setGenerating(true)
     try {
       const response = await fetch('/api/fun-tools', {
@@ -110,6 +119,7 @@ export default function MemeGeneratorPage() {
         setBottomText(firstVariation.bottomText || '')
         toast({ title: '💡 AI Generated Idea!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate idea')
       }
     } catch (error) {

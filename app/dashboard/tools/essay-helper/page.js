@@ -119,6 +119,7 @@ export default function EssayHelperPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Configuration
   const [essayType, setEssayType] = useState('')
@@ -247,6 +248,7 @@ export default function EssayHelperPage() {
           description: `Extracted ${data.wordCount || 'text'} from ${file.name}`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to extract text')
       }
     } catch (error) {
@@ -351,6 +353,7 @@ export default function EssayHelperPage() {
       const data = await response.json()
       if (data.success) {
         setPdfUrl(data.pdfUrl)
+        await complete(creditResult.transactionId)
         toast({ title: 'PDF Ready!', description: 'Your essay PDF is ready for download' })
       } else {
         throw new Error(data.error)

@@ -68,6 +68,7 @@ const NICHE_CATEGORIES = [
 
 export default function QuickVideoStudioPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Get niches for a category
   const getNichesForCategory = (categoryId) => {

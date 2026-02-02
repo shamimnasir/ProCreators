@@ -93,6 +93,7 @@ export default function SalaryNegotiatorPage() {
   const [copied, setCopied] = useState({})
   const [activeTab, setActiveTab] = useState('scripts')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
   const [negotiationType, setNegotiationType] = useState('initial-offer')
@@ -198,6 +199,7 @@ export default function SalaryNegotiatorPage() {
         
         toast({ title: '💰 Negotiation Strategy Ready!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

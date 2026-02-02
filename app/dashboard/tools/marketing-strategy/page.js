@@ -108,6 +108,7 @@ export default function MarketingStrategyPage() {
   const [generating, setGenerating] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form State
   const [framework, setFramework] = useState('complete')
@@ -216,8 +217,10 @@ export default function MarketingStrategyPage() {
         setResultTab('overview')
         
         // Don't auto-save text version - PDF will be saved on export
+        await complete(creditResult.transactionId)
         toast({ title: '📊 Marketing Strategy Generated!', description: 'Click "Export PDF" to save a formatted copy' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

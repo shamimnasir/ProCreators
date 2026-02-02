@@ -74,6 +74,7 @@ export default function NetworkingMessagePage() {
   const [activeTab, setActiveTab] = useState('setup')
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form state
   const [recipientName, setRecipientName] = useState('')
@@ -158,6 +159,7 @@ export default function NetworkingMessagePage() {
           toast({ title: '✉️ Message Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

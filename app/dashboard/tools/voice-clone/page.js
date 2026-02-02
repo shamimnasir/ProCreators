@@ -17,6 +17,7 @@ export default function VoiceClonePage() {
   const [loading, setLoading] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -43,12 +44,14 @@ export default function VoiceClonePage() {
       const data = await response.json()
       if (data.success) {
         setAudioUrl(data.audioUrl)
+        await complete(creditResult.transactionId)
         toast({
           title: "Success",
           description: data.message || "Voice generated!"
         })
       }
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       toast({
         title: "Error",
         description: error.message,

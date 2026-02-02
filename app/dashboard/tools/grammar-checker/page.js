@@ -55,6 +55,7 @@ export default function GrammarCheckerPage() {
   const [loading, setLoading] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Input state
   const [inputText, setInputText] = useState('')
@@ -134,6 +135,7 @@ export default function GrammarCheckerPage() {
           description: `Extracted ${data.wordCount || 'text'} from ${file.name}`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to extract text')
       }
     } catch (error) {

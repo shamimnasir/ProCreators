@@ -65,6 +65,7 @@ export default function PitchDeckPage() {
   const [exportingPDF, setExportingPDF] = useState(false)
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Deck Style
   const [deckStyle, setDeckStyle] = useState('classic')
@@ -168,6 +169,7 @@ export default function PitchDeckPage() {
           toast({ title: '🎯 Pitch Deck Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

@@ -469,6 +469,7 @@ export default function ResumeBuilderPage() {
   const [headshot, setHeadshot] = useState(null)
   const [linkedInWarning, setLinkedInWarning] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   const fileInputRef = useRef(null)
   const headshotInputRef = useRef(null)
 
@@ -533,9 +534,11 @@ export default function ResumeBuilderPage() {
     try {
       const res = await fetch('/api/resume-builder/extract-text', { method: 'POST', body: formData })
       const data = await res.json()
-      if (data.success) { setRawInfo(data.text); setUploadedFileName(file.name); toast({ title: 'CV Uploaded!' }) }
+      if (data.success) { setRawInfo(data.text); setUploadedFileName(file.name); await complete(creditResult.transactionId)
+        toast({ title: 'CV Uploaded!' }) }
       else throw new Error(data.error)
-    } catch (err) { toast({ title: 'Upload Failed', description: err.message, variant: 'destructive' }) }
+    } catch (err) { await refund(creditResult.transactionId, err.message)
+      toast({ title: 'Upload Failed', description: err.message, variant: 'destructive' }) }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = '' }
   }
 

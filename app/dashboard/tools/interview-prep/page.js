@@ -350,6 +350,7 @@ export default function InterviewPrepPage() {
   const [feedback, setFeedback] = useState(null)
   const [mode, setMode] = useState('setup') // setup, questions, practice, feedback
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
   const [jobTitle, setJobTitle] = useState('')
@@ -428,6 +429,7 @@ export default function InterviewPrepPage() {
         
         toast({ title: '🎤 Questions Generated!', description: `${data.data.questions?.length || 0} questions ready` })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {
@@ -472,6 +474,7 @@ export default function InterviewPrepPage() {
       if (data.success) {
         setFeedback(data.data)
         setMode('feedback')
+        await complete(creditResult.transactionId)
         toast({ title: '✅ Feedback Ready!' })
       } else {
         throw new Error(data.error)

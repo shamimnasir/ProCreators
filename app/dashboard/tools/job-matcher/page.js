@@ -110,6 +110,7 @@ function SkillsSection({ title, skills, type }) {
 function AnalysisResults({ data }) {
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   if (!data) return null
   
@@ -498,8 +499,10 @@ export default function JobMatcherPage() {
       if (data.success) {
         setResumeText(data.text)
         setUploadedFileName(file.name)
+        await complete(creditResult.transactionId)
         toast({ title: 'Resume Uploaded!', description: 'Text extracted successfully' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

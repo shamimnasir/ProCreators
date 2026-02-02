@@ -360,6 +360,7 @@ export default function SlidesMakerPage() {
   const [generating, setGenerating] = useState(false)
   const [generatingImageIndex, setGeneratingImageIndex] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Step 1: Topic & Type
   const [topic, setTopic] = useState('')
@@ -522,6 +523,7 @@ export default function SlidesMakerPage() {
           description: `Generated ${data.presentation.slides.length} slides with AI backgrounds. Saved to Library.`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate presentation')
       }
     } catch (error) {

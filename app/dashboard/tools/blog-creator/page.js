@@ -96,6 +96,7 @@ export default function BlogCreatorPage() {
   const [copied, setCopied] = useState({})
   const [activeTab, setActiveTab] = useState('article')
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
   const [articleType, setArticleType] = useState('seo-article')
@@ -203,6 +204,7 @@ export default function BlogCreatorPage() {
           await runQualityChecks(data.data.content)
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

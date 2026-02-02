@@ -175,6 +175,7 @@ export default function YouTubeCreatorPage() {
   const [activeTab, setActiveTab] = useState('setup')
   const [copied, setCopied] = useState({})
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Form state
   const [videoTopic, setVideoTopic] = useState('')
@@ -254,6 +255,7 @@ export default function YouTubeCreatorPage() {
           toast({ title: '🎬 YouTube Content Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

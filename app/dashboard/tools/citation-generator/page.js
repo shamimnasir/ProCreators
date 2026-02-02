@@ -111,6 +111,7 @@ export default function CitationGeneratorPage() {
   const [loading, setLoading] = useState(false)
   const [fetchingUrl, setFetchingUrl] = useState(false)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Configuration
   const [citationStyle, setCitationStyle] = useState('apa7')
@@ -227,6 +228,7 @@ export default function CitationGeneratorPage() {
         setUrlToFetch('')
         toast({ title: 'Citation Added!' })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {
@@ -278,6 +280,7 @@ export default function CitationGeneratorPage() {
       const data = await response.json()
       if (data.success) {
         setGeneratedBibliography(data.bibliography)
+        await complete(creditResult.transactionId)
         toast({ title: 'Bibliography Generated!' })
       } else {
         throw new Error(data.error)
