@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Quote, Globe, Save, Download } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function QuotesPage() {
   const [topic, setTopic] = useState('')

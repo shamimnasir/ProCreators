@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   CheckCircle, AlertCircle, AlertTriangle, Info,
   Sparkles, Loader2, ArrowLeft, Copy, RefreshCw,

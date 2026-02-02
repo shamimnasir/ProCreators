@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Smile, Download, Sparkles, Loader2, Image, Type, Upload, Wand2, Copy, RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const MEME_TEMPLATES = [
   { id: 'drake', name: 'Drake Hotline', icon: '👉', description: 'Yes/No comparison' },

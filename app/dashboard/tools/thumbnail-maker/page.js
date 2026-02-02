@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Wand2, Upload, Download, ImageIcon, Type, Sparkles, RefreshCw,
   Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,

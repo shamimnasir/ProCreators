@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { User, Sparkles, Loader2, Copy, Palette } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const STYLES = [
   { id: 'anime', name: 'Anime/Manga', icon: '🎌', desc: 'Japanese animation style' },

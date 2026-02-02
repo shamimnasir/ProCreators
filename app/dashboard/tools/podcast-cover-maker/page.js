@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Wand2, Upload, Download, ImageIcon, Sparkles, RefreshCw,
   Zap, Target, X, Copy, Headphones, Mic, Radio, Music,

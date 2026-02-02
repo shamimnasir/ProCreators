@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Download, ArrowLeft, ArrowRight, Sparkles, CheckCircle,
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,

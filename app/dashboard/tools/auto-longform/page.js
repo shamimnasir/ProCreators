@@ -2,6 +2,8 @@
 
 import { Card } from '@/components/ui/card'
 import { Zap } from 'lucide-react'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function AutoLongFormPage() {
   return (

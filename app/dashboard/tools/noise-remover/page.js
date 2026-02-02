@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Upload, Download, Play, Pause, Volume2, VolumeX, Wand2,
   RefreshCw, X, FileAudio, Waves, Sparkles, Zap, CheckCircle,

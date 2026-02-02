@@ -13,6 +13,8 @@ import { Progress } from '@/components/ui/progress'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Wand2, Upload, Download, Sparkles, Image as ImageIcon, Palette,
   Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,

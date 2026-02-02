@@ -2,6 +2,8 @@
 
 import { Card } from '@/components/ui/card'
 import { User } from 'lucide-react'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function TalkingHeadPage() {
   return (

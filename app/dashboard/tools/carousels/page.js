@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Image from 'next/image'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function CarouselsToolPage() {
   const [prompt, setPrompt] = useState('')

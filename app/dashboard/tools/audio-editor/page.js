@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Upload, Download, Play, Pause, Scissors, Volume2, Music,
   RefreshCw, X, Plus, Clock, Zap, FileAudio, Layers, Wand2,

@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Slider } from '@/components/ui/slider'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Sparkles, Loader2, ArrowLeft, Copy, RefreshCw,
   FileText, Upload, FileUp, File, X, Wand2,

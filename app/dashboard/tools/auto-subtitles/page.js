@@ -10,6 +10,8 @@ import { Loader2, Upload, Download, Subtitles, Globe, Play, Pause, Edit2, Save }
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function AutoSubtitlesPage() {
   const [videoFile, setVideoFile] = useState(null)

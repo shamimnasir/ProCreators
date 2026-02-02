@@ -11,6 +11,8 @@ import { Loader2, Video, Globe, Upload, Sparkles, Download, CheckCircle, Image a
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function ReelsPage() {
   const [topic, setTopic] = useState('')

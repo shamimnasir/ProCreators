@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Download, Sparkles, ArrowLeft, ArrowRight,
   CheckCircle, Plus, Trash2, Save, FolderOpen, FilePlus, 

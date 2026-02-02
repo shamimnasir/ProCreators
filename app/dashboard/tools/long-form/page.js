@@ -2,6 +2,8 @@
 
 import { Card } from '@/components/ui/card'
 import { Video } from 'lucide-react'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function LongFormPage() {
   return (

@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Heart, Sparkles, Loader2, Copy, Download } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const OCCASIONS = [
   { id: 'just-because', name: 'Just Because', icon: '💕' },

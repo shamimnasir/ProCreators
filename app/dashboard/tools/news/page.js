@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Download, Save, Sparkles, Globe, Link as LinkIcon } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 export default function NewsPage() {
   const [topic, setTopic] = useState('')

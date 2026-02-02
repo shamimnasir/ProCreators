@@ -13,6 +13,8 @@ import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 // Import shared components for Pro features
 import CoverImagePrompt from '@/components/shared/CoverImagePrompt'

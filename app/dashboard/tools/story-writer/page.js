@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BookOpen, Sparkles, Loader2, Copy, Download, ChevronDown } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 
 const GENRES = [
   { id: 'fantasy', name: 'Fantasy', icon: '🧙', desc: 'Magic, dragons, epic quests' },

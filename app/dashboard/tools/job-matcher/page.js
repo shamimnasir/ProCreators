@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { useCredits } from '@/components/CreditBalance'
 import { 
   Target, Sparkles, Loader2, CheckCircle, XCircle, AlertTriangle,
   FileText, Briefcase, TrendingUp, Lightbulb, RefreshCw, Upload,
