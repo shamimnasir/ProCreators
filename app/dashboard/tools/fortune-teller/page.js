@@ -196,18 +196,21 @@ export default function FortuneTellerPage() {
                 />
               </div>
 
-              <Button 
-                size="lg" 
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" 
-                onClick={handleGenerate} 
-                disabled={generating}
-              >
-                {generating ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Consulting the Spirits...</>
-                ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Reveal My Fortune</>  
-                )}
-              </Button>
+              <div className="flex items-center justify-between gap-4">
+                <CreditCostBadge toolId="fortune-teller" />
+                <Button 
+                  size="lg" 
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" 
+                  onClick={handleGenerate} 
+                  disabled={generating}
+                >
+                  {generating ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Consulting the Spirits...</>
+                  ) : (
+                    <><Sparkles className="mr-2 h-4 w-4" /> Reveal My Fortune</>  
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
