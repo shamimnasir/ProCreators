@@ -1180,15 +1180,18 @@ agent_communication:
 
   - task: "Admin Controls API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/app/api/admin/controls/route.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "IMPLEMENTED: Kill switches for emergency shutdown, maintenance mode, and feature-level toggles."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE TESTING COMPLETED: Admin controls API working perfectly. GET Controls: ✅ Successfully retrieved 10 control settings including globalEnabled, videoGenerationEnabled, imageGenerationEnabled, audioGenerationEnabled, textGenerationEnabled, and other feature toggles. Response Structure: ✅ Proper success/controls format returned. Feature Management: ✅ All feature control settings available for admin management. Database Integration: ✅ Controls stored and retrieved from MongoDB correctly. Emergency Controls: ✅ Kill switches available for emergency shutdown scenarios. Ready for admin panel integration."
 
   - task: "Admin Users API"
     implemented: true
