@@ -51,9 +51,23 @@ export default function FortuneTellerPage() {
   const [generating, setGenerating] = useState(false)
   const [fortune, setFortune] = useState(null)
   const { toast } = useToast()
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     setGenerating(true)
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('fortune-teller')
+    if (!creditResult.success) {
+      setGenerating(false)
+      toast({
+        title: 'Insufficient Credits',
+        description: creditResult.error || 'You need more credits.',
+        variant: 'destructive'
+      })
+      return
+    }
+    
     try {
       const response = await fetch('/api/fun-tools', {
         method: 'POST',
@@ -69,18 +83,20 @@ export default function FortuneTellerPage() {
 
       const data = await response.json()
       if (data.success) {
+        await complete(creditResult.transactionId)
         setFortune(data.data)
         toast({
           title: '🔮 The Spirits Have Spoken!',
-          description: 'Your fortune has been revealed'
+          description: `Fortune revealed! Used ${creditResult.cost} credits.`
         })
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {
       toast({
         title: 'The Spirits Are Silent',
-        description: error.message,
+        description: error.message + ' (Credits refunded)',
         variant: 'destructive'
       })
     } finally {
