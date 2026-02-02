@@ -209,10 +209,11 @@ export default function AdCopyPage() {
           toast({ title: '🎯 Ad Copy Generated!' })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {
-      toast({ title: 'Generation Failed', description: err.message, variant: 'destructive' })
+      toast({ title: 'Generation Failed', description: err.message + ' (Credits refunded)', variant: 'destructive' })
     } finally {
       setGenerating(false)
     }
