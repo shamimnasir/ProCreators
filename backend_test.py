@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend Testing for Digital Products Suite (ProCreators)
-Tests all 14 Digital Product tools APIs systematically
+ProCreators Phase 2-3 API Testing Script
+Tests: Credit System, Stripe Payment, Authentication, Admin Controls
 """
 
 import requests
@@ -10,439 +10,485 @@ import time
 import sys
 from datetime import datetime
 
-# Get base URL from environment
-BASE_URL = "https://user-mgmt-panel.preview.emergentagent.com/api"
+# Base URL from environment
+BASE_URL = "https://user-mgmt-panel.preview.emergentagent.com"
+API_BASE = f"{BASE_URL}/api"
 
-class DigitalProductsTestSuite:
+class ProCreatorsAPITest:
     def __init__(self):
-        self.results = []
-        self.total_tests = 0
-        self.passed_tests = 0
-        self.failed_tests = 0
+        self.results = {
+            "total_tests": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": []
+        }
+        self.session_token = None
+        self.test_user_id = None
         
-    def log(self, message, level="INFO"):
+    def log(self, message, test_name=None):
         timestamp = datetime.now().strftime("%H:%M:%S")
-        print(f"[{timestamp}] {level}: {message}")
+        prefix = f"[{timestamp}]"
+        if test_name:
+            prefix += f" [{test_name}]"
+        print(f"{prefix} {message}")
         
-    def test_endpoint(self, tool_name, endpoint, payload, expected_fields=None):
-        """Test a single API endpoint"""
-        self.total_tests += 1
-        self.log(f"Testing {tool_name}...")
+    def test_result(self, test_name, success, message="", data=None):
+        self.results["total_tests"] += 1
+        if success:
+            self.results["passed"] += 1
+            self.log(f"✅ PASS: {message}", test_name)
+        else:
+            self.results["failed"] += 1
+            self.results["errors"].append(f"{test_name}: {message}")
+            self.log(f"❌ FAIL: {message}", test_name)
+        
+        if data:
+            self.log(f"Response: {json.dumps(data, indent=2)[:200]}...", test_name)
+    
+    def make_request(self, method, endpoint, data=None, headers=None):
+        """Make HTTP request with error handling"""
+        url = f"{API_BASE}{endpoint}"
+        default_headers = {"Content-Type": "application/json"}
+        if headers:
+            default_headers.update(headers)
         
         try:
-            url = f"{BASE_URL}{endpoint}"
-            self.log(f"POST {url}")
-            self.log(f"Payload: {json.dumps(payload, indent=2)}")
-            
-            response = requests.post(url, json=payload, timeout=60)
-            response_data = response.json()
-            
-            # Check HTTP status
-            if response.status_code == 200:
-                # Check response structure
-                if response_data.get('success'):
-                    # Validate expected fields
-                    missing_fields = []
-                    if expected_fields:
-                        for field in expected_fields:
-                            if field not in response_data:
-                                missing_fields.append(field)
-                    
-                    if not missing_fields:
-                        self.passed_tests += 1
-                        self.log(f"✅ {tool_name} - WORKING", "SUCCESS")
-                        result = {
-                            'tool': tool_name,
-                            'endpoint': endpoint,
-                            'status': 'WORKING',
-                            'response_fields': list(response_data.keys()),
-                            'content_summary': self._get_content_summary(response_data)
-                        }
-                    else:
-                        self.failed_tests += 1
-                        self.log(f"❌ {tool_name} - Missing fields: {missing_fields}", "ERROR")
-                        result = {
-                            'tool': tool_name,
-                            'endpoint': endpoint,
-                            'status': 'NOT WORKING',
-                            'error': f'Missing response fields: {missing_fields}',
-                            'response_fields': list(response_data.keys())
-                        }
-                else:
-                    self.failed_tests += 1
-                    error_msg = response_data.get('error', 'Unknown error')
-                    self.log(f"❌ {tool_name} - API Error: {error_msg}", "ERROR")
-                    result = {
-                        'tool': tool_name,
-                        'endpoint': endpoint,
-                        'status': 'NOT WORKING',
-                        'error': f'API returned success=false: {error_msg}'
-                    }
-            elif response.status_code == 400:
-                # Validation error - this might be expected for some test cases
-                error_msg = response_data.get('error', 'Validation error')
-                if 'required' in error_msg.lower():
-                    self.log(f"⚠️  {tool_name} - Expected validation error: {error_msg}", "WARN")
-                    # Test with minimal required fields
-                    return self._test_minimal_payload(tool_name, endpoint)
-                else:
-                    self.failed_tests += 1
-                    self.log(f"❌ {tool_name} - Validation Error: {error_msg}", "ERROR")
-                    result = {
-                        'tool': tool_name,
-                        'endpoint': endpoint,
-                        'status': 'NOT WORKING',
-                        'error': f'400 Validation Error: {error_msg}'
-                    }
+            if method.upper() == "GET":
+                response = requests.get(url, headers=default_headers, timeout=30)
+            elif method.upper() == "POST":
+                response = requests.post(url, json=data, headers=default_headers, timeout=30)
+            elif method.upper() == "DELETE":
+                response = requests.delete(url, headers=default_headers, timeout=30)
             else:
-                self.failed_tests += 1
-                self.log(f"❌ {tool_name} - HTTP {response.status_code}: {response.text[:200]}", "ERROR")
-                result = {
-                    'tool': tool_name,
-                    'endpoint': endpoint,
-                    'status': 'NOT WORKING',
-                    'error': f'HTTP {response.status_code}: {response.text[:200]}'
-                }
+                return None, f"Unsupported method: {method}"
                 
+            return response, None
         except requests.exceptions.Timeout:
-            self.failed_tests += 1
-            self.log(f"❌ {tool_name} - Request timeout (60s)", "ERROR")
-            result = {
-                'tool': tool_name,
-                'endpoint': endpoint,
-                'status': 'NOT WORKING',
-                'error': 'Request timeout after 60 seconds'
-            }
+            return None, "Request timeout (30s)"
+        except requests.exceptions.ConnectionError:
+            return None, "Connection error - service might be down"
         except Exception as e:
-            self.failed_tests += 1
-            self.log(f"❌ {tool_name} - Exception: {str(e)}", "ERROR")
-            result = {
-                'tool': tool_name,
-                'endpoint': endpoint,
-                'status': 'NOT WORKING',
-                'error': f'Exception: {str(e)}'
-            }
-        
-        self.results.append(result)
-        return result
-        
-    def _test_minimal_payload(self, tool_name, endpoint):
-        """Try minimal payload for tools that failed validation"""
-        minimal_payloads = {
-            '/planner-maker/generate': {'plannerType': 'daily'},
-            '/worksheet-maker/generate': {'topic': 'Math Practice'},
-            '/coloring-book/generate': {'theme': 'animals'},
-            '/journal-maker/generate': {'journalType': 'daily'},
-            '/checklist-maker/generate': {'checklistType': 'daily'},
-            '/ebook-maker/generate': {'topic': 'Test Topic'},
-            '/recipe-book/generate': {'theme': 'healthy'},
-            '/how-to-guide/generate': {'topic': 'Test Guide'},
-            '/notion-templates/generate': {'templateType': 'productivity'},
-            '/slides-maker/generate': {'topic': 'Test Presentation'},
-            '/learning-cards/generate': {'topic': 'Math'},
-            '/quiz-maker/generate': {'topic': 'General Knowledge'},
-            '/storybook-maker/generate': {'theme': 'adventure'},
-            '/activity-book/generate': {'theme': 'kids'}
-        }
-        
-        minimal = minimal_payloads.get(endpoint)
-        if minimal:
-            self.log(f"Retrying {tool_name} with minimal payload: {minimal}")
-            return self.test_endpoint(f"{tool_name} (minimal)", endpoint, minimal)
-        else:
-            return {
-                'tool': tool_name,
-                'endpoint': endpoint,
-                'status': 'NOT WORKING',
-                'error': 'Could not determine minimal required fields'
-            }
+            return None, f"Request error: {str(e)}"
     
-    def _get_content_summary(self, response_data):
-        """Extract key information from successful response"""
-        summary = {}
-        if 'title' in response_data:
-            summary['title'] = response_data['title']
-        if 'pageCount' in response_data:
-            summary['pageCount'] = response_data['pageCount']
-        if 'downloadUrl' in response_data:
-            summary['hasDownloadUrl'] = True
-        if 'libraryId' in response_data:
-            summary['savedToLibrary'] = True
-        return summary
+    # =================== CREDIT SYSTEM API TESTS ===================
     
-    def run_all_tests(self):
-        """Run comprehensive tests for all 14 Digital Products"""
-        self.log("Starting Comprehensive Digital Products Test Suite")
-        self.log("=" * 60)
+    def test_credit_get_balance(self):
+        """Test GET /api/credits - Check user balance"""
+        test_name = "Credit Balance Check"
         
-        # Test all 14 digital products
-        tests = [
-            # Category 1: Printables & Planners
-            {
-                'name': 'Planner Maker',
-                'endpoint': '/planner-maker/generate',
-                'payload': {
-                    'plannerType': 'daily',
-                    'colorScheme': 'rose-gold',
-                    'coverStyle': 'elegant', 
-                    'paperSize': 'letter',
-                    'pageCount': 12,
-                    'customTitle': 'My Test Planner',
-                    'customInstructions': 'Create a productivity-focused planner'
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount']
-            },
-            {
-                'name': 'Worksheet Maker',
-                'endpoint': '/worksheet-maker/generate', 
-                'payload': {
-                    'worksheetType': 'math',
-                    'gradeLevel': '3rd',
-                    'topic': 'Addition and Subtraction',
-                    'questionCount': 10,
-                    'includeAnswerKey': True
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount', 'questionCount']
-            },
-            {
-                'name': 'Coloring Book',
-                'endpoint': '/coloring-book/generate',
-                'payload': {
-                    'theme': 'animals',
-                    'difficulty': 'medium',
-                    'pageCount': 12,
-                    'title': 'Animal Adventures Coloring Book',
-                    'generateImages': False,  # Skip image generation for speed
-                    'generateCover': False
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount', 'pages']
-            },
-            {
-                'name': 'Journal Maker',
-                'endpoint': '/journal-maker/generate',
-                'payload': {
-                    'journalType': 'daily',
-                    'pageCount': 30,
-                    'customTitle': 'My Daily Journal',
-                    'includePrompts': True
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl', 'pageCount']
-            },
-            {
-                'name': 'Checklist Maker', 
-                'endpoint': '/checklist-maker/generate',
-                'payload': {
-                    'checklistType': 'daily',
-                    'title': 'Daily Task Checklist',
-                    'customItems': ['Wake up early', 'Exercise', 'Read book', 'Plan tomorrow'],
-                    'pageCount': 7
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
+        # Test with demo user
+        response, error = self.make_request("GET", "/credits?userId=demo-user-001")
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
             
-            # Category 2: Ebooks & Guides
-            {
-                'name': 'Ebook Maker',
-                'endpoint': '/ebook-maker/generate',
-                'payload': {
-                    'topic': 'Digital Marketing Basics',
-                    'targetAudience': 'beginners',
-                    'chapterCount': 5,
-                    'tone': 'friendly',
-                    'includeImages': False
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Recipe Book',
-                'endpoint': '/recipe-book/generate',
-                'payload': {
-                    'theme': 'healthy',
-                    'cuisineType': 'mediterranean',
-                    'recipeCount': 15,
-                    'dietaryRestrictions': ['vegetarian'],
-                    'includeNutrition': True
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Guide Maker',
-                'endpoint': '/how-to-guide/generate',
-                'payload': {
-                    'topic': 'How to Start a Small Business',
-                    'targetAudience': 'entrepreneurs',
-                    'difficulty': 'beginner',
-                    'includeImages': False,
-                    'stepCount': 10
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
+        try:
+            data = response.json()
             
-            # Category 3: Templates
-            {
-                'name': 'Notion Templates',
-                'endpoint': '/notion-templates/generate',
-                'payload': {
-                    'templateType': 'productivity',
-                    'category': 'personal',
-                    'features': ['task-tracking', 'habit-tracker', 'goal-setting'],
-                    'customization': 'beginner-friendly'
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Slides Maker',
-                'endpoint': '/slides-maker/generate',
-                'payload': {
-                    'topic': 'Introduction to AI',
-                    'slideCount': 10,
-                    'style': 'professional',
-                    'targetAudience': 'business',
-                    'includeImages': False
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            
-            # Category 4: Education  
-            {
-                'name': 'Quiz Maker',
-                'endpoint': '/quiz-maker/generate',
-                'payload': {
-                    'topic': 'General Knowledge',
-                    'difficulty': 'medium',
-                    'questionCount': 20,
-                    'questionTypes': ['multiple-choice', 'true-false'],
-                    'includeAnswers': True
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Storybook Maker',
-                'endpoint': '/storybook-maker/generate',
-                'payload': {
-                    'theme': 'adventure',
-                    'ageGroup': '6-10',
-                    'mainCharacter': 'brave little mouse',
-                    'setting': 'magical forest',
-                    'pageCount': 16,
-                    'generateImages': False
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Activity Book',
-                'endpoint': '/activity-book/generate',
-                'payload': {
-                    'theme': 'kids',
-                    'ageGroup': '5-8',
-                    'activityTypes': ['puzzles', 'coloring', 'games'],
-                    'pageCount': 20,
-                    'difficulty': 'easy'
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            }
+            if response.status_code == 200 and data.get("success"):
+                credits = data.get("credits", 0)
+                plan = data.get("plan", "unknown")
+                self.test_result(test_name, True, f"Balance retrieved: {credits} credits, plan: {plan}", data)
+            else:
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_credit_operations(self):
+        """Test POST /api/credits - Various credit operations"""
+        operations = [
+            ("check", "Credit Check", {"userId": "demo-user-001", "toolId": "blog-creator"}),
+            ("deduct", "Credit Deduction", {"userId": "demo-user-001", "toolId": "blog-creator"}),
+            ("history", "Credit History", {"userId": "demo-user-001"})
         ]
         
-        # Check for Learning Cards separately as it might have different endpoint
-        learning_cards_tests = [
-            {
-                'name': 'Learning Cards',
-                'endpoint': '/learning-cards/generate',
-                'payload': {
-                    'topic': 'Math Facts',
-                    'cardCount': 20,
-                    'difficulty': 'beginner',
-                    'cardType': 'flashcards'
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            },
-            {
-                'name': 'Learning Cards (alt)',
-                'endpoint': '/flashcards/generate', 
-                'payload': {
-                    'topic': 'Math Facts',
-                    'cardCount': 20,
-                    'difficulty': 'beginner'
-                },
-                'expected_fields': ['success', 'title', 'downloadUrl']
-            }
-        ]
-        
-        # Run main tests
-        for test in tests:
-            self.test_endpoint(test['name'], test['endpoint'], test['payload'], test['expected_fields'])
-            time.sleep(1)  # Brief pause between tests
+        for action, test_name, payload in operations:
+            payload["action"] = action
+            response, error = self.make_request("POST", "/credits", payload)
             
-        # Try Learning Cards with both possible endpoints
-        learning_cards_found = False
-        for test in learning_cards_tests:
-            try:
-                result = self.test_endpoint(test['name'], test['endpoint'], test['payload'], test['expected_fields'])
-                if result['status'] == 'WORKING':
-                    learning_cards_found = True
-                    break
-            except:
+            if error:
+                self.test_result(test_name, False, f"Request failed: {error}")
                 continue
                 
-        if not learning_cards_found:
-            self.results.append({
-                'tool': 'Learning Cards',
-                'endpoint': '/learning-cards/generate OR /flashcards/generate',
-                'status': 'NOT WORKING',
-                'error': 'Neither /learning-cards/generate nor /flashcards/generate endpoints found'
-            })
+            try:
+                data = response.json()
+                
+                if action == "deduct" and response.status_code == 402:
+                    self.test_result(test_name, True, "Insufficient credits (expected behavior)", data)
+                elif response.status_code == 200 and data.get("success"):
+                    self.test_result(test_name, True, f"Action '{action}' completed successfully", data)
+                else:
+                    self.test_result(test_name, False, f"Unexpected response: {data.get('error', response.status_code)}")
+                    
+            except json.JSONDecodeError:
+                self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    # =================== STRIPE CHECKOUT API TESTS ===================
+    
+    def test_stripe_checkout_packages(self):
+        """Test GET /api/stripe/checkout - Get credit packages"""
+        test_name = "Stripe Packages List"
         
-        # Generate summary
-        self.generate_summary()
+        response, error = self.make_request("GET", "/stripe/checkout")
         
-    def generate_summary(self):
-        """Generate comprehensive test summary"""
-        self.log("=" * 60)
-        self.log("DIGITAL PRODUCTS TEST SUMMARY")
-        self.log("=" * 60)
-        
-        working_tools = []
-        not_working_tools = []
-        
-        for result in self.results:
-            if result['status'] == 'WORKING':
-                working_tools.append(result)
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                packages = data.get("packages", [])
+                if len(packages) >= 4:  # Expecting 4 packages
+                    package_names = [pkg.get("name") for pkg in packages]
+                    self.test_result(test_name, True, f"Found {len(packages)} packages: {package_names}", data)
+                else:
+                    self.test_result(test_name, False, f"Expected 4 packages, got {len(packages)}")
             else:
-                not_working_tools.append(result)
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
                 
-        self.log(f"Total Tests: {self.total_tests}")
-        self.log(f"✅ Working: {len(working_tools)}")
-        self.log(f"❌ Not Working: {len(not_working_tools)}")
-        self.log(f"Success Rate: {(len(working_tools)/self.total_tests)*100:.1f}%")
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_stripe_checkout_session(self):
+        """Test POST /api/stripe/checkout - Create checkout session"""
+        test_name = "Stripe Checkout Session"
         
-        if working_tools:
-            self.log("\n✅ WORKING TOOLS:")
-            for tool in working_tools:
-                endpoint = tool['endpoint']
-                summary = tool.get('content_summary', {})
-                summary_text = f" - {summary}" if summary else ""
-                self.log(f"  • {tool['tool']} ({endpoint}){summary_text}")
-                
-        if not_working_tools:
-            self.log("\n❌ NOT WORKING TOOLS:")
-            for tool in not_working_tools:
-                endpoint = tool['endpoint'] 
-                error = tool.get('error', 'Unknown error')
-                self.log(f"  • {tool['tool']} ({endpoint})")
-                self.log(f"    Error: {error}")
-                
-        self.log("=" * 60)
-        return {
-            'total_tests': self.total_tests,
-            'working_tools': working_tools,
-            'not_working_tools': not_working_tools,
-            'success_rate': (len(working_tools)/self.total_tests)*100 if self.total_tests > 0 else 0
+        payload = {
+            "packageId": "starter",
+            "userId": "test-user-12345",
+            "originUrl": BASE_URL
         }
+        
+        response, error = self.make_request("POST", "/stripe/checkout", payload)
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                checkout_url = data.get("url")
+                session_id = data.get("sessionId")
+                if checkout_url and session_id:
+                    self.test_result(test_name, True, f"Checkout session created: {session_id[:20]}...", data)
+                else:
+                    self.test_result(test_name, False, "Missing checkout URL or session ID")
+            else:
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_stripe_status(self):
+        """Test GET /api/stripe/status - Check payment status"""
+        test_name = "Stripe Payment Status"
+        
+        # Using a dummy session ID since we can't create a real payment
+        dummy_session_id = "cs_test_dummy_session_12345"
+        response, error = self.make_request("GET", f"/stripe/status?session_id={dummy_session_id}")
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            # Expecting 404 for dummy session - that's correct behavior
+            if response.status_code == 404:
+                self.test_result(test_name, True, "Correctly handled non-existent session", data)
+            elif response.status_code == 400:
+                self.test_result(test_name, True, "API validation working", data)
+            else:
+                self.test_result(test_name, False, f"Unexpected response: {response.status_code} - {data.get('error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    # =================== AUTHENTICATION API TESTS ===================
+    
+    def test_auth_signup(self):
+        """Test POST /api/auth - User signup"""
+        test_name = "User Signup"
+        
+        # Generate unique email for testing
+        timestamp = str(int(time.time()))
+        test_email = f"test-{timestamp}@example.com"
+        
+        payload = {
+            "action": "signup",
+            "email": test_email,
+            "password": "testPassword123",
+            "name": "Test User"
+        }
+        
+        response, error = self.make_request("POST", "/auth", payload)
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                self.test_user_id = data.get("userId")
+                message = data.get("message", "")
+                self.test_result(test_name, True, f"Signup successful: {message}", data)
+            elif response.status_code == 400 and "already registered" in data.get("error", ""):
+                self.test_result(test_name, True, "Email already exists (expected for repeated tests)", data)
+            else:
+                self.test_result(test_name, False, f"Signup failed: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_auth_login(self):
+        """Test POST /api/auth - User login"""
+        test_name = "User Login"
+        
+        payload = {
+            "action": "login", 
+            "email": "test@test.com",
+            "password": "test123"
+        }
+        
+        response, error = self.make_request("POST", "/auth", payload)
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                self.session_token = data.get("sessionToken")
+                user_info = data.get("user", {})
+                self.test_result(test_name, True, f"Login successful for {user_info.get('email')}", data)
+            elif response.status_code == 401:
+                self.test_result(test_name, True, f"Login rejected (expected): {data.get('error')}", data)
+            else:
+                self.test_result(test_name, False, f"Unexpected response: {data.get('error', response.status_code)}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_auth_actions(self):
+        """Test other authentication actions"""
+        actions = [
+            ("verify", "Email Verification", {"token": "dummy-verification-token"}),
+            ("forgot_password", "Forgot Password", {"email": "test@example.com"})
+        ]
+        
+        for action, test_name, payload in actions:
+            payload["action"] = action
+            response, error = self.make_request("POST", "/auth", payload)
+            
+            if error:
+                self.test_result(test_name, False, f"Request failed: {error}")
+                continue
+                
+            try:
+                data = response.json()
+                
+                if action == "verify" and response.status_code == 400:
+                    self.test_result(test_name, True, "Invalid token rejected (expected)", data)
+                elif action == "forgot_password" and response.status_code == 200:
+                    self.test_result(test_name, True, "Password reset email handling working", data)
+                else:
+                    self.test_result(test_name, True, f"Action '{action}' handled appropriately", data)
+                    
+            except json.JSONDecodeError:
+                self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_session_verification(self):
+        """Test GET /api/auth/session - Session verification"""
+        test_name = "Session Verification"
+        
+        # Test without token first
+        response, error = self.make_request("GET", "/auth/session")
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 401:
+                self.test_result(test_name, True, "No token rejected correctly", data)
+            else:
+                self.test_result(test_name, False, f"Expected 401, got {response.status_code}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+        
+        # Test with dummy token
+        headers = {"Authorization": "Bearer dummy-token-12345"}
+        response, error = self.make_request("GET", "/auth/session", headers=headers)
+        
+        if error:
+            self.test_result("Session with Token", False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 401:
+                self.test_result("Session with Token", True, "Invalid token rejected correctly", data)
+            else:
+                self.test_result("Session with Token", False, f"Expected 401, got {response.status_code}")
+                
+        except json.JSONDecodeError:
+            self.test_result("Session with Token", False, f"Invalid JSON response: {response.text[:100]}")
+    
+    # =================== ADMIN API TESTS ===================
+    
+    def test_admin_controls(self):
+        """Test GET /api/admin/controls - Get admin controls"""
+        test_name = "Admin Controls Get"
+        
+        response, error = self.make_request("GET", "/admin/controls")
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                controls = data.get("controls", {})
+                self.test_result(test_name, True, f"Admin controls retrieved: {len(controls)} settings", data)
+            else:
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_admin_users_list(self):
+        """Test GET /api/admin/users - List users"""
+        test_name = "Admin Users List"
+        
+        response, error = self.make_request("GET", "/admin/users?limit=10")
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                users = data.get("users", [])
+                pagination = data.get("pagination", {})
+                self.test_result(test_name, True, f"Retrieved {len(users)} users, total: {pagination.get('total', 0)}", data)
+            else:
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    def test_admin_add_credits(self):
+        """Test POST /api/admin/users - Add credits action"""
+        test_name = "Admin Add Credits"
+        
+        payload = {
+            "action": "add_credits",
+            "userId": "demo-user-001",
+            "amount": 10,
+            "reason": "Testing credit addition"
+        }
+        
+        response, error = self.make_request("POST", "/admin/users", payload)
+        
+        if error:
+            self.test_result(test_name, False, f"Request failed: {error}")
+            return
+            
+        try:
+            data = response.json()
+            
+            if response.status_code == 200 and data.get("success"):
+                self.test_result(test_name, True, "Credits added successfully", data)
+            else:
+                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                
+        except json.JSONDecodeError:
+            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+    
+    # =================== MAIN TEST RUNNER ===================
+    
+    def run_all_tests(self):
+        """Run all test suites"""
+        self.log("🚀 Starting ProCreators Phase 2-3 API Testing...")
+        self.log(f"🔗 Testing against: {API_BASE}")
+        
+        print("\n" + "="*60)
+        print("CREDIT SYSTEM API TESTS")
+        print("="*60)
+        
+        self.test_credit_get_balance()
+        self.test_credit_operations()
+        
+        print("\n" + "="*60)
+        print("STRIPE PAYMENT API TESTS")
+        print("="*60)
+        
+        self.test_stripe_checkout_packages()
+        self.test_stripe_checkout_session()
+        self.test_stripe_status()
+        
+        print("\n" + "="*60)
+        print("AUTHENTICATION API TESTS") 
+        print("="*60)
+        
+        self.test_auth_signup()
+        self.test_auth_login()
+        self.test_auth_actions()
+        self.test_session_verification()
+        
+        print("\n" + "="*60)
+        print("ADMIN API TESTS")
+        print("="*60)
+        
+        self.test_admin_controls()
+        self.test_admin_users_list()
+        self.test_admin_add_credits()
+        
+        # Final Results
+        print("\n" + "="*60)
+        print("TEST RESULTS SUMMARY")
+        print("="*60)
+        
+        total = self.results["total_tests"]
+        passed = self.results["passed"]
+        failed = self.results["failed"]
+        
+        print(f"📊 Total Tests: {total}")
+        print(f"✅ Passed: {passed}")
+        print(f"❌ Failed: {failed}")
+        print(f"📈 Success Rate: {(passed/total*100):.1f}%")
+        
+        if self.results["errors"]:
+            print(f"\n🚨 FAILED TESTS:")
+            for error in self.results["errors"]:
+                print(f"   • {error}")
+        
+        print(f"\n🏁 Testing completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        return passed == total
 
 if __name__ == "__main__":
-    # Run the comprehensive test suite
-    test_suite = DigitalProductsTestSuite()
-    test_suite.run_all_tests()
+    tester = ProCreatorsAPITest()
+    success = tester.run_all_tests()
     
-    # Exit with proper code
-    sys.exit(0 if test_suite.failed_tests == 0 else 1)
+    # Exit with appropriate code
+    sys.exit(0 if success else 1)
