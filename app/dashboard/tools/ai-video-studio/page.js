@@ -1252,6 +1252,10 @@ export default function AIVideoStudioPage() {
                 <h3 className="font-bold mt-2">{selectedTemplate?.shortName || selectedTemplate?.name}</h3>
               </div>
               
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <CreditCostBadge toolId="ai-video-studio" className="bg-white/20 border-white/40 text-white" />
+              </div>
+              
               <Button
                 className="w-full h-12 text-lg bg-white text-black hover:bg-white/90"
                 disabled={generating}
