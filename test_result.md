@@ -1090,3 +1090,134 @@ test_plan:
 agent_communication:
     - agent: "main"
       message: "COMPREHENSIVE DIGITAL PRODUCTS TESTING REQUIRED. Cleaned up Digital Products config by removing all Coming Soon tools. Now need to test all 14 active Digital Product tools: planner-maker, worksheet-maker, coloring-book, journal-maker, checklist-maker, ebook-maker, recipe-book, guide-maker (how-to-guide), notion-templates, slides-maker, learning-cards, quiz-maker, storybook-maker, activity-book. For each tool: 1) Test the main generate API endpoint, 2) Test with various input parameters, 3) Verify response structure and content quality, 4) Test validation (missing required fields). Report any non-functional tools so they can be fixed before deployment."
+
+  - task: "Credit System API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/credits/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Complete credit system with check, deduct, refund, complete, and history actions. Auto-initializes users with 50 free credits. Used by all tool APIs."
+
+  - task: "Stripe Checkout API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/stripe/checkout/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Creates Stripe checkout sessions for credit packages (Starter $9.99/100, Creator $39.99/500, Pro $99.99/1500, Business $299.99/5000). Returns checkout URL."
+
+  - task: "Stripe Payment Status API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/stripe/status/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Checks payment status from Stripe and adds credits to user account on successful payment."
+
+  - task: "Stripe Webhook API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/stripe/webhook/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Handles Stripe webhook events (checkout.session.completed, expired, payment_failed). Adds credits automatically on successful payment."
+
+  - task: "Authentication API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/auth/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Full auth system with signup, login, verify email, forgot_password, reset_password, resend_verification actions. Uses Mailgun for emails."
+
+  - task: "Session Verification API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/auth/session/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Verifies session tokens and returns user data. Supports logout via DELETE."
+
+  - task: "Admin Controls API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/admin/controls/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Kill switches for emergency shutdown, maintenance mode, and feature-level toggles."
+
+  - task: "Admin Users API"
+    implemented: true
+    working: "NA"
+    file: "/app/app/api/admin/users/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: User management with add/remove credits, ban/suspend users, change plans, reset credits."
+
+  - task: "Email Service (Mailgun)"
+    implemented: true
+    working: "NA"
+    file: "/app/lib/email.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "IMPLEMENTED: Email service with verification, password reset, welcome, and purchase receipt emails. Domain: procreators.io"
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 5
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Credit System API"
+    - "Stripe Checkout API"
+    - "Stripe Payment Status API"
+    - "Authentication API"
+    - "Session Verification API"
+    - "Admin Controls API"
+    - "Admin Users API"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "main"
+      message: "Phase 2-3 complete. Please test all new APIs: Credit system (check/deduct/refund/complete), Stripe payment (checkout/status/webhook), Authentication (signup/login/verify/reset), Admin (controls/users). Focus on pre-deployment testing to identify any issues."
