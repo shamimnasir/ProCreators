@@ -596,18 +596,21 @@ export default function AdCopyPage() {
                 )}
 
                 {/* Generate Button */}
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={generating || !productName}
-                  className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
-                  size="lg"
-                >
-                  {generating ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating {variationCount} Ad Variations...</>
-                  ) : (
-                    <><Wand2 className="h-4 w-4 mr-2" /> Generate {variationCount} Ad Variations</>  
-                  )}
-                </Button>
+                <div className="flex items-center gap-3">
+                  <CreditCostBadge toolId="ad-copy" />
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={generating || !productName}
+                    className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
+                    size="lg"
+                  >
+                    {generating ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating {variationCount} Ad Variations...</>
+                    ) : (
+                      <><Wand2 className="h-4 w-4 mr-2" /> Generate {variationCount} Ad Variations</>  
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </TabsContent>
