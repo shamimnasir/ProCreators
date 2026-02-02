@@ -170,17 +170,17 @@ export default function BlogCreatorPage() {
         
         // Auto-save to library
         try {
-          const articleType = ARTICLE_TYPES.find(t => t.id === articleTypeId)
+          const articleTypeObj = ARTICLE_TYPES.find(t => t.id === articleType)
           await saveToLibrary({
             type: 'blog-article',
             category: 'text',
-            title: data.data.title || `${articleType?.name || 'Blog'}: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
-            description: data.data.metaDescription || `${articleType?.name || 'Blog article'} about ${topic.substring(0, 100)}`,
+            title: data.data.title || `${articleTypeObj?.name || 'Blog'}: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
+            description: data.data.metaDescription || `${articleTypeObj?.name || 'Blog article'} about ${topic.substring(0, 100)}`,
             content: data.data.content || '',
             metadata: {
-              articleType: articleTypeId,
+              articleType: articleType,
               topic,
-              mainKeyword,
+              mainKeyword: targetKeyword,
               secondaryKeywords,
               wordCount: data.data.wordCount || wordCount,
               tone,
