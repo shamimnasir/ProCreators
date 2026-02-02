@@ -601,11 +601,19 @@ export default function ImageEditorPage() {
   
   const fileInputRef = useRef(null)
   const fusionInputRef = useRef(null)
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   // Handle image generation
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       toast.error('Please enter a prompt')
+      return
+    }
+    
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('image-editor')
+    if (!creditResult.success) {
+      toast.error(creditResult.error || 'Insufficient credits')
       return
     }
     
@@ -629,22 +637,25 @@ export default function ImageEditorPage() {
       const data = await response.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         setGeneratedImage(data.imageUrl)
         setImageHistory(prev => [
           { id: Date.now(), url: data.imageUrl, prompt, type: 'generated', style: selectedStyle },
           ...prev.slice(0, 19)
         ])
         if (data.savedToLibrary) {
-          toast.success('Image generated and saved to Library!')
+          toast.success(`Image generated and saved! (${creditResult.cost} credits)`)
         } else {
-          toast.success('Image generated successfully!')
+          toast.success(`Image generated! (${creditResult.cost} credits)`)
         }
       } else {
-        toast.error(data.error || 'Failed to generate image')
+        await refund(creditResult.transactionId, data.error)
+        toast.error(data.error || 'Failed to generate image (credits refunded)')
       }
     } catch (error) {
+      await refund(creditResult.transactionId, error.message)
       console.error('Generation error:', error)
-      toast.error('Failed to generate image')
+      toast.error('Failed to generate image (credits refunded)')
     } finally {
       setIsLoading(false)
     }
