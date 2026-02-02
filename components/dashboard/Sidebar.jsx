@@ -198,7 +198,9 @@ const navigation = [
       { name: '📄 Page Manager', href: '/dashboard/admin/pages', icon: FileText },
       { name: '👥 User Management', href: '/dashboard/admin/users', icon: Users },
       { name: '🔒 Kill Switches', href: '/dashboard/admin/controls', icon: Shield },
-      { name: '⚙️ System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
+      { name: '⚙️ Site Settings', href: '/dashboard/admin/site-settings', icon: Settings2 },
+      { name: '📄 Policy Pages', href: '/dashboard/admin/policy-pages', icon: FileText },
+      { name: '📝 System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
       { name: '🎬 System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
       { name: '🎥 System Prompts (AI Video)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
     ]
