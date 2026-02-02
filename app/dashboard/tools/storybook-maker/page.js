@@ -198,7 +198,6 @@ export default function StorybookMakerPage() {
       
       toast({ title: "Story Generated!", description: `Created ${data.story?.pages?.length || pageCount} pages. Edit them below!` })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

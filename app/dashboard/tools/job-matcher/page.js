@@ -502,7 +502,6 @@ export default function JobMatcherPage() {
         await complete(creditResult.transactionId)
         toast({ title: 'Resume Uploaded!', description: 'Text extracted successfully' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

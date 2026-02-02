@@ -295,7 +295,6 @@ export default function QuizMakerPage() {
       setStep(2)
       toast({ title: "Questions Generated!", description: `${data.quiz?.questions?.length || questionCount} questions created. Edit them below!` })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

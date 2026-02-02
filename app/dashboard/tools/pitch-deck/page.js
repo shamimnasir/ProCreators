@@ -169,7 +169,6 @@ export default function PitchDeckPage() {
           toast({ title: '🎯 Pitch Deck Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

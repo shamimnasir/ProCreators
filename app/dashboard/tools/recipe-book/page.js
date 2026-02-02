@@ -214,7 +214,6 @@ export default function RecipeBookPage() {
         }
       }
     } catch (e) {
-      await refund(creditResult.transactionId, e.message)
       toast({ title: "Save failed", description: e.message, variant: "destructive" })
     } finally {
       setIsSaving(false)

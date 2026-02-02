@@ -337,7 +337,6 @@ export default function CoverLetterPage() {
         
         toast({ title: '✉️ Cover Letter Generated!' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

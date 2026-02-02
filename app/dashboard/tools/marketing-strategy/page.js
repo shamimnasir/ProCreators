@@ -220,7 +220,6 @@ export default function MarketingStrategyPage() {
         await complete(creditResult.transactionId)
         toast({ title: '📊 Marketing Strategy Generated!', description: 'Click "Export PDF" to save a formatted copy' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

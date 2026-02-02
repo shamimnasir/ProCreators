@@ -70,7 +70,6 @@ export default function ThreadsToolPage() {
           description: `Thread generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate')
       }
     } catch (error) {

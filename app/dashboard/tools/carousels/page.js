@@ -124,7 +124,6 @@ export default function CarouselsToolPage() {
           description: "Review your carousel structure below"
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate content map')
       }
     } catch (error) {

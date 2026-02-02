@@ -523,7 +523,6 @@ export default function SlidesMakerPage() {
           description: `Generated ${data.presentation.slides.length} slides with AI backgrounds. Saved to Library.`
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate presentation')
       }
     } catch (error) {

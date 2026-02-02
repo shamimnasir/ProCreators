@@ -87,7 +87,6 @@ export default function LoveLetterPage() {
           description: 'A heartfelt letter crafted just for you'
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

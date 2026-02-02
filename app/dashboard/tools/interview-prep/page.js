@@ -429,7 +429,6 @@ export default function InterviewPrepPage() {
         
         toast({ title: '🎤 Questions Generated!', description: `${data.data.questions?.length || 0} questions ready` })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

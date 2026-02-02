@@ -246,7 +246,6 @@ export default function JournalMakerPage() {
       setStep(2)
       toast({ title: "Structure Generated!", description: "Review and customize your journal." })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

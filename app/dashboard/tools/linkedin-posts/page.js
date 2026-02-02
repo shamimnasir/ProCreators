@@ -311,7 +311,6 @@ export default function SocialMediaPostCreator() {
         
         toast({ title: '✨ Posts Generated!' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

@@ -204,7 +204,6 @@ export default function BlogCreatorPage() {
           await runQualityChecks(data.data.content)
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

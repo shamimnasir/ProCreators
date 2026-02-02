@@ -100,7 +100,6 @@ export default function QuotesPage() {
           description: "Quote saved to library successfully!"
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

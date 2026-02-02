@@ -319,7 +319,6 @@ export default function ActivityBookPage() {
       setStep(2)
       toast({ title: "Activities Generated!", description: `${data.pages?.length || pageCount} activity pages created. Edit them below!` })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

@@ -144,7 +144,6 @@ export default function ProfessionalEmailPage() {
           toast({ title: '📧 Email Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

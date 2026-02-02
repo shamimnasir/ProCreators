@@ -51,7 +51,6 @@ export default function VoiceClonePage() {
         })
       }
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({
         title: "Error",
         description: error.message,

@@ -128,7 +128,6 @@ export default function SwotAnalysisPage() {
           toast({ title: '📊 SWOT Analysis Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

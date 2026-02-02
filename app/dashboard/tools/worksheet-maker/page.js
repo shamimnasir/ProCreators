@@ -202,7 +202,6 @@ export default function WorksheetMakerPage() {
       setStep(2)
       toast({ title: "Worksheet Generated!", description: "Review and customize your questions." })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

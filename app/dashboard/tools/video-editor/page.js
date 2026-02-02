@@ -140,7 +140,6 @@ function TrimSection({ onTrimComplete }) {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
     } catch (e) {
-      await refund(creditResult.transactionId, e.message)
       toast({ title: 'Error', description: e.message, variant: 'destructive' })
     } finally {
       setIsLoading(false)

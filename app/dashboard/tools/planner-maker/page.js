@@ -207,7 +207,6 @@ export default function PlannerMakerPage() {
       setGeneratedPDF(data.downloadUrl)
     } catch (error) {
       console.error('Generation error:', error)
-      await refund(creditResult.transactionId, error.message)
       toast({
         title: 'Generation Failed',
         description: error.message || 'Something went wrong',

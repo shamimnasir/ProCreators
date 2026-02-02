@@ -228,7 +228,6 @@ export default function NotionTemplateMakerPage() {
         toast({ title: "Draft Saved!", description: `"${draftTitle}" saved.` })
       }
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Save Failed", variant: "destructive" })
     }
   }

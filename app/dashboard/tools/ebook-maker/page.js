@@ -500,7 +500,6 @@ export default function EbookMakerPage() {
       }
     } catch (error) {
       console.error('Failed to save draft:', error)
-      await refund(creditResult.transactionId, error.message)
       toast({ 
         title: "Save Failed", 
         description: "Could not save draft. Please try again.",

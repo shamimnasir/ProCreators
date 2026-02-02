@@ -51,7 +51,6 @@ export default function NewsPage() {
           description: "URL content fetched successfully!"
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to fetch URL')
       }
     } catch (error) {

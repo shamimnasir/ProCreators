@@ -89,7 +89,6 @@ export default function StoryWriterPage() {
           description: 'Your unique tale has been written'
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

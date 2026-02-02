@@ -301,7 +301,6 @@ export default function LessonPlannerPage() {
           description: "Review and customize your lesson plan.",
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate lesson plan')
       }
     } catch (error) {

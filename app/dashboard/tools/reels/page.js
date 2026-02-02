@@ -90,7 +90,6 @@ export default function ReelsPage() {
           description: data.scriptType || "Viral script generated!"
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

@@ -160,7 +160,6 @@ export default function ContentHumanizerPage() {
         setInputText(data.text)
         toast({ title: 'File uploaded successfully!' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to extract text')
       }
     } catch (error) {

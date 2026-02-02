@@ -255,7 +255,6 @@ export default function YouTubeCreatorPage() {
           toast({ title: '🎬 YouTube Content Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

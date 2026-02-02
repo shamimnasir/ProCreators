@@ -228,7 +228,6 @@ export default function CitationGeneratorPage() {
         setUrlToFetch('')
         toast({ title: 'Citation Added!' })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {

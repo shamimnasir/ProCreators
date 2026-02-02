@@ -78,7 +78,6 @@ export default function ListsPage() {
           description: `List generated successfully in ${language === 'bengali' ? 'Bengali' : 'English'}!`
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate')
       }
     } catch (error) {

@@ -537,8 +537,7 @@ export default function ResumeBuilderPage() {
       if (data.success) { setRawInfo(data.text); setUploadedFileName(file.name); await complete(creditResult.transactionId)
         toast({ title: 'CV Uploaded!' }) }
       else throw new Error(data.error)
-    } catch (err) { await refund(creditResult.transactionId, err.message)
-      toast({ title: 'Upload Failed', description: err.message, variant: 'destructive' }) }
+    } catch (err) { toast({ title: 'Upload Failed', description: err.message, variant: 'destructive' }) }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = '' }
   }
 

@@ -230,7 +230,6 @@ export default function ColoringBookPage() {
       setStep(2)
       toast({ title: "Page Ideas Generated!", description: `${data.pages?.length || pageCount} page ideas created. Edit them below!` })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({ title: "Generation Failed", description: error.message, variant: "destructive" })
     } finally {
       setLoading(false)

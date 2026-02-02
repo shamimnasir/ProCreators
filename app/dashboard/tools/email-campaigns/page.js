@@ -176,7 +176,6 @@ export default function EmailCampaignPage() {
           toast({ title: '📧 Email Campaign Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

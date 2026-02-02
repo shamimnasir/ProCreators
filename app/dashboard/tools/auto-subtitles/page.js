@@ -87,7 +87,6 @@ export default function AutoSubtitlesPage() {
         description: `Captions generated in ${language === 'bengali' ? 'Bengali' : 'English'}!`
       })
     } catch (error) {
-      await refund(creditResult.transactionId, error.message)
       toast({
         title: "Error",
         description: error.message,

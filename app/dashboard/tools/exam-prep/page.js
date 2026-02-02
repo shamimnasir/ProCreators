@@ -345,7 +345,6 @@ export default function ExamPrepPage() {
           description: `${data.questions.length} AI-generated practice questions ready`
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to generate questions')
       }
     } catch (error) {

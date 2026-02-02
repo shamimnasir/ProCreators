@@ -183,7 +183,6 @@ export default function BusinessPlanPage() {
           toast({ title: '📋 Business Plan Generated!' })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (err) {

@@ -248,7 +248,6 @@ export default function EssayHelperPage() {
           description: `Extracted ${data.wordCount || 'text'} from ${file.name}`
         })
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error || 'Failed to extract text')
       }
     } catch (error) {
