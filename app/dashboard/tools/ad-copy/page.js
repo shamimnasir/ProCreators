@@ -130,6 +130,7 @@ export default function AdCopyPage() {
   // Results
   const [result, setResult] = useState(null)
   const [selectedAd, setSelectedAd] = useState(0)
+  const { checkAndDeduct, refund, complete } = useCredits()
 
   const handleGenerate = async () => {
     if (!productName) {
@@ -139,6 +140,18 @@ export default function AdCopyPage() {
 
     setGenerating(true)
     setResult(null)
+
+    // Deduct credits first
+    const creditResult = await checkAndDeduct('ad-copy', { variationCount })
+    if (!creditResult.success) {
+      setGenerating(false)
+      toast({
+        title: 'Insufficient Credits',
+        description: creditResult.error || 'You need more credits to generate ad copy.',
+        variant: 'destructive'
+      })
+      return
+    }
 
     try {
       const res = await fetch('/api/ad-copy/generate', {
@@ -164,6 +177,7 @@ export default function AdCopyPage() {
       const data = await res.json()
       
       if (data.success) {
+        await complete(creditResult.transactionId)
         setResult(data)
         setActiveTab('results')
         setSelectedAd(0)
@@ -186,7 +200,7 @@ export default function AdCopyPage() {
             }
           })
           if (saveResult.success) {
-            toast({ title: '🎯 Ad Copy Generated!', description: '✅ Auto-saved to Library' })
+            toast({ title: '🎯 Ad Copy Generated!', description: `✅ Auto-saved to Library (${creditResult.cost} credits used)` })
           } else {
             toast({ title: '🎯 Ad Copy Generated!' })
           }
