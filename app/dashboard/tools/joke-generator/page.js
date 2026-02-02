@@ -215,18 +215,21 @@ export default function JokeGeneratorPage() {
               </div>
             </div>
 
-            <Button 
-              size="lg" 
-              className="w-full" 
-              onClick={handleGenerate} 
-              disabled={generating || (!topic && !customTopic)}
-            >
-              {generating ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Jokes...</>
-              ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Jokes</>  
-              )}
-            </Button>
+            <div className="flex items-center justify-between gap-4">
+              <CreditCostBadge toolId="joke-generator" />
+              <Button 
+                size="lg" 
+                className="flex-1" 
+                onClick={handleGenerate} 
+                disabled={generating || (!topic && !customTopic)}
+              >
+                {generating ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Jokes...</>
+                ) : (
+                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Jokes</>  
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
