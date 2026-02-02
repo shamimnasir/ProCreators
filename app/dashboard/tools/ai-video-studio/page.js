@@ -431,18 +431,21 @@ export default function AIVideoStudioPage() {
         
         const actualDuration = data.duration ? Math.round(data.duration) : duration
         if (libraryResult.success) {
+          await complete(creditResult.transactionId)
           toast({ 
             title: '🎬 Video Generated & Saved!', 
-            description: `${actualDuration}s video saved to your library`
+            description: `${actualDuration}s video saved to your library (${creditResult.cost} credits used)`
           })
         } else {
-          toast({ title: '🎬 Video Generated!', description: `${actualDuration}s video ready` })
+          await complete(creditResult.transactionId)
+          toast({ title: '🎬 Video Generated!', description: `${actualDuration}s video ready (${creditResult.cost} credits)` })
         }
       } else {
+        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {
-      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' })
+      toast({ title: 'Generation Failed', description: error.message + ' (Credits refunded)', variant: 'destructive' })
     } finally {
       setGenerating(false)
     }
