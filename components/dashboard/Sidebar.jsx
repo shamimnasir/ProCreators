@@ -219,6 +219,44 @@ export function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [expandedSections, setExpandedSections] = useState({})
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+
+  // Check if current user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        // First check localStorage for session
+        const sessionToken = localStorage.getItem('sessionToken')
+        if (sessionToken) {
+          const res = await fetch('/api/auth/session', {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+          })
+          const data = await res.json()
+          if (data.success && data.user) {
+            setUserEmail(data.user.email)
+            // Check if user email is in admin list OR has admin role
+            setIsAdmin(
+              ADMIN_EMAILS.includes(data.user.email?.toLowerCase()) || 
+              data.user.role === 'admin' ||
+              data.user.isAdmin === true
+            )
+          }
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error)
+      }
+    }
+    checkAdminStatus()
+  }, [])
+
+  // Filter navigation to hide Admin section for non-admin users
+  const filteredNavigation = navigation.filter(item => {
+    if (item.name === 'Admin') {
+      return isAdmin
+    }
+    return true
+  })
 
   const toggleSection = (name) => {
     setExpandedSections(prev => ({
