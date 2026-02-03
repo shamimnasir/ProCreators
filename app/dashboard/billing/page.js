@@ -20,13 +20,38 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
   const [transactions, setTransactions] = useState([])
+  const [userId, setUserId] = useState(DEMO_USER_ID)
   const { toast } = useToast()
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    fetchCredits()
+    // Get logged-in user first, then fetch data
+    initUserAndFetchData()
+  }, [])
+
+  const initUserAndFetchData = async () => {
+    let currentUserId = DEMO_USER_ID
+    
+    try {
+      const sessionToken = localStorage.getItem('sessionToken')
+      if (sessionToken) {
+        const res = await fetch('/api/auth/session', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        })
+        const data = await res.json()
+        if (data.success && data.user) {
+          currentUserId = data.user.id
+          setUserId(currentUserId)
+        }
+      }
+    } catch (error) {
+      console.error('Error getting user:', error)
+    }
+    
+    // Now fetch data with the correct userId
+    fetchCredits(currentUserId)
     fetchPackages()
-    fetchTransactions()
+    fetchTransactions(currentUserId)
     
     // Check for payment success/cancel
     const sessionId = searchParams.get('session_id')
@@ -34,7 +59,7 @@ export default function BillingPage() {
     const canceled = searchParams.get('canceled')
     
     if (sessionId && success) {
-      pollPaymentStatus(sessionId)
+      pollPaymentStatus(sessionId, currentUserId)
     } else if (canceled) {
       toast({
         title: 'Payment Canceled',
@@ -42,11 +67,12 @@ export default function BillingPage() {
         variant: 'default'
       })
     }
-  }, [])
+  }
 
-  const fetchCredits = async () => {
+  const fetchCredits = async (uid) => {
+    const currentUserId = uid || userId
     try {
-      const res = await fetch(`/api/credits?userId=${DEMO_USER_ID}`)
+      const res = await fetch(`/api/credits?userId=${currentUserId}`)
       const data = await res.json()
       if (data.success) {
         setCredits(data.credits)
