@@ -41,6 +41,20 @@ export default function ProfilePage() {
           
           // Fetch user-specific stats
           fetchUserStats(data.user.id)
+          return
+        }
+      }
+      
+      // Fallback: Load demo user data if no session
+      const demoRes = await fetch('/api/user/profile?userId=demo-user-001')
+      if (demoRes.ok) {
+        const demoData = await demoRes.json()
+        if (demoData.user) {
+          setUser({ id: 'demo-user-001', ...demoData.user })
+          setName(demoData.user.name || 'Demo User')
+          setEmail(demoData.user.email || 'demo@example.com')
+          setAvatarUrl(demoData.user.avatarUrl || '')
+          fetchUserStats('demo-user-001')
         }
       }
     } catch (error) {
