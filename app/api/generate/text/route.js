@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
 import { SYSTEM_PROMPTS } from '@/lib/system-prompts'
 import { getCollection } from '@/lib/mongodb'
+import { generateWithTracking, estimateTokens } from '@/lib/ai-tracking'
 
 export async function POST(request) {
   try {
-    const { prompt, type, systemMessage } = await request.json()
+    const { prompt, type, systemMessage, userId, transactionId, creditsCharged } = await request.json()
     
     if (!prompt) {
       return NextResponse.json(
@@ -52,6 +53,24 @@ export async function POST(request) {
         { success: false, error: result.error },
         { status: 500 }
       )
+    }
+    
+    // Track API cost if we have tracking info
+    if (userId && transactionId && creditsCharged) {
+      try {
+        await generateWithTracking({
+          toolId: type || 'text-generation',
+          userId,
+          transactionId,
+          provider: 'google',
+          model: 'gemini-flash',
+          inputText: prompt + (finalSystemMessage || ''),
+          outputText: result.content,
+          creditsCharged
+        })
+      } catch (trackError) {
+        console.error('Cost tracking error (non-fatal):', trackError)
+      }
     }
     
     // Clean up formatting: Replace asterisks with dashes, remove emojis
