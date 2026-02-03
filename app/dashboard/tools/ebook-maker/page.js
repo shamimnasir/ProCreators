@@ -1182,18 +1182,21 @@ export default function EbookMakerPage() {
               </div>
             </div>
 
-            <Button 
-              className="w-full" 
-              size="lg"
-              onClick={generateOutline}
-              disabled={loading}
-            >
-              {loading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</>
-              ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Outline</>
-              )}
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="ebook-maker" />
+              <Button 
+                className="flex-1" 
+                size="lg"
+                onClick={generateOutline}
+                disabled={loading}
+              >
+                {loading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</>
+                ) : (
+                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Outline</>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
