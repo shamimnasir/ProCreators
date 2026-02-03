@@ -47,7 +47,9 @@ export async function GET(request) {
         name: user.name,
         credits: user.credits,
         plan: user.plan,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        avatarUrl: user.avatarUrl || null,
+        role: user.role || 'user'
       }
     })
     
