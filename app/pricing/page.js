@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, Sparkles, ArrowLeft } from 'lucide-react'
+import { Check, Sparkles, ArrowLeft, Zap, Star, Crown, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -11,50 +11,83 @@ import { useToast } from '@/hooks/use-toast'
 
 const pricingTiers = [
   {
+    id: 'free',
     name: 'Free',
     price: 0,
-    priceId: 'free',
+    priceYearly: 0,
+    monthlyCredits: 50,
+    icon: Zap,
+    color: 'from-gray-500 to-gray-600',
     features: [
-      '10 AI generations/month',
+      '50 starter credits (expires in 7 days)',
       'Basic content tools',
-      'Standard support',
       'Watermarked exports',
+      'Standard support',
       'Community access'
     ],
     cta: 'Current Plan',
     popular: false
   },
   {
+    id: 'creator',
     name: 'Creator',
-    price: 29,
-    priceId: 'price_creator',
+    price: 19,
+    priceYearly: 190,
+    monthlyCredits: 400,
+    icon: Star,
+    color: 'from-purple-500 to-pink-500',
     features: [
-      '500 AI generations/month',
+      '400 credits/month',
       'All content tools',
-      'Priority support',
       'No watermarks',
-      'Advanced editing',
-      'Analytics dashboard',
-      'Export to all formats'
+      'Priority rendering queue',
+      'Bangla Voice Studio access',
+      '10% discount on extra credits',
+      'Email support'
     ],
-    cta: 'Upgrade to Creator',
+    cta: 'Start Creator',
     popular: true
   },
   {
-    name: 'Pro Automation',
-    price: 99,
-    priceId: 'price_pro',
+    id: 'pro',
+    name: 'Pro',
+    price: 49,
+    priceYearly: 490,
+    monthlyCredits: 1000,
+    icon: Crown,
+    color: 'from-orange-500 to-red-500',
     features: [
-      'Unlimited AI generations',
-      'Auto-posting to socials',
-      'Bulk content creation',
-      'API access',
-      'White-label options',
-      'Dedicated support',
-      'Custom integrations',
-      'Team collaboration'
+      '1,000 credits/month',
+      'Everything in Creator',
+      'Daily auto-reel generator',
+      'Batch generation',
+      'Shorts repurposing',
+      '4K export quality',
+      '20% discount on extra credits',
+      'Priority support'
     ],
-    cta: 'Upgrade to Pro',
+    cta: 'Go Pro',
+    popular: false
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    price: 99,
+    priceYearly: 990,
+    monthlyCredits: 3000,
+    icon: Building2,
+    color: 'from-green-500 to-teal-500',
+    features: [
+      '3,000 credits/month',
+      'Everything in Pro',
+      'Team access (5 seats)',
+      'Brand kits',
+      'Client folders',
+      'API access',
+      '30% discount on extra credits',
+      'Dedicated support'
+    ],
+    cta: 'Contact Sales',
     popular: false
   },
 ]
@@ -65,22 +98,36 @@ export default function PricingPage() {
   const router = useRouter()
   const { toast } = useToast()
 
-  const handleSubscribe = async (priceId, planName) => {
-    if (priceId === 'free') {
+  const handleSubscribe = async (planId, planName) => {
+    if (planId === 'free') {
+      router.push('/dashboard')
       return
     }
 
-    setLoading(priceId)
+    setLoading(planId)
     try {
-      // TODO: Implement Stripe checkout
-      toast({
-        title: "Stripe integration pending",
-        description: "Add your Stripe credentials to .env to enable payments"
+      const sessionToken = localStorage.getItem('sessionToken')
+      
+      const res = await fetch('/api/subscription/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
+        },
+        body: JSON.stringify({
+          planId,
+          billingCycle,
+          originUrl: window.location.origin
+        })
       })
       
-      setTimeout(() => {
-        router.push('/dashboard/billing')
-      }, 1500)
+      const data = await res.json()
+      
+      if (data.success && data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -90,6 +137,22 @@ export default function PricingPage() {
     } finally {
       setLoading(null)
     }
+  }
+
+  const getPrice = (tier) => {
+    if (billingCycle === 'yearly') {
+      return Math.floor(tier.priceYearly / 12)
+    }
+    return tier.price
+  }
+
+  const getSavings = (tier) => {
+    if (billingCycle === 'yearly' && tier.price > 0) {
+      const monthlyCost = tier.price * 12
+      const yearlyCost = tier.priceYearly
+      return Math.round((1 - yearlyCost / monthlyCost) * 100)
+    }
+    return 0
   }
 
   return (
@@ -109,14 +172,14 @@ export default function PricingPage() {
       </header>
 
       {/* Pricing Section */}
-      <section className="container py-24">
-        <div className="mx-auto max-w-6xl">
+      <section className="container py-16">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Choose Your Plan</h1>
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Simple, Transparent Pricing</h1>
             <p className="mb-6 text-lg text-muted-foreground">
-              Start free, upgrade as you grow
+              Choose a plan that fits your creative needs. Credits reset monthly.
             </p>
-            <div className="inline-flex rounded-lg border p-1">
+            <div className="inline-flex rounded-lg border p-1 bg-muted/50">
               <Button
                 variant={billingCycle === 'monthly' ? 'default' : 'ghost'}
                 size="sm"
@@ -129,65 +192,113 @@ export default function PricingPage() {
                 size="sm"
                 onClick={() => setBillingCycle('yearly')}
               >
-                Yearly <span className="ml-1 text-xs">(Save 20%)</span>
+                Yearly <span className="ml-1 text-xs text-green-500 font-bold">Save 17%</span>
               </Button>
             </div>
           </div>
-          <div className="grid gap-8 md:grid-cols-3">
-            {pricingTiers.map((tier, index) => (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card
-                  className={`relative h-full ${
-                    tier.popular ? 'border-primary shadow-lg' : ''
-                  }`}
+          
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {pricingTiers.map((tier, index) => {
+              const Icon = tier.icon
+              return (
+                <motion.div
+                  key={tier.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  {tier.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
-                      Most Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                    <CardDescription>
-                      <div className="flex items-baseline mt-4">
-                        <span className="text-4xl font-bold">
-                          ${billingCycle === 'yearly' ? Math.floor(tier.price * 0.8) : tier.price}
-                        </span>
-                        <span className="ml-2 text-muted-foreground">/month</span>
+                  <Card
+                    className={`relative h-full flex flex-col ${
+                      tier.popular ? 'border-2 border-purple-500 shadow-lg shadow-purple-500/20' : ''
+                    }`}
+                  >
+                    {tier.popular && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-1 text-sm font-medium text-white">
+                        Most Popular
                       </div>
-                      {billingCycle === 'yearly' && tier.price > 0 && (
-                        <p className="text-sm text-primary mt-2">
-                          Billed ${Math.floor(tier.price * 0.8 * 12)}/year
+                    )}
+                    <CardHeader className="pb-4">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center text-white mb-3`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                      <CardDescription>
+                        <div className="flex items-baseline mt-2">
+                          <span className="text-4xl font-bold text-foreground">
+                            ${getPrice(tier)}
+                          </span>
+                          <span className="ml-2 text-muted-foreground">/month</span>
+                        </div>
+                        {billingCycle === 'yearly' && tier.price > 0 && (
+                          <p className="text-sm text-green-500 font-medium mt-1">
+                            Billed ${tier.priceYearly}/year (Save {getSavings(tier)}%)
+                          </p>
+                        )}
+                        <p className="text-sm mt-2 font-medium text-primary">
+                          {tier.monthlyCredits.toLocaleString()} credits/month
                         </p>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, i) => (
-                        <li key={i} className="flex items-start">
-                          <Check className="mr-2 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      className="w-full"
-                      variant={tier.popular ? 'default' : 'outline'}
-                      onClick={() => handleSubscribe(tier.priceId, tier.name)}
-                      disabled={loading === tier.priceId || tier.priceId === 'free'}
-                    >
-                      {loading === tier.priceId ? 'Processing...' : tier.cta}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col">
+                      <ul className="space-y-3 flex-1">
+                        {tier.features.map((feature, i) => (
+                          <li key={i} className="flex items-start">
+                            <Check className="mr-2 h-5 w-5 shrink-0 text-green-500" />
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className={`w-full mt-6 ${tier.popular ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : ''}`}
+                        variant={tier.popular ? 'default' : 'outline'}
+                        onClick={() => handleSubscribe(tier.id, tier.name)}
+                        disabled={loading === tier.id || tier.id === 'free'}
+                      >
+                        {loading === tier.id ? 'Processing...' : tier.cta}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* Credit Info */}
+          <div className="mt-16 text-center">
+            <h2 className="text-2xl font-bold mb-4">Need More Credits?</h2>
+            <p className="text-muted-foreground mb-6">
+              Subscribers get discounts on extra credit packs. Purchased credits never expire and roll over!
+            </p>
+            <Link href="/dashboard/billing">
+              <Button variant="outline" size="lg">
+                View Credit Packs
+              </Button>
+            </Link>
+          </div>
+
+          {/* FAQ */}
+          <div className="mt-16 max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg border">
+                <h3 className="font-semibold mb-2">Do monthly credits roll over?</h3>
+                <p className="text-sm text-muted-foreground">
+                  No, monthly subscription credits reset each billing cycle. However, any credits you purchase separately will never expire and roll over indefinitely.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border">
+                <h3 className="font-semibold mb-2">Can I upgrade or downgrade anytime?</h3>
+                <p className="text-sm text-muted-foreground">
+                  Yes! You can change your plan anytime. When upgrading, you'll get immediate access to your new credits. When downgrading, your current credits remain until the billing cycle ends.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border">
+                <h3 className="font-semibold mb-2">What happens if I run out of credits?</h3>
+                <p className="text-sm text-muted-foreground">
+                  You can always buy additional credit packs. Subscribers enjoy 10-30% discounts on credit purchases depending on their plan level.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
