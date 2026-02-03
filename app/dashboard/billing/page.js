@@ -97,12 +97,13 @@ export default function BillingPage() {
     }
   }
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = async (uid) => {
+    const currentUserId = uid || userId
     try {
       const res = await fetch('/api/credits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'history', userId: DEMO_USER_ID })
+        body: JSON.stringify({ action: 'history', userId: currentUserId })
       })
       const data = await res.json()
       if (data.success) {
@@ -113,7 +114,7 @@ export default function BillingPage() {
     }
   }
 
-  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+  const pollPaymentStatus = async (sessionId, currentUserId, attempts = 0) => {
     const maxAttempts = 5
     
     if (attempts >= maxAttempts) {
@@ -134,8 +135,8 @@ export default function BillingPage() {
           title: '🎉 Payment Successful!',
           description: `${data.credits} credits have been added to your account.`,
         })
-        fetchCredits()
-        fetchTransactions()
+        fetchCredits(currentUserId)
+        fetchTransactions(currentUserId)
         return
       } else if (data.status === 'expired') {
         toast({
