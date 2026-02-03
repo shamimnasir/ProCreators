@@ -938,17 +938,20 @@ export default function PitchDeckPage() {
                     Next <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={generating || !companyName}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  >
-                    {generating ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
-                    ) : (
-                      <><Wand2 className="h-4 w-4 mr-2" /> Generate Pitch Deck</>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <CreditCostBadge toolId="pitch-deck" />
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={generating || !companyName}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      {generating ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+                      ) : (
+                        <><Wand2 className="h-4 w-4 mr-2" /> Generate Pitch Deck</>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </TabsContent>

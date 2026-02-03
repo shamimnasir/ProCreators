@@ -918,17 +918,20 @@ export default function BusinessPlanPage() {
                     Next <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                 ) : (
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={generating || !companyName}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    {generating ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
-                    ) : (
-                      <><Wand2 className="h-4 w-4 mr-2" /> Generate {selectedPlanType?.name}</>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <CreditCostBadge toolId="business-plan" />
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={generating || !companyName}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      {generating ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+                      ) : (
+                        <><Wand2 className="h-4 w-4 mr-2" /> Generate {selectedPlanType?.name}</>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </div>
             </TabsContent>
