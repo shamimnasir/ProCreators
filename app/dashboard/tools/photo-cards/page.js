@@ -592,13 +592,16 @@ export default function PhotoCardsPage() {
               </div>
             </div>
 
-            <Button 
-              onClick={generateCard} 
-              disabled={!uploadedImage || !headline.trim()}
-              className="w-full"
-            >
-              Generate Card
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="photo-cards" />
+              <Button 
+                onClick={generateCard} 
+                disabled={!uploadedImage || !headline.trim()}
+                className="flex-1"
+              >
+                Generate Card
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
