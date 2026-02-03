@@ -8,9 +8,12 @@ import { useCredits } from '@/components/CreditBalance'
 export default function AutoLongFormPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Auto Long Form</h1>
-        <p className="text-muted-foreground mt-1">Automated long-form video creation</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Auto Long Form</h1>
+          <p className="text-muted-foreground mt-1">Automated long-form video creation</p>
+        </div>
+        <CreditCostBadge toolId="auto-longform" />
       </div>
       <Card className="p-12 text-center">
         <Zap className="h-16 w-16 mx-auto text-muted-foreground mb-4" />

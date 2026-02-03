@@ -8,9 +8,12 @@ import { useCredits } from '@/components/CreditBalance'
 export default function TalkingHeadPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Talking-Head Generator</h1>
-        <p className="text-muted-foreground mt-1">Create AI-powered talking head videos</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Talking-Head Generator</h1>
+          <p className="text-muted-foreground mt-1">Create AI-powered talking head videos</p>
+        </div>
+        <CreditCostBadge toolId="talking-head" />
       </div>
       <Card className="p-12 text-center">
         <User className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
