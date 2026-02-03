@@ -620,13 +620,16 @@ export default function QuizMakerPage() {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg" onClick={generateQuestions} disabled={loading}>
-                  {loading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate {questionCount} Questions</>  
-                  )}
-                </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCostBadge toolId="quiz-maker" />
+                  <Button className="flex-1" size="lg" onClick={generateQuestions} disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {questionCount} Questions</>  
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
