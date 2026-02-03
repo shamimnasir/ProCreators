@@ -419,18 +419,21 @@ export default function GrammarCheckerPage() {
               </div>
 
               {/* Check Button */}
-              <Button 
-                onClick={checkGrammar} 
-                disabled={loading || wordCount < 10}
-                className="w-full"
-                size="lg"
-              >
-                {loading ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analyzing...</>
-                ) : (
-                  <><Sparkles className="h-4 w-4 mr-2" /> Check Grammar & Style</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="grammar-checker" />
+                <Button 
+                  onClick={checkGrammar} 
+                  disabled={loading || wordCount < 10}
+                  className="flex-1"
+                  size="lg"
+                >
+                  {loading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analyzing...</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Check Grammar & Style</>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

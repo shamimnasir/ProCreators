@@ -485,18 +485,21 @@ export default function NetworkingMessagePage() {
               </Card>
 
               {/* Generate Button */}
-              <Button 
-                onClick={generateMessage} 
-                disabled={generating || !recipientName.trim()}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                size="lg"
-              >
-                {generating ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Crafting Message...</>
-                ) : (
-                  <><Sparkles className="h-4 w-4 mr-2" /> Generate Networking Message</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="networking-message" />
+                <Button 
+                  onClick={generateMessage} 
+                  disabled={generating || !recipientName.trim()}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  size="lg"
+                >
+                  {generating ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Crafting Message...</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Generate Networking Message</>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>
