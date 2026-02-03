@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
+import { getUserIdFromRequest } from '@/lib/get-user-id'
 
 // GET - Fetch a specific draft
 export async function GET(request, { params }) {
   try {
     const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const queryUserId = searchParams.get('userId')
     
     const drafts = await getCollection('drafts')
-    const userId = 'default-user'
+    const userId = queryUserId || await getUserIdFromRequest(request)
     
     const draft = await drafts.findOne({ id, userId })
     
@@ -38,7 +41,7 @@ export async function PUT(request, { params }) {
     const data = await request.json()
     
     const drafts = await getCollection('drafts')
-    const userId = 'default-user'
+    const userId = data.userId || await getUserIdFromRequest(request)
     const now = new Date().toISOString()
     
     const result = await drafts.updateOne(
@@ -77,9 +80,11 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params
+    const { searchParams } = new URL(request.url)
+    const queryUserId = searchParams.get('userId')
     
     const drafts = await getCollection('drafts')
-    const userId = 'default-user'
+    const userId = queryUserId || await getUserIdFromRequest(request)
     
     const result = await drafts.deleteOne({ id, userId })
     
