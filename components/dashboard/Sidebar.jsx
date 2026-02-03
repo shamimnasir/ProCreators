@@ -208,6 +208,7 @@ const navigation = [
       { name: '🔒 Kill Switches', href: '/dashboard/admin/controls', icon: Shield },
       { name: '⚙️ Site Settings', href: '/dashboard/admin/site-settings', icon: Settings2 },
       { name: '📄 Policy Pages', href: '/dashboard/admin/policy-pages', icon: FileText },
+      { name: '💰 Cost Analytics', href: '/dashboard/admin/costs', icon: TrendingUp },
       { name: '📝 System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
       { name: '🎬 System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
       { name: '🎥 System Prompts (AI Video)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
