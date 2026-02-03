@@ -660,13 +660,16 @@ export default function ActivityBookPage() {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg" onClick={generatePages} disabled={loading}>
-                  {loading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Activities...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Activity Pages</>
-                  )}
-                </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCostBadge toolId="activity-book" />
+                  <Button className="flex-1" size="lg" onClick={generatePages} disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Activities...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Activity Pages</>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
