@@ -241,34 +241,108 @@ export default function BillingPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Credits & Billing</h1>
-        <p className="text-muted-foreground mt-1">
-          Purchase credits and manage your account
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Credits & Billing</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your subscription and purchase credits
+          </p>
+        </div>
+        <Link href="/pricing">
+          <Button variant="outline">
+            View Plans <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
-      {/* Current Balance */}
-      <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 border-yellow-200 dark:border-yellow-800">
+      {/* Credit Balance Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Total Credits */}
+        <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 border-yellow-200 dark:border-yellow-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Coins className="h-8 w-8 text-yellow-500" />
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Total Balance</p>
+            </div>
+            {loading ? (
+              <Loader2 className="h-8 w-8 animate-spin" />
+            ) : (
+              <span className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">
+                {(membershipCredits + purchasedCredits).toLocaleString()}
+              </span>
+            )}
+            <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">credits available</p>
+          </CardContent>
+        </Card>
+
+        {/* Membership Credits */}
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <RefreshCw className="h-6 w-6 text-purple-500" />
+              <p className="text-sm font-medium text-muted-foreground">Monthly Credits</p>
+            </div>
+            <span className="text-3xl font-bold">{membershipCredits.toLocaleString()}</span>
+            <div className="flex items-center gap-2 mt-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Resets monthly • No rollover</p>
+            </div>
+            {subscription?.renewsAt && (
+              <p className="text-xs text-purple-600 mt-1">
+                Renews: {new Date(subscription.renewsAt).toLocaleDateString()}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Purchased Credits */}
+        <Card className="border-green-200 dark:border-green-800">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Infinity className="h-6 w-6 text-green-500" />
+              <p className="text-sm font-medium text-muted-foreground">Purchased Credits</p>
+            </div>
+            <span className="text-3xl font-bold">{purchasedCredits.toLocaleString()}</span>
+            <div className="flex items-center gap-2 mt-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <p className="text-xs text-green-600">Never expire • Roll over forever</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Current Plan */}
+      <Card className={`${plan !== 'free' ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200' : ''}`}>
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Current Balance</p>
-              <div className="flex items-center gap-3 mt-2">
-                <Coins className="h-10 w-10 text-yellow-500" />
-                {loading ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                ) : (
-                  <span className="text-5xl font-bold text-yellow-900 dark:text-yellow-100">
-                    {credits?.toLocaleString() || 0}
-                  </span>
-                )}
-                <span className="text-2xl text-yellow-700 dark:text-yellow-300">credits</span>
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl ${plan !== 'free' ? 'bg-gradient-to-br from-purple-500 to-pink-500' : 'bg-gray-200'} text-white`}>
+                {plan === 'business' ? <Building2 className="h-6 w-6" /> : 
+                 plan === 'pro' ? <Crown className="h-6 w-6" /> : 
+                 plan === 'creator' ? <Star className="h-6 w-6" /> : 
+                 <Zap className="h-6 w-6" />}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold capitalize">{plan} Plan</h3>
+                <p className="text-sm text-muted-foreground">
+                  {plan === 'free' ? 'Upgrade to unlock more credits and features' :
+                   subscription?.status === 'active' ? 'Your subscription is active' :
+                   'Manage your subscription'}
+                </p>
               </div>
             </div>
-            <Badge className="bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 px-4 py-2 text-lg capitalize">
-              {plan} Plan
-            </Badge>
+            <div className="flex items-center gap-3">
+              {plan !== 'free' && subscription?.status && (
+                <Badge className={`${subscription.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                  {subscription.status}
+                </Badge>
+              )}
+              <Link href="/pricing">
+                <Button className={plan === 'free' ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}>
+                  {plan === 'free' ? 'Upgrade Now' : 'Manage Plan'}
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardContent>
       </Card>
