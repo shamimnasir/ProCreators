@@ -462,18 +462,21 @@ export default function ProfessionalEmailPage() {
               </Card>
 
               {/* Generate Button */}
-              <Button 
-                onClick={generateEmail} 
-                disabled={generating || !mainMessage.trim()}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-                size="lg"
-              >
-                {generating ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Writing Email...</>
-                ) : (
-                  <><Sparkles className="h-4 w-4 mr-2" /> Generate Professional Email</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="professional-email" />
+                <Button 
+                  onClick={generateEmail} 
+                  disabled={generating || !mainMessage.trim()}
+                  className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+                  size="lg"
+                >
+                  {generating ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Writing Email...</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Generate Professional Email</>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>

@@ -775,18 +775,21 @@ export default function SocialMediaPostCreator() {
           )}
 
           {/* Generate Button */}
-          <Button 
-            size="lg" 
-            className={`w-full bg-gradient-to-r ${selectedPlatform?.color || 'from-purple-600 to-pink-600'} hover:opacity-90 h-14 text-lg`}
-            onClick={handleGenerate}
-            disabled={generating || !topic}
-          >
-            {generating ? (
-              <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating {selectedPlatform?.name} Posts...</>
-            ) : (
-              <><Sparkles className="mr-2 h-6 w-6" />Generate {selectedPlatform?.name} Posts</>         
-            )}
-          </Button>
+          <div className="flex items-center gap-4">
+            <CreditCostBadge toolId="linkedin-posts" />
+            <Button 
+              size="lg" 
+              className={`flex-1 bg-gradient-to-r ${selectedPlatform?.color || 'from-purple-600 to-pink-600'} hover:opacity-90 h-14 text-lg`}
+              onClick={handleGenerate}
+              disabled={generating || !topic}
+            >
+              {generating ? (
+                <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating {selectedPlatform?.name} Posts...</>
+              ) : (
+                <><Sparkles className="mr-2 h-6 w-6" />Generate {selectedPlatform?.name} Posts</>         
+              )}
+            </Button>
+          </div>
         </>
       ) : (
         /* Results View */
