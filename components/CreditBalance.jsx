@@ -127,18 +127,40 @@ export function CreditCost({ toolId, params = {} }) {
 }
 
 // Hook for managing credits in tool pages
-export function useCredits(userId = DEMO_USER_ID) {
+export function useCredits(propUserId) {
   const [credits, setCredits] = useState(0)
   const [plan, setPlan] = useState('free')
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState(propUserId || DEMO_USER_ID)
 
   useEffect(() => {
-    fetchCredits()
-  }, [userId])
+    // Get user from session if not provided
+    const initUser = async () => {
+      if (!propUserId) {
+        try {
+          const sessionToken = localStorage.getItem('sessionToken')
+          if (sessionToken) {
+            const res = await fetch('/api/auth/session', {
+              headers: { 'Authorization': `Bearer ${sessionToken}` }
+            })
+            const data = await res.json()
+            if (data.success && data.user) {
+              setUserId(data.user.id)
+            }
+          }
+        } catch (error) {
+          console.error('Error getting user:', error)
+        }
+      }
+      fetchCredits()
+    }
+    initUser()
+  }, [propUserId])
 
   const fetchCredits = async () => {
     try {
-      const res = await fetch(`/api/credits?userId=${userId}`)
+      const currentUserId = userId
+      const res = await fetch(`/api/credits?userId=${currentUserId}`)
       const data = await res.json()
       if (data.success) {
         setCredits(data.credits || 0)
