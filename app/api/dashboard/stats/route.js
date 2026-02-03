@@ -3,12 +3,15 @@ import { getCollection } from '@/lib/mongodb'
 
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId') || 'demo-user-001'
+    
     const libraryCollection = await getCollection('library')
     const now = new Date()
     
-    // Base query for non-expired items
+    // Base query for user-specific, non-expired items
     const baseQuery = {
-      userId: 'default-user',
+      userId: userId,
       $or: [
         { expiresAt: { $gte: now } },
         { expiresAt: { $exists: false } }
@@ -26,10 +29,10 @@ export async function GET(request) {
       }
     ]).toArray()
     
-    // Get total AI generations (all items)
+    // Get total AI generations (all items for this user)
     const totalCount = await libraryCollection.countDocuments(baseQuery)
     
-    // Get recent activity (last 5 items)
+    // Get recent activity (last 5 items for this user)
     const recentActivity = await libraryCollection
       .find(baseQuery)
       .sort({ createdAt: -1 })
