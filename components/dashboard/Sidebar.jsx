@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -56,6 +56,13 @@ import {
   Shield,
   Settings2
 } from 'lucide-react'
+
+// Admin emails that can access the admin panel
+const ADMIN_EMAILS = [
+  'admin@procreators.io',
+  'its4shamim@gmail.com',
+  // Add more admin emails here
+]
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
