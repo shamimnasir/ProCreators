@@ -3,10 +3,12 @@ import { getCollection } from '@/lib/mongodb'
 import { unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
+import { getUserIdFromRequest } from '@/lib/get-user-id'
 
 export async function DELETE(request) {
   try {
-    const { id } = await request.json()
+    const body = await request.json()
+    const { id, userId: bodyUserId } = body
     
     if (!id) {
       return NextResponse.json(
@@ -15,12 +17,15 @@ export async function DELETE(request) {
       )
     }
 
+    // Get user ID from body or request headers
+    const userId = bodyUserId || await getUserIdFromRequest(request)
+
     const libraryCollection = await getCollection('library')
     
     // Get the item first to check if it has a file
     const item = await libraryCollection.findOne({ 
       id,
-      userId: 'default-user' // TODO: Replace with actual user ID when auth is implemented
+      userId
     })
 
     if (!item) {
@@ -31,7 +36,7 @@ export async function DELETE(request) {
     }
 
     // Delete the database entry
-    await libraryCollection.deleteOne({ id, userId: 'default-user' })
+    await libraryCollection.deleteOne({ id, userId })
 
     // Delete the associated file if it exists
     if (item.filePath) {
