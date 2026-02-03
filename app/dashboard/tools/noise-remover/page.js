@@ -311,23 +311,26 @@ export default function NoiseRemoverPage() {
               </div>
 
               {/* Process Button */}
-              <Button
-                onClick={handleRemoveNoise}
-                disabled={isLoading || !audioFile}
-                className="w-full h-14 text-lg bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Remove Background Noise
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="noise-remover" />
+                <Button
+                  onClick={handleRemoveNoise}
+                  disabled={isLoading || !audioFile}
+                  className="flex-1 h-14 text-lg bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5 mr-2" />
+                      Remove Background Noise
+                    </>
+                  )}
+                </Button>
+              </div>
 
               {/* Progress */}
               {isLoading && (

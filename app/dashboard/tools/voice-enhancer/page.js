@@ -332,23 +332,26 @@ export default function VoiceEnhancerPage() {
               </div>
 
               {/* Process Button */}
-              <Button
-                onClick={handleEnhance}
-                disabled={isLoading || !audioFile}
-                className="w-full h-14 text-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Enhancing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Enhance Voice ({currentPreset?.name})
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="voice-enhancer" />
+                <Button
+                  onClick={handleEnhance}
+                  disabled={isLoading || !audioFile}
+                  className="flex-1 h-14 text-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Enhancing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-5 w-5 mr-2" />
+                      Enhance Voice ({currentPreset?.name})
+                    </>
+                  )}
+                </Button>
+              </div>
 
               {/* Progress */}
               {isLoading && (
