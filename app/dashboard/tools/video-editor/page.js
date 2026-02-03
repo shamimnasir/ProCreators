@@ -247,9 +247,12 @@ function TrimSection({ onTrimComplete }) {
                       <Button variant="outline" size="sm" onClick={() => setTrimEnd((currentTime / duration) * 100)}>Set</Button>
                     </div>
                   </div>
-                  <Button onClick={handleTrim} disabled={isLoading || !videoFile} className="w-full bg-rose-600 hover:bg-rose-700">
-                    {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : <><Scissors className="h-4 w-4 mr-2" /> Trim Video</>}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <CreditCostBadge toolId="video-editor" />
+                    <Button onClick={handleTrim} disabled={isLoading || !videoFile} className="flex-1 bg-rose-600 hover:bg-rose-700">
+                      {isLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> : <><Scissors className="h-4 w-4 mr-2" /> Trim Video</>}
+                    </Button>
+                  </div>
                 </div>
                 {isLoading && <Progress value={progress} className="h-2" />}
               </div>
