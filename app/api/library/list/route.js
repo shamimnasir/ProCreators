@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
+import { getUserIdFromRequest } from '@/lib/get-user-id'
 
 export async function GET(request) {
   try {
@@ -7,13 +8,17 @@ export async function GET(request) {
     const toolFilter = searchParams.get('tool') // Optional tool filter
     const category = searchParams.get('category') // Optional category filter
     const limit = parseInt(searchParams.get('limit')) || 100
+    const queryUserId = searchParams.get('userId') // Optional userId from query
+    
+    // Get user ID from query params or request headers
+    const userId = queryUserId || await getUserIdFromRequest(request)
     
     const libraryCollection = await getCollection('library')
-    const now = new Date()  // Keep as Date object, not string
+    const now = new Date()
     
     // Build query
     const query = { 
-      userId: 'default-user',
+      userId,
       $or: [
         { expiresAt: { $gte: now } },
         { expiresAt: { $exists: false } } // For backwards compatibility with old items
@@ -30,7 +35,6 @@ export async function GET(request) {
       query.category = category
     }
     
-    // TODO: Replace 'default-user' with actual user ID when auth is implemented
     const items = await libraryCollection
       .find(query)
       .sort({ createdAt: -1 })
