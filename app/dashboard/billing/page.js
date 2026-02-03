@@ -163,7 +163,7 @@ export default function BillingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           packageId,
-          userId: DEMO_USER_ID,
+          userId: userId,
           originUrl: window.location.origin
         })
       })
