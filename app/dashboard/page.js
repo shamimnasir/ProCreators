@@ -70,12 +70,32 @@ export default function DashboardPage() {
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
-    const fetchStats = async () => {
+    // Get user ID from session first
+    const getUserAndFetchStats = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/dashboard/stats')
+        
+        // Try to get user from session
+        let currentUserId = 'demo-user-001'
+        const sessionToken = localStorage.getItem('sessionToken')
+        
+        if (sessionToken) {
+          const sessionRes = await fetch('/api/auth/session', {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+          })
+          const sessionData = await sessionRes.json()
+          if (sessionData.success && sessionData.user) {
+            currentUserId = sessionData.user.id
+          }
+        }
+        
+        setUserId(currentUserId)
+        
+        // Fetch user-specific stats
+        const response = await fetch(`/api/dashboard/stats?userId=${currentUserId}`)
         const data = await response.json()
         
         if (data.success) {
@@ -92,7 +112,7 @@ export default function DashboardPage() {
       }
     }
 
-    fetchStats()
+    getUserAndFetchStats()
   }, [])
 
   const statCards = [
