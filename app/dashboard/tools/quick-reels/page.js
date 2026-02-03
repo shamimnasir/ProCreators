@@ -87,10 +87,11 @@ export default function QuickVideoStudioPage() {
             <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
               <Video className="h-8 w-8" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold">Quick Video Studio</h1>
               <p className="text-white/80">AI-Powered Short-Form Video Creation</p>
             </div>
+            <CreditCostBadge toolId="quick-reels" />
           </div>
           
           {/* Stats */}
