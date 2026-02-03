@@ -875,10 +875,11 @@ export default function ExamPrepPage() {
               <Switch checked={includeExplanations} onCheckedChange={setIncludeExplanations} />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <Button variant="outline" onClick={() => setStep(1)}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
+              <CreditCostBadge toolId="exam-prep" />
               <Button className="flex-1" onClick={generateQuestions} disabled={loading}>
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching Web & Generating...</>
