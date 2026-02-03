@@ -431,13 +431,16 @@ export default function WorksheetMakerPage() {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg" onClick={generateStructure} disabled={loading}>
-                  {loading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
-                  )}
-                </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCostBadge toolId="worksheet-maker" />
+                  <Button className="flex-1" size="lg" onClick={generateStructure} disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

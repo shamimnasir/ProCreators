@@ -587,13 +587,16 @@ export default function ColoringBookPage() {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg" onClick={generatePages} disabled={loading}>
-                  {loading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Page Ideas...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Page Ideas</>
-                  )}
-                </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCostBadge toolId="coloring-book" />
+                  <Button className="flex-1" size="lg" onClick={generatePages} disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Page Ideas...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Page Ideas</>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
