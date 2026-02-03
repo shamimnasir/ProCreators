@@ -507,18 +507,21 @@ export default function SwotAnalysisPage() {
                       </Select>
                     </div>
                     
-                    <Button
-                      onClick={handleGenerate}
-                      disabled={generating || !subjectName}
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
-                      {generating ? (
-                        <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Analyzing...</>
-                      ) : (
-                        <><Wand2 className="h-5 w-5 mr-2" /> Generate SWOT Analysis</>
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      <CreditCostBadge toolId="swot-analysis" />
+                      <Button
+                        onClick={handleGenerate}
+                        disabled={generating || !subjectName}
+                        size="lg"
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        {generating ? (
+                          <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Analyzing...</>
+                        ) : (
+                          <><Wand2 className="h-5 w-5 mr-2" /> Generate SWOT Analysis</>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
