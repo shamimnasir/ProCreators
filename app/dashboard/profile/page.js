@@ -63,7 +63,8 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
-    if (!user) return
+    // Get userId either from user state or fallback to demo
+    const userId = user?.id || 'demo-user-001'
     
     setSaving(true)
     try {
@@ -72,10 +73,10 @@ export default function ProfilePage() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`
+          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
         },
         body: JSON.stringify({ 
-          userId: user.id,
+          userId,
           name,
           avatarUrl
         })
@@ -88,13 +89,16 @@ export default function ProfilePage() {
           title: "Profile updated",
           description: "Your profile has been saved successfully"
         })
+        // Refresh user data
+        fetchUserProfile()
       } else {
-        throw new Error(data.error)
+        throw new Error(data.error || 'Failed to save profile')
       }
     } catch (error) {
+      console.error('Save error:', error)
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || 'Failed to save profile',
         variant: "destructive"
       })
     } finally {
