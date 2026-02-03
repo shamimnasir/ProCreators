@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+import { getUserIdFromRequest } from '@/lib/get-user-id'
 
 // GET - Fetch all drafts for the user (filtered by tool type)
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const toolType = searchParams.get('toolType')
+    const queryUserId = searchParams.get('userId')
     
     const drafts = await getCollection('drafts')
     
-    // For now, use a default user ID (can be updated when auth is added)
-    const userId = 'default-user'
+    // Get user ID from query params or request headers
+    const userId = queryUserId || await getUserIdFromRequest(request)
     
     const query = { userId }
     if (toolType) {
@@ -42,7 +44,8 @@ export async function POST(request) {
     const data = await request.json()
     const drafts = await getCollection('drafts')
     
-    const userId = 'default-user'
+    // Get user ID from body or request headers
+    const userId = data.userId || await getUserIdFromRequest(request)
     const now = new Date().toISOString()
     
     // Check if updating existing draft
@@ -108,6 +111,7 @@ export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url)
     const draftId = searchParams.get('id')
+    const queryUserId = searchParams.get('userId')
     
     if (!draftId) {
       return NextResponse.json(
@@ -117,7 +121,7 @@ export async function DELETE(request) {
     }
     
     const drafts = await getCollection('drafts')
-    const userId = 'default-user'
+    const userId = queryUserId || await getUserIdFromRequest(request)
     
     await drafts.deleteOne({ id: draftId, userId })
     
