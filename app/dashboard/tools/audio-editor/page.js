@@ -409,10 +409,13 @@ export default function AudioEditorPage() {
                         />
                       </div>
                     </div>
-                    <Button onClick={handleTrim} disabled={isLoading || !audioFile} className="mt-4 w-full bg-green-600 hover:bg-green-700">
-                      {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Scissors className="h-4 w-4 mr-2" />}
-                      Trim Audio
-                    </Button>
+                    <div className="flex items-center gap-4 mt-4">
+                      <CreditCostBadge toolId="audio-editor" />
+                      <Button onClick={handleTrim} disabled={isLoading || !audioFile} className="flex-1 bg-green-600 hover:bg-green-700">
+                        {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Scissors className="h-4 w-4 mr-2" />}
+                        Trim Audio
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 

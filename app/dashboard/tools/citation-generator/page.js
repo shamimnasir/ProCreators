@@ -530,13 +530,16 @@ export default function CitationGeneratorPage() {
                 ))}
               </div>
 
-              <Button onClick={addCitation} disabled={loading} className="w-full">
-                {loading ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Formatting...</>
-                ) : (
-                  <><Plus className="h-4 w-4 mr-2" /> Add to Bibliography</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="citation-generator" />
+                <Button onClick={addCitation} disabled={loading} className="flex-1">
+                  {loading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Formatting...</>
+                  ) : (
+                    <><Plus className="h-4 w-4 mr-2" /> Add to Bibliography</>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
