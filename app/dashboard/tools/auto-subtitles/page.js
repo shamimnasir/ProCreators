@@ -232,15 +232,18 @@ export default function AutoSubtitlesPage() {
             </div>
 
             {/* Generate Button */}
-            <Button
-              onClick={handleGenerateCaptions}
-              disabled={!videoFile || loading}
-              className="w-full"
-            >
-              {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Subtitles className="mr-2 h-4 w-4" />
-              Generate Captions
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="auto-subtitles" />
+              <Button
+                onClick={handleGenerateCaptions}
+                disabled={!videoFile || loading}
+                className="flex-1"
+              >
+                {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Subtitles className="mr-2 h-4 w-4" />
+                Generate Captions
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
