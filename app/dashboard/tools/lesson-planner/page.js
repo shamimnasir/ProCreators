@@ -765,10 +765,11 @@ export default function LessonPlannerPage() {
               </div>
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center gap-4">
               <Button variant="outline" onClick={() => setStep(2)}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
+              <CreditCostBadge toolId="lesson-planner" />
               <Button onClick={generateLessonPlan} disabled={!canProceedStep3 || loading}>
                 {loading ? (
                   <>

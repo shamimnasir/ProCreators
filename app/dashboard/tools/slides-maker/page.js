@@ -1061,6 +1061,7 @@ export default function SlidesMakerPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
+              <CreditCostBadge toolId="slides-maker" />
               <Button 
                 onClick={handleGenerate} 
                 className="flex-1"
