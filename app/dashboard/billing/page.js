@@ -4,18 +4,24 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { 
   CreditCard, Calendar, TrendingUp, Coins, Sparkles, 
-  Loader2, Check, Zap, Crown, Building2, Star 
+  Loader2, Check, Zap, Crown, Building2, Star, RefreshCw,
+  ArrowRight, Clock, Infinity
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 const DEMO_USER_ID = 'demo-user-001'
 
 export default function BillingPage() {
+  const [membershipCredits, setMembershipCredits] = useState(0)
+  const [purchasedCredits, setPurchasedCredits] = useState(0)
   const [credits, setCredits] = useState(null)
   const [plan, setPlan] = useState('free')
+  const [subscription, setSubscription] = useState(null)
   const [packages, setPackages] = useState([])
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
@@ -50,6 +56,7 @@ export default function BillingPage() {
     
     // Now fetch data with the correct userId
     fetchCredits(currentUserId)
+    fetchMembership(currentUserId)
     fetchPackages()
     fetchTransactions(currentUserId)
     
@@ -57,8 +64,16 @@ export default function BillingPage() {
     const sessionId = searchParams.get('session_id')
     const success = searchParams.get('success')
     const canceled = searchParams.get('canceled')
+    const subscriptionSuccess = searchParams.get('subscription')
     
-    if (sessionId && success) {
+    if (subscriptionSuccess === 'success') {
+      toast({
+        title: '🎉 Subscription Activated!',
+        description: 'Welcome to your new plan! Your credits have been added.',
+      })
+      fetchCredits(currentUserId)
+      fetchMembership(currentUserId)
+    } else if (sessionId && success) {
       pollPaymentStatus(sessionId, currentUserId)
     } else if (canceled) {
       toast({
@@ -82,6 +97,22 @@ export default function BillingPage() {
       console.error('Error fetching credits:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchMembership = async (uid) => {
+    const currentUserId = uid || userId
+    try {
+      const res = await fetch(`/api/membership?userId=${currentUserId}`)
+      const data = await res.json()
+      if (data.success) {
+        setMembershipCredits(data.membershipCredits || 0)
+        setPurchasedCredits(data.purchasedCredits || 0)
+        setSubscription(data.subscription)
+        setPlan(data.plan || 'free')
+      }
+    } catch (error) {
+      console.error('Error fetching membership:', error)
     }
   }
 
