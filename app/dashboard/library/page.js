@@ -122,7 +122,7 @@ export default function LibraryPage() {
       const response = await fetch('/api/library/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, userId })
       })
       
       const data = await response.json()
