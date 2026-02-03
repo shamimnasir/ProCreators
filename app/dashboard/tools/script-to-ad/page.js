@@ -204,15 +204,18 @@ For each script include:
               />
             </div>
 
-            <Button
-              onClick={handleGenerateScripts}
-              disabled={loading}
-              className="w-full"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate 3 Ad Scripts
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="script-to-ad" />
+              <Button
+                onClick={handleGenerateScripts}
+                disabled={loading}
+                className="flex-1"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate 3 Ad Scripts
+              </Button>
+            </div>
 
             {generatedScripts && (
               <div className="pt-4 border-t">

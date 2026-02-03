@@ -475,13 +475,16 @@ export default function StorybookMakerPage() {
                   />
                 </div>
 
-                <Button className="w-full" size="lg" onClick={generateStory} disabled={loading}>
-                  {loading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Story...</>
-                  ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Story with AI</>
-                  )}
-                </Button>
+                <div className="flex items-center gap-4">
+                  <CreditCostBadge toolId="storybook-maker" />
+                  <Button className="flex-1" size="lg" onClick={generateStory} disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Story...</>
+                    ) : (
+                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Story with AI</>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
