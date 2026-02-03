@@ -2154,6 +2154,11 @@ Product URL: ${scrapeData.product.url}`
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Credit Cost Badge */}
+          <div className="flex justify-center">
+            <CreditCostBadge toolId="story-reels" />
+          </div>
+          
           {/* Preview Button (Recommended) */}
           <Button 
             onClick={handleGeneratePreview} 
