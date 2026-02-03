@@ -293,7 +293,7 @@ export function Sidebar() {
       
       <ScrollArea className="flex-1">
         <div className="space-y-1 p-2">
-          {navigation.map((item) => (
+          {filteredNavigation.map((item) => (
             <div key={item.name}>
               {item.children ? (
                 <div>
