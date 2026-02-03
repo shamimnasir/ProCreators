@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+import { getUserIdFromRequest } from '@/lib/get-user-id'
 
 export async function POST(request) {
   try {
-    const { content, type, title, description, metadata, videoUrl, script, filePath, fileSize } = await request.json()
+    const body = await request.json()
+    const { content, type, title, description, metadata, videoUrl, script, filePath, fileSize, userId: bodyUserId } = body
 
     if (!content && !videoUrl && !filePath) {
       return NextResponse.json(
@@ -36,9 +38,8 @@ export async function POST(request) {
       category = 'document'
     }
 
-    // Get session ID from cookie or generate one
-    // TODO: Replace with actual user ID when auth is implemented
-    const userId = 'default-user'
+    // Get user ID from body or request headers
+    const userId = bodyUserId || await getUserIdFromRequest(request)
 
     // Calculate expiration: 30 days from now
     const expiresAt = new Date()
