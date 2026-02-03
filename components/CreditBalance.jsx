@@ -9,10 +9,34 @@ import Link from 'next/link'
 // Default demo user ID for development
 const DEMO_USER_ID = 'demo-user-001'
 
-export function CreditBalance({ userId = DEMO_USER_ID, compact = false }) {
+export function CreditBalance({ userId: propUserId, compact = false }) {
   const [credits, setCredits] = useState(null)
   const [plan, setPlan] = useState('free')
   const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState(propUserId || DEMO_USER_ID)
+
+  useEffect(() => {
+    // Get user from session if not provided
+    const initUser = async () => {
+      if (!propUserId) {
+        try {
+          const sessionToken = localStorage.getItem('sessionToken')
+          if (sessionToken) {
+            const res = await fetch('/api/auth/session', {
+              headers: { 'Authorization': `Bearer ${sessionToken}` }
+            })
+            const data = await res.json()
+            if (data.success && data.user) {
+              setUserId(data.user.id)
+            }
+          }
+        } catch (error) {
+          console.error('Error getting user:', error)
+        }
+      }
+    }
+    initUser()
+  }, [propUserId])
 
   useEffect(() => {
     fetchCredits()
