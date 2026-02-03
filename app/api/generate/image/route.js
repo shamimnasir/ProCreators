@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { generateImage } from '@/lib/gemini-image'
+import { trackImageGeneration } from '@/lib/ai-tracking'
 
 export async function POST(request) {
   try {
-    const { prompt } = await request.json()
+    const { prompt, userId, transactionId, creditsCharged, toolId } = await request.json()
     
     if (!prompt) {
       return NextResponse.json(
@@ -19,6 +20,23 @@ export async function POST(request) {
         { success: false, error: result.error },
         { status: 500 }
       )
+    }
+    
+    // Track API cost if we have tracking info
+    if (userId && transactionId && creditsCharged) {
+      try {
+        await trackImageGeneration({
+          toolId: toolId || 'image-generation',
+          userId,
+          transactionId,
+          provider: 'fal',
+          model: 'fal-flux',
+          imageCount: 1,
+          creditsCharged
+        })
+      } catch (trackError) {
+        console.error('Cost tracking error (non-fatal):', trackError)
+      }
     }
     
     return NextResponse.json({
