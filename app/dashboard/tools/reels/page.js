@@ -424,15 +424,18 @@ export default function ReelsPage() {
               </Card>
             </div>
 
-            <Button 
-              onClick={handleGenerateScript} 
-              disabled={scriptLoading || (!topic.trim() && !objectImage)} 
-              className="w-full"
-            >
-              {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate Viral Script
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="reels" />
+              <Button 
+                onClick={handleGenerateScript} 
+                disabled={scriptLoading || (!topic.trim() && !objectImage)} 
+                className="flex-1"
+              >
+                {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate Viral Script
+              </Button>
+            </div>
 
             {generatedScript && (
               <div className="space-y-2 pt-4 border-t">

@@ -712,18 +712,21 @@ Nice to have:
           </div>
 
           {/* Analyze Button */}
-          <Button 
-            size="lg" 
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-14 text-lg"
-            onClick={handleAnalyze}
-            disabled={analyzing || !resumeText || !jobDescription}
-          >
-            {analyzing ? (
-              <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Analyzing Match...</>
-            ) : (
-              <><Target className="mr-2 h-6 w-6" />Analyze Job Match</>
-            )}
-          </Button>
+          <div className="flex items-center gap-4">
+            <CreditCostBadge toolId="job-matcher" />
+            <Button 
+              size="lg" 
+              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 h-14 text-lg"
+              onClick={handleAnalyze}
+              disabled={analyzing || !resumeText || !jobDescription}
+            >
+              {analyzing ? (
+                <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Analyzing Match...</>
+              ) : (
+                <><Target className="mr-2 h-6 w-6" />Analyze Job Match</>
+              )}
+            </Button>
+          </div>
         </>
       ) : (
         /* Results View */
