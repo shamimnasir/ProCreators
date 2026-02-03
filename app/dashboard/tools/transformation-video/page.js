@@ -1133,7 +1133,8 @@ export default function TransformationVideoPage() {
           </Card>
 
           {/* Next Step Button */}
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 items-center">
+            <CreditCostBadge toolId="transformation-video" />
             {/* Show different button based on whether scenes already exist */}
             {imageSource === 'ai' && scenes.length > 0 ? (
               <Button

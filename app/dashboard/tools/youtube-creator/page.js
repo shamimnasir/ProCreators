@@ -746,18 +746,21 @@ export default function YouTubeCreatorPage() {
               </Card>
 
               {/* Generate Button */}
-              <Button 
-                onClick={generateContent} 
-                disabled={generating || !videoTopic.trim()}
-                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                size="lg"
-              >
-                {generating ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating Content...</>
-                ) : (
-                  <><Sparkles className="h-4 w-4 mr-2" /> Generate YouTube Content</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="youtube-creator" />
+                <Button 
+                  onClick={generateContent} 
+                  disabled={generating || !videoTopic.trim()}
+                  className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                  size="lg"
+                >
+                  {generating ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating Content...</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Generate YouTube Content</>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>
