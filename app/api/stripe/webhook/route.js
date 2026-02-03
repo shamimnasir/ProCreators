@@ -1,7 +1,9 @@
-// Stripe Webhook Handler - Process payment events
+// Stripe Webhook Handler - Process payment and subscription events
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { addCredits } from '@/lib/credits'
+import { refillMembershipCredits, changeSubscription, MEMBERSHIP_PLANS, addPurchasedCredits } from '@/lib/membership'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request) {
   try {
@@ -33,7 +35,16 @@ export async function POST(request) {
     
     const { db } = await connectToDatabase()
     
+    // Log all webhook events
+    await db.collection('webhook_logs').insertOne({
+      _id: uuidv4(),
+      type: event.type,
+      eventId: event.id,
+      createdAt: new Date()
+    })
+    
     switch (event.type) {
+      // ============= CHECKOUT COMPLETED =============
       case 'checkout.session.completed': {
         const session = event.data.object
         
@@ -49,34 +60,211 @@ export async function POST(request) {
         
         if (session.payment_status === 'paid') {
           const userId = session.metadata?.userId
-          const credits = parseInt(session.metadata?.credits || '0')
+          const planId = session.metadata?.planId
+          const billingCycle = session.metadata?.billingCycle || 'monthly'
           
-          if (userId && credits > 0) {
-            // Add credits
-            await addCredits(
-              userId,
-              credits,
-              `Credit purchase via webhook`,
-              'stripe_webhook'
-            )
+          // Check if this is a subscription or one-time purchase
+          if (session.mode === 'subscription' && planId) {
+            // SUBSCRIPTION PURCHASE
+            const plan = MEMBERSHIP_PLANS[planId]
+            if (plan) {
+              // Activate subscription
+              await changeSubscription(userId, planId, billingCycle)
+              
+              // Store Stripe IDs
+              await db.collection('users').updateOne(
+                { _id: userId },
+                {
+                  $set: {
+                    stripeCustomerId: session.customer,
+                    stripeSubscriptionId: session.subscription,
+                    subscriptionStatus: 'active'
+                  }
+                }
+              )
+              
+              // Mark transaction complete
+              await db.collection('subscription_transactions').updateOne(
+                { sessionId: session.id },
+                {
+                  $set: {
+                    status: 'completed',
+                    stripeCustomerId: session.customer,
+                    stripeSubscriptionId: session.subscription,
+                    completedAt: new Date()
+                  }
+                }
+              )
+              
+              console.log(`Subscription activated: ${userId} -> ${planId}`)
+            }
             
-            // Update transaction
-            await db.collection('payment_transactions').updateOne(
-              { sessionId: session.id },
+          } else {
+            // ONE-TIME CREDIT PURCHASE
+            const credits = parseInt(session.metadata?.credits || '0')
+            
+            if (userId && credits > 0) {
+              // Add as PURCHASED credits (these rollover)
+              await addPurchasedCredits(
+                userId,
+                credits,
+                `Credit pack purchase: ${credits} credits`,
+                session.payment_intent
+              )
+              
+              // Also update legacy credits field for backward compatibility
+              await addCredits(
+                userId,
+                credits,
+                `Credit purchase via webhook`,
+                'stripe_webhook'
+              )
+              
+              // Update transaction
+              await db.collection('payment_transactions').updateOne(
+                { sessionId: session.id },
+                {
+                  $set: {
+                    status: 'completed',
+                    paymentStatus: 'paid',
+                    creditsAdded: true,
+                    creditType: 'purchased', // Mark as purchased (rollover)
+                    completedAt: new Date(),
+                    updatedAt: new Date()
+                  }
+                },
+                { upsert: true }
+              )
+              
+              console.log(`Added ${credits} purchased credits to user ${userId}`)
+            }
+          }
+        }
+        break
+      }
+      
+      // ============= SUBSCRIPTION RENEWAL (Invoice Paid) =============
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object
+        
+        // Only process subscription renewals, not initial payments
+        if (invoice.billing_reason === 'subscription_cycle') {
+          const subscriptionId = invoice.subscription
+          
+          // Find user by subscription ID
+          const user = await db.collection('users').findOne({ 
+            stripeSubscriptionId: subscriptionId 
+          })
+          
+          if (user) {
+            // Refill membership credits (resets, no rollover)
+            await refillMembershipCredits(user._id)
+            
+            // Log renewal
+            await db.collection('subscription_transactions').insertOne({
+              _id: uuidv4(),
+              userId: user._id,
+              type: 'renewal',
+              planId: user.plan,
+              amount: invoice.amount_paid / 100,
+              currency: invoice.currency,
+              stripeInvoiceId: invoice.id,
+              status: 'completed',
+              createdAt: new Date()
+            })
+            
+            console.log(`Subscription renewed for user ${user._id}`)
+          }
+        }
+        break
+      }
+      
+      // ============= PAYMENT FAILED =============
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object
+        const subscriptionId = invoice.subscription
+        
+        if (subscriptionId) {
+          const user = await db.collection('users').findOne({ 
+            stripeSubscriptionId: subscriptionId 
+          })
+          
+          if (user) {
+            await db.collection('users').updateOne(
+              { _id: user._id },
               {
                 $set: {
-                  status: 'completed',
-                  paymentStatus: 'paid',
-                  creditsAdded: true,
-                  completedAt: new Date(),
-                  updatedAt: new Date()
+                  subscriptionStatus: 'past_due',
+                  paymentFailedAt: new Date()
+                },
+                $push: {
+                  notifications: {
+                    type: 'payment_failed',
+                    message: 'Your subscription payment failed. Please update your payment method.',
+                    createdAt: new Date()
+                  }
                 }
-              },
-              { upsert: true }
+              }
             )
-            
-            console.log(`Added ${credits} credits to user ${userId}`)
+            console.log(`Payment failed for user ${user._id}`)
           }
+        }
+        break
+      }
+      
+      // ============= SUBSCRIPTION CANCELED =============
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object
+        
+        const user = await db.collection('users').findOne({ 
+          stripeSubscriptionId: subscription.id 
+        })
+        
+        if (user) {
+          // Downgrade to free, but KEEP purchased credits
+          await db.collection('users').updateOne(
+            { _id: user._id },
+            {
+              $set: {
+                plan: 'free',
+                membershipCredits: 0, // Remove subscription credits
+                subscriptionStatus: 'canceled',
+                stripeSubscriptionId: null,
+                subscriptionRenewsAt: null,
+                canceledAt: new Date()
+              },
+              $push: {
+                notifications: {
+                  type: 'subscription_canceled',
+                  message: 'Your subscription has been canceled. Your purchased credits are still available.',
+                  createdAt: new Date()
+                }
+              }
+            }
+          )
+          console.log(`Subscription canceled for user ${user._id}`)
+        }
+        break
+      }
+      
+      // ============= SUBSCRIPTION UPDATED =============
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object
+        
+        const user = await db.collection('users').findOne({ 
+          stripeSubscriptionId: subscription.id 
+        })
+        
+        if (user) {
+          await db.collection('users').updateOne(
+            { _id: user._id },
+            {
+              $set: {
+                subscriptionStatus: subscription.status,
+                subscriptionRenewsAt: new Date(subscription.current_period_end * 1000)
+              }
+            }
+          )
         }
         break
       }
@@ -112,11 +300,4 @@ export async function POST(request) {
       { status: 500 }
     )
   }
-}
-
-// Disable body parser for webhooks
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 }
