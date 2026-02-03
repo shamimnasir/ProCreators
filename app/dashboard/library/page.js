@@ -43,11 +43,40 @@ export default function LibraryPage() {
   const [selectedTool, setSelectedTool] = useState('all')
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'feed'
   const [playingVideo, setPlayingVideo] = useState(null)
+  const [userId, setUserId] = useState(null)
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchLibrary()
-  }, [selectedTool])
+    // Get user ID first, then fetch library
+    initUser()
+  }, [])
+
+  useEffect(() => {
+    if (userId) {
+      fetchLibrary()
+    }
+  }, [selectedTool, userId])
+
+  const initUser = async () => {
+    try {
+      const sessionToken = localStorage.getItem('sessionToken')
+      if (sessionToken) {
+        const res = await fetch('/api/auth/session', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` }
+        })
+        const data = await res.json()
+        if (data.success && data.user) {
+          setUserId(data.user.id)
+          return
+        }
+      }
+      // Fallback to demo user
+      setUserId('demo-user-001')
+    } catch (error) {
+      console.error('Error getting user:', error)
+      setUserId('demo-user-001')
+    }
+  }
 
   // Helper to get niche display info
   const getNicheInfo = (nicheSlug) => {
@@ -69,9 +98,9 @@ export default function LibraryPage() {
   const fetchLibrary = async () => {
     setLoading(true)
     try {
-      const url = selectedTool === 'all' 
-        ? '/api/library/list' 
-        : `/api/library/list?tool=${selectedTool}`
+      let url = selectedTool === 'all' 
+        ? `/api/library/list?userId=${userId}` 
+        : `/api/library/list?tool=${selectedTool}&userId=${userId}`
       const response = await fetch(url)
       const data = await response.json()
       if (data.success) {
