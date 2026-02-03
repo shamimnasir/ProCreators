@@ -474,18 +474,21 @@ export default function AIHumanizerPage() {
                 <span>Min: 20 words</span>
               </div>
 
-              <Button 
-                onClick={humanizeText} 
-                disabled={loading || wordCount < 20}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                size="lg"
-              >
-                {loading ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Humanizing...</>
-                ) : (
-                  <><Sparkles className="h-4 w-4 mr-2" /> Humanize Text</>
-                )}
-              </Button>
+              <div className="flex items-center gap-4">
+                <CreditCostBadge toolId="ai-humanizer" />
+                <Button 
+                  onClick={humanizeText} 
+                  disabled={loading || wordCount < 20}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  size="lg"
+                >
+                  {loading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Humanizing...</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Humanize Text</>
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
