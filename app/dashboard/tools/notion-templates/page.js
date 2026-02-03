@@ -707,10 +707,11 @@ export default function NotionTemplateMakerPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Button variant="outline" onClick={() => setStep(1)}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Back
                 </Button>
+                <CreditCostBadge toolId="notion-templates" />
                 <Button className="flex-1" onClick={generateTemplate} disabled={loading || !templateName}>
                   {loading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>

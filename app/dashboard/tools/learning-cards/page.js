@@ -1179,13 +1179,16 @@ export default function FlashcardMakerPage() {
               </div>
             </div>
 
-            <Button onClick={generateWithAI} disabled={loading || !aiTopic.trim()} className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-              {loading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
-              ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate {aiCount} Flashcards</>
-              )}
-            </Button>
+            <div className="flex items-center gap-4">
+              <CreditCostBadge toolId="learning-cards" />
+              <Button onClick={generateWithAI} disabled={loading || !aiTopic.trim()} className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                {loading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
+                ) : (
+                  <><Sparkles className="mr-2 h-4 w-4" /> Generate {aiCount} Flashcards</>
+                )}
+              </Button>
+            </div>
 
             {/* Generated Flashcards Preview & Edit */}
             {flashcards.filter(c => c.front || c.back).length > 0 && (
