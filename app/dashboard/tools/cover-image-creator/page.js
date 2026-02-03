@@ -604,24 +604,27 @@ CONTENT:`
                   </div>
                   
                   {/* Generate Button */}
-                  <Button 
-                    onClick={generateCoverImage} 
-                    disabled={isLoading || (!topic.trim() && !brandName.trim())}
-                    className="w-full h-12 text-lg bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="h-5 w-5 mr-2" />
-                        Generate {currentPlatform.name}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <CreditCostBadge toolId="cover-image-creator" />
+                    <Button 
+                      onClick={generateCoverImage} 
+                      disabled={isLoading || (!topic.trim() && !brandName.trim())}
+                      className="flex-1 h-12 text-lg bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600"
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-5 w-5 mr-2" />
+                          Generate {currentPlatform.name}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </TabsContent>
                 
                 {/* Upload Tab */}

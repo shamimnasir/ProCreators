@@ -532,24 +532,27 @@ DESIGN REQUIREMENTS:
                   </div>
                   
                   {/* Generate Button */}
-                  <Button 
-                    onClick={generatePodcastCover} 
-                    disabled={isLoading || !podcastName.trim()}
-                    className="w-full h-12 text-lg bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="h-5 w-5 mr-2" />
-                        Generate Podcast Cover
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <CreditCostBadge toolId="podcast-cover-maker" />
+                    <Button 
+                      onClick={generatePodcastCover} 
+                      disabled={isLoading || !podcastName.trim()}
+                      className="flex-1 h-12 text-lg bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-5 w-5 mr-2" />
+                          Generate Podcast Cover
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </TabsContent>
                 
                 {/* Upload Tab */}
