@@ -834,7 +834,7 @@ export default function Home() {
             >
               <p className="text-lg text-muted-foreground mb-6">
                 Most creators struggle with expensive tools and steep learning curves. <br/>
-                <span className="text-foreground font-medium">We changed that.</span> Now you can create like a pro team — without being one.
+                <span className="text-foreground font-medium">We changed that.</span> Now you can create like a pro team - without being one.
               </p>
               <div className="inline-flex items-center gap-2 text-sm text-yellow-400">
                 <Award className="h-4 w-4" />
