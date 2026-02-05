@@ -283,28 +283,33 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="space-y-8"
             >
-              {/* AI Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa]">
-                <Zap className="h-4 w-4" />
-                AI-Powered Content Generation - Now Live
+              {/* Warning Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400">
+                <span className="animate-pulse">⚠️</span>
+                WARNING: Highly Addictive Platform
               </div>
 
-              {/* Main Logo Text */}
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                <span className="bg-gradient-to-b from-foreground via-foreground/80 to-muted-foreground bg-clip-text text-transparent">
-                  The Easiest Way to Create
-                </span>
+              {/* Main Provocative H1 */}
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+                <span className="text-red-500">Don't</span>
+                <span className="text-foreground"> use </span>
+                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">ProCreators</span>
+                <span className="text-foreground">,</span>
                 <br />
-                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">
-                  Income-Friendly Content
-                </span>
+                <span className="text-foreground">because it's </span>
+                <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-pulse">ADDICTIVE</span>
               </h1>
 
-              {/* Tagline */}
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl leading-relaxed">
-                Generate viral posts, stunning images, engaging videos, and digital products with AI.
+              {/* H2 - Expanded Benefits */}
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
+                It solves <span className="text-foreground font-semibold">ALL the problems</span> of Content Creators, Marketers, Digital Product Makers & Business Owners in <span className="text-[#7c3aed] font-bold">ONE place</span>
                 <br />
-                Perfect for creators, marketers, and agencies.
+                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-yellow-400 font-bold">CREATOR DOPAMINES</span>! 🧠⚡</span>
+              </p>
+
+              {/* Subheadline */}
+              <p className="text-lg md:text-xl text-orange-400 font-medium">
+                ⚠️ Once you're in, there's no way out!
               </p>
 
               {/* CTA Buttons */}
@@ -314,7 +319,7 @@ export default function Home() {
                   onClick={() => router.push('/register')}
                   className="text-lg px-8 py-6 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
                 >
-                  Start Free Trial
+                  Get Addicted Now 🔥
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
