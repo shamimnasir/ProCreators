@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { 
-  Sparkles, 
   Image as ImageIcon, 
   Video, 
   BookOpen,
@@ -41,7 +40,9 @@ import {
   Megaphone,
   BadgeDollarSign,
   Lightbulb,
-  CircleDollarSign
+  CircleDollarSign,
+  PlayCircle,
+  Award
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
