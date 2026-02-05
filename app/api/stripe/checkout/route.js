@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
+import { MEMBERSHIP_PLANS } from '@/lib/membership'
 
 // Credit packages - NEVER accept amounts from frontend
 const CREDIT_PACKAGES = {
@@ -39,12 +40,53 @@ const CREDIT_PACKAGES = {
   }
 }
 
-// GET - Return available packages
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    packages: Object.values(CREDIT_PACKAGES)
-  })
+// Helper function to get subscriber discount
+function getSubscriberDiscount(planId) {
+  const plan = MEMBERSHIP_PLANS[planId]
+  return plan?.creditDiscount || 0
+}
+
+// GET - Return available packages with optional subscriber discount
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId')
+    
+    let discount = 0
+    let userPlan = 'free'
+    
+    // If userId provided, check their subscription for discounts
+    if (userId) {
+      const { db } = await connectToDatabase()
+      const user = await db.collection('users').findOne({ _id: userId })
+      if (user && user.plan && user.plan !== 'free') {
+        userPlan = user.plan
+        discount = getSubscriberDiscount(user.plan)
+      }
+    }
+    
+    // Return packages with discounted prices if applicable
+    const packagesWithDiscount = Object.values(CREDIT_PACKAGES).map(pack => ({
+      ...pack,
+      originalPrice: pack.price,
+      price: discount > 0 ? Math.round((pack.price * (1 - discount)) * 100) / 100 : pack.price,
+      discount: discount > 0 ? Math.round(discount * 100) : 0,
+      discountLabel: discount > 0 ? `${Math.round(discount * 100)}% ${userPlan} discount` : null
+    }))
+    
+    return NextResponse.json({
+      success: true,
+      packages: packagesWithDiscount,
+      userPlan,
+      discount: Math.round(discount * 100)
+    })
+  } catch (error) {
+    console.error('Error fetching packages:', error)
+    return NextResponse.json({
+      success: true,
+      packages: Object.values(CREDIT_PACKAGES)
+    })
+  }
 }
 
 // POST - Create checkout session
