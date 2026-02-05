@@ -228,8 +228,41 @@ export function StaticPage({ pageId }) {
     )
   }
 
+  // Build schema for the page
+  const buildPageSchema = () => {
+    const schemas = []
+    
+    // Add Organization schema for about page
+    if (pageId === 'about') {
+      schemas.push(generateOrganizationSchema({
+        description: page.metaDescription
+      }))
+    }
+    
+    // Add breadcrumb schema
+    schemas.push(generateBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: page.title }
+    ]))
+    
+    // Extract FAQs from content blocks if present
+    const faqBlock = page.contentBlocks?.find(b => b.type === 'faq')
+    if (faqBlock?.content?.items?.length) {
+      const faqs = faqBlock.content.items.map(item => ({
+        question: item.question,
+        answer: item.answer
+      }))
+      schemas.push(generateFAQSchema(faqs))
+    }
+    
+    return schemas
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Schema.org structured data */}
+      <CustomSchema schemas={buildPageSchema()} />
+      
       <Header />
       <main className="flex-1">
         <div className="container max-w-4xl mx-auto px-6 py-12">
