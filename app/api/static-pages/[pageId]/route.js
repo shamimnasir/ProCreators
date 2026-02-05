@@ -207,6 +207,49 @@ const DEFAULT_TEMPLATES = {
         }
       }
     ]
+  },
+  homepage: {
+    title: 'Homepage',
+    metaTitle: 'ProCreators - AI-Powered Content Creation Platform',
+    metaDescription: 'Create professional videos, images, ebooks, and more with AI. The ultimate content creation platform for creators.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Create Content That Dominates',
+          subtitle: 'AI-powered tools to create professional videos, images, ebooks, and more in minutes.',
+          badge: 'AI-Powered',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Why Choose ProCreators?',
+          columns: 3,
+          items: [
+            { icon: '⚡', title: 'Lightning Fast', description: 'Generate content in seconds, not hours' },
+            { icon: '🎨', title: 'Professional Quality', description: 'Studio-grade output every time' },
+            { icon: '💰', title: 'Cost Effective', description: 'Save thousands on content creation' }
+          ]
+        }
+      },
+      {
+        id: 'faq-1',
+        type: 'faq',
+        content: {
+          title: 'Frequently Asked Questions',
+          items: [
+            { question: 'What is ProCreators?', answer: 'ProCreators is an AI-powered content creation platform that helps you create professional videos, images, ebooks, social media content, and more.' },
+            { question: 'How much does it cost?', answer: 'We offer a free plan with 50 credits. Paid plans start at $19/month for Creator, $49/month for Pro, and $99/month for Business.' },
+            { question: 'What can I create?', answer: 'You can create AI videos, reels, thumbnails, ebooks, blog posts, social media content, educational materials, business documents, and 70+ other content types.' },
+            { question: 'Do I need technical skills?', answer: 'No! ProCreators is designed for everyone. Our AI handles the complex work while you focus on your creative vision.' }
+          ]
+        }
+      }
+    ]
   }
 }
 
