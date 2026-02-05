@@ -603,8 +603,8 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="rounded-2xl border border-border bg-white/5 p-8 backdrop-blur-sm hover:border-[#7c3aed]/50 transition-all"
               >
-                <div className="mb-6 h-48 rounded-xl bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 flex items-center justify-center">
-                  <Rocket className="h-16 w-16 text-[#a78bfa]" />
+                <div className="mb-6 h-16 w-16 rounded-xl bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 flex items-center justify-center">
+                  <useCase.icon className="h-8 w-8 text-[#a78bfa]" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-foreground">{useCase.title}</h3>
                 <p className="text-muted-foreground mb-6">{useCase.description}</p>
