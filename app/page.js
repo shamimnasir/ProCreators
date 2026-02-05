@@ -445,20 +445,64 @@ export default function Home() {
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
                 <Lightbulb className="h-4 w-4" />
-                Tools for EVERY Creator
+                This Is Incredible
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Whatever Your </span>
-                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Hustle</span>
-                <span className="text-foreground">,</span>
+                <span className="text-foreground">Stop Paying for </span>
+                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through">10 Different Tools</span>
                 <br />
-                <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">We've Got Your Tools</span>
+                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Get 70+ Tools in ONE</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Job seekers, marketers, students, teachers - <span className="text-foreground font-semibold">everyone wins here</span>
+                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-green-400 font-bold">$19/month</span>
                 <br />
-                <span className="text-sm text-yellow-400">70+ specialized AI tools across every category</span>
+                <span className="text-sm text-yellow-400">Your wallet just did a happy dance</span>
               </p>
+            </div>
+
+            {/* Content Creators Category - Most Popular - NOW FIRST */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center">
+                  <Video className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Content Creators</h3>
+                  <p className="text-muted-foreground text-sm">Videos, reels, ebooks & everything that goes viral</p>
+                </div>
+                <span className="ml-auto bg-[#7c3aed]/20 text-[#a78bfa] text-xs font-bold px-3 py-1 rounded-full border border-[#7c3aed]/30">
+                  Most Popular
+                </span>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
+                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
+                  { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500' },
+                  { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
+                ].map((tool, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    {tool.hot && (
+                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                        HOT
+                      </span>
+                    )}
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
             {/* Jobs & Careers Category */}
@@ -552,7 +596,7 @@ export default function Home() {
             </div>
 
             {/* Students & Teachers Category */}
-            <div className="mb-16">
+            <div className="mb-12">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
                   <GraduationCap className="h-6 w-6 text-white" />
@@ -584,51 +628,6 @@ export default function Home() {
                     {tool.hot && (
                       <span className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                         POPULAR
-                      </span>
-                    )}
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
-                      <tool.icon className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
-                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Content Creators Category - Original Popular Tools */}
-            <div className="mb-12">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center">
-                  <Video className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">Content Creators</h3>
-                  <p className="text-muted-foreground text-sm">Videos, reels, ebooks & everything that goes viral</p>
-                </div>
-                <span className="ml-auto bg-[#7c3aed]/20 text-[#a78bfa] text-xs font-bold px-3 py-1 rounded-full border border-[#7c3aed]/30">
-                  Most Popular
-                </span>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
-                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
-                  { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500' },
-                  { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
-                ].map((tool, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: i * 0.05 }}
-                    viewport={{ once: true }}
-                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
-                    onClick={() => router.push('/dashboard')}
-                  >
-                    {tool.hot && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                        HOT
                       </span>
                     )}
                     <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
