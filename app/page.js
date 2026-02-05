@@ -86,7 +86,7 @@ const tools = [
 
 const features = [
   {
-    icon: Sparkles,
+    icon: Layers,
     title: '70+ AI Tools in ONE Platform',
     description: 'Stop paying for 10 different tools. Get everything you need to dominate content creation.'
   },
