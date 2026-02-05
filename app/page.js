@@ -576,8 +576,8 @@ export default function Home() {
         <div className="container px-6">
           <div className="mb-16 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
-              <span>💰</span>
-              Built for Money Makers
+              <Target className="h-4 w-4" />
+              Built for Success
             </div>
             <h2 className="mb-4 text-4xl md:text-6xl font-bold">
               <span className="text-foreground">Whether You're a </span>
