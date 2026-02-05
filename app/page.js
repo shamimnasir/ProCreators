@@ -636,9 +636,7 @@ export default function Home() {
               <span className="text-foreground"> Word For It</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These creators were <span className="text-red-400 line-through">skeptical</span> <span className="text-green-400 font-bold">addicted</span> too.
-              <br />
-              <span className="text-sm text-yellow-400">Warning: Reading testimonials may cause FOMO 😅</span>
+              See how creators like you are getting incredible results.
             </p>
           </div>
 
