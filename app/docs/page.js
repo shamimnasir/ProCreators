@@ -110,7 +110,7 @@ export default function DocsPage() {
             />
           </div>
         </div>
-      </header>
+      </section>
 
       {/* Quick Links */}
       <section className="py-8 border-b border-border bg-white/5">
