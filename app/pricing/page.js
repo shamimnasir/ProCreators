@@ -232,6 +232,9 @@ export default function PricingPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {pricingTiers.map((tier, index) => {
               const Icon = tier.icon
+              const isCurrentPlan = currentUser?.plan === tier.id || (!currentUser && tier.id === 'free')
+              const isUpgrade = currentUser?.plan && ['free', 'creator', 'pro'].indexOf(currentUser.plan) < ['free', 'creator', 'pro', 'business'].indexOf(tier.id)
+              
               return (
                 <motion.div
                   key={tier.id}
@@ -242,9 +245,14 @@ export default function PricingPage() {
                   <Card
                     className={`relative h-full flex flex-col ${
                       tier.popular ? 'border-2 border-purple-500 shadow-lg shadow-purple-500/20' : ''
-                    }`}
+                    } ${isCurrentPlan ? 'border-2 border-green-500 shadow-lg shadow-green-500/20' : ''}`}
                   >
-                    {tier.popular && (
+                    {isCurrentPlan && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-4 py-1 text-sm font-medium text-white">
+                        ✓ Current Plan
+                      </div>
+                    )}
+                    {tier.popular && !isCurrentPlan && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-1 text-sm font-medium text-white">
                         Most Popular
                       </div>
@@ -281,12 +289,12 @@ export default function PricingPage() {
                         ))}
                       </ul>
                       <Button
-                        className={`w-full mt-6 ${tier.popular ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : ''}`}
-                        variant={tier.popular ? 'default' : 'outline'}
+                        className={`w-full mt-6 ${tier.popular && !isCurrentPlan ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : ''} ${isCurrentPlan ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                        variant={tier.popular || isCurrentPlan ? 'default' : 'outline'}
                         onClick={() => handleSubscribe(tier.id, tier.name)}
-                        disabled={loading === tier.id || tier.id === 'free'}
+                        disabled={loading === tier.id || isCurrentPlan}
                       >
-                        {loading === tier.id ? 'Processing...' : tier.cta}
+                        {loading === tier.id ? 'Processing...' : isCurrentPlan ? '✓ Current Plan' : isUpgrade ? `Upgrade to ${tier.name}` : tier.cta}
                       </Button>
                     </CardContent>
                   </Card>
