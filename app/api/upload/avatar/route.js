@@ -4,12 +4,21 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
+import { requireAuth } from '@/lib/auth-middleware'
+import { sanitizeFilename } from '@/lib/sanitize'
 
 export async function POST(request) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
+    const userId = auth.userId
+    
     const formData = await request.formData()
     const file = formData.get('file')
-    const userId = formData.get('userId') || 'demo-user-001'
     
     if (!file) {
       return NextResponse.json({ success: false, error: 'No file uploaded' }, { status: 400 })
