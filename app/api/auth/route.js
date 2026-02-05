@@ -3,14 +3,45 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from '@/lib/email'
+import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
+import { sanitizeEmail } from '@/lib/sanitize'
 
-// Simple password hashing (in production use bcrypt)
-const hashPassword = (password) => {
-  return crypto.createHash('sha256').update(password + process.env.SALT || 'procreators').digest('hex')
+// Secure password hashing with bcrypt
+const SALT_ROUNDS = 12
+
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, SALT_ROUNDS)
+}
+
+const verifyPassword = async (password, hash) => {
+  // Support both old SHA256 hashes (for migration) and new bcrypt hashes
+  if (hash && hash.length === 64 && !hash.startsWith('$2')) {
+    // Old SHA256 hash - verify and flag for update
+    const sha256Hash = crypto.createHash('sha256').update(password + (process.env.SALT || 'procreators')).digest('hex')
+    return { valid: sha256Hash === hash, needsUpgrade: true }
+  }
+  // New bcrypt hash
+  const valid = await bcrypt.compare(password, hash)
+  return { valid, needsUpgrade: false }
 }
 
 const generateToken = () => crypto.randomBytes(32).toString('hex')
+
+// Password strength validation
+const validatePassword = (password) => {
+  if (!password || password.length < 8) {
+    return { valid: false, error: 'Password must be at least 8 characters' }
+  }
+  if (password.length > 128) {
+    return { valid: false, error: 'Password too long' }
+  }
+  // Check for at least one number and one letter
+  if (!/[0-9]/.test(password) || !/[a-zA-Z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one letter and one number' }
+  }
+  return { valid: true }
+}
 
 export async function POST(request) {
   try {
