@@ -741,7 +741,7 @@ export default function Home() {
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Success closely tracks how well you build a product that is so good, people spontaneously tell their friends about it.</span>
               </blockquote>
               <p className="mt-6 text-lg text-muted-foreground">
-                If people naturally refer others, you've accomplished roughly <span className="text-green-400 font-bold">80% of what's needed</span> to be a very successful company.
+                When creators naturally share their wins with other creators, that's when you know you've built something <span className="text-green-400 font-bold">truly special</span>.
               </p>
               
               {/* Key Message Highlights */}
@@ -758,6 +758,18 @@ export default function Home() {
                   </div>
                   <p className="text-foreground font-semibold">Stop Fighting Software. Start Publishing.</p>
                 </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <Target className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-foreground font-semibold">Your Unfair Advantage in the Attention Economy.</p>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center shrink-0">
+                    <Layers className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-foreground font-semibold">One Tool. Infinite Possibilities.</p>
+                </div>
               </div>
             </motion.div>
 
@@ -773,9 +785,9 @@ export default function Home() {
                 <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center">
                   <Heart className="h-8 w-8 text-green-400" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">User Delight</h3>
+                <h3 className="text-xl font-bold text-foreground mb-3">Creator-First Design</h3>
                 <p className="text-muted-foreground">
-                  We focus on building products people <span className="text-green-400 font-semibold">genuinely love</span> — not just use. That leads to spontaneous referrals.
+                  Every feature is built for <span className="text-green-400 font-semibold">real creators like you</span> — not tech experts. If it doesn't save you time, we don't ship it.
                 </p>
               </motion.div>
 
@@ -789,9 +801,9 @@ export default function Home() {
                 <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 flex items-center justify-center">
                   <Zap className="h-8 w-8 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Dead Simple</h3>
+                <h3 className="text-xl font-bold text-foreground mb-3">Stupidly Simple</h3>
                 <p className="text-muted-foreground">
-                  Our product is <span className="text-blue-400 font-semibold">easy to explain in a few words</span>: "70+ AI tools for content creators. One platform. $19/month."
+                  <span className="text-blue-400 font-semibold">Click. Create. Publish.</span> That's it. No tutorials needed. No learning curve. Just results in minutes.
                 </p>
               </motion.div>
 
@@ -805,9 +817,9 @@ export default function Home() {
                 <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 border border-[#7c3aed]/30 flex items-center justify-center">
                   <Users className="h-8 w-8 text-[#a78bfa]" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Viral Word-of-Mouth</h3>
+                <h3 className="text-xl font-bold text-foreground mb-3">Creator Community</h3>
                 <p className="text-muted-foreground">
-                  Like Google & Facebook, we grow because <span className="text-[#a78bfa] font-semibold">users recommend us to friends</span>. That's the real growth driver.
+                  Our best marketing? <span className="text-[#a78bfa] font-semibold">Creators showing off their wins.</span> When you create something amazing, you can't help but share it.
                 </p>
               </motion.div>
             </div>
@@ -821,12 +833,12 @@ export default function Home() {
               className="text-center"
             >
               <p className="text-lg text-muted-foreground mb-6">
-                Most founders search for a mysterious "secret" to growth. <br/>
-                <span className="text-foreground font-medium">The real secret?</span> Build something so good that users can't stop talking about it.
+                Most creators struggle with expensive tools and steep learning curves. <br/>
+                <span className="text-foreground font-medium">We changed that.</span> Now you can create like a pro team — without being one.
               </p>
               <div className="inline-flex items-center gap-2 text-sm text-yellow-400">
                 <Award className="h-4 w-4" />
-                That's exactly what we did with ProCreators.
+                That's the ProCreators difference.
                 <Award className="h-4 w-4" />
               </div>
             </motion.div>
