@@ -8,6 +8,31 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
+import { PricingSchema } from '@/components/SchemaMarkup'
+
+// Pricing FAQs for schema
+const pricingFAQs = [
+  {
+    question: 'What are credits and how do they work?',
+    answer: 'Credits are the currency used to generate content on ProCreators. Each tool costs a certain number of credits based on complexity. Monthly subscription credits reset each billing cycle, while purchased credits never expire.'
+  },
+  {
+    question: 'Can I upgrade or downgrade my plan?',
+    answer: 'Yes! You can upgrade your plan at any time and the new credits will be added immediately. When downgrading, the change takes effect at the start of your next billing cycle.'
+  },
+  {
+    question: 'What happens to unused credits?',
+    answer: 'Monthly subscription credits reset at the start of each billing cycle. However, any credits you purchase separately never expire and roll over indefinitely.'
+  },
+  {
+    question: 'Is there a free trial?',
+    answer: 'Yes! Every new user gets 50 free credits to try all our tools. No credit card required.'
+  },
+  {
+    question: 'How do subscriber discounts work?',
+    answer: 'Subscribers get discounts when purchasing extra credits: Creator plan gets 5% off, Pro plan gets 10% off, and Business plan gets 15% off all credit purchases.'
+  }
+]
 
 const pricingTiers = [
   {
