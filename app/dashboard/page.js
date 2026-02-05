@@ -78,8 +78,8 @@ export default function DashboardPage() {
       try {
         setLoading(true)
         
-        // Try to get user from session
-        let currentUserId = 'demo-user-001'
+        // Try to get user from session - NO FALLBACK TO DEMO USER
+        let currentUserId = null
         const sessionToken = localStorage.getItem('sessionToken')
         
         if (sessionToken) {
@@ -92,10 +92,18 @@ export default function DashboardPage() {
           }
         }
         
+        // If no authenticated user, redirect to login
+        if (!currentUserId) {
+          window.location.href = '/login?redirect=/dashboard'
+          return
+        }
+        
         setUserId(currentUserId)
         
         // Fetch user-specific stats
-        const response = await fetch(`/api/dashboard/stats?userId=${currentUserId}`)
+        const response = await fetch(`/api/dashboard/stats?userId=${currentUserId}`, {
+          headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+        })
         const data = await response.json()
         
         if (data.success) {
