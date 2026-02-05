@@ -14,8 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-const DEMO_USER_ID = 'demo-user-001'
-
+// SECURITY: No demo user fallback
 export default function BillingPage() {
   const [membershipCredits, setMembershipCredits] = useState(0)
   const [purchasedCredits, setPurchasedCredits] = useState(0)
@@ -26,7 +25,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(null)
   const [transactions, setTransactions] = useState([])
-  const [userId, setUserId] = useState(DEMO_USER_ID)
+  const [userId, setUserId] = useState(null)
   const { toast } = useToast()
   const searchParams = useSearchParams()
 
@@ -36,7 +35,7 @@ export default function BillingPage() {
   }, [])
 
   const initUserAndFetchData = async () => {
-    let currentUserId = DEMO_USER_ID
+    let currentUserId = null
     
     try {
       const sessionToken = localStorage.getItem('sessionToken')
@@ -50,8 +49,16 @@ export default function BillingPage() {
           setUserId(currentUserId)
         }
       }
+      
+      // SECURITY: Redirect to login if not authenticated
+      if (!currentUserId) {
+        window.location.href = '/login?redirect=/dashboard/billing'
+        return
+      }
     } catch (error) {
       console.error('Error getting user:', error)
+      window.location.href = '/login?redirect=/dashboard/billing'
+      return
     }
     
     // Now fetch data with the correct userId - packages need userId for discounts
