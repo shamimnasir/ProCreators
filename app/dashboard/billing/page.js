@@ -116,10 +116,11 @@ export default function BillingPage() {
     }
   }
 
-  const fetchPackages = async () => {
+  const fetchPackagesWithDiscount = async (uid) => {
+    const currentUserId = uid || userId
     try {
       // Pass userId to get subscriber-specific discounts
-      const res = await fetch(`/api/stripe/checkout?userId=${userId}`)
+      const res = await fetch(`/api/stripe/checkout?userId=${currentUserId}`)
       const data = await res.json()
       if (data.success) {
         setPackages(data.packages)
