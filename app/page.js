@@ -787,7 +787,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Creator-First Design</h3>
                 <p className="text-muted-foreground">
-                  Every feature is built for <span className="text-green-400 font-semibold">real creators like you</span> — not tech experts. If it doesn't save you time, we don't ship it.
+                  Every feature is built for <span className="text-green-400 font-semibold">real creators like you</span> - not tech experts. If it doesn't save you time, we don't ship it.
                 </p>
               </motion.div>
 
