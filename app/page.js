@@ -444,8 +444,8 @@ export default function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
-                <span>🤯</span>
-                This Is INSANE
+                <Lightbulb className="h-4 w-4" />
+                This Is Incredible
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Stop Paying for </span>
