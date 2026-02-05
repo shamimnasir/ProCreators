@@ -122,6 +122,13 @@ export default function AdminUsersPage() {
     }
   }
 
+  const getRoleBadge = (role) => {
+    if (role === 'admin') {
+      return <Badge className="bg-red-600">Admin</Badge>
+    }
+    return null
+  }
+
   const getPlanBadge = (plan) => {
     const colors = {
       free: 'bg-gray-500',
