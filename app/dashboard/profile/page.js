@@ -124,6 +124,16 @@ export default function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // SECURITY: Require authentication for uploads
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to upload photos",
+        variant: "destructive"
+      })
+      return
+    }
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
@@ -148,10 +158,12 @@ export default function ProfilePage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('userId', user?.id || 'demo-user-001')
+      formData.append('userId', user.id)
 
+      const sessionToken = localStorage.getItem('sessionToken')
       const res = await fetch('/api/upload/avatar', {
         method: 'POST',
+        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {},
         body: formData
       })
 
