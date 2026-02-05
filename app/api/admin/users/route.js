@@ -68,7 +68,7 @@ export async function GET(request) {
     const [users, total] = await Promise.all([
       db.collection('users')
         .find(query)
-        .project({ password: 0 }) // Exclude passwords
+        .project({ password: 0, passwordHash: 0 }) // Exclude passwords
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -76,13 +76,30 @@ export async function GET(request) {
       db.collection('users').countDocuments(query)
     ])
     
-    // Get stats
+    // Add computed totalCredits to each user (membershipCredits + purchasedCredits)
+    const usersWithCredits = users.map(user => ({
+      ...user,
+      // Calculate total credits from both sources
+      totalCredits: (user.membershipCredits || 0) + (user.purchasedCredits || 0),
+      // Keep individual breakdown for display
+      membershipCredits: user.membershipCredits || 0,
+      purchasedCredits: user.purchasedCredits || 0
+    }))
+    
+    // Get stats - use new credit fields
     const stats = await db.collection('users').aggregate([
       {
         $group: {
           _id: '$plan',
           count: { $sum: 1 },
-          totalCredits: { $sum: '$credits' },
+          totalCredits: { 
+            $sum: { 
+              $add: [
+                { $ifNull: ['$membershipCredits', 0] }, 
+                { $ifNull: ['$purchasedCredits', 0] }
+              ] 
+            } 
+          },
           totalUsed: { $sum: '$totalCreditsUsed' }
         }
       }
@@ -90,7 +107,7 @@ export async function GET(request) {
     
     return NextResponse.json({
       success: true,
-      users,
+      users: usersWithCredits,
       pagination: {
         page,
         limit,
