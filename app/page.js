@@ -681,14 +681,14 @@ export default function Home() {
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
                 <CircleDollarSign className="h-4 w-4" />
-                Simple, Transparent Pricing
+                Ridiculously Affordable
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Pick Your </span>
                 <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Addiction Level</span>
               </h2>
               <p className="mb-8 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Start free. Upgrade as you grow. No hidden fees.
+                Start free. Upgrade when you're <span className="text-yellow-400 font-semibold">hooked</span>. (Spoiler: You will be)
               </p>
               <div className="inline-flex rounded-lg border border-white/20 p-1 bg-white/5">
                 <Button
