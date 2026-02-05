@@ -832,6 +832,9 @@ export default function AIVideoStudioPage() {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Extra content from Page Manager */}
+        <ToolPageExtraContent toolId="ai-video-studio" />
       </div>
     )
   }
