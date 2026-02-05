@@ -41,32 +41,25 @@ export default function ProfilePage() {
           
           // Fetch user-specific stats
           fetchUserStats(data.user.id)
+          setLoading(false)
           return
         }
       }
       
-      // Fallback: Load demo user data if no session
-      const demoRes = await fetch('/api/user/profile?userId=demo-user-001')
-      if (demoRes.ok) {
-        const demoData = await demoRes.json()
-        if (demoData.user) {
-          setUser({ id: 'demo-user-001', ...demoData.user })
-          setName(demoData.user.name || 'Demo User')
-          setEmail(demoData.user.email || 'demo@example.com')
-          setAvatarUrl(demoData.user.avatarUrl || '')
-          fetchUserStats('demo-user-001')
-        }
-      }
+      // SECURITY: Redirect to login if not authenticated
+      window.location.href = '/login?redirect=/dashboard/profile'
     } catch (error) {
       console.error('Error fetching profile:', error)
-    } finally {
-      setLoading(false)
+      window.location.href = '/login?redirect=/dashboard/profile'
     }
   }
 
   const fetchUserStats = async (userId) => {
     try {
-      const res = await fetch(`/api/user/stats?userId=${userId}`)
+      const sessionToken = localStorage.getItem('sessionToken')
+      const res = await fetch(`/api/user/stats?userId=${userId}`, {
+        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      })
       const data = await res.json()
       if (data.success) {
         setStats(data.stats)
@@ -77,8 +70,15 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
-    // Get userId either from user state or fallback to demo
-    const userId = user?.id || 'demo-user-001'
+    // SECURITY: Only allow save if user is authenticated
+    if (!user?.id) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to save changes',
+        variant: 'destructive'
+      })
+      return
+    }
     
     setSaving(true)
     try {
@@ -90,7 +90,7 @@ export default function ProfilePage() {
           ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
         },
         body: JSON.stringify({ 
-          userId,
+          userId: user.id,
           name,
           avatarUrl
         })
