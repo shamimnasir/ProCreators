@@ -6,6 +6,8 @@ import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from 
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { sanitizeEmail } from '@/lib/sanitize'
+import { logAuthSuccess, logAuthFailure, checkBruteForce, SECURITY_EVENTS, logSecurityEvent } from '@/lib/security-logger'
+import { validateRequest, authSchema } from '@/lib/validation'
 
 // Secure password hashing with bcrypt
 const SALT_ROUNDS = 12
