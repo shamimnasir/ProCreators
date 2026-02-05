@@ -510,11 +510,20 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                Why Creators Are OBSESSED 🤯
+              <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/20 border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-400 mb-6">
+                <span>🧠</span>
+                The Dopamine Factory
+              </div>
+              <h2 className="mb-4 text-4xl md:text-6xl font-bold">
+                <span className="text-foreground">Why </span>
+                <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">50,000+ Creators</span>
+                <br />
+                <span className="text-foreground">Can't Stop Using This</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                We didn't build just another AI tool. We built the <span className="text-[#7c3aed] font-semibold">Swiss Army Knife</span> of content creation.
+                It's not magic. It's just <span className="text-[#7c3aed] font-bold">criminally good AI</span> that makes you feel like a genius.
+                <br />
+                <span className="text-sm text-yellow-400">(Side effects: Uncontrollable urge to create more content)</span>
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -543,11 +552,21 @@ export default function Home() {
       <section className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] to-[#1a1147]">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-              Built for Every Creator
+            <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
+              <span>💰</span>
+              Built for Money Makers
+            </div>
+            <h2 className="mb-4 text-4xl md:text-6xl font-bold">
+              <span className="text-foreground">Whether You're a </span>
+              <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Beginner</span>
+              <br />
+              <span className="text-foreground">or a </span>
+              <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">7-Figure Creator</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Whether you're solo or leading a team, ProCreators scales with your needs
+              We've got your back. <span className="text-white font-semibold">Zero learning curve.</span> Just results.
+              <br />
+              <span className="text-sm text-green-400">Your success story starts here. 🚀</span>
             </p>
           </div>
           
