@@ -365,8 +365,9 @@ export default function Home() {
               </p>
 
               {/* Subheadline */}
-              <p className="text-lg md:text-xl text-orange-400 font-medium">
-                ⚠️ Once you're in, there's no way out!
+              <p className="text-lg md:text-xl text-orange-400 font-medium flex items-center justify-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Once you're in, there's no way out!
               </p>
 
               {/* CTA Buttons */}
