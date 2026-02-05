@@ -953,7 +953,7 @@ export default function Home() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 md:py-32 bg-gradient-to-b from-[#1a1147] to-[#0a0e27]">
         <div className="container px-6 relative z-10">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
                 <CircleDollarSign className="h-4 w-4" />
