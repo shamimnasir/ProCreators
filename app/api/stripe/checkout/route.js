@@ -89,7 +89,7 @@ export async function GET(request) {
   }
 }
 
-// POST - Create checkout session
+// POST - Create checkout session with subscriber discount
 export async function POST(request) {
   try {
     const body = await request.json()
@@ -126,12 +126,32 @@ export async function POST(request) {
       )
     }
     
+    // Check user's subscription for discount
+    const { db } = await connectToDatabase()
+    const user = await db.collection('users').findOne({ _id: userId })
+    let discount = 0
+    let userPlan = 'free'
+    
+    if (user && user.plan && user.plan !== 'free') {
+      userPlan = user.plan
+      discount = getSubscriberDiscount(user.plan)
+    }
+    
+    // Calculate final price with discount
+    const originalPrice = pack.price
+    const finalPrice = discount > 0 ? Math.round((originalPrice * (1 - discount)) * 100) / 100 : originalPrice
+    
     // Create URLs
     const successUrl = `${originUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`
     const cancelUrl = `${originUrl}/dashboard/billing?canceled=true`
     
     // Create Stripe checkout session using native API
     const stripe = require('stripe')(STRIPE_API_KEY)
+    
+    // Build product description with discount info
+    const description = discount > 0 
+      ? `${pack.credits} credits for ProCreators (${Math.round(discount * 100)}% ${userPlan} discount applied)`
+      : `${pack.credits} credits for ProCreators`
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -140,9 +160,9 @@ export async function POST(request) {
           currency: 'usd',
           product_data: {
             name: pack.name,
-            description: `${pack.credits} credits for ProCreators`,
+            description: description,
           },
-          unit_amount: Math.round(pack.price * 100), // Convert to cents
+          unit_amount: Math.round(finalPrice * 100), // Convert to cents
         },
         quantity: 1,
       }],
@@ -153,12 +173,15 @@ export async function POST(request) {
         userId,
         packageId,
         credits: pack.credits.toString(),
+        originalPrice: originalPrice.toString(),
+        finalPrice: finalPrice.toString(),
+        discount: (discount * 100).toString(),
+        userPlan,
         source: 'procreators_web'
       }
     })
     
     // Store pending transaction in database
-    const { db } = await connectToDatabase()
     await db.collection('payment_transactions').insertOne({
       _id: uuidv4(),
       sessionId: session.id,
@@ -166,7 +189,10 @@ export async function POST(request) {
       packageId,
       packageName: pack.name,
       credits: pack.credits,
-      amount: pack.price,
+      originalAmount: originalPrice,
+      amount: finalPrice,
+      discount: discount * 100,
+      userPlan,
       currency: 'usd',
       status: 'pending',
       paymentStatus: 'initiated',
@@ -177,7 +203,10 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       url: session.url,
-      sessionId: session.id
+      sessionId: session.id,
+      originalPrice,
+      finalPrice,
+      discount: Math.round(discount * 100)
     })
     
   } catch (error) {
