@@ -385,8 +385,9 @@ export default function Home() {
                   size="lg"
                   variant="outline"
                   className="text-lg px-8 py-6 border-2 border-border bg-muted/50 hover:bg-muted text-foreground"
+                  onClick={() => router.push('/dashboard')}
                 >
-                  Book a Demo
+                  Explore Tools
                 </Button>
               </div>
 
