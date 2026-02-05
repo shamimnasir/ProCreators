@@ -767,17 +767,17 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-4xl rounded-3xl border border-[#7c3aed]/50 bg-gradient-to-b from-[#7c3aed]/20 to-transparent p-12 md:p-16 text-center backdrop-blur-sm shadow-2xl shadow-[#7c3aed]/30">
             <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 mb-6">
-              <span className="animate-pulse">⚠️</span>
-              Last Warning Before Addiction
+              <Rocket className="h-4 w-4" />
+              Ready to Transform Your Content?
             </div>
             <h2 className="mb-6 text-4xl md:text-5xl font-bold text-foreground">
-              You've Been Warned. <br/>
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Now Get Addicted.</span>
+              Start Creating <br/>
+              <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Professional Content Today</span>
             </h2>
             <p className="mb-10 text-xl text-muted-foreground">
-              70+ AI tools. One platform. Unlimited creative dopamine. 🧠⚡
+              70+ AI tools. One platform. Unlimited possibilities.
               <br />
-              <span className="text-sm">Your future self will thank you. (Or curse you for not starting sooner)</span>
+              <span className="text-sm">Join thousands of creators who've already transformed their workflow</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -785,12 +785,12 @@ export default function Home() {
                 onClick={() => router.push('/register')}
                 className="text-lg px-12 py-7 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
               >
-                🔥 Get Your First Hit FREE
+                Get Started Free
                 <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">
-              50 free credits • No credit card • Cancel anytime (but you won't want to 😏)
+              50 free credits • No credit card required • Cancel anytime
             </p>
           </div>
         </div>
