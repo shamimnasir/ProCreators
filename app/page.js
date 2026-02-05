@@ -125,37 +125,43 @@ const stats = [
 
 const useCases = [
   {
-    title: '🎬 Content Creators',
+    title: 'Content Creators',
+    icon: Video,
     description: 'Stop struggling with content. Create viral reels, engaging posts, and professional videos that explode your growth.',
     image: '/api/placeholder/400/300',
     features: ['Auto-generate viral hooks', 'AI thumbnails that get clicks', 'Voice clone in any language']
   },
   {
-    title: '📈 Digital Marketers',
+    title: 'Digital Marketers',
+    icon: Megaphone,
     description: 'Scale your campaigns with AI. Create months of content in hours. Yes, your boss will be impressed.',
     image: '/api/placeholder/400/300',
     features: ['SEO-optimized blog posts', 'Ad copy that converts', 'Social media on autopilot']
   },
   {
-    title: '💰 Digital Product Sellers',
+    title: 'Digital Product Sellers',
+    icon: BadgeDollarSign,
     description: 'Create ebooks, planners, coloring books, and courses that sell on Amazon, Etsy, and Gumroad while you sleep.',
     image: '/api/placeholder/400/300',
     features: ['KDP-ready ebooks', 'Print-on-demand designs', 'Course content generator']
   },
   {
-    title: '🏢 Business Owners',
+    title: 'Business Owners',
+    icon: Building2,
     description: 'Stop paying agencies $5000/month. Do it yourself in 10 minutes. We won\'t tell anyone.',
     image: '/api/placeholder/400/300',
     features: ['Professional presentations', 'Business plans & proposals', 'Marketing materials']
   },
   {
-    title: '🎓 Educators & Coaches',
+    title: 'Educators & Coaches',
+    icon: GraduationCap,
     description: 'Create engaging courses, lesson plans, and educational content that your students will actually love.',
     image: '/api/placeholder/400/300',
     features: ['Lesson plan generator', 'Quiz & worksheet maker', 'Video explanations in minutes']
   },
   {
-    title: '🚀 Agencies & Freelancers',
+    title: 'Agencies & Freelancers',
+    icon: Briefcase,
     description: 'Deliver 10x more to your clients without hiring. White-label everything. Charge premium prices.',
     image: '/api/placeholder/400/300',
     features: ['Bulk content creation', 'Client folder management', 'Brand kit templates']
