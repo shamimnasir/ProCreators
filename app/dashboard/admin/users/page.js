@@ -343,6 +343,19 @@ export default function AdminUsersPage() {
                                 <ShieldCheck className="h-4 w-4 mr-2" /> Activate User
                               </Button>
                             )}
+                            <hr className="my-2" />
+                            {user.role === 'admin' ? (
+                              <Button variant="outline" className="justify-start text-orange-600" onClick={() => openActionDialog(user, 'remove_admin')}>
+                                <Shield className="h-4 w-4 mr-2" /> Remove Admin
+                              </Button>
+                            ) : (
+                              <Button variant="outline" className="justify-start text-blue-600" onClick={() => openActionDialog(user, 'make_admin')}>
+                                <Shield className="h-4 w-4 mr-2" /> Make Admin
+                              </Button>
+                            )}
+                            <Button variant="outline" className="justify-start text-red-700" onClick={() => openActionDialog(user, 'delete_user')}>
+                              <Trash2 className="h-4 w-4 mr-2" /> Delete User
+                            </Button>
                           </div>
                         </DialogContent>
                       </Dialog>
