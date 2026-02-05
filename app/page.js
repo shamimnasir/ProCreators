@@ -32,6 +32,31 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { Logo } from '@/components/ui/Logo'
 import { FeatureIcon } from '@/components/ui/FeatureIcon'
+import { HomepageSchema } from '@/components/SchemaMarkup'
+
+// Homepage FAQ data for schema
+const homepageFAQs = [
+  {
+    question: 'What is ProCreators?',
+    answer: 'ProCreators is an AI-powered content creation platform that helps creators make professional videos, images, ebooks, social media posts, and more in minutes using advanced artificial intelligence.'
+  },
+  {
+    question: 'How much does ProCreators cost?',
+    answer: 'ProCreators offers a free plan with 50 credits to try all tools. Paid plans start at $19/month for Creator (400 credits), $49/month for Pro (1000 credits), and $99/month for Business (3000 credits).'
+  },
+  {
+    question: 'What types of content can I create with ProCreators?',
+    answer: 'You can create AI-generated videos, Instagram/TikTok reels, YouTube thumbnails, ebooks, blog posts, social media threads, carousels, podcast covers, business plans, educational materials, and 70+ other content types.'
+  },
+  {
+    question: 'Do I need technical skills to use ProCreators?',
+    answer: 'No technical skills required! ProCreators is designed for everyone - from beginners to professionals. Our AI handles all the complex work while you focus on your creative vision.'
+  },
+  {
+    question: 'Can I cancel my subscription anytime?',
+    answer: 'Yes, you can cancel your subscription at any time with no questions asked. Your remaining credits stay valid until the end of your billing period.'
+  }
+]
 
 const tools = [
   { name: 'Thread Generator', icon: MessageSquare },
