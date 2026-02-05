@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
+import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId') || 'demo-user-001'
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
+    const userId = auth.userId
     
     const libraryCollection = await getCollection('library')
     const now = new Date()
