@@ -2,30 +2,17 @@
 import { NextResponse } from 'next/server'
 import { getUserMembership, MEMBERSHIP_PLANS } from '@/lib/membership'
 import { connectToDatabase } from '@/lib/mongodb'
+import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url)
-    let userId = searchParams.get('userId')
-    
-    // Try to get userId from auth header if not provided
-    if (!userId) {
-      const authHeader = request.headers.get('Authorization')
-      if (authHeader?.startsWith('Bearer ')) {
-        try {
-          const jwt = require('jsonwebtoken')
-          const token = authHeader.substring(7)
-          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
-          userId = decoded.userId
-        } catch (e) {
-          // Token invalid
-        }
-      }
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
     }
     
-    if (!userId) {
-      userId = 'demo-user-001'
-    }
+    const userId = auth.userId
     
     const { db } = await connectToDatabase()
     const user = await db.collection('users').findOne({ _id: userId })
