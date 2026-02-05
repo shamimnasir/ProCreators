@@ -132,6 +132,18 @@ const useCases = [
     image: '/api/placeholder/400/300',
     features: ['Professional presentations', 'Business plans & proposals', 'Marketing materials']
   },
+  {
+    title: '🎓 Educators & Coaches',
+    description: 'Create engaging courses, lesson plans, and educational content that your students will actually love.',
+    image: '/api/placeholder/400/300',
+    features: ['Lesson plan generator', 'Quiz & worksheet maker', 'Video explanations in minutes']
+  },
+  {
+    title: '🚀 Agencies & Freelancers',
+    description: 'Deliver 10x more to your clients without hiring. White-label everything. Charge premium prices.',
+    image: '/api/placeholder/400/300',
+    features: ['Bulk content creation', 'Client folder management', 'Brand kit templates']
+  },
 ]
 
 const testimonials = [
