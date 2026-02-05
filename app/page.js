@@ -25,7 +25,23 @@ import {
   Rocket,
   Star,
   BarChart3,
-  FileText
+  FileText,
+  AlertTriangle,
+  Brain,
+  DollarSign,
+  Heart,
+  Target,
+  Layers,
+  Globe,
+  GraduationCap,
+  Building2,
+  Briefcase,
+  PenTool,
+  Palette,
+  Megaphone,
+  BadgeDollarSign,
+  Lightbulb,
+  CircleDollarSign
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
