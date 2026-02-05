@@ -362,7 +362,7 @@ export default function Home() {
               <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
                 It solves <span className="text-foreground font-semibold">ALL the problems</span> of Creators, Businesses, Educators, Students & Job Seekers in <span className="text-[#7c3aed] font-bold">ONE place</span>
                 <br />
-                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-yellow-400 font-bold">CREATOR DOPAMINES</span>! 🧠⚡</span>
+                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-yellow-400 font-bold">CREATOR DOPAMINES</span>!</span>
               </p>
 
               {/* Subheadline */}
