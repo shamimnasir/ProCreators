@@ -443,7 +443,7 @@ export default function Home() {
       {/* All Tools Section - Niche Based */}
       <section id="tools" className="py-20 md:py-32 relative">
         <div className="container px-6 relative z-10">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
                 <Lightbulb className="h-4 w-4" />
