@@ -275,6 +275,65 @@ export async function POST(request) {
         return NextResponse.json({ success: true, message: 'Suspicious flag cleared' })
       }
       
+      case 'delete_user': {
+        // Delete user permanently
+        const { confirmEmail } = params
+        const user = await db.collection('users').findOne({ _id: userId })
+        
+        if (!user) {
+          return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 })
+        }
+        
+        // Safety check - require email confirmation
+        if (confirmEmail !== user.email) {
+          return NextResponse.json({ success: false, error: 'Email confirmation does not match' }, { status: 400 })
+        }
+        
+        // Archive user data before deletion
+        await db.collection('deleted_users').insertOne({
+          ...user,
+          deletedAt: new Date(),
+          deletedBy: adminId
+        })
+        
+        // Delete user's data
+        await Promise.all([
+          db.collection('users').deleteOne({ _id: userId }),
+          db.collection('credit_transactions').deleteMany({ userId }),
+          db.collection('payment_transactions').deleteMany({ userId }),
+          db.collection('generations').deleteMany({ userId })
+        ])
+        
+        return NextResponse.json({ success: true, message: 'User deleted permanently' })
+      }
+      
+      case 'make_admin': {
+        // Make user an admin
+        await db.collection('users').updateOne(
+          { _id: userId },
+          { 
+            $set: { 
+              role: 'admin',
+              madeAdminAt: new Date(),
+              madeAdminBy: adminId
+            }
+          }
+        )
+        return NextResponse.json({ success: true, message: 'User is now an admin' })
+      }
+      
+      case 'remove_admin': {
+        // Remove admin privileges
+        await db.collection('users').updateOne(
+          { _id: userId },
+          { 
+            $set: { role: 'user' },
+            $unset: { madeAdminAt: '', madeAdminBy: '' }
+          }
+        )
+        return NextResponse.json({ success: true, message: 'Admin privileges removed' })
+      }
+      
       default:
         return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
     }
