@@ -684,7 +684,7 @@ export default function Home() {
                 <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Addiction Level</span>
               </h2>
               <p className="mb-8 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Start free. Upgrade when you're <span className="text-yellow-400 font-semibold">hooked</span>. (Spoiler: You will be 😈)
+                Start free. Upgrade as you grow. No hidden fees.
               </p>
               <div className="inline-flex rounded-lg border border-white/20 p-1 bg-white/5">
                 <Button
