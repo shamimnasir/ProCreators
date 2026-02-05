@@ -392,10 +392,11 @@ export default function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                22 Powerful Tools. Endless Possibilities.
+                70+ AI Tools. Your Content Empire Awaits.
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to create, automate, and scale your content across every platform
+                Everything you need to create, automate, and scale your content across every platform.<br/>
+                <span className="text-sm text-[#7c3aed]">Warning: Side effects include explosive growth and excessive dopamine.</span>
               </p>
             </div>
 
