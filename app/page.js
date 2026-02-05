@@ -677,7 +677,8 @@ export default function Home() {
                     <h3 className="mb-3 text-2xl font-bold text-foreground">{tier.name}</h3>
                     <div className="flex items-baseline">
                       <span className="text-5xl font-bold text-foreground">{tier.price}</span>
-                      <span className="ml-2 text-muted-foreground">/month</span>
+                      {tier.period && <span className="ml-1 text-muted-foreground">{tier.period}</span>}
+                      {tier.name === 'Free' && <span className="ml-2 text-green-400 text-sm">forever</span>}
                     </div>
                   </div>
                   <ul className="mb-8 space-y-4">
