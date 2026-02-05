@@ -456,7 +456,7 @@ export default function Home() {
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-green-400 font-bold">$19/month</span>
                 <br />
-                <span className="text-sm text-yellow-400">Your wallet just did a happy dance 💃</span>
+                <span className="text-sm text-[#a78bfa]">Save thousands on your content creation stack</span>
               </p>
             </div>
 
