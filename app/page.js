@@ -420,12 +420,20 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                70+ AI Tools. Your Content Empire Awaits.
+              <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
+                <span>🤯</span>
+                This Is INSANE
+              </div>
+              <h2 className="mb-4 text-4xl md:text-6xl font-bold">
+                <span className="text-foreground">Stop Paying for </span>
+                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through">10 Different Tools</span>
+                <br />
+                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Get 70+ Tools in ONE</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to create, automate, and scale your content across every platform.<br/>
-                <span className="text-sm text-[#7c3aed]">Warning: Side effects include explosive growth and excessive dopamine.</span>
+                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-green-400 font-bold">$19/month</span>
+                <br />
+                <span className="text-sm text-yellow-400">Your wallet just did a happy dance 💃</span>
               </p>
             </div>
 
