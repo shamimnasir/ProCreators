@@ -762,7 +762,7 @@ export default function Home() {
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shrink-0">
                     <Target className="h-5 w-5 text-white" />
                   </div>
-                  <p className="text-foreground font-semibold">Your Unfair Advantage in the Attention Economy.</p>
+                  <p className="text-foreground font-semibold">Unfair Advantage in the Attention Economy.</p>
                 </div>
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center shrink-0">
