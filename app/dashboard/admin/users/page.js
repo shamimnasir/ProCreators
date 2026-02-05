@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Users, Search, RefreshCw, Loader2, Ban, ShieldCheck, 
   CreditCard, Mail, Calendar, Activity, AlertTriangle,
-  ChevronLeft, ChevronRight, Plus, Minus, UserCog
+  ChevronLeft, ChevronRight, Plus, Minus, UserCog, Trash2, Shield
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
