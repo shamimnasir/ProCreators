@@ -208,17 +208,6 @@ export default function LoginPage() {
                 </span>
               </button>
             </div>
-            
-            {/* Demo mode notice */}
-            <div className="mt-6 p-3 bg-muted rounded-lg">
-              <p className="text-xs text-muted-foreground text-center">
-                <strong>Demo Mode:</strong> You can also{' '}
-                <Link href="/dashboard" className="text-primary hover:underline">
-                  skip to dashboard
-                </Link>{' '}
-                to try the tools with demo credits.
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>
