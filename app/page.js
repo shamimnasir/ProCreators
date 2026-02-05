@@ -118,9 +118,9 @@ const features = [
 ]
 
 const stats = [
-  { number: '70+', label: 'AI Tools', icon: Sparkles },
+  { number: '70+', label: 'AI Tools', icon: Layers },
   { number: '1M+', label: 'Content Created', icon: FileText },
-  { number: '99%', label: 'Addiction Rate 😈', icon: Star },
+  { number: '99%', label: 'Addiction Rate', icon: Heart },
   { number: '∞', label: 'Creative Possibilities', icon: Rocket },
 ]
 
