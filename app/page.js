@@ -360,7 +360,7 @@ export default function Home() {
 
               {/* H2 - Expanded Benefits */}
               <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
-                It solves <span className="text-foreground font-semibold">ALL the problems</span> of Content Creators, Marketers, Digital Product Makers & Business Owners in <span className="text-[#7c3aed] font-bold">ONE place</span>
+                It solves <span className="text-foreground font-semibold">ALL the problems</span> of Creators, Marketers, Educators, Students & Job Seekers in <span className="text-[#7c3aed] font-bold">ONE place</span>
                 <br />
                 <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-yellow-400 font-bold">CREATOR DOPAMINES</span>! 🧠⚡</span>
               </p>
