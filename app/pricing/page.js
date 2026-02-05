@@ -342,7 +342,7 @@ export default function PricingPage() {
               <div className="p-4 rounded-lg border">
                 <h3 className="font-semibold mb-2">What happens if I run out of credits?</h3>
                 <p className="text-sm text-muted-foreground">
-                  You can always buy additional credit packs. Subscribers enjoy 10-30% discounts on credit purchases depending on their plan level.
+                  You can always buy additional credit packs. Subscribers enjoy 5-15% discounts on credit purchases depending on their plan level.
                 </p>
               </div>
             </div>
