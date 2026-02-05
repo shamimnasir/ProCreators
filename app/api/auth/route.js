@@ -278,6 +278,12 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: 'Token and new password required' }, { status: 400 })
         }
         
+        // Validate new password strength
+        const passwordCheck = validatePassword(newPassword)
+        if (!passwordCheck.valid) {
+          return NextResponse.json({ success: false, error: passwordCheck.error }, { status: 400 })
+        }
+        
         const user = await db.collection('users').findOne({
           resetToken: token,
           resetTokenExpiry: { $gt: new Date() }
@@ -287,10 +293,13 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: 'Invalid or expired reset token' }, { status: 400 })
         }
         
+        // Hash new password with bcrypt
+        const newHash = await hashPassword(newPassword)
+        
         await db.collection('users').updateOne(
           { _id: user._id },
           {
-            $set: { passwordHash: hashPassword(newPassword) },
+            $set: { passwordHash: newHash, passwordChangedAt: new Date() },
             $unset: { resetToken: '', resetTokenExpiry: '' }
           }
         )
