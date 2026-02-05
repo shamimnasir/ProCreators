@@ -282,6 +282,7 @@ export default function AdminUsersPage() {
                   
                   <div className="flex items-center gap-4">
                     {getStatusBadge(user.accountStatus)}
+                    {getRoleBadge(user.role)}
                     {getPlanBadge(user.plan)}
                     
                     <div className="text-right">
