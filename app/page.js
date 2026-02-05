@@ -672,11 +672,18 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#7c3aed]/20 via-[#a78bfa]/20 to-[#7c3aed]/20"></div>
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-4xl rounded-3xl border border-[#7c3aed]/50 bg-gradient-to-b from-[#7c3aed]/20 to-transparent p-12 md:p-16 text-center backdrop-blur-sm shadow-2xl shadow-[#7c3aed]/30">
+            <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 mb-6">
+              <span className="animate-pulse">⚠️</span>
+              Last Warning Before Addiction
+            </div>
             <h2 className="mb-6 text-4xl md:text-5xl font-bold text-foreground">
-              Ready to Dominate Content Creation?
+              You've Been Warned. <br/>
+              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Now Get Addicted.</span>
             </h2>
             <p className="mb-10 text-xl text-muted-foreground">
-              Join thousands of creators already building their empires with ProCreators
+              70+ AI tools. One platform. Unlimited creative dopamine. 🧠⚡
+              <br />
+              <span className="text-sm">Your future self will thank you. (Or curse you for not starting sooner)</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -684,19 +691,12 @@ export default function Home() {
                 onClick={() => router.push('/register')}
                 className="text-lg px-12 py-7 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
               >
-                Start Your Free Trial
+                🔥 Get Your First Hit FREE
                 <ArrowRight className="ml-3 h-5 w-5" />
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="text-lg px-12 py-7 border-2 border-white/40 bg-white/10 hover:bg-white/20 text-foreground"
-              >
-                Talk to Sales
               </Button>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">
-              No credit card required • 14-day free trial • Cancel anytime
+              50 free credits • No credit card • Cancel anytime (but you won't want to 😏)
             </p>
           </div>
         </div>
