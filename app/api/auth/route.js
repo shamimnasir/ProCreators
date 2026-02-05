@@ -59,8 +59,20 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: 'Email and password required' }, { status: 400 })
         }
         
+        // Validate password strength
+        const passwordCheck = validatePassword(password)
+        if (!passwordCheck.valid) {
+          return NextResponse.json({ success: false, error: passwordCheck.error }, { status: 400 })
+        }
+        
+        // Sanitize email
+        const sanitizedEmail = sanitizeEmail(email)
+        if (!sanitizedEmail || !sanitizedEmail.includes('@')) {
+          return NextResponse.json({ success: false, error: 'Invalid email address' }, { status: 400 })
+        }
+        
         // Check if user exists
-        const existingUser = await db.collection('users').findOne({ email: email.toLowerCase() })
+        const existingUser = await db.collection('users').findOne({ email: sanitizedEmail })
         if (existingUser) {
           return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 400 })
         }
@@ -70,13 +82,14 @@ export async function POST(request) {
         const tokenExpiry = new Date()
         tokenExpiry.setHours(tokenExpiry.getHours() + 24) // 24 hour expiry
         
-        // Create user
+        // Create user with bcrypt hashed password
         const userId = uuidv4()
+        const hashedPassword = await hashPassword(password)
         const newUser = {
           _id: userId,
-          email: email.toLowerCase(),
-          name: name || '',
-          passwordHash: hashPassword(password),
+          email: sanitizedEmail,
+          name: (name || '').substring(0, 100).trim(),
+          passwordHash: hashedPassword,
           credits: 50, // Free starter credits
           plan: 'free',
           emailVerified: false,
