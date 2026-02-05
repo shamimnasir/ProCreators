@@ -699,7 +699,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why ProCreators Works - Philosophy Section */}
+      {/* #1 Reason We Built ProCreators - Philosophy Section */}
       <section className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] via-[#1a1147] to-[#0a0e27] relative overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-30">
@@ -712,13 +712,14 @@ export default function Home() {
             {/* Section Header */}
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
-                <Sparkles className="h-4 w-4" />
+                <Award className="h-4 w-4" />
                 Our Philosophy
               </div>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                <span className="text-foreground">Why </span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">#1 Reason</span>
+                <span className="text-foreground"> Why We Built </span>
+                <br />
                 <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">ProCreators</span>
-                <span className="text-foreground"> Works</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 We built something so good, you'll <span className="text-foreground font-semibold">spontaneously tell your friends</span> about it.
@@ -734,14 +735,30 @@ export default function Home() {
               className="relative rounded-3xl border border-[#7c3aed]/30 bg-gradient-to-b from-[#7c3aed]/10 to-transparent p-8 md:p-12 mb-12 backdrop-blur-sm"
             >
               <div className="absolute -top-4 left-8 bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] text-white text-sm font-bold px-4 py-2 rounded-full">
-                The Core Lesson
+                The Core Truth
               </div>
               <blockquote className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed mt-4">
-                "The single most important lesson for startups: <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">success closely tracks how well you build a product that is so good, people spontaneously tell their friends about it.</span>"
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Success closely tracks how well you build a product that is so good, people spontaneously tell their friends about it.</span>
               </blockquote>
               <p className="mt-6 text-lg text-muted-foreground">
                 If people naturally refer others, you've accomplished roughly <span className="text-green-400 font-bold">80% of what's needed</span> to be a very successful company.
               </p>
+              
+              {/* Key Message Highlights */}
+              <div className="mt-8 grid md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <X className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-foreground font-semibold">No Camera. No Editing. No Burnout.</p>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shrink-0">
+                    <PlayCircle className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-foreground font-semibold">Stop Fighting Software. Start Publishing.</p>
+                </div>
+              </div>
             </motion.div>
 
             {/* Three Pillars */}
@@ -808,9 +825,9 @@ export default function Home() {
                 <span className="text-foreground font-medium">The real secret?</span> Build something so good that users can't stop talking about it.
               </p>
               <div className="inline-flex items-center gap-2 text-sm text-yellow-400">
-                <Sparkles className="h-4 w-4" />
+                <Award className="h-4 w-4" />
                 That's exactly what we did with ProCreators.
-                <Sparkles className="h-4 w-4" />
+                <Award className="h-4 w-4" />
               </div>
             </motion.div>
           </div>
