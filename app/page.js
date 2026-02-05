@@ -401,36 +401,33 @@ export default function Home() {
 
             {/* Tool Categories */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">All Tools (22)</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Video & Audio (6)</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Image & Design (6)</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Text Content (6)</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">Digital Products (2)</Button>
+              <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">All Tools (70+)</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">🎬 Video & Audio</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">🖼️ Image & Design</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">✍️ Writing & Content</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">📚 Digital Products</Button>
+              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">📱 Social Media</Button>
             </div>
 
             {/* Tools Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
               {[
-                { name: 'Auto Subtitles & Captions', desc: 'Add AI-powered subtitles to any video', icon: MessageSquare, color: 'from-cyan-500 to-blue-500' },
-                { name: 'Script-to-Ad Generator', desc: 'Generate complete ads with script & voiceover', icon: Film, color: 'from-pink-500 to-rose-500' },
-                { name: 'Reels & Short Videos', desc: 'Create viral reels with AI scenes & voiceover', icon: Video, color: 'from-orange-500 to-red-500' },
-                { name: 'Talking Head Videos', desc: 'AI avatars that speak your script', icon: Users, color: 'from-green-500 to-emerald-500' },
-                { name: 'Video Editor', desc: 'Trim, merge, and enhance videos', icon: Film, color: 'from-yellow-500 to-orange-500' },
-                { name: 'Voice Clone', desc: 'Clone any voice for unlimited TTS', icon: Mic, color: 'from-purple-500 to-pink-500' },
-                { name: 'AI Thumbnail Maker', desc: 'Platform-optimized thumbnails with AI', icon: ImageIcon, color: 'from-pink-500 to-purple-500' },
-                { name: 'Photo Cards', desc: 'Beautiful social media cards', icon: ImageIcon, color: 'from-purple-500 to-indigo-500' },
-                { name: 'Learning Cards', desc: 'Educational flashcards & study materials', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
-                { name: 'Carousels', desc: 'Multi-slide social media carousels', icon: ImageIcon, color: 'from-cyan-500 to-teal-500' },
-                { name: 'Image Editor', desc: 'AI-powered image editing & enhancement', icon: ImageIcon, color: 'from-green-500 to-lime-500' },
-                { name: 'Slides Maker', desc: 'Full presentation decks in minutes', icon: Presentation, color: 'from-orange-500 to-amber-500' },
-                { name: 'Quotes Generator', desc: 'Inspiring quotes for social media', icon: Quote, color: 'from-purple-500 to-violet-500' },
-                { name: 'Thread Creator', desc: 'Engaging Twitter/X threads', icon: MessageSquare, color: 'from-blue-500 to-indigo-500' },
-                { name: 'List Maker', desc: 'Comprehensive lists & listicles', icon: FileText, color: 'from-cyan-500 to-sky-500' },
-                { name: 'News Articles', desc: 'Professional news-style content', icon: FileText, color: 'from-red-500 to-pink-500' },
-                { name: 'Long-Form Articles', desc: '1500+ word in-depth content', icon: FileText, color: 'from-amber-500 to-yellow-500' },
-                { name: 'Tutorials', desc: 'Step-by-step how-to guides', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
-                { name: 'Ebook Generator', desc: 'Complete ebooks with chapters & cover', icon: BookOpen, color: 'from-indigo-500 to-blue-500' },
-                { name: 'Storybook Maker', desc: "Children's stories with illustrations", icon: BookOpen, color: 'from-pink-500 to-fuchsia-500' },
+                { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
+                { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
+                { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500', hot: true },
+                { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500', hot: true },
+                { name: 'AI Thumbnail Maker', desc: 'YouTube thumbnails that get clicks. CTR go brrr 📈', icon: ImageIcon, color: 'from-yellow-500 to-orange-500' },
+                { name: 'Blog Writer Pro', desc: 'SEO-optimized articles that rank. Google loves it!', icon: FileText, color: 'from-blue-500 to-cyan-500' },
+                { name: 'Talking Head Videos', desc: 'AI avatars that speak your script. No camera needed!', icon: Users, color: 'from-cyan-500 to-blue-500' },
+                { name: 'Coloring Book Maker', desc: 'Create & sell coloring books. Kids love them!', icon: ImageIcon, color: 'from-pink-500 to-purple-500' },
+                { name: 'LinkedIn Posts', desc: 'Go viral on LinkedIn. Thought leadership made easy', icon: TrendingUp, color: 'from-blue-600 to-blue-400' },
+                { name: 'Thread Creator', desc: 'Twitter/X threads that get millions of impressions', icon: MessageSquare, color: 'from-sky-500 to-blue-500' },
+                { name: 'Carousel Generator', desc: 'Swipe-worthy carousels for Instagram & LinkedIn', icon: ImageIcon, color: 'from-purple-500 to-indigo-500' },
+                { name: 'Business Plan Writer', desc: 'Investor-ready business plans in 10 minutes', icon: BarChart3, color: 'from-emerald-500 to-green-500' },
+                { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that convert', icon: Zap, color: 'from-orange-500 to-red-500' },
+                { name: 'Slides Maker', desc: 'Presentations that WOW. Pitch decks that close deals', icon: Presentation, color: 'from-indigo-500 to-purple-500' },
+                { name: 'Quote Maker', desc: 'Inspirational quotes that get shared 10,000 times', icon: Quote, color: 'from-violet-500 to-purple-500' },
+                { name: 'Auto Subtitles', desc: 'AI captions in any language. Accessibility = more views', icon: MessageSquare, color: 'from-teal-500 to-cyan-500' },
               ].map((tool, i) => (
                 <motion.div
                   key={i}
@@ -441,6 +438,11 @@ export default function Home() {
                   className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                   onClick={() => router.push('/dashboard')}
                 >
+                  {tool.hot && (
+                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                      🔥 HOT
+                    </span>
+                  )}
                   <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
                     <tool.icon className="h-6 w-6 text-foreground" />
                   </div>
@@ -456,9 +458,10 @@ export default function Home() {
                 onClick={() => router.push('/dashboard')}
                 className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-foreground font-bold"
               >
-                Access All 22 Tools Free
+                🚀 Access All 70+ Tools FREE
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+              <p className="mt-4 text-sm text-muted-foreground">No credit card required. Start creating in 30 seconds.</p>
             </div>
           </div>
         </div>
@@ -470,10 +473,10 @@ export default function Home() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
               <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                A Powerful Range of AI Tools
+                Why Creators Are OBSESSED 🤯
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to dominate content creation, all powered by cutting-edge AI
+                We didn't build just another AI tool. We built the <span className="text-[#7c3aed] font-semibold">Swiss Army Knife</span> of content creation.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
