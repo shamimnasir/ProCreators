@@ -164,10 +164,29 @@ export async function POST(request) {
           return NextResponse.json({ success: false, error: 'Email and password required' }, { status: 400 })
         }
         
-        const user = await db.collection('users').findOne({ email: email.toLowerCase() })
+        const sanitizedEmail = sanitizeEmail(email)
+        const user = await db.collection('users').findOne({ email: sanitizedEmail })
         
-        if (!user || user.passwordHash !== hashPassword(password)) {
+        if (!user) {
+          // Use constant time comparison to prevent timing attacks
+          await bcrypt.compare(password, '$2a$12$dummy.hash.for.timing.attack.prevention')
           return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 })
+        }
+        
+        // Verify password (supports both old SHA256 and new bcrypt)
+        const passwordResult = await verifyPassword(password, user.passwordHash)
+        
+        if (!passwordResult.valid) {
+          return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 })
+        }
+        
+        // If using old hash, upgrade to bcrypt
+        if (passwordResult.needsUpgrade) {
+          const newHash = await hashPassword(password)
+          await db.collection('users').updateOne(
+            { _id: user._id },
+            { $set: { passwordHash: newHash, passwordUpgradedAt: new Date() } }
+          )
         }
         
         if (!user.emailVerified) {
