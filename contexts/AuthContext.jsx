@@ -116,7 +116,8 @@ export function AuthProvider({ children }) {
       forgotPassword,
       resendVerification,
       isAuthenticated: !!user,
-      userId: user?.id || 'demo-user-001'
+      userId: user?.id || null, // SECURITY: Return null instead of demo user
+      sessionToken: typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null
     }}>
       {children}
     </AuthContext.Provider>
