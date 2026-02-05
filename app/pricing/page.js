@@ -42,7 +42,7 @@ const pricingTiers = [
       'No watermarks',
       'Priority rendering queue',
       'Bangla Voice Studio access',
-      '10% discount on extra credits',
+      '5% discount on extra credits',
       'Email support'
     ],
     cta: 'Start Creator',
@@ -63,7 +63,7 @@ const pricingTiers = [
       'Batch generation',
       'Shorts repurposing',
       '4K export quality',
-      '20% discount on extra credits',
+      '10% discount on extra credits',
       'Priority support'
     ],
     cta: 'Go Pro',
@@ -84,7 +84,7 @@ const pricingTiers = [
       'Brand kits',
       'Client folders',
       'API access',
-      '30% discount on extra credits',
+      '15% discount on extra credits',
       'Dedicated support'
     ],
     cta: 'Start Business',
