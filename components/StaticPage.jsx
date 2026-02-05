@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
 import { Loader2 } from 'lucide-react'
+import { CustomSchema } from '@/components/SchemaMarkup'
+import { 
+  generateOrganizationSchema, 
+  generateFAQSchema, 
+  generateBreadcrumbSchema 
+} from '@/lib/schema'
 
 // Content block renderer (same as in ToolPageRenderer)
 function ContentBlock({ block }) {
