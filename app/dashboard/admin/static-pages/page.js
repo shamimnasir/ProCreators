@@ -334,6 +334,46 @@ export default function StaticPagesManager() {
                 onCheckedChange={(checked) => updateField('isPublished', checked)}
               />
             </div>
+            
+            {/* Schema Settings */}
+            <div className="pt-4 border-t mt-4">
+              <Label className="text-sm font-semibold mb-3 flex items-center gap-2">
+                🔍 Schema.org Settings
+              </Label>
+              <p className="text-xs text-muted-foreground mb-3">
+                JSON-LD structured data is automatically generated. Customize the key values below:
+              </p>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Schema Type</Label>
+                  <select 
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    value={selectedPage.schemaType || 'auto'}
+                    onChange={(e) => updateField('schemaType', e.target.value)}
+                  >
+                    <option value="auto">Auto-detect</option>
+                    <option value="Organization">Organization</option>
+                    <option value="WebPage">WebPage</option>
+                    <option value="FAQPage">FAQPage</option>
+                    <option value="AboutPage">AboutPage</option>
+                    <option value="ContactPage">ContactPage</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Custom Schema (JSON)</Label>
+                  <Textarea 
+                    value={selectedPage.customSchema || ''} 
+                    onChange={(e) => updateField('customSchema', e.target.value)}
+                    placeholder='{"@type": "Organization", ...}'
+                    rows={4}
+                    className="font-mono text-xs"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty for auto-generated schema. Add custom JSON-LD to override.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
