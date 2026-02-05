@@ -603,11 +603,19 @@ export default function Home() {
       <section className="py-20 md:py-32">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-              Loved by 10,000+ Creators
+            <div className="inline-flex items-center gap-2 rounded-full bg-pink-500/20 border border-pink-500/30 px-4 py-2 text-sm font-medium text-pink-400 mb-6">
+              <span>❤️</span>
+              Real Results, Real People
+            </div>
+            <h2 className="mb-4 text-4xl md:text-6xl font-bold">
+              <span className="text-foreground">Don't Take </span>
+              <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">OUR</span>
+              <span className="text-foreground"> Word For It</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See what our users are saying about ProCreators
+              These creators were <span className="text-red-400 line-through">skeptical</span> <span className="text-green-400 font-bold">addicted</span> too.
+              <br />
+              <span className="text-sm text-yellow-400">Warning: Reading testimonials may cause FOMO 😅</span>
             </p>
           </div>
 
