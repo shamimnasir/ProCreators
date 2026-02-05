@@ -161,17 +161,34 @@ export async function POST(request) {
       // ===== LOGIN =====
       case 'login': {
         const { email, password } = body
+        const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
         
         if (!email || !password) {
           return NextResponse.json({ success: false, error: 'Email and password required' }, { status: 400 })
         }
         
         const sanitizedEmail = sanitizeEmail(email)
+        
+        // Check for brute force attempts
+        const bruteForceCheck = await checkBruteForce(sanitizedEmail)
+        if (bruteForceCheck.blocked) {
+          await logSecurityEvent(SECURITY_EVENTS.LOGIN_BLOCKED, {
+            email: sanitizedEmail.substring(0, 3) + '***',
+            ip: clientIp,
+            reason: 'Too many failed attempts'
+          })
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Too many failed attempts. Please try again later.' 
+          }, { status: 429 })
+        }
+        
         const user = await db.collection('users').findOne({ email: sanitizedEmail })
         
         if (!user) {
           // Use constant time comparison to prevent timing attacks
           await bcrypt.compare(password, '$2a$12$dummy.hash.for.timing.attack.prevention')
+          await logAuthFailure(sanitizedEmail, clientIp, 'User not found')
           return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 })
         }
         
@@ -179,6 +196,7 @@ export async function POST(request) {
         const passwordResult = await verifyPassword(password, user.passwordHash)
         
         if (!passwordResult.valid) {
+          await logAuthFailure(sanitizedEmail, clientIp, 'Invalid password')
           return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 })
         }
         
@@ -200,6 +218,11 @@ export async function POST(request) {
         }
         
         if (user.accountStatus === 'banned' || user.accountStatus === 'suspended') {
+          await logSecurityEvent(SECURITY_EVENTS.LOGIN_BLOCKED, {
+            userId: user._id,
+            ip: clientIp,
+            reason: user.accountStatus
+          })
           return NextResponse.json({ 
             success: false, 
             error: `Account ${user.accountStatus}. Contact support.` 
@@ -218,6 +241,9 @@ export async function POST(request) {
           expiresAt: sessionExpiry,
           createdAt: new Date()
         })
+        
+        // Log successful login
+        await logAuthSuccess(user._id, clientIp)
         
         // Update last active
         await db.collection('users').updateOne(
