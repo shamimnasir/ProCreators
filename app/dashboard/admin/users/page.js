@@ -285,9 +285,14 @@ export default function AdminUsersPage() {
                     {getRoleBadge(user.role)}
                     {getPlanBadge(user.plan)}
                     
-                    <div className="text-right">
-                      <p className="font-bold">{user.credits?.toLocaleString() || 0}</p>
-                      <p className="text-xs text-muted-foreground">credits</p>
+                    <div className="text-right min-w-[80px]">
+                      <p className="font-bold">{user.totalCredits?.toLocaleString() || 0}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.membershipCredits > 0 && <span className="text-purple-500">{user.membershipCredits}m</span>}
+                        {user.membershipCredits > 0 && user.purchasedCredits > 0 && ' + '}
+                        {user.purchasedCredits > 0 && <span className="text-green-500">{user.purchasedCredits}p</span>}
+                        {!user.membershipCredits && !user.purchasedCredits && 'credits'}
+                      </p>
                     </div>
                     
                     <div className="text-right">
