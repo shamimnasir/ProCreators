@@ -162,14 +162,7 @@ export default function LoginPage() {
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  {isLogin && (
-                    <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                      Forgot password?
-                    </Link>
-                  )}
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -193,6 +186,14 @@ export default function LoginPage() {
                 )}
                 {isLogin ? 'Sign in' : 'Create account'}
               </Button>
+              
+              {isLogin && (
+                <div className="text-center">
+                  <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
             </form>
             
             <div className="mt-6 text-center">
