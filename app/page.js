@@ -101,54 +101,60 @@ const features = [
 ]
 
 const stats = [
-  { number: '50K+', label: 'Content Created', icon: FileText },
-  { number: '10K+', label: 'Active Users', icon: Users },
-  { number: '98%', label: 'Satisfaction Rate', icon: Star },
-  { number: '24/7', label: 'Support', icon: Clock },
+  { number: '70+', label: 'AI Tools', icon: Sparkles },
+  { number: '1M+', label: 'Content Created', icon: FileText },
+  { number: '99%', label: 'Addiction Rate 😈', icon: Star },
+  { number: '∞', label: 'Creative Possibilities', icon: Rocket },
 ]
 
 const useCases = [
   {
-    title: 'For Content Creators',
-    description: 'Generate viral content, stunning visuals, and engaging videos to grow your audience',
+    title: '🎬 Content Creators',
+    description: 'Stop struggling with content. Create viral reels, engaging posts, and professional videos that explode your growth.',
     image: '/api/placeholder/400/300',
-    features: ['Unlimited AI generations', 'Multi-platform support', 'Advanced analytics']
+    features: ['Auto-generate viral hooks', 'AI thumbnails that get clicks', 'Voice clone in any language']
   },
   {
-    title: 'For Marketing Teams',
-    description: 'Scale your content production and maintain consistency across all channels',
+    title: '📈 Digital Marketers',
+    description: 'Scale your campaigns with AI. Create months of content in hours. Yes, your boss will be impressed.',
     image: '/api/placeholder/400/300',
-    features: ['Team collaboration', 'Brand guidelines', 'Content calendar']
+    features: ['SEO-optimized blog posts', 'Ad copy that converts', 'Social media on autopilot']
   },
   {
-    title: 'For Agencies',
-    description: 'Deliver exceptional results for multiple clients with powerful automation',
+    title: '💰 Digital Product Sellers',
+    description: 'Create ebooks, planners, coloring books, and courses that sell on Amazon, Etsy, and Gumroad while you sleep.',
     image: '/api/placeholder/400/300',
-    features: ['Client management', 'White-label options', 'Bulk creation']
+    features: ['KDP-ready ebooks', 'Print-on-demand designs', 'Course content generator']
+  },
+  {
+    title: '🏢 Business Owners',
+    description: 'Stop paying agencies $5000/month. Do it yourself in 10 minutes. We won\'t tell anyone.',
+    image: '/api/placeholder/400/300',
+    features: ['Professional presentations', 'Business plans & proposals', 'Marketing materials']
   },
 ]
 
 const testimonials = [
   {
-    name: 'Sarah Johnson',
-    role: 'Content Creator',
-    company: 'Digital Nomad',
+    name: 'Rakib Hassan',
+    role: 'YouTube Creator',
+    company: '500K+ Subscribers',
     image: '/api/placeholder/100/100',
-    quote: 'ProCreators has transformed my content workflow. I can now create in minutes what used to take hours!'
+    quote: 'I was skeptical at first. Now I create 10x more content in half the time. My channel growth went crazy! 🚀'
   },
   {
-    name: 'Michael Chen',
-    role: 'Marketing Director',
-    company: 'TechStart Inc',
+    name: 'Priya Sharma',
+    role: 'Digital Marketer',
+    company: 'Agency Owner',
     image: '/api/placeholder/100/100',
-    quote: 'The AI-powered tools are incredibly accurate. Our team productivity has increased by 300%.'
+    quote: 'Fired my content writer (sorry Amit). ProCreators writes better blog posts and never complains about deadlines. 😂'
   },
   {
-    name: 'Emma Williams',
-    role: 'Agency Owner',
-    company: 'Creative Solutions',
+    name: 'James Wilson',
+    role: 'KDP Publisher',
+    company: '$10K/month passive',
     image: '/api/placeholder/100/100',
-    quote: 'Best investment we made for our agency. Client satisfaction has skyrocketed!'
+    quote: 'Made $10,000 last month from ebooks created with ProCreators. The coloring book tool is absolutely insane!'
   },
 ]
 
