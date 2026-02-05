@@ -233,7 +233,7 @@ export default function PricingPage() {
             <span>Back to Dashboard</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <LogoIcon className="h-8 w-8" />
             <span className="text-xl font-bold">ProCreators</span>
           </div>
         </div>
