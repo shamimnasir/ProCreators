@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
+import { ToolPageExtraContent } from '@/components/ToolPageRenderer'
 import { 
   Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
