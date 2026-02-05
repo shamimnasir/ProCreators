@@ -377,7 +377,7 @@ export default function Home() {
                   onClick={() => router.push('/register')}
                   className="text-lg px-8 py-6 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
                 >
-                  Start Creating Free
+                  Get Addicted Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
