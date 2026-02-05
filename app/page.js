@@ -769,7 +769,7 @@ export default function Home() {
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center shrink-0">
                     <Layers className="h-5 w-5 text-white" />
                   </div>
-                  <p className="text-foreground font-semibold">One Tool. Infinite Possibilities.</p>
+                  <p className="text-foreground font-semibold">One Platform. Infinite Possibilities.</p>
                 </div>
               </div>
             </motion.div>
