@@ -163,40 +163,57 @@ const pricingTiers = [
     name: 'Free',
     price: '$0',
     features: [
-      '10 AI generations/month',
-      'Basic content tools',
-      'Standard support',
-      'Watermarked exports'
+      '50 free credits',
+      'Access all 70+ tools',
+      'Try before you buy',
+      'No credit card needed'
     ],
-    cta: 'Get Started',
+    cta: 'Start Free',
     popular: false
   },
   {
     name: 'Creator',
-    price: '$29',
+    price: '$19',
+    period: '/mo',
     features: [
-      '500 AI generations/month',
-      'All content tools',
-      'Priority support',
+      '400 credits/month',
+      'All 70+ AI tools',
       'No watermarks',
-      'Advanced editing',
-      'Analytics dashboard'
+      'Bangla Voice Studio',
+      '5% discount on extra credits',
+      'Email support'
     ],
-    cta: 'Start Creating',
+    cta: 'Get Creator',
     popular: true
   },
   {
-    name: 'Pro Automation',
-    price: '$99',
+    name: 'Pro',
+    price: '$49',
+    period: '/mo',
     features: [
-      'Unlimited AI generations',
-      'Auto-posting',
-      'Bulk creation',
-      'API access',
-      'White-label options',
-      'Dedicated support'
+      '1,000 credits/month',
+      'Everything in Creator',
+      'Auto-reel generator',
+      'Batch generation',
+      '10% discount on credits',
+      'Priority support'
     ],
     cta: 'Go Pro',
+    popular: false
+  },
+  {
+    name: 'Business',
+    price: '$99',
+    period: '/mo',
+    features: [
+      '3,000 credits/month',
+      'Everything in Pro',
+      'Team access (5 seats)',
+      'API access',
+      '15% discount on credits',
+      'Dedicated support'
+    ],
+    cta: 'Get Business',
     popular: false
   },
 ]
