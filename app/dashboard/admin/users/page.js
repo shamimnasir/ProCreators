@@ -412,6 +412,9 @@ export default function AdminUsersPage() {
               {currentAction === 'activate' && 'Activate User'}
               {currentAction === 'verify_email' && 'Verify Email'}
               {currentAction === 'clear_suspicious' && 'Clear Suspicious Flag'}
+              {currentAction === 'delete_user' && '⚠️ Delete User Permanently'}
+              {currentAction === 'make_admin' && 'Make User Admin'}
+              {currentAction === 'remove_admin' && 'Remove Admin Privileges'}
             </DialogTitle>
             <DialogDescription>
               {selectedUser?.email}
