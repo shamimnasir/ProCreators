@@ -3,25 +3,20 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { MEMBERSHIP_PLANS } from '@/lib/membership'
 import { v4 as uuidv4 } from 'uuid'
+import { requireAuth } from '@/lib/auth-middleware'
 
 export async function POST(request) {
   try {
+    // SECURITY: Require authentication for subscription checkout
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
+    const userId = auth.userId
+    
     const body = await request.json()
     const { planId, billingCycle = 'monthly', originUrl } = body
-    
-    // Get user from auth header
-    let userId = 'demo-user-001'
-    const authHeader = request.headers.get('Authorization')
-    if (authHeader?.startsWith('Bearer ')) {
-      try {
-        const jwt = require('jsonwebtoken')
-        const token = authHeader.substring(7)
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
-        userId = decoded.userId
-      } catch (e) {
-        // Use demo user if token invalid
-      }
-    }
     
     // Validate plan
     const plan = MEMBERSHIP_PLANS[planId]
