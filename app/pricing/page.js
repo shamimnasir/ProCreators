@@ -95,8 +95,30 @@ const pricingTiers = [
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [loading, setLoading] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null)
   const router = useRouter()
   const { toast } = useToast()
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const sessionToken = localStorage.getItem('sessionToken')
+      if (sessionToken) {
+        try {
+          const res = await fetch('/api/auth/session', {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+          })
+          const data = await res.json()
+          if (data.success && data.user) {
+            setCurrentUser(data.user)
+          }
+        } catch (e) {
+          console.error('Auth check failed:', e)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
   const handleSubscribe = async (planId, planName) => {
     if (planId === 'free') {
@@ -104,15 +126,25 @@ export default function PricingPage() {
       return
     }
 
+    // Check if user is logged in
+    const sessionToken = localStorage.getItem('sessionToken')
+    if (!sessionToken) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive"
+      })
+      router.push('/auth/login?redirect=/pricing')
+      return
+    }
+
     setLoading(planId)
     try {
-      const sessionToken = localStorage.getItem('sessionToken')
-      
       const res = await fetch('/api/subscription/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
+          'Authorization': `Bearer ${sessionToken}`
         },
         body: JSON.stringify({
           planId,
