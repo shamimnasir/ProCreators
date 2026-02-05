@@ -519,7 +519,7 @@ export default function Home() {
                 onClick={() => router.push('/dashboard')}
                 className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-foreground font-bold"
               >
-                Access All 70+ Tools Free
+                Access All 70+ Tools FREE
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <p className="mt-4 text-sm text-muted-foreground">No credit card required. Start creating in 30 seconds.</p>
