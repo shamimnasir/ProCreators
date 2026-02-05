@@ -118,9 +118,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
+            <LogoIcon className="w-10 h-10" />
             <span className="text-2xl font-bold">ProCreators</span>
           </Link>
         </div>
