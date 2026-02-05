@@ -87,7 +87,7 @@ const pricingTiers = [
       '30% discount on extra credits',
       'Dedicated support'
     ],
-    cta: 'Contact Sales',
+    cta: 'Start Business',
     popular: false
   },
 ]
