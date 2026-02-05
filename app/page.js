@@ -342,7 +342,7 @@ export default function Home() {
             >
               {/* Warning Badge */}
               <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400">
-                <span className="animate-pulse">⚠️</span>
+                <AlertTriangle className="h-4 w-4 animate-pulse" />
                 WARNING: Highly Addictive Platform
               </div>
 
