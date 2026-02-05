@@ -588,8 +588,6 @@ export default function Home() {
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               We've got your back. <span className="text-white font-semibold">Zero learning curve.</span> Just results.
-              <br />
-              <span className="text-sm text-green-400">Your success story starts here. 🚀</span>
             </p>
           </div>
           
