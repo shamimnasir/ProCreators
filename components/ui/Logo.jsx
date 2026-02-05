@@ -1,89 +1,60 @@
-export function Logo({ className = "h-8 w-8", variant = "default" }) {
-  if (variant === "icon") {
-    return (
-      <svg
-        viewBox="0 0 100 100"
+// ProCreators Logo Component
+// Clean, professional logo with stylized "P" and radiating elements
+
+export function Logo({ className = "h-8 w-8", variant = "default", showText = true }) {
+  const iconOnly = variant === "icon"
+  
+  const LogoSVG = ({ size = className }) => (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={size}
+    >
+      {/* Background circle with gradient */}
+      <rect x="5" y="5" width="90" height="90" rx="22" fill="url(#bgGradient)" />
+      
+      {/* Main "P" letterform */}
+      <path
+        d="M32 28 L32 72 M32 28 L54 28 C64 28 72 36 72 46 C72 56 64 64 54 64 L32 64"
+        stroke="white"
+        strokeWidth="8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className={className}
-      >
-        {/* Outer glow circle */}
-        <circle cx="50" cy="50" r="45" fill="url(#glow)" opacity="0.2" />
-        
-        {/* Main icon - stylized P with sparkle */}
-        <path
-          d="M30 25 L30 75 M30 25 L55 25 C62 25 67 30 67 37 C67 44 62 49 55 49 L30 49"
-          stroke="url(#gradient)"
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        
-        {/* Sparkle elements */}
-        <circle cx="70" cy="30" r="3" fill="#a78bfa" />
-        <circle cx="75" cy="40" r="2" fill="#c4b5fd" />
-        <circle cx="65" cy="40" r="2" fill="#c4b5fd" />
-        
-        {/* Star accent */}
-        <path
-          d="M70 25 L71 28 L74 28 L71.5 30 L72.5 33 L70 31 L67.5 33 L68.5 30 L66 28 L69 28 Z"
-          fill="#7c3aed"
-        />
-        
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#a78bfa" />
-          </linearGradient>
-          <radialGradient id="glow">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-      </svg>
-    )
+      />
+      
+      {/* Radiating star/spark accent - top right */}
+      <path
+        d="M68 22 L70 28 L76 28 L71 32 L73 38 L68 34 L63 38 L65 32 L60 28 L66 28 Z"
+        fill="white"
+        opacity="0.9"
+      />
+      
+      {/* Small accent dots */}
+      <circle cx="76" cy="44" r="3" fill="white" opacity="0.6" />
+      <circle cx="72" cy="54" r="2" fill="white" opacity="0.4" />
+      
+      <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#7c3aed" />
+          <stop offset="50%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#a78bfa" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+  
+  if (iconOnly) {
+    return <LogoSVG />
   }
   
   // Full logo with text
   return (
-    <div className="flex items-center gap-2 group">
-      <div className="relative">
-        <svg
-          viewBox="0 0 100 100"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={className}
-        >
-          <circle cx="50" cy="50" r="45" fill="url(#glow)" opacity="0.2" />
-          <path
-            d="M30 25 L30 75 M30 25 L55 25 C62 25 67 30 67 37 C67 44 62 49 55 49 L30 49"
-            stroke="url(#gradient)"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="70" cy="30" r="3" fill="#a78bfa" />
-          <circle cx="75" cy="40" r="2" fill="#c4b5fd" />
-          <circle cx="65" cy="40" r="2" fill="#c4b5fd" />
-          <path
-            d="M70 25 L71 28 L74 28 L71.5 30 L72.5 33 L70 31 L67.5 33 L68.5 30 L66 28 L69 28 Z"
-            fill="#7c3aed"
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#a78bfa" />
-            </linearGradient>
-            <radialGradient id="glow">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 blur-xl bg-[#7c3aed]/30 group-hover:bg-[#7c3aed]/50 transition-all"></div>
-      </div>
-      {variant === "full" && (
-        <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+    <div className="flex items-center gap-2">
+      <LogoSVG />
+      {showText && (
+        <span className="text-xl font-bold text-foreground">
           ProCreators
         </span>
       )}
@@ -91,6 +62,51 @@ export function Logo({ className = "h-8 w-8", variant = "default" }) {
   )
 }
 
+// Icon-only version for compact use
 export function LogoMark({ className = "h-10 w-10" }) {
   return <Logo variant="icon" className={className} />
 }
+
+// Square logo icon for use in cards/buttons
+export function LogoIcon({ className = "h-10 w-10" }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Background */}
+      <rect x="5" y="5" width="90" height="90" rx="22" fill="url(#bgGradientIcon)" />
+      
+      {/* P letterform */}
+      <path
+        d="M32 28 L32 72 M32 28 L54 28 C64 28 72 36 72 46 C72 56 64 64 54 64 L32 64"
+        stroke="white"
+        strokeWidth="8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      
+      {/* Star accent */}
+      <path
+        d="M68 22 L70 28 L76 28 L71 32 L73 38 L68 34 L63 38 L65 32 L60 28 L66 28 Z"
+        fill="white"
+        opacity="0.9"
+      />
+      
+      <circle cx="76" cy="44" r="3" fill="white" opacity="0.6" />
+      
+      <defs>
+        <linearGradient id="bgGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#7c3aed" />
+          <stop offset="50%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#a78bfa" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+export default Logo
