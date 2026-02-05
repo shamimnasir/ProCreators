@@ -27,8 +27,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Video file not found' }, { status: 404 })
     }
     
-    console.log(`[${jobId}] Analyzing audio in: ${videoPath}`)
-    
     const result = {
       beats: [],
       silences: [],
@@ -52,8 +50,6 @@ export async function POST(request) {
     
     // Detect silences using FFmpeg silencedetect filter
     if (detectSilences) {
-      console.log(`[${jobId}] Detecting silences...`)
-      
       const silenceOutput = await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
           '-i', videoPath,
@@ -92,13 +88,10 @@ export async function POST(request) {
         })
       }
       
-      console.log(`[${jobId}] Found ${result.silences.length} silences`)
-    }
+      }
     
     // Detect beats using FFmpeg audio analysis
     if (detectBeats) {
-      console.log(`[${jobId}] Detecting beats...`)
-      
       // Use volume changes as beat approximation
       const beatOutput = await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
@@ -170,8 +163,7 @@ export async function POST(request) {
         }
       }
       
-      console.log(`[${jobId}] Found ${result.beats.length} beats`)
-    }
+      }
     
     // Get loudness info
     const loudnessOutput = await new Promise((resolve, reject) => {
@@ -197,8 +189,6 @@ export async function POST(request) {
     } catch (e) {
       // Couldn't parse loudness info
     }
-    
-    console.log(`[${jobId}] ✅ Audio analysis complete`)
     
     return NextResponse.json({
       success: true,

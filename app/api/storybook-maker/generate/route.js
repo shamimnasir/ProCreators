@@ -375,7 +375,7 @@ async function generateIllustration(prompt, style) {
       
       const fullPrompt = `${styleDesc}: ${prompt}. Child-friendly, no scary elements, suitable for children's picture book.`
       
-      console.log(`Generating illustration: ${prompt.substring(0, 50)}...`)
+      }...`)
       
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
@@ -502,8 +502,6 @@ async function generatePDF(storyData, options) {
     ].join('')
     
     if (hasNonAscii(allText)) {
-      console.log('Non-ASCII text detected, loading Unicode fonts...')
-      
       // Lohit-Bengali has excellent Bengali conjunct/ligature support
       // FreeSerif is a good fallback with comprehensive Unicode support
       const fontPaths = [
@@ -525,10 +523,8 @@ async function generatePDF(storyData, options) {
           const fontBytes = await fs.readFile(fontPath)
           unicodeFont = await pdfDoc.embedFont(fontBytes, { subset: false })
           hasUnicodeFont = true
-          console.log(`Loaded Unicode font: ${fontPath}`)
           break
         } catch (e) {
-          console.log(`Failed to load ${fontPath}: ${e.message}`)
           // Try next font
         }
       }
@@ -538,7 +534,6 @@ async function generatePDF(storyData, options) {
         try {
           const fontBytes = await fs.readFile(fontPath)
           unicodeFontBold = await pdfDoc.embedFont(fontBytes, { subset: false })
-          console.log(`Loaded Unicode bold font: ${fontPath}`)
           break
         } catch (e) {
           // Try next font, or fall back to regular
@@ -598,8 +593,6 @@ async function generatePDF(storyData, options) {
       })
       
       hasCoverImage = true
-      console.log('Cover image embedded full-page successfully')
-      
       // Only add author name at bottom if we have a cover image
       // (title is already in the AI-generated cover)
       if (authorName) {
@@ -994,12 +987,8 @@ export async function POST(request) {
       generateIllustrations = false
     } = body
     
-    console.log(`Storybook action: ${action}`)
-    
     // ACTION: Generate Story Text
     if (action === 'generate-story') {
-      console.log(`Generating story: "${title}" - ${genre} for ${ageGroup}, ${pageCount} pages`)
-      
       const result = await generateStoryText(title, genre, ageGroup, pageCount, customPrompt)
       
       if (!result.success) {
@@ -1018,8 +1007,6 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'No story provided' }, { status: 400 })
       }
       
-      console.log(`Generating illustrations for ${story.pages.length} pages...`)
-      
       const updatedPages = [...story.pages]
       
       // Generate cover image first
@@ -1028,8 +1015,7 @@ export async function POST(request) {
       const coverResult = await generateIllustration(coverPrompt, illustrationStyle)
       if (coverResult.success) {
         coverImageUrl = coverResult.imageUrl
-        console.log('Cover image generated successfully')
-      }
+        }
       
       // Generate page illustrations in batches
       const BATCH_SIZE = 2
@@ -1048,8 +1034,7 @@ export async function POST(request) {
         for (const { pageIdx, imageUrl } of batchResults) {
           if (imageUrl) {
             updatedPages[pageIdx].imageUrl = imageUrl
-            console.log(`Page ${pageIdx + 1} illustration generated`)
-          }
+            }
         }
       }
       
@@ -1070,16 +1055,12 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'No story provided' }, { status: 400 })
       }
       
-      console.log(`Generating PDF for "${story.title}"...`)
-      
       // Generate illustrations if requested and not already present
       let finalStory = { ...story }
       
       if (generateIllustrations) {
         const pagesNeedingImages = story.pages.filter(p => !p.imageUrl)
         if (pagesNeedingImages.length > 0 || !story.coverImageUrl) {
-          console.log(`Generating ${pagesNeedingImages.length} missing illustrations...`)
-          
           // Generate cover
           if (!story.coverImageUrl) {
             const coverPrompt = `Book cover for children's story "${story.title}": ${story.summary || 'colorful engaging children\'s book cover'}`
@@ -1111,7 +1092,7 @@ export async function POST(request) {
       let renderMethod = 'pdf-lib'
       
       if (needsHtmlPdf) {
-        console.log('Detected complex script (Bengali/Hindi), using HTML-to-PDF for proper text rendering...')
+        , using HTML-to-PDF for proper text rendering...')
         try {
           const htmlContent = generateStorybookHTML(finalStory, {
             primaryColor,
@@ -1121,8 +1102,7 @@ export async function POST(request) {
           
           pdfBytes = await generatePDFFromHTML(htmlContent)
           renderMethod = 'html-to-pdf'
-          console.log('HTML-to-PDF generation successful')
-        } catch (htmlError) {
+          } catch (htmlError) {
           console.error('HTML-to-PDF failed, falling back to pdf-lib:', htmlError.message)
           pdfBytes = await generatePDF(finalStory, {
             paperSize,
@@ -1178,8 +1158,6 @@ export async function POST(request) {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       })
-      
-      console.log(`Storybook PDF generated: ${filePath}`)
       
       return NextResponse.json({
         success: true,

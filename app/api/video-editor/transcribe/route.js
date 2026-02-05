@@ -30,8 +30,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Video file not found' }, { status: 404 })
     }
     
-    console.log(`[${jobId}] Transcribing video: ${videoPath}`)
-    
     // Extract audio from video using FFmpeg
     const audioPath = `/tmp/audio-${jobId}.wav`
     
@@ -55,8 +53,6 @@ export async function POST(request) {
       ffmpeg.on('error', reject)
     })
     
-    console.log(`[${jobId}] Audio extracted, running Whisper...`)
-    
     // Run Whisper transcription
     const outputDir = `/tmp/whisper-${jobId}`
     await mkdir(outputDir, { recursive: true })
@@ -79,7 +75,7 @@ export async function POST(request) {
     }
     // If auto, Whisper will detect language automatically
     
-    console.log(`[${jobId}] Whisper args: ${whisperArgs.join(' ')} (lang: ${detectedLanguage || 'auto-detect'})`)
+    } (lang: ${detectedLanguage || 'auto-detect'})`)
     
     const whisperResult = await new Promise((resolve, reject) => {
       const whisper = spawn(whisperPath, whisperArgs)
@@ -90,7 +86,6 @@ export async function POST(request) {
       whisper.stderr.on('data', (data) => { stderr += data.toString() })
       
       whisper.on('close', async (code) => {
-        console.log(`[${jobId}] Whisper exit code: ${code}`)
         if (code === 0) {
           try {
             // Read the JSON output
@@ -127,8 +122,6 @@ export async function POST(request) {
     
     // Track detected language from whisper result
     const detectedLang = whisperResult.language || detectedLanguage || 'en'
-    console.log(`[${jobId}] Whisper detected language: ${detectedLang}`)
-    
     if (whisperResult.segments) {
       for (const seg of whisperResult.segments) {
         segments.push({
@@ -155,9 +148,7 @@ export async function POST(request) {
       }
     }
     
-    console.log(`[${jobId}] Transcript: ${fullText.slice(0, 200)}...`)
-    console.log(`[${jobId}] Words extracted: ${words.length}`)
-    
+    }...`)
     // Detect filler words - comprehensive list including Bengali and English
     const englishFillers = [
       'um', 'uh', 'uhh', 'umm', 'ummm', 'uhm', 'hmm', 'hm', 'mmm', 'mm',
@@ -217,7 +208,7 @@ export async function POST(request) {
           end: word.end,
           type: 'filler'
         })
-        console.log(`[${jobId}] Found filler (exact): "${word.word}"`)
+        : "${word.word}"`)
         continue
       }
       
@@ -231,7 +222,7 @@ export async function POST(request) {
             end: word.end,
             type: 'filler_sound'
           })
-          console.log(`[${jobId}] Found filler (sound pattern): "${word.word}"`)
+          : "${word.word}"`)
           matched = true
           break
         }
@@ -247,13 +238,11 @@ export async function POST(request) {
             end: word.end,
             type: 'filler_bengali'
           })
-          console.log(`[${jobId}] Found filler (Bengali pattern): "${word.word}"`)
+          : "${word.word}"`)
           break
         }
       }
     }
-    
-    console.log(`[${jobId}] Total fillers found: ${fillerWords.length}`)
     
     // Detect silences (gaps > 0.5s between words)
     const silences = []
@@ -274,8 +263,6 @@ export async function POST(request) {
       await unlink(audioPath)
       await require('fs/promises').rm(outputDir, { recursive: true, force: true })
     } catch (e) { /* ignore */ }
-    
-    console.log(`[${jobId}] ✅ Transcription complete: ${segments.length} segments, ${words.length} words`)
     
     return NextResponse.json({
       success: true,

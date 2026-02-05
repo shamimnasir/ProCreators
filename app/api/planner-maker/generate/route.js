@@ -78,7 +78,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
     let text = response.text().trim()
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
     
-    console.log('AI generated content successfully via Gemini')
     return JSON.parse(text)
   } catch (error) {
     console.error('AI content generation error:', error.message || error)
@@ -486,8 +485,6 @@ export async function POST(request) {
       customImagePrompt
     } = await request.json()
 
-    console.log(`Generating ${plannerType} planner with ${pageCount} pages...`)
-
     // Get configurations
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['rose-gold']
     const cover = COVER_STYLES[coverStyle] || COVER_STYLES['elegant']
@@ -503,37 +500,31 @@ export async function POST(request) {
       height: sizeConfig?.points?.height || 648
     }
     
-    console.log(`Paper size: ${paperSize} -> ${sizeConfig?.name || 'default'} (${size.width}x${size.height} points = ${size.width/72}"x${size.height/72}")`)
+    `)
 
     // Generate AI content
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions, customHabits)
-    console.log('Content generated:', content.title)
-
     // Generate cover image (AI-powered) - supports custom prompts
     let coverImageUrl = null
     if (coverImageStyle !== 'gradient') {
       try {
         if (coverImageStyle === 'custom' && customImagePrompt) {
           // User provided custom description
-          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Custom cover image generated successfully')
-          }
+            }
         } else {
           // Use theme-based prompt
           const themeKey = getPlannerTheme(plannerType)
-          console.log(`Generating cover image for theme: ${themeKey}`)
           const imageResult = await generateCoverImage(themeKey)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         }
       } catch (imgError) {
-        console.log('Error generating cover image:', imgError.message)
-      }
+        }
     }
 
     // Create PDF
@@ -679,8 +670,6 @@ export async function POST(request) {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     })
-
-    console.log(`Planner generated: ${filePath}`)
 
     return NextResponse.json({
       success: true,

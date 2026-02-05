@@ -43,8 +43,6 @@ async function runLLM(prompt, systemPrompt = '') {
   return new Promise((resolve) => {
     const scriptPath = path.join(process.cwd(), 'scripts', 'llm_call.py')
     
-    console.log('runLLM called, EMERGENT_LLM_KEY present:', !!process.env.EMERGENT_LLM_KEY)
-    
     const inputData = JSON.stringify({
       prompt,
       system_prompt: systemPrompt || 'You are a creative activity book creator. Generate engaging, age-appropriate content.'
@@ -101,7 +99,7 @@ async function generateCoverImage(theme, customTheme, primaryColor, customCoverP
         ? `${customCoverPrompt}. Professional activity book cover, vibrant colors, fun and engaging design for children.`
         : `Fun and colorful activity book cover for "${themeDesc}" theme. Playful design with puzzles, games, and educational elements. Bright vibrant colors, child-friendly illustration style, professional book cover quality, no text on the image.`
       
-      console.log(`Generating cover: ${fullPrompt.substring(0, 80)}...`)
+      }...`)
       
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
@@ -1553,8 +1551,6 @@ async function generateAIThemedContent(theme) {
     return aiContentCache.get(theme.toLowerCase())
   }
   
-  console.log(`Generating AI content for custom theme: ${theme}`)
-  
   try {
     const prompt = `Generate comprehensive activity book content for the theme "${theme}". Return ONLY a valid JSON object with this exact structure, no markdown or extra text:
 {
@@ -1642,7 +1638,7 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
 
     const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
     
-    console.log('LLM Result:', JSON.stringify(result).substring(0, 500))
+    .substring(0, 500))
     
     if (result && result.success && result.content) {
       // Clean up the result - remove markdown code blocks if present
@@ -1663,7 +1659,7 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
         cleanResult = cleanResult.substring(firstBrace, lastBrace + 1)
       }
       
-      console.log('Cleaned AI response:', cleanResult.substring(0, 300))
+      )
       
       // Try to parse JSON, with fallback
       let aiContent
@@ -1710,8 +1706,6 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
       
       // Cache the result
       aiContentCache.set(theme.toLowerCase(), generatedContent)
-      console.log(`AI content generated and cached for theme: ${theme}`)
-      
       return generatedContent
     }
   } catch (error) {
@@ -1952,7 +1946,7 @@ async function generateActivityPages(body) {
     
     const themeToUse = customTheme || theme
     
-    console.log(`Received selectedActivities: ${JSON.stringify(selectedActivities)}`)
+    }`)
     
     // Filter out special markers like '__none__' and ensure we have valid activities
     let activities = selectedActivities && selectedActivities.length > 0 
@@ -1961,12 +1955,10 @@ async function generateActivityPages(body) {
     
     // If no valid activities after filtering, fall back to all generators
     if (activities.length === 0) {
-      console.log('No valid activities found, falling back to all generators')
       activities = Object.keys(ACTIVITY_GENERATORS)
     }
     
-    console.log(`Generating ${pageCount} activity pages for ${themeToUse} theme, age group: ${ageGroup}`)
-    console.log(`Using activities: ${activities.join(', ')}`)
+    }`)
     
     const generatedPages = []
     
@@ -2075,8 +2067,6 @@ async function generateActivityPDF(body) {
   const cleanAuthor = stripEmojis(authorName) || ''
   const cleanTheme = stripEmojis(customTheme || theme) || 'Fun'
   
-  console.log(`Creating Activity Book PDF: ${cleanTitle}, ${validPages.length} pages`)
-  
   // Create PDF
   const pdfDoc = await PDFDocument.create()
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -2096,12 +2086,10 @@ async function generateActivityPDF(body) {
   // Generate cover image
   let coverImageUrl = null
   if (generateCover !== false) {
-    console.log('Generating cover image...')
     const coverResult = await generateCoverImage(theme, customTheme, primaryColor, customCoverPrompt)
     if (coverResult.success && coverResult.imageUrl) {
       coverImageUrl = coverResult.imageUrl
-      console.log('Cover image generated successfully')
-    }
+      }
   }
   
   // ===== COVER PAGE =====
@@ -2184,8 +2172,6 @@ async function generateActivityPDF(body) {
   // ===== ACTIVITY PAGES =====
   for (let i = 0; i < validPages.length; i++) {
     const pageData = validPages[i]
-    console.log(`Drawing page ${i + 1}: title="${pageData.title}", activityType="${pageData.activityType}", contentType="${pageData.content?.type}"`)
-    
     page = pdfDoc.addPage([pageWidth, pageHeight])
     
     // White background
@@ -2578,8 +2564,6 @@ async function generateActivityPDF(body) {
     createdAt: new Date(),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
   })
-  
-  console.log(`Activity book generated: ${filePath}`)
   
   return NextResponse.json({
     success: true,

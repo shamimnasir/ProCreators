@@ -117,7 +117,7 @@ function formatASSTime(seconds) {
 
 // ==================== IMAGE GENERATION ====================
 async function generateImageWithAI(prompt, jobId, index) {
-  console.log(`[${jobId}] Generating image ${index + 1}: ${prompt.substring(0, 50)}...`)
+  }...`)
   
   try {
     // Use Gemini nano-banana for image generation (same as other tools)
@@ -129,7 +129,6 @@ async function generateImageWithAI(prompt, jobId, index) {
     )
     
     if (result.success && result.imageUrl) {
-      console.log(`[${jobId}] ✅ Image ${index + 1} generated`)
       return result.imageUrl
     }
     
@@ -139,7 +138,6 @@ async function generateImageWithAI(prompt, jobId, index) {
     
     // Fallback: try Fal.ai if Gemini fails
     try {
-      console.log(`[${jobId}] Trying Fal.ai fallback...`)
       const result = await fal.subscribe('fal-ai/flux/schnell', {
         input: {
           prompt: `${prompt}, cinematic, high quality`,
@@ -149,7 +147,7 @@ async function generateImageWithAI(prompt, jobId, index) {
       })
       
       if (result.data?.images?.[0]?.url) {
-        console.log(`[${jobId}] ✅ Image ${index + 1} generated (Fal.ai fallback)`)
+        `)
         return result.data.images[0].url
       }
     } catch (fallbackError) {
@@ -162,12 +160,9 @@ async function generateImageWithAI(prompt, jobId, index) {
 
 // ==================== VIDEO GENERATION ====================
 async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration = 5, useAiVideo = false) {
-  console.log(`[${jobId}] Processing video ${index + 1} from image...`)
-  
   // For faster generation and better reliability, use FFmpeg by default
   // AI video generation can take 2-3 minutes per clip which causes timeouts
   if (!useAiVideo) {
-    console.log(`[${jobId}] Using FFmpeg for fast video generation`)
     return {
       url: imageUrl,
       prompt: prompt,
@@ -180,7 +175,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
   if (!replicateKey) {
-    console.log(`[${jobId}] No Replicate key, returning image for FFmpeg processing`)
     return {
       url: imageUrl,
       prompt: prompt,
@@ -192,8 +186,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
   
   try {
     // Use Stable Video Diffusion for image-to-video (best quality)
-    console.log(`[${jobId}] Using Stable Video Diffusion for image-to-video...`)
-    
     const response = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
@@ -218,8 +210,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Video ${index + 1} prediction ID: ${prediction.id}`)
-    
     // Poll until complete (max 3 minutes)
     let attempts = 0
     while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 90) {
@@ -232,13 +222,12 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
       prediction = await statusResponse.json()
       
       if (attempts % 15 === 0) {
-        console.log(`[${jobId}] Video ${index + 1} status: ${prediction.status} (${attempts * 2}s)`)
+        `)
       }
     }
     
     if (prediction.status === 'succeeded' && prediction.output) {
       const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
-      console.log(`[${jobId}] ✅ AI Video ${index + 1} generated successfully`)
       return {
         url: videoUrl,
         prompt: prompt,
@@ -255,8 +244,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
     
     // Fallback: Try text-to-video with ZeroScope
     try {
-      console.log(`[${jobId}] Trying ZeroScope text-to-video fallback...`)
-      
       const response = await fetch('https://api.replicate.com/v1/predictions', {
         method: 'POST',
         headers: {
@@ -280,8 +267,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
       }
       
       let prediction = await response.json()
-      console.log(`[${jobId}] ZeroScope prediction ID: ${prediction.id}`)
-      
       let attempts = 0
       while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 90) {
         await new Promise(r => setTimeout(r, 2000))
@@ -295,7 +280,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
       
       if (prediction.status === 'succeeded' && prediction.output) {
         const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
-        console.log(`[${jobId}] ✅ ZeroScope video ${index + 1} generated`)
         return {
           url: videoUrl,
           prompt: prompt,
@@ -310,7 +294,6 @@ async function generateVideoFromImage(imageUrl, prompt, jobId, index, duration =
     }
     
     // Final fallback: return image for FFmpeg processing
-    console.log(`[${jobId}] All AI video models failed, using image fallback`)
     return {
       url: imageUrl,
       prompt: prompt,
@@ -338,15 +321,12 @@ async function compileTransformationVideo({
   const tempDir = `/tmp/transformation-video-${jobId}`
   
   try {
-    console.log(`[${jobId}] 🎬 Starting FFmpeg compilation...`)
-    
     await mkdir(tempDir, { recursive: true })
     
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     
     // Step 1: Process video clips - either download AI videos or convert images
-    console.log(`[${jobId}] Step 1: Processing ${videos.length} clips...`)
     const videoFiles = []
     
     for (let i = 0; i < videos.length; i++) {
@@ -358,17 +338,14 @@ async function compileTransformationVideo({
       try {
         if (video.type === 'ai-video') {
           // Download AI-generated video
-          console.log(`[${jobId}] Downloading AI video ${i + 1}/${videos.length}...`)
           const response = await fetch(video.url)
           if (!response.ok) throw new Error(`HTTP ${response.status}`)
           
           const fileStream = createWriteStream(videoPath)
           await pipeline(Readable.fromWeb(response.body), fileStream)
           videoFiles.push(videoPath)
-          console.log(`[${jobId}] ✅ Downloaded AI video ${i + 1}/${videos.length}`)
-        } else {
+          } else {
           // Image fallback - convert to video with FFmpeg
-          console.log(`[${jobId}] Converting image ${i + 1}/${videos.length} to video...`)
           const imagePath = join(tempDir, `image-${i}.jpg`)
           
           // Download the image
@@ -397,7 +374,6 @@ async function compileTransformationVideo({
               .output(videoPath)
               .on('end', () => {
                 videoFiles.push(videoPath)
-                console.log(`[${jobId}] ✅ Created video from image ${i + 1}/${videos.length}`)
                 resolve()
               })
               .on('error', (err) => {
@@ -417,14 +393,11 @@ async function compileTransformationVideo({
     }
     
     // Step 2: Generate or process voice audio
-    console.log(`[${jobId}] Step 2: Processing audio...`)
     let audioPath = join(tempDir, 'voice.mp3')
     let hasAudio = false
     let spokenText = narrationText
     
     if (voiceOption === 'tts' && narrationText && narrationText.trim()) {
-      console.log(`[${jobId}] Generating TTS...`)
-      
       try {
         const client = new textToSpeech.TextToSpeechClient({
           keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -462,16 +435,14 @@ async function compileTransformationVideo({
         const [response] = await client.synthesizeSpeech(ttsRequest)
         await writeFile(audioPath, response.audioContent, 'binary')
         hasAudio = true
-        console.log(`[${jobId}] ✅ TTS generated`)
-      } catch (ttsError) {
+        } catch (ttsError) {
         console.error(`[${jobId}] TTS failed:`, ttsError.message)
       }
     } else if (voiceOption === 'upload' && voiceFile) {
       const buffer = Buffer.from(await voiceFile.arrayBuffer())
       await writeFile(audioPath, buffer)
       hasAudio = true
-      console.log(`[${jobId}] ✅ Uploaded audio saved`)
-    }
+      }
     
     // Get audio duration
     let actualDuration = duration
@@ -482,11 +453,9 @@ async function compileTransformationVideo({
           else resolve(metadata.format.duration || duration)
         })
       })
-      console.log(`[${jobId}] Audio duration: ${actualDuration}s`)
-    }
+      }
     
     // Step 3: Normalize and process clips
-    console.log(`[${jobId}] Step 3: Processing ${videoFiles.length} clips...`)
     const targetWidth = dimensions.width
     const targetHeight = dimensions.height
     const durationPerClip = actualDuration / videoFiles.length
@@ -510,7 +479,6 @@ async function compileTransformationVideo({
           .output(normalizedPath)
           .on('end', () => {
             normalizedFiles.push(normalizedPath)
-            console.log(`[${jobId}] ✅ Processed clip ${i + 1}/${videoFiles.length}`)
             resolve()
           })
           .on('error', reject)
@@ -519,7 +487,6 @@ async function compileTransformationVideo({
     }
     
     // Step 4: Concatenate clips
-    console.log(`[${jobId}] Step 4: Concatenating clips...`)
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
@@ -538,7 +505,6 @@ async function compileTransformationVideo({
     })
     
     // Step 5: Merge with audio
-    console.log(`[${jobId}] Step 5: Merging audio...`)
     const videoWithAudioPath = join(tempDir, 'with-audio.mp4')
     
     if (hasAudio && existsSync(audioPath)) {
@@ -557,7 +523,6 @@ async function compileTransformationVideo({
     }
     
     // Step 6: Add captions
-    console.log(`[${jobId}] Step 6: Adding captions...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     const shouldAddCaptions = captionStyle && captionStyle !== 'none' && hasAudio && spokenText
@@ -590,7 +555,6 @@ async function compileTransformationVideo({
     }
     
     // Step 7: Save to public folder
-    console.log(`[${jobId}] Step 7: Saving video...`)
     const videoBuffer = await readFile(finalVideoPath)
     
     const publicDir = '/app/public/transformation-videos'
@@ -602,10 +566,7 @@ async function compileTransformationVideo({
     await writeFile(publicVideoPath, videoBuffer)
     
     const videoUrl = `/transformation-videos/${jobId}.mp4`
-    console.log(`[${jobId}] ✅ Video saved: ${videoUrl}`)
-    
     // Step 8: Save to library
-    console.log(`[${jobId}] Step 8: Saving to library...`)
     try {
       const libraryCollection = await getCollection('library')
       
@@ -633,8 +594,7 @@ async function compileTransformationVideo({
         expiresAt
       })
       
-      console.log(`[${jobId}] ✅ Saved to library`)
-    } catch (saveError) {
+      } catch (saveError) {
       console.error(`[${jobId}] Library save failed:`, saveError.message)
     }
     
@@ -644,8 +604,6 @@ async function compileTransformationVideo({
     } catch (e) {
       // Ignore cleanup errors
     }
-    
-    console.log(`[${jobId}] 🎉 Compilation complete!`)
     
     return {
       videoUrl,
@@ -671,8 +629,6 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
-    console.log(`[${jobId}] Starting transformation video generation...`)
-    
     const formData = await request.formData()
     
     const topic = formData.get('topic') || ''
@@ -707,8 +663,6 @@ export async function POST(request) {
       narrationText = scenes.map(s => s.narration || '').filter(Boolean).join(' ')
       
       // Generate images for each scene
-      console.log(`[${jobId}] Generating ${scenes.length} images...`)
-      
       for (let i = 0; i < scenes.length; i++) {
         const scene = scenes[i]
         const imageUrl = await generateImageWithAI(scene.visualPrompt, jobId, i)
@@ -720,8 +674,6 @@ export async function POST(request) {
     } else {
       // Use uploaded images
       const imageCount = parseInt(formData.get('imageCount') || '0')
-      console.log(`[${jobId}] Processing ${imageCount} uploaded images...`)
-      
       for (let i = 0; i < imageCount; i++) {
         const imageFile = formData.get(`image_${i}`)
         const description = formData.get(`image_${i}_description`) || ''
@@ -760,8 +712,6 @@ export async function POST(request) {
       throw new Error('At least 2 images are required for transformation video')
     }
     
-    console.log(`[${jobId}] Have ${imageUrls.length} images, generating videos...`)
-    
     // Generate video clips from images
     const videoClips = []
     const durationPerScene = Math.max(3, Math.floor(targetDuration / imageUrls.length))
@@ -777,8 +727,6 @@ export async function POST(request) {
     if (videoClips.length === 0) {
       throw new Error('Failed to generate any video clips')
     }
-    
-    console.log(`[${jobId}] Generated ${videoClips.length} video clips, compiling...`)
     
     // Compile final video
     const result = await compileTransformationVideo({

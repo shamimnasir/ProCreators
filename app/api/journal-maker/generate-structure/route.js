@@ -125,8 +125,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII char
       }))
     }
     
-    console.log('AI generated journal structure successfully')
-    
     return NextResponse.json({
       success: true,
       structure

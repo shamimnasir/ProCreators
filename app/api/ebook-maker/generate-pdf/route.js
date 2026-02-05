@@ -64,7 +64,6 @@ function safeGetTextWidth(text, font, fontSize) {
     return font.widthOfTextAtSize(text, fontSize)
   } catch (e) {
     // Fallback for complex scripts where glyph lookup fails
-    console.log('Using fallback width for complex script text')
     return text.length * fontSize * 0.55
   }
 }
@@ -76,7 +75,7 @@ function safeDrawText(page, text, options) {
     page.drawText(text, options)
     return true
   } catch (e) {
-    console.log('Text drawing error, using fallback:', e.message.substring(0, 50))
+    )
     // For complex scripts, the font may not support all glyphs
     // Try to draw what we can
     try {
@@ -95,7 +94,6 @@ function safeDrawText(page, text, options) {
       return true
     } catch (fallbackError) {
       // Complete failure - skip this text
-      console.log('Complete text drawing failure, skipping')
       return false
     }
   }
@@ -493,8 +491,6 @@ export async function POST(request) {
       )
     }
     
-    console.log(`Generating ebook PDF: "${cover.title}" with ${chapters.length} chapters...`)
-    
     const colorScheme = settings?.colorScheme || 'ocean-blue'
     const customColor = settings?.customColor || null
     const coverStyle = settings?.coverStyle || 'elegant'
@@ -507,8 +503,6 @@ export async function POST(request) {
     // For complex scripts (Bengali, Hindi, Arabic, etc.), use HTML-to-PDF approach
     // which properly handles ligatures, conjuncts, and RTL text
     if (needsUnicodeFont) {
-      console.log('Detected complex script, using HTML-to-PDF generation for proper text rendering...')
-      
       try {
         // Generate HTML content
         const htmlContent = generateEbookHTML({
@@ -555,7 +549,7 @@ export async function POST(request) {
         
         await library.insertOne(libraryEntry)
         
-        console.log('Ebook PDF generated (HTML method):', filePath)
+        :', filePath)
         
         return NextResponse.json({
           success: true,
@@ -567,7 +561,6 @@ export async function POST(request) {
         })
       } catch (htmlError) {
         console.error('HTML-to-PDF generation failed:', htmlError.message)
-        console.log('Falling back to pdf-lib method...')
         // Fall through to pdf-lib method
       }
     }
@@ -583,25 +576,21 @@ export async function POST(request) {
         
         // For custom prompts, use the user's description directly
         if (coverImageStyle === 'custom' && customImagePrompt) {
-          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Custom cover image generated successfully')
-          }
+            }
         } else {
           // Use theme-based prompt
           const themeKey = getEbookTheme(genre)
-          console.log(`Generating cover image for theme: ${themeKey}`)
           const imageResult = await generateCoverImage(themeKey)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         }
       } catch (imgError) {
-        console.log('Cover image generation failed:', imgError.message)
-      }
+        }
     }
     
     // Create PDF
@@ -626,26 +615,19 @@ export async function POST(request) {
           const bengaliRegularPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Regular.ttf')
           const bengaliBoldPath = path.join(process.cwd(), 'public/fonts/NotoSansBengali-Bold.ttf')
           
-          console.log('Loading Bengali fonts from:', bengaliRegularPath)
-          
           const regularFontBytes = await fs.readFile(bengaliRegularPath)
           const boldFontBytes = await fs.readFile(bengaliBoldPath)
-          
-          console.log('Font bytes loaded:', regularFontBytes.length, boldFontBytes.length)
           
           // CRITICAL: Use subset: false to embed full font with all Unicode glyphs
           regularFont = await pdfDoc.embedFont(regularFontBytes, { subset: false })
           boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: false })
           italicFont = regularFont // Bengali fonts typically don't have italic variant
           
-          console.log('Bengali fonts embedded:', { regularFont: !!regularFont, boldFont: !!boldFont })
-          
           if (!regularFont || !boldFont) {
             throw new Error('Font embedding returned null')
           }
           
-          console.log('Bengali fonts embedded successfully with full Unicode support')
-        } else {
+          } else {
           // Fallback to standard Noto Sans for other scripts
           const notoRegularPath = path.join(process.cwd(), 'public/fonts/NotoSans-Regular.ttf')
           const notoBoldPath = path.join(process.cwd(), 'public/fonts/NotoSans-Bold.ttf')
@@ -657,11 +639,8 @@ export async function POST(request) {
           boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: false })
           italicFont = regularFont
           
-          console.log('Noto Sans fonts embedded successfully')
-        }
+          }
       } catch (fontError) {
-        console.log('Custom font loading failed, falling back to standard fonts:', fontError.message)
-        console.log('Font error stack:', fontError.stack)
         regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
         boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
         italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
@@ -675,14 +654,10 @@ export async function POST(request) {
     
     // Final validation - ensure fonts are not null
     if (!regularFont || !boldFont) {
-      console.log('CRITICAL: Font embedding failed, fonts are null')
-      console.log('Falling back to standard fonts')
       regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
       boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
       italicFont = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic)
     }
-    
-    console.log('Final font check:', { regularFont: !!regularFont, boldFont: !!boldFont, italicFont: !!italicFont })
     
     // Page setup - use 6x9 (most popular) by default, with proper margins
     // Import dynamic margins based on page count for proper KDP compliance
@@ -711,8 +686,6 @@ export async function POST(request) {
     
     // ===== COVER PAGE =====
     let page = pdfDoc.addPage([pageWidth, pageHeight])
-    
-    console.log('About to create cover page, fonts:', { boldFont: !!boldFont, regularFont: !!regularFont })
     
     if (coverImageUrl) {
       await drawCoverPageWithImage(page, pdfDoc, {
@@ -1149,8 +1122,6 @@ export async function POST(request) {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
-    
-    console.log(`Ebook PDF generated: ${filePath}`)
     
     return NextResponse.json({
       success: true,

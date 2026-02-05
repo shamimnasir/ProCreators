@@ -410,8 +410,6 @@ Return ONLY a valid JSON array of flashcard objects:
 
 Generate exactly ${count} flashcards. Return ONLY the JSON array, no other text or markdown formatting.`
 
-    console.log(`Generating ${count} AI flashcards for topic: ${topic}`)
-    
     const result = await generateWithGemini(prompt, 'You are an expert educator creating high-quality flashcard content for learning. Return only valid JSON arrays.')
     
     if (!result.success || !result.content) {
@@ -440,7 +438,6 @@ Generate exactly ${count} flashcards. Return ONLY the JSON array, no other text 
       back: card.back.trim()
     }))
     
-    console.log(`Successfully generated ${validCards.length} flashcards with AI`)
     return validCards
     
   } catch (error) {
@@ -494,7 +491,6 @@ export async function POST(request) {
     
     // Fallback to database
     if (!flashcards || flashcards.length === 0) {
-      console.log('Falling back to database flashcards')
       const dbResult = getFlashcardsFromDatabase(topic, count, difficulty, bestCategory)
       flashcards = dbResult.flashcards
     }

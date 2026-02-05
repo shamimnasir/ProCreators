@@ -8,8 +8,6 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const language = searchParams.get('language') || 'bn' // Default to Bengali
     
-    console.log(`[List Voices] Fetching voices for language: ${language}`)
-    
     // Initialize Google Cloud TTS client with service account
     const client = new textToSpeech.TextToSpeechClient({
       keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -18,8 +16,6 @@ export async function GET(request) {
     // List all voices
     const [result] = await client.listVoices({})
     const voices = result.voices
-    
-    console.log(`[List Voices] Total voices available: ${voices.length}`)
     
     // Filter voices by language code
     // For Bengali, Google uses 'bn-IN' (Indian Bengali) - no 'bn-BD' yet
@@ -43,8 +39,6 @@ export async function GET(request) {
       return hasLanguagePrefix && !isStarName
     })
     
-    console.log(`[List Voices] Filtered voices for ${language}: ${filteredVoices.length}`)
-    
     // Format voices for frontend
     const formattedVoices = filteredVoices.map(voice => ({
       name: voice.name,
@@ -56,7 +50,6 @@ export async function GET(request) {
     
     // If no voices found for the language, provide fallback info
     if (formattedVoices.length === 0) {
-      console.log(`[List Voices] No voices found for ${language}, using defaults`)
       return NextResponse.json({
         success: true,
         voices: [],

@@ -65,7 +65,7 @@ function extractDialogueFromScript(script, language = 'en') {
           
           if (hasBengali || hasDevanagari) {
             dialogues.push(dialogue.trim())
-            console.log(`[Dialogue] Found ${language} dialogue: "${dialogue.substring(0, 50)}..."`)
+            }..."`)
           }
         } else {
           dialogues.push(dialogue.trim())
@@ -120,8 +120,6 @@ function extractDialogueFromScript(script, language = 'en') {
   // If still no dialogues and language is Bengali/Hindi, 
   // extract ALL text in that script (Bengali/Devanagari characters)
   if (dialogues.length === 0 && (language === 'bn' || language === 'hi')) {
-    console.log(`[Dialogue] No quoted dialogues found, extracting all ${language} text...`)
-    
     // Extract sentences containing Bengali/Hindi script
     const sentences = script.split(/[.!?।]+/)
     for (const sentence of sentences) {
@@ -145,7 +143,7 @@ function extractDialogueFromScript(script, language = 'en') {
     ? Math.round((1 - dialogueOnly.length / script.length) * 100) 
     : 0
   
-  console.log(`[Smart Dialogue Extraction] Language: ${language}, Full: ${script.length} chars → Dialogue: ${dialogueOnly.length} chars (${costSavings}% savings, ${uniqueDialogues.length} dialogues found)`)
+  `)
   
   return {
     dialogueOnly,
@@ -167,8 +165,6 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   const words = script.trim().split(/\s+/).filter(w => w.length > 0)
   const totalChars = script.replace(/\s+/g, '').length
   const charsPerSecond = totalChars / duration
-  
-  console.log(`[Captions] Words: ${words.length}, Chars: ${totalChars}, Duration: ${duration}s`)
   
   // Base font size for portrait videos
   const baseFontSize = height >= 2160 ? 72 : height >= 1920 ? 64 : height >= 1440 ? 56 : 48
@@ -296,8 +292,6 @@ async function compileVideoWithFFmpeg({
   const tempDir = `/tmp/ai-video-studio-${jobId}`
   
   try {
-    console.log(`[${jobId}] 🎬 Starting FFmpeg compilation...`)
-    
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
@@ -305,7 +299,6 @@ async function compileVideoWithFFmpeg({
     const { pipeline } = require('stream/promises')
     
     // Step 1: Download all video clips in parallel
-    console.log(`[${jobId}] Step 1: Downloading ${videos.length} video clips...`)
     const videoFiles = []
     
     const downloadPromises = videos.map(async (video, index) => {
@@ -331,7 +324,7 @@ async function compileVideoWithFFmpeg({
           return { index, path: null, success: false }
         }
         
-        console.log(`[${jobId}] Downloading clip ${index + 1}: ${videoUrl.substring(0, 60)}...`)
+        }...`)
         
         if (videoUrl.startsWith('/')) {
           // Local file - copy it
@@ -340,7 +333,6 @@ async function compileVideoWithFFmpeg({
           if (fs.existsSync(localPath)) {
             const buffer = fs.readFileSync(localPath)
             await writeFile(videoPath, buffer)
-            console.log(`[${jobId}] ✅ Copied local clip ${index + 1}/${videos.length}`)
             return { index, path: videoPath, success: true }
           }
         } else {
@@ -352,7 +344,6 @@ async function compileVideoWithFFmpeg({
           
           const fileStream = createWriteStream(videoPath)
           await pipeline(Readable.fromWeb(response.body), fileStream)
-          console.log(`[${jobId}] ✅ Downloaded clip ${index + 1}/${videos.length}`)
           return { index, path: videoPath, success: true }
         }
       } catch (error) {
@@ -376,18 +367,13 @@ async function compileVideoWithFFmpeg({
       videoFiles.push(result.path)
     }
     
-    console.log(`[${jobId}] Downloaded ${videoFiles.length} clips successfully`)
-    
     // Step 2: Generate or process voice audio
-    console.log(`[${jobId}] Step 2: Processing audio...`)
     let audioPath = join(tempDir, 'voice.mp3')
     let hasAudio = false
     let spokenText = prompt // Track what text is actually spoken for caption sync
     
     if (voiceOption === 'tts' && prompt && prompt.trim()) {
       // Generate TTS with Google Cloud
-      console.log(`[${jobId}] Generating TTS with Google Cloud...`)
-      
       // Extract dialogue if narration mode is 'dialogue-only' (default)
       let ttsText = prompt
       if (narrationMode !== 'full') {
@@ -395,14 +381,11 @@ async function compileVideoWithFFmpeg({
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
           spokenText = extracted.dialogueOnly // Captions should match spoken text
-          console.log(`[${jobId}] 🎭 Dialogue-only mode: ${extracted.dialogueCount} dialogues, ~${extracted.costSavings}% cost savings`)
-          console.log(`[${jobId}] 🗣️ Will speak: "${ttsText.substring(0, 100)}..."`)
+          }..."`)
         } else {
-          console.log(`[${jobId}] ⚠️ No dialogue found in script, using full text`)
-        }
+          }
       } else {
-        console.log(`[${jobId}] 📜 Full narration mode: using entire script`)
-      }
+        }
       
       try {
         const client = new textToSpeech.TextToSpeechClient({
@@ -424,8 +407,6 @@ async function compileVideoWithFFmpeg({
           default: languageCode = 'en-US'
         }
         
-        console.log(`[${jobId}] 🌐 TTS Language selection: ${ttsLanguage}`)
-        
         // Build voice config - CRITICAL: Extract language code FROM the voice name
         // Google TTS requires the languageCode to MATCH the voice's language
         // Voice format is: {lang}-{region}-{modelName}, e.g., "en-AU-Chirp3-HD-Achernar"
@@ -439,12 +420,11 @@ async function compileVideoWithFFmpeg({
             // Use the voice's actual language code to avoid mismatch errors
             voiceConfig.languageCode = voiceLanguageCode
             voiceConfig.name = selectedVoice
-            console.log(`[${jobId}] 🎤 Using voice: ${selectedVoice} (language: ${voiceLanguageCode})`)
+            `)
           }
         } else {
           // No specific voice selected - use default for the language
-          console.log(`[${jobId}] 🎤 Using default ${languageCode} voice`)
-        }
+          }
         
         const ttsRequest = {
           input: { text: ttsText },  // Use extracted dialogue or full text
@@ -459,8 +439,7 @@ async function compileVideoWithFFmpeg({
         const [response] = await client.synthesizeSpeech(ttsRequest)
         await writeFile(audioPath, response.audioContent, 'binary')
         hasAudio = true
-        console.log(`[${jobId}] ✅ TTS generated successfully`)
-      } catch (ttsError) {
+        } catch (ttsError) {
         console.error(`[${jobId}] ⚠️ TTS failed:`, ttsError.message)
         // Continue without audio
       }
@@ -479,7 +458,6 @@ async function compileVideoWithFFmpeg({
           .output(audioPath)
           .on('end', () => {
             hasAudio = true
-            console.log(`[${jobId}] ✅ Uploaded audio normalized`)
             resolve()
           })
           .on('error', (err) => {
@@ -504,11 +482,9 @@ async function compileVideoWithFFmpeg({
           }
         })
       })
-      console.log(`[${jobId}] Audio duration: ${actualDuration}s`)
-    }
+      }
     
     // Step 3: Normalize and trim each clip
-    console.log(`[${jobId}] Step 3: Normalizing ${videoFiles.length} clips...`)
     const targetWidth = dimensions.width
     const targetHeight = dimensions.height
     const durationPerClip = actualDuration / videoFiles.length
@@ -526,9 +502,9 @@ async function compileVideoWithFFmpeg({
         // Apply 3-second trim ONLY for stock videos (skip watermarks/intros)
         if (videoMeta.type === 'stock') {
           cmd.inputOptions(['-ss', '3']) // Skip first 3 seconds
-          console.log(`[${jobId}] 📹 Trimming first 3s from stock clip ${i + 1} (keyword: ${videoMeta.keyword || 'unknown'})`)
+          `)
         } else {
-          console.log(`[${jobId}] 🎨 Processing AI clip ${i + 1} (no trim)`)
+          `)
         }
         
         // Build basic video filter string
@@ -550,7 +526,6 @@ async function compileVideoWithFFmpeg({
           .output(normalizedPath)
           .on('end', () => {
             normalizedFiles.push(normalizedPath)
-            console.log(`[${jobId}] ✅ Normalized clip ${i + 1}/${videoFiles.length}`)
             resolve()
           })
           .on('error', (err) => {
@@ -562,7 +537,6 @@ async function compileVideoWithFFmpeg({
     }
     
     // Step 4: Concatenate all normalized clips
-    console.log(`[${jobId}] Step 4: Concatenating ${normalizedFiles.length} clips...`)
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
@@ -581,7 +555,6 @@ async function compileVideoWithFFmpeg({
         ])
         .output(concatVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] ✅ Clips concatenated`)
           resolve()
         })
         .on('error', reject)
@@ -589,7 +562,6 @@ async function compileVideoWithFFmpeg({
     })
     
     // Step 5: Merge video with audio (if audio exists)
-    console.log(`[${jobId}] Step 5: Merging video with audio...`)
     const videoWithAudioPath = join(tempDir, 'with-audio.mp4')
     
     if (hasAudio && existsSync(audioPath)) {
@@ -608,7 +580,6 @@ async function compileVideoWithFFmpeg({
           ])
           .output(videoWithAudioPath)
           .on('end', () => {
-            console.log(`[${jobId}] ✅ Audio merged`)
             resolve()
           })
           .on('error', reject)
@@ -618,12 +589,10 @@ async function compileVideoWithFFmpeg({
       // No audio - just copy the concatenated video
       const fs = require('fs')
       fs.copyFileSync(concatVideoPath, videoWithAudioPath)
-      console.log(`[${jobId}] Video saved without audio`)
-    }
+      }
     
     // Step 6: Add captions if caption style is not 'none'
     // IMPORTANT: Captions should match what's actually being spoken (spokenText)
-    console.log(`[${jobId}] Step 6: Processing captions...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     // Only add captions if we have audio (captions should sync with spoken audio)
@@ -643,7 +612,7 @@ async function compileVideoWithFFmpeg({
         
         const captionsPath = join(tempDir, 'captions.ass')
         await writeFile(captionsPath, captionContent)
-        console.log(`[${jobId}] ✅ ASS captions generated (synced with ${spokenText.length} chars of spoken text)`)
+        `)
         
         // Burn captions into video
         const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
@@ -660,7 +629,6 @@ async function compileVideoWithFFmpeg({
             ])
             .output(finalVideoPath)
             .on('end', () => {
-              console.log(`[${jobId}] ✅ Captions burned into video`)
               resolve()
             })
             .on('error', (err) => {
@@ -679,11 +647,10 @@ async function compileVideoWithFFmpeg({
     } else {
       // No captions - just copy the video
       require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
-      console.log(`[${jobId}] Skipping captions (style: ${captionStyle}, hasAudio: ${hasAudio})`)
+      `)
     }
     
     // Step 7: Save to public folder
-    console.log(`[${jobId}] Step 7: Saving video...`)
     const videoBuffer = await readFile(finalVideoPath)
     
     const publicDir = '/app/public/ai-video-studio'
@@ -695,10 +662,7 @@ async function compileVideoWithFFmpeg({
     await writeFile(publicVideoPath, videoBuffer)
     
     const videoUrl = `/ai-video-studio/${jobId}.mp4`
-    console.log(`[${jobId}] ✅ Video saved to: ${videoUrl}`)
-    
     // Step 7: Auto-save to library
-    console.log(`[${jobId}] Step 7: Saving to library...`)
     try {
       const libraryCollection = await getCollection('library')
       
@@ -736,18 +700,14 @@ async function compileVideoWithFFmpeg({
       }
       
       await libraryCollection.insertOne(libraryDoc)
-      console.log(`[${jobId}] ✅ Video auto-saved to library`)
-    } catch (saveError) {
+      } catch (saveError) {
       console.error(`[${jobId}] ⚠️ Library save failed:`, saveError.message)
     }
     
     // Cleanup temp files
-    console.log(`[${jobId}] Cleaning up...`)
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
     } catch (e) { /* Ignore cleanup errors */ }
-    
-    console.log(`[${jobId}] 🎉 FFmpeg compilation complete!`)
     
     return {
       videoUrl,
@@ -918,7 +878,7 @@ function extractKeywordsFromScript(script, count = 5) {
 // Search stock videos by keywords using the Quick Reels Hub API
 async function searchStockVideosByKeywords(keywords, count = 3) {
   try {
-    console.log(`[Hybrid] Searching stock videos for keywords: ${keywords.join(', ')}`)
+    }`)
     
     // Use the existing search-videos API from Quick Reels Hub
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
@@ -935,7 +895,6 @@ async function searchStockVideosByKeywords(keywords, count = 3) {
     const data = await response.json()
     
     if (data.success && data.videos && data.videos.length > 0) {
-      console.log(`[Hybrid] ✅ Found ${data.videos.length} stock videos`)
       return data.videos.map(v => ({
         url: v.url,
         keyword: v.keyword,
@@ -958,7 +917,6 @@ async function fetchStockVideos(keywords, count = 3) {
   const pexelsKey = process.env.PEXELS_API_KEY
   
   if (!pexelsKey) {
-    console.log('[Stock Videos] No PEXELS_API_KEY, using fallback videos')
     return getFallbackVideos(count)
   }
   
@@ -1029,7 +987,6 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
   if (!replicateKey) {
-    console.log(`[${jobId}] No Replicate key, falling back to stock videos`)
     return getFallbackVideos(Math.ceil(duration / 5))
   }
   
@@ -1038,8 +995,6 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   
   // Parse prompt into scene descriptions
   const scenes = parsePromptToScenes(prompt, numScenes)
-  
-  console.log(`[${jobId}] Generating ${scenes.length} AI scenes...`)
   
   // Get format dimensions for AI generation
   // Support portrait (9:16), landscape (16:9), and square (1:1)
@@ -1055,7 +1010,7 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   // Generate scenes in parallel (up to 2 at a time to avoid rate limits)
   for (let i = 0; i < scenes.length; i++) {
     const scene = scenes[i]
-    console.log(`[${jobId}] Generating scene ${i + 1}/${scenes.length}: "${scene.substring(0, 50)}..."`)
+    }..."`)
     
     try {
       // Use ZeroScope for text-to-video
@@ -1083,8 +1038,6 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
       }
       
       let prediction = await response.json()
-      console.log(`[${jobId}] Scene ${i + 1} prediction ID: ${prediction.id}`)
-      
       // Poll until complete
       let attempts = 0
       while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < 120) {
@@ -1097,13 +1050,12 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
         prediction = await statusResponse.json()
         
         if (attempts % 10 === 0) {
-          console.log(`[${jobId}] Scene ${i + 1} status: ${prediction.status} (${attempts * 2}s)`)
+          `)
         }
       }
       
       if (prediction.status === 'succeeded' && prediction.output) {
         const videoUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output
-        console.log(`[${jobId}] ✅ Scene ${i + 1} complete: ${videoUrl}`)
         aiVideos.push({
           url: videoUrl,
           keyword: scene,
@@ -1120,7 +1072,6 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   
   // If we didn't get any AI videos, fall back to stock
   if (aiVideos.length === 0) {
-    console.log(`[${jobId}] No AI videos generated, falling back to stock videos`)
     return getFallbackVideos(numScenes)
   }
   
@@ -1277,8 +1228,6 @@ function parsePromptToScenes(prompt, numScenes) {
   // Take only what we need
   const scenes = enhancedParts.slice(0, numScenes)
   
-  console.log(`[Scene Parser] Extracted ${scenes.length} scenes with context:`, globalContext)
-  
   return scenes
 }
 
@@ -1286,8 +1235,6 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
-    console.log(`[${jobId}] Starting video generation...`)
-    
     // Parse request
     const formData = await request.formData()
     const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
@@ -1309,10 +1256,6 @@ export async function POST(request) {
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
-    console.log(`[${jobId}] Mode: ${mode}, Duration: ${duration}s, Format: ${format}`)
-    console.log(`[${jobId}] Template: ${templateId}, VideoSource: ${videoSource}, HasValidImage: ${hasValidImage}`)
-    console.log(`[${jobId}] Voice: ${voiceOption}, TTS Language: ${ttsLanguage}, Narration: ${narrationMode}`)
-    
     // Get format dimensions - supports portrait (9:16), landscape (16:9), square (1:1)
     let dimensions
     if (format === 'portrait') {
@@ -1328,8 +1271,6 @@ export async function POST(request) {
     
     // Check for image-to-video mode with uploaded image
     if (mode === 'image-to-video' && hasValidImage) {
-      console.log(`[${jobId}] 📸 IMAGE-TO-VIDEO mode with uploaded image`)
-      
       // Upload image and convert to video using Fal.ai image-to-video
       try {
         const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
@@ -1343,8 +1284,7 @@ export async function POST(request) {
         if (videos.length === 0) {
           throw new Error('Image-to-video generation failed')
         }
-        console.log(`[${jobId}] ✅ Generated ${videos.length} videos from image`)
-      } catch (imgError) {
+        } catch (imgError) {
         console.error(`[${jobId}] ⚠️ Image-to-video failed:`, imgError.message)
         // Fallback to stock videos based on prompt keywords
         const keywords = extractKeywordsFromScript(prompt, 5)
@@ -1352,72 +1292,60 @@ export async function POST(request) {
       }
     } else if (videoSource === 'ai') {
       // Generate AI video clips using Fal.ai
-      console.log(`[${jobId}] 🎨 Generating AI video clips with Fal.ai...`)
-      
       try {
         videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
         
         if (videos.length === 0) {
           throw new Error('No AI videos generated from Fal.ai')
         }
-        console.log(`[${jobId}] ✅ Generated ${videos.length} AI clips`)
-      } catch (falError) {
+        } catch (falError) {
         console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
         
         // Try Replicate as fallback
         try {
-          console.log(`[${jobId}] 🔄 Trying Replicate fallback...`)
           videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
           
           if (videos.length === 0) {
             throw new Error('Replicate also failed')
           }
-          console.log(`[${jobId}] ✅ Generated ${videos.length} clips with Replicate`)
-        } catch (replicateError) {
+          } catch (replicateError) {
           console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
-          console.log(`[${jobId}] 📹 Falling back to stock videos`)
-          
           const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
           videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         }
       }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
-      console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
+      ...`)
       
       // Extract keywords from script for stock video search
       const keywords = extractKeywordsFromScript(prompt, 5)
-      console.log(`[${jobId}] Extracted keywords: ${keywords.join(', ')}`)
+      }`)
       
       // Try to generate 1-2 AI videos for key scenes
       try {
         const aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
         if (aiVideos.length > 0) {
           videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
-          console.log(`[${jobId}] ✅ Got ${aiVideos.length} AI clips`)
-        }
+          }
       } catch (e) {
-        console.log(`[${jobId}] AI generation skipped: ${e.message}`)
-      }
+        }
       
       // Search and add stock videos based on keywords (with 3-second trim later)
       const numStockClips = Math.max(2, Math.ceil(duration / 5) - videos.length)
       const stockVideos = await searchStockVideosByKeywords(keywords, numStockClips)
       videos.push(...stockVideos.map(v => ({ ...v, type: 'stock' })))
-      console.log(`[${jobId}] ✅ Got ${stockVideos.length} stock clips (will be 3s trimmed)`)
+      `)
       
     } else {
       // AI only mode (stock-only is now removed)
-      console.log(`[${jobId}] 🎨 AI-only mode, generating with Fal.ai...`)
-      
       try {
         videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
         
         if (videos.length === 0) {
           throw new Error('No AI videos generated')
         }
-        console.log(`[${jobId}] ✅ Generated ${videos.length} AI clips`)
-      } catch (falError) {
+        } catch (falError) {
         console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
         
         // Try Replicate as fallback
@@ -1425,7 +1353,6 @@ export async function POST(request) {
           videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
         } catch (replicateError) {
           // Final fallback: use hybrid mode
-          console.log(`[${jobId}] All AI failed, falling back to stock videos`)
           const keywords = extractKeywordsFromScript(prompt, 5)
           videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
         }
@@ -1435,8 +1362,6 @@ export async function POST(request) {
     if (videos.length === 0) {
       throw new Error('No video clips available for compilation')
     }
-    
-    console.log(`[${jobId}] 🎬 Compiling ${videos.length} clips with FFmpeg...`)
     
     // Step 2: Compile video using FFmpeg (replaces Shotstack)
     const result = await compileVideoWithFFmpeg({
@@ -1474,7 +1399,7 @@ export async function POST(request) {
 
 // ==================== SHOTSTACK GENERATION ====================
 async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile, videoSource }) {
-  console.log(`[${jobId}] Using Shotstack for video generation (source: ${videoSource})...`)
+  ...`)
   
   const apiKey = process.env.SHOTSTACK_API_KEY
   if (!apiKey) {
@@ -1499,22 +1424,17 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   
   if (mode === 'image-to-video' && imageFile && typeof imageFile !== 'string' && imageFile.size > 0) {
     // For image-to-video, first upload the image to Shotstack Serve API
-    console.log(`[${jobId}] Uploading image to Shotstack...`)
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
-    console.log(`[${jobId}] Image uploaded: ${imageUrl}`)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else if (videoSource === 'ai') {
     // AI-Generated Video Scenes using Fal.ai
     // Primary: Ovi/Pixverse (cheapest), then Wan/Minimax, then Kling, then Replicate
-    console.log(`[${jobId}] 🎨 Starting AI video generation with Fal.ai...`)
-    
     let aiVideos = []
     try {
       // Generate AI video clips using Fal.ai
       aiVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
       
       if (aiVideos.length > 0) {
-        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} AI video clips with Fal.ai`)
         // Try to compose the AI videos with text overlays using Shotstack
         editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, aiVideos, jobId)
       } else {
@@ -1528,7 +1448,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
         const replicateVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
         
         if (replicateVideos.length > 0) {
-          console.log(`[${jobId}] ✅ Generated ${replicateVideos.length} AI video clips with Replicate (fallback)`)
+          `)
           aiVideos = replicateVideos
           editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, replicateVideos, jobId)
         } else {
@@ -1549,15 +1469,14 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     }
   } else if (videoSource === 'hybrid') {
     // Hybrid: Mix AI-generated video with stock footage
-    console.log(`[${jobId}] ✨ Building hybrid video (AI + Stock)...`)
+    ...`)
     
     let aiVideos = []
     try {
       // Generate 1-2 AI video clips for key moments
       aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
     } catch (error) {
-      console.log(`[${jobId}] ⚠️ AI generation failed for hybrid, using more stock footage`)
-    }
+      }
     
     // Fetch stock videos for B-roll
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
@@ -1566,18 +1485,15 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     editJson = buildHybridVideoEdit(templateId, prompt, duration, dimensions, stockVideos, aiVideos, jobId)
   } else {
     // Stock Videos: Original implementation
-    console.log(`[${jobId}] 📹 Fetching cinematic stock videos for template: ${templateId}`)
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-    console.log(`[${jobId}] Keywords: ${keywords.join(', ')}`)
+    }`)
     
     const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
-    console.log(`[${jobId}] Fetched ${stockVideos.length} stock videos`)
-    
     // Build video with stock footage backgrounds
     editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
   }
   
-  console.log(`[${jobId}] Submitting to Shotstack:`, JSON.stringify(editJson).substring(0, 500))
+  .substring(0, 500))
   
   // Submit render request
   const renderResponse = await fetch(`${baseUrl}/render`, {
@@ -1595,7 +1511,6 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     
     // If we have AI videos, return the first one directly instead of failing
     if (generatedAIVideos.length > 0) {
-      console.log(`[${jobId}] ⚠️ Shotstack failed, returning raw AI video instead`)
       const firstAIVideo = generatedAIVideos[0]
       return {
         videoUrl: firstAIVideo.url,
@@ -1619,8 +1534,6 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     throw new Error('No render ID returned from Shotstack')
   }
   
-  console.log(`[${jobId}] Render submitted. ID: ${renderId}`)
-  
   // Poll for completion
   let videoUrl = null
   let attempts = 0
@@ -1642,15 +1555,13 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const statusData = await statusResponse.json()
     const status = statusData.response?.status
     
-    console.log(`[${jobId}] Render status: ${status} (attempt ${attempts})`)
+    `)
     
     if (status === 'done') {
       videoUrl = statusData.response?.url
-      console.log(`[${jobId}] ✅ Render complete! URL: ${videoUrl}`)
-    } else if (status === 'failed') {
+      } else if (status === 'failed') {
       // If Shotstack composition fails but we have AI videos, return them
       if (generatedAIVideos.length > 0) {
-        console.log(`[${jobId}] ⚠️ Shotstack composition failed, returning raw AI video`)
         const firstAIVideo = generatedAIVideos[0]
         return {
           videoUrl: firstAIVideo.url,
@@ -1670,7 +1581,6 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   if (!videoUrl) {
     // If we have AI videos and timed out, return them
     if (generatedAIVideos.length > 0) {
-      console.log(`[${jobId}] ⚠️ Shotstack timed out, returning raw AI video`)
       const firstAIVideo = generatedAIVideos[0]
       return {
         videoUrl: firstAIVideo.url,
@@ -1717,8 +1627,6 @@ async function uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId) {
     
     // Return the public URL
     const publicUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/ai-video-uploads/${fileName}`
-    console.log(`[${jobId}] Image saved to: ${publicUrl}`)
-    
     return publicUrl
   } catch (error) {
     console.error(`[${jobId}] Image upload error:`, error)
@@ -1854,8 +1762,7 @@ Style: Scroll-stopping commercial with dynamic motion.
 Motion: Smooth zoom in, subtle rotation, professional product showcase. 
 Effects: High contrast, vibrant colors, clean transitions.
 Mood: Energetic, professional, attention-grabbing.`
-    console.log(`[${jobId}] 🎬 Using AD-STYLE motion prompt for promo template`)
-  } else {
+    } else {
     motionPrompt = `Animate this image with cinematic motion: ${prompt}. 
 Add subtle camera movement, depth, and professional lighting effects.`
   }
@@ -1870,8 +1777,6 @@ Add subtle camera movement, depth, and professional lighting effects.`
     
     while (!success && modelIndex < imageToVideoModels.length) {
       const model = imageToVideoModels[modelIndex]
-      console.log(`[${jobId}] 🖼️ Generating image-to-video clip ${i + 1}/${numClips} with ${model.name}...`)
-      
       try {
         const input = {
           prompt: motionPrompt,
@@ -1891,14 +1796,13 @@ Add subtle camera movement, depth, and professional lighting effects.`
           timeout: 180000, // 3 min timeout
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] 🎬 ${model.name} processing...`)
-            }
+              }
           }
         })
         
-        console.log(`[${jobId}] Raw Fal.ai response:`, JSON.stringify(result.data).substring(0, 300))
+        .substring(0, 300))
         const videoUrl = extractVideoUrl(result.data)
-        console.log(`[${jobId}] Extracted URL type: ${typeof videoUrl}, value: ${String(videoUrl).substring(0, 100)}`)
+        .substring(0, 100)}`)
         
         if (videoUrl && typeof videoUrl === 'string') {
           videos.push({
@@ -1908,7 +1812,6 @@ Add subtle camera movement, depth, and professional lighting effects.`
             type: 'ai-image-to-video',
             index: i
           })
-          console.log(`[${jobId}] ✅ Image-to-video clip ${i + 1} complete with ${model.name}`)
           success = true
         } else {
           throw new Error(`No valid video URL in response (got ${typeof videoUrl})`)
@@ -1922,15 +1825,13 @@ Add subtle camera movement, depth, and professional lighting effects.`
           modelIndex++
           attempts = 0
           if (modelIndex < imageToVideoModels.length) {
-            console.log(`[${jobId}] 🔄 Switching to ${imageToVideoModels[modelIndex].name}`)
-          }
+            }
         }
       }
     }
     
     if (!success) {
-      console.log(`[${jobId}] ⚠️ All image-to-video models failed for clip ${i + 1}`)
-    }
+      }
   }
   
   return videos
@@ -2012,8 +1913,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   let modelIndex = 0
   let consecutiveFailures = 0
   
-  console.log(`[${jobId}] 🎬 Starting AI video generation with ${models.length} available models`)
-  console.log(`[${jobId}] Model priority: ${models.map(m => `${m.name} ($${m.costPerSecond}/s)`).join(' → ')}`)
+  `).join(' → ')}`)
   
   for (let i = 0; i < numClips; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
@@ -2021,8 +1921,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
       dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
     }`
     
-    console.log(`[${jobId}] 🎬 Clip ${i + 1}/${numClips} using ${selectedModel.tier} ${selectedModel.name}...`)
-    console.log(`[${jobId}] Prompt: "${cinematicPrompt.substring(0, 80)}..."`)
+    }..."`)
     
     try {
       const result = await fal.subscribe(selectedModel.endpoint, {
@@ -2034,8 +1933,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         logs: true,
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
-            console.log(`[${jobId}] Clip ${i + 1} progress: ${update.logs?.length || 0} logs`)
-          }
+            }
         }
       })
       
@@ -2043,7 +1941,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
       const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
       
       if (videoUrl) {
-        console.log(`[${jobId}] ✅ Clip ${i + 1} generated with ${selectedModel.name}: ${videoUrl.substring(0, 60)}...`)
+        }...`)
         videos.push({
           url: videoUrl,
           prompt: scenePrompt,
@@ -2054,13 +1952,11 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         })
         consecutiveFailures = 0 // Reset on success
       } else {
-        console.log(`[${jobId}] ⚠️ Clip ${i + 1} - no video URL in response from ${selectedModel.name}`)
         consecutiveFailures++
         // Try next model after 2 consecutive failures
         if (consecutiveFailures >= 2 && modelIndex < models.length - 1) {
           modelIndex++
           selectedModel = models[modelIndex]
-          console.log(`[${jobId}] 🔄 Switching to ${selectedModel.tier} ${selectedModel.name} after failures`)
           consecutiveFailures = 0
         }
         i-- // Retry this clip
@@ -2073,7 +1969,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
       if (modelIndex < models.length - 1) {
         modelIndex++
         selectedModel = models[modelIndex]
-        console.log(`[${jobId}] 🔄 Switching to ${selectedModel.tier} ${selectedModel.name} due to error`)
         consecutiveFailures = 0
         i-- // Retry this clip
       }
@@ -2084,7 +1979,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   if (videos.length > 0) {
     const modelUsed = [...new Set(videos.map(v => v.model))].join(', ')
     const totalCost = videos.reduce((sum, v) => sum + v.cost, 0)
-    console.log(`[${jobId}] 📊 Generated ${videos.length} clips using: ${modelUsed} | Est. cost: $${totalCost.toFixed(2)}`)
+    }`)
   }
   
   return videos
@@ -2105,7 +2000,7 @@ async function generateAIVideosWithReplicate(prompt, duration, dimensions, jobId
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
     
-    console.log(`[${jobId}] 🎬 Generating clip ${i + 1}/${numClips} with Replicate (fallback)...`)
+    ...`)
     
     try {
       // Use MiniMax video model on Replicate
@@ -2145,13 +2040,12 @@ async function generateAIVideosWithReplicate(prompt, duration, dimensions, jobId
         result = await statusResponse.json()
         
         if (attempts % 10 === 0) {
-          console.log(`[${jobId}] Replicate clip ${i + 1} status: ${result.status} (${attempts * 2}s)`)
+          `)
         }
       }
       
       if (result.status === 'succeeded' && result.output) {
         const videoUrl = Array.isArray(result.output) ? result.output[0] : result.output
-        console.log(`[${jobId}] ✅ Replicate clip ${i + 1} generated`)
         videos.push({
           url: videoUrl,
           prompt: scenePrompt,
@@ -2286,15 +2180,13 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
   const scenes = parsePromptToScenes(prompt, numScenes)
   const generatedImages = []
   
-  console.log(`[${jobId}] Generating ${numScenes} AI images using FLUX model...`)
-  
   // Generate images in parallel (up to 3 at a time)
   const imagePromises = scenes.slice(0, numScenes).map(async (scenePrompt, index) => {
     const cinematicPrompt = `${scenePrompt}, cinematic lighting, dramatic atmosphere, high quality, professional photography, ${
       dimensions.height > dimensions.width ? 'vertical composition, portrait orientation' : 'wide cinematic shot, landscape orientation'
     }, 8K resolution, photorealistic`
     
-    console.log(`[${jobId}] Scene ${index + 1}: "${cinematicPrompt.substring(0, 60)}..."`)
+    }..."`)
     
     try {
       // Create image using Shotstack Create API
@@ -2329,8 +2221,6 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
         return null
       }
       
-      console.log(`[${jobId}] Image ${index + 1} queued: ${assetId}`)
-      
       // Poll for completion
       let imageUrl = null
       let attempts = 0
@@ -2350,12 +2240,11 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
           
           if (status === 'done') {
             imageUrl = statusData.data?.attributes?.url
-            console.log(`[${jobId}] ✅ Image ${index + 1} ready: ${imageUrl}`)
-          } else if (status === 'failed') {
+            } else if (status === 'failed') {
             console.error(`[${jobId}] ❌ Image ${index + 1} failed`)
             break
           } else if (attempts % 5 === 0) {
-            console.log(`[${jobId}] Image ${index + 1} status: ${status} (${attempts * 2}s)`)
+            `)
           }
         }
       }
@@ -2775,8 +2664,6 @@ function parsePromptToLines(prompt, maxLines = 4) {
 
 // ==================== REPLICATE GENERATION ====================
 async function generateWithReplicate({ jobId, mode, prompt, duration, format, templateId, imageFile }) {
-  console.log(`[${jobId}] Using Replicate for AI video generation...`)
-  
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
   if (!replicateKey) {
@@ -2801,8 +2688,6 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     const base64Image = imageBuffer.toString('base64')
     const mimeType = imageFile.type || 'image/jpeg'
     const imageDataUrl = `data:${mimeType};base64,${base64Image}`
-    
-    console.log(`[${jobId}] Running SVD image-to-video...`)
     
     // Use Stable Video Diffusion via Replicate API directly
     const response = await fetch('https://api.replicate.com/v1/predictions', {
@@ -2830,8 +2715,6 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Prediction started: ${prediction.id}`)
-    
     // Poll until complete
     while (!['succeeded', 'failed', 'canceled'].includes(prediction.status)) {
       await new Promise(r => setTimeout(r, 2000))
@@ -2840,8 +2723,7 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
         headers: { 'Authorization': `Bearer ${replicateKey}` }
       })
       prediction = await statusResponse.json()
-      console.log(`[${jobId}] SVD status: ${prediction.status}`)
-    }
+      }
     
     if (prediction.status !== 'succeeded') {
       throw new Error(`SVD generation failed: ${prediction.error || prediction.status}`)
@@ -2851,8 +2733,6 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     
   } else {
     // Text-to-video using ZeroScope
-    console.log(`[${jobId}] Running ZeroScope text-to-video...`)
-    
     const formattedPrompt = format === 'portrait'
       ? `${prompt || 'beautiful scenery'}, vertical video, 9:16 aspect ratio, high quality`
       : `${prompt || 'beautiful scenery'}, horizontal video, 16:9 aspect ratio, cinematic, high quality`
@@ -2881,8 +2761,6 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Prediction started: ${prediction.id}`)
-    
     // Poll until complete
     while (!['succeeded', 'failed', 'canceled'].includes(prediction.status)) {
       await new Promise(r => setTimeout(r, 2000))
@@ -2891,8 +2769,7 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
         headers: { 'Authorization': `Bearer ${replicateKey}` }
       })
       prediction = await statusResponse.json()
-      console.log(`[${jobId}] ZeroScope status: ${prediction.status}`)
-    }
+      }
     
     if (prediction.status !== 'succeeded') {
       throw new Error(`ZeroScope generation failed: ${prediction.error || prediction.status}`)
@@ -2904,8 +2781,6 @@ async function generateWithReplicate({ jobId, mode, prompt, duration, format, te
   if (!videoUrl) {
     throw new Error('No video URL returned from Replicate')
   }
-  
-  console.log(`[${jobId}] ✅ Replicate generation complete! URL: ${videoUrl}`)
   
   return {
     videoUrl,
@@ -2948,6 +2823,6 @@ function extractVideoUrl(output) {
   // Handle nested video object
   if (output.data?.video?.url) return output.data.video.url
   
-  console.log('[extractVideoUrl] Unknown format:', JSON.stringify(output).substring(0, 200))
+  .substring(0, 200))
   return null
 }

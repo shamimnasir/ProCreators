@@ -37,8 +37,6 @@ export async function POST(request) {
     
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    console.log(`[${jobId}] Processing video with ${operations.length} operations`)
-    
     let currentInput = inputPath
     let tempFiles = []
     
@@ -46,8 +44,6 @@ export async function POST(request) {
       const op = operations[i]
       const tempOutput = join(OUTPUT_DIR, `${jobId}-temp-${i}.mp4`)
       tempFiles.push(tempOutput)
-      
-      console.log(`[${jobId}] Operation ${i + 1}: ${op.type}`)
       
       switch (op.type) {
         case 'remove_segments':
@@ -86,7 +82,6 @@ export async function POST(request) {
           break
           
         default:
-          console.log(`[${jobId}] Unknown operation: ${op.type}`)
           continue
       }
       
@@ -115,7 +110,7 @@ export async function POST(request) {
     const { stat } = await import('fs/promises')
     const stats = await stat(finalOutput)
     
-    console.log(`[${jobId}] ✅ Processing complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    }MB`)
     
     return NextResponse.json({
       success: true,
@@ -165,8 +160,6 @@ async function removeSegments(input, output, segments, jobId) {
     return
   }
   
-  console.log(`[${jobId}] Keeping ${keepSegments.length} segments, removing ${segments.length}`)
-  
   // Build FFmpeg filter for concatenating kept segments
   const filterParts = []
   const concatInputs = []
@@ -206,8 +199,6 @@ async function addCaptions(input, output, transcript, style = {}, jobId) {
   const assContent = generateASSFromTranscript(transcript, style)
   const assPath = `/tmp/${jobId}-captions.ass`
   await writeFile(assPath, assContent)
-  
-  console.log(`[${jobId}] Generated ASS captions with ${transcript.segments.length} segments`)
   
   // Burn captions into video
   const escapedPath = assPath.replace(/\\/g, '/').replace(/:/g, '\\:')
@@ -262,8 +253,6 @@ async function enhanceAudio(input, output, settings = {}, jobId) {
   
   const filterString = audioFilters.length > 0 ? audioFilters.join(',') : 'anull'
   
-  console.log(`[${jobId}] Applying audio filters: ${filterString}`)
-  
   await runFFmpeg([
     '-i', input,
     '-af', filterString,
@@ -309,8 +298,6 @@ async function applyColorGrade(input, output, preset = 'neutral', jobId) {
   
   const filter = presets[preset] || presets.neutral
   
-  console.log(`[${jobId}] Applying color grade: ${preset}`)
-  
   await runFFmpeg([
     '-i', input,
     '-vf', filter,
@@ -342,8 +329,6 @@ async function trimVideo(input, output, start, end, jobId) {
     '-y',
     output
   )
-  
-  console.log(`[${jobId}] Trimming: ${start || 0}s to ${end || 'end'}`)
   
   await runFFmpeg(args, jobId)
 }
@@ -386,7 +371,7 @@ async function cropVideo(input, output, aspectRatio = '9:16', position = 'center
     }
   }
   
-  console.log(`[${jobId}] Cropping to ${aspectRatio} (${outW}x${outH})`)
+  `)
   
   await runFFmpeg([
     '-i', input,
@@ -430,8 +415,6 @@ async function beatSyncCuts(input, output, beats, scenes, jobId) {
     // No matching cut points, use beat times directly
     cutPoints.push(...beats.slice(0, 10).map(b => b.time))
   }
-  
-  console.log(`[${jobId}] Beat sync with ${cutPoints.length} cut points`)
   
   // For now, just copy - beat sync would require more complex editing
   // This is a placeholder for the full implementation
@@ -541,7 +524,7 @@ async function getVideoInfo(videoPath) {
 // Helper: Run FFmpeg command
 async function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg:`, args.slice(0, 10).join(' '), '...')
+    .join(' '), '...')
     
     const ffmpeg = spawn('ffmpeg', args)
     

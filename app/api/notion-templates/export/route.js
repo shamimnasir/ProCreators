@@ -853,8 +853,7 @@ export async function POST(request) {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       })
-      console.log(`Notion template saved to library: ${documentId}`)
-    } catch (libError) {
+      } catch (libError) {
       console.error('Failed to save to library:', libError)
     }
     

@@ -95,8 +95,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks. Use plain ASCII char
       checklist.tips = checklist.tips.map(t => sanitizeText(t))
     }
     
-    console.log('AI generated checklist structure successfully')
-    
     return NextResponse.json({
       success: true,
       checklist

@@ -90,7 +90,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Topic is required' }, { status: 400 })
     }
     
-    console.log(`[Transformation] Generating ${sceneCount} progressive construction scenes for: ${topic.substring(0, 50)}...`)
+    }...`)
     
     // Build the prompt for progressive construction transformation
     const prompt = SCENE_GENERATION_PROMPT
@@ -159,10 +159,9 @@ export async function POST(request) {
         scenes = [scenes]
       }
       
-      console.log(`[Transformation] Generated ${scenes.length} scenes`)
-    } catch (parseError) {
+      } catch (parseError) {
       console.error('[Transformation] Failed to parse LLM response:', parseError)
-      console.log('[Transformation] Raw response:', result.substring(0, 500))
+      )
       
       // Generate fallback scenes
       scenes = generateFallbackScenes(topic, sceneCount, language)

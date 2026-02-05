@@ -154,8 +154,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
       outline.conclusion.keyPoints = (outline.conclusion.keyPoints || []).map(p => sanitizeText(p))
     }
     
-    console.log('AI generated outline successfully')
-    
     return NextResponse.json({
       success: true,
       outline

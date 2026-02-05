@@ -398,10 +398,8 @@ export async function POST(request) {
             }
           })
         })
-        console.log('Bibliography saved to library:', filename)
-      } catch (e) {
-        console.log('Library save skipped:', e.message)
-      }
+        } catch (e) {
+        }
       
       return NextResponse.json({
         success: true,

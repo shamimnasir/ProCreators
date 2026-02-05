@@ -502,10 +502,8 @@ Make each section detailed with specific activities, time allocations, and pract
             }
           })
         })
-        console.log('Lesson plan saved to library:', filename)
-      } catch (e) {
-        console.log('Library save skipped:', e.message)
-      }
+        } catch (e) {
+        }
 
       return NextResponse.json({
         success: true,

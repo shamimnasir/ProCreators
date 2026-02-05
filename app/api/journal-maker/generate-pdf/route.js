@@ -77,8 +77,6 @@ export async function POST(request) {
       )
     }
     
-    console.log(`Generating journal PDF: "${cover.title}"...`)
-    
     const colorScheme = settings?.colorScheme || 'lavender'
     const coverStyle = settings?.coverStyle || 'floral'
     const journalType = settings?.journalType || 'gratitude'
@@ -93,25 +91,21 @@ export async function POST(request) {
       try {
         if (coverImageStyle === 'custom' && customImagePrompt) {
           // User provided custom description
-          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Custom cover image generated successfully')
-          }
+            }
         } else {
           // Use theme-based prompt
           const themeKey = getJournalTheme(journalType)
-          console.log(`Generating cover image for theme: ${themeKey}`)
           const imageResult = await generateCoverImage(themeKey)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         }
       } catch (imgError) {
-        console.log('Cover image generation failed:', imgError.message)
-      }
+        }
     }
     
     // Create PDF
@@ -127,7 +121,7 @@ export async function POST(request) {
     const margin = Math.min(50, pageWidth * 0.08) // Scale margin with page size
     const contentWidth = pageWidth - (margin * 2)
     
-    console.log(`Journal PDF: ${paperSize?.name || '6x9'} (${pageWidth}x${pageHeight})`)
+    `)
     
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['lavender']
     const coverStyleObj = COVER_STYLES[coverStyle] || COVER_STYLES['floral']
@@ -472,8 +466,6 @@ export async function POST(request) {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
-    
-    console.log(`Journal PDF generated: ${filePath}`)
     
     return NextResponse.json({
       success: true,

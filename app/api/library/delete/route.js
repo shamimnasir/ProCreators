@@ -44,8 +44,7 @@ export async function DELETE(request) {
       if (existsSync(fullPath)) {
         try {
           await unlink(fullPath)
-          console.log(`Deleted file: ${fullPath}`)
-        } catch (fileError) {
+          } catch (fileError) {
           console.error('Failed to delete file:', fileError)
           // Continue anyway, DB entry is deleted
         }

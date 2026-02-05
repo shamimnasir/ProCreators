@@ -75,15 +75,13 @@ export async function POST(request) {
     await mkdir(tempDir, { recursive: true })
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    console.log(`[${jobId}] AI Enhancement: ${features.join(', ')}`)
+    }`)
     
     let currentInput = inputPath
     const results = {}
     
     // Feature 1: Silence Detection & Removal
     if (features.includes('silence_removal')) {
-      console.log(`[${jobId}] Detecting silences...`)
-      
       // Detect silent segments
       const silences = await detectSilences(currentInput, silenceThreshold, silenceMinDuration, jobId)
       results.silencesDetected = silences.length
@@ -99,29 +97,23 @@ export async function POST(request) {
         }
         
         currentInput = outputPath
-        console.log(`[${jobId}] Removed ${silences.length} silent segments (${results.silenceDuration.toFixed(1)}s)`)
+        }s)`)
       }
     }
     
     // Feature 2: Filler Word Removal
     if (features.includes('filler_removal') && transcript?.segments) {
-      console.log(`[${jobId}] Detecting filler words...`)
-      
       // Log what's in the transcript for debugging
-      console.log(`[${jobId}] Transcript segments: ${transcript.segments.length}`)
       const sampleWords = transcript.segments.slice(0, 3).map(s => s.text).join(' | ')
-      console.log(`[${jobId}] Sample transcript: ${sampleWords}`)
-      
       const fillerSegments = detectFillerWords(transcript, fillerWords)
       results.fillersDetected = fillerSegments.length
       results.fillerDuration = fillerSegments.reduce((sum, s) => sum + (s.end - s.start), 0)
       
       // Log detected fillers
       if (fillerSegments.length > 0) {
-        console.log(`[${jobId}] Found fillers: ${fillerSegments.map(f => f.word).join(', ')}`)
+        .join(', ')}`)
       } else {
-        console.log(`[${jobId}] No fillers detected in transcript. Whisper may not have transcribed them.`)
-      }
+        }
       
       const fillerSegments = detectFillerWords(transcript, fillerWords)
       results.fillersDetected = fillerSegments.length
@@ -131,14 +123,12 @@ export async function POST(request) {
         const outputPath = join(tempDir, `fillers-removed.mp4`)
         await removeSegments(currentInput, outputPath, fillerSegments, jobId)
         currentInput = outputPath
-        console.log(`[${jobId}] Removed ${fillerSegments.length} filler words (${results.fillerDuration.toFixed(1)}s)`)
+        }s)`)
       }
     }
     
     // Feature 3: Audio Ducking (lower music when speech)
     if (features.includes('audio_ducking') && musicPath) {
-      console.log(`[${jobId}] Applying audio ducking...`)
-      
       const musicFullPath = join('/app/public', musicPath)
       if (existsSync(musicFullPath)) {
         const outputPath = join(tempDir, `ducked.mp4`)
@@ -160,7 +150,7 @@ export async function POST(request) {
     
     const stats = await stat(finalOutput)
     
-    console.log(`[${jobId}] ✅ AI Enhancement complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    }MB`)
     
     return NextResponse.json({
       success: true,
@@ -488,7 +478,7 @@ async function getVideoDuration(path) {
 // Run FFmpeg
 function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg: ${args.slice(0, 6).join(' ')}...`)
+    .join(' ')}...`)
     const proc = spawn('ffmpeg', args)
     let err = ''
     proc.stderr.on('data', d => err += d)

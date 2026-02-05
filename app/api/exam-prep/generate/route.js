@@ -142,7 +142,7 @@ async function webSearch(query, numResults = 5, retryCount = 0) {
     })
     
     if (!response.ok) {
-      console.log(`DuckDuckGo search failed (status ${response.status}), retrying...`)
+      , retrying...`)
       if (retryCount < 2) {
         return webSearch(query, numResults, retryCount + 1)
       }
@@ -188,12 +188,11 @@ async function webSearch(query, numResults = 5, retryCount = 0) {
       if (results.length >= numResults) break
     }
     
-    console.log(`Web search for "${query.substring(0, 40)}..." found ${results.length} results`)
+    }..." found ${results.length} results`)
     return results
   } catch (error) {
     if (error.name === 'AbortError') {
-      console.log('Web search timed out, skipping...')
-    } else {
+      } else {
       console.error('Web search error:', error.message)
     }
     // Graceful degradation - official sources still work
@@ -237,8 +236,6 @@ async function scrapeUrl(url) {
 
 // HYBRID APPROACH: Search web for official exam info, then use LLM to structure it
 async function searchExamInfo(examName, examId = null) {
-  console.log(`\n=== HYBRID EXAM SEARCH: ${examName} ===`)
-  
   let webContent = []
   let officialSources = []
   let searchSources = []
@@ -248,18 +245,15 @@ async function searchExamInfo(examName, examId = null) {
   
   // Step 2: Try to scrape official sources first
   if (knownSource) {
-    console.log(`Found official source config for ${examId}`)
     for (const url of knownSource.urls) {
       try {
         const content = await scrapeUrl(url)
         if (content && content.length > 200) {
           webContent.push(content)
           officialSources.push({ url, authority: knownSource.authority })
-          console.log(`✓ Scraped official source: ${url}`)
-        }
+          }
       } catch (e) {
-        console.log(`✗ Failed to scrape ${url}`)
-      }
+        }
     }
   }
   
@@ -286,15 +280,12 @@ async function searchExamInfo(examName, examId = null) {
         if (content && content.length > 300) {
           webContent.push(content)
           searchSources.push({ url: result.url, title: result.title })
-          console.log(`✓ Scraped search result: ${result.url}`)
-        }
+          }
       } catch (e) {
         // Skip failed scrapes
       }
     }
   }
-  
-  console.log(`Total web content pieces: ${webContent.length}`)
   
   // Step 4: Use LLM to analyze and structure the information
   const webDataSummary = webContent.length > 0 
@@ -386,7 +377,7 @@ Return ONLY valid JSON.`
         searchedAt: new Date().toISOString()
       }
       
-      console.log(`=== EXAM INFO READY (${webContent.length} web sources used) ===\n`)
+      ===\n`)
       return examInfo
     }
     return null
@@ -792,7 +783,7 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'Exam name required' }, { status: 400 })
       }
       
-      console.log(`\n📚 Exam Search Request: ${examName} (ID: ${examId || 'custom'})`)
+      `)
       
       // Use hybrid approach: web search + LLM
       const examInfo = await searchExamInfo(examName, examId)
@@ -809,7 +800,6 @@ export async function POST(request) {
     
     // Generate practice questions
     if (action === 'generate-questions') {
-      console.log(`\n📝 Question Generation Request: ${body.examName}`)
       const questions = await generateQuestions(body)
       
       return NextResponse.json({
@@ -854,10 +844,8 @@ export async function POST(request) {
             }
           })
         })
-        console.log('Exam prep saved to library:', filename)
-      } catch (e) {
-        console.log('Library save skipped:', e.message)
-      }
+        } catch (e) {
+        }
       
       return NextResponse.json({
         success: true,

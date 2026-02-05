@@ -127,8 +127,6 @@ export async function POST(request) {
     // Ensure chapters is an array
     const validChapters = Array.isArray(chapters) ? chapters : []
     
-    console.log(`Generating How-To Guide: "${title}"...`)
-    
     // Get paper dimensions
     const width = paperSize?.width || 612
     const height = paperSize?.height || 792
@@ -143,15 +141,13 @@ export async function POST(request) {
     if (coverImageStyle && coverImageStyle !== 'gradient') {
       try {
         const themePrompt = customImagePrompt || `professional ${guideType} guide cover, educational, step-by-step tutorial, knowledge sharing, modern design`
-        console.log(`Generating cover image: ${themePrompt.substring(0, 50)}...`)
+        }...`)
         const imageResult = await generateCoverImage('default-elegant', themePrompt)
         if (imageResult.success && imageResult.imageUrl) {
           coverImageUrl = imageResult.imageUrl
-          console.log('Cover image generated successfully')
-        }
+          }
       } catch (imgError) {
-        console.log('Cover image generation failed:', imgError.message)
-      }
+        }
     }
     
     // Create PDF
@@ -637,8 +633,6 @@ export async function POST(request) {
     await fs.writeFile(filePath, pdfBytes)
     
     const pageCount = pdfDoc.getPageCount()
-    console.log(`Guide generated: ${pageCount} pages`)
-    
     return NextResponse.json({
       success: true,
       title: sanitizeText(title) || 'How-To Guide',

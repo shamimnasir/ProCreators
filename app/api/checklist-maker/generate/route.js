@@ -32,7 +32,6 @@ async function generateChecklistContent(checklistType, customItems, itemCount) {
   // If user provided custom items, use them directly
   if (customItems && customItems.trim()) {
     const userItems = customItems.split('\n').filter(line => line.trim()).map(line => line.trim())
-    console.log(`Using ${userItems.length} custom items provided by user`)
     return {
       title: `My ${config.name}`,
       subtitle: config.description,
@@ -119,8 +118,6 @@ export async function POST(request) {
       customTitle
     } = await request.json()
     
-    console.log(`Generating ${checklistType} checklist...`)
-    
     const content = await generateChecklistContent(checklistType, customItems, itemCount)
     
     // Override title if custom title provided
@@ -133,24 +130,20 @@ export async function POST(request) {
     if (coverImageStyle !== 'gradient') {
       try {
         if (coverImageStyle === 'custom' && customImagePrompt) {
-          console.log(`Generating cover image with custom prompt: ${customImagePrompt.substring(0, 50)}...`)
+          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Custom cover image generated successfully')
-          }
+            }
         } else {
           const themeKey = getChecklistTheme(checklistType)
-          console.log(`Generating cover image for theme: ${themeKey}`)
           const imageResult = await generateCoverImage(themeKey)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         }
       } catch (imgError) {
-        console.log('Cover image generation failed:', imgError.message)
-      }
+        }
     }
     
     // Create PDF
@@ -168,7 +161,7 @@ export async function POST(request) {
     const margins = getMargins(estimatedPages, false)
     const margin = margins.inside.points
     
-    console.log(`Checklist PDF: ${sizeConfig?.name || 'default'} (${width}x${height} points), margin: ${margin}pt`)
+    , margin: ${margin}pt`)
     
     const colors = {
       modern: { primary: rgb(0.1, 0.1, 0.3), accent: rgb(0.3, 0.5, 0.8), bg: rgb(0.95, 0.97, 1) },
@@ -185,7 +178,6 @@ export async function POST(request) {
     
     // Add cover page with image if available
     if (coverImageUrl) {
-      console.log('Adding cover page with image to PDF')
       const coverPage = pdfDoc.addPage([width, height])
       const colorSchemeMap = {
         modern: {
@@ -232,8 +224,7 @@ export async function POST(request) {
           regularFont,
           coverImageUrl
         })
-        console.log('Cover page added successfully')
-      } catch (coverError) {
+        } catch (coverError) {
         console.error('Error adding cover page:', coverError.message)
       }
     }

@@ -123,8 +123,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
       }))
     }
     
-    console.log('AI generated worksheet structure successfully')
-    
     return NextResponse.json({
       success: true,
       worksheet

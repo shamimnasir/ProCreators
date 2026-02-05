@@ -40,8 +40,8 @@ export async function POST(request) {
         const response = await result.response
         enhancedPrompt = response.text().trim()
         
-        console.log('[Enhance Prompt] Original:', prompt.substring(0, 50))
-        console.log('[Enhance Prompt] Enhanced:', enhancedPrompt.substring(0, 100))
+        )
+        )
         
       } catch (aiError) {
         console.error('[Enhance Prompt] AI enhancement failed:', aiError.message)

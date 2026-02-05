@@ -21,8 +21,6 @@ async function updateJobStatus(jobId, updates) {
 
 // Generate image using Gemini nano-banana
 async function generateImageWithAI(prompt, jobId, index) {
-  console.log(`[${jobId}] Generating image ${index + 1}...`)
-  
   const apiKey = process.env.GOOGLE_API_KEY
   if (!apiKey) {
     throw new Error('Google API key not configured')
@@ -63,8 +61,6 @@ async function generateImageWithAI(prompt, jobId, index) {
 
 // Generate AI video from image using Replicate
 async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, index, duration = 5) {
-  console.log(`[${jobId}] Generating AI video ${index + 1}...`)
-  
   const replicateKey = process.env.REPLICATE_API_TOKEN
   
   if (!replicateKey) {
@@ -72,8 +68,6 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
   }
   
   try {
-    console.log(`[${jobId}] Using high-quality AI video model...`)
-    
     // Create a motion-focused prompt
     const fullMotionPrompt = motionPrompt 
       ? `${motionPrompt}. Progressive construction, workers moving, realistic building activity, smooth cinematic motion, time-lapse feel.`
@@ -102,8 +96,6 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
     }
     
     let prediction = await response.json()
-    console.log(`[${jobId}] Video ${index + 1} prediction ID: ${prediction.id}`)
-    
     // Poll until complete
     const maxWaitTime = 300000 // 5 minutes max
     const startTime = Date.now()
@@ -121,12 +113,11 @@ async function generateAIVideo(imageUrl, visualPrompt, motionPrompt, jobId, inde
       prediction = await pollResponse.json()
       
       const elapsed = Math.round((Date.now() - startTime) / 1000)
-      console.log(`[${jobId}] Video ${index + 1} status: ${prediction.status} (${elapsed}s)`)
+      `)
     }
     
     if (prediction.status === 'succeeded') {
       const videoUrl = prediction.output
-      console.log(`[${jobId}] ✅ AI Video ${index + 1} generated successfully`)
       return videoUrl
     }
     
@@ -235,7 +226,6 @@ async function processTransformationJob(jobId, params) {
       let imageUrl = scene.imageUrl
       
       if (imageUrl) {
-        console.log(`[${jobId}] Scene ${i + 1} already has image, skipping generation`)
         imageUrls.push({ url: imageUrl, prompt: scene.visualPrompt, scene })
         await updateJobStatus(jobId, { 
           progress: 5 + Math.floor((i + 1) / scenes.length * 20),
@@ -514,9 +504,6 @@ async function processTransformationJob(jobId, params) {
       try {
         // Support both 'url' and 'path' properties for backward compatibility
         const musicUrl = backgroundMusic.url || backgroundMusic.path
-        console.log(`[${jobId}] Downloading background music: ${backgroundMusic.name}`)
-        console.log(`[${jobId}] Music URL: ${musicUrl}`)
-        
         const musicPath = join(tempDir, 'music.mp3')
         
         // Check if it's a local path or URL
@@ -524,11 +511,9 @@ async function processTransformationJob(jobId, params) {
         if (musicUrl.startsWith('/')) {
           // Local file path - read directly
           const localPath = join('/app/public', musicUrl)
-          console.log(`[${jobId}] Reading local music file: ${localPath}`)
           if (existsSync(localPath)) {
             musicBuffer = await readFile(localPath)
-            console.log(`[${jobId}] Local music file read: ${musicBuffer.length} bytes`)
-          } else {
+            } else {
             throw new Error(`Local music file not found: ${localPath}`)
           }
         } else {
@@ -536,16 +521,13 @@ async function processTransformationJob(jobId, params) {
           const musicResponse = await fetch(musicUrl)
           if (musicResponse.ok) {
             musicBuffer = Buffer.from(await musicResponse.arrayBuffer())
-            console.log(`[${jobId}] Remote music downloaded: ${musicBuffer.length} bytes`)
-          } else {
+            } else {
             throw new Error(`Failed to download music: ${musicResponse.status}`)
           }
         }
         
         if (musicBuffer && musicBuffer.length > 0) {
           await writeFile(musicPath, musicBuffer)
-          console.log(`[${jobId}] Music saved to: ${musicPath}`)
-          
           const videoWithMusicPath = join(tempDir, 'with-music.mp4')
           
           await new Promise((resolve, reject) => {
@@ -555,7 +537,6 @@ async function processTransformationJob(jobId, params) {
             
             if (hasVoiceAudio) {
               // Mix voice (louder) with background music (softer)
-              console.log(`[${jobId}] Mixing voice + music...`)
               cmd.complexFilter([
                 '[0:a]volume=1.0[voice]',
                 '[1:a]volume=0.3,aloop=loop=-1:size=2e+09[music]',
@@ -564,7 +545,7 @@ async function processTransformationJob(jobId, params) {
               .outputOptions(['-c:v', 'copy', '-map', '0:v:0', '-map', '[aout]', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest'])
             } else {
               // Just background music - video has no audio track yet
-              console.log(`[${jobId}] Adding music only (no voice)...`)
+              ...`)
               cmd.outputOptions([
                 '-c:v', 'copy',
                 '-c:a', 'aac', 
@@ -578,7 +559,6 @@ async function processTransformationJob(jobId, params) {
             
             cmd.output(videoWithMusicPath)
               .on('end', () => {
-                console.log(`[${jobId}] ✅ Background music added successfully`)
                 resolve()
               })
               .on('error', (err) => {
@@ -672,8 +652,6 @@ async function processTransformationJob(jobId, params) {
       fileSize: videoBuffer.length
     })
     
-    console.log(`[${jobId}] 🎉 Job complete! Video: ${videoUrl}`)
-    
     // Cleanup
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
@@ -699,8 +677,6 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
-    console.log(`[${jobId}] Starting async transformation job...`)
-    
     const formData = await request.formData()
     
     const topic = formData.get('topic') || ''
@@ -719,10 +695,8 @@ export async function POST(request) {
     if (backgroundMusicJson) {
       try {
         backgroundMusic = JSON.parse(backgroundMusicJson)
-        console.log(`[${jobId}] Background music selected: ${backgroundMusic.name}`)
-      } catch (e) {
-        console.log(`[${jobId}] Could not parse background music`)
-      }
+        } catch (e) {
+        }
     }
     
     // Support portrait (9:16), landscape (16:9), and square (1:1)

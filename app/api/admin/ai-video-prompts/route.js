@@ -75,8 +75,6 @@ export async function POST(request) {
       { upsert: true }
     )
     
-    console.log(`[AI Video Prompts] Saved prompt for template: ${templateId}`)
-    
     return NextResponse.json({
       success: true,
       message: 'Prompt saved successfully',
@@ -112,8 +110,6 @@ export async function DELETE(request) {
     
     // Delete the custom prompt
     const result = await promptsCollection.deleteOne({ templateId })
-    
-    console.log(`[AI Video Prompts] Deleted prompt for template: ${templateId}`)
     
     return NextResponse.json({
       success: true,

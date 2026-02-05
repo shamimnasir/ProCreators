@@ -168,7 +168,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown. Use plain ASCII.`
     }
     chapter.content = combinedContent.trim()
     
-    console.log(`AI generated chapter content: ${chapter.title} (${chapter.sections?.length || 0} sections)`)
+    `)
     
     return NextResponse.json({
       success: true,

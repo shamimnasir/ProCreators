@@ -110,8 +110,6 @@ export async function POST(request) {
     
     const pages = pageCount || 30
     
-    console.log(`Generating ${journalType} journal with ${pages} pages...`)
-    
     // Generate content
     const content = await generateJournalPrompts(journalType, pages, customTheme)
     

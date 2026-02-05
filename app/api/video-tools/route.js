@@ -51,8 +51,6 @@ export async function POST(request) {
     const formData = await request.formData()
     const action = formData.get('action') || 'info'
     
-    console.log(`[Video Tools] Action: ${action}`)
-    
     if (action === 'info') {
       // Get video file info
       const videoFile = formData.get('video')
@@ -104,7 +102,6 @@ export async function POST(request) {
       // Use fast copy for simple trim, re-encode for accuracy
       const ffmpegCmd = `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${duration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${outputPath}"`
       
-      console.log('[FFmpeg] Running trim:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -148,7 +145,6 @@ export async function POST(request) {
         const duration = clip.end - clip.start
         const ffmpegCmd = `ffmpeg -y -ss ${clip.start} -i "${inputPath}" -t ${duration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${clipOutputPath}"`
         
-        console.log(`[FFmpeg] Creating clip ${i + 1}:`, ffmpegCmd)
         await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
         
         const clipBuffer = await readFile(clipOutputPath)
@@ -199,7 +195,6 @@ export async function POST(request) {
         // Scale to 1080p, pad if necessary, normalize audio
         const scaleCmd = `ffmpeg -y -i "${inputPaths[i]}" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -preset fast -crf 23 -r 30 -c:a aac -b:a 128k -ar 44100 -ac 2 "${scaledPath}"`
         
-        console.log(`[FFmpeg] Scaling video ${i + 1}:`, scaleCmd)
         await execAsync(scaleCmd, { maxBuffer: 100 * 1024 * 1024 })
       }
       
@@ -215,7 +210,6 @@ export async function POST(request) {
       // Merge using concat demuxer
       const mergeCmd = `ffmpeg -y -f concat -safe 0 -i "${concatFile}" -c copy "${outputPath}"`
       
-      console.log('[FFmpeg] Running merge:', mergeCmd)
       await execAsync(mergeCmd, { maxBuffer: 200 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -260,7 +254,6 @@ export async function POST(request) {
         
         const ffmpegCmd = `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${partDuration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${partOutputPath}"`
         
-        console.log(`[FFmpeg] Creating part ${i + 1}:`, ffmpegCmd)
         await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
         
         const partBuffer = await readFile(partOutputPath)

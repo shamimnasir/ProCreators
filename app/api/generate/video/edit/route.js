@@ -21,33 +21,22 @@ export async function POST(request) {
       )
     }
 
-    console.log('[Video Edit] Starting video edit process...')
-    console.log('[Video Edit] Parameters:', { trimStart, trimEnd, brightness, contrast, saturation })
-
     // Download the video
-    console.log('[Video Edit] Downloading video from:', videoUrl.substring(0, 100))
+    )
     const videoResponse = await fetch(videoUrl)
     if (!videoResponse.ok) {
       throw new Error(`Failed to download video: ${videoResponse.status}`)
     }
     
     const videoBuffer = Buffer.from(await videoResponse.arrayBuffer())
-    console.log('[Video Edit] Downloaded video size:', videoBuffer.length, 'bytes')
-    
     inputPath = `/tmp/${randomUUID()}.mp4`
     outputPath = `/tmp/${randomUUID()}.mp4`
     
     await writeFile(inputPath, videoBuffer)
-    console.log('[Video Edit] Saved video to:', inputPath)
-
     // Get actual video duration using ffprobe
     const probeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${inputPath}"`
-    console.log('[FFprobe] Running:', probeCmd)
-    
     const { stdout: durationOutput } = await execAsync(probeCmd)
     const videoDuration = parseFloat(durationOutput.trim())
-    console.log('[FFprobe] Video duration:', videoDuration, 'seconds')
-
     if (!videoDuration || videoDuration <= 0) {
       throw new Error('Could not determine video duration')
     }
@@ -56,8 +45,6 @@ export async function POST(request) {
     const startTime = (trimStart / 100) * videoDuration
     const endTime = (trimEnd / 100) * videoDuration
     const duration = endTime - startTime
-
-    console.log('[Video Edit] Calculated times:', { startTime, endTime, duration })
 
     if (duration <= 0) {
       throw new Error('Invalid trim range: end time must be after start time')
@@ -77,14 +64,11 @@ export async function POST(request) {
     // -ss before -i for faster seeking, -t for duration
     const ffmpegCmd = `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${duration} -vf "${filterComplex.join(',')}" -c:v libx264 -preset fast -crf 23 -c:a copy "${outputPath}"`
     
-    console.log('[FFmpeg] Running:', ffmpegCmd)
-    
     // Execute ffmpeg with proper error handling
     try {
       const { stderr } = await execAsync(ffmpegCmd, { maxBuffer: 10 * 1024 * 1024 })
-      console.log('[FFmpeg] Completed successfully')
       if (stderr) {
-        console.log('[FFmpeg] stderr:', stderr.substring(0, 500))
+        )
       }
     } catch (execError) {
       console.error('[FFmpeg] Execution error:', execError.message)
@@ -93,10 +77,7 @@ export async function POST(request) {
     }
 
     // Read the edited video
-    console.log('[Video Edit] Reading edited video from:', outputPath)
     const editedVideo = await readFile(outputPath)
-    console.log('[Video Edit] Edited video size:', editedVideo.length, 'bytes')
-    
     if (editedVideo.length === 0) {
       throw new Error('Edited video is empty')
     }
@@ -109,7 +90,6 @@ export async function POST(request) {
     await unlink(inputPath).catch(() => {})
     await unlink(outputPath).catch(() => {})
 
-    console.log('[Video Edit] Success! Edited video ready')
     return NextResponse.json({
       success: true,
       videoUrl: dataUrl,

@@ -34,7 +34,6 @@ export async function POST(request) {
           finalSystemMessage = SYSTEM_PROMPTS[type]?.prompt || "You are a helpful AI assistant specialized in creating engaging content."
         }
       } catch (dbError) {
-        console.log('Database not available, using default prompts')
         finalSystemMessage = SYSTEM_PROMPTS[type]?.prompt || "You are a helpful AI assistant specialized in creating engaging content."
       }
     }

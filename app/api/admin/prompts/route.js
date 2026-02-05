@@ -63,8 +63,6 @@ export async function POST(request) {
       { upsert: true }
     )
     
-    console.log(`[Admin Prompts] Saved prompt for niche: ${nicheSlug}`)
-    
     return NextResponse.json({
       success: true,
       message: 'Prompt saved successfully',
@@ -100,8 +98,6 @@ export async function DELETE(request) {
     
     // Delete the custom prompt
     const result = await promptsCollection.deleteOne({ nicheSlug })
-    
-    console.log(`[Admin Prompts] Deleted prompt for niche: ${nicheSlug}`)
     
     return NextResponse.json({
       success: true,

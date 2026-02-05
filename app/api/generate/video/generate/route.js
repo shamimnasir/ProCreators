@@ -42,8 +42,6 @@ export async function POST(request) {
     }
     
     const targetPlatform = platformConfig[platform] || platformConfig.instagram
-    console.log('[Video Generation] Target platform:', targetPlatform.name, '| Aspect:', targetPlatform.aspectRatio)
-
     // Check if API keys are available
     const replicateKey = process.env.REPLICATE_API_TOKEN
     
@@ -67,25 +65,19 @@ export async function POST(request) {
     const imageToUse = image
     const hasImage = !!imageToUse
     
-    console.log('[Video Generation] Has image input:', hasImage)
-    console.log('[Video Generation] Image type:', image ? 'provided' : 'none')
-    
     const models = VIDEO_MODELS[mode] || VIDEO_MODELS.budget
     
     // Try models in priority order
     for (const model of models) {
       // Skip if model doesn't support required input type
       if (hasImage && model.type === 'text') {
-        console.log(`[Video Generation] Skipping ${model.id} - requires image but model is text-only`)
         continue
       }
       if (!hasImage && model.type === 'image') {
-        console.log(`[Video Generation] Skipping ${model.id} - no image but model requires one`)
         continue
       }
       
       try {
-        console.log(`[Video Generation] Attempting ${model.id} for ${mode} mode with${hasImage ? '' : 'out'} image...`)
         const result = await generateWithModel(replicate, model.id, script, duration, imageToUse, targetPlatform)
         
         return NextResponse.json({
@@ -139,8 +131,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   const isTextModel = modelId.includes('t2v') || modelId.includes('text')
   const isImageModel = modelId.includes('i2v') || modelId.includes('image')
   
-  console.log(`[${modelId}] generateWithModel called with inputImage:`, !!inputImage)
-  
   // Build input based on model type
   let input = {}
   
@@ -152,9 +142,7 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. ${aspectRatio} aspect ratio.`
     : script.substring(0, 500)
   
-  console.log(`[${modelId}] Using prompt:`, visualPrompt.substring(0, 100))
-  console.log(`[${modelId}] Has input image:`, !!inputImage)
-  
+  )
   // Model-specific configurations
   if (modelId.includes('wan-video')) {
     // Wan models - support both text and image input
@@ -163,7 +151,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       num_frames: Math.min(duration * 8, 80),
     }
     if (inputImage) {
-      console.log(`[${modelId}] Adding reference image for image-to-video`)
       input.image = inputImage
       input.motion_bucket_id = 127
       input.cond_aug = 0.02
@@ -176,7 +163,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       aspect_ratio: aspectRatio,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Using image as reference frame`)
       input.image = inputImage
       input.motion_strength = 0.8
       input.seed = Math.floor(Math.random() * 1000000)
@@ -189,7 +175,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       aspect_ratio: aspectRatio,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Using reference image`)
       input.image = inputImage
     }
   } else if (modelId.includes('kling')) {
@@ -200,7 +185,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       aspect_ratio: aspectRatio,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Using image as starting frame`)
       input.image = inputImage
       input.creativity = 0.7
     }
@@ -210,7 +194,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       prompt: visualPrompt,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Setting first frame from image`)
       input.first_frame_image = inputImage
     }
   } else if (modelId.includes('luma')) {
@@ -219,7 +202,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       prompt: visualPrompt,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Using keyframe image`)
       input.keyframes = {
         frame0: {
           type: 'image',
@@ -235,7 +217,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       aspect_ratio: aspectRatio,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Using reference image`)
       input.image = inputImage
     }
   } else if (modelId.includes('seedance')) {
@@ -246,7 +227,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       resolution: '1080p',
     }
     if (inputImage) {
-      console.log(`[${modelId}] Adding reference image`)
       input.image = inputImage
     }
   } else if (modelId.includes('stable-video')) {
@@ -254,7 +234,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     if (!inputImage) {
       throw new Error('This model requires an input image')
     }
-    console.log(`[${modelId}] SVD image-to-video mode`)
     input = {
       input_image: inputImage,
       video_length: '25_frames_with_svd_xt',
@@ -269,12 +248,12 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       prompt: visualPrompt,
     }
     if (inputImage) {
-      console.log(`[${modelId}] Adding image (generic)`)
+      `)
       input.image = inputImage
     }
   }
   
-  console.log(`[${modelId}] Running with input:`, JSON.stringify(input).substring(0, 200))
+  .substring(0, 200))
   
   // Use predictions.create and wait for completion
   let prediction = await replicate.predictions.create({
@@ -282,21 +261,15 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     input: input
   })
   
-  console.log(`[${modelId}] Prediction created:`, prediction.id, '- Status:', prediction.status)
-  
   // Poll until prediction completes
   while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
     await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
     prediction = await replicate.predictions.get(prediction.id)
-    console.log(`[${modelId}] Prediction status:`, prediction.status)
-  }
+    }
   
   if (prediction.status !== 'succeeded') {
     throw new Error(`Prediction failed with status: ${prediction.status}`)
   }
-  
-  console.log(`[${modelId}] Prediction succeeded! Output type:`, typeof prediction.output)
-  console.log(`[${modelId}] Output:`, prediction.output)
   
   const output = prediction.output
   
@@ -308,32 +281,29 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   
   // If output is a string URL
   if (typeof output === 'string') {
-    console.log(`[${modelId}] Direct URL:`, output)
     return output
   }
   
   // If output is an array
   if (Array.isArray(output)) {
-    console.log(`[${modelId}] Array output, taking first element`)
     const firstOutput = output[0]
     
     // Check if it's a FileOutput object with url() method
     if (firstOutput && typeof firstOutput.url === 'function') {
       const videoUrl = firstOutput.url()
-      console.log(`[${modelId}] Got URL from array element url() method:`, videoUrl)
+      method:`, videoUrl)
       return typeof videoUrl === 'string' ? videoUrl : videoUrl.toString()
     }
     
     // Check if it's a FileOutput with toString()
     if (firstOutput && typeof firstOutput.toString === 'function') {
       const videoUrl = firstOutput.toString()
-      console.log(`[${modelId}] Got URL from array element toString():`, videoUrl)
+      :`, videoUrl)
       return videoUrl
     }
     
     // If it's already a string
     if (typeof firstOutput === 'string') {
-      console.log(`[${modelId}] Array element is string:`, firstOutput)
       return firstOutput
     }
     
@@ -344,24 +314,21 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   // If output has url() method (Replicate FileOutput)
   if (output && typeof output.url === 'function') {
     const videoUrl = output.url()
-    console.log(`[${modelId}] Got URL from url() method:`, videoUrl)
+    method:`, videoUrl)
     // URL might be a URL object, convert to string
     return typeof videoUrl === 'string' ? videoUrl : videoUrl.href
   }
   
   // If output has url property
   if (output && typeof output.url === 'string') {
-    console.log(`[${modelId}] URL from property:`, output.url)
     return output.url
   }
   
   // If output has video property
   if (output && output.video) {
-    console.log(`[${modelId}] URL from video property:`, output.video)
     return output.video
   }
   
-  console.warn(`[${modelId}] Unexpected output format, returning as-is`)
   return output
 }
 

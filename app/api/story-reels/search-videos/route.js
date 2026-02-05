@@ -19,9 +19,6 @@ export async function POST(request) {
       throw new Error('Neither PEXELS_API_KEY nor PIXABAY_API_KEY configured')
     }
 
-    console.log('[Stock Videos] Priority: Pexels Videos → Pixabay Videos')
-    console.log('[Stock Videos] Searching for', keywords.length, 'keywords')
-
     // Simple translation map for common Bengali words (faster than API calls)
     const bengaliToEnglish = {
       'প্রেম': 'love',
@@ -124,8 +121,6 @@ export async function POST(request) {
     // Search function for a single keyword
     const searchKeyword = async (keyword) => {
       const searchTerm = quickTranslate(keyword)
-      console.log(`[Search] ${keyword} → ${searchTerm}`)
-      
       // Priority 1: Try Pexels Videos first (best quality and relevance)
       if (pexelsKey) {
         try {
@@ -141,7 +136,6 @@ export async function POST(request) {
             // Get the best quality video file (HD or SD)
             const videoFile = video.video_files.find(f => f.quality === 'hd') || video.video_files[0]
             
-            console.log(`[Pexels] ✅ Found video for "${keyword}"`)
             return {
               id: video.id,
               keyword,
@@ -154,8 +148,7 @@ export async function POST(request) {
               source: 'pexels'
             }
           } else {
-            console.log(`[Pexels] No videos found for "${keyword}", trying Pixabay...`)
-          }
+            }
         } catch (error) {
           console.error(`[Pexels] Error for ${keyword}:`, error.message)
         }
@@ -174,7 +167,6 @@ export async function POST(request) {
             const video = pixabayData.hits[0]
             const videoFile = video.videos.medium || video.videos.small || video.videos.large
             
-            console.log(`[Pixabay] ✅ Found video for "${keyword}"`)
             return {
               id: video.id,
               keyword,
@@ -187,19 +179,16 @@ export async function POST(request) {
               source: 'pixabay'
             }
           } else {
-            console.log(`[Pixabay] No videos found for "${keyword}"`)
-          }
+            }
         } catch (error) {
           console.error(`[Pixabay] Error for ${keyword}:`, error.message)
         }
       }
       
-      console.log(`[Search] ❌ No videos found for "${keyword}" from any source`)
       return null // No video found for this keyword
     }
 
     // Search all keywords IN PARALLEL (much faster!)
-    console.log('[Stock Videos] Starting parallel search...')
     const startTime = Date.now()
     
     const searchPromises = keywords.map(keyword => searchKeyword(keyword))
@@ -209,11 +198,8 @@ export async function POST(request) {
     const videos = results.filter(v => v !== null)
     
     const endTime = Date.now()
-    console.log(`[Stock Videos] Found ${videos.length} videos in ${endTime - startTime}ms`)
-
     if (videos.length === 0) {
       // Try generic fallback if no videos found
-      console.log('[Fallback] No videos found, trying generic search...')
       const fallbackKeywords = ['nature', 'people', 'lifestyle', 'city', 'abstract']
       const fallbackPromises = fallbackKeywords.map(k => searchKeyword(k))
       const fallbackResults = await Promise.all(fallbackPromises)

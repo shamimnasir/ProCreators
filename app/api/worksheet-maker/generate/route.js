@@ -94,8 +94,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Topic is required' }, { status: 400 })
     }
     
-    console.log(`Generating ${worksheetType} worksheet for grade ${gradeLevel}...`)
-    
     const content = await generateWorksheetContent(worksheetType, gradeLevel || '3rd', topic, questionCount || 10)
     
     // Create PDF

@@ -123,7 +123,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks.`
       }))
     }
     
-    console.log('AI generated ebook content successfully via Gemini')
     return content
   } catch (error) {
     console.error('AI content generation error:', error.message || error)
@@ -170,7 +169,6 @@ function wrapText(text, font, fontSize, maxWidth) {
       }
     } catch (e) {
       // If word causes encoding error, skip it
-      console.log('Skipping problematic word:', word)
       continue
     }
   }
@@ -585,8 +583,6 @@ export async function POST(request) {
       )
     }
     
-    console.log(`Generating ebook: "${title}" with ${chapterCount} chapters...`)
-    
     // Generate content with AI
     const ebookContent = await generateEbookContent(
       title,
@@ -597,25 +593,17 @@ export async function POST(request) {
       authorName
     )
     
-    console.log('Ebook content generated, creating cover image...')
-    
     // Generate cover image
     let coverImageUrl = null
     try {
       const themeKey = getEbookTheme(genre || 'non-fiction')
-      console.log(`Generating cover image for theme: ${themeKey}`)
       const imageResult = await generateCoverImage(themeKey)
       if (imageResult.success && imageResult.imageUrl) {
         coverImageUrl = imageResult.imageUrl
-        console.log('Cover image generated successfully')
-      } else {
-        console.log('Cover image generation failed, using fallback design:', imageResult.error)
-      }
+        } else {
+        }
     } catch (imgError) {
-      console.log('Error generating cover image:', imgError.message)
-    }
-    
-    console.log('Creating PDF...')
+      }
     
     // Create PDF
     const pdfDoc = await createEbookPDF(
@@ -663,8 +651,6 @@ export async function POST(request) {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
-    
-    console.log(`Ebook generated: ${filePath}`)
     
     return NextResponse.json({
       success: true,

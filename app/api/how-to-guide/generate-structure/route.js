@@ -354,7 +354,6 @@ function findMatchingTopic(title) {
   for (const [topicKey, keywords] of Object.entries(KEYWORD_MAPPINGS)) {
     for (const keyword of keywords) {
       if (titleLower.includes(keyword)) {
-        console.log(`Matched keyword "${keyword}" to topic "${topicKey}"`)
         return TOPIC_DATABASE[topicKey] || null
       }
     }
@@ -367,8 +366,6 @@ export async function POST(request) {
   try {
     const { guideType, title, chapterCount, targetAudience, difficulty } = await request.json()
     
-    console.log(`Generating guide structure for title: "${title}", type: ${guideType}`)
-    
     // First, try to match the title to specific content
     let matchedTopic = findMatchingTopic(title)
     
@@ -379,12 +376,10 @@ export async function POST(request) {
     let generatedIntro = ''
     
     if (matchedTopic) {
-      console.log(`Found matching topic for "${title}"`)
       resultChapters = [...matchedTopic.chapters]
       generatedSubtitle = matchedTopic.subtitle
       generatedIntro = matchedTopic.introduction
     } else {
-      console.log(`No specific match for "${title}", using generic content`)
       resultChapters = [...GENERIC_GUIDE.chapters]
       generatedSubtitle = GENERIC_GUIDE.subtitle
       generatedIntro = GENERIC_GUIDE.introduction

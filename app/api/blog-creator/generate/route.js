@@ -246,8 +246,6 @@ Generate the complete blog post. Return ONLY JSON.`
       // Try direct parsing first
       blogData = JSON.parse(cleanResponse)
     } catch (parseError) {
-      console.log('Initial parse failed, attempting recovery...', parseError.message)
-      
       try {
         // Extract JSON from response
         const jsonMatch = response.match(/\{[\s\S]*\}/)
@@ -269,8 +267,6 @@ Generate the complete blog post. Return ONLY JSON.`
           throw new Error('No JSON found in response')
         }
       } catch (secondError) {
-        console.log('JSON recovery failed, creating structured response from raw content:', secondError.message)
-        
         // Fallback: Create a structured response from raw text
         // Try to extract content from the malformed JSON
         let content = response

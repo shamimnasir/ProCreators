@@ -16,8 +16,7 @@ async function extractFromPDF(filePath) {
       return stdout.trim()
     }
   } catch (error) {
-    console.log('pdftotext failed, trying pdf-parse fallback:', error.message)
-  }
+    }
   
   // Fallback to pdf-parse (JavaScript library)
   try {

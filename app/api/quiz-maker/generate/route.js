@@ -172,7 +172,7 @@ async function generateCoverImage(topic, quizType, customPrompt) {
         ? `${customPrompt}. Professional quiz book cover, clean modern design, educational and engaging.`
         : `Professional quiz and test book cover about "${topicInfo.name}". Modern, clean design with subtle ${topicInfo.name.toLowerCase()} themed elements. Educational, engaging, high quality cover art, no text on the image.`
       
-      console.log(`Generating quiz cover: ${fullPrompt.substring(0, 80)}...`)
+      }...`)
       
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
@@ -519,8 +519,6 @@ export async function POST(request) {
     
     // Action: Generate quiz structure (questions only)
     if (action === 'generate-structure') {
-      console.log(`Generating quiz structure for topic: ${topic || customTopic}, type: ${quizType}`)
-      
       const content = await generateQuizContent(
         customTopic || topic,
         quizType,
@@ -539,8 +537,6 @@ export async function POST(request) {
     
     // Action: Generate PDF
     if (action === 'generate-pdf' || !action) {
-      console.log(`Generating quiz PDF for topic: ${topic || customTopic}`)
-      
       // Get quiz content (either passed in or generate new)
       let content = quizContent
       if (!content) {
@@ -576,7 +572,7 @@ export async function POST(request) {
       
       // Use HTML-to-PDF for complex scripts (better text rendering)
       if (needsHtmlPdf) {
-        console.log('Detected complex script (Bengali/Hindi/Arabic/CJK), using HTML-to-PDF for proper text rendering...')
+        , using HTML-to-PDF for proper text rendering...')
         
         try {
           const finalTitle = customTitle || content.title || 'Quiz'
@@ -585,15 +581,12 @@ export async function POST(request) {
           let coverImageUrl = null
           if (generateCover) {
             try {
-              console.log('Generating cover image for HTML-to-PDF quiz...')
               const coverResult = await generateCoverImage(topic || customTopic, quizType, customCoverPrompt)
               if (coverResult.success && coverResult.imageUrl) {
                 coverImageUrl = coverResult.imageUrl
-                console.log('Cover image generated successfully:', coverImageUrl)
-              }
+                }
             } catch (e) {
-              console.log('Cover image generation failed:', e.message)
-            }
+              }
           }
           
           // Generate HTML content
@@ -611,8 +604,6 @@ export async function POST(request) {
           // Generate PDF from HTML using Puppeteer
           pdfBytes = await generatePDFFromHTML(htmlContent)
           renderMethod = 'html-to-pdf'
-          console.log('HTML-to-PDF generation successful for quiz')
-          
           // Save PDF
           const outputDir = '/app/public/quizzes'
           await fs.mkdir(outputDir, { recursive: true })
@@ -663,8 +654,6 @@ export async function POST(request) {
       }
       
       // Standard pdf-lib generation (for ASCII content or as fallback)
-      console.log('Using pdf-lib for PDF generation')
-      
       // Generate cover image if requested
       let coverImageUrl = null
       if (generateCover) {
@@ -672,11 +661,9 @@ export async function POST(request) {
           const coverResult = await generateCoverImage(topic || customTopic, quizType, customCoverPrompt)
           if (coverResult.success && coverResult.imageUrl) {
             coverImageUrl = coverResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         } catch (e) {
-          console.log('Cover image generation failed:', e.message)
-        }
+          }
       }
       
       // Create PDF
@@ -770,8 +757,7 @@ export async function POST(request) {
             opacity: 0.3
           })
         } catch (e) {
-          console.log('Failed to embed cover image:', e.message)
-        }
+          }
       }
       
       // Add decorative elements

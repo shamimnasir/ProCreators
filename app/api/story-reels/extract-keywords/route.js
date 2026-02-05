@@ -15,10 +15,6 @@ export async function POST(request) {
     // Calculate how many 3-second segments we need
     const segmentCount = Math.ceil(duration / 3)
     
-    console.log('[Keyword Extraction] Script length:', script.length)
-    console.log('[Keyword Extraction] Duration:', duration, 'seconds')
-    console.log('[Keyword Extraction] Target segments:', segmentCount)
-
     // Use AI to extract thematic English keywords for stock video search
     const systemMessage = `You are an expert at analyzing stories and extracting visual keywords for stock video search.
 
@@ -49,15 +45,11 @@ ${script}
 
 Remember: Return ONLY a JSON array of ${segmentCount} English keywords that represent visual scenes for this story.`
 
-    console.log('[Keyword Extraction] Calling AI for thematic analysis...')
-
     const result = await generateText(userPrompt, systemMessage)
 
     if (!result.success) {
       throw new Error(result.error || 'AI keyword extraction failed')
     }
-
-    console.log('[Keyword Extraction] AI response:', result.content)
 
     // Parse AI response to extract keywords array
     let keywords = []
@@ -84,8 +76,6 @@ Remember: Return ONLY a JSON array of ${segmentCount} English keywords that repr
 
     } catch (parseError) {
       console.error('[Keyword Extraction] Parse error:', parseError)
-      console.log('[Keyword Extraction] Trying fallback extraction...')
-      
       // Fallback: extract words that look like keywords from the response
       const matches = result.content.match(/"([^"]+)"/g)
       if (matches && matches.length > 0) {
@@ -98,8 +88,6 @@ Remember: Return ONLY a JSON array of ${segmentCount} English keywords that repr
 
     // If still not enough keywords, add generic visual keywords
     if (keywords.length < segmentCount) {
-      console.log('[Keyword Extraction] Adding fallback keywords...')
-      
       const genericKeywords = [
         'nature landscape', 'people walking', 'city street', 'blue sky', 
         'sunset', 'ocean waves', 'mountain view', 'forest trees', 
@@ -117,8 +105,6 @@ Remember: Return ONLY a JSON array of ${segmentCount} English keywords that repr
 
     // Ensure we have exactly the right number
     keywords = keywords.slice(0, segmentCount)
-
-    console.log('[Keyword Extraction] Final keywords:', keywords)
 
     return NextResponse.json({
       success: true,

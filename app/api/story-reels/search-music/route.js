@@ -9,39 +9,31 @@ export async function POST(request) {
   try {
     const { query, duration } = await request.json()
     
-    console.log(`[Music Search] Query: "${query}", duration: ${duration}s`)
-    
     let tracks = []
     let serviceName = 'Unknown'
     
     // Try Freesound first (primary)
     if (FREESOUND_API_KEY) {
       try {
-        console.log('[Freesound] Attempting primary music search...')
         const freesoundTracks = await searchFreesound(query, duration)
         if (freesoundTracks && freesoundTracks.length > 0) {
           tracks = freesoundTracks
           serviceName = 'Freesound'
-          console.log(`[Freesound] Success: ${tracks.length} tracks found`)
-        }
+          }
       } catch (error) {
-        console.log('[Freesound] Failed, trying fallback...', error.message)
-      }
+        }
     }
     
     // Fallback to TheAudioDB if Freesound fails
     if (tracks.length === 0) {
       try {
-        console.log('[TheAudioDB] Attempting fallback music search...')
         const audioDbTracks = await searchTheAudioDB(query, duration)
         if (audioDbTracks && audioDbTracks.length > 0) {
           tracks = audioDbTracks
           serviceName = 'TheAudioDB'
-          console.log(`[TheAudioDB] Success: ${tracks.length} tracks found`)
-        }
+          }
       } catch (error) {
-        console.log('[TheAudioDB] Failed:', error.message)
-      }
+        }
     }
     
     // If both fail, return informative error
@@ -115,8 +107,6 @@ async function searchFreesound(query, duration) {
 async function searchTheAudioDB(query, duration) {
   // Since both Freesound and TheAudioDB don't provide downloadable music easily,
   // return a helpful message instead of failing silently
-  console.log(`[TheAudioDB] Music APIs unavailable`)
-  
   // Return null to trigger the "proceed without music" message
   return null
 }

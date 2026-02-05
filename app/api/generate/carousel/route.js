@@ -26,7 +26,6 @@ export async function POST(request) {
     // Step 1: Get carousel text content (either generate or use manual input)
     if (generationMode === 'manual') {
       // Manual mode - use user-provided text
-      console.log('Manual mode: Using user-provided slide text')
       carouselSequence = manualSlides.map((slide, index) => ({
         slideNumber: slide.slideNumber || (index + 1),
         text: slide.text,
@@ -34,7 +33,6 @@ export async function POST(request) {
       }))
     } else {
       // Auto mode - generate text with AI
-      console.log('Auto mode: Generating carousel text content with AI')
       const carouselSystemPrompt = `You are a social media carousel content expert. Create a ${slideCount}-slide carousel sequence.
 
 For the topic provided, create ${slideCount} slides with:
@@ -66,7 +64,6 @@ Format your response as JSON array:
 Language for text content: ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
 Keep text concise and impactful. Images should be text-free visuals that support the text.`
 
-      console.log('Step 1: Generating carousel sequence...')
       const sequenceResult = await generateText(
         `Create a ${slideCount}-slide carousel about: ${prompt}`,
         carouselSystemPrompt
@@ -94,14 +91,12 @@ Keep text concise and impactful. Images should be text-free visuals that support
       }
     }
 
-    console.log(`Step 2: Generating ${carouselSequence.length} images...`)
-
     // Step 2: Generate images for each slide
     const slides = []
     for (let i = 0; i < carouselSequence.length; i++) {
       const slide = carouselSequence[i]
       
-      console.log(`Generating image ${i + 1}/${carouselSequence.length} for ${platform} (${width}x${height})...`)
+      ...`)
       
       // Determine aspect ratio description
       const aspectRatio = width / height
@@ -128,7 +123,6 @@ Keep text concise and impactful. Images should be text-free visuals that support
         
         // Add logo if provided
         if (logo) {
-          console.log(`Adding logo to slide ${i + 1}...`)
           try {
             const logoResult = await new Promise((resolve, reject) => {
               const pythonProcess = spawn('/root/.venv/bin/python3', [
@@ -172,8 +166,7 @@ Keep text concise and impactful. Images should be text-free visuals that support
 
             if (logoResult.success) {
               finalImageUrl = logoResult.image
-              console.log(`Logo added successfully to slide ${i + 1}`)
-            }
+              }
           } catch (logoError) {
             console.error(`Failed to add logo to slide ${i + 1}:`, logoError.message)
             // Continue with original image if logo fails
@@ -198,8 +191,6 @@ Keep text concise and impactful. Images should be text-free visuals that support
         })
       }
     }
-
-    console.log(`Carousel generation complete! Generated ${slides.length} slides`)
 
     return NextResponse.json({
       success: true,

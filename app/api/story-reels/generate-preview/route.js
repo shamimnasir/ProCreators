@@ -18,8 +18,6 @@ export async function POST(request) {
   const tempDir = `/tmp/story-reels-preview-${jobId}`
   
   try {
-    console.log(`[Preview ${jobId}] Starting preview generation...`)
-    
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
@@ -34,11 +32,8 @@ export async function POST(request) {
     const stockVideos = JSON.parse(formData.get('stockVideos'))
     const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
 
-    console.log(`[Preview ${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice })
-    console.log(`[Preview ${jobId}] Video order received with ${videoOrder.length} clips`)
-
     // Step 1: Download stock videos and process images (using streams)
-    console.log(`[Preview ${jobId}] Processing ${stockVideos.length} clips (videos + images)...`)
+    ...`)
     const videoFiles = []
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
@@ -58,7 +53,6 @@ export async function POST(request) {
           if (video.url.startsWith('/')) {
             // Local cached image - read from file system
             const localPath = join(process.cwd(), 'public', video.url)
-            console.log(`[Preview ${jobId}] Reading local image from: ${localPath}`)
             const fs = require('fs')
             if (!fs.existsSync(localPath)) {
               throw new Error(`Local image not found: ${localPath}`)
@@ -120,7 +114,7 @@ export async function POST(request) {
               // VIRAL STYLE: Bold colored box
               filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
               
-              console.log(`[Preview ${jobId}] Adding ${color.toUpperCase()} text overlay to clip ${i + 1}: "${textOverlay.text}"`)
+              } text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
@@ -135,7 +129,6 @@ export async function POST(request) {
               .output(videoPath)
               .on('end', () => {
                 videoFiles.push(videoPath)
-                console.log(`[Preview ${jobId}] ✅ Converted image ${i + 1}/${stockVideos.length} to video`)
                 resolve()
               })
               .on('error', (err) => {
@@ -149,7 +142,6 @@ export async function POST(request) {
           if (video.url.startsWith('/')) {
             // Local cached video (UGC) - copy from filesystem
             const localPath = join(process.cwd(), 'public', video.url)
-            console.log(`[Preview ${jobId}] Reading local UGC video from: ${localPath}`)
             const fs = require('fs')
             if (!fs.existsSync(localPath)) {
               throw new Error(`Local UGC video not found: ${localPath}`)
@@ -157,8 +149,7 @@ export async function POST(request) {
             const videoBuffer = fs.readFileSync(localPath)
             await writeFile(videoPath, videoBuffer)
             videoFiles.push(videoPath)
-            console.log(`[Preview ${jobId}] ✅ Copied UGC video ${i + 1}/${stockVideos.length}`)
-          } else {
+            } else {
             // External stock video - download it
             const response = await fetch(video.url)
             if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -167,8 +158,7 @@ export async function POST(request) {
             await pipeline(Readable.fromWeb(response.body), fileStream)
             
             videoFiles.push(videoPath)
-            console.log(`[Preview ${jobId}] ✅ Downloaded video ${i + 1}/${stockVideos.length}`)
-          }
+            }
         }
       } catch (error) {
         console.error(`[Preview ${jobId}] ❌ Error processing clip ${i}:`, error.message)
@@ -180,12 +170,11 @@ export async function POST(request) {
     }
 
     // Step 2: Generate or use audio
-    console.log(`[Preview ${jobId}] Processing audio (${voiceOption})...`)
+    ...`)
     const audioPath = join(tempDir, 'voice.mp3')
     
     if (voiceOption === 'upload' && voiceFile) {
       // Use uploaded audio
-      console.log(`[Preview ${jobId}] Using uploaded audio...`)
       const buffer = Buffer.from(await voiceFile.arrayBuffer())
       const tempUploadPath = join(tempDir, 'uploaded-voice-raw.mp3')
       await writeFile(tempUploadPath, buffer)
@@ -201,7 +190,6 @@ export async function POST(request) {
           .audioBitrate('128k')
           .output(audioPath)
           .on('end', () => {
-            console.log(`[Preview ${jobId}] Uploaded audio normalized`)
             resolve()
           })
           .on('error', (err) => {
@@ -213,8 +201,6 @@ export async function POST(request) {
       })
     } else {
       // Generate TTS audio
-      console.log(`[Preview ${jobId}] Generating TTS audio...`)
-      
       try {
         const client = new textToSpeech.TextToSpeechClient({
           keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -250,12 +236,10 @@ export async function POST(request) {
           },
       }
 
-      console.log(`[Preview ${jobId}] Calling Google Cloud TTS...`)
       const [response] = await client.synthesizeSpeech(request)
       await writeFile(audioPath, response.audioContent, 'binary')
       
-        console.log(`[Preview ${jobId}] TTS generated successfully`)
-      } catch (error) {
+        } catch (error) {
         console.error(`[Preview ${jobId}] TTS failed:`, error.message)
         // Create silent audio as fallback
         await new Promise((resolve, reject) => {
@@ -283,7 +267,7 @@ export async function POST(request) {
     })
 
     // Step 4: Create PREVIEW video (720p, fast encoding)
-    console.log(`[Preview ${jobId}] Creating preview video (720p)...`)
+    ...`)
     
     const durationPerClip = actualAudioDuration / videoFiles.length
     const normalizedFiles = []
@@ -337,7 +321,6 @@ export async function POST(request) {
     })
 
     // Step 5: Add audio to video (no captions yet - will be CSS overlay)
-    console.log(`[Preview ${jobId}] Adding audio to preview...`)
     const previewVideoPath = join(tempDir, 'preview.mp4')
     
     await new Promise((resolve, reject) => {
@@ -360,7 +343,6 @@ export async function POST(request) {
     })
 
     // Step 6: Save to public folder
-    console.log(`[Preview ${jobId}] Saving preview...`)
     const videoBuffer = await require('fs/promises').readFile(previewVideoPath)
     const audioBuffer = await require('fs/promises').readFile(audioPath)
     
@@ -399,7 +381,6 @@ export async function POST(request) {
     }
 
     // Cleanup temp files
-    console.log(`[Preview ${jobId}] Cleaning up...`)
     try {
       for (const file of [...videoFiles, ...normalizedFiles]) {
         await unlink(file).catch(() => {})
@@ -409,10 +390,7 @@ export async function POST(request) {
       await unlink(previewVideoPath).catch(() => {})
       await unlink(clipListPath).catch(() => {})
     } catch (e) {
-      console.log(`[Preview ${jobId}] Cleanup warning:`, e.message)
-    }
-
-    console.log(`[Preview ${jobId}] Preview generation complete!`)
+      }
 
     return NextResponse.json({
       success: true,
@@ -431,8 +409,7 @@ export async function POST(request) {
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
     } catch (e) {
-      console.log(`[Preview ${jobId}] Cleanup error:`, e.message)
-    }
+      }
 
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate preview' },

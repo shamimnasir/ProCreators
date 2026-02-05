@@ -14,8 +14,6 @@ export async function POST(request) {
       expiresAt: { $lt: now, $exists: true }
     }).toArray()
 
-    console.log(`Found ${expiredItems.length} expired library items to cleanup`)
-
     // Delete associated files
     for (const item of expiredItems) {
       if (item.filePath) {
@@ -23,8 +21,7 @@ export async function POST(request) {
         if (existsSync(fullPath)) {
           try {
             await unlink(fullPath)
-            console.log(`Deleted expired file: ${fullPath}`)
-          } catch (fileError) {
+            } catch (fileError) {
             console.error(`Failed to delete file ${fullPath}:`, fileError)
           }
         }
@@ -35,8 +32,6 @@ export async function POST(request) {
     const result = await libraryCollection.deleteMany({
       expiresAt: { $lt: now, $exists: true }
     })
-
-    console.log(`Cleaned up ${result.deletedCount} expired library items`)
 
     return NextResponse.json({
       success: true,

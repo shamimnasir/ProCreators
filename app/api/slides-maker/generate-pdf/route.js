@@ -75,8 +75,7 @@ function safeDrawText(page, text, options) {
     page.drawText(cleanText, options)
   } catch (e) {
     // If Bangla font fails, try with fallback or skip
-    console.warn('Text drawing error:', e.message)
-  }
+    }
 }
 
 // Fetch and embed image
@@ -834,13 +833,9 @@ export async function POST(request) {
       )
     }
 
-    console.log(`Creating PDF with ${presentation.slides.length} slides`)
-
     // Check if presentation contains Bangla text
     const presentationText = JSON.stringify(presentation)
     const hasBangla = containsBangla(presentationText)
-    console.log(`Presentation contains Bangla: ${hasBangla}`)
-
     // Page dimensions based on aspect ratio
     const dimensions = aspectRatio === '4:3' 
       ? { width: 800, height: 600 }
@@ -868,13 +863,10 @@ export async function POST(request) {
           const banglaBoldBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Bold.ttf')
           banglaFont = await pdfDoc.embedFont(banglaRegularBytes)
           banglaBoldFont = await pdfDoc.embedFont(banglaBoldBytes)
-          console.log('Bangla fonts loaded successfully')
-        } catch (banglaErr) {
-          console.warn('Could not load Bangla fonts:', banglaErr.message)
-        }
+          } catch (banglaErr) {
+          }
       }
     } catch (fontErr) {
-      console.warn('Could not load custom fonts, using standard fonts:', fontErr.message)
       const { StandardFonts } = await import('pdf-lib')
       regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
       boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
@@ -926,8 +918,6 @@ export async function POST(request) {
     } catch (dbError) {
       console.error('Failed to save to library:', dbError)
     }
-
-    console.log(`Presentation PDF generated: ${filePath}`)
 
     return NextResponse.json({
       success: true,

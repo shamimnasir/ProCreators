@@ -51,7 +51,7 @@ export async function POST(request) {
     
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    console.log(`[${jobId}] Generating ${type} clip: "${text.slice(0,30)}..." (${duration}s) ${width}x${height}`)
+    }..." (${duration}s) ${width}x${height}`)
     
     const outputPath = join(OUTPUT_DIR, `${jobId}-${type}.mp4`)
     
@@ -61,8 +61,6 @@ export async function POST(request) {
     
     // Get font that supports the text
     const fontPath = getFontPath(text + subtext)
-    console.log(`[${jobId}] Using font: ${fontPath}`)
-    
     // Calculate font size based on text length and width to prevent overflow
     let adjustedFontSize = fontSize
     const textLength = text.length
@@ -133,13 +131,13 @@ export async function POST(request) {
       outputPath
     ]
     
-    console.log(`[${jobId}] FFmpeg filter: ${fullFilter.slice(0, 200)}...`)
+    }...`)
     
     await runFFmpeg(args, jobId)
     
     const stats = await stat(outputPath)
     
-    console.log(`[${jobId}] ✅ ${type} clip generated: ${Math.round(stats.size / 1024)}KB`)
+    }KB`)
     
     return NextResponse.json({
       success: true,

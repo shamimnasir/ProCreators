@@ -54,7 +54,6 @@ export async function POST(request) {
         })
         
         if (transaction && transaction.creditsAdded) {
-          console.log('Payment already processed:', session.id)
           return NextResponse.json({ received: true, status: 'already_processed' })
         }
         
@@ -96,8 +95,7 @@ export async function POST(request) {
                 }
               )
               
-              console.log(`Subscription activated: ${userId} -> ${planId}`)
-            }
+              }
             
           } else {
             // ONE-TIME CREDIT PURCHASE
@@ -136,8 +134,7 @@ export async function POST(request) {
                 { upsert: true }
               )
               
-              console.log(`Added ${credits} purchased credits to user ${userId}`)
-            }
+              }
           }
         }
         break
@@ -173,8 +170,7 @@ export async function POST(request) {
               createdAt: new Date()
             })
             
-            console.log(`Subscription renewed for user ${user._id}`)
-          }
+            }
         }
         break
       }
@@ -206,8 +202,7 @@ export async function POST(request) {
                 }
               }
             )
-            console.log(`Payment failed for user ${user._id}`)
-          }
+            }
         }
         break
       }
@@ -242,8 +237,7 @@ export async function POST(request) {
               }
             }
           )
-          console.log(`Subscription canceled for user ${user._id}`)
-        }
+          }
         break
       }
       
@@ -286,7 +280,6 @@ export async function POST(request) {
       
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object
-        console.log('Payment failed:', paymentIntent.id)
         break
       }
     }

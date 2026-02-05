@@ -53,7 +53,7 @@ export async function POST(request) {
     const preset = VIDEO_PRESETS[outputPreset] || VIDEO_PRESETS['youtube-hd']
     const keepOriginal = outputPreset === 'original'
     
-    console.log(`[${jobId}] 🎬 Merge: ${clips.length} clips, transition: ${transition} (${transitionDuration}s)`)
+    `)
     
     // Generate transition sound
     let soundPath = null
@@ -72,11 +72,8 @@ export async function POST(request) {
       const clipPath = join('/app/public', clip.filePath)
       
       if (!existsSync(clipPath)) {
-        console.log(`[${jobId}] Clip ${i} not found: ${clipPath}`)
         continue
       }
-      
-      console.log(`[${jobId}] Processing clip ${i + 1}/${clips.length}`)
       
       const processedPath = join(tempDir, `clip-${i}.mp4`)
       const filters = []
@@ -136,7 +133,6 @@ export async function POST(request) {
       // Use xfade transitions
       const success = await mergeWithXfade(processedClips, mergedOutput, transition, transitionDuration, soundPath, jobId)
       if (!success) {
-        console.log(`[${jobId}] Xfade failed, using concat`)
         await concatClips(processedClips, mergedOutput, jobId)
       }
     }
@@ -170,7 +166,7 @@ export async function POST(request) {
     } catch (e) {}
     
     const stats = await stat(outputPath)
-    console.log(`[${jobId}] ✅ Complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    }MB`)
     
     return NextResponse.json({
       success: true,
@@ -231,7 +227,7 @@ async function mergeWithXfade(clips, output, transition, duration, soundPath, jo
     // Remove trailing semicolon
     filterComplex = filterComplex.slice(0, -1)
     
-    console.log(`[${jobId}] Xfade filter: ${filterComplex.slice(0, 200)}...`)
+    }...`)
     
     // Build input args
     const inputArgs = clips.flatMap(c => ['-i', c])
@@ -300,10 +296,8 @@ async function addTransitionSounds(videoPath, soundPath, durations, transitionDu
     await copyFile(tempOutput, videoPath)
     await unlink(tempOutput)
     
-    console.log(`[${jobId}] Added ${transitionTimes.length} transition sounds`)
-  } catch (error) {
-    console.log(`[${jobId}] Sound overlay skipped: ${error.message}`)
-  }
+    } catch (error) {
+    }
 }
 
 // Simple concat without transitions
@@ -399,8 +393,6 @@ async function addCaptionsToVideo(input, output, transcript, jobId) {
   const bom = Buffer.from([0xEF, 0xBB, 0xBF])
   await writeFile(srtPath, Buffer.concat([bom, Buffer.from(srt, 'utf8')]))
   
-  console.log(`[${jobId}] Writing captions with ${transcript.segments.length} segments`)
-  
   try {
     // Use Noto Sans Bengali UI for better international character support
     // The font name must match what fc-list shows
@@ -410,9 +402,7 @@ async function addCaptionsToVideo(input, output, transcript, jobId) {
       '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
       '-c:a', 'copy', '-y', output
     ], jobId)
-    console.log(`[${jobId}] Captions added successfully`)
-  } catch (e) {
-    console.log(`[${jobId}] Caption error: ${e.message}, trying fallback...`)
+    } catch (e) {
     // Fallback: try with default Noto Sans (supports more scripts)
     try {
       await runFFmpeg([
@@ -422,7 +412,6 @@ async function addCaptionsToVideo(input, output, transcript, jobId) {
         '-c:a', 'copy', '-y', output
       ], jobId)
     } catch (e2) {
-      console.log(`[${jobId}] Fallback caption also failed, copying original`)
       await copyFile(input, output)
     }
   }
@@ -451,7 +440,7 @@ async function addMusic(video, output, music, jobId) {
 // Run FFmpeg
 function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg: ${args.slice(0, 8).join(' ')}...`)
+    .join(' ')}...`)
     const proc = spawn('ffmpeg', args)
     let err = ''
     proc.stderr.on('data', d => err += d)

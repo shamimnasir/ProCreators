@@ -70,8 +70,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Exam name required' }, { status: 400 })
     }
     
-    console.log(`Searching for exam information: ${examName}`)
-    
     // Use LLM with grounded knowledge about exams
     const prompt = `You are a comprehensive exam information database. Provide detailed, accurate information about the exam: "${examName}"
 

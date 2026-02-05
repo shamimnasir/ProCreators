@@ -73,7 +73,7 @@ export async function POST(request) {
       )
     }
 
-    console.log(`Generating ${slideCount} slides for: "${topic}" (${presentationType})`)
+    `)
 
     const typeContext = PRESENTATION_TYPES[presentationType] || PRESENTATION_TYPES['business']
     
@@ -108,8 +108,6 @@ export async function POST(request) {
       languageScript = 'Korean script'
     }
     
-    console.log(`Detected language: ${detectedLanguage}`)
-
     // For non-English, use a much more directive prompt
     const isNonEnglish = detectedLanguage !== 'English'
     
@@ -224,16 +222,11 @@ Return ONLY valid JSON.`
       throw new Error('Invalid presentation structure')
     }
 
-    console.log(`Generated ${presentation.slides.length} slides successfully`)
-
     // Generate background images for all slides if requested
     if (generateImages) {
-      console.log('Generating background images for slides...')
-      
       // Generate images in parallel for speed
       const imagePromises = presentation.slides.map(async (slide, index) => {
         try {
-          console.log(`Generating image for slide ${index + 1}...`)
           const imageUrl = await generateSlideBackground(
             slide.title || slide.quote || `Slide ${index + 1}`,
             slide.type,
@@ -256,8 +249,7 @@ Return ONLY valid JSON.`
         }
       })
       
-      console.log('Background images generated')
-    }
+      }
 
     // Add default styling to each slide
     presentation.slides = presentation.slides.map((slide, index) => ({

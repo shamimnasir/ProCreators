@@ -19,8 +19,6 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
-    console.log(`[Freesound Download] Downloading sound ID: ${soundId}`)
-
     // Create music cache directory
     const musicDir = '/app/public/music-cache'
     if (!existsSync(musicDir)) {
@@ -32,7 +30,6 @@ export async function POST(request) {
     const cachedPublicPath = `/music-cache/${soundId}.mp3`
     
     if (existsSync(cachedPath)) {
-      console.log(`[Freesound Download] Using cached file: ${soundId}`)
       return NextResponse.json({
         success: true,
         filePath: cachedPath,
@@ -45,8 +42,6 @@ export async function POST(request) {
     // Use preview URL (HQ MP3) instead of download endpoint
     // Download endpoint requires OAuth2, but preview URLs work with API key
     const downloadUrl = previewUrl || `https://freesound.org/apiv2/sounds/${soundId}/?token=${FREESOUND_API_KEY}`
-    
-    console.log(`[Freesound Download] Fetching preview from Freesound...`)
     
     // If we don't have previewUrl, fetch sound details first
     let audioUrl = previewUrl
@@ -73,7 +68,7 @@ export async function POST(request) {
     const buffer = Buffer.from(arrayBuffer)
     await writeFile(cachedPath, buffer)
     
-    console.log(`[Freesound Download] Downloaded and cached: ${soundId} (${buffer.length} bytes)`)
+    `)
 
     return NextResponse.json({
       success: true,

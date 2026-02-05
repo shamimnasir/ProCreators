@@ -25,7 +25,7 @@ export async function POST(request) {
       )
     } catch (indexError) {
       // Index might already exist, that's okay
-      console.log('TTL index creation skipped (may already exist)')
+      ')
     }
 
     // Determine content category
@@ -64,7 +64,7 @@ export async function POST(request) {
 
     await libraryCollection.insertOne(document)
 
-    console.log(`Library item saved: ${document.id} (${category}) - expires in 30 days`)
+    - expires in 30 days`)
 
     return NextResponse.json({
       success: true,

@@ -194,7 +194,7 @@ function drawText(page, text, options, banglaFont = null, fallbackFont = null) {
   }
   
   // Last resort - skip the text
-  console.warn('Could not render text:', cleanText.substring(0, 50))
+  )
 }
 
 // Draw a rounded rectangle
@@ -489,8 +489,6 @@ async function generatePDF(notes, config) {
   
   // Check if notes contain Bangla text
   const hasBangla = notesHaveBangla(notes)
-  console.log('Notes contain Bangla:', hasBangla)
-  
   // Embed fonts - keep BOTH standard and Bangla fonts
   let regularFont, boldFont, italicFont, banglaFont, banglaBoldFont
   
@@ -509,13 +507,10 @@ async function generatePDF(notes, config) {
         const banglaBoldBytes = await fs.readFile('/app/public/fonts/NotoSansBengali-Bold.ttf')
         banglaFont = await pdfDoc.embedFont(banglaRegularBytes)
         banglaBoldFont = await pdfDoc.embedFont(banglaBoldBytes)
-        console.log('Bangla fonts loaded successfully for study notes')
-      } catch (banglaErr) {
-        console.warn('Could not load Bangla fonts:', banglaErr.message)
-      }
+        } catch (banglaErr) {
+        }
     }
   } catch (fontError) {
-    console.warn('Custom fonts not available, using standard fonts:', fontError.message)
     regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
     boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique)
@@ -1162,7 +1157,6 @@ export async function POST(request) {
             sourceContent = buffer.toString('utf-8')
           } else if (file.type === 'application/pdf' || fileName.endsWith('.pdf')) {
             // PDF files - extract text
-            console.log('Extracting text from PDF:', file.name)
             sourceContent = await extractTextFromPDF(buffer)
             if (!sourceContent || sourceContent.trim().length < 50) {
               return NextResponse.json({
@@ -1170,8 +1164,7 @@ export async function POST(request) {
                 error: 'Could not extract text from PDF. The PDF might be image-based or protected. Please try copying the text manually.'
               }, { status: 400 })
             }
-            console.log('Extracted PDF text length:', sourceContent.length)
-          } else {
+            } else {
             // Try to read as text for other files
             sourceContent = buffer.toString('utf-8')
           }
@@ -1190,7 +1183,6 @@ export async function POST(request) {
           
           // Truncate very long content to avoid token limits (keep first ~15000 chars)
           if (sourceContent.length > 15000) {
-            console.log('Truncating content from', sourceContent.length, 'to 15000 chars')
             sourceContent = sourceContent.substring(0, 15000) + '\n\n[Content truncated for processing...]'
           }
         }
@@ -1315,8 +1307,6 @@ Remember: ONLY use information from the source content. Do not add external info
               notes = JSON.parse(jsonStr)
             } catch (e) {
               // If parsing fails, try to extract key fields manually
-              console.log('First JSON parse failed, trying manual extraction')
-              
               const titleMatch = jsonStr.match(/"title"\s*:\s*"([^"]+)"/)
               const contentMatch = jsonStr.match(/"content"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"|"\s*\}|\",\s*\")/)
               const summaryMatch = jsonStr.match(/"summary"\s*:\s*"([^"]*)"/)
@@ -1404,8 +1394,7 @@ Remember: ONLY use information from the source content. Do not add external info
           })
         })
       } catch (e) {
-        console.log('Library save skipped:', e.message)
-      }
+        }
       
       return NextResponse.json({ success: true, pdfUrl, filename })
     }

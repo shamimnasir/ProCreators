@@ -19,8 +19,6 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
-    console.log(`[Product Scraper] Scraping URL: ${url}`)
-
     // Validate URL format
     let parsedUrl
     try {
@@ -58,8 +56,6 @@ export async function POST(request) {
     }
 
     const html = await response.text()
-    console.log(`[Product Scraper] Fetched ${html.length} bytes of HTML`)
-    
     // Extract images and videos from HTML first
     const mediaUrls = extractMediaFromHtml(html, url)
     
@@ -86,9 +82,6 @@ export async function POST(request) {
     const cachedVideos = await downloadAndCacheVideos(productInfo.videos.slice(0, 3))
     productInfo.videos = cachedVideos
     
-    console.log(`[Product Scraper] Successfully scraped product:`, productInfo.name || 'Unknown')
-    console.log(`[Product Scraper] Cached ${cachedImages.length} images and ${cachedVideos.length} UGC videos locally`)
-
     return NextResponse.json({
       success: true,
       product: productInfo,
@@ -112,7 +105,6 @@ function extractMediaFromHtml(html, baseUrl) {
     // Method 1: Extract from Amazon's inline JSON data (colorImages, altImages)
     const colorImagesMatch = html.match(/'colorImages':\s*\{[^}]*'initial':\s*(\[[^\]]+\])/s)
     if (colorImagesMatch) {
-      console.log('[Media Extract] Found colorImages data structure')
       const jsonStr = colorImagesMatch[1]
       const urlMatches = jsonStr.match(/https?:\/\/[^"'\s,]+\/images\/I\/[A-Za-z0-9+_-]+\.jpg/g) || []
       urlMatches.forEach(url => {
@@ -132,11 +124,8 @@ function extractMediaFromHtml(html, baseUrl) {
       }
     }
     
-    console.log(`[Media Extract] Found ${images.length} Amazon media URLs`)
-    
     // Method 5: If still no images, try to find ANY amazon image URLs in the HTML
     if (images.length === 0) {
-      console.log('[Media Extract] No images found with specific methods, trying broad search...')
       const broadMatches = html.match(/https?:\/\/[^"'\s<>]+amazon[^"'\s<>]+\.(?:jpg|jpeg|png|webp)/gi) || []
       for (const url of broadMatches) {
         const cleanUrl = url.replace(/\\"/g, '').replace(/&quot;/g, '').replace(/&amp;/g, '&')
@@ -146,8 +135,7 @@ function extractMediaFromHtml(html, baseUrl) {
           images.push(cleanUrl)
         }
       }
-      console.log(`[Media Extract] Broad search found ${images.length} additional URLs`)
-    }
+      }
     
     // Method 3: Look for hiRes and large images in JSON structures
     const hiResMatches = html.match(/"(?:hiRes|large)":\s*"([^"]+)"/g) || []
@@ -282,8 +270,6 @@ function extractMediaFromHtml(html, baseUrl) {
     
     // Extract User-Generated Content (UGC) videos from Amazon
     // Amazon stores customer videos in their video player data structures
-    console.log('[UGC Extract] Looking for customer review videos...')
-    
     // Method 1: Look for video URLs in data-video-url attributes
     const dataVideoMatches = html.match(/data-video-url=["']([^"']+)["']/gi) || []
     for (const match of dataVideoMatches) {
@@ -321,12 +307,9 @@ function extractMediaFromHtml(html, baseUrl) {
     const liveVideoMatches = html.match(/https?:\/\/[^"'\s]*amazon\.com\/live\/video\/[a-zA-Z0-9]+/gi) || []
     for (const url of liveVideoMatches) {
       // These are Amazon Live URLs, we'll note them but may need special handling
-      console.log('[UGC Extract] Found Amazon Live URL:', url)
-    }
+      }
     
-    console.log(`[UGC Extract] Found ${videos.length} total video URLs`)
-    
-  } catch (error) {
+    } catch (error) {
     console.error('[Media Extraction] Error:', error)
   }
   
@@ -458,8 +441,6 @@ async function downloadAndCacheImages(imageUrls) {
   // Remove duplicates
   const uniqueUrls = [...new Set(validUrls)]
   
-  console.log(`[Image Cache] Found ${uniqueUrls.length} valid image URLs, will download up to 10`)
-  
   for (let i = 0; i < Math.min(uniqueUrls.length, 10); i++) {
     try {
       const imageUrl = uniqueUrls[i]
@@ -468,7 +449,7 @@ async function downloadAndCacheImages(imageUrls) {
       const filename = `${imageId}.${ext}`
       const filepath = join(cacheDir, filename)
       
-      console.log(`[Image Cache] Downloading image ${i + 1}/10: ${imageUrl.substring(0, 100)}...`)
+      }...`)
       
       const response = await fetch(imageUrl, {
         headers: {
@@ -481,7 +462,6 @@ async function downloadAndCacheImages(imageUrls) {
       })
       
       if (!response.ok) {
-        console.log(`[Image Cache] Failed to fetch image ${i + 1}: ${response.status}`)
         continue
       }
       
@@ -490,7 +470,7 @@ async function downloadAndCacheImages(imageUrls) {
       
       // Validate image size (should be at least 1KB)
       if (buffer.length < 1024) {
-        console.log(`[Image Cache] Image ${i + 1} too small (${buffer.length} bytes), skipping`)
+        , skipping`)
         continue
       }
       
@@ -498,7 +478,7 @@ async function downloadAndCacheImages(imageUrls) {
       
       // Return the local URL path
       cachedImages.push(`/product-images-cache/${filename}`)
-      console.log(`[Image Cache] ✓ Cached image ${i + 1}/10 (${Math.round(buffer.length / 1024)}KB)`)
+      }KB)`)
       
     } catch (error) {
       console.error(`[Image Cache] Error downloading image ${i + 1}:`, error.message)
@@ -506,7 +486,6 @@ async function downloadAndCacheImages(imageUrls) {
     }
   }
   
-  console.log(`[Image Cache] Successfully cached ${cachedImages.length} images`)
   return cachedImages
 }
 
@@ -535,8 +514,6 @@ async function downloadAndCacheVideos(videoUrls) {
   // Remove duplicates
   const uniqueUrls = [...new Set(validUrls)]
   
-  console.log(`[Video Cache] Found ${uniqueUrls.length} valid video URLs, will download up to 3`)
-  
   for (let i = 0; i < Math.min(uniqueUrls.length, 3); i++) {
     try {
       const videoUrl = uniqueUrls[i]
@@ -545,7 +522,7 @@ async function downloadAndCacheVideos(videoUrls) {
       const filename = `${videoId}.${ext}`
       const filepath = join(cacheDir, filename)
       
-      console.log(`[Video Cache] Downloading video ${i + 1}/3: ${videoUrl.substring(0, 100)}...`)
+      }...`)
       
       const response = await fetch(videoUrl, {
         headers: {
@@ -558,7 +535,6 @@ async function downloadAndCacheVideos(videoUrls) {
       })
       
       if (!response.ok) {
-        console.log(`[Video Cache] Failed to fetch video ${i + 1}: ${response.status}`)
         continue
       }
       
@@ -567,7 +543,7 @@ async function downloadAndCacheVideos(videoUrls) {
       
       // Validate video size (should be at least 10KB)
       if (buffer.length < 10240) {
-        console.log(`[Video Cache] Video ${i + 1} too small (${buffer.length} bytes), skipping`)
+        , skipping`)
         continue
       }
       
@@ -578,7 +554,7 @@ async function downloadAndCacheVideos(videoUrls) {
         url: `/product-videos-cache/${filename}`,
         type: 'ugc-video'
       })
-      console.log(`[Video Cache] ✓ Cached video ${i + 1}/3 (${Math.round(buffer.length / 1024)}KB)`)
+      }KB)`)
       
     } catch (error) {
       console.error(`[Video Cache] Error downloading video ${i + 1}:`, error.message)
@@ -586,6 +562,5 @@ async function downloadAndCacheVideos(videoUrls) {
     }
   }
   
-  console.log(`[Video Cache] Successfully cached ${cachedVideos.length} UGC videos`)
   return cachedVideos
 }

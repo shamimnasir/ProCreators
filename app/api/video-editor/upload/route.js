@@ -47,7 +47,7 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    console.log(`[Upload] Chunk ${chunkIndex + 1}/${totalChunks} for ${fileId} (${buffer.length} bytes)`)
+    `)
     
     if (chunkIndex === 0) {
       // First chunk - create new file
@@ -75,7 +75,7 @@ export async function POST(request) {
         }, { status: 400 })
       }
       
-      console.log(`[Upload] ✅ Complete: ${fileId} (${Math.round(stats.size / 1024 / 1024)}MB)`)
+      }MB)`)
       
       return NextResponse.json({
         success: true,

@@ -222,8 +222,6 @@ export async function POST(request) {
   try {
     const { bookType, title, recipeCount, targetAudience } = await request.json()
     
-    console.log(`Generating recipe book structure for: ${bookType}`)
-    
     const config = BOOK_TYPE_CONFIGS[bookType] || BOOK_TYPE_CONFIGS['general']
     const recipesPerCategory = Math.ceil(recipeCount / config.categories.length)
     
@@ -279,8 +277,6 @@ Return ONLY valid JSON.`
       text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       
       const data = JSON.parse(text)
-      console.log(`AI generated ${data.categories?.length || 0} categories`)
-      
       return NextResponse.json({
         success: true,
         ...data
@@ -290,8 +286,6 @@ Return ONLY valid JSON.`
       
       // Detect cuisine from user's title to generate relevant recipes
       const detectedCuisine = detectCuisineFromTitle(title)
-      console.log(`Detected cuisine from title "${title}": ${detectedCuisine || 'none - using default'}`)
-      
       let fallbackCategories
       
       if (detectedCuisine) {

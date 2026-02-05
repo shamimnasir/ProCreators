@@ -51,8 +51,6 @@ export async function POST(request) {
     const formData = await request.formData()
     const action = formData.get('action') || 'info'
     
-    console.log(`[Audio Editor] Action: ${action}`)
-    
     if (action === 'info') {
       // Get audio file info
       const audioFile = formData.get('audio')
@@ -97,7 +95,6 @@ export async function POST(request) {
       const duration = endTime - startTime
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -ss ${startTime} -t ${duration} -acodec copy "${outputPath}"`
       
-      console.log('[FFmpeg] Running:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 50 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -141,7 +138,6 @@ export async function POST(request) {
       
       const ffmpegCmd = `ffmpeg -y -f concat -safe 0 -i "${concatFile}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running merge:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -189,7 +185,6 @@ export async function POST(request) {
       
       ffmpegCmd += ` "${outputPath}"`
       
-      console.log('[FFmpeg] Running convert:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -239,7 +234,6 @@ export async function POST(request) {
       const filter = noiseLevels[noiseLevel] || noiseLevels.medium
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running noise reduction:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -282,7 +276,6 @@ export async function POST(request) {
       const filter = presets[preset] || presets.podcast
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running voice enhancement:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -321,7 +314,6 @@ export async function POST(request) {
       
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running volume adjustment:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -370,7 +362,6 @@ export async function POST(request) {
       
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filters.join(',')}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running fade:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
@@ -418,7 +409,6 @@ export async function POST(request) {
       
       const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
       
-      console.log('[FFmpeg] Running speed change:', ffmpegCmd)
       await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)

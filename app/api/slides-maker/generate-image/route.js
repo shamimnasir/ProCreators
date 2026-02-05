@@ -47,7 +47,7 @@ export async function POST(request) {
       }
     }
     
-    console.log('Generating slide background with prompt:', imagePrompt.substring(0, 100) + '...')
+    + '...')
     
     const result = await generateImage(imagePrompt, 'gemini-3-pro-image-preview', 'standard', '1792x1024')
     

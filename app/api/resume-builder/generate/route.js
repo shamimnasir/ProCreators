@@ -85,7 +85,6 @@ async function fetchLinkedInData(url) {
     }
     return null
   } catch (error) {
-    console.log('LinkedIn fetch failed:', error.message)
     return null
   }
 }

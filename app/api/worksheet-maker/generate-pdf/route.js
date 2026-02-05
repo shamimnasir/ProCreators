@@ -447,9 +447,6 @@ export async function POST(request) {
       )
     }
     
-    console.log(`Generating worksheet PDF: "${cover.title}"...`)
-    console.log(`Language: ${language || 'English'}`)
-    
     const colorScheme = settings?.colorScheme || 'ocean-blue'
     const coverStyle = settings?.coverStyle || 'modern'
     const subject = settings?.subject || 'general'
@@ -458,15 +455,13 @@ export async function POST(request) {
     
     // Determine if we need Puppeteer (for non-Latin scripts)
     const requiresUnicode = worksheetRequiresUnicode(cover, sections, bonusQuestions)
-    console.log(`Requires Unicode (Puppeteer): ${requiresUnicode}`)
+    : ${requiresUnicode}`)
     
     let pdfBytes
     let pageCount = 0
     
     if (requiresUnicode) {
       // ===== PUPPETEER PATH (Multi-language) =====
-      console.log('Using Puppeteer for multi-language support...')
-      
       const htmlContent = generateWorksheetHTML({
         cover,
         sections,
@@ -486,22 +481,17 @@ export async function POST(request) {
       
     } else {
       // ===== PDF-LIB PATH (Latin scripts) =====
-      console.log('Using pdf-lib for Latin script...')
-      
       // Generate cover image
       let coverImageUrl = null
       if (settings?.generateCoverImage !== false) {
         try {
           const themeKey = getWorksheetTheme(subject)
-          console.log(`Generating cover image for theme: ${themeKey}`)
           const imageResult = await generateCoverImage(themeKey)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            console.log('Cover image generated successfully')
-          }
+            }
         } catch (imgError) {
-          console.log('Cover image generation failed:', imgError.message)
-        }
+          }
       }
       
       const pdfDoc = await PDFDocument.create()
@@ -856,8 +846,6 @@ export async function POST(request) {
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
-    
-    console.log(`Worksheet PDF generated: ${filePath}`)
     
     return NextResponse.json({
       success: true,

@@ -27,8 +27,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Video file not found' }, { status: 404 })
     }
     
-    console.log(`[${jobId}] Detecting scenes in: ${videoPath}`)
-    
     // Get video duration first
     const durationResult = await new Promise((resolve, reject) => {
       const ffprobe = spawn('ffprobe', [
@@ -47,8 +45,6 @@ export async function POST(request) {
     })
     
     const videoDuration = durationResult || 0
-    console.log(`[${jobId}] Video duration: ${videoDuration}s`)
-    
     // Use FFmpeg scene detection filter
     const scenesOutput = await new Promise((resolve, reject) => {
       const ffmpeg = spawn('ffmpeg', [
@@ -143,8 +139,6 @@ export async function POST(request) {
         }
       })
     )
-    
-    console.log(`[${jobId}] ✅ Detected ${scenes.length} scenes`)
     
     return NextResponse.json({
       success: true,

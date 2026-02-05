@@ -32,8 +32,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Transcript with segments required' }, { status: 400 })
     }
     
-    console.log(`[${jobId}] AI B-Roll: mode=${mode}, segments=${transcript.segments.length}`)
-    
     // Analyze transcript to find good B-roll insertion points
     const suggestions = await analyzeBrollOpportunities(transcript, maxSuggestions)
     
@@ -329,7 +327,7 @@ async function getVideoDuration(path) {
 // Run FFmpeg
 function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg B-Roll: ${args.slice(0, 8).join(' ')}...`)
+    .join(' ')}...`)
     const proc = spawn('ffmpeg', args)
     let err = ''
     proc.stderr.on('data', d => err += d)

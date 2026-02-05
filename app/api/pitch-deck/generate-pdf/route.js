@@ -8,7 +8,6 @@ async function tryGeneratePDF(htmlContent) {
     const { generatePDFFromHTML } = await import('@/lib/html-pdf-generator')
     return await generatePDFFromHTML(htmlContent)
   } catch (error) {
-    console.log('PDF generation not available:', error.message)
     return null
   }
 }

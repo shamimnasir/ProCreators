@@ -57,8 +57,6 @@ async function saveToLibrary(imageUrl, prompt, action, style = null) {
     }
     
     await libraryCollection.insertOne(document)
-    console.log(`[Image Editor] Saved to library: ${imageId}`)
-    
     return { id: imageId, filePath: publicPath }
   } catch (error) {
     console.error('[Image Editor] Library save error:', error)
@@ -205,7 +203,7 @@ export async function POST(request) {
         )
       }
       
-      console.log(`[Image Editor] Generating: "${prompt.slice(0, 50)}..." with style: ${style}`)
+      }..." with style: ${style}`)
       
       result = await executeNanoBanana({
         action: 'generate',
@@ -226,7 +224,7 @@ export async function POST(request) {
         )
       }
       
-      console.log(`[Image Editor] Editing with: "${editPrompt.slice(0, 50)}..."`)
+      }..."`)
       
       result = await executeNanoBanana({
         action: 'edit',
@@ -254,7 +252,7 @@ export async function POST(request) {
         )
       }
       
-      console.log(`[Image Editor] Fusing ${images.length} images: "${fusionPrompt.slice(0, 50)}..."`)
+      }..."`)
       
       result = await executeNanoBanana({
         action: 'fuse',

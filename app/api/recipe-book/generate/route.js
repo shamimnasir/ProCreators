@@ -115,8 +115,6 @@ export async function POST(request) {
       paperSize
     } = await request.json()
     
-    console.log(`Generating Recipe Book: "${title}"...`)
-    
     // Get paper dimensions
     const width = paperSize?.width || 612
     const height = paperSize?.height || 792
@@ -131,15 +129,13 @@ export async function POST(request) {
     if (coverImageStyle && coverImageStyle !== 'gradient') {
       try {
         const themePrompt = customImagePrompt || `beautiful food photography, ${bookType} cookbook, professional culinary photography, appetizing dishes`
-        console.log(`Generating cover image: ${themePrompt.substring(0, 50)}...`)
+        }...`)
         const imageResult = await generateCoverImage('default-elegant', themePrompt)
         if (imageResult.success && imageResult.imageUrl) {
           coverImageUrl = imageResult.imageUrl
-          console.log('Cover image generated successfully')
-        }
+          }
       } catch (imgError) {
-        console.log('Cover image generation failed:', imgError.message)
-      }
+        }
     }
     
     // Create PDF
@@ -539,7 +535,7 @@ export async function POST(request) {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
     
-    console.log(`Recipe book generated: ${pdfDoc.getPageCount()} pages`)
+    } pages`)
     
     return NextResponse.json({
       success: true,

@@ -36,8 +36,6 @@ export async function POST(request) {
     
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    console.log(`[${jobId}] Exporting video: format=${format}, quality=${quality}, resolution=${resolution}`)
-    
     // Build FFmpeg arguments based on settings
     const outputPath = join(OUTPUT_DIR, `${jobId}.${format}`)
     const args = ['-i', inputPath]
@@ -148,7 +146,7 @@ export async function POST(request) {
     
     const stats = await require('fs/promises').stat(outputPath)
     
-    console.log(`[${jobId}] ✅ Export complete: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    }MB`)
     
     return NextResponse.json({
       success: true,
@@ -169,7 +167,7 @@ export async function POST(request) {
 // Helper: Run FFmpeg command
 async function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg export:`, args.slice(0, 8).join(' '), '...')
+    .join(' '), '...')
     
     const ffmpeg = spawn('ffmpeg', args)
     

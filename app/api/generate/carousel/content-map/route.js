@@ -57,8 +57,6 @@ Example format for "5 productivity tips":
 Language: ${language === 'bengali' ? 'Bengali (বাংলা)' : 'English'}
 Keep titles concise (3-7 words). Descriptions should be brief (10-15 words).`
 
-    console.log('Generating content map for:', prompt)
-    
     const result = await generateText(
       `Create a content map for a carousel about: ${prompt}`,
       systemPrompt

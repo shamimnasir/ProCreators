@@ -20,8 +20,6 @@ export async function POST(request) {
   const tempDir = `/tmp/story-reels-${jobId}`
   
   try {
-    console.log(`[${jobId}] Starting video composition...`)
-    
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
@@ -52,19 +50,14 @@ export async function POST(request) {
       customIdx++
     }
 
-    console.log(`[${jobId}] Config:`, { duration, voiceOption, ttsLanguage, selectedVoice, captionStyle, resolution, captionFontSize, captionPosition, musicTrack, customMusicPath })
-    console.log(`[${jobId}] Stock videos: ${stockVideos.length}, Custom videos: ${customVideoFiles.length}, Total order: ${videoOrder.length}`)
-    
     // Log detailed info about each clip
     const imageClips = stockVideos.filter(v => v.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(v.url))
     const videoClips = stockVideos.filter(v => !imageClips.includes(v))
-    console.log(`[${jobId}] Breakdown: ${imageClips.length} product images, ${videoClips.length} stock videos`)
     if (imageClips.length > 0) {
-      console.log(`[${jobId}] Product images:`, imageClips.map((img, i) => `${i+1}. ${img.url.substring(0, 80)}...`))
+      => `${i+1}. ${img.url.substring(0, 80)}...`))
     }
 
     // Step 1: Process all video clips (stock videos + custom uploads) - PARALLELIZED
-    console.log(`[${jobId}] Step 1: Processing ${videoOrder.length} video clips in parallel...`)
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     const pLimit = (await import('p-limit')).default
@@ -108,15 +101,13 @@ export async function POST(request) {
             const customFile = customVideoFiles[clipInfo.customIdx]
             const buffer = Buffer.from(await customFile.arrayBuffer())
             await writeFile(videoPath, buffer)
-            console.log(`[${jobId}] ✅ Saved custom clip ${i + 1}/${totalClips} (${customFile.name})`)
+            `)
             return { index: i, path: videoPath, success: true }
           } else if (stockVideos[clipInfo.stockIdx]) {
             // Handle stock video URL, UGC video, or product image
             const video = stockVideos[clipInfo.stockIdx]
             const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
             const isUGCVideo = video.type === 'ugc-video'
-            
-            console.log(`[${jobId}] Clip ${i + 1} detected as: ${isImage ? '🖼️ IMAGE' : isUGCVideo ? '👤 UGC VIDEO' : '🎥 VIDEO'}`)
             
             if (isImage) {
               // Download image and convert to video with motion effects
@@ -173,7 +164,6 @@ export async function POST(request) {
                   ])
                   .output(videoPath)
                   .on('end', () => {
-                    console.log(`[${jobId}] ✅ Converted image ${i + 1}/${totalClips} to video with motion`)
                     resolve()
                   })
                   .on('error', (err) => {
@@ -187,15 +177,13 @@ export async function POST(request) {
               if (video.url.startsWith('/')) {
                 // Local cached video (UGC) - copy from filesystem
                 const localPath = join(process.cwd(), 'public', video.url)
-                console.log(`[${jobId}] Reading local UGC video from: ${localPath}`)
                 const fs = require('fs')
                 if (!fs.existsSync(localPath)) {
                   throw new Error(`Local UGC video not found: ${localPath}`)
                 }
                 const videoBuffer = fs.readFileSync(localPath)
                 await writeFile(videoPath, videoBuffer)
-                console.log(`[${jobId}] ✅ Copied UGC video ${i + 1}/${totalClips}`)
-              } else {
+                } else {
                 // External stock video - download it
                 const response = await fetch(video.url)
                 if (!response.ok) {
@@ -209,8 +197,7 @@ export async function POST(request) {
                   fileStream
                 )
                 
-                console.log(`[${jobId}] ✅ Downloaded stock clip ${i + 1}/${totalClips}`)
-              }
+                }
             }
             
             return { index: i, path: videoPath, success: true }
@@ -227,7 +214,6 @@ export async function POST(request) {
     }
     
     // Execute all tasks in parallel (with concurrency limit)
-    console.log(`[${jobId}] Starting parallel processing of ${processingTasks.length} clips...`)
     const results = await Promise.all(processingTasks)
     
     // Collect successful video files in correct order
@@ -240,16 +226,11 @@ export async function POST(request) {
       throw new Error('Failed to process any video clips')
     }
     
-    console.log(`[${jobId}] Successfully processed ${videoFiles.length} clips in parallel`)
-
     // Step 2: Generate or use voice audio
-    console.log(`[${jobId}] Step 2: Processing voice audio...`)
     let audioPath = join(tempDir, 'voice.mp3')
     
     if (voiceOption === 'tts') {
       // Generate TTS with Google Cloud
-      console.log(`[${jobId}] Generating TTS with Google Cloud Text-to-Speech...`)
-      
       try {
         // Initialize Google Cloud TTS client with service account
         const client = new textToSpeech.TextToSpeechClient({
@@ -271,7 +252,7 @@ export async function POST(request) {
         }
         
         const languageName = ttsLanguage === 'bn' ? 'Bengali' : 'English'
-        console.log(`[${jobId}] Using language code: ${languageCode} (${languageName})`)
+        `)
 
         // Construct the request - omit ssmlGender when using specific voice name
         // Google TTS will use the voice's natural gender
@@ -294,7 +275,7 @@ export async function POST(request) {
           // Other voices (Neural2, Wavenet, Standard) don't need model parameter
         }
 
-        console.log(`[${jobId}] Voice config:`, JSON.stringify(voiceConfig))
+        )
         
         const request = {
           input: { text: script },
@@ -307,17 +288,13 @@ export async function POST(request) {
           },
         }
 
-        console.log(`[${jobId}] Calling Google Cloud TTS API...`)
         const [response] = await client.synthesizeSpeech(request)
 
         // Write the audio content to file
         await writeFile(audioPath, response.audioContent, 'binary')
         
-        console.log(`[${jobId}] Google Cloud TTS generated successfully, size:`, response.audioContent.length)
-      } catch (googleError) {
+        } catch (googleError) {
         console.error(`[${jobId}] Google Cloud TTS failed:`, googleError.message)
-        console.log(`[${jobId}] Falling back to silent audio...`)
-        
         // Fallback to silent audio if Google TTS fails
         await new Promise((resolve, reject) => {
           ffmpeg()
@@ -327,7 +304,6 @@ export async function POST(request) {
             .audioCodec('libmp3lame')
             .save(audioPath)
             .on('end', () => {
-              console.log(`[${jobId}] Silent audio fallback created`)
               resolve()
             })
             .on('error', reject)
@@ -335,14 +311,10 @@ export async function POST(request) {
       }
     } else if (voiceOption === 'upload') {
       // Use uploaded audio with volume boost (original recording option)
-      console.log(`[${jobId}] Processing uploaded audio with volume normalization...`)
-      
       if (voiceFile) {
         const buffer = Buffer.from(await voiceFile.arrayBuffer())
         const tempUploadPath = join(tempDir, 'uploaded-voice-raw.mp3')
         await writeFile(tempUploadPath, buffer)
-        console.log(`[${jobId}] Uploaded audio saved, size:`, buffer.length)
-        
         // Normalize volume to match TTS loudness (boost by 6dB and normalize)
         await new Promise((resolve, reject) => {
           ffmpeg(tempUploadPath)
@@ -354,7 +326,6 @@ export async function POST(request) {
             .audioBitrate('128k')
             .output(audioPath)
             .on('end', () => {
-              console.log(`[${jobId}] Uploaded audio normalized and boosted`)
               resolve()
             })
             .on('error', (err) => {
@@ -376,7 +347,6 @@ export async function POST(request) {
     }
 
     // Step 2b: Get actual audio duration BEFORE processing video clips
-    console.log(`[${jobId}] Step 2b: Getting actual audio duration...`)
     const actualAudioDuration = await new Promise((resolve, reject) => {
       ffmpeg.ffprobe(audioPath, (err, metadata) => {
         if (err) {
@@ -384,29 +354,25 @@ export async function POST(request) {
           resolve(duration) // Fallback to target duration
         } else {
           const audioDuration = metadata.format.duration
-          console.log(`[${jobId}] Actual audio duration: ${audioDuration}s (target was ${duration}s)`)
+          `)
           resolve(audioDuration)
         }
       })
     })
 
     // Step 3: Normalize each clip individually, then concatenate
-    console.log(`[${jobId}] Step 3: Processing and concatenating video clips...`)
-    
     // Determine target dimensions for 9:16 portrait (vertical) format
     // For Reels/Shorts, we need portrait orientation
     const targetWidth = resolution === '4k' ? '1216' : resolution === '2k' ? '810' : resolution === '1080p' ? '1080' : '720'
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
     
-    console.log(`[${jobId}] Target resolution: ${targetWidth}x${targetHeight} (9:16 portrait)`)
+    `)
     
     // Calculate duration per clip based on ACTUAL AUDIO DURATION (not target duration)
     const durationPerClip = actualAudioDuration / videoFiles.length
-    console.log(`[${jobId}] Each clip will be ${durationPerClip.toFixed(2)} seconds (based on ${actualAudioDuration.toFixed(2)}s audio)`)
+    } seconds (based on ${actualAudioDuration.toFixed(2)}s audio)`)
     
     // Step 3a: Normalize each clip individually - PARALLELIZED
-    console.log(`[${jobId}] Starting parallel normalization of ${videoFiles.length} clips...`)
-    
     // Track which clips are images, stock videos, or custom uploads
     const clipTypes = []
     let stockIdx = 0
@@ -442,11 +408,10 @@ export async function POST(request) {
           // Trim first 3 seconds ONLY for stock videos (not images, UGC, or custom)
           if (clipType && clipType.type === 'stock') {
             cmd.inputOptions(['-ss', '3'])
-            console.log(`[${jobId}] Trimming first 3 seconds from stock video ${i + 1}`)
-          } else if (clipType && clipType.type === 'image') {
-            console.log(`[${jobId}] Processing product image ${i + 1} (no trim, has Ken Burns effect)`)
+            } else if (clipType && clipType.type === 'image') {
+            `)
           } else if (clipType && clipType.type === 'ugc') {
-            console.log(`[${jobId}] Processing UGC video ${i + 1} (no trim, user review content)`)
+            `)
           }
           
           // Build video filter with optional text overlay
@@ -484,7 +449,7 @@ export async function POST(request) {
             // VIRAL STYLE: Bold colored box with high-contrast text
             videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
             
-            console.log(`[${jobId}] Adding ${color.toUpperCase()} text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
+            } text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
           cmd.outputOptions([
@@ -498,7 +463,6 @@ export async function POST(request) {
             ])
             .output(normalizedPath)
             .on('end', () => {
-              console.log(`[${jobId}] ✅ Normalized clip ${i + 1}/${videoFiles.length}`)
               resolve({ index: i, path: normalizedPath })
             })
             .on('error', (err) => {
@@ -518,15 +482,10 @@ export async function POST(request) {
       .sort((a, b) => a.index - b.index)
       .map(r => r.path)
     
-    console.log(`[${jobId}] All ${normalizedFiles.length} clips normalized in parallel`)
-    
     // Step 3b: Concatenate normalized clips
-    console.log(`[${jobId}] Concatenating ${normalizedFiles.length} normalized clips...`)
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = normalizedFiles.map(file => `file '${file}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
-    console.log(`[${jobId}] Concat list created with ${normalizedFiles.length} files`)
-    
     const concatVideoPath = join(tempDir, 'concat.mp4')
     
     await new Promise((resolve, reject) => {
@@ -541,7 +500,6 @@ export async function POST(request) {
         ])
         .output(concatVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video clips concatenated successfully`)
           resolve()
         })
         .on('error', (err) => {
@@ -550,31 +508,26 @@ export async function POST(request) {
         })
         .on('progress', (progress) => {
           if (progress.percent) {
-            console.log(`[${jobId}] Concat progress: ${Math.round(progress.percent)}%`)
+            }%`)
           }
         })
         .run()
     })
 
     // Step 4: Generate ASS captions file synced with actual audio duration
-    console.log(`[${jobId}] Step 4: Generating captions synced with audio (${actualAudioDuration.toFixed(2)}s)...`)
+    }s)...`)
     const captionsPath = join(tempDir, 'captions.ass')
     const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
     await writeFile(captionsPath, captionContent, 'utf8')
 
     // Step 5: Add background music if requested
-    console.log(`[${jobId}] Step 5: Processing audio and music...`)
     let finalAudioPath = audioPath
     
     if (musicTrack !== 'none') {
-      console.log(`[${jobId}] Adding background music: ${musicTrack}`)
-      
       // Determine music path (custom Freesound download or built-in)
       let musicPath = customMusicPath ? `/app/public${customMusicPath}` : getMusicPath(musicTrack)
       
       if (musicPath && existsSync(musicPath)) {
-        console.log(`[${jobId}] Music file found: ${musicPath}`)
-        
         // Step 6a: Trim music to match video duration (auto-cut)
         const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
         
@@ -589,7 +542,6 @@ export async function POST(request) {
             ])
             .output(trimmedMusicPath)
             .on('end', () => {
-              console.log(`[${jobId}] Music trimmed to ${actualAudioDuration}s`)
               resolve()
             })
             .on('error', (err) => {
@@ -621,24 +573,20 @@ export async function POST(request) {
               .output(mixedAudioPath)
               .on('end', () => {
                 finalAudioPath = mixedAudioPath
-                console.log(`[${jobId}] Background music mixed successfully`)
                 resolve()
               })
               .on('error', (err) => {
                 console.error(`[${jobId}] Music mixing error:`, err.message)
-                console.log(`[${jobId}] Continuing without background music`)
                 resolve() // Continue without music on error
               })
               .run()
           })
         }
       } else {
-        console.log(`[${jobId}] Music file not found: ${musicPath}, continuing without background music`)
-      }
+        }
     }
 
     // Step 7: Add captions to video directly (OPTIMIZED - removed redundant normalization step)
-    console.log(`[${jobId}] Step 7: Adding captions to video...`)
     const captionedVideoPath = join(tempDir, 'captioned.mp4')
     
     // Build caption filter based on style
@@ -657,7 +605,6 @@ export async function POST(request) {
         ])
         .output(captionedVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Captions added successfully`)
           resolve()
         })
         .on('error', (err) => {
@@ -665,13 +612,12 @@ export async function POST(request) {
           reject(err)
         })
         .on('progress', (progress) => {
-          console.log(`[${jobId}] Adding captions: ${Math.round(progress.percent || 0)}%`)
+          }%`)
         })
         .run()
     })
     
     // Step 7b: Merge captioned video with audio
-    console.log(`[${jobId}] Step 7b: Merging video with audio...`)
     const finalVideoPath = join(tempDir, 'final.mp4')
     
     await new Promise((resolve, reject) => {
@@ -689,7 +635,6 @@ export async function POST(request) {
         ])
         .output(finalVideoPath)
         .on('end', () => {
-          console.log(`[${jobId}] Video composition complete`)
           resolve()
         })
         .on('error', (err) => {
@@ -700,7 +645,6 @@ export async function POST(request) {
     })
 
     // Step 8: Save video to public folder
-    console.log(`[${jobId}] Step 8: Saving video to public folder...`)
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
     
     // Ensure public directory exists
@@ -712,8 +656,6 @@ export async function POST(request) {
     // Save to public folder
     const publicVideoPath = join(publicDir, `${jobId}.mp4`)
     await writeFile(publicVideoPath, videoBuffer)
-    console.log(`[${jobId}] Video saved to:`, publicVideoPath)
-    
     // Generate public URL
     const videoUrl = `/story-reels/${jobId}.mp4`
 
@@ -724,11 +666,9 @@ export async function POST(request) {
       const captionsBuffer = await require('fs/promises').readFile(captionsPath)
       await writeFile(captionsPublicPath, captionsBuffer)
       captionsUrl = `/story-reels/${jobId}.srt`
-      console.log(`[${jobId}] Captions saved to:`, captionsPublicPath)
-    }
+      }
 
     // Cleanup temp files
-    console.log(`[${jobId}] Cleaning up temp files...`)
     try {
       for (const file of videoFiles) {
         await unlink(file).catch(() => {})
@@ -745,13 +685,9 @@ export async function POST(request) {
       await unlink(captionsPath).catch(() => {})
       await unlink(clipListPath).catch(() => {})
     } catch (e) {
-      console.log(`[${jobId}] Cleanup warning:`, e.message)
-    }
-
-    console.log(`[${jobId}] Video composition complete! Size:`, videoBuffer.length, 'bytes')
+      }
 
     // Step 9: Auto-save to Library
-    console.log(`[${jobId}] Step 9: Saving to library...`)
     try {
       const libraryCollection = await getCollection('library')
       
@@ -762,7 +698,7 @@ export async function POST(request) {
           { expireAfterSeconds: 0 }
         )
       } catch (indexError) {
-        console.log('TTL index creation skipped (may already exist)')
+        ')
       }
 
       // Calculate expiration: 30 days from now
@@ -801,7 +737,7 @@ export async function POST(request) {
       }
 
       await libraryCollection.insertOne(libraryDoc)
-      console.log(`[${jobId}] Video auto-saved to library (expires in 30 days)`)
+      `)
     } catch (saveError) {
       console.error(`[${jobId}] Failed to auto-save to library:`, saveError)
       // Don't fail the request if library save fails
@@ -826,8 +762,7 @@ export async function POST(request) {
     try {
       await require('fs/promises').rm(tempDir, { recursive: true, force: true })
     } catch (e) {
-      console.log(`[${jobId}] Cleanup error:`, e.message)
-    }
+      }
 
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to compose video' },
@@ -853,7 +788,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   // Average reading speed for Bengali: ~10-12 characters per second for narration
   const charsPerSecond = totalChars / duration
   
-  console.log(`[Captions] Total words: ${words.length}, Total chars: ${totalChars}, Duration: ${duration}s, Chars/sec: ${charsPerSecond.toFixed(2)}`)
+  }`)
   
   // Base font size - SIGNIFICANTLY INCREASED for portrait videos
   // Portrait 1080x1920 needs much larger fonts than landscape
@@ -979,8 +914,6 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
       bold = -1
       alignment = 2 // Bottom
   }
-  
-  console.log(`[Captions] Font size: ${fontSize}px, Outline: ${outline}, Shadow: ${shadow}, Resolution: ${width}x${height}`)
   
   // ASS Header with UTF-8 support for Bengali
   let ass = `\ufeff[Script Info]

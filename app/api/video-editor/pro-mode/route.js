@@ -51,20 +51,14 @@ export async function POST(request) {
     await mkdir(tempDir, { recursive: true })
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    console.log(`[${jobId}] 🎬 PRO MODE: Starting professional video transformation...`)
-    console.log(`[${jobId}] Options: B-roll=${addBroll}, Music=${musicTrack}, Captions=${captionStyle}`)
-    
     // Get video info
     const videoInfo = await getVideoInfo(inputPath)
-    console.log(`[${jobId}] Source: ${videoInfo.width}x${videoInfo.height}, ${videoInfo.duration}s`)
-    
     // Step 1: Download B-roll videos if requested
     let brollVideos = []
     if (addBroll && brollKeywords.length > 0) {
-      console.log(`[${jobId}] Step 1: Fetching B-roll for keywords: ${brollKeywords.join(', ')}`)
+      }`)
       brollVideos = await fetchBrollVideos(brollKeywords, tempDir, jobId)
-      console.log(`[${jobId}] Downloaded ${brollVideos.length} B-roll clips`)
-    }
+      }
     
     // Step 2: Build segments to remove (fillers + silences)
     const segmentsToRemove = []
@@ -78,11 +72,7 @@ export async function POST(request) {
     
     // Step 3: Calculate segments to keep
     const keepSegments = calculateKeepSegments(segmentsToRemove, videoInfo.duration)
-    console.log(`[${jobId}] Keeping ${keepSegments.length} segments, removing ${segmentsToRemove.length}`)
-    
     // Step 4: Process main video - extract, normalize, cut
-    console.log(`[${jobId}] Step 4: Processing main video...`)
-    
     const targetDimensions = getTargetDimensions(resolution, videoInfo)
     let processedVideoPath = join(tempDir, 'processed-main.mp4')
     
@@ -96,7 +86,6 @@ export async function POST(request) {
     
     // Step 5: Insert B-roll if requested
     if (addBroll && brollVideos.length > 0) {
-      console.log(`[${jobId}] Step 5: Inserting B-roll cuts...`)
       const brollVideoPath = join(tempDir, 'with-broll.mp4')
       await insertBroll(processedVideoPath, brollVideoPath, brollVideos, brollStyle, scenes, beats, targetDimensions, jobId)
       processedVideoPath = brollVideoPath
@@ -104,7 +93,6 @@ export async function POST(request) {
     
     // Step 6: Enhance audio
     if (audioEnhance) {
-      console.log(`[${jobId}] Step 6: Enhancing audio...`)
       const enhancedPath = join(tempDir, 'audio-enhanced.mp4')
       await enhanceAudio(processedVideoPath, enhancedPath, jobId)
       processedVideoPath = enhancedPath
@@ -112,7 +100,6 @@ export async function POST(request) {
     
     // Step 7: Apply color grading
     if (colorGrade !== 'neutral') {
-      console.log(`[${jobId}] Step 7: Applying color grade: ${colorGrade}`)
       const gradedPath = join(tempDir, 'color-graded.mp4')
       await applyColorGrade(processedVideoPath, gradedPath, colorGrade, jobId)
       processedVideoPath = gradedPath
@@ -120,7 +107,6 @@ export async function POST(request) {
     
     // Step 8: Add captions
     if (transcript && transcript.segments && transcript.segments.length > 0) {
-      console.log(`[${jobId}] Step 8: Burning in captions...`)
       const captionedPath = join(tempDir, 'captioned.mp4')
       
       // Recalculate transcript timing if we removed segments
@@ -134,7 +120,6 @@ export async function POST(request) {
     
     // Step 9: Add background music
     if (musicTrack !== 'none') {
-      console.log(`[${jobId}] Step 9: Adding background music...`)
       const musicPath = join(tempDir, 'with-music.mp4')
       await addBackgroundMusic(processedVideoPath, musicPath, musicTrack, jobId)
       processedVideoPath = musicPath
@@ -151,7 +136,7 @@ export async function POST(request) {
     
     const stats = await require('fs/promises').stat(finalPath)
     
-    console.log(`[${jobId}] ✅ PRO MODE complete! Output: ${Math.round(stats.size / 1024 / 1024)}MB`)
+    }MB`)
     
     return NextResponse.json({
       success: true,
@@ -211,11 +196,9 @@ async function fetchBrollVideos(keywords, tempDir, jobId) {
               keyword: video.keyword,
               duration: video.duration || 5
             })
-            console.log(`[${jobId}] Downloaded B-roll: ${video.keyword}`)
-          }
+            }
         } catch (e) {
-          console.log(`[${jobId}] Failed to download B-roll ${i}: ${e.message}`)
-        }
+          }
       }
     }
   } catch (error) {
@@ -462,7 +445,6 @@ async function addBackgroundMusic(input, output, musicTrack, jobId) {
   const musicPath = musicPaths[musicTrack]
   
   if (!musicPath || !existsSync(musicPath)) {
-    console.log(`[${jobId}] Music track not found, skipping`)
     await copyFile(input, output)
     return
   }
@@ -633,7 +615,7 @@ function getTargetDimensions(resolution, sourceInfo) {
 
 async function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    console.log(`[${jobId}] FFmpeg:`, args.slice(0, 8).join(' '), '...')
+    .join(' '), '...')
     
     const ffmpeg = spawn('ffmpeg', args)
     

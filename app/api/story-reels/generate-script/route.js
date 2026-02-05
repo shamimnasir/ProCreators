@@ -7,12 +7,6 @@ export async function POST(request) {
   try {
     const { duration, language, niche, customTopic } = await request.json()
     
-    console.log('=== SCRIPT GENERATION DEBUG ===')
-    console.log('Received niche:', niche)
-    console.log('Received language:', language)
-    console.log('Received duration:', duration)
-    console.log('Received customTopic:', customTopic)
-
     if (!duration || duration < 10 || duration > 60) {
       return NextResponse.json(
         { success: false, error: 'Duration must be between 10 and 60 seconds' },
@@ -34,22 +28,15 @@ export async function POST(request) {
         
         if (customPrompt && customPrompt.prompt) {
           nichePrompt = customPrompt.prompt
-          console.log('✅ Using CUSTOM admin prompt for niche:', niche)
-          console.log('Prompt template length:', nichePrompt.length)
-        } else {
+          } else {
           // Fall back to default prompt from config
           const nicheConfig = getNicheBySlug(niche)
-          console.log('Niche config found:', nicheConfig ? 'YES' : 'NO')
           if (nicheConfig) {
-            console.log('Using DEFAULT prompt template for niche:', nicheConfig.name)
             nichePrompt = nicheConfig.promptTemplate
-            console.log('Prompt template length:', nichePrompt.length)
-          } else {
-            console.log('⚠️ WARNING: No niche config found for slug:', niche)
-          }
+            } else {
+            }
         }
       } catch (dbError) {
-        console.log('Could not check custom prompts, using default:', dbError.message)
         // Fall back to default prompt from config
         const nicheConfig = getNicheBySlug(niche)
         if (nicheConfig) {
@@ -57,7 +44,7 @@ export async function POST(request) {
         }
       }
     } else {
-      console.log('Using default Story Reels prompt (niche:', niche, ')')
+      ')
     }
 
     // Default system message for original story-reels (backward compatibility)
@@ -108,9 +95,8 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     
     finalSystemMessage = finalSystemMessage + languageEnforcement
     
-    console.log('=== FINAL PROMPT BEING USED ===')
-    console.log('System message (first 200 chars):', finalSystemMessage.substring(0, 200))
-    console.log('Using niche prompt:', nichePrompt ? 'YES' : 'NO (using default)')
+    :', finalSystemMessage.substring(0, 200))
+    ')
 
     let userPrompt = ''
     
@@ -138,7 +124,7 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     // Check if user provided a topic/context (from script box or custom topic input)
     const hasUserTopic = customTopic && customTopic.trim().length > 0
     
-    console.log('Has user topic:', hasUserTopic, '| Topic:', customTopic?.substring(0, 50))
+    )
     
     if (hasUserTopic) {
       // User provided a topic - use it as the basis for generation

@@ -26,8 +26,6 @@ export async function POST(request) {
     const formData = await request.formData()
     const action = formData.get('action') || 'info'
     
-    console.log(`[Image Tools] Action: ${action}`)
-    
     if (action === 'info') {
       // Get image file info
       const imageFile = formData.get('image')

@@ -27,16 +27,10 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Video file not found' }, { status: 404 })
     }
     
-    console.log(`[${jobId}] Fast scene detection: ${videoPath}`)
-    
     // Get video info quickly
     const videoInfo = await getVideoInfo(videoPath)
-    console.log(`[${jobId}] Video: ${videoInfo.duration}s, ${videoInfo.width}x${videoInfo.height}`)
-    
     // Quick scene detection with timeout
     const scenes = await detectScenesQuick(videoPath, videoInfo.duration, jobId)
-    
-    console.log(`[${jobId}] ✅ Fast detection complete: ${scenes.length} scenes`)
     
     return NextResponse.json({
       success: true,
@@ -61,7 +55,6 @@ async function detectScenesQuick(videoPath, duration, jobId) {
     
     // Set a timeout - if FFmpeg takes too long, return time-based segments
     const timeout = setTimeout(() => {
-      console.log(`[${jobId}] Scene detection timeout, using time-based segments`)
       resolve(createTimeBasedSegments(duration))
     }, 15000) // 15 second timeout
     
