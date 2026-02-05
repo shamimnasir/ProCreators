@@ -366,6 +366,11 @@ export default function BillingPage() {
                   POPULAR
                 </div>
               )}
+              {pack.discount > 0 && (
+                <div className="absolute top-0 left-0 bg-green-500 text-white text-xs px-3 py-1 rounded-br-lg font-medium">
+                  {pack.discount}% OFF
+                </div>
+              )}
               <CardHeader className="pb-2">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getPackageColor(pack.id)} flex items-center justify-center text-white mb-2`}>
                   {getPackageIcon(pack.id)}
@@ -379,9 +384,21 @@ export default function BillingPage() {
                   <span className="text-muted-foreground ml-2">credits</span>
                 </div>
                 <div className="mb-4">
-                  <span className="text-2xl font-bold">${pack.price}</span>
+                  {pack.discount > 0 && pack.originalPrice ? (
+                    <>
+                      <span className="text-lg text-muted-foreground line-through mr-2">${pack.originalPrice}</span>
+                      <span className="text-2xl font-bold text-green-600">${pack.price}</span>
+                    </>
+                  ) : (
+                    <span className="text-2xl font-bold">${pack.price}</span>
+                  )}
                   <span className="text-muted-foreground ml-1">USD</span>
                 </div>
+                {pack.discountLabel && (
+                  <p className="text-xs text-green-600 font-medium mb-2">
+                    {pack.discountLabel}
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground mb-4">
                   ${(pack.price / pack.credits * 100).toFixed(1)}¢ per credit
                 </p>
