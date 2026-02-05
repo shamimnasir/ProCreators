@@ -70,11 +70,11 @@ export default function LibraryPage() {
           return
         }
       }
-      // Fallback to demo user
-      setUserId('demo-user-001')
+      // SECURITY: Redirect to login instead of demo user fallback
+      window.location.href = '/login?redirect=/dashboard/library'
     } catch (error) {
       console.error('Error getting user:', error)
-      setUserId('demo-user-001')
+      window.location.href = '/login?redirect=/dashboard/library'
     }
   }
 
