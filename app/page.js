@@ -680,8 +680,8 @@ export default function Home() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
-                <span>💸</span>
-                Ridiculously Affordable
+                <CircleDollarSign className="h-4 w-4" />
+                Simple, Transparent Pricing
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Pick Your </span>
