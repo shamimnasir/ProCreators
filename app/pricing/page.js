@@ -99,7 +99,7 @@ export default function PricingPage() {
   const router = useRouter()
   const { toast } = useToast()
 
-  // Check if user is logged in
+  // Check if user is logged in and get their current plan
   useEffect(() => {
     const checkAuth = async () => {
       const sessionToken = localStorage.getItem('sessionToken')
@@ -110,7 +110,14 @@ export default function PricingPage() {
           })
           const data = await res.json()
           if (data.success && data.user) {
-            setCurrentUser(data.user)
+            // Also fetch membership info for current plan
+            const membershipRes = await fetch(`/api/membership?userId=${data.user.id}`)
+            const membershipData = await membershipRes.json()
+            
+            setCurrentUser({
+              ...data.user,
+              plan: membershipData.plan || 'free'
+            })
           }
         } catch (e) {
           console.error('Auth check failed:', e)
