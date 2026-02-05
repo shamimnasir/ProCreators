@@ -91,6 +91,7 @@ export async function POST(request) {
     
     // Store pending subscription in database
     const { db } = await connectToDatabase()
+    const amount = billingCycle === 'yearly' ? plan.priceYearly : plan.price
     await db.collection('subscription_transactions').insertOne({
       _id: uuidv4(),
       sessionId: session.id,
@@ -98,7 +99,7 @@ export async function POST(request) {
       planId,
       planName: plan.name,
       monthlyCredits: plan.monthlyCredits,
-      amount: price,
+      amount,
       billingCycle,
       currency: 'usd',
       status: 'pending',
