@@ -70,12 +70,12 @@ export function Footer() {
           <div>
             <h3 className="text-foreground font-semibold mb-4">Company</h3>
             <ul className="space-y-3">
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">About Us</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Careers</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm">About Us</Link></li>
+              <li><Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Careers</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Press Kit</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Partners</Link></li>
               <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Affiliate Program</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Contact</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -86,9 +86,9 @@ export function Footer() {
             © 2025 ProCreators. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Terms of Service</Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Cookie Policy</Link>
+            <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link>
+            <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Terms of Service</Link>
+            <Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Cookie Policy</Link>
             <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">GDPR</Link>
             <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Security</Link>
           </div>
