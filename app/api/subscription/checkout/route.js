@@ -47,9 +47,15 @@ export async function POST(request) {
       )
     }
     
-    // Calculate price based on billing cycle
-    const price = billingCycle === 'yearly' ? plan.priceYearly : plan.price
-    const interval = billingCycle === 'yearly' ? 'year' : 'month'
+    // Get the correct Stripe Price ID
+    const priceId = billingCycle === 'yearly' ? plan.stripeYearlyPriceId : plan.stripePriceId
+    
+    if (!priceId || priceId.includes('placeholder')) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe price not configured for this plan' },
+        { status: 500 }
+      )
+    }
     
     // Create URLs
     const successUrl = `${originUrl}/dashboard/billing?subscription=success&plan=${planId}&session_id={CHECKOUT_SESSION_ID}`
@@ -61,18 +67,7 @@ export async function POST(request) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `${plan.name} Plan`,
-            description: `${plan.monthlyCredits} credits/month - ProCreators ${plan.name} membership`,
-          },
-          unit_amount: Math.round(price * 100), // Convert to cents
-          recurring: {
-            interval: interval,
-            interval_count: 1
-          }
-        },
+        price: priceId, // Use existing Stripe Price ID
         quantity: 1,
       }],
       mode: 'subscription',
