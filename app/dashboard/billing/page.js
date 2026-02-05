@@ -54,10 +54,10 @@ export default function BillingPage() {
       console.error('Error getting user:', error)
     }
     
-    // Now fetch data with the correct userId
+    // Now fetch data with the correct userId - packages need userId for discounts
     fetchCredits(currentUserId)
     fetchMembership(currentUserId)
-    fetchPackages()
+    fetchPackagesWithDiscount(currentUserId)
     fetchTransactions(currentUserId)
     
     // Check for payment success/cancel
