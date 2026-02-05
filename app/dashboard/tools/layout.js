@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { ToolPageExtraContent } from '@/components/ToolPageRenderer'
+import { ToolSchema } from '@/components/SchemaMarkup'
 
 export default function ToolsLayout({ children }) {
   const pathname = usePathname()
@@ -13,7 +14,12 @@ export default function ToolsLayout({ children }) {
   
   return (
     <>
+      {/* Schema.org structured data for tool page */}
+      {toolId && <ToolSchema toolId={toolId} />}
+      
       {children}
+      
+      {/* Extra content from Page Manager */}
       {toolId && <ToolPageExtraContent toolId={toolId} />}
     </>
   )
