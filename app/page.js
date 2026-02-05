@@ -438,79 +438,207 @@ export default function Home() {
         </div>
       </section>
 
-      {/* All Tools Section */}
+      {/* All Tools Section - Niche Based */}
       <section id="tools" className="py-20 md:py-32 relative">
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
                 <Lightbulb className="h-4 w-4" />
-                This Is Incredible
+                Tools for EVERY Creator
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Stop Paying for </span>
-                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through">10 Different Tools</span>
+                <span className="text-foreground">Whatever Your </span>
+                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Hustle</span>
+                <span className="text-foreground">,</span>
                 <br />
-                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Get 70+ Tools in ONE</span>
+                <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">We've Got Your Tools</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-green-400 font-bold">$19/month</span>
+                Job seekers, marketers, students, teachers - <span className="text-foreground font-semibold">everyone wins here</span>
                 <br />
-                <span className="text-sm text-yellow-400">Your wallet just did a happy dance</span>
+                <span className="text-sm text-yellow-400">70+ specialized AI tools across every category</span>
               </p>
             </div>
 
-            {/* Tool Categories */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <Button className="bg-[#7c3aed] hover:bg-[#6d28d9]">All Tools (70+)</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">🎬 Video & Audio</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">🖼️ Image & Design</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">✍️ Writing & Content</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">📚 Digital Products</Button>
-              <Button variant="outline" className="border-border text-muted-foreground hover:bg-muted/50">📱 Social Media</Button>
+            {/* Jobs & Careers Category */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <Briefcase className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Jobs & Careers</h3>
+                  <p className="text-muted-foreground text-sm">Land your dream job with AI-powered tools</p>
+                </div>
+                <span className="ml-auto bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/30">
+                  Career Boosters
+                </span>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'AI Resume Builder', desc: 'ATS-friendly resumes that get you interviews. Beat the bots!', icon: FileText, color: 'from-blue-500 to-cyan-500', hot: true },
+                  { name: 'Cover Letter Writer', desc: 'Personalized cover letters for any job in 30 seconds', icon: PenTool, color: 'from-cyan-500 to-teal-500', hot: true },
+                  { name: 'Interview Prep Coach', desc: 'AI mock interviews with feedback. Crush your next interview!', icon: Users, color: 'from-teal-500 to-green-500' },
+                  { name: 'LinkedIn Optimizer', desc: 'Profile makeover that attracts recruiters like magnets', icon: TrendingUp, color: 'from-blue-600 to-blue-400' },
+                ].map((tool, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    {tool.hot && (
+                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        TOP PICK
+                      </span>
+                    )}
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            {/* Tools Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
-              {[
-                { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
-                { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
-                { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500', hot: true },
-                { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500', hot: true },
-                { name: 'AI Thumbnail Maker', desc: 'YouTube thumbnails that get clicks. CTR go brrr 📈', icon: ImageIcon, color: 'from-yellow-500 to-orange-500' },
-                { name: 'Blog Writer Pro', desc: 'SEO-optimized articles that rank. Google loves it!', icon: FileText, color: 'from-blue-500 to-cyan-500' },
-                { name: 'Talking Head Videos', desc: 'AI avatars that speak your script. No camera needed!', icon: Users, color: 'from-cyan-500 to-blue-500' },
-                { name: 'Coloring Book Maker', desc: 'Create & sell coloring books. Kids love them!', icon: ImageIcon, color: 'from-pink-500 to-purple-500' },
-                { name: 'LinkedIn Posts', desc: 'Go viral on LinkedIn. Thought leadership made easy', icon: TrendingUp, color: 'from-blue-600 to-blue-400' },
-                { name: 'Thread Creator', desc: 'Twitter/X threads that get millions of impressions', icon: MessageSquare, color: 'from-sky-500 to-blue-500' },
-                { name: 'Carousel Generator', desc: 'Swipe-worthy carousels for Instagram & LinkedIn', icon: ImageIcon, color: 'from-purple-500 to-indigo-500' },
-                { name: 'Business Plan Writer', desc: 'Investor-ready business plans in 10 minutes', icon: BarChart3, color: 'from-emerald-500 to-green-500' },
-                { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that convert', icon: Zap, color: 'from-orange-500 to-red-500' },
-                { name: 'Slides Maker', desc: 'Presentations that WOW. Pitch decks that close deals', icon: Presentation, color: 'from-indigo-500 to-purple-500' },
-                { name: 'Quote Maker', desc: 'Inspirational quotes that get shared 10,000 times', icon: Quote, color: 'from-violet-500 to-purple-500' },
-                { name: 'Auto Subtitles', desc: 'AI captions in any language. Accessibility = more views', icon: MessageSquare, color: 'from-teal-500 to-cyan-500' },
-              ].map((tool, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: (i % 8) * 0.05 }}
-                  viewport={{ once: true }}
-                  className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  {tool.hot && (
-                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                      🔥 HOT
-                    </span>
-                  )}
-                  <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
-                    <tool.icon className="h-6 w-6 text-foreground" />
-                  </div>
-                  <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
-                  <p className="text-sm text-muted-foreground">{tool.desc}</p>
-                </motion.div>
-              ))}
+            {/* Business & Marketing Category */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <Megaphone className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Business & Marketing</h3>
+                  <p className="text-muted-foreground text-sm">Scale your business and crush your marketing goals</p>
+                </div>
+                <span className="ml-auto bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full border border-orange-500/30">
+                  Revenue Drivers
+                </span>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that actually convert', icon: Zap, color: 'from-orange-500 to-red-500', hot: true },
+                  { name: 'Social Media Manager', desc: 'Months of content scheduled in minutes. Autopilot mode!', icon: MessageSquare, color: 'from-pink-500 to-rose-500', hot: true },
+                  { name: 'Business Plan Writer', desc: 'Investor-ready business plans that close funding rounds', icon: BarChart3, color: 'from-emerald-500 to-green-500' },
+                  { name: 'Email Campaign Pro', desc: 'Cold emails that get replies. Nurture sequences that sell', icon: FileText, color: 'from-red-500 to-pink-500' },
+                ].map((tool, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    {tool.hot && (
+                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                        HOT
+                      </span>
+                    )}
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Students & Teachers Category */}
+            <div className="mb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
+                  <GraduationCap className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Students & Teachers</h3>
+                  <p className="text-muted-foreground text-sm">Ace your studies and supercharge your teaching</p>
+                </div>
+                <span className="ml-auto bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full border border-purple-500/30">
+                  Education Power-Ups
+                </span>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'Essay Writer Pro', desc: 'Research, outline & write A+ essays. Citations included!', icon: PenTool, color: 'from-purple-500 to-violet-500', hot: true },
+                  { name: 'Study Guide Maker', desc: 'Turn any textbook into easy-to-digest study materials', icon: BookOpen, color: 'from-violet-500 to-purple-500', hot: true },
+                  { name: 'Lesson Plan Generator', desc: 'Teachers: Create engaging lesson plans in 5 minutes', icon: Presentation, color: 'from-indigo-500 to-blue-500' },
+                  { name: 'Quiz & Test Creator', desc: 'Generate quizzes, flashcards & practice tests instantly', icon: FileText, color: 'from-blue-500 to-violet-500' },
+                ].map((tool, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    {tool.hot && (
+                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        POPULAR
+                      </span>
+                    )}
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Content Creators Category - Original Popular Tools */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center">
+                  <Video className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground">Content Creators</h3>
+                  <p className="text-muted-foreground text-sm">Videos, reels, ebooks & everything that goes viral</p>
+                </div>
+                <span className="ml-auto bg-[#7c3aed]/20 text-[#a78bfa] text-xs font-bold px-3 py-1 rounded-full border border-[#7c3aed]/30">
+                  Most Popular
+                </span>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
+                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
+                  { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500' },
+                  { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
+                ].map((tool, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    {tool.hot && (
+                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                        HOT
+                      </span>
+                    )}
+                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
             <div className="text-center">
