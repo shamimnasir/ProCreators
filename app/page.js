@@ -534,8 +534,8 @@ export default function Home() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/20 border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-400 mb-6">
-                <span>🧠</span>
-                The Dopamine Factory
+                <Brain className="h-4 w-4" />
+                The Power Behind It
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Why </span>
