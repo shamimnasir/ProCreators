@@ -208,6 +208,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Schema.org structured data for SEO */}
+      <HomepageSchema faqs={homepageFAQs} />
+      
       {/* Header */}
       <header className="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container flex h-20 items-center justify-between px-6">
