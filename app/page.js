@@ -656,11 +656,16 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                Choose Your Plan
+              <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
+                <span>💸</span>
+                Ridiculously Affordable
+              </div>
+              <h2 className="mb-4 text-4xl md:text-6xl font-bold">
+                <span className="text-foreground">Pick Your </span>
+                <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Addiction Level</span>
               </h2>
               <p className="mb-8 text-lg text-muted-foreground max-w-2xl mx-auto">
-                From beginner to professional creator - we have the perfect plan for your journey
+                Start free. Upgrade when you're <span className="text-yellow-400 font-semibold">hooked</span>. (Spoiler: You will be 😈)
               </p>
               <div className="inline-flex rounded-lg border border-white/20 p-1 bg-white/5">
                 <Button
@@ -677,11 +682,11 @@ export default function Home() {
                   onClick={() => setBillingCycle('yearly')}
                   className={billingCycle === 'yearly' ? 'bg-[#7c3aed]' : 'text-muted-foreground'}
                 >
-                  Yearly <span className="ml-1 text-xs">(Save 20%)</span>
+                  Yearly <span className="ml-1 text-xs text-green-400 font-bold">(Save 20%)</span>
                 </Button>
               </div>
             </div>
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-4">
               {pricingTiers.map((tier, index) => (
                 <motion.div
                   key={index}
