@@ -43,9 +43,10 @@ export async function POST(request) {
       // Directory might already exist
     }
     
-    // Generate unique filename
-    const ext = file.name.split('.').pop()
-    const filename = `${userId}-${uuidv4()}.${ext}`
+    // Generate unique filename - SECURITY: Sanitize extension
+    const originalExt = file.name.split('.').pop()
+    const ext = sanitizeFilename(originalExt).substring(0, 4) // Limit extension length
+    const filename = `${userId.substring(0, 36)}-${uuidv4()}.${ext}`
     const filepath = path.join(uploadsDir, filename)
     
     // Save file
