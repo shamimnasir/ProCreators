@@ -59,44 +59,44 @@ const homepageFAQs = [
 ]
 
 const tools = [
-  { name: 'Thread Generator', icon: MessageSquare },
-  { name: 'Quote Maker', icon: Quote },
-  { name: 'Image Creator', icon: ImageIcon },
-  { name: 'Video Studio', icon: Video },
-  { name: 'Ebook Builder', icon: BookOpen },
-  { name: 'Slides Maker', icon: Presentation },
+  { name: 'AI Video Studio', icon: Video, desc: '4K videos with voice & music' },
+  { name: 'Quick Reels', icon: Film, desc: 'Viral TikTok & Instagram reels' },
+  { name: 'Ebook Creator', icon: BookOpen, desc: 'Sell on Amazon KDP' },
+  { name: 'Thumbnail Maker', icon: ImageIcon, desc: 'YouTube-ready thumbnails' },
+  { name: 'Blog Writer', icon: FileText, desc: 'SEO-optimized articles' },
+  { name: 'Voice Clone', icon: Mic, desc: 'Your voice, any language' },
 ]
 
 const features = [
   {
     icon: Sparkles,
-    title: 'AI-Powered Generation',
-    description: 'Create professional content in seconds using cutting-edge AI models'
-  },
-  {
-    icon: ImageIcon,
-    title: 'Image Creation',
-    description: 'Generate stunning visuals with Google Gemini Nano Banana'
+    title: '70+ AI Tools in ONE Platform',
+    description: 'Stop paying for 10 different tools. Get everything you need to dominate content creation.'
   },
   {
     icon: Video,
-    title: 'Video Production',
-    description: 'Create reels, shorts, and long-form videos automatically'
+    title: 'AI Videos That Go VIRAL',
+    description: 'Auto-generate reels, shorts, and long-form videos that rack up millions of views.'
   },
   {
     icon: BookOpen,
-    title: 'Digital Products',
-    description: 'Generate ebooks, storybooks, and learning materials instantly'
+    title: 'Digital Products = Passive Income',
+    description: 'Create ebooks, planners, coloring books, and courses to sell while you sleep.'
   },
   {
-    icon: Presentation,
-    title: 'Slide Decks',
-    description: 'Turn notes into professional presentations in minutes'
+    icon: TrendingUp,
+    title: 'Social Media on Autopilot',
+    description: 'Threads, carousels, quotes, LinkedIn posts - schedule weeks of content in minutes.'
   },
   {
     icon: Mic,
-    title: 'Voice Synthesis',
-    description: 'Clone voices and create talking-head videos effortlessly'
+    title: 'Voice Clone Magic',
+    description: 'Clone your voice once. Create unlimited content in ANY language. Yes, even Bangla!'
+  },
+  {
+    icon: Rocket,
+    title: 'From Idea to Income in Minutes',
+    description: 'What used to take days now takes minutes. More content = more money.'
   },
 ]
 
