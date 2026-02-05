@@ -483,6 +483,52 @@ export default function AdminUsersPage() {
                 />
               </div>
             )}
+            
+            {currentAction === 'delete_user' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                    ⚠️ This action is PERMANENT and cannot be undone!
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    All user data, transactions, and generations will be deleted.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Type the user's email to confirm:</Label>
+                  <Input
+                    placeholder={selectedUser?.email}
+                    value={actionParams.confirmEmail || ''}
+                    onChange={(e) => setActionParams({ ...actionParams, confirmEmail: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter: <code className="bg-muted px-1 rounded">{selectedUser?.email}</code>
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {currentAction === 'make_admin' && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  This will grant admin privileges to <strong>{selectedUser?.email}</strong>.
+                </p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                  Admins can manage users, credits, and system settings.
+                </p>
+              </div>
+            )}
+            
+            {currentAction === 'remove_admin' && (
+              <div className="p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border border-orange-200 dark:border-orange-800">
+                <p className="text-sm text-orange-700 dark:text-orange-300">
+                  This will remove admin privileges from <strong>{selectedUser?.email}</strong>.
+                </p>
+                <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                  They will become a regular user.
+                </p>
+              </div>
+            )}
           </div>
           
           <DialogFooter>
