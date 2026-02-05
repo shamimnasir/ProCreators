@@ -255,17 +255,32 @@ function ContentBlock({ block }) {
 
 // Export a wrapper component that renders below the main tool UI
 export function ToolPageExtraContent({ toolId }) {
-  const { pageData, loading } = useToolPage(toolId)
+  const { pageData, loading, error } = useToolPage(toolId)
   
-  if (loading || !pageData?.contentBlocks?.length) return null
+  // Debug logging
+  console.log('[ToolPageExtraContent]', { toolId, loading, error, hasPageData: !!pageData, blocksCount: pageData?.contentBlocks?.length })
+  
+  if (loading) {
+    console.log('[ToolPageExtraContent] Still loading...')
+    return null
+  }
+  
+  if (!pageData?.contentBlocks?.length) {
+    console.log('[ToolPageExtraContent] No content blocks found')
+    return null
+  }
   
   // Filter out hero blocks (usually shown at top), render remaining
   const extraBlocks = pageData.contentBlocks.filter(b => b.type !== 'hero')
+  console.log('[ToolPageExtraContent] Extra blocks:', extraBlocks.map(b => b.type))
   
-  if (extraBlocks.length === 0) return null
+  if (extraBlocks.length === 0) {
+    console.log('[ToolPageExtraContent] No extra blocks after filtering')
+    return null
+  }
   
   return (
-    <div className="mt-12 pt-8 border-t">
+    <div className="tool-page-content mt-12 pt-8 border-t">
       {extraBlocks.map((block) => (
         <ContentBlock key={block.id} block={block} />
       ))}
