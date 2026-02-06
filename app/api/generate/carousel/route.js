@@ -135,8 +135,6 @@ Keep text concise and impactful. Images should be text-free visuals that support
     for (let i = 0; i < carouselSequence.length; i++) {
       const slide = carouselSequence[i]
       
-      ...`)
-      
       // Determine aspect ratio description
       const aspectRatio = width / height
       let aspectDesc = 'square'
