@@ -203,9 +203,7 @@ const navigation = [
     name: 'Admin',
     icon: Settings,
     children: [
-      { name: '🗂️ Unified Page Manager', href: '/dashboard/admin/page-manager', icon: FileText },
-      { name: '📄 Page Manager', href: '/dashboard/admin/pages', icon: FileText },
-      { name: '🌐 Static Pages', href: '/dashboard/admin/static-pages', icon: FileText },
+      { name: '📄 Page Manager', href: '/dashboard/admin/page-manager', icon: FileText },
       { name: '👥 User Management', href: '/dashboard/admin/users', icon: Users },
       { name: '🔒 Kill Switches', href: '/dashboard/admin/controls', icon: Shield },
       { name: '⚙️ Site Settings', href: '/dashboard/admin/site-settings', icon: Settings2 },
