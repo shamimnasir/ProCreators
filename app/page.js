@@ -310,16 +310,29 @@ export default function Home() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost" className="border border-border hover:bg-accent">
-                Log In
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 glow-primary font-semibold">
-                Start Free Trial
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <span className="text-sm text-muted-foreground">Hi, {userName}</span>
+                <Link href="/dashboard">
+                  <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="border border-border hover:bg-accent">
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold">
+                    Start Free Trial
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <button className="md:hidden text-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
