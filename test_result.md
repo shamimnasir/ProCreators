@@ -320,12 +320,15 @@ backend:
     working: true
     file: "/app/app/api/generate/image/route.js"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
+    priority: "high"
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Image generation using Gemini Nano Banana model with direct Google API key. Used by Carousel and Photocard generators."
+        - working: true
+          agent: "testing"
+          comment: "✅ ZOD VALIDATION WORKING: All validation tests passed. Missing prompt correctly rejected with 400 status and 'Validation failed' error. Invalid aspect ratio correctly rejected with proper error structure. Zod schema validates: prompt (required, max 2000), userId, transactionId, creditsCharged, toolId, style, aspectRatio (enum). API returns proper JSON with success/imageUrl structure."
 
 frontend:
   - task: "Refactored Homepage Components Rendering"
