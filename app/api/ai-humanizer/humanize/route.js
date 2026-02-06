@@ -3,6 +3,24 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// AI Humanizer input schema
+const humanizeSchema = z.object({
+  text: z.string().min(1, 'Text is required').max(50000, 'Text too long (max 50,000 characters)'),
+  level: z.enum(['light', 'medium', 'heavy']).default('medium'),
+  tone: z.enum(['conversational', 'professional', 'casual', 'academic', 'friendly']).default('conversational'),
+  techniques: z.array(z.enum([
+    'vary_sentences',
+    'add_transitions', 
+    'use_contractions',
+    'add_personality',
+    'simplify_vocab',
+    'add_examples',
+    'rhetorical_questions'
+  ])).max(7).default([])
+})
 
 async function runLLM(prompt, systemPrompt) {
   return new Promise(async (resolve, reject) => {
