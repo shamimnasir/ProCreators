@@ -2,6 +2,25 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Marketing Strategy input schema
+const marketingStrategySchema = z.object({
+  businessName: z.string().min(1, 'Business name is required').max(200),
+  businessDescription: z.string().min(1, 'Business description is required').max(5000),
+  industry: z.enum(['saas', 'ecommerce', 'service', 'health', 'finance', 'education', 'food', 'real-estate', 'travel', 'manufacturing', 'nonprofit', 'other']).default('other'),
+  businessStage: z.enum(['startup', 'growth', 'established', 'enterprise']).default('growth'),
+  targetAudience: z.string().max(2000).optional(),
+  competitors: z.string().max(2000).optional(),
+  currentChallenges: z.string().max(2000).optional(),
+  goals: z.string().max(2000).optional(),
+  budget: z.enum(['micro', 'small', 'medium', 'large']).default('small'),
+  timeline: z.string().max(200).default('12 months'),
+  framework: z.enum(['7ps', 'stp', 'ansoff', 'funnel', 'complete']).default('complete'),
+  existingChannels: z.string().max(1000).optional(),
+  uniqueValue: z.string().max(1000).optional()
+})
 
 // Marketing Frameworks
 const FRAMEWORKS = {
