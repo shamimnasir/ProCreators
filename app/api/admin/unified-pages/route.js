@@ -354,11 +354,11 @@ export async function POST(request) {
   }
 }
 
-// PUT - Update page
+// PUT - Update page (both registry and custom pages)
 export async function PUT(request) {
   try {
     const body = await request.json()
-    const { pageId, seo, contentBlocks, sections, quarters, isPublished, customData } = body
+    const { pageId, seo, contentBlocks, sections, quarters, isPublished, customData, title, path, category } = body
     
     if (!pageId) {
       return NextResponse.json({ success: false, error: 'pageId is required' }, { status: 400 })
@@ -366,6 +366,7 @@ export async function PUT(request) {
     
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
+    const customCollection = db.collection(CUSTOM_PAGES_COLLECTION)
     
     // Build update object
     const updateData = {
@@ -378,8 +379,19 @@ export async function PUT(request) {
     if (quarters !== undefined) updateData.quarters = quarters
     if (typeof isPublished === 'boolean') updateData.isPublished = isPublished
     if (customData !== undefined) updateData.customData = customData
+    if (title !== undefined) updateData.title = title
+    if (path !== undefined) updateData.path = path
+    if (category !== undefined) updateData.category = category
     
-    // Check if page exists
+    // Check if it's a custom page first
+    const existingCustom = await customCollection.findOne({ pageId })
+    if (existingCustom) {
+      await customCollection.updateOne({ pageId }, { $set: updateData })
+      const updatedPage = await customCollection.findOne({ pageId })
+      return NextResponse.json({ success: true, page: updatedPage })
+    }
+    
+    // Check if page exists in registry collection
     const existing = await collection.findOne({ pageId })
     
     if (existing) {
