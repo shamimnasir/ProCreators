@@ -127,6 +127,17 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(marketingStrategySchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const {
       businessName,
       businessDescription,
@@ -141,14 +152,7 @@ export async function POST(request) {
       framework,
       existingChannels,
       uniqueValue
-    } = body
-
-    if (!businessName || !businessDescription) {
-      return NextResponse.json(
-        { success: false, error: 'Business name and description are required' },
-        { status: 400 }
-      )
-    }
+    } = validation.data
 
     // Language detection
     const allText = `${businessName} ${businessDescription} ${targetAudience || ''} ${goals || ''}`
