@@ -94,7 +94,10 @@ export default function BillingPage() {
   const fetchCredits = async (uid) => {
     const currentUserId = uid || userId
     try {
-      const res = await fetch(`/api/credits?userId=${currentUserId}`)
+      const sessionToken = localStorage.getItem('sessionToken')
+      const res = await fetch(`/api/credits?userId=${currentUserId}`, {
+        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      })
       const data = await res.json()
       if (data.success) {
         setCredits(data.credits)
@@ -110,7 +113,10 @@ export default function BillingPage() {
   const fetchMembership = async (uid) => {
     const currentUserId = uid || userId
     try {
-      const res = await fetch(`/api/membership?userId=${currentUserId}`)
+      const sessionToken = localStorage.getItem('sessionToken')
+      const res = await fetch(`/api/membership?userId=${currentUserId}`, {
+        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      })
       const data = await res.json()
       if (data.success) {
         setMembershipCredits(data.membershipCredits || 0)
