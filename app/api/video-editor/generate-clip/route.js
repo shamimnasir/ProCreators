@@ -34,6 +34,12 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const {
       type = 'intro',
@@ -51,8 +57,6 @@ export async function POST(request) {
     } = body
     
     await mkdir(OUTPUT_DIR, { recursive: true })
-    
-    }..." (${duration}s) ${width}x${height}`)
     
     const outputPath = join(OUTPUT_DIR, `${jobId}-${type}.mp4`)
     
