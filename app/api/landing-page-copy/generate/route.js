@@ -2,6 +2,29 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Landing Page Copy input schema
+const landingPageCopySchema = z.object({
+  productName: z.string().min(1, 'Product name is required').max(200),
+  productDescription: z.string().max(2000).optional(),
+  industry: z.enum(['saas', 'ecommerce', 'coaching', 'agency', 'finance', 'health', 'education', 'realestate', 'b2b', 'startup']).optional(),
+  targetAudience: z.string().max(1000).optional(),
+  framework: z.enum(['pas', 'hso', 'bab', 'quest', 'spin', 'acfunnel']).default('pas'),
+  tone: z.enum(['professional', 'conversational', 'urgent', 'empathetic', 'bold', 'luxurious']).default('professional'),
+  painPoints: z.string().max(2000).optional(),
+  desiredOutcome: z.string().max(1000).optional(),
+  uniqueSellingPoints: z.string().max(2000).optional(),
+  competitorWeaknesses: z.string().max(1000).optional(),
+  socialProof: z.string().max(2000).optional(),
+  specificResults: z.string().max(1000).optional(),
+  pricing: z.string().max(500).optional(),
+  guarantee: z.string().max(500).optional(),
+  urgencyElement: z.string().max(500).optional(),
+  generateFullPage: z.boolean().default(false),
+  sectionsToGenerate: z.array(z.enum(['hero', 'problem', 'solution', 'features', 'benefits', 'testimonials', 'faq', 'comparison', 'guarantee', 'cta'])).max(10).default(['hero', 'problem', 'solution', 'cta'])
+})
 
 // Landing Page Copywriting Frameworks for 2026
 const FRAMEWORKS = {
