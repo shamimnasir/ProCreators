@@ -440,20 +440,16 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 text-sm font-medium text-yellow-400 mb-6">
-                <Lightbulb className="h-4 w-4" />
-                This Is Incredible
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-4 py-2 text-sm font-medium text-emerald-400 mb-6">
+                <Zap className="h-4 w-4" />
+                70+ AI Tools in ONE Platform
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Stop Paying for </span>
-                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through">10 Different Tools</span>
-                <br />
-                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Get 70+ Tools in ONE</span>
+                <span className="text-foreground">Everything You Need to </span>
+                <span className="text-[#a78bfa]">Create, Grow & Monetize</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-green-400 font-bold">$19/month</span>
-                <br />
-                <span className="text-sm text-yellow-400">Your wallet just did a happy dance</span>
+                From viral videos to passive income ebooks - all your creative tools in one place.
               </p>
             </div>
 
@@ -461,10 +457,10 @@ export default function Home() {
             <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500' },
-                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500' },
-                  { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500' },
-                  { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
+                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video },
+                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film },
+                  { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic },
+                  { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen },
                 ].map((tool, i) => (
                   <motion.div
                     key={i}
@@ -475,7 +471,7 @@ export default function Home() {
                     className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#7c3aed]">
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
@@ -489,10 +485,10 @@ export default function Home() {
             <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'AI Resume Builder', desc: 'ATS-friendly resumes that get you interviews. Beat the bots!', icon: FileText, color: 'from-blue-500 to-cyan-500' },
-                  { name: 'Cover Letter Writer', desc: 'Personalized cover letters for any job in 30 seconds', icon: PenTool, color: 'from-cyan-500 to-teal-500' },
-                  { name: 'Interview Prep Coach', desc: 'AI mock interviews with feedback. Crush your next interview!', icon: Users, color: 'from-teal-500 to-green-500' },
-                  { name: 'LinkedIn Optimizer', desc: 'Profile makeover that attracts recruiters like magnets', icon: TrendingUp, color: 'from-blue-600 to-blue-400' },
+                  { name: 'AI Resume Builder', desc: 'ATS-friendly resumes that get you interviews. Beat the bots!', icon: FileText },
+                  { name: 'Cover Letter Writer', desc: 'Personalized cover letters for any job in 30 seconds', icon: PenTool },
+                  { name: 'Interview Prep Coach', desc: 'AI mock interviews with feedback. Crush your next interview!', icon: Users },
+                  { name: 'LinkedIn Optimizer', desc: 'Profile makeover that attracts recruiters like magnets', icon: TrendingUp },
                 ].map((tool, i) => (
                   <motion.div
                     key={i}
@@ -500,10 +496,10 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                     viewport={{ once: true }}
-                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/20 cursor-pointer"
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#7c3aed]">
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
@@ -517,10 +513,10 @@ export default function Home() {
             <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that actually convert', icon: Zap, color: 'from-orange-500 to-red-500' },
-                  { name: 'Social Media Manager', desc: 'Months of content scheduled in minutes. Autopilot mode!', icon: MessageSquare, color: 'from-pink-500 to-rose-500' },
-                  { name: 'Business Plan Writer', desc: 'Investor-ready business plans that close funding rounds', icon: BarChart3, color: 'from-emerald-500 to-green-500' },
-                  { name: 'Email Campaign Pro', desc: 'Cold emails that get replies. Nurture sequences that sell', icon: FileText, color: 'from-red-500 to-pink-500' },
+                  { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that actually convert', icon: Zap },
+                  { name: 'Social Media Manager', desc: 'Months of content scheduled in minutes. Autopilot mode!', icon: MessageSquare },
+                  { name: 'Business Plan Writer', desc: 'Investor-ready business plans that close funding rounds', icon: BarChart3 },
+                  { name: 'Email Campaign Pro', desc: 'Cold emails that get replies. Nurture sequences that sell', icon: FileText },
                 ].map((tool, i) => (
                   <motion.div
                     key={i}
@@ -528,10 +524,10 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                     viewport={{ once: true }}
-                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/20 cursor-pointer"
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#7c3aed]">
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
@@ -545,10 +541,10 @@ export default function Home() {
             <div className="mb-12">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'Essay Writer Pro', desc: 'Research, outline & write A+ essays. Citations included!', icon: PenTool, color: 'from-purple-500 to-violet-500' },
-                  { name: 'Study Guide Maker', desc: 'Turn any textbook into easy-to-digest study materials', icon: BookOpen, color: 'from-violet-500 to-purple-500' },
-                  { name: 'Lesson Plan Generator', desc: 'Teachers: Create engaging lesson plans in 5 minutes', icon: Presentation, color: 'from-indigo-500 to-blue-500' },
-                  { name: 'Quiz & Test Creator', desc: 'Generate quizzes, flashcards & practice tests instantly', icon: FileText, color: 'from-blue-500 to-violet-500' },
+                  { name: 'Essay Writer Pro', desc: 'Research, outline & write A+ essays. Citations included!', icon: PenTool },
+                  { name: 'Study Guide Maker', desc: 'Turn any textbook into easy-to-digest study materials', icon: BookOpen },
+                  { name: 'Lesson Plan Generator', desc: 'Teachers: Create engaging lesson plans in 5 minutes', icon: Presentation },
+                  { name: 'Quiz & Test Creator', desc: 'Generate quizzes, flashcards & practice tests instantly', icon: FileText },
                 ].map((tool, i) => (
                   <motion.div
                     key={i}
@@ -556,10 +552,10 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
                     viewport={{ once: true }}
-                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
+                    className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#7c3aed]">
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="mb-2 text-lg font-bold text-foreground">{tool.name}</h3>
