@@ -349,24 +349,24 @@ export default function Home() {
 
               {/* Main Provocative H1 */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                <span className="text-[#a78bfa]">Don't</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Don't</span>
                 <span className="text-foreground"> use </span>
                 <span className="text-[#a78bfa]">ProCreators</span>
                 <span className="text-foreground">,</span>
                 <br />
                 <span className="text-foreground">because it's </span>
-                <span className="text-emerald-400">ADDICTIVE</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">ADDICTIVE</span>
               </h1>
 
               {/* H2 - Expanded Benefits */}
               <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
                 It solves <span className="text-foreground font-semibold">ALL the problems</span> of Creators, Businesses, Educators, Students & Job Seekers in <span className="text-[#a78bfa] font-bold">ONE place</span>
                 <br />
-                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-[#a78bfa] font-bold">CREATOR DOPAMINES</span>!</span>
+                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold">CREATOR DOPAMINES</span>!</span>
               </p>
 
               {/* Subheadline */}
-              <p className="text-lg md:text-xl text-[#a78bfa] font-medium flex items-center justify-center gap-2">
+              <p className="text-lg md:text-xl text-orange-400 font-medium flex items-center justify-center gap-2">
                 <AlertTriangle className="h-5 w-5" />
                 Once you're in, there's no way out!
               </p>
@@ -376,7 +376,7 @@ export default function Home() {
                 <Button 
                   size="lg"
                   onClick={() => router.push('/register')}
-                  className="text-lg px-8 py-6 bg-[#7c3aed] hover:bg-[#6d28d9] border-0 text-white font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
+                  className="text-lg px-8 py-6 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-0 text-black font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105"
                 >
                   Get Addicted Now
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -384,7 +384,7 @@ export default function Home() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="text-lg px-8 py-6 border-2 border-border bg-muted/50 hover:bg-muted text-foreground"
+                  className="text-lg px-8 py-6 border-2 border-[#7c3aed] bg-transparent hover:bg-[#7c3aed]/20 text-foreground"
                   onClick={() => router.push('/dashboard')}
                 >
                   Explore Tools
