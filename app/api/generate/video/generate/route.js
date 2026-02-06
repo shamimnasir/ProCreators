@@ -289,7 +289,7 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   }
   
   if (prediction.status !== 'succeeded') {
-    throw new Error(`Prediction failed with status: ${prediction.status}`)
+    throw new Error('Prediction failed with status: ' + prediction.status)
   }
   
   const output = prediction.output
