@@ -462,24 +462,12 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Content Creators Category - Most Popular - NOW FIRST */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center">
-                  <Video className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">Content Creators</h3>
-                  <p className="text-muted-foreground text-sm">Videos, reels, ebooks & everything that goes viral</p>
-                </div>
-                <span className="ml-auto bg-[#7c3aed]/20 text-[#a78bfa] text-xs font-bold px-3 py-1 rounded-full border border-[#7c3aed]/30">
-                  Most Popular
-                </span>
-              </div>
+            {/* Content Creators Tools */}
+            <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500', hot: true },
-                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500', hot: true },
+                  { name: 'AI Video Studio', desc: 'Create 4K videos with AI - scripts, scenes, voice & music', icon: Video, color: 'from-red-500 to-orange-500' },
+                  { name: 'Quick Reels Generator', desc: 'Viral TikTok & Instagram reels in 60 seconds', icon: Film, color: 'from-pink-500 to-rose-500' },
                   { name: 'Voice Clone Studio', desc: 'Clone your voice. Speak ANY language. Even Bangla!', icon: Mic, color: 'from-purple-500 to-pink-500' },
                   { name: 'Ebook Creator', desc: 'Write & publish on Amazon KDP. Start earning passive income', icon: BookOpen, color: 'from-green-500 to-emerald-500' },
                 ].map((tool, i) => (
@@ -492,11 +480,6 @@ export default function Home() {
                     className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-[#7c3aed]/50 hover:shadow-xl hover:shadow-[#7c3aed]/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    {tool.hot && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                        HOT
-                      </span>
-                    )}
                     <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
@@ -507,24 +490,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Jobs & Careers Category */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">Jobs & Careers</h3>
-                  <p className="text-muted-foreground text-sm">Land your dream job with AI-powered tools</p>
-                </div>
-                <span className="ml-auto bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/30">
-                  Career Boosters
-                </span>
-              </div>
+            {/* Jobs & Careers Tools */}
+            <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'AI Resume Builder', desc: 'ATS-friendly resumes that get you interviews. Beat the bots!', icon: FileText, color: 'from-blue-500 to-cyan-500', hot: true },
-                  { name: 'Cover Letter Writer', desc: 'Personalized cover letters for any job in 30 seconds', icon: PenTool, color: 'from-cyan-500 to-teal-500', hot: true },
+                  { name: 'AI Resume Builder', desc: 'ATS-friendly resumes that get you interviews. Beat the bots!', icon: FileText, color: 'from-blue-500 to-cyan-500' },
+                  { name: 'Cover Letter Writer', desc: 'Personalized cover letters for any job in 30 seconds', icon: PenTool, color: 'from-cyan-500 to-teal-500' },
                   { name: 'Interview Prep Coach', desc: 'AI mock interviews with feedback. Crush your next interview!', icon: Users, color: 'from-teal-500 to-green-500' },
                   { name: 'LinkedIn Optimizer', desc: 'Profile makeover that attracts recruiters like magnets', icon: TrendingUp, color: 'from-blue-600 to-blue-400' },
                 ].map((tool, i) => (
@@ -537,11 +508,6 @@ export default function Home() {
                     className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    {tool.hot && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        TOP PICK
-                      </span>
-                    )}
                     <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
@@ -552,24 +518,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Business & Marketing Category */}
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                  <Megaphone className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">Business & Marketing</h3>
-                  <p className="text-muted-foreground text-sm">Scale your business and crush your marketing goals</p>
-                </div>
-                <span className="ml-auto bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full border border-orange-500/30">
-                  Revenue Drivers
-                </span>
-              </div>
+            {/* Business & Marketing Tools */}
+            <div className="mb-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that actually convert', icon: Zap, color: 'from-orange-500 to-red-500', hot: true },
-                  { name: 'Social Media Manager', desc: 'Months of content scheduled in minutes. Autopilot mode!', icon: MessageSquare, color: 'from-pink-500 to-rose-500', hot: true },
+                  { name: 'Ad Copy Generator', desc: 'Facebook, Google, TikTok ads that actually convert', icon: Zap, color: 'from-orange-500 to-red-500' },
+                  { name: 'Social Media Manager', desc: 'Months of content scheduled in minutes. Autopilot mode!', icon: MessageSquare, color: 'from-pink-500 to-rose-500' },
                   { name: 'Business Plan Writer', desc: 'Investor-ready business plans that close funding rounds', icon: BarChart3, color: 'from-emerald-500 to-green-500' },
                   { name: 'Email Campaign Pro', desc: 'Cold emails that get replies. Nurture sequences that sell', icon: FileText, color: 'from-red-500 to-pink-500' },
                 ].map((tool, i) => (
@@ -582,11 +536,6 @@ export default function Home() {
                     className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-orange-500/50 hover:shadow-xl hover:shadow-orange-500/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    {tool.hot && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                        HOT
-                      </span>
-                    )}
                     <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
@@ -597,24 +546,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Students & Teachers Category */}
+            {/* Students & Teachers Tools */}
             <div className="mb-12">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
-                  <GraduationCap className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">Students & Teachers</h3>
-                  <p className="text-muted-foreground text-sm">Ace your studies and supercharge your teaching</p>
-                </div>
-                <span className="ml-auto bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full border border-purple-500/30">
-                  Education Power-Ups
-                </span>
-              </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { name: 'Essay Writer Pro', desc: 'Research, outline & write A+ essays. Citations included!', icon: PenTool, color: 'from-purple-500 to-violet-500', hot: true },
-                  { name: 'Study Guide Maker', desc: 'Turn any textbook into easy-to-digest study materials', icon: BookOpen, color: 'from-violet-500 to-purple-500', hot: true },
+                  { name: 'Essay Writer Pro', desc: 'Research, outline & write A+ essays. Citations included!', icon: PenTool, color: 'from-purple-500 to-violet-500' },
+                  { name: 'Study Guide Maker', desc: 'Turn any textbook into easy-to-digest study materials', icon: BookOpen, color: 'from-violet-500 to-purple-500' },
                   { name: 'Lesson Plan Generator', desc: 'Teachers: Create engaging lesson plans in 5 minutes', icon: Presentation, color: 'from-indigo-500 to-blue-500' },
                   { name: 'Quiz & Test Creator', desc: 'Generate quizzes, flashcards & practice tests instantly', icon: FileText, color: 'from-blue-500 to-violet-500' },
                 ].map((tool, i) => (
@@ -627,11 +564,6 @@ export default function Home() {
                     className="group relative rounded-xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-6 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
                     onClick={() => router.push('/dashboard')}
                   >
-                    {tool.hot && (
-                      <span className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        POPULAR
-                      </span>
-                    )}
                     <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.color}`}>
                       <tool.icon className="h-6 w-6 text-white" />
                     </div>
