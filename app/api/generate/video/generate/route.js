@@ -276,8 +276,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     }
   }
   
-  .substring(0, 200))
-  
   // Use predictions.create and wait for completion
   let prediction = await replicate.predictions.create({
     version: modelId.split(':')[1], // Extract version ID from model string  
