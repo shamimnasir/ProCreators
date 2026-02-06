@@ -445,16 +445,20 @@ export default function Home() {
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-4 py-2 text-sm font-medium text-emerald-400 mb-6">
-                <Zap className="h-4 w-4" />
-                70+ AI Tools in ONE Platform
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
+                <Lightbulb className="h-4 w-4" />
+                This Is Incredible
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Everything You Need to </span>
-                <span className="text-[#a78bfa]">Create, Grow & Monetize</span>
+                <span className="text-foreground">Stop Paying for </span>
+                <span className="text-muted-foreground line-through">10 Different Tools</span>
+                <br />
+                <span className="text-[#a78bfa]">Get 70+ Tools in ONE</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                From viral videos to passive income ebooks - all your creative tools in one place.
+                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-emerald-400 font-bold">$19/month</span>
+                <br />
+                <span className="text-sm text-[#a78bfa]">Your wallet just did a happy dance</span>
               </p>
             </div>
 
