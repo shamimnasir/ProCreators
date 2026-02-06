@@ -1098,7 +1098,36 @@ test_plan:
 
 agent_communication:
     - agent: "main"
-      message: "COMPREHENSIVE DIGITAL PRODUCTS TESTING REQUIRED. Cleaned up Digital Products config by removing all Coming Soon tools. Now need to test all 14 active Digital Product tools: planner-maker, worksheet-maker, coloring-book, journal-maker, checklist-maker, ebook-maker, recipe-book, guide-maker (how-to-guide), notion-templates, slides-maker, learning-cards, quiz-maker, storybook-maker, activity-book. For each tool: 1) Test the main generate API endpoint, 2) Test with various input parameters, 3) Verify response structure and content quality, 4) Test validation (missing required fields). Report any non-functional tools so they can be fixed before deployment."
+      message: "SECURITY IMPLEMENTATION - Phase 3 Complete: Rate Limiting + Zod Validation
+      
+      **NEW SECURITY FEATURES IMPLEMENTED:**
+      
+      1) **Rate Limiter Created** (`/lib/rate-limiter.js`):
+         - In-memory rate limiting with configurable limits per action
+         - Limits: auth_login (5/15min), auth_signup (3/hr), stripe_checkout (10/hr), etc.
+         - Returns 429 with Retry-After header when exceeded
+         - Logs violations to security_logs collection
+         - Adds X-RateLimit-* headers to all responses
+      
+      2) **Critical APIs Secured with Zod + Rate Limiting:**
+         - `/api/auth/route.js` - Added rate limiting for login/signup/reset
+         - `/api/user/profile/route.js` - Full rewrite: auth + Zod + rate limit + sanitization
+         - `/api/stripe/checkout/route.js` - Full rewrite: auth + Zod + rate limit + logging
+         - `/api/subscription/checkout/route.js` - Added Zod validation + rate limiting
+         - `/api/library/save/route.js` - Full rewrite: Zod + rate limit + sanitization
+      
+      3) **New Zod Schemas Added** (`/lib/validation.js`):
+         - profileUpdateSchema - For profile updates
+         - stripeCheckoutSchema - For credit purchases
+         - subscriptionCheckoutSchema - For subscription changes
+         - librarySaveSchema - For content saves
+      
+      **TESTING REQUIRED:**
+      1. Test rate limiting on /api/auth (login should block after 5 attempts)
+      2. Test Zod validation on /api/stripe/checkout (invalid packageId should fail)
+      3. Test /api/user/profile (unauthenticated should return 401)
+      4. Test /api/library/save (missing title should return validation error)
+      5. Verify rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining)"
 
   - task: "Credit System API"
     implemented: true
