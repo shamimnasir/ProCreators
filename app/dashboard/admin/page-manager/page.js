@@ -15,7 +15,7 @@ import {
   Search, Filter, RefreshCw, ExternalLink, CheckCircle, XCircle,
   Map, CreditCard, BookOpen, FileQuestion, Video, BarChart, Building,
   GraduationCap, Lock, Activity, Users2, Briefcase, Settings, Database,
-  Check, X, Wrench, Layout, Code
+  Check, X, Wrench, Layout, Code, Menu, Link2, PlusCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -25,6 +25,16 @@ const ICONS = {
   Home, Users, Shield, FileText, Cookie, Mail, Briefcase, Map, CreditCard,
   BookOpen, FileQuestion, Video, BarChart, Building, GraduationCap, Lock, Activity, Users2, Wrench
 }
+
+// Page types for new pages
+const PAGE_TYPES = [
+  { id: 'content', name: 'Content Page', description: 'Standard page with content blocks' },
+  { id: 'solution', name: 'Solution Page', description: 'Page for a specific audience/solution' },
+  { id: 'landing', name: 'Landing Page', description: 'Marketing/landing page' }
+]
+
+// Categories for new pages
+const PAGE_CATEGORIES = ['Custom', 'Company', 'Legal', 'Product', 'Support', 'Solutions', 'Marketing']
 
 // Block types for content editing
 const BLOCK_TYPES = [
@@ -45,15 +55,19 @@ export default function UnifiedPageManager() {
   const [activeTab, setActiveTab] = useState('website')
   const [pages, setPages] = useState([])
   const [tools, setTools] = useState([])
+  const [menus, setMenus] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedPage, setSelectedPage] = useState(null)
   const [selectedTool, setSelectedTool] = useState(null)
+  const [selectedMenu, setSelectedMenu] = useState(null)
   const [saving, setSaving] = useState(false)
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedBlock, setExpandedBlock] = useState(null)
   const [initializing, setInitializing] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newPage, setNewPage] = useState({ title: '', type: 'content', category: 'Custom' })
   const { toast } = useToast()
 
   useEffect(() => {
@@ -61,6 +75,8 @@ export default function UnifiedPageManager() {
       fetchPages()
     } else if (activeTab === 'tools') {
       fetchTools()
+    } else if (activeTab === 'menus') {
+      fetchMenus()
     }
   }, [activeTab, activeCategory])
 
