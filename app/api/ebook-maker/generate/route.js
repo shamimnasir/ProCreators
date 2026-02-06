@@ -565,6 +565,12 @@ async function createEbookPDF(content, designStyle, colorScheme, coverStyle, aut
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for ebook generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+    
     const { 
       title, 
       outline, 
