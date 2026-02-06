@@ -322,6 +322,18 @@ backend:
           comment: "Image generation using Gemini Nano Banana model with direct Google API key. Used by Carousel and Photocard generators."
 
 frontend:
+  - task: "Refactored Homepage Components Rendering"
+    implemented: true
+    working: false
+    file: "/app/app/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL RENDERING ISSUE: Homepage refactoring has broken main content rendering. Header component works correctly (logo, navigation, buttons visible), but all main content components are not rendering: Hero section (headline, warning badge, CTA buttons), Features section, Stats section (70+, 1M+, 99%, ∞), Use Cases, Pricing section, and Footer are all missing. Only blank space appears below the header. Root cause appears to be component import/export issues or JavaScript errors preventing React component mounting. Modular refactoring from 1,177-line monolithic file to separate components (/components/landing/HeroSection.jsx, Sections.jsx, MoreSections.jsx) has introduced critical functionality loss. IMMEDIATE FIX REQUIRED."
+
   - task: "Story Reels - Simplified Google TTS UI"
     implemented: true
     working: "NA"
