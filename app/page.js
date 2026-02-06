@@ -596,15 +596,18 @@ export default function Home() {
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
                 <Brain className="h-4 w-4" />
-                Why Creators Love Us
+                The Dopamine Factory
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Trusted by </span>
-                <span className="text-emerald-400">50,000+</span>
-                <span className="text-foreground"> Creators</span>
+                <span className="text-foreground">Why </span>
+                <span className="text-[#a78bfa]">50,000+ Creators</span>
+                <br />
+                <span className="text-foreground">Can't Stop Using This</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to create, grow, and monetize your content - all in one platform.
+                It's not magic. It's just <span className="text-[#a78bfa] font-bold">criminally good AI</span> that makes you feel like a genius.
+                <br />
+                <span className="text-sm text-[#a78bfa]">(Side effects: Uncontrollable urge to create more content)</span>
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
