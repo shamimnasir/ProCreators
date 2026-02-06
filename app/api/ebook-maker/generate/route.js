@@ -14,6 +14,7 @@ import {
   getCurrentYear
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Use Google Generative AI with the proper Google API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
