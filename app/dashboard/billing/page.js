@@ -132,8 +132,11 @@ export default function BillingPage() {
   const fetchPackagesWithDiscount = async (uid) => {
     const currentUserId = uid || userId
     try {
+      const sessionToken = localStorage.getItem('sessionToken')
       // Pass userId to get subscriber-specific discounts
-      const res = await fetch(`/api/stripe/checkout?userId=${currentUserId}`)
+      const res = await fetch(`/api/stripe/checkout?userId=${currentUserId}`, {
+        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      })
       const data = await res.json()
       if (data.success) {
         setPackages(data.packages)
@@ -146,9 +149,13 @@ export default function BillingPage() {
   const fetchTransactions = async (uid) => {
     const currentUserId = uid || userId
     try {
+      const sessionToken = localStorage.getItem('sessionToken')
       const res = await fetch('/api/credits', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
+        },
         body: JSON.stringify({ action: 'history', userId: currentUserId })
       })
       const data = await res.json()
