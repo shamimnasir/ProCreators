@@ -197,13 +197,18 @@ if (rateLimitCheck.limited) {
 - `/lib/csrf.js` - CSRF protection
 - `/lib/validation.js` - Zod validation schemas
 - `/lib/security-logger.js` - Security monitoring
+- `/lib/rate-limiter.js` - Rate limiting 🆕
 
 ### New API Routes
 - `/api/csrf` - CSRF token endpoint
 - `/api/admin/security-logs` - Security logs (admin only)
 
-### Updated Files
-- `/app/api/auth/route.js` - bcrypt + security logging
+### Updated Files (Security Hardened)
+- `/app/api/auth/route.js` - bcrypt + security logging + rate limiting 🆕
+- `/app/api/user/profile/route.js` - Zod + auth + rate limiting 🆕
+- `/app/api/stripe/checkout/route.js` - Zod + auth + rate limiting 🆕
+- `/app/api/subscription/checkout/route.js` - Zod + rate limiting 🆕
+- `/app/api/library/save/route.js` - Zod + rate limiting 🆕
 - `/lib/get-user-id.js` - Removed demo fallback
 - `/contexts/AuthContext.jsx` - Secure userId
 - `/next.config.js` - Security headers
