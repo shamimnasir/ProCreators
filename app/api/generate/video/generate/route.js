@@ -271,7 +271,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
       prompt: visualPrompt,
     }
     if (inputImage) {
-      `)
       input.image = inputImage
     }
   }
