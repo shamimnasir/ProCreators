@@ -2,6 +2,41 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Pitch Deck input schema
+const pitchDeckSchema = z.object({
+  companyName: z.string().min(1, 'Company name is required').max(200),
+  tagline: z.string().max(500).optional(),
+  companyDescription: z.string().max(2000).optional(),
+  industry: z.string().max(100).optional(),
+  problemStatement: z.string().max(2000).optional(),
+  solution: z.string().max(2000).optional(),
+  keyFeatures: z.string().max(1000).optional(),
+  uniqueValue: z.string().max(1000).optional(),
+  targetMarket: z.string().max(1000).optional(),
+  marketSize: z.string().max(500).optional(),
+  competitors: z.string().max(1000).optional(),
+  competitiveAdvantage: z.string().max(1000).optional(),
+  revenueModel: z.string().max(1000).optional(),
+  pricing: z.string().max(500).optional(),
+  unitEconomics: z.string().max(500).optional(),
+  currentTraction: z.string().max(1000).optional(),
+  milestones: z.string().max(1000).optional(),
+  customerTestimonials: z.string().max(1000).optional(),
+  founders: z.string().max(1000).optional(),
+  keyTeam: z.string().max(1000).optional(),
+  advisors: z.string().max(500).optional(),
+  fundingStage: z.string().max(50).optional(),
+  fundingAmount: z.string().max(100).optional(),
+  useOfFunds: z.string().max(1000).optional(),
+  financialProjections: z.string().max(1000).optional(),
+  deckStyle: z.enum(['classic', 'storytelling', 'datadriven', 'vision']).default('classic'),
+  presenterName: z.string().max(100).optional(),
+  presenterTitle: z.string().max(100).optional(),
+  contactEmail: z.string().email().max(200).optional().or(z.literal(''))
+})
 
 // Industries
 const INDUSTRIES = {
