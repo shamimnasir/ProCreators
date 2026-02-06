@@ -116,6 +116,133 @@ export default function UnifiedPageManager() {
     }
   }
 
+  // Fetch menus
+  const fetchMenus = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/menus')
+      const data = await res.json()
+      if (data.success) {
+        setMenus(data.menus)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Create new custom page
+  const createNewPage = async () => {
+    if (!newPage.title.trim()) {
+      toast({ title: 'Error', description: 'Page title is required', variant: 'destructive' })
+      return
+    }
+    
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/unified-pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-new',
+          title: newPage.title,
+          type: newPage.type,
+          category: newPage.category
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: 'Page Created!', description: `${newPage.title} has been created` })
+        setShowCreateModal(false)
+        setNewPage({ title: '', type: 'content', category: 'Custom' })
+        fetchPages()
+        // Open the page for editing
+        setSelectedPage(data.page)
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Save menu
+  const saveMenu = async () => {
+    if (!selectedMenu) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/menus', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectedMenu)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: 'Saved!', description: 'Menu updated successfully' })
+        setSelectedMenu(data.menu)
+        fetchMenus()
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Add menu item
+  const addMenuItem = () => {
+    const newItem = {
+      id: `item-${Date.now()}`,
+      label: 'New Link',
+      link: '/',
+      type: 'page',
+      order: (selectedMenu.items?.length || 0) + 1
+    }
+    setSelectedMenu(prev => ({
+      ...prev,
+      items: [...(prev.items || []), newItem]
+    }))
+  }
+
+  // Update menu item
+  const updateMenuItem = (itemId, field, value) => {
+    setSelectedMenu(prev => ({
+      ...prev,
+      items: prev.items.map(item => 
+        item.id === itemId ? { ...item, [field]: value } : item
+      )
+    }))
+  }
+
+  // Delete menu item
+  const deleteMenuItem = (itemId) => {
+    setSelectedMenu(prev => ({
+      ...prev,
+      items: prev.items.filter(item => item.id !== itemId)
+    }))
+  }
+
+  // Move menu item
+  const moveMenuItem = (itemId, direction) => {
+    const items = [...(selectedMenu.items || [])]
+    const index = items.findIndex(i => i.id === itemId)
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === items.length - 1)) return
+    
+    const newIndex = direction === 'up' ? index - 1 : index + 1
+    const [item] = items.splice(index, 1)
+    items.splice(newIndex, 0, item)
+    
+    // Update order numbers
+    items.forEach((item, i) => item.order = i + 1)
+    
+    setSelectedMenu(prev => ({ ...prev, items }))
+  }
+
   // Initialize all tool pages
   const initializeAllToolPages = async () => {
     setInitializing(true)
