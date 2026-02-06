@@ -1236,6 +1236,12 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
+    // SECURITY: Rate limiting for AI video studio
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+    
     // Parse request
     const formData = await request.formData()
     const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
