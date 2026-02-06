@@ -974,13 +974,13 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#7c3aed]/20 via-[#a78bfa]/20 to-[#7c3aed]/20"></div>
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-4xl rounded-3xl border border-[#7c3aed]/50 bg-gradient-to-b from-[#7c3aed]/20 to-transparent p-12 md:p-16 text-center backdrop-blur-sm shadow-2xl shadow-[#7c3aed]/30">
-            <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
               <AlertTriangle className="h-4 w-4" />
               Last Warning Before Addiction
             </div>
             <h2 className="mb-6 text-4xl md:text-5xl font-bold text-foreground">
               You've Been Warned. <br/>
-              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Now Get Addicted.</span>
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Now Get Addicted.</span>
             </h2>
             <p className="mb-10 text-xl text-muted-foreground">
               70+ AI tools. One platform. Unlimited creative dopamine.
@@ -991,7 +991,7 @@ export default function Home() {
               <Button 
                 size="lg" 
                 onClick={() => router.push('/register')}
-                className="text-lg px-12 py-7 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
+                className="text-lg px-12 py-7 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-0 text-black font-bold uppercase tracking-wider transition-all duration-300 hover:scale-105"
               >
                 Get Your First Hit FREE
                 <ArrowRight className="ml-3 h-5 w-5" />
