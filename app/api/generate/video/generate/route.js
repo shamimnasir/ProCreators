@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server'
 import Replicate from 'replicate'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
 
 export const maxDuration = 300 // 5 minutes timeout for video generation
+
+// Video generation input schema
+const videoGenerationSchema = z.object({
+  script: z.string().min(1, 'Script is required').max(5000, 'Script too long'),
+  mode: z.enum(['budget', 'fast', 'pro']).default('budget'),
+  duration: z.number().int().min(5).max(300).optional(),
+  language: z.string().max(50).optional(),
+  platform: z.enum(['instagram', 'tiktok', 'youtube', 'facebook']).default('instagram'),
+  image: z.string().url().max(5000).optional().or(z.string().max(100000).optional()) // URL or base64
+})
 
 // Smart model selection based on mode
 const VIDEO_MODELS = {
@@ -31,14 +43,19 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
-    const { script, mode, duration, language, platform, image } = await request.json()
-
-    if (!script) {
-      return NextResponse.json(
-        { success: false, error: 'Script is required' },
-        { status: 400 }
-      )
+    const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(videoGenerationSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
     }
+    
+    const { script, mode, duration, language, platform, image } = validation.data
 
     // Platform-specific configurations
     const platformConfig = {
