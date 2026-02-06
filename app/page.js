@@ -834,19 +834,19 @@ export default function Home() {
       <section className="py-20 md:py-32">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-pink-500/20 border border-pink-500/30 px-4 py-2 text-sm font-medium text-pink-400 mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
               <Heart className="h-4 w-4" />
               Real Results, Real People
             </div>
             <h2 className="mb-4 text-4xl md:text-6xl font-bold">
               <span className="text-foreground">Don't Take </span>
-              <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">OUR</span>
+              <span className="text-[#a78bfa]">OUR</span>
               <span className="text-foreground"> Word For It</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These creators were <span className="text-red-400 line-through">skeptical</span> <span className="text-green-400 font-bold">addicted</span> too.
+              These creators were <span className="text-muted-foreground line-through">skeptical</span> <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold">addicted</span> too.
               <br />
-              <span className="text-sm text-yellow-400">Warning: Reading testimonials may cause FOMO</span>
+              <span className="text-sm text-orange-400">Warning: Reading testimonials may cause FOMO</span>
             </p>
           </div>
 
@@ -863,7 +863,7 @@ export default function Home() {
                 <div className="mb-6">
                   <div className="flex gap-1 mb-4">
                     {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="h-5 w-5 fill-[#7c3aed] text-[#7c3aed]" />
+                      <Star key={j} className="h-5 w-5 fill-orange-400 text-orange-400" />
                     ))}
                   </div>
                   <p className="text-muted-foreground italic">"{testimonial.quote}"</p>
@@ -883,20 +883,20 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 md:py-32 bg-gradient-to-b from-[#1a1147] to-[#0a0e27]">
+      <section id="pricing" className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/30">
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
                 <CircleDollarSign className="h-4 w-4" />
                 Ridiculously Affordable
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Pick Your </span>
-                <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">Addiction Level</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Addiction Level</span>
               </h2>
               <p className="mb-8 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Start free. Upgrade when you're <span className="text-yellow-400 font-semibold">hooked</span>. (Spoiler: You will be)
+                Start free. Upgrade when you're <span className="text-orange-400 font-semibold">hooked</span>. (Spoiler: You will be)
               </p>
               <div className="inline-flex rounded-lg border border-white/20 p-1 bg-white/5">
                 <Button
