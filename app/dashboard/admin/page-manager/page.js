@@ -952,6 +952,164 @@ export default function UnifiedPageManager() {
             )}
           </div>
         </TabsContent>
+
+        {/* Menus Tab */}
+        <TabsContent value="menus" className="space-y-4 mt-6">
+          {selectedMenu ? (
+            // Menu Editor
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedMenu(null)}>
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedMenu.name}</h2>
+                    <p className="text-muted-foreground text-sm">Location: {selectedMenu.location}</p>
+                  </div>
+                </div>
+                <Button onClick={saveMenu} disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                  Save Menu
+                </Button>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Menu Items</CardTitle>
+                      <CardDescription>Drag to reorder, edit labels and links</CardDescription>
+                    </div>
+                    <Button onClick={addMenuItem}>
+                      <Plus className="h-4 w-4 mr-2" /> Add Link
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {selectedMenu.items?.map((item, index) => (
+                    <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                      <div className="flex flex-col gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveMenuItem(item.id, 'up')}>
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => moveMenuItem(item.id, 'down')}>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex-1 grid md:grid-cols-3 gap-3">
+                        <Input 
+                          value={item.label} 
+                          onChange={(e) => updateMenuItem(item.id, 'label', e.target.value)}
+                          placeholder="Link Label"
+                        />
+                        <Input 
+                          value={item.link} 
+                          onChange={(e) => updateMenuItem(item.id, 'link', e.target.value)}
+                          placeholder="/path or https://..."
+                        />
+                        <select 
+                          className="border rounded px-3 py-2"
+                          value={item.type}
+                          onChange={(e) => updateMenuItem(item.id, 'type', e.target.value)}
+                        >
+                          <option value="page">Internal Page</option>
+                          <option value="anchor">Anchor Link</option>
+                          <option value="external">External Link</option>
+                        </select>
+                      </div>
+                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteMenuItem(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {(!selectedMenu.items || selectedMenu.items.length === 0) && (
+                    <p className="text-center text-muted-foreground py-4">No menu items. Click "Add Link" to add one.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Available Pages Reference */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Available Pages</CardTitle>
+                  <CardDescription>Click to copy the path</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {pages.slice(0, 15).map(page => (
+                      <Badge 
+                        key={page.pageId} 
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-primary/10"
+                        onClick={() => {
+                          navigator.clipboard.writeText(page.path)
+                          toast({ title: 'Copied!', description: page.path })
+                        }}
+                      >
+                        {page.title}: {page.path}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            // Menu List
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {loading ? (
+                  <Card className="col-span-full">
+                    <CardContent className="py-12 text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ) : menus.map(menu => (
+                  <Card key={menu.menuId} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-100">
+                            <Menu className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{menu.name}</CardTitle>
+                            <CardDescription className="text-xs">{menu.location}</CardDescription>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="outline">{menu.items?.length || 0} links</Badge>
+                        {menu.isDefault && <Badge variant="secondary">Default</Badge>}
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => setSelectedMenu(menu)}>
+                        <Edit className="h-4 w-4 mr-2" /> Edit Menu
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Info Card */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-3">
+                    <Link2 className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-blue-900">How Menu Management Works</h3>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Edit the Header and Footer menus to add or remove links. Your changes will automatically appear on the website.
+                        You can link to any page you create, including custom pages.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   )
