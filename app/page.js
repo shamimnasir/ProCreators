@@ -715,12 +715,12 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="rounded-2xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-8 text-center"
               >
-                <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex items-center justify-center">
-                  <Heart className="h-8 w-8 text-green-400" />
+                <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 border border-[#7c3aed]/30 flex items-center justify-center">
+                  <Heart className="h-8 w-8 text-[#a78bfa]" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Creator-First Design</h3>
                 <p className="text-muted-foreground">
-                  Every feature is built for <span className="text-green-400 font-semibold">real creators like you</span> - not tech experts. If it doesn't save you time, we don't ship it.
+                  Every feature is built for <span className="text-orange-400 font-semibold">real creators like you</span> - not tech experts. If it doesn't save you time, we don't ship it.
                 </p>
               </motion.div>
 
@@ -731,12 +731,12 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="rounded-2xl border border-border bg-gradient-to-b from-muted/30 to-transparent p-8 text-center"
               >
-                <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 flex items-center justify-center">
-                  <Zap className="h-8 w-8 text-blue-400" />
+                <div className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#7c3aed]/20 to-[#a78bfa]/20 border border-[#7c3aed]/30 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-[#a78bfa]" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Stupidly Simple</h3>
                 <p className="text-muted-foreground">
-                  <span className="text-blue-400 font-semibold">Click. Create. Publish.</span> That's it. No tutorials needed. No learning curve. Just results in minutes.
+                  <span className="text-orange-400 font-semibold">Click. Create. Publish.</span> That's it. No tutorials needed. No learning curve. Just results in minutes.
                 </p>
               </motion.div>
 
@@ -769,7 +769,7 @@ export default function Home() {
                 Most creators struggle with expensive tools and steep learning curves. <br/>
                 <span className="text-foreground font-medium">We changed that.</span> Now you can create like a pro team - without being one.
               </p>
-              <div className="inline-flex items-center gap-2 text-sm text-yellow-400">
+              <div className="inline-flex items-center gap-2 text-sm text-orange-400">
                 <Award className="h-4 w-4" />
                 That's the ProCreators difference.
                 <Award className="h-4 w-4" />
@@ -780,24 +780,24 @@ export default function Home() {
       </section>
 
       {/* Use Cases / Solutions Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] to-[#1a1147]">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/30">
         <div className="container px-6">
           <div className="mb-16 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm font-medium text-green-400 mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
               <Target className="h-4 w-4" />
               Built for Money Makers
             </div>
             <h2 className="mb-4 text-4xl md:text-6xl font-bold">
               <span className="text-foreground">Whether You're a </span>
-              <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">Beginner</span>
+              <span className="text-[#a78bfa]">Beginner</span>
               <br />
               <span className="text-foreground">or a </span>
-              <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">7-Figure Creator</span>
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">7-Figure Creator</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               We've got your back. <span className="text-white font-semibold">Zero learning curve.</span> Just results.
               <br />
-              <span className="text-sm text-green-400">Your success story starts here.</span>
+              <span className="text-sm text-orange-400">Your success story starts here.</span>
             </p>
           </div>
           
