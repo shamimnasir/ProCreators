@@ -84,6 +84,18 @@ export async function POST(request) {
     }
     
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(blogCreatorSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
+    // Use validated and sanitized data
     const {
       articleType,
       topic,
@@ -106,14 +118,9 @@ export async function POST(request) {
       internalLinks,
       keyPoints,
       competitorUrls,
-      // Humanization settings
       humanizationLevel,
       enabledTechniques
-    } = body
-
-    if (!topic) {
-      return NextResponse.json({ success: false, error: 'Topic is required' }, { status: 400 })
-    }
+    } = validation.data
 
     const isAffiliateType = ['affiliate-best', 'product-review', 'comparison', 'buyers-guide'].includes(articleType)
 
