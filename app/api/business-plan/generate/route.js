@@ -142,9 +142,20 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(businessPlanSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const {
       // Plan Type
-      planType = 'traditional',
+      planType,
       
       // Company Basics
       companyName,
@@ -195,14 +206,7 @@ export async function POST(request) {
       shortTermGoals,
       longTermGoals,
       milestones
-    } = body
-
-    if (!companyName) {
-      return NextResponse.json(
-        { success: false, error: 'Company name is required' },
-        { status: 400 }
-      )
-    }
+    } = validation.data
 
     // Language detection
     const allText = `${companyName} ${companyDescription || ''} ${targetMarket || ''} ${productsServices || ''}`
