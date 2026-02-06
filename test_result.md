@@ -1090,23 +1090,10 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Digital Products - Planner Maker API"
-    - "Digital Products - Worksheet Maker API"
-    - "Digital Products - Coloring Book API"
-    - "Digital Products - Journal Maker API"
-    - "Digital Products - Checklist Maker API"
-    - "Digital Products - Ebook Maker API"
-    - "Digital Products - Recipe Book API"
-    - "Digital Products - Guide Maker API"
-    - "Digital Products - Notion Templates API"
-    - "Digital Products - Slides Maker API"
-    - "Digital Products - Learning Cards API"
-    - "Digital Products - Quiz Maker API"
-    - "Digital Products - Storybook Maker API"
-    - "Digital Products - Activity Book API"
+    - "Refactored Homepage Components Rendering"
   stuck_tasks: []
-  test_all: true
-  test_priority: "sequential"
+  test_all: false
+  test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
