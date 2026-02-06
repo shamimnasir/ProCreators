@@ -335,7 +335,7 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   // If output has url() method (Replicate FileOutput)
   if (output && typeof output.url === 'function') {
     const videoUrl = output.url()
-    method:`, videoUrl)
+    console.log('FileOutput url() method:', videoUrl)
     // URL might be a URL object, convert to string
     return typeof videoUrl === 'string' ? videoUrl : videoUrl.href
   }
