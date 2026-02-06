@@ -4,6 +4,35 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Blog generation input schema
+const blogCreatorSchema = z.object({
+  articleType: z.enum(['seo-article', 'affiliate-best', 'product-review', 'comparison', 'how-to-guide', 'listicle', 'ultimate-guide', 'buyers-guide']).default('seo-article'),
+  topic: z.string().min(1, 'Topic is required').max(500, 'Topic too long'),
+  targetKeyword: z.string().max(200).optional(),
+  secondaryKeywords: z.string().max(500).optional(),
+  industry: z.string().max(100).optional(),
+  targetAudience: z.string().max(200).optional(),
+  writingStyle: z.enum(['formal', 'conversational', 'technical', 'casual', 'professional']).default('professional'),
+  wordCount: z.number().int().min(100).max(10000).default(1500),
+  tone: z.enum(['authoritative', 'friendly', 'persuasive', 'informative', 'enthusiastic']).default('informative'),
+  products: z.string().max(2000).optional(),
+  affiliateNetwork: z.string().max(100).optional(),
+  priceRange: z.string().max(100).optional(),
+  includeProsCons: z.boolean().default(true),
+  includeRatings: z.boolean().default(true),
+  includePricing: z.boolean().default(true),
+  includeFAQ: z.boolean().default(true),
+  includeTOC: z.boolean().default(true),
+  includeMetaTags: z.boolean().default(true),
+  internalLinks: z.string().max(2000).optional(),
+  keyPoints: z.string().max(2000).optional(),
+  competitorUrls: z.string().max(2000).optional(),
+  humanizationLevel: z.enum(['none', 'light', 'medium', 'heavy']).optional(),
+  enabledTechniques: z.array(z.string()).max(10).optional()
+})
 
 async function runLLM(prompt, systemPrompt) {
   return new Promise(async (resolve, reject) => {
