@@ -263,6 +263,9 @@ backend:
         - working: true
           agent: "main"
           comment: "✅ WORKING! Text generation API functional and tested. Used by Threads, Quotes, News, Lists, and Tutorial generators."
+        - working: true
+          agent: "testing"
+          comment: "✅ ZOD VALIDATION WORKING: All validation tests passed. Missing prompt correctly rejected with 400 status and 'Validation failed' error. Prompt too long (>10000 chars) correctly rejected. Zod schema validates: prompt (required, max 10000), type, systemMessage (max 5000), userId, transactionId, creditsCharged. API returns proper JSON with success/content/sessionId structure."
   
   - task: "Carousel Generation API"
     implemented: true
