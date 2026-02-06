@@ -569,7 +569,7 @@ export default function Home() {
               <Button 
                 size="lg"
                 onClick={() => router.push('/dashboard')}
-                className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] hover:from-[#6d28d9] hover:to-[#7c3aed] text-foreground font-bold"
+                className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold"
               >
                 Access All 70+ Tools FREE
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -581,24 +581,21 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 md:py-32 bg-gradient-to-b from-[#0a0e27] to-[#1a1147]">
+      <section id="features" className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/30">
         <div className="container px-6 relative z-10">
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/20 border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-400 mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa] mb-6">
                 <Brain className="h-4 w-4" />
-                The Dopamine Factory
+                Why Creators Love Us
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
-                <span className="text-foreground">Why </span>
-                <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">50,000+ Creators</span>
-                <br />
-                <span className="text-foreground">Can't Stop Using This</span>
+                <span className="text-foreground">Trusted by </span>
+                <span className="text-emerald-400">50,000+</span>
+                <span className="text-foreground"> Creators</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                It's not magic. It's just <span className="text-[#7c3aed] font-bold">criminally good AI</span> that makes you feel like a genius.
-                <br />
-                <span className="text-sm text-yellow-400">(Side effects: Uncontrollable urge to create more content)</span>
+                Everything you need to create, grow, and monetize your content - all in one platform.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
