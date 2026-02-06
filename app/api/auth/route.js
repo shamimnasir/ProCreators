@@ -50,6 +50,18 @@ export async function POST(request) {
   try {
     const body = await request.json()
     const { action } = body
+    
+    // SECURITY: Apply rate limiting based on action type
+    let rateLimitAction = 'api_general'
+    if (action === 'login') rateLimitAction = 'auth_login'
+    else if (action === 'signup') rateLimitAction = 'auth_signup'
+    else if (action === 'forgot_password' || action === 'reset_password') rateLimitAction = 'auth_password_reset'
+    
+    const rateLimitCheck = await enforceRateLimit(request, rateLimitAction)
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+    
     const { db } = await connectToDatabase()
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
     
