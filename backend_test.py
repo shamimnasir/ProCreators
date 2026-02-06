@@ -1,386 +1,421 @@
 #!/usr/bin/env python3
 """
-Backend Security Testing for ProCreators.io
-Tests rate limiting, Zod validation, authentication, and security headers
+Backend API Testing Script for Zod Validation
+Tests all content generation APIs with valid and invalid payloads
 """
 
 import requests
 import json
-import time
 import sys
 from typing import Dict, Any, List
 
 # Base URL from environment
 BASE_URL = "https://ratelimit-clean.preview.emergentagent.com"
 
-class SecurityTester:
+class APITester:
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.session = requests.Session()
         self.session.headers.update({
             'Content-Type': 'application/json',
-            'User-Agent': 'ProCreators-Security-Test/1.0'
+            'User-Agent': 'Backend-Test-Script/1.0'
         })
+        self.results = []
+    
+    def test_api(self, endpoint: str, test_name: str, payload: Dict[str, Any], expected_status: int = 200) -> Dict[str, Any]:
+        """Test an API endpoint with given payload"""
+        url = f"{self.base_url}{endpoint}"
         
-    def test_rate_limiting_auth_login(self):
-        """Test rate limiting on /api/auth (POST) - Should block after 5 attempts"""
-        print("\n🔒 Testing Rate Limiting on /api/auth (login)")
-        print("=" * 60)
-        
-        url = f"{self.base_url}/api/auth"
-        test_payload = {
-            "action": "login",
-            "email": "test@test.com",
-            "password": "wrongpassword123"
-        }
-        
-        results = []
-        
-        # Make 6 requests in quick succession
-        for i in range(1, 7):
+        try:
+            print(f"\n🧪 Testing: {test_name}")
+            print(f"📍 Endpoint: {endpoint}")
+            print(f"📦 Payload: {json.dumps(payload, indent=2)}")
+            
+            response = self.session.post(url, json=payload, timeout=30)
+            
+            print(f"📊 Status: {response.status_code}")
+            
             try:
-                response = self.session.post(url, json=test_payload, timeout=10)
-                
-                # Check rate limit headers
-                rate_limit_headers = {
-                    'X-RateLimit-Limit': response.headers.get('X-RateLimit-Limit'),
-                    'X-RateLimit-Remaining': response.headers.get('X-RateLimit-Remaining'),
-                    'X-RateLimit-Reset': response.headers.get('X-RateLimit-Reset'),
-                    'Retry-After': response.headers.get('Retry-After')
-                }
-                
-                result = {
-                    'attempt': i,
-                    'status_code': response.status_code,
-                    'headers': rate_limit_headers,
-                    'response_time': response.elapsed.total_seconds()
-                }
-                
-                if response.status_code == 429:
-                    result['blocked'] = True
-                    result['retry_after'] = response.headers.get('Retry-After')
-                    print(f"   Attempt {i}: ❌ BLOCKED (429) - Retry-After: {result['retry_after']}s")
-                else:
-                    result['blocked'] = False
-                    remaining = rate_limit_headers.get('X-RateLimit-Remaining', 'N/A')
-                    print(f"   Attempt {i}: ✅ ALLOWED ({response.status_code}) - Remaining: {remaining}")
-                
-                results.append(result)
-                
-                # Small delay between requests
-                time.sleep(0.1)
-                
-            except Exception as e:
-                print(f"   Attempt {i}: ❌ ERROR - {str(e)}")
-                results.append({'attempt': i, 'error': str(e)})
-        
-        # Analyze results
-        blocked_attempts = [r for r in results if r.get('blocked', False)]
-        allowed_attempts = [r for r in results if not r.get('blocked', True) and not r.get('error')]
-        
-        print(f"\n📊 Rate Limiting Results:")
-        print(f"   • Allowed attempts: {len(allowed_attempts)}")
-        print(f"   • Blocked attempts: {len(blocked_attempts)}")
-        print(f"   • Expected: First 5 allowed, 6th blocked")
-        
-        # Check if rate limiting works as expected
-        if len(allowed_attempts) <= 5 and len(blocked_attempts) >= 1:
-            print("   ✅ PASS: Rate limiting working correctly")
-            return True
-        else:
-            print("   ❌ FAIL: Rate limiting not working as expected")
-            return False
-    
-    def test_zod_validation_stripe_checkout(self):
-        """Test Zod validation on /api/stripe/checkout (POST)"""
-        print("\n🔒 Testing Zod Validation on /api/stripe/checkout")
-        print("=" * 60)
-        
-        url = f"{self.base_url}/api/stripe/checkout"
-        
-        # Test 1: Invalid packageId
-        print("   Test 1: Invalid packageId")
-        invalid_payload = {
-            "packageId": "invalid",
-            "userId": "test-user-123",
-            "originUrl": "https://test.com"
-        }
-        
-        try:
-            response = self.session.post(url, json=invalid_payload, timeout=10)
-            print(f"   Status: {response.status_code}")
+                response_data = response.json()
+                print(f"📄 Response: {json.dumps(response_data, indent=2)[:500]}...")
+            except:
+                response_data = {"raw_response": response.text[:500]}
+                print(f"📄 Raw Response: {response.text[:500]}...")
             
-            if response.status_code == 400:
-                data = response.json()
-                if 'errors' in data or 'validation' in data.get('error', '').lower():
-                    print("   ✅ PASS: Invalid packageId correctly rejected with validation error")
-                    test1_pass = True
-                else:
-                    print("   ❌ FAIL: Invalid packageId rejected but no validation error message")
-                    test1_pass = False
+            # Determine if test passed
+            status_match = response.status_code == expected_status
+            
+            if expected_status == 400:
+                # For validation errors, check for expected error structure
+                validation_error = (
+                    response_data.get('success') == False and
+                    response_data.get('error') == 'Validation failed' and
+                    'errors' in response_data
+                )
+                test_passed = status_match and validation_error
             else:
-                print("   ❌ FAIL: Invalid packageId not rejected (expected 400)")
-                test1_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test1_pass = False
-        
-        # Test 2: Missing required fields
-        print("\n   Test 2: Missing required fields")
-        missing_fields_payload = {
-            "packageId": "starter"
-            # Missing userId and originUrl
-        }
-        
-        try:
-            response = self.session.post(url, json=missing_fields_payload, timeout=10)
-            print(f"   Status: {response.status_code}")
+                # For success cases, check for success field
+                test_passed = status_match and response_data.get('success', False)
             
-            if response.status_code == 400:
-                data = response.json()
-                if 'errors' in data or 'validation' in data.get('error', '').lower():
-                    print("   ✅ PASS: Missing fields correctly rejected with validation error")
-                    test2_pass = True
-                else:
-                    print("   ❌ FAIL: Missing fields rejected but no validation error message")
-                    test2_pass = False
-            else:
-                print("   ❌ FAIL: Missing fields not rejected (expected 400)")
-                test2_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test2_pass = False
-        
-        return test1_pass and test2_pass
-    
-    def test_authentication_user_profile(self):
-        """Test authentication on /api/user/profile (POST)"""
-        print("\n🔒 Testing Authentication on /api/user/profile")
-        print("=" * 60)
-        
-        url = f"{self.base_url}/api/user/profile"
-        
-        # Test 1: POST without auth header
-        print("   Test 1: POST without auth header")
-        test_payload = {
-            "name": "Test User",
-            "avatarUrl": "https://example.com/avatar.jpg"
-        }
-        
-        try:
-            # Remove any existing auth headers
-            headers = self.session.headers.copy()
-            if 'Authorization' in headers:
-                del headers['Authorization']
-            
-            response = requests.post(url, json=test_payload, headers=headers, timeout=10)
-            print(f"   Status: {response.status_code}")
-            
-            if response.status_code == 401:
-                data = response.json()
-                if data.get('code') == 'AUTH_REQUIRED':
-                    print("   ✅ PASS: Unauthenticated POST correctly rejected with AUTH_REQUIRED")
-                    test1_pass = True
-                else:
-                    print("   ❌ FAIL: Unauthenticated POST rejected but wrong error code")
-                    test1_pass = False
-            else:
-                print("   ❌ FAIL: Unauthenticated POST not rejected (expected 401)")
-                test1_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test1_pass = False
-        
-        # Test 2: GET with userId param (should work)
-        print("\n   Test 2: GET with userId param")
-        try:
-            get_url = f"{url}?userId=test-user-123"
-            response = requests.get(get_url, timeout=10)
-            print(f"   Status: {response.status_code}")
-            
-            if response.status_code in [200, 404]:  # 200 if user exists, 404 if not
-                print("   ✅ PASS: GET with userId param works (returns 200 or 404)")
-                test2_pass = True
-            else:
-                print(f"   ❌ FAIL: GET with userId param failed (expected 200/404, got {response.status_code})")
-                test2_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test2_pass = False
-        
-        return test1_pass and test2_pass
-    
-    def test_zod_validation_library_save(self):
-        """Test Zod validation on /api/library/save (POST)"""
-        print("\n🔒 Testing Zod Validation on /api/library/save")
-        print("=" * 60)
-        
-        url = f"{self.base_url}/api/library/save"
-        
-        # Test 1: Missing required field (title)
-        print("   Test 1: Missing required field (title)")
-        missing_title_payload = {
-            "content": "test content",
-            "type": "text"
-            # Missing title
-        }
-        
-        try:
-            response = self.session.post(url, json=missing_title_payload, timeout=10)
-            print(f"   Status: {response.status_code}")
-            
-            if response.status_code == 400:
-                data = response.json()
-                if 'errors' in data or 'validation' in data.get('error', '').lower():
-                    print("   ✅ PASS: Missing title correctly rejected with validation error")
-                    test1_pass = True
-                else:
-                    print("   ❌ FAIL: Missing title rejected but no validation error message")
-                    test1_pass = False
-            else:
-                print("   ❌ FAIL: Missing title not rejected (expected 400)")
-                test1_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test1_pass = False
-        
-        # Test 2: Valid payload (should succeed or have rate limit headers)
-        print("\n   Test 2: Valid payload")
-        valid_payload = {
-            "content": "test content",
-            "type": "text",
-            "title": "Test Content"
-        }
-        
-        try:
-            response = self.session.post(url, json=valid_payload, timeout=10)
-            print(f"   Status: {response.status_code}")
-            
-            # Check for rate limit headers
-            rate_limit_headers = {
-                'X-RateLimit-Limit': response.headers.get('X-RateLimit-Limit'),
-                'X-RateLimit-Remaining': response.headers.get('X-RateLimit-Remaining'),
-                'X-RateLimit-Reset': response.headers.get('X-RateLimit-Reset')
+            result = {
+                'test_name': test_name,
+                'endpoint': endpoint,
+                'status_code': response.status_code,
+                'expected_status': expected_status,
+                'response_data': response_data,
+                'test_passed': test_passed
             }
             
-            has_rate_limit_headers = any(rate_limit_headers.values())
-            
-            if response.status_code in [200, 201] or has_rate_limit_headers:
-                print("   ✅ PASS: Valid payload accepted or rate limit headers present")
-                test2_pass = True
+            if test_passed:
+                print("✅ PASS")
             else:
-                print(f"   ❌ FAIL: Valid payload failed unexpectedly ({response.status_code})")
-                test2_pass = False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            test2_pass = False
-        
-        return test1_pass and test2_pass
-    
-    def test_rate_limit_headers(self):
-        """Test that rate limit headers are present on secured endpoints"""
-        print("\n🔒 Testing Rate Limit Headers")
-        print("=" * 60)
-        
-        # Test on a simple endpoint that should have rate limiting
-        url = f"{self.base_url}/api/library/save"
-        test_payload = {
-            "content": "header test",
-            "type": "text",
-            "title": "Header Test"
-        }
-        
-        try:
-            response = self.session.post(url, json=test_payload, timeout=10)
-            
-            # Check for rate limit headers
-            headers_to_check = [
-                'X-RateLimit-Limit',
-                'X-RateLimit-Remaining', 
-                'X-RateLimit-Reset'
-            ]
-            
-            found_headers = {}
-            for header in headers_to_check:
-                value = response.headers.get(header)
-                found_headers[header] = value
-                if value:
-                    print(f"   ✅ {header}: {value}")
+                print("❌ FAIL")
+                if expected_status == 400:
+                    print(f"   Expected validation error structure, got: {response_data}")
                 else:
-                    print(f"   ❌ {header}: Not found")
+                    print(f"   Expected status {expected_status}, got {response.status_code}")
             
-            # Check if at least some rate limit headers are present
-            headers_present = sum(1 for v in found_headers.values() if v is not None)
+            self.results.append(result)
+            return result
             
-            if headers_present >= 2:  # At least 2 out of 3 headers
-                print("   ✅ PASS: Rate limit headers present")
-                return True
-            else:
-                print("   ❌ FAIL: Rate limit headers missing or incomplete")
-                return False
-                
-        except Exception as e:
-            print(f"   ❌ ERROR: {str(e)}")
-            return False
+        except requests.exceptions.RequestException as e:
+            print(f"❌ NETWORK ERROR: {str(e)}")
+            result = {
+                'test_name': test_name,
+                'endpoint': endpoint,
+                'error': str(e),
+                'test_passed': False
+            }
+            self.results.append(result)
+            return result
+    
+    def run_image_generation_tests(self):
+        """Test /api/generate/image endpoint"""
+        print("\n" + "="*60)
+        print("🖼️  TESTING IMAGE GENERATION API")
+        print("="*60)
+        
+        # Valid test
+        self.test_api(
+            "/api/generate/image",
+            "Image Gen - Valid Request",
+            {"prompt": "A beautiful sunset over mountains"},
+            200
+        )
+        
+        # Missing prompt
+        self.test_api(
+            "/api/generate/image",
+            "Image Gen - Missing Prompt",
+            {},
+            400
+        )
+        
+        # Prompt too long (>2000 chars)
+        long_prompt = "A" * 2001
+        self.test_api(
+            "/api/generate/image",
+            "Image Gen - Prompt Too Long",
+            {"prompt": long_prompt},
+            400
+        )
+        
+        # Valid with optional fields
+        self.test_api(
+            "/api/generate/image",
+            "Image Gen - With Optional Fields",
+            {
+                "prompt": "sunset",
+                "style": "realistic",
+                "aspectRatio": "16:9"
+            },
+            200
+        )
+        
+        # Invalid aspect ratio
+        self.test_api(
+            "/api/generate/image",
+            "Image Gen - Invalid Aspect Ratio",
+            {
+                "prompt": "test",
+                "aspectRatio": "invalid"
+            },
+            400
+        )
+    
+    def run_text_generation_tests(self):
+        """Test /api/generate/text endpoint"""
+        print("\n" + "="*60)
+        print("📝 TESTING TEXT GENERATION API")
+        print("="*60)
+        
+        # Valid test
+        self.test_api(
+            "/api/generate/text",
+            "Text Gen - Valid Request",
+            {"prompt": "Write a short poem about nature"},
+            200
+        )
+        
+        # Missing prompt
+        self.test_api(
+            "/api/generate/text",
+            "Text Gen - Missing Prompt",
+            {},
+            400
+        )
+        
+        # Prompt too long (>10000 chars)
+        long_prompt = "A" * 10001
+        self.test_api(
+            "/api/generate/text",
+            "Text Gen - Prompt Too Long",
+            {"prompt": long_prompt},
+            400
+        )
+        
+        # Valid with type
+        self.test_api(
+            "/api/generate/text",
+            "Text Gen - With Type",
+            {
+                "prompt": "Write tips",
+                "type": "tutorial"
+            },
+            200
+        )
+    
+    def run_blog_creator_tests(self):
+        """Test /api/blog-creator/generate endpoint"""
+        print("\n" + "="*60)
+        print("📰 TESTING BLOG CREATOR API")
+        print("="*60)
+        
+        # Valid test
+        self.test_api(
+            "/api/blog-creator/generate",
+            "Blog Creator - Valid Request",
+            {"topic": "How to start a business"},
+            200
+        )
+        
+        # Missing topic
+        self.test_api(
+            "/api/blog-creator/generate",
+            "Blog Creator - Missing Topic",
+            {"articleType": "seo-article"},
+            400
+        )
+        
+        # Invalid article type
+        self.test_api(
+            "/api/blog-creator/generate",
+            "Blog Creator - Invalid Article Type",
+            {
+                "topic": "test",
+                "articleType": "invalid-type"
+            },
+            400
+        )
+        
+        # Invalid tone
+        self.test_api(
+            "/api/blog-creator/generate",
+            "Blog Creator - Invalid Tone",
+            {
+                "topic": "test",
+                "tone": "invalid-tone"
+            },
+            400
+        )
+        
+        # Valid full payload
+        self.test_api(
+            "/api/blog-creator/generate",
+            "Blog Creator - Full Payload",
+            {
+                "topic": "Starting a business",
+                "articleType": "how-to-guide",
+                "tone": "friendly",
+                "writingStyle": "conversational",
+                "wordCount": 1500
+            },
+            200
+        )
+    
+    def run_carousel_generation_tests(self):
+        """Test /api/generate/carousel endpoint"""
+        print("\n" + "="*60)
+        print("🎠 TESTING CAROUSEL GENERATION API")
+        print("="*60)
+        
+        # Valid auto mode
+        self.test_api(
+            "/api/generate/carousel",
+            "Carousel - Valid Auto Mode",
+            {
+                "prompt": "5 tips for productivity",
+                "generationMode": "auto"
+            },
+            200
+        )
+        
+        # Auto mode without prompt
+        self.test_api(
+            "/api/generate/carousel",
+            "Carousel - Auto Mode Missing Prompt",
+            {"generationMode": "auto"},
+            400
+        )
+        
+        # Invalid platform
+        self.test_api(
+            "/api/generate/carousel",
+            "Carousel - Invalid Platform",
+            {
+                "prompt": "test",
+                "platform": "invalid"
+            },
+            400
+        )
+        
+        # Valid manual mode
+        self.test_api(
+            "/api/generate/carousel",
+            "Carousel - Valid Manual Mode",
+            {
+                "generationMode": "manual",
+                "manualSlides": [
+                    {"text": "Slide 1"},
+                    {"text": "Slide 2"}
+                ]
+            },
+            200
+        )
+        
+        # Manual mode without slides
+        self.test_api(
+            "/api/generate/carousel",
+            "Carousel - Manual Mode Missing Slides",
+            {"generationMode": "manual"},
+            400
+        )
+    
+    def run_video_generation_tests(self):
+        """Test /api/generate/video/generate endpoint"""
+        print("\n" + "="*60)
+        print("🎬 TESTING VIDEO GENERATION API")
+        print("="*60)
+        
+        # Valid test
+        self.test_api(
+            "/api/generate/video/generate",
+            "Video Gen - Valid Request",
+            {"script": "A short video about nature"},
+            200
+        )
+        
+        # Missing script
+        self.test_api(
+            "/api/generate/video/generate",
+            "Video Gen - Missing Script",
+            {},
+            400
+        )
+        
+        # Invalid mode
+        self.test_api(
+            "/api/generate/video/generate",
+            "Video Gen - Invalid Mode",
+            {
+                "script": "test",
+                "mode": "invalid"
+            },
+            400
+        )
+        
+        # Invalid platform
+        self.test_api(
+            "/api/generate/video/generate",
+            "Video Gen - Invalid Platform",
+            {
+                "script": "test",
+                "platform": "invalid"
+            },
+            400
+        )
+        
+        # Valid full payload
+        self.test_api(
+            "/api/generate/video/generate",
+            "Video Gen - Full Payload",
+            {
+                "script": "Nature video",
+                "mode": "fast",
+                "platform": "instagram"
+            },
+            200
+        )
     
     def run_all_tests(self):
-        """Run all security tests"""
-        print("🚀 Starting ProCreators.io Security Testing")
-        print("=" * 80)
-        print(f"Base URL: {self.base_url}")
-        print("=" * 80)
+        """Run all API tests"""
+        print("🚀 Starting Zod Validation Testing")
+        print(f"🌐 Base URL: {self.base_url}")
         
-        results = {}
+        self.run_image_generation_tests()
+        self.run_text_generation_tests()
+        self.run_blog_creator_tests()
+        self.run_carousel_generation_tests()
+        self.run_video_generation_tests()
         
-        # Test 1: Rate Limiting on Auth
-        results['rate_limiting_auth'] = self.test_rate_limiting_auth_login()
+        self.print_summary()
+    
+    def print_summary(self):
+        """Print test summary"""
+        print("\n" + "="*60)
+        print("📊 TEST SUMMARY")
+        print("="*60)
         
-        # Test 2: Zod Validation on Stripe Checkout
-        results['zod_validation_stripe'] = self.test_zod_validation_stripe_checkout()
+        total_tests = len(self.results)
+        passed_tests = sum(1 for r in self.results if r.get('test_passed', False))
+        failed_tests = total_tests - passed_tests
         
-        # Test 3: Authentication on User Profile
-        results['authentication_profile'] = self.test_authentication_user_profile()
+        print(f"Total Tests: {total_tests}")
+        print(f"✅ Passed: {passed_tests}")
+        print(f"❌ Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
         
-        # Test 4: Zod Validation on Library Save
-        results['zod_validation_library'] = self.test_zod_validation_library_save()
+        if failed_tests > 0:
+            print("\n❌ FAILED TESTS:")
+            for result in self.results:
+                if not result.get('test_passed', False):
+                    print(f"  - {result['test_name']}")
+                    if 'error' in result:
+                        print(f"    Error: {result['error']}")
+                    elif 'response_data' in result:
+                        print(f"    Response: {result['response_data']}")
         
-        # Test 5: Rate Limit Headers
-        results['rate_limit_headers'] = self.test_rate_limit_headers()
+        print("\n🎯 VALIDATION TESTING COMPLETE")
         
-        # Summary
-        print("\n" + "=" * 80)
-        print("🏁 SECURITY TESTING SUMMARY")
-        print("=" * 80)
-        
-        passed = sum(1 for result in results.values() if result)
-        total = len(results)
-        
-        for test_name, result in results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
-            print(f"   {test_name.replace('_', ' ').title()}: {status}")
-        
-        print(f"\nOverall: {passed}/{total} tests passed")
-        
-        if passed == total:
-            print("🎉 ALL SECURITY TESTS PASSED!")
-            return True
-        else:
-            print("⚠️  SOME SECURITY TESTS FAILED!")
-            return False
+        return passed_tests, failed_tests
 
 def main():
-    """Main function to run security tests"""
-    tester = SecurityTester(BASE_URL)
-    success = tester.run_all_tests()
+    """Main test runner"""
+    tester = APITester(BASE_URL)
     
-    # Exit with appropriate code
-    sys.exit(0 if success else 1)
+    try:
+        tester.run_all_tests()
+        passed, failed = tester.print_summary()
+        
+        # Exit with appropriate code
+        sys.exit(0 if failed == 0 else 1)
+        
+    except KeyboardInterrupt:
+        print("\n⚠️  Testing interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n💥 Unexpected error: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
