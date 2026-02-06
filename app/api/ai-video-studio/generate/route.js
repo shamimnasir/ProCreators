@@ -8,6 +8,7 @@ import { fal } from '@fal-ai/client'
 import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
