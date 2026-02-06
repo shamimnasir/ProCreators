@@ -661,18 +661,85 @@ export default function UnifiedPageManager() {
             Page Manager
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage all website pages and tool pages from one place
+            Manage all website pages, tool pages, and navigation menus
           </p>
         </div>
-        <Button variant="outline" onClick={activeTab === 'website' ? fetchPages : fetchTools}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowCreateModal(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Page
+          </Button>
+          <Button variant="outline" onClick={activeTab === 'website' ? fetchPages : activeTab === 'tools' ? fetchTools : fetchMenus}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
+
+      {/* Create Page Modal */}
+      {showCreateModal && (
+        <Card className="border-2 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <PlusCircle className="h-5 w-5" />
+                Create New Page
+              </CardTitle>
+              <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription>Create a custom page that you can add to your header, footer, or anywhere on your site</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Page Title *</Label>
+                <Input 
+                  value={newPage.title}
+                  onChange={(e) => setNewPage(p => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g., Partner Program, Affiliate, FAQ"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Page Type</Label>
+                <select 
+                  className="w-full border rounded px-3 py-2"
+                  value={newPage.type}
+                  onChange={(e) => setNewPage(p => ({ ...p, type: e.target.value }))}
+                >
+                  {PAGE_TYPES.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <select 
+                  className="w-full border rounded px-3 py-2"
+                  value={newPage.category}
+                  onChange={(e) => setNewPage(p => ({ ...p, category: e.target.value }))}
+                >
+                  {PAGE_CATEGORIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button onClick={createNewPage} disabled={saving || !newPage.title.trim()}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                Create Page
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-lg">
           <TabsTrigger value="website" className="gap-2">
             <Globe className="h-4 w-4" />
             Website Pages
@@ -680,6 +747,10 @@ export default function UnifiedPageManager() {
           <TabsTrigger value="tools" className="gap-2">
             <Wrench className="h-4 w-4" />
             Tool Pages
+          </TabsTrigger>
+          <TabsTrigger value="menus" className="gap-2">
+            <Menu className="h-4 w-4" />
+            Menus
           </TabsTrigger>
         </TabsList>
 
