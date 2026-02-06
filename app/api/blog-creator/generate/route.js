@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 async function runLLM(prompt, systemPrompt) {
   return new Promise(async (resolve, reject) => {
