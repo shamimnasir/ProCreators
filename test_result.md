@@ -188,15 +188,18 @@ backend:
 
   - task: "Blog Creator Generate API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/app/api/blog-creator/generate/route.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "UPDATED: Blog creator API already accepts humanizationLevel and enabledTechniques parameters and includes them in the LLM prompt context."
+        - working: true
+          agent: "testing"
+          comment: "✅ ZOD VALIDATION WORKING: All validation tests passed. Missing topic correctly rejected with 400 status and 'Validation failed' error. Invalid article type correctly rejected with proper error structure. Zod schema validates: articleType (enum), topic (required, max 500), targetKeyword, secondaryKeywords, industry, targetAudience, writingStyle (enum), wordCount (100-10000), tone (enum), products, affiliateNetwork, priceRange, all boolean flags, humanizationLevel (enum). API returns proper JSON with success/data/metadata structure."
 
   - task: "Google Cloud TTS API Integration"
     implemented: true
