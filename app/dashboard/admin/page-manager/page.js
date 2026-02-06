@@ -942,6 +942,314 @@ export default function UnifiedPageManager() {
           )}
         </TabsContent>
 
+        {/* Blog Posts Tab */}
+        <TabsContent value="blog" className="space-y-4 mt-6">
+          {selectedPost ? (
+            // Blog Post Editor
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedPost(null)}>
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedPost.title}</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant={selectedPost.isPublished ? 'default' : 'secondary'}>
+                        {selectedPost.isPublished ? 'Published' : 'Draft'}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">/blog/{selectedPost.slug}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant={selectedPost.isPublished ? 'outline' : 'default'}
+                    onClick={() => {
+                      setSelectedPost(p => ({ ...p, isPublished: !p.isPublished }))
+                    }}
+                  >
+                    {selectedPost.isPublished ? 'Unpublish' : 'Publish'}
+                  </Button>
+                  <Button variant="outline" onClick={() => deleteBlogPost(selectedPost.postId)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button onClick={saveBlogPost} disabled={saving}>
+                    {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                    Save
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Post Content</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>Title</Label>
+                        <Input 
+                          value={selectedPost.title}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, title: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label>Excerpt (Short description)</Label>
+                        <Textarea 
+                          value={selectedPost.excerpt || ''}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, excerpt: e.target.value }))}
+                          rows={2}
+                          placeholder="Brief description for blog listing and SEO..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Content (Supports Markdown)</Label>
+                        <Textarea 
+                          value={selectedPost.content || ''}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, content: e.target.value }))}
+                          rows={15}
+                          placeholder="Write your blog post content here. You can use Markdown formatting..."
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Post Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>Category</Label>
+                        <Input 
+                          value={selectedPost.category || ''}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, category: e.target.value }))}
+                          placeholder="e.g., Tutorials, News"
+                        />
+                      </div>
+                      <div>
+                        <Label>Author</Label>
+                        <Input 
+                          value={selectedPost.author || ''}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, author: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label>Cover Image URL</Label>
+                        <Input 
+                          value={selectedPost.coverImage || ''}
+                          onChange={(e) => setSelectedPost(p => ({ ...p, coverImage: e.target.value }))}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label>Featured Post</Label>
+                        <Switch 
+                          checked={selectedPost.featured || false}
+                          onCheckedChange={(checked) => setSelectedPost(p => ({ ...p, featured: checked }))}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">SEO</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <Label>Meta Title</Label>
+                        <Input 
+                          value={selectedPost.seo?.metaTitle || ''}
+                          onChange={(e) => setSelectedPost(p => ({ 
+                            ...p, 
+                            seo: { ...p.seo, metaTitle: e.target.value } 
+                          }))}
+                        />
+                      </div>
+                      <div>
+                        <Label>Meta Description</Label>
+                        <Textarea 
+                          value={selectedPost.seo?.metaDescription || ''}
+                          onChange={(e) => setSelectedPost(p => ({ 
+                            ...p, 
+                            seo: { ...p.seo, metaDescription: e.target.value } 
+                          }))}
+                          rows={2}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Blog Posts List
+            <>
+              {/* Stats */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Total Posts</CardDescription>
+                    <CardTitle className="text-3xl">{blogStats.total || 0}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Published</CardDescription>
+                    <CardTitle className="text-3xl text-green-600">{blogStats.published || 0}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Drafts</CardDescription>
+                    <CardTitle className="text-3xl text-yellow-600">{blogStats.draft || 0}</CardTitle>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Featured</CardDescription>
+                    <CardTitle className="text-3xl text-blue-600">{blogStats.featured || 0}</CardTitle>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  {blogCategories.map(cat => (
+                    <Button
+                      key={cat}
+                      variant={activeCategory === cat ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setActiveCategory(cat)}
+                    >
+                      {cat}
+                    </Button>
+                  ))}
+                </div>
+                <Button onClick={() => setShowCreatePostModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" /> New Post
+                </Button>
+              </div>
+
+              {/* Create Post Modal */}
+              {showCreatePostModal && (
+                <Card className="border-2 border-blue-200 bg-blue-50">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Create New Blog Post</CardTitle>
+                      <Button variant="ghost" size="icon" onClick={() => setShowCreatePostModal(false)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Post Title *</Label>
+                        <Input 
+                          value={newPost.title}
+                          onChange={(e) => setNewPost(p => ({ ...p, title: e.target.value }))}
+                          placeholder="e.g., 10 Tips for Better Content"
+                        />
+                      </div>
+                      <div>
+                        <Label>Category</Label>
+                        <Input 
+                          value={newPost.category}
+                          onChange={(e) => setNewPost(p => ({ ...p, category: e.target.value }))}
+                          placeholder="e.g., Tutorials"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Excerpt (optional)</Label>
+                      <Textarea 
+                        value={newPost.excerpt}
+                        onChange={(e) => setNewPost(p => ({ ...p, excerpt: e.target.value }))}
+                        rows={2}
+                        placeholder="Brief description..."
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setShowCreatePostModal(false)}>Cancel</Button>
+                      <Button onClick={createBlogPost} disabled={saving || !newPost.title.trim()}>
+                        {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                        Create Draft
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Posts List */}
+              <div className="space-y-3">
+                {loading ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ) : blogPosts.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center text-muted-foreground">
+                      <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No blog posts yet. Create your first post!</p>
+                    </CardContent>
+                  </Card>
+                ) : blogPosts.map(post => (
+                  <Card key={post.postId} className="hover:shadow-md transition-shadow">
+                    <CardContent className="py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-2 h-12 rounded-full ${post.isPublished ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium">{post.title}</h3>
+                              {post.featured && <Badge className="bg-blue-100 text-blue-700">Featured</Badge>}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{post.excerpt?.slice(0, 80)}...</p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              <span>{post.category}</span>
+                              <span>•</span>
+                              <span>{post.author}</span>
+                              <span>•</span>
+                              <span>{post.readTime}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={post.isPublished ? 'default' : 'secondary'}>
+                            {post.isPublished ? 'Published' : 'Draft'}
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={() => setSelectedPost(post)}>
+                            <Edit className="h-4 w-4 mr-1" /> Edit
+                          </Button>
+                          {post.isPublished && (
+                            <Link href={`/blog/${post.slug}`} target="_blank">
+                              <Button variant="ghost" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+        </TabsContent>
+
         {/* Tool Pages Tab */}
         <TabsContent value="tools" className="space-y-4 mt-6">
           {/* Stats */}
