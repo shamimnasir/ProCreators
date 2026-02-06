@@ -8,6 +8,37 @@ import path from 'path'
 import { spawn } from 'child_process'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Storybook Maker input schema
+const storybookSchema = z.object({
+  action: z.enum(['generate-story', 'generate-illustrations', 'generate-pdf']).default('generate-story'),
+  title: z.string().max(500).optional(),
+  genre: z.string().max(100).optional(),
+  ageGroup: z.enum(['toddler', 'preschool', 'early-reader', 'middle-grade']).default('preschool'),
+  pageCount: z.number().int().min(1).max(50).default(8),
+  customPrompt: z.string().max(2000).optional(),
+  story: z.object({
+    title: z.string().max(500).optional(),
+    summary: z.string().max(1000).optional(),
+    characters: z.array(z.string().max(200)).max(20).optional(),
+    moral: z.string().max(500).optional(),
+    pages: z.array(z.object({
+      pageNumber: z.number().int().optional(),
+      text: z.string().max(2000).optional(),
+      illustrationPrompt: z.string().max(1000).optional(),
+      imageUrl: z.string().max(100000).optional()
+    })).max(50).optional(),
+    coverImageUrl: z.string().max(100000).optional()
+  }).optional(),
+  paperSize: z.enum(['8.5x8.5', '8x10', '8.5x11', '6x9']).default('8.5x8.5'),
+  primaryColor: z.string().max(50).default('#4f46e5'),
+  secondaryColor: z.string().max(50).default('#818cf8'),
+  authorName: z.string().max(200).optional(),
+  illustrationStyle: z.string().max(100).default('watercolor'),
+  generateIllustrations: z.boolean().default(false)
+})
 
 // KDP Paper Sizes for Children's Books
 const PAPER_SIZES = {
