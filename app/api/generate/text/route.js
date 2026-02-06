@@ -4,6 +4,18 @@ import { SYSTEM_PROMPTS } from '@/lib/system-prompts'
 import { getCollection } from '@/lib/mongodb'
 import { generateWithTracking, estimateTokens } from '@/lib/ai-tracking'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Text generation input schema
+const textGenerationSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required').max(10000, 'Prompt too long'),
+  type: z.string().max(100).optional(),
+  systemMessage: z.string().max(5000).optional(),
+  userId: z.string().max(100).optional(),
+  transactionId: z.string().max(100).optional(),
+  creditsCharged: z.number().positive().max(10000).optional()
+})
 
 export async function POST(request) {
   try {
@@ -13,14 +25,19 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
-    const { prompt, type, systemMessage, userId, transactionId, creditsCharged } = await request.json()
+    const body = await request.json()
     
-    if (!prompt) {
-      return NextResponse.json(
-        { success: false, error: 'Prompt is required' },
-        { status: 400 }
-      )
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(textGenerationSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
     }
+    
+    const { prompt, type, systemMessage, userId, transactionId, creditsCharged } = validation.data
 
     // Get system prompt for the tool type
     let finalSystemMessage = systemMessage
