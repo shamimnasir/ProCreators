@@ -1,494 +1,386 @@
 #!/usr/bin/env python3
 """
-ProCreators Phase 2-3 API Testing Script
-Tests: Credit System, Stripe Payment, Authentication, Admin Controls
+Backend Security Testing for ProCreators.io
+Tests rate limiting, Zod validation, authentication, and security headers
 """
 
 import requests
 import json
 import time
 import sys
-from datetime import datetime
+from typing import Dict, Any, List
 
 # Base URL from environment
 BASE_URL = "https://devshield-6.preview.emergentagent.com"
-API_BASE = f"{BASE_URL}/api"
 
-class ProCreatorsAPITest:
-    def __init__(self):
-        self.results = {
-            "total_tests": 0,
-            "passed": 0,
-            "failed": 0,
-            "errors": []
-        }
-        self.session_token = None
-        self.test_user_id = None
+class SecurityTester:
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Content-Type': 'application/json',
+            'User-Agent': 'ProCreators-Security-Test/1.0'
+        })
         
-    def log(self, message, test_name=None):
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        prefix = f"[{timestamp}]"
-        if test_name:
-            prefix += f" [{test_name}]"
-        print(f"{prefix} {message}")
+    def test_rate_limiting_auth_login(self):
+        """Test rate limiting on /api/auth (POST) - Should block after 5 attempts"""
+        print("\n🔒 Testing Rate Limiting on /api/auth (login)")
+        print("=" * 60)
         
-    def test_result(self, test_name, success, message="", data=None):
-        self.results["total_tests"] += 1
-        if success:
-            self.results["passed"] += 1
-            self.log(f"✅ PASS: {message}", test_name)
-        else:
-            self.results["failed"] += 1
-            self.results["errors"].append(f"{test_name}: {message}")
-            self.log(f"❌ FAIL: {message}", test_name)
-        
-        if data:
-            self.log(f"Response: {json.dumps(data, indent=2)[:200]}...", test_name)
-    
-    def make_request(self, method, endpoint, data=None, headers=None):
-        """Make HTTP request with error handling"""
-        url = f"{API_BASE}{endpoint}"
-        default_headers = {"Content-Type": "application/json"}
-        if headers:
-            default_headers.update(headers)
-        
-        try:
-            if method.upper() == "GET":
-                response = requests.get(url, headers=default_headers, timeout=30)
-            elif method.upper() == "POST":
-                response = requests.post(url, json=data, headers=default_headers, timeout=30)
-            elif method.upper() == "DELETE":
-                response = requests.delete(url, headers=default_headers, timeout=30)
-            else:
-                return None, f"Unsupported method: {method}"
-                
-            return response, None
-        except requests.exceptions.Timeout:
-            return None, "Request timeout (30s)"
-        except requests.exceptions.ConnectionError:
-            return None, "Connection error - service might be down"
-        except Exception as e:
-            return None, f"Request error: {str(e)}"
-    
-    # =================== CREDIT SYSTEM API TESTS ===================
-    
-    def test_credit_get_balance(self):
-        """Test GET /api/credits - Check user balance"""
-        test_name = "Credit Balance Check"
-        
-        # Test with demo user
-        response, error = self.make_request("GET", "/credits?userId=demo-user-001")
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                credits = data.get("credits", 0)
-                plan = data.get("plan", "unknown")
-                self.test_result(test_name, True, f"Balance retrieved: {credits} credits, plan: {plan}", data)
-            else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_credit_operations(self):
-        """Test POST /api/credits - Various credit operations"""
-        operations = [
-            ("check", "Credit Check", {"userId": "demo-user-001", "toolId": "blog-creator"}),
-            ("deduct", "Credit Deduction", {"userId": "demo-user-001", "toolId": "blog-creator"}),
-            ("history", "Credit History", {"userId": "demo-user-001"})
-        ]
-        
-        for action, test_name, payload in operations:
-            payload["action"] = action
-            response, error = self.make_request("POST", "/credits", payload)
-            
-            if error:
-                self.test_result(test_name, False, f"Request failed: {error}")
-                continue
-                
-            try:
-                data = response.json()
-                
-                if action == "deduct" and response.status_code == 402:
-                    self.test_result(test_name, True, "Insufficient credits (expected behavior)", data)
-                elif response.status_code == 200 and data.get("success"):
-                    self.test_result(test_name, True, f"Action '{action}' completed successfully", data)
-                else:
-                    self.test_result(test_name, False, f"Unexpected response: {data.get('error', response.status_code)}")
-                    
-            except json.JSONDecodeError:
-                self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    # =================== STRIPE CHECKOUT API TESTS ===================
-    
-    def test_stripe_checkout_packages(self):
-        """Test GET /api/stripe/checkout - Get credit packages"""
-        test_name = "Stripe Packages List"
-        
-        response, error = self.make_request("GET", "/stripe/checkout")
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                packages = data.get("packages", [])
-                if len(packages) >= 4:  # Expecting 4 packages
-                    package_names = [pkg.get("name") for pkg in packages]
-                    self.test_result(test_name, True, f"Found {len(packages)} packages: {package_names}", data)
-                else:
-                    self.test_result(test_name, False, f"Expected 4 packages, got {len(packages)}")
-            else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_stripe_checkout_session(self):
-        """Test POST /api/stripe/checkout - Create checkout session"""
-        test_name = "Stripe Checkout Session"
-        
-        payload = {
-            "packageId": "starter",
-            "userId": "test-user-12345",
-            "originUrl": BASE_URL
-        }
-        
-        response, error = self.make_request("POST", "/stripe/checkout", payload)
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                checkout_url = data.get("url")
-                session_id = data.get("sessionId")
-                if checkout_url and session_id:
-                    self.test_result(test_name, True, f"Checkout session created: {session_id[:20]}...", data)
-                else:
-                    self.test_result(test_name, False, "Missing checkout URL or session ID")
-            else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_stripe_status(self):
-        """Test GET /api/stripe/status - Check payment status"""
-        test_name = "Stripe Payment Status"
-        
-        # Using a dummy session ID since we can't create a real payment
-        dummy_session_id = "cs_test_dummy_session_12345"
-        response, error = self.make_request("GET", f"/stripe/status?session_id={dummy_session_id}")
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            # Expecting 404 for dummy session - that's correct behavior
-            if response.status_code == 404:
-                self.test_result(test_name, True, "Correctly handled non-existent session", data)
-            elif response.status_code == 400:
-                self.test_result(test_name, True, "API validation working", data)
-            else:
-                self.test_result(test_name, False, f"Unexpected response: {response.status_code} - {data.get('error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    # =================== AUTHENTICATION API TESTS ===================
-    
-    def test_auth_signup(self):
-        """Test POST /api/auth - User signup"""
-        test_name = "User Signup"
-        
-        # Generate unique email for testing
-        timestamp = str(int(time.time()))
-        test_email = f"test-{timestamp}@example.com"
-        
-        payload = {
-            "action": "signup",
-            "email": test_email,
-            "password": "testPassword123",
-            "name": "Test User"
-        }
-        
-        response, error = self.make_request("POST", "/auth", payload)
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                self.test_user_id = data.get("userId")
-                message = data.get("message", "")
-                self.test_result(test_name, True, f"Signup successful: {message}", data)
-            elif response.status_code == 400 and "already registered" in data.get("error", ""):
-                self.test_result(test_name, True, "Email already exists (expected for repeated tests)", data)
-            else:
-                self.test_result(test_name, False, f"Signup failed: {data.get('error', 'Unknown error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_auth_login(self):
-        """Test POST /api/auth - User login"""
-        test_name = "User Login"
-        
-        payload = {
-            "action": "login", 
+        url = f"{self.base_url}/api/auth"
+        test_payload = {
+            "action": "login",
             "email": "test@test.com",
-            "password": "test123"
+            "password": "wrongpassword123"
         }
         
-        response, error = self.make_request("POST", "/auth", payload)
+        results = []
         
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                self.session_token = data.get("sessionToken")
-                user_info = data.get("user", {})
-                self.test_result(test_name, True, f"Login successful for {user_info.get('email')}", data)
-            elif response.status_code == 401:
-                self.test_result(test_name, True, f"Login rejected (expected): {data.get('error')}", data)
-            else:
-                self.test_result(test_name, False, f"Unexpected response: {data.get('error', response.status_code)}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_auth_actions(self):
-        """Test other authentication actions"""
-        actions = [
-            ("verify", "Email Verification", {"token": "dummy-verification-token"}),
-            ("forgot_password", "Forgot Password", {"email": "test@example.com"})
-        ]
-        
-        for action, test_name, payload in actions:
-            payload["action"] = action
-            response, error = self.make_request("POST", "/auth", payload)
-            
-            if error:
-                self.test_result(test_name, False, f"Request failed: {error}")
-                continue
-                
+        # Make 6 requests in quick succession
+        for i in range(1, 7):
             try:
-                data = response.json()
+                response = self.session.post(url, json=test_payload, timeout=10)
                 
-                if action == "verify" and response.status_code == 400:
-                    self.test_result(test_name, True, "Invalid token rejected (expected)", data)
-                elif action == "forgot_password" and response.status_code == 200:
-                    self.test_result(test_name, True, "Password reset email handling working", data)
+                # Check rate limit headers
+                rate_limit_headers = {
+                    'X-RateLimit-Limit': response.headers.get('X-RateLimit-Limit'),
+                    'X-RateLimit-Remaining': response.headers.get('X-RateLimit-Remaining'),
+                    'X-RateLimit-Reset': response.headers.get('X-RateLimit-Reset'),
+                    'Retry-After': response.headers.get('Retry-After')
+                }
+                
+                result = {
+                    'attempt': i,
+                    'status_code': response.status_code,
+                    'headers': rate_limit_headers,
+                    'response_time': response.elapsed.total_seconds()
+                }
+                
+                if response.status_code == 429:
+                    result['blocked'] = True
+                    result['retry_after'] = response.headers.get('Retry-After')
+                    print(f"   Attempt {i}: ❌ BLOCKED (429) - Retry-After: {result['retry_after']}s")
                 else:
-                    self.test_result(test_name, True, f"Action '{action}' handled appropriately", data)
-                    
-            except json.JSONDecodeError:
-                self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_session_verification(self):
-        """Test GET /api/auth/session - Session verification"""
-        test_name = "Session Verification"
-        
-        # Test without token first
-        response, error = self.make_request("GET", "/auth/session")
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 401:
-                self.test_result(test_name, True, "No token rejected correctly", data)
-            else:
-                self.test_result(test_name, False, f"Expected 401, got {response.status_code}")
+                    result['blocked'] = False
+                    remaining = rate_limit_headers.get('X-RateLimit-Remaining', 'N/A')
+                    print(f"   Attempt {i}: ✅ ALLOWED ({response.status_code}) - Remaining: {remaining}")
                 
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-        
-        # Test with dummy token
-        headers = {"Authorization": "Bearer dummy-token-12345"}
-        response, error = self.make_request("GET", "/auth/session", headers=headers)
-        
-        if error:
-            self.test_result("Session with Token", False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 401:
-                self.test_result("Session with Token", True, "Invalid token rejected correctly", data)
-            else:
-                self.test_result("Session with Token", False, f"Expected 401, got {response.status_code}")
+                results.append(result)
                 
-        except json.JSONDecodeError:
-            self.test_result("Session with Token", False, f"Invalid JSON response: {response.text[:100]}")
-    
-    # =================== ADMIN API TESTS ===================
-    
-    def test_admin_controls(self):
-        """Test GET /api/admin/controls - Get admin controls"""
-        test_name = "Admin Controls Get"
-        
-        response, error = self.make_request("GET", "/admin/controls")
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                controls = data.get("controls", {})
-                self.test_result(test_name, True, f"Admin controls retrieved: {len(controls)} settings", data)
-            else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                # Small delay between requests
+                time.sleep(0.1)
                 
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+            except Exception as e:
+                print(f"   Attempt {i}: ❌ ERROR - {str(e)}")
+                results.append({'attempt': i, 'error': str(e)})
+        
+        # Analyze results
+        blocked_attempts = [r for r in results if r.get('blocked', False)]
+        allowed_attempts = [r for r in results if not r.get('blocked', True) and not r.get('error')]
+        
+        print(f"\n📊 Rate Limiting Results:")
+        print(f"   • Allowed attempts: {len(allowed_attempts)}")
+        print(f"   • Blocked attempts: {len(blocked_attempts)}")
+        print(f"   • Expected: First 5 allowed, 6th blocked")
+        
+        # Check if rate limiting works as expected
+        if len(allowed_attempts) <= 5 and len(blocked_attempts) >= 1:
+            print("   ✅ PASS: Rate limiting working correctly")
+            return True
+        else:
+            print("   ❌ FAIL: Rate limiting not working as expected")
+            return False
     
-    def test_admin_users_list(self):
-        """Test GET /api/admin/users - List users"""
-        test_name = "Admin Users List"
+    def test_zod_validation_stripe_checkout(self):
+        """Test Zod validation on /api/stripe/checkout (POST)"""
+        print("\n🔒 Testing Zod Validation on /api/stripe/checkout")
+        print("=" * 60)
         
-        response, error = self.make_request("GET", "/admin/users?limit=10")
+        url = f"{self.base_url}/api/stripe/checkout"
         
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
-        try:
-            data = response.json()
-            
-            if response.status_code == 200 and data.get("success"):
-                users = data.get("users", [])
-                pagination = data.get("pagination", {})
-                self.test_result(test_name, True, f"Retrieved {len(users)} users, total: {pagination.get('total', 0)}", data)
-            else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
-                
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
-    
-    def test_admin_add_credits(self):
-        """Test POST /api/admin/users - Add credits action"""
-        test_name = "Admin Add Credits"
-        
-        payload = {
-            "action": "add_credits",
-            "userId": "demo-user-001",
-            "amount": 10,
-            "reason": "Testing credit addition"
+        # Test 1: Invalid packageId
+        print("   Test 1: Invalid packageId")
+        invalid_payload = {
+            "packageId": "invalid",
+            "userId": "test-user-123",
+            "originUrl": "https://test.com"
         }
         
-        response, error = self.make_request("POST", "/admin/users", payload)
-        
-        if error:
-            self.test_result(test_name, False, f"Request failed: {error}")
-            return
-            
         try:
-            data = response.json()
+            response = self.session.post(url, json=invalid_payload, timeout=10)
+            print(f"   Status: {response.status_code}")
             
-            if response.status_code == 200 and data.get("success"):
-                self.test_result(test_name, True, "Credits added successfully", data)
+            if response.status_code == 400:
+                data = response.json()
+                if 'errors' in data or 'validation' in data.get('error', '').lower():
+                    print("   ✅ PASS: Invalid packageId correctly rejected with validation error")
+                    test1_pass = True
+                else:
+                    print("   ❌ FAIL: Invalid packageId rejected but no validation error message")
+                    test1_pass = False
             else:
-                self.test_result(test_name, False, f"API error: {data.get('error', 'Unknown error')}")
+                print("   ❌ FAIL: Invalid packageId not rejected (expected 400)")
+                test1_pass = False
                 
-        except json.JSONDecodeError:
-            self.test_result(test_name, False, f"Invalid JSON response: {response.text[:100]}")
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test1_pass = False
+        
+        # Test 2: Missing required fields
+        print("\n   Test 2: Missing required fields")
+        missing_fields_payload = {
+            "packageId": "starter"
+            # Missing userId and originUrl
+        }
+        
+        try:
+            response = self.session.post(url, json=missing_fields_payload, timeout=10)
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code == 400:
+                data = response.json()
+                if 'errors' in data or 'validation' in data.get('error', '').lower():
+                    print("   ✅ PASS: Missing fields correctly rejected with validation error")
+                    test2_pass = True
+                else:
+                    print("   ❌ FAIL: Missing fields rejected but no validation error message")
+                    test2_pass = False
+            else:
+                print("   ❌ FAIL: Missing fields not rejected (expected 400)")
+                test2_pass = False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test2_pass = False
+        
+        return test1_pass and test2_pass
     
-    # =================== MAIN TEST RUNNER ===================
+    def test_authentication_user_profile(self):
+        """Test authentication on /api/user/profile (POST)"""
+        print("\n🔒 Testing Authentication on /api/user/profile")
+        print("=" * 60)
+        
+        url = f"{self.base_url}/api/user/profile"
+        
+        # Test 1: POST without auth header
+        print("   Test 1: POST without auth header")
+        test_payload = {
+            "name": "Test User",
+            "avatarUrl": "https://example.com/avatar.jpg"
+        }
+        
+        try:
+            # Remove any existing auth headers
+            headers = self.session.headers.copy()
+            if 'Authorization' in headers:
+                del headers['Authorization']
+            
+            response = requests.post(url, json=test_payload, headers=headers, timeout=10)
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code == 401:
+                data = response.json()
+                if data.get('code') == 'AUTH_REQUIRED':
+                    print("   ✅ PASS: Unauthenticated POST correctly rejected with AUTH_REQUIRED")
+                    test1_pass = True
+                else:
+                    print("   ❌ FAIL: Unauthenticated POST rejected but wrong error code")
+                    test1_pass = False
+            else:
+                print("   ❌ FAIL: Unauthenticated POST not rejected (expected 401)")
+                test1_pass = False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test1_pass = False
+        
+        # Test 2: GET with userId param (should work)
+        print("\n   Test 2: GET with userId param")
+        try:
+            get_url = f"{url}?userId=test-user-123"
+            response = requests.get(get_url, timeout=10)
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code in [200, 404]:  # 200 if user exists, 404 if not
+                print("   ✅ PASS: GET with userId param works (returns 200 or 404)")
+                test2_pass = True
+            else:
+                print(f"   ❌ FAIL: GET with userId param failed (expected 200/404, got {response.status_code})")
+                test2_pass = False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test2_pass = False
+        
+        return test1_pass and test2_pass
+    
+    def test_zod_validation_library_save(self):
+        """Test Zod validation on /api/library/save (POST)"""
+        print("\n🔒 Testing Zod Validation on /api/library/save")
+        print("=" * 60)
+        
+        url = f"{self.base_url}/api/library/save"
+        
+        # Test 1: Missing required field (title)
+        print("   Test 1: Missing required field (title)")
+        missing_title_payload = {
+            "content": "test content",
+            "type": "text"
+            # Missing title
+        }
+        
+        try:
+            response = self.session.post(url, json=missing_title_payload, timeout=10)
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code == 400:
+                data = response.json()
+                if 'errors' in data or 'validation' in data.get('error', '').lower():
+                    print("   ✅ PASS: Missing title correctly rejected with validation error")
+                    test1_pass = True
+                else:
+                    print("   ❌ FAIL: Missing title rejected but no validation error message")
+                    test1_pass = False
+            else:
+                print("   ❌ FAIL: Missing title not rejected (expected 400)")
+                test1_pass = False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test1_pass = False
+        
+        # Test 2: Valid payload (should succeed or have rate limit headers)
+        print("\n   Test 2: Valid payload")
+        valid_payload = {
+            "content": "test content",
+            "type": "text",
+            "title": "Test Content"
+        }
+        
+        try:
+            response = self.session.post(url, json=valid_payload, timeout=10)
+            print(f"   Status: {response.status_code}")
+            
+            # Check for rate limit headers
+            rate_limit_headers = {
+                'X-RateLimit-Limit': response.headers.get('X-RateLimit-Limit'),
+                'X-RateLimit-Remaining': response.headers.get('X-RateLimit-Remaining'),
+                'X-RateLimit-Reset': response.headers.get('X-RateLimit-Reset')
+            }
+            
+            has_rate_limit_headers = any(rate_limit_headers.values())
+            
+            if response.status_code in [200, 201] or has_rate_limit_headers:
+                print("   ✅ PASS: Valid payload accepted or rate limit headers present")
+                test2_pass = True
+            else:
+                print(f"   ❌ FAIL: Valid payload failed unexpectedly ({response.status_code})")
+                test2_pass = False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            test2_pass = False
+        
+        return test1_pass and test2_pass
+    
+    def test_rate_limit_headers(self):
+        """Test that rate limit headers are present on secured endpoints"""
+        print("\n🔒 Testing Rate Limit Headers")
+        print("=" * 60)
+        
+        # Test on a simple endpoint that should have rate limiting
+        url = f"{self.base_url}/api/library/save"
+        test_payload = {
+            "content": "header test",
+            "type": "text",
+            "title": "Header Test"
+        }
+        
+        try:
+            response = self.session.post(url, json=test_payload, timeout=10)
+            
+            # Check for rate limit headers
+            headers_to_check = [
+                'X-RateLimit-Limit',
+                'X-RateLimit-Remaining', 
+                'X-RateLimit-Reset'
+            ]
+            
+            found_headers = {}
+            for header in headers_to_check:
+                value = response.headers.get(header)
+                found_headers[header] = value
+                if value:
+                    print(f"   ✅ {header}: {value}")
+                else:
+                    print(f"   ❌ {header}: Not found")
+            
+            # Check if at least some rate limit headers are present
+            headers_present = sum(1 for v in found_headers.values() if v is not None)
+            
+            if headers_present >= 2:  # At least 2 out of 3 headers
+                print("   ✅ PASS: Rate limit headers present")
+                return True
+            else:
+                print("   ❌ FAIL: Rate limit headers missing or incomplete")
+                return False
+                
+        except Exception as e:
+            print(f"   ❌ ERROR: {str(e)}")
+            return False
     
     def run_all_tests(self):
-        """Run all test suites"""
-        self.log("🚀 Starting ProCreators Phase 2-3 API Testing...")
-        self.log(f"🔗 Testing against: {API_BASE}")
+        """Run all security tests"""
+        print("🚀 Starting ProCreators.io Security Testing")
+        print("=" * 80)
+        print(f"Base URL: {self.base_url}")
+        print("=" * 80)
         
-        print("\n" + "="*60)
-        print("CREDIT SYSTEM API TESTS")
-        print("="*60)
+        results = {}
         
-        self.test_credit_get_balance()
-        self.test_credit_operations()
+        # Test 1: Rate Limiting on Auth
+        results['rate_limiting_auth'] = self.test_rate_limiting_auth_login()
         
-        print("\n" + "="*60)
-        print("STRIPE PAYMENT API TESTS")
-        print("="*60)
+        # Test 2: Zod Validation on Stripe Checkout
+        results['zod_validation_stripe'] = self.test_zod_validation_stripe_checkout()
         
-        self.test_stripe_checkout_packages()
-        self.test_stripe_checkout_session()
-        self.test_stripe_status()
+        # Test 3: Authentication on User Profile
+        results['authentication_profile'] = self.test_authentication_user_profile()
         
-        print("\n" + "="*60)
-        print("AUTHENTICATION API TESTS") 
-        print("="*60)
+        # Test 4: Zod Validation on Library Save
+        results['zod_validation_library'] = self.test_zod_validation_library_save()
         
-        self.test_auth_signup()
-        self.test_auth_login()
-        self.test_auth_actions()
-        self.test_session_verification()
+        # Test 5: Rate Limit Headers
+        results['rate_limit_headers'] = self.test_rate_limit_headers()
         
-        print("\n" + "="*60)
-        print("ADMIN API TESTS")
-        print("="*60)
+        # Summary
+        print("\n" + "=" * 80)
+        print("🏁 SECURITY TESTING SUMMARY")
+        print("=" * 80)
         
-        self.test_admin_controls()
-        self.test_admin_users_list()
-        self.test_admin_add_credits()
+        passed = sum(1 for result in results.values() if result)
+        total = len(results)
         
-        # Final Results
-        print("\n" + "="*60)
-        print("TEST RESULTS SUMMARY")
-        print("="*60)
+        for test_name, result in results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"   {test_name.replace('_', ' ').title()}: {status}")
         
-        total = self.results["total_tests"]
-        passed = self.results["passed"]
-        failed = self.results["failed"]
+        print(f"\nOverall: {passed}/{total} tests passed")
         
-        print(f"📊 Total Tests: {total}")
-        print(f"✅ Passed: {passed}")
-        print(f"❌ Failed: {failed}")
-        print(f"📈 Success Rate: {(passed/total*100):.1f}%")
-        
-        if self.results["errors"]:
-            print(f"\n🚨 FAILED TESTS:")
-            for error in self.results["errors"]:
-                print(f"   • {error}")
-        
-        print(f"\n🏁 Testing completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
-        return passed == total
+        if passed == total:
+            print("🎉 ALL SECURITY TESTS PASSED!")
+            return True
+        else:
+            print("⚠️  SOME SECURITY TESTS FAILED!")
+            return False
 
-if __name__ == "__main__":
-    tester = ProCreatorsAPITest()
+def main():
+    """Main function to run security tests"""
+    tester = SecurityTester(BASE_URL)
     success = tester.run_all_tests()
     
     # Exit with appropriate code
     sys.exit(0 if success else 1)
+
+if __name__ == "__main__":
+    main()
