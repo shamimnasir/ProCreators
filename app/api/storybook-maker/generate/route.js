@@ -1009,21 +1009,32 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(storybookSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const {
-      action = 'generate-story', // 'generate-story', 'generate-illustrations', 'generate-pdf'
+      action,
       title,
       genre,
       ageGroup,
       pageCount,
       customPrompt,
-      story, // For illustration/pdf generation
+      story,
       paperSize,
       primaryColor,
       secondaryColor,
       authorName,
       illustrationStyle,
-      generateIllustrations = false
-    } = body
+      generateIllustrations
+    } = validation.data
     
     // ACTION: Generate Story Text
     if (action === 'generate-story') {
