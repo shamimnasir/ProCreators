@@ -600,6 +600,124 @@ agent_communication:
       
       **RECOMMENDATION:** Business Plan Generator API is fully functional and ready for production use. All plan types generate high-quality, structured business planning content with proper frameworks and comprehensive sections."
     - agent: "testing"
+      message: "✅ ZOD VALIDATION TESTING COMPLETED - 4 OUT OF 5 APIs WORKING:
+      
+      **COMPREHENSIVE ZOD VALIDATION TESTING RESULTS:**
+      
+      🎯 **WORKING APIS (4/5) - ZOD VALIDATION FULLY FUNCTIONAL:**
+      
+      1) **✅ Image Generation API (/api/generate/image):**
+         - Missing prompt: Correctly rejected with 400 status and 'Validation failed' error
+         - Invalid aspect ratio: Correctly rejected with proper error structure
+         - Prompt too long (>2000 chars): Correctly rejected
+         - Valid requests: Successfully processed and return proper imageUrl
+         - Schema validates: prompt (required, max 2000), userId, transactionId, creditsCharged, toolId, style, aspectRatio (enum)
+      
+      2) **✅ Text Generation API (/api/generate/text):**
+         - Missing prompt: Correctly rejected with 400 status and 'Validation failed' error
+         - Prompt too long (>10000 chars): Correctly rejected
+         - Valid requests: Successfully processed and return content with sessionId
+         - Schema validates: prompt (required, max 10000), type, systemMessage (max 5000), userId, transactionId, creditsCharged
+      
+      3) **✅ Blog Creator API (/api/blog-creator/generate):**
+         - Missing topic: Correctly rejected with 400 status and 'Validation failed' error
+         - Invalid article type: Correctly rejected with proper error structure
+         - Invalid tone: Correctly rejected
+         - Valid requests: Successfully generate complete blog posts with metadata
+         - Schema validates: articleType (enum), topic (required, max 500), targetKeyword, secondaryKeywords, industry, targetAudience, writingStyle (enum), wordCount (100-10000), tone (enum), products, affiliateNetwork, priceRange, all boolean flags, humanizationLevel (enum)
+      
+      4) **✅ Carousel Generation API (/api/generate/carousel):**
+         - Auto mode missing prompt: Correctly rejected with 400 status and 'Prompt is required for auto-generation mode' error
+         - Invalid platform: Correctly rejected with 'Validation failed' error
+         - Manual mode missing slides: Correctly rejected
+         - Valid requests: Successfully generate carousel slides with images
+         - Schema validates: prompt, language, slideCount (2-20), width/height (100-4000), platform (enum), generationMode (enum), manualSlides (array), logo, logoSize, logoPosition
+         - FIXED: Resolved syntax errors in route.js file that were causing 520 errors
+      
+      🚨 **NOT WORKING API (1/5) - SYNTAX ERRORS BLOCKING VALIDATION:**
+      
+      5) **❌ Video Generation API (/api/generate/video/generate):**
+         - Returns 520 errors with HTML instead of JSON responses
+         - Multiple JavaScript syntax errors in route.js file preventing compilation:
+           * Line 292: Malformed console.log statement
+           * Line 322: Stray ':' character
+           * Line 338: Another malformed console.log
+           * Missing closing braces and stray code fragments
+         - Zod validation cannot be tested until syntax errors are fixed
+         - Schema should validate: script (required, max 5000), mode (enum), duration (5-300), language, platform (enum), image (url or base64)
+      
+      **VALIDATION ERROR STRUCTURE VERIFIED:**
+      All working APIs return proper validation errors with:
+      ```json
+      {
+        'success': false,
+        'error': 'Validation failed',
+        'errors': [
+          {
+            'field': 'fieldName',
+            'message': 'Specific error message'
+          }
+        ]
+      }
+      ```
+      
+      **SUCCESS RATE: 80% (4/5 APIs)**
+      
+      **RECOMMENDATION:** 
+      - 4 out of 5 content generation APIs have fully functional Zod validation
+      - Video Generation API requires syntax error fixes before validation can be tested
+      - All working APIs properly reject invalid payloads and return structured error responses
+      - Validation schemas are comprehensive and cover all required/optional fields with proper constraints"
+      
+      **COMPREHENSIVE BACKEND TESTING RESULTS:**
+      
+      🎯 **ALL 5 TEST CASES PASSED - 100% SUCCESS RATE:**
+      
+      1) **Basic Traditional Plan Test (✅ PASS):**
+         - Minimal fields test with companyName, companyDescription, planType=traditional, industry=technology, businessStage=idea
+         - Successfully generates complete business plan with all required sections
+         - Returns proper JSON with executiveSummary, companyDescription, productsAndServices, marketAnalysis, marketingPlan, operationsPlan, managementTeam, financialPlan
+         - Response times: ~30 seconds for comprehensive plan generation
+      
+      2) **Lean Canvas Test (✅ PASS):**
+         - planType=lean with companyName=LeanStartup, SaaS platform description
+         - All 9 canvas sections working perfectly: problem, solution, uniqueValueProposition, unfairAdvantage, customerSegments, keyMetrics, channels, costStructure, revenueStreams
+         - Lean startup methodology properly applied with business model canvas structure
+         - Response times: ~9 seconds for lean canvas generation
+      
+      3) **Pitch Deck Test (✅ PASS):**
+         - planType=pitch with companyName=PitchPro, finance industry, MVP stage, $500K funding needed
+         - All 12 slides present with correct titles: Title Slide, The Problem, The Solution, Market Opportunity, Business Model, Traction, Competition, Go-to-Market Strategy, The Team, Financials, The Ask, Thank You
+         - Investor pitch deck structure follows proven presentation framework
+         - Response times: ~15 seconds for pitch deck generation
+      
+      4) **Validation Test (✅ PASS):**
+         - Missing required field (companyName) correctly rejected
+         - Proper 400 HTTP status returned with clear error message: 'Company name is required'
+         - Input validation working as expected
+      
+      5) **Full Payload Test (✅ PASS):**
+         - Comprehensive payload with all 25+ fields tested (company details, mission/vision, products/services, market analysis, team, operations, financials, goals)
+         - All sections detailed and comprehensive with substantial content
+         - Complex business plan generation with full context integration
+         - Response times: ~28 seconds for comprehensive plan with all details
+      
+      **API QUALITY VERIFICATION:**
+      - ✅ All responses return proper JSON structure with 'success', 'data', and 'metadata'
+      - ✅ Metadata includes planType, companyName, industry, stage, detectedLanguage, generatedAt
+      - ✅ Error handling works correctly (400 for validation errors, 500 for server errors)
+      - ✅ Response times acceptable (9-30 seconds for LLM generation depending on complexity)
+      - ✅ Content quality high with detailed, professional business planning content
+      - ✅ All 3 plan types (traditional, lean, pitch) generate unique, framework-specific content
+      - ✅ Language detection and multi-language support implemented (Bengali/Hindi detection)
+      
+      **BUSINESS PLAN FRAMEWORKS VERIFIED:**
+      - ✅ Traditional Business Plan: Complete 8-section comprehensive plan for banks/investors
+      - ✅ Lean Startup Canvas: 9-section business model canvas for quick iteration
+      - ✅ Investor Pitch Deck: 12-slide presentation structure for funding pitches
+      
+      **RECOMMENDATION:** Business Plan Generator API is fully functional and ready for production use. All plan types generate high-quality, structured business planning content with proper frameworks and comprehensive sections."
+    - agent: "testing"
       message: "✅ BUSINESS PLAN PDF EXPORT API TESTING COMPLETED SUCCESSFULLY:
       
       **COMPREHENSIVE BACKEND TESTING RESULTS:**
