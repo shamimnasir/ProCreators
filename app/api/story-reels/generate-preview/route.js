@@ -40,7 +40,7 @@ export async function POST(request) {
     const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
 
     // Step 1: Download stock videos and process images (using streams)
-    ...`)
+    console.log(`[Preview ${jobId}] 📹 Processing ${stockVideos.length} clips...`)
     const videoFiles = []
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
