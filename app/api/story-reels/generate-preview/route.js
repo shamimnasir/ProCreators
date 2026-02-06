@@ -177,7 +177,7 @@ export async function POST(request) {
     }
 
     // Step 2: Generate or use audio
-    ...`)
+    console.log(`[Preview ${jobId}] 🎵 Processing audio...`)
     const audioPath = join(tempDir, 'voice.mp3')
     
     if (voiceOption === 'upload' && voiceFile) {
