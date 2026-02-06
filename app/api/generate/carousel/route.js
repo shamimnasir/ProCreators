@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
 import { generateImage } from '@/lib/gemini-image'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Carousel generation input schema
+const carouselGenerationSchema = z.object({
+  prompt: z.string().max(2000).optional(),
+  language: z.string().max(50).default('english'),
+  slideCount: z.number().int().min(2).max(20).default(5),
+  width: z.number().int().min(100).max(4000).default(1080),
+  height: z.number().int().min(100).max(4000).default(1080),
+  platform: z.enum(['instagram-square', 'instagram-portrait', 'linkedin', 'facebook', 'twitter']).default('instagram-square'),
+  generationMode: z.enum(['auto', 'manual']).default('auto'),
+  manualSlides: z.array(z.object({
+    slideNumber: z.number().int().optional(),
+    text: z.string().max(500)
+  })).max(20).optional(),
+  logo: z.string().max(100000).optional().nullable(),
+  logoSize: z.number().int().min(20).max(500).default(80),
+  logoPosition: z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right']).default('top-right')
+})
 
 export async function POST(request) {
   try {
@@ -11,9 +31,21 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
-    const { prompt, language, slideCount = 5, width = 1080, height = 1080, platform = 'instagram-square', generationMode = 'auto', manualSlides = [], logo = null, logoSize = 80, logoPosition = 'top-right' } = await request.json()
+    const body = await request.json()
     
-    // Validation based on mode
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(carouselGenerationSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
+    const { prompt, language, slideCount, width, height, platform, generationMode, manualSlides, logo, logoSize, logoPosition } = validation.data
+    
+    // Additional validation based on mode
     if (generationMode === 'auto' && !prompt) {
       return NextResponse.json(
         { success: false, error: 'Prompt is required for auto-generation mode' },
