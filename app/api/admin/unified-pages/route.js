@@ -166,12 +166,21 @@ export async function GET(request) {
     
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
+    const customCollection = db.collection(CUSTOM_PAGES_COLLECTION)
     
     if (pageId) {
-      // Get specific page
+      // Get specific page - check custom pages first, then registry
       let page = await collection.findOne({ pageId })
       
-      // If page doesn't exist in DB, return template
+      // Check custom pages collection
+      if (!page) {
+        page = await customCollection.findOne({ pageId })
+        if (page) {
+          page.isCustomPage = true
+        }
+      }
+      
+      // If page doesn't exist in DB, return template from registry
       if (!page && PAGE_REGISTRY[pageId]) {
         const registry = PAGE_REGISTRY[pageId]
         const template = DEFAULT_TEMPLATES[registry.type] || DEFAULT_TEMPLATES.content
@@ -199,7 +208,10 @@ export async function GET(request) {
     const savedPages = await collection.find({}).toArray()
     const savedPagesMap = new Map(savedPages.map(p => [p.pageId, p]))
     
-    // Build complete page list
+    // Get custom pages
+    const customPages = await customCollection.find({}).toArray()
+    
+    // Build complete page list from registry
     let allPages = Object.entries(PAGE_REGISTRY).map(([pageId, info]) => {
       const saved = savedPagesMap.get(pageId)
       return {
@@ -211,13 +223,32 @@ export async function GET(request) {
       }
     })
     
+    // Add custom pages to the list
+    customPages.forEach(cp => {
+      allPages.push({
+        pageId: cp.pageId,
+        title: cp.title,
+        path: cp.path,
+        type: cp.type || 'content',
+        category: cp.category || 'Custom',
+        icon: cp.icon || 'FileText',
+        isPublished: cp.isPublished ?? true,
+        isCustomized: true,
+        isCustomPage: true,
+        updatedAt: cp.updatedAt
+      })
+    })
+    
     // Filter by category if specified
     if (category && category !== 'all') {
       allPages = allPages.filter(p => p.category === category)
     }
     
-    // Get unique categories
-    const categories = [...new Set(Object.values(PAGE_REGISTRY).map(p => p.category))]
+    // Get unique categories (including Custom if there are custom pages)
+    const categories = [...new Set([
+      ...Object.values(PAGE_REGISTRY).map(p => p.category),
+      ...customPages.map(p => p.category || 'Custom')
+    ])]
     
     return NextResponse.json({ 
       success: true, 
