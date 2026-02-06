@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
 import { generateImage } from '@/lib/gemini-image'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Presentation types with specific prompts
 const PRESENTATION_TYPES = {
@@ -55,6 +56,12 @@ async function generateSlideBackground(slideTitle, slideType, topic, themeColor)
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       topic, 
       presentationType = 'business',

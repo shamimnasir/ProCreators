@@ -5,6 +5,7 @@ import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper function to check if text contains Bangla characters
 function containsBangla(text) {
@@ -820,6 +821,12 @@ function drawConclusionSlide(page, slide, fonts, dimensions, textColor, bgColor,
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       presentation,
       theme = 'modern-blue',

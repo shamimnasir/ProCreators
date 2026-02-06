@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
@@ -84,6 +85,12 @@ Return ONLY the JSON array with all required fields. No other text.`
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { topic, theme, sceneCount } = await request.json()
     
     if (!topic) {

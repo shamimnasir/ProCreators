@@ -8,6 +8,7 @@ import path from 'path'
 import { generateCoverImage, getChecklistTheme } from '@/lib/cover-image-generator'
 import { drawCoverPageWithImage, drawCoverPage } from '@/lib/pdf-design'
 import { getSizeById } from '@/lib/paper-sizes'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
 
@@ -106,6 +107,12 @@ IMPORTANT: Return ONLY valid JSON.`
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       checklistType, 
       customItems, 

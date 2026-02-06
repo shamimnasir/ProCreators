@@ -8,6 +8,7 @@ import path from 'path'
 import { spawn } from 'child_process'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 import { generateQuizHTML } from '@/lib/quiz-html-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Check if text contains non-ASCII characters (Bengali, Hindi, Arabic, Chinese, etc.)
 function hasNonAscii(text) {
@@ -494,6 +495,12 @@ function wrapText(text, font, fontSize, maxWidth, useUnicode = false) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { 
       action,

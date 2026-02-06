@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
 import { generatePlaceholderVoice, clonePlaceholderVoice } from '@/lib/voice/placeholder'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { text, type, voiceSample } = await request.json()
     
     if (!text) {

@@ -6,6 +6,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { spawn } from 'child_process'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
@@ -263,6 +264,12 @@ function stripEmojis(text) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       theme, 
       customTheme, 

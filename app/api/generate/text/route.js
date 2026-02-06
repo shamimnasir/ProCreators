@@ -3,9 +3,16 @@ import { generateText } from '@/lib/gemini-text'
 import { SYSTEM_PROMPTS } from '@/lib/system-prompts'
 import { getCollection } from '@/lib/mongodb'
 import { generateWithTracking, estimateTokens } from '@/lib/ai-tracking'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { prompt, type, systemMessage, userId, transactionId, creditsCharged } = await request.json()
     
     if (!prompt) {

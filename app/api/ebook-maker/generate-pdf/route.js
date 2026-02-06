@@ -15,6 +15,7 @@ import {
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
 import { generatePDFFromHTML, generateEbookHTML } from '@/lib/html-pdf-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to sanitize text - PRESERVES Unicode characters (Bengali, Hindi, Chinese, etc.)
 function sanitizeText(text, preserveNewlines = false) {
@@ -476,6 +477,12 @@ function renderRichContent(pdfDoc, page, blocks, options) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       cover,
       introduction,

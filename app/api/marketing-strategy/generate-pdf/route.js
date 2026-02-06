@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Check if Puppeteer/Chromium is available
 async function tryGeneratePDF(htmlContent) {
@@ -940,6 +941,12 @@ function generateMarketingStrategyHTML(data, metadata) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { data, metadata, saveToLibrary: shouldSaveToLibrary } = body
 

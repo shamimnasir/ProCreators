@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY || process.env.GOOGLE_API_KEY)
 
@@ -220,6 +221,12 @@ function getThemedCategories(cuisine) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { bookType, title, recipeCount, targetAudience } = await request.json()
     
     const config = BOOK_TYPE_CONFIGS[bookType] || BOOK_TYPE_CONFIGS['general']

@@ -15,6 +15,7 @@ import {
 } from '@/lib/pdf-design'
 import { generateCoverImage, getPlannerTheme } from '@/lib/cover-image-generator'
 import { getSizeById } from '@/lib/paper-sizes'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Use Google Generative AI with the proper Google API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
@@ -469,6 +470,12 @@ function drawHabitPage(page, fonts, colors, month) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       plannerType, 
       colorScheme = 'rose-gold',

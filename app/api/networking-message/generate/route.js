@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Message types with templates
 const MESSAGE_TYPES = {
@@ -70,6 +71,12 @@ async function callLLM(prompt, systemPrompt) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const {
       recipientName,

@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
 import { generateImage } from '@/lib/gemini-image'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { prompt, language, slideCount = 5, width = 1080, height = 1080, platform = 'instagram-square', generationMode = 'auto', manualSlides = [], logo = null, logoSize = 80, logoPosition = 'top-right' } = await request.json()
     
     // Validation based on mode

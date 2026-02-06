@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
@@ -44,6 +45,12 @@ function detectLanguage(text) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { topic, genre, targetAudience, chapterCount, tone } = await request.json()
     
     if (!topic) {

@@ -13,6 +13,7 @@ import {
 } from '@/lib/pdf-design'
 import { generateCoverImage, getWorksheetTheme } from '@/lib/cover-image-generator'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Check if text contains non-Latin characters (Bengali, Hindi, Arabic, Chinese, etc.)
 function hasNonLatinCharacters(text) {
@@ -438,6 +439,12 @@ function generateWorksheetHTML(data) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { cover, sections, bonusQuestions, settings, includeAnswerKey, language } = await request.json()
     
     if (!cover?.title || !sections?.length) {

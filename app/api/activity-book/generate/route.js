@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { spawn } from 'child_process'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Activity Generation Functions
 const ACTIVITY_GENERATORS = {
@@ -1909,6 +1910,12 @@ async function getImageBytes(imageUrl) {
 // Main API Handler
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { action } = body
     

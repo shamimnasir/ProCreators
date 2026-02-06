@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to run LLM
 async function runLLM(prompt, systemPrompt = 'You are an expert curriculum designer and experienced teacher.') {
@@ -335,6 +336,12 @@ function generateLessonPlanHTML(lessonPlan, config) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { action } = body
 

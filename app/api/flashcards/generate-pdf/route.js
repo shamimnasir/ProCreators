@@ -4,6 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { getCollection } from '@/lib/mongodb'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // KDP Sizes in points (72 points = 1 inch)
 const KDP_SIZES = {
@@ -207,6 +208,12 @@ function drawBackgroundPattern(page, x, y, cardWidth, cardHeight, design, baseCo
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const {
       title,

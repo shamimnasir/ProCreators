@@ -12,6 +12,7 @@ import {
   getCurrentYear
 } from '@/lib/pdf-design'
 import { generateCoverImage, getJournalTheme } from '@/lib/cover-image-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to sanitize text
 function sanitizeText(text) {
@@ -59,6 +60,12 @@ function wrapText(text, font, fontSize, maxWidth) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { 
       cover,
       introduction,

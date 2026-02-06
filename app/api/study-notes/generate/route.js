@@ -5,6 +5,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Check if text contains Bangla characters
 function containsBangla(text) {
@@ -1123,6 +1124,12 @@ async function generatePDF(notes, config) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const contentType = request.headers.get('content-type') || ''
     
     // Handle FormData (for file uploads)

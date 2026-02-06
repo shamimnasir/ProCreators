@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
 import { generateText } from '@/lib/gemini-text'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { topic, hasObjectImage, language } = await request.json()
 
     if (!topic && !hasObjectImage) {

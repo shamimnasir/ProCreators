@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to call the Python script for text generation
 async function generateWithGemini(prompt, systemMessage = 'You are an expert educator creating flashcard content.') {
@@ -471,6 +472,12 @@ function getFlashcardsFromDatabase(topic, count, difficulty, category) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { topic, count = 20, difficulty = 'medium', category, useAI = true } = body
     

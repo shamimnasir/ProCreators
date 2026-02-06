@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Replicate from 'replicate'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export const maxDuration = 300 // 5 minutes timeout for video generation
 
@@ -24,6 +25,12 @@ const VIDEO_MODELS = {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { script, mode, duration, language, platform, image } = await request.json()
 
     if (!script) {

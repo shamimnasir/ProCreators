@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Keyword-based content database - matched against user's title
 const TOPIC_DATABASE = {
@@ -364,6 +365,12 @@ function findMatchingTopic(title) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { guideType, title, chapterCount, targetAudience, difficulty } = await request.json()
     
     // First, try to match the title to specific content

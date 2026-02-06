@@ -4,6 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { getCollection } from '@/lib/mongodb'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to parse hex color to RGB
 function hexToRgb(hex) {
@@ -27,6 +28,12 @@ const ASSORTED_COLORS = [
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const {
       title,
       templateStyle,

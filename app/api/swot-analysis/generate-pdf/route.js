@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Generate SWOT Analysis PDF HTML
 function generateSwotHTML(data, metadata) {
@@ -469,6 +470,12 @@ function generateSwotHTML(data, metadata) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { data, metadata, saveToLibrary: shouldSaveToLibrary } = body
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // PREMIUM TEMPLATE STRUCTURES - Comprehensive multi-database systems
 // Each template includes: Multiple databases, Dashboard content, Getting started guide, Rich sample data
@@ -1037,6 +1038,12 @@ const VIEW_CONFIGS = {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const body = await request.json()
     const { 
       category, 

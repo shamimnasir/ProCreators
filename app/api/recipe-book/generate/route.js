@@ -6,6 +6,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { drawCoverPageWithImage, PDF_COLOR_SCHEMES } from '@/lib/pdf-design'
 import { generateCoverImage } from '@/lib/cover-image-generator'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Color schemes for recipe books
 const RECIPE_COLOR_SCHEMES = {
@@ -98,6 +99,12 @@ function wrapText(text, font, fontSize, maxWidth) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const {
       bookType,
       title,
