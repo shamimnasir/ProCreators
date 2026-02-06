@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Base URL from environment
-BASE_URL = "https://procreators-homepage.preview.emergentagent.com"
+BASE_URL = "https://devshield-6.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 class ProCreatorsAPITest:
