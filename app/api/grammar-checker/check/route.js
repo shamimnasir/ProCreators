@@ -56,11 +56,18 @@ async function runLLM(prompt, systemPrompt) {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { text, writingStyle = 'conversational' } = body
-
-    if (!text) {
-      return NextResponse.json({ success: false, error: 'Text is required' }, { status: 400 })
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(grammarCheckSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
     }
+    
+    const { text, writingStyle } = validation.data
 
     const systemPrompt = `You are an expert grammar checker and writing quality analyzer. Analyze text for:
 1. Grammar errors
