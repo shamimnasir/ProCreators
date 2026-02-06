@@ -211,8 +211,6 @@ async function generateCoverImage(topic, quizType, customPrompt) {
         ? `${customPrompt}. Professional quiz book cover, clean modern design, educational and engaging.`
         : `Professional quiz and test book cover about "${topicInfo.name}". Modern, clean design with subtle ${topicInfo.name.toLowerCase()} themed elements. Educational, engaging, high quality cover art, no text on the image.`
       
-      }...`)
-      
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
       const inputData = JSON.stringify({
