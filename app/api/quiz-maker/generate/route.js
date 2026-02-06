@@ -9,6 +9,44 @@ import { spawn } from 'child_process'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 import { generateQuizHTML } from '@/lib/quiz-html-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Quiz Maker input schema
+const quizMakerSchema = z.object({
+  action: z.enum(['generate-structure', 'generate-pdf']).optional(),
+  topic: z.string().max(500).optional(),
+  quizType: z.enum(['academic', 'fun', 'trivia', 'personality', 'assessment', 'educational']).default('academic'),
+  gradeLevel: z.string().max(50).optional(),
+  questionCount: z.number().int().min(1).max(100).default(10),
+  questionTypes: z.array(z.enum(['multiple-choice', 'true-false', 'short-answer', 'matching', 'fill-blank'])).max(5).default(['multiple-choice']),
+  difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']).default('medium'),
+  customPrompt: z.string().max(2000).optional(),
+  customTopic: z.string().max(500).optional(),
+  includeAnswerKey: z.boolean().default(true),
+  generateCover: z.boolean().default(true),
+  customCoverPrompt: z.string().max(1000).optional(),
+  primaryColor: z.string().max(50).default('#1e40af'),
+  secondaryColor: z.string().max(50).default('#3b82f6'),
+  paperSize: z.enum(['8.5x11', '8.5x8.5', 'A4', 'Letter']).default('8.5x11'),
+  title: z.string().max(500).optional(),
+  authorName: z.string().max(200).optional(),
+  quizContent: z.object({
+    title: z.string().max(500).optional(),
+    description: z.string().max(2000).optional(),
+    instructions: z.string().max(2000).optional(),
+    questions: z.array(z.object({
+      question: z.string().max(2000).optional(),
+      options: z.array(z.string().max(500)).max(10).optional(),
+      answer: z.string().max(1000).optional(),
+      explanation: z.string().max(1000).optional()
+    })).max(100).optional(),
+    bonusQuestion: z.object({
+      question: z.string().max(2000).optional(),
+      answer: z.string().max(1000).optional()
+    }).optional()
+  }).optional()
+})
 
 // Check if text contains non-ASCII characters (Bengali, Hindi, Arabic, Chinese, etc.)
 function hasNonAscii(text) {
