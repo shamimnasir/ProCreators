@@ -286,7 +286,7 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
   while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
     await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
     prediction = await replicate.predictions.get(prediction.id)
-    }
+  }
   
   if (prediction.status !== 'succeeded') {
     throw new Error(`Prediction failed with status: ${prediction.status}`)
