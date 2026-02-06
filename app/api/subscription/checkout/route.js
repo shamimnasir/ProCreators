@@ -1,35 +1,53 @@
-// Subscription Checkout API - Creates Stripe subscription checkout sessions
+// Subscription Checkout API - Secured with Zod validation and rate limiting
+// Creates Stripe subscription checkout sessions
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { MEMBERSHIP_PLANS } from '@/lib/membership'
 import { v4 as uuidv4 } from 'uuid'
 import { requireAuth } from '@/lib/auth-middleware'
+import { validateRequest, subscriptionCheckoutSchema } from '@/lib/validation'
+import { enforceRateLimit } from '@/lib/rate-limiter'
+import { logSecurityEvent, SECURITY_EVENTS } from '@/lib/security-logger'
 
 export async function POST(request) {
   try {
-    // SECURITY: Require authentication for subscription checkout
+    // SECURITY: Rate limiting for subscription changes
+    const rateLimitCheck = await enforceRateLimit(request, 'subscription')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+    
+    // SECURITY: Require authentication
     const auth = await requireAuth(request)
     if (!auth.authenticated) {
       return auth.response
     }
     
+    const body = await request.json()
+    
+    // SECURITY: Zod validation
+    const validation = validateRequest(subscriptionCheckoutSchema, {
+      planId: body.planId,
+      billingCycle: body.billingCycle,
+      originUrl: body.originUrl
+    })
+    
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
+    const { planId, billingCycle, originUrl } = validation.data
     const userId = auth.userId
     
-    const body = await request.json()
-    const { planId, billingCycle = 'monthly', originUrl } = body
-    
-    // Validate plan
+    // Get plan from server-side config (never trust client)
     const plan = MEMBERSHIP_PLANS[planId]
     if (!plan || planId === 'free') {
       return NextResponse.json(
         { success: false, error: 'Invalid plan' },
-        { status: 400 }
-      )
-    }
-    
-    if (!originUrl) {
-      return NextResponse.json(
-        { success: false, error: 'originUrl required' },
         { status: 400 }
       )
     }
@@ -42,7 +60,7 @@ export async function POST(request) {
       )
     }
     
-    // Get the correct Stripe Price ID
+    // Get the correct Stripe Price ID from server config
     const priceId = billingCycle === 'yearly' ? plan.stripeYearlyPriceId : plan.stripePriceId
     
     if (!priceId || priceId.includes('placeholder')) {
@@ -52,7 +70,7 @@ export async function POST(request) {
       )
     }
     
-    // Create URLs
+    // Create URLs with validated origin
     const successUrl = `${originUrl}/dashboard/billing?subscription=success&plan=${planId}&session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${originUrl}/pricing?canceled=true`
     
@@ -62,7 +80,7 @@ export async function POST(request) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price: priceId, // Use existing Stripe Price ID
+        price: priceId,
         quantity: 1,
       }],
       mode: 'subscription',
@@ -87,8 +105,10 @@ export async function POST(request) {
     // Store pending subscription in database
     const { db } = await connectToDatabase()
     const amount = billingCycle === 'yearly' ? plan.priceYearly : plan.price
+    const transactionId = uuidv4()
+    
     await db.collection('subscription_transactions').insertOne({
-      _id: uuidv4(),
+      _id: transactionId,
       sessionId: session.id,
       userId,
       planId,
@@ -102,6 +122,17 @@ export async function POST(request) {
       updatedAt: new Date()
     })
     
+    // Log the subscription initiation for audit
+    await logSecurityEvent(SECURITY_EVENTS.SENSITIVE_DATA_ACCESS, {
+      action: 'subscription_checkout_initiated',
+      userId,
+      planId,
+      billingCycle,
+      amount,
+      transactionId,
+      ip: request.headers.get('x-forwarded-for') || 'unknown'
+    })
+    
     return NextResponse.json({
       success: true,
       url: session.url,
@@ -109,15 +140,14 @@ export async function POST(request) {
     })
     
   } catch (error) {
-    console.error('Subscription checkout error:', error)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Subscription checkout failed' },
       { status: 500 }
     )
   }
 }
 
-// GET - Return available plans
+// GET - Return available plans (public, no auth required)
 export async function GET() {
   const plans = Object.values(MEMBERSHIP_PLANS).map(plan => ({
     id: plan.id,
