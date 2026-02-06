@@ -48,6 +48,12 @@ async function runLLM(prompt, systemPrompt) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Rate limiting for blog generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+    
     const body = await request.json()
     const {
       articleType,
