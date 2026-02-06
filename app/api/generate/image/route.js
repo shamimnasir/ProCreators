@@ -2,6 +2,19 @@ import { NextResponse } from 'next/server'
 import { generateImage } from '@/lib/gemini-image'
 import { trackImageGeneration } from '@/lib/ai-tracking'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Image generation input schema
+const imageGenerationSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required').max(2000, 'Prompt too long'),
+  userId: z.string().max(100).optional(),
+  transactionId: z.string().max(100).optional(),
+  creditsCharged: z.number().positive().max(10000).optional(),
+  toolId: z.string().max(100).optional(),
+  style: z.string().max(100).optional(),
+  aspectRatio: z.enum(['1:1', '16:9', '9:16', '4:3', '3:4']).optional()
+})
 
 export async function POST(request) {
   try {
@@ -11,14 +24,19 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
     
-    const { prompt, userId, transactionId, creditsCharged, toolId } = await request.json()
+    const body = await request.json()
     
-    if (!prompt) {
-      return NextResponse.json(
-        { success: false, error: 'Prompt is required' },
-        { status: 400 }
-      )
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(imageGenerationSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
     }
+    
+    const { prompt, userId, transactionId, creditsCharged, toolId } = validation.data
 
     const result = await generateImage(prompt)
     
