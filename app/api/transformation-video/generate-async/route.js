@@ -6,6 +6,7 @@ import { join } from 'path'
 import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
