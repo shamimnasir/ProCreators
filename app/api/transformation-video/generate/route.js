@@ -9,6 +9,7 @@ import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { spawn } from 'child_process'
 import path from 'path'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
