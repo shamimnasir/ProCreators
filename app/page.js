@@ -258,6 +258,30 @@ export default function Home() {
   const { setTheme } = useTheme()
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userName, setUserName] = useState('')
+
+  // Check if user is logged in
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      const sessionToken = localStorage.getItem('sessionToken')
+      if (sessionToken) {
+        try {
+          const res = await fetch('/api/auth/session', {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+          })
+          const data = await res.json()
+          if (data.success && data.user) {
+            setIsLoggedIn(true)
+            setUserName(data.user.name || data.user.email?.split('@')[0] || 'User')
+          }
+        } catch (error) {
+          console.error('Auth check error:', error)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
   // Set dark mode for homepage (landing page)
   React.useEffect(() => {
