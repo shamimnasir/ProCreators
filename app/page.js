@@ -342,33 +342,28 @@ export default function Home() {
               className="space-y-8"
             >
               {/* Warning Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-red-500/20 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400">
-                <AlertTriangle className="h-4 w-4 animate-pulse" />
-                WARNING: Highly Addictive Platform
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/30 px-4 py-2 text-sm font-medium text-[#a78bfa]">
+                <Target className="h-4 w-4" />
+                Built for Money Makers
               </div>
 
-              {/* Main Provocative H1 */}
+              {/* Main H1 - Clean professional style */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                <span className="text-red-500">Don't</span>
-                <span className="text-foreground"> use </span>
-                <span className="bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] bg-clip-text text-transparent">ProCreators</span>
-                <span className="text-foreground">,</span>
+                <span className="text-foreground">Whether You're a </span>
+                <span className="text-[#a78bfa]">Beginner</span>
                 <br />
-                <span className="text-foreground">because it's </span>
-                <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-pulse">ADDICTIVE</span>
+                <span className="text-foreground">or a </span>
+                <span className="text-emerald-400">7-Figure Creator</span>
               </h1>
 
               {/* H2 - Expanded Benefits */}
               <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
-                It solves <span className="text-foreground font-semibold">ALL the problems</span> of Creators, Businesses, Educators, Students & Job Seekers in <span className="text-[#7c3aed] font-bold">ONE place</span>
-                <br />
-                <span className="text-lg text-muted-foreground/80">...and it just keeps releasing <span className="text-yellow-400 font-bold">CREATOR DOPAMINES</span>!</span>
+                We've got your back. <span className="text-foreground font-semibold">Zero learning curve.</span> Just results.
               </p>
 
               {/* Subheadline */}
-              <p className="text-lg md:text-xl text-orange-400 font-medium flex items-center justify-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Once you're in, there's no way out!
+              <p className="text-lg md:text-xl text-emerald-400 font-medium">
+                Your success story starts here.
               </p>
 
               {/* CTA Buttons */}
@@ -376,9 +371,9 @@ export default function Home() {
                 <Button 
                   size="lg"
                   onClick={() => router.push('/register')}
-                  className="text-lg px-8 py-6 bg-gradient-to-r from-[#7c3aed] via-[#a78bfa] to-[#7c3aed] hover:from-[#6d28d9] hover:via-[#7c3aed] hover:to-[#6d28d9] border-0 text-foreground font-bold uppercase tracking-wider glow-primary transition-all duration-300 hover:scale-105"
+                  className="text-lg px-8 py-6 bg-[#7c3aed] hover:bg-[#6d28d9] border-0 text-white font-bold glow-primary transition-all duration-300 hover:scale-105"
                 >
-                  Get Addicted Now
+                  Start Creating Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button 
@@ -393,7 +388,7 @@ export default function Home() {
 
               {/* Trial notice */}
               <p className="text-sm text-muted-foreground">
-                14-day free trial • No credit card required • Cancel anytime
+                50 free credits • No credit card required • Cancel anytime
               </p>
 
               {/* Tool badges */}
