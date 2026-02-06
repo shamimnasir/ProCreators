@@ -145,6 +145,48 @@ Automatically integrated into login:
 - Logs `BRUTE_FORCE` event for monitoring
 - Returns 429 Too Many Requests
 
+### 5. Rate Limiting (`/lib/rate-limiter.js`) 🆕
+In-memory rate limiter protecting against API abuse:
+
+**Configured Limits:**
+```javascript
+RATE_LIMITS = {
+  auth_login: { maxRequests: 5, windowMs: 15 * 60 * 1000 },     // 5 per 15 min
+  auth_signup: { maxRequests: 3, windowMs: 60 * 60 * 1000 },    // 3 per hour
+  auth_password_reset: { maxRequests: 3, windowMs: 60 * 60 * 1000 },
+  stripe_checkout: { maxRequests: 10, windowMs: 60 * 60 * 1000 },
+  subscription: { maxRequests: 5, windowMs: 60 * 60 * 1000 },
+  profile_update: { maxRequests: 20, windowMs: 60 * 60 * 1000 },
+  library_save: { maxRequests: 100, windowMs: 60 * 60 * 1000 },
+  content_generate: { maxRequests: 60, windowMs: 60 * 60 * 1000 },
+  api_general: { maxRequests: 100, windowMs: 60 * 1000 }        // 100 per min
+}
+```
+
+**Usage:**
+```javascript
+import { enforceRateLimit } from '@/lib/rate-limiter'
+
+// At the start of your API handler
+const rateLimitCheck = await enforceRateLimit(request, 'stripe_checkout')
+if (rateLimitCheck.limited) {
+  return rateLimitCheck.response  // Returns 429 with Retry-After header
+}
+```
+
+**Protected APIs:**
+- `/api/auth` - Login, signup, password reset
+- `/api/user/profile` - Profile updates
+- `/api/stripe/checkout` - Credit purchases
+- `/api/subscription/checkout` - Subscription changes
+- `/api/library/save` - Content saves
+
+**Response Headers:**
+- `X-RateLimit-Limit` - Maximum requests allowed
+- `X-RateLimit-Remaining` - Requests remaining
+- `X-RateLimit-Reset` - Seconds until reset
+- `Retry-After` - Seconds to wait (on 429)
+
 ---
 
 ## Security Files Summary
