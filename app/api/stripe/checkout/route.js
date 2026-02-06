@@ -1,10 +1,15 @@
-// Stripe Checkout API - Creates checkout sessions for credit purchases
+// Stripe Checkout API - Secured with Zod validation and rate limiting
+// Creates checkout sessions for credit purchases
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 import { MEMBERSHIP_PLANS } from '@/lib/membership'
+import { requireAuth, optionalAuth } from '@/lib/auth-middleware'
+import { validateRequest, stripeCheckoutSchema } from '@/lib/validation'
+import { enforceRateLimit } from '@/lib/rate-limiter'
+import { logSecurityEvent, SECURITY_EVENTS } from '@/lib/security-logger'
 
-// Credit packages - NEVER accept amounts from frontend
+// Credit packages - NEVER accept amounts from frontend (server-side pricing only)
 const CREDIT_PACKAGES = {
   starter: {
     id: 'starter',
@@ -49,8 +54,14 @@ function getSubscriberDiscount(planId) {
 // GET - Return available packages with optional subscriber discount
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const auth = await optionalAuth(request)
+    let userId = auth?.userId
+    
+    // Fallback to query param
+    if (!userId) {
+      const { searchParams } = new URL(request.url)
+      userId = searchParams.get('userId')
+    }
     
     let discount = 0
     let userPlan = 'free'
@@ -81,7 +92,6 @@ export async function GET(request) {
       discount: Math.round(discount * 100)
     })
   } catch (error) {
-    console.error('Error fetching packages:', error)
     return NextResponse.json({
       success: true,
       packages: Object.values(CREDIT_PACKAGES)
@@ -92,28 +102,42 @@ export async function GET(request) {
 // POST - Create checkout session with subscriber discount
 export async function POST(request) {
   try {
-    const body = await request.json()
-    const { packageId, userId, originUrl } = body
+    // SECURITY: Rate limiting for checkout creation
+    const rateLimitCheck = await enforceRateLimit(request, 'stripe_checkout')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
     
-    // Validate package
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
+    const body = await request.json()
+    
+    // SECURITY: Zod validation - use authenticated userId, not from body
+    const validation = validateRequest(stripeCheckoutSchema, {
+      packageId: body.packageId,
+      userId: auth.userId,
+      originUrl: body.originUrl
+    })
+    
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
+    const { packageId, userId, originUrl } = validation.data
+    
+    // Get package from server-side config (NEVER trust client pricing)
     const pack = CREDIT_PACKAGES[packageId]
     if (!pack) {
       return NextResponse.json(
         { success: false, error: 'Invalid package' },
-        { status: 400 }
-      )
-    }
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'userId required' },
-        { status: 400 }
-      )
-    }
-    
-    if (!originUrl) {
-      return NextResponse.json(
-        { success: false, error: 'originUrl required' },
         { status: 400 }
       )
     }
@@ -137,15 +161,15 @@ export async function POST(request) {
       discount = getSubscriberDiscount(user.plan)
     }
     
-    // Calculate final price with discount
+    // Calculate final price with discount (server-side only)
     const originalPrice = pack.price
     const finalPrice = discount > 0 ? Math.round((originalPrice * (1 - discount)) * 100) / 100 : originalPrice
     
-    // Create URLs
+    // Create URLs with validated origin
     const successUrl = `${originUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`
     const cancelUrl = `${originUrl}/dashboard/billing?canceled=true`
     
-    // Create Stripe checkout session using native API
+    // Create Stripe checkout session
     const stripe = require('stripe')(STRIPE_API_KEY)
     
     // Build product description with discount info
@@ -182,8 +206,9 @@ export async function POST(request) {
     })
     
     // Store pending transaction in database
+    const transactionId = uuidv4()
     await db.collection('payment_transactions').insertOne({
-      _id: uuidv4(),
+      _id: transactionId,
       sessionId: session.id,
       userId,
       packageId,
@@ -200,6 +225,16 @@ export async function POST(request) {
       updatedAt: new Date()
     })
     
+    // Log the checkout initiation for audit
+    await logSecurityEvent(SECURITY_EVENTS.SENSITIVE_DATA_ACCESS, {
+      action: 'stripe_checkout_initiated',
+      userId,
+      packageId,
+      amount: finalPrice,
+      transactionId,
+      ip: request.headers.get('x-forwarded-for') || 'unknown'
+    })
+    
     return NextResponse.json({
       success: true,
       url: session.url,
@@ -210,9 +245,8 @@ export async function POST(request) {
     })
     
   } catch (error) {
-    console.error('Stripe checkout error:', error)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Checkout creation failed' },
       { status: 500 }
     )
   }
