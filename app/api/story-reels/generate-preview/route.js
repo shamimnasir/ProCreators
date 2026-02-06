@@ -274,7 +274,7 @@ export async function POST(request) {
     })
 
     // Step 4: Create PREVIEW video (720p, fast encoding)
-    ...`)
+    console.log(`[Preview ${jobId}] 🎬 Creating preview video...`)
     
     const durationPerClip = actualAudioDuration / videoFiles.length
     const normalizedFiles = []
