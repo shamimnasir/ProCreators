@@ -4,6 +4,7 @@ import { join } from 'path'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { randomUUID } from 'crypto'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 const execAsync = promisify(exec)
 
@@ -12,6 +13,12 @@ export async function POST(request) {
   let outputPath = null
   
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const { videoUrl, trimStart, trimEnd, brightness, contrast, saturation } = await request.json()
 
     if (!videoUrl) {
@@ -22,7 +29,6 @@ export async function POST(request) {
     }
 
     // Download the video
-    )
     const videoResponse = await fetch(videoUrl)
     if (!videoResponse.ok) {
       throw new Error(`Failed to download video: ${videoResponse.status}`)
