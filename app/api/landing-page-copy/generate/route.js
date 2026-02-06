@@ -177,6 +177,17 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(landingPageCopySchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const {
       // Basic Info
       productName,
@@ -204,16 +215,9 @@ export async function POST(request) {
       urgencyElement,
       
       // Output Control
-      generateFullPage = false,
-      sectionsToGenerate = ['hero', 'problem', 'solution', 'cta']
-    } = body
-
-    if (!productName) {
-      return NextResponse.json(
-        { success: false, error: 'Product/Service name is required' },
-        { status: 400 }
-      )
-    }
+      generateFullPage,
+      sectionsToGenerate
+    } = validation.data
 
     // Language detection - check for Bengali and other non-English scripts
     const allText = `${productName} ${productDescription || ''} ${targetAudience || ''} ${painPoints || ''}`
