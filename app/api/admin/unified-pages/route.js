@@ -254,7 +254,7 @@ export async function GET(request) {
       success: true, 
       pages: allPages,
       categories,
-      totalPages: Object.keys(PAGE_REGISTRY).length
+      totalPages: allPages.length
     })
     
   } catch (error) {
@@ -263,18 +263,62 @@ export async function GET(request) {
   }
 }
 
-// POST - Create or initialize page
+// POST - Create NEW custom page or initialize existing page
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { pageId, action } = body
-    
-    if (!pageId || !PAGE_REGISTRY[pageId]) {
-      return NextResponse.json({ success: false, error: 'Invalid pageId' }, { status: 400 })
-    }
+    const { pageId, action, title, path, category, type = 'content', icon = 'FileText' } = body
     
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
+    const customCollection = db.collection(CUSTOM_PAGES_COLLECTION)
+    
+    // ACTION: Create new custom page
+    if (action === 'create-new') {
+      if (!title) {
+        return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 })
+      }
+      
+      // Generate pageId and path from title if not provided
+      const newPageId = pageId || `custom-${generateSlug(title)}-${Date.now()}`
+      const newPath = path || `/p/${generateSlug(title)}`
+      
+      // Check if path already exists
+      const existingPath = await customCollection.findOne({ path: newPath })
+      if (existingPath) {
+        return NextResponse.json({ success: false, error: 'A page with this path already exists' }, { status: 400 })
+      }
+      
+      const template = DEFAULT_TEMPLATES[type] || DEFAULT_TEMPLATES.content
+      
+      const newPage = {
+        _id: uuidv4(),
+        pageId: newPageId,
+        title,
+        path: newPath,
+        type,
+        category: category || 'Custom',
+        icon,
+        ...template,
+        seo: {
+          metaTitle: `${title} | ProCreators`,
+          metaDescription: `${title} - ProCreators AI Content Creation Platform`
+        },
+        isPublished: true,
+        isCustomPage: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      
+      await customCollection.insertOne(newPage)
+      
+      return NextResponse.json({ success: true, page: newPage, message: 'Custom page created' })
+    }
+    
+    // ACTION: Initialize existing registry page
+    if (!pageId || !PAGE_REGISTRY[pageId]) {
+      return NextResponse.json({ success: false, error: 'Invalid pageId for registry page' }, { status: 400 })
+    }
     
     // Check if page already exists
     const existing = await collection.findOne({ pageId })
