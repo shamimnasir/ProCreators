@@ -242,15 +242,18 @@ backend:
   
   - task: "Video Generation API"
     implemented: true
-    working: true
+    working: false
     file: "/app/app/api/generate/video/generate/route.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
           agent: "main"
           comment: "Multi-model video generation working with Replicate. Supports Budget/Fast/Pro modes, platform-specific aspect ratios (9:16), and image-to-video."
+        - working: false
+          agent: "testing"
+          comment: "❌ SYNTAX ERRORS PREVENTING ZOD VALIDATION: API returning 520 errors due to JavaScript syntax errors in route.js file. Found multiple issues: stray console.log statements with incorrect syntax (line 292: 'method:', line 322: ':', line 338: 'method:'), missing closing brace (line 289), and stray code fragments. Zod validation cannot be tested until syntax errors are fixed. Schema should validate: script (required, max 5000), mode (enum), duration (5-300), language, platform (enum), image (url or base64)."
   
   - task: "Text Generation API"
     implemented: true
