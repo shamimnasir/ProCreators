@@ -250,6 +250,267 @@ const DEFAULT_TEMPLATES = {
         }
       }
     ]
+  },
+  'solutions-creators': {
+    title: 'For Content Creators',
+    metaTitle: 'For Content Creators | ProCreators',
+    metaDescription: 'How ProCreators helps content creators grow their audience and monetize their content with AI-powered tools.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Built for Content Creators',
+          subtitle: 'Create engaging content 10x faster. Grow your audience. Monetize your passion.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Why Creators Love Us',
+          columns: 3,
+          items: [
+            { icon: '🎬', title: 'Video Creation', description: 'Create viral reels, shorts, and long-form videos in minutes' },
+            { icon: '📱', title: 'Social Media', description: 'Generate engaging posts, carousels, and threads instantly' },
+            { icon: '💰', title: 'Monetize Faster', description: 'Create digital products and courses to sell' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Start Creating Today',
+          subtitle: 'Join thousands of creators using ProCreators',
+          buttonText: 'Get Started Free',
+          buttonLink: '/login'
+        }
+      }
+    ]
+  },
+  'solutions-marketers': {
+    title: 'For Marketing Teams',
+    metaTitle: 'For Marketing Teams | ProCreators',
+    metaDescription: 'Scale your marketing content production with AI. Create engaging campaigns, social posts, and more.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Scale Your Marketing with AI',
+          subtitle: 'Create weeks of content in hours. Maintain brand consistency. Drive results.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Marketing Superpowers',
+          columns: 3,
+          items: [
+            { icon: '📊', title: 'Campaign Content', description: 'Generate ad copy, landing pages, and email campaigns' },
+            { icon: '🎯', title: 'Brand Consistency', description: 'Keep your brand voice across all content' },
+            { icon: '⚡', title: '10x Productivity', description: 'Do more with less. Scale without hiring.' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Transform Your Marketing',
+          subtitle: 'See how teams are scaling with AI',
+          buttonText: 'Start Free Trial',
+          buttonLink: '/login'
+        }
+      }
+    ]
+  },
+  'solutions-agencies': {
+    title: 'For Agencies',
+    metaTitle: 'For Agencies | ProCreators',
+    metaDescription: 'White-label AI content creation for agencies. Scale your client work without scaling your team.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Agency-Grade AI Content',
+          subtitle: 'Deliver more to clients. Scale without hiring. Increase your margins.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Built for Agencies',
+          columns: 3,
+          items: [
+            { icon: '🏢', title: 'White Label', description: 'Brand as your own. Impress your clients.' },
+            { icon: '👥', title: 'Team Collaboration', description: 'Multiple users, multiple clients, one platform' },
+            { icon: '📈', title: 'Scale Profits', description: 'Increase margins while delivering more' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Scale Your Agency',
+          subtitle: 'Join agencies already growing with ProCreators',
+          buttonText: 'Book a Demo',
+          buttonLink: '/contact'
+        }
+      }
+    ]
+  },
+  'solutions-educators': {
+    title: 'For Educators',
+    metaTitle: 'For Educators | ProCreators',
+    metaDescription: 'Create engaging educational content with AI. Build courses, worksheets, quizzes and more.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'AI-Powered Educational Content',
+          subtitle: 'Create engaging courses, worksheets, and quizzes in minutes.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Perfect for Educators',
+          columns: 3,
+          items: [
+            { icon: '📚', title: 'Course Creation', description: 'Build comprehensive courses and ebooks' },
+            { icon: '📝', title: 'Worksheets & Quizzes', description: 'Generate practice materials instantly' },
+            { icon: '🎥', title: 'Video Lessons', description: 'Create engaging video content for students' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Start Teaching with AI',
+          subtitle: 'Join educators creating better content faster',
+          buttonText: 'Get Started Free',
+          buttonLink: '/login'
+        }
+      }
+    ]
+  },
+  community: {
+    title: 'Community',
+    metaTitle: 'Community | ProCreators',
+    metaDescription: 'Join the ProCreators community. Connect with fellow creators, share tips, and get support.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Join Our Community',
+          subtitle: 'Connect with thousands of creators. Learn, share, and grow together.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Community Benefits',
+          columns: 3,
+          items: [
+            { icon: '💬', title: 'Discord Server', description: 'Join our active Discord community' },
+            { icon: '🎓', title: 'Learning Resources', description: 'Access tutorials and guides' },
+            { icon: '🤝', title: 'Networking', description: 'Connect with other creators' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Join the Community',
+          subtitle: 'Be part of something bigger',
+          buttonText: 'Join Discord',
+          buttonLink: 'https://discord.gg/procreators'
+        }
+      }
+    ]
+  },
+  status: {
+    title: 'System Status',
+    metaTitle: 'System Status | ProCreators',
+    metaDescription: 'Check the current status of ProCreators services.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'System Status',
+          subtitle: 'All systems operational',
+          badge: '✅ Operational',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Service Status',
+          columns: 3,
+          items: [
+            { icon: '✅', title: 'API', description: 'Operational' },
+            { icon: '✅', title: 'Dashboard', description: 'Operational' },
+            { icon: '✅', title: 'AI Generation', description: 'Operational' }
+          ]
+        }
+      }
+    ]
+  },
+  security: {
+    title: 'Security',
+    metaTitle: 'Security | ProCreators',
+    metaDescription: 'Learn about ProCreators security measures, data protection, and privacy practices.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Security at ProCreators',
+          subtitle: 'Your data security is our top priority.',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'features-1',
+        type: 'features',
+        content: {
+          title: 'Our Security Measures',
+          columns: 3,
+          items: [
+            { icon: '🔒', title: 'Encryption', description: 'All data encrypted in transit and at rest' },
+            { icon: '🛡️', title: 'SOC 2 Compliant', description: 'Enterprise-grade security standards' },
+            { icon: '🔐', title: 'Regular Audits', description: 'Continuous security monitoring and testing' }
+          ]
+        }
+      },
+      {
+        id: 'para-1',
+        type: 'paragraph',
+        content: {
+          text: 'At ProCreators, we take security seriously. We use industry-standard encryption, follow best practices for data protection, and regularly audit our systems to ensure your content and data are safe.'
+        }
+      }
+    ]
   }
 }
 
