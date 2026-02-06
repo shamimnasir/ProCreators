@@ -135,6 +135,17 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(resumeBuilderSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const { 
       rawInfo,
       targetJob, 
@@ -145,7 +156,7 @@ export async function POST(request) {
       education,
       skills,
       references
-    } = body
+    } = validation.data
 
     if (!rawInfo && !personalInfo?.name) {
       return NextResponse.json({ 
