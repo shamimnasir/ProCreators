@@ -1090,14 +1090,52 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Refactored Homepage Components Rendering"
+    - "Zod Validation - Blog Creator API"
+    - "Zod Validation - Image Generation API"
+    - "Zod Validation - Video Generation API"
+    - "Zod Validation - Carousel Generation API"
+    - "Zod Validation - Text Generation API"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "FRONTEND TESTING - Refactored Homepage Components
+      message: "IMPLEMENTING ZOD VALIDATION ON KEY CONTENT GENERATION APIs:
+      
+      **APIs Updated with Zod Validation:**
+      
+      1) **/api/blog-creator/generate** - Blog Creator
+         - Schema validates: articleType (enum), topic (required, max 500), targetKeyword, 
+           secondaryKeywords, industry, targetAudience, writingStyle (enum), wordCount (100-10000),
+           tone (enum), products, affiliateNetwork, priceRange, all boolean flags, humanizationLevel (enum)
+      
+      2) **/api/generate/image** - Image Generation  
+         - Schema validates: prompt (required, max 2000), userId, transactionId, creditsCharged, 
+           toolId, style, aspectRatio (enum)
+      
+      3) **/api/generate/video/generate** - Video Generation
+         - Schema validates: script (required, max 5000), mode (enum), duration (5-300),
+           language, platform (enum), image (url or base64)
+      
+      4) **/api/generate/carousel** - Carousel Generation
+         - Schema validates: prompt, language, slideCount (2-20), width/height (100-4000),
+           platform (enum), generationMode (enum), manualSlides (array), logo, logoSize, logoPosition
+      
+      5) **/api/generate/text** - Text Generation
+         - Schema validates: prompt (required, max 10000), type, systemMessage (max 5000),
+           userId, transactionId, creditsCharged
+      
+      **TESTS TO PERFORM:**
+      
+      Test each API endpoint with:
+      1. Valid payload - should return success
+      2. Missing required field - should return 400 with 'Validation failed'
+      3. Invalid enum value - should return 400 with specific error
+      4. Payload exceeding max length - should return 400 with 'too long' error
+      
+      **BASE URL:** http://localhost:3000"
+    - agent: "testing"
       
       **TESTING THE REFACTORED HOMEPAGE:**
       
