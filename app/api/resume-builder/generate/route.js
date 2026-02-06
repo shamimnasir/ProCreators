@@ -4,6 +4,42 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Resume Builder input schema
+const resumeBuilderSchema = z.object({
+  rawInfo: z.string().max(50000).optional(),
+  targetJob: z.string().max(200).optional(),
+  industry: z.string().max(100).optional(),
+  template: z.enum(['modern', 'classic', 'creative', 'minimal', 'tech', 'executive']).default('modern'),
+  personalInfo: z.object({
+    name: z.string().max(200).optional(),
+    email: z.string().email().max(200).optional().or(z.literal('')),
+    phone: z.string().max(50).optional(),
+    location: z.string().max(200).optional(),
+    linkedin: z.string().max(500).optional()
+  }).optional(),
+  experiences: z.array(z.object({
+    title: z.string().max(200).optional(),
+    company: z.string().max(200).optional(),
+    duration: z.string().max(100).optional(),
+    description: z.string().max(2000).optional()
+  })).max(20).optional(),
+  education: z.array(z.object({
+    degree: z.string().max(200).optional(),
+    school: z.string().max(200).optional(),
+    year: z.string().max(50).optional()
+  })).max(10).optional(),
+  skills: z.string().max(2000).optional(),
+  references: z.array(z.object({
+    name: z.string().max(200).optional(),
+    designation: z.string().max(200).optional(),
+    company: z.string().max(200).optional(),
+    email: z.string().max(200).optional(),
+    phone: z.string().max(50).optional()
+  })).max(5).optional()
+})
 
 // Helper to run LLM using Python script
 async function runLLM(prompt, systemPrompt = 'You are an expert resume writer.') {
