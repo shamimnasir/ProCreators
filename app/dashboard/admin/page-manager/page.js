@@ -140,6 +140,96 @@ export default function UnifiedPageManager() {
     }
   }
 
+  // Fetch blog posts
+  const fetchBlogPosts = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/blog')
+      const data = await res.json()
+      if (data.success) {
+        setBlogPosts(data.posts || [])
+        setBlogStats(data.stats || {})
+        setBlogCategories(data.categories || ['All', 'Uncategorized'])
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Create new blog post
+  const createBlogPost = async () => {
+    if (!newPost.title.trim()) {
+      toast({ title: 'Error', description: 'Post title is required', variant: 'destructive' })
+      return
+    }
+    
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPost)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: 'Post Created!', description: 'Draft saved. Open to edit and publish.' })
+        setShowCreatePostModal(false)
+        setNewPost({ title: '', category: 'Uncategorized', excerpt: '' })
+        fetchBlogPosts()
+        setSelectedPost(data.post)
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Save blog post
+  const saveBlogPost = async () => {
+    if (!selectedPost) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/blog', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectedPost)
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: 'Saved!', description: 'Blog post updated' })
+        setSelectedPost(data.post)
+        fetchBlogPosts()
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Delete blog post
+  const deleteBlogPost = async (postId) => {
+    if (!confirm('Delete this post permanently?')) return
+    try {
+      const res = await fetch(`/api/admin/blog?postId=${postId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: 'Deleted', description: 'Post has been removed' })
+        setSelectedPost(null)
+        fetchBlogPosts()
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' })
+    }
+  }
+
   // Create new custom page
   const createNewPage = async () => {
     if (!newPage.title.trim()) {
