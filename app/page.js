@@ -600,14 +600,14 @@ export default function Home() {
               </div>
               <h2 className="mb-4 text-4xl md:text-6xl font-bold">
                 <span className="text-foreground">Why </span>
-                <span className="text-[#a78bfa]">50,000+ Creators</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">50,000+ Creators</span>
                 <br />
                 <span className="text-foreground">Can't Stop Using This</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 It's not magic. It's just <span className="text-[#a78bfa] font-bold">criminally good AI</span> that makes you feel like a genius.
                 <br />
-                <span className="text-sm text-[#a78bfa]">(Side effects: Uncontrollable urge to create more content)</span>
+                <span className="text-sm text-orange-400">(Side effects: Uncontrollable urge to create more content)</span>
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
