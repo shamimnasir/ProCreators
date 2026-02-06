@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 
 const COLLECTION_NAME = 'unified_pages'
+const CUSTOM_PAGES_COLLECTION = 'custom_pages'
 
 // All manageable pages with their types and default configurations
 const PAGE_REGISTRY = {
@@ -32,6 +33,14 @@ const PAGE_REGISTRY = {
   security: { type: 'content', title: 'Security', path: '/security', icon: 'Lock', category: 'Company' },
   status: { type: 'status', title: 'System Status', path: '/status', icon: 'Activity', category: 'Support' },
   community: { type: 'content', title: 'Community', path: '/community', icon: 'Users2', category: 'Support' }
+}
+
+// Helper to generate slug from title
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 // Default content templates by page type
