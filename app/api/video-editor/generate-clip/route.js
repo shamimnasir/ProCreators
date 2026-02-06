@@ -3,6 +3,7 @@ import { spawn } from 'child_process'
 import { mkdir, stat } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
+import { enforceRateLimit } from '@/lib/rate-limiter'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
