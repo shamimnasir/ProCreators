@@ -56,18 +56,24 @@ export default function UnifiedPageManager() {
   const [pages, setPages] = useState([])
   const [tools, setTools] = useState([])
   const [menus, setMenus] = useState([])
+  const [blogPosts, setBlogPosts] = useState([])
+  const [blogStats, setBlogStats] = useState({})
+  const [blogCategories, setBlogCategories] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedPage, setSelectedPage] = useState(null)
   const [selectedTool, setSelectedTool] = useState(null)
   const [selectedMenu, setSelectedMenu] = useState(null)
+  const [selectedPost, setSelectedPost] = useState(null)
   const [saving, setSaving] = useState(false)
   const [activeCategory, setActiveCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedBlock, setExpandedBlock] = useState(null)
   const [initializing, setInitializing] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false)
   const [newPage, setNewPage] = useState({ title: '', type: 'content', category: 'Custom' })
+  const [newPost, setNewPost] = useState({ title: '', category: 'Uncategorized', excerpt: '' })
   const { toast } = useToast()
 
   useEffect(() => {
@@ -77,6 +83,8 @@ export default function UnifiedPageManager() {
       fetchTools()
     } else if (activeTab === 'menus') {
       fetchMenus()
+    } else if (activeTab === 'blog') {
+      fetchBlogPosts()
     }
   }, [activeTab, activeCategory])
 
