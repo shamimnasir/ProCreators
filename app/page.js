@@ -351,12 +351,23 @@ export default function Home() {
               <Link href="/blog" className="block text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
               <Link href="/dashboard" className="block text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
               <div className="pt-4 border-t border-border space-y-3">
-                <Link href="/login" className="block">
-                  <Button variant="outline" className="w-full">Log In</Button>
-                </Link>
-                <Link href="/register" className="block">
-                  <Button className="w-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa]">Start Free Trial</Button>
-                </Link>
+                {isLoggedIn ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">Logged in as {userName}</p>
+                    <Link href="/dashboard" className="block">
+                      <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-semibold">Go to Dashboard</Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="block">
+                      <Button variant="outline" className="w-full">Log In</Button>
+                    </Link>
+                    <Link href="/register" className="block">
+                      <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-semibold">Start Free Trial</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
