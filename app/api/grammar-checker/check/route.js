@@ -3,6 +3,14 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Grammar Checker input schema
+const grammarCheckSchema = z.object({
+  text: z.string().min(1, 'Text is required').max(50000, 'Text too long (max 50,000 characters)'),
+  writingStyle: z.enum(['conversational', 'formal', 'academic', 'creative', 'technical', 'business']).default('conversational')
+})
 
 async function runLLM(prompt, systemPrompt) {
   return new Promise(async (resolve, reject) => {
