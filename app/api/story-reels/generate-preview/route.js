@@ -156,7 +156,7 @@ export async function POST(request) {
             const videoBuffer = fs.readFileSync(localPath)
             await writeFile(videoPath, videoBuffer)
             videoFiles.push(videoPath)
-            } else {
+          } else {
             // External stock video - download it
             const response = await fetch(video.url)
             if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -165,7 +165,7 @@ export async function POST(request) {
             await pipeline(Readable.fromWeb(response.body), fileStream)
             
             videoFiles.push(videoPath)
-            }
+          }
         }
       } catch (error) {
         console.error(`[Preview ${jobId}] ❌ Error processing clip ${i}:`, error.message)
