@@ -678,6 +678,12 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
+    // SECURITY: Rate limiting for content generation
+    const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
+    if (rateLimitCheck.limited) {
+      return rateLimitCheck.response
+    }
+
     const formData = await request.formData()
     
     const topic = formData.get('topic') || ''
