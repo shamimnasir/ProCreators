@@ -407,8 +407,6 @@ async function generateIllustration(prompt, style) {
       
       const fullPrompt = `${styleDesc}: ${prompt}. Child-friendly, no scary elements, suitable for children's picture book.`
       
-      }...`)
-      
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
       const inputData = JSON.stringify({
