@@ -166,7 +166,6 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. ${aspectRatio} aspect ratio.`
     : script.substring(0, 500)
   
-  )
   // Model-specific configurations
   if (modelId.includes('wan-video')) {
     // Wan models - support both text and image input
