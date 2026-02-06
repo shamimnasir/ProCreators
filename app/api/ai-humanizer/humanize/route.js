@@ -114,11 +114,18 @@ const TECHNIQUE_PROMPTS = {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { text, level = 'medium', tone = 'conversational', techniques = [] } = body
-
-    if (!text) {
-      return NextResponse.json({ success: false, error: 'Text is required' }, { status: 400 })
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(humanizeSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
     }
+    
+    const { text, level, tone, techniques } = validation.data
 
     // Build technique instructions
     let techniqueInstructions = ''
