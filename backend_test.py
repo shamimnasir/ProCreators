@@ -11,7 +11,7 @@ import sys
 from typing import Dict, Any, List
 
 # Base URL from environment
-BASE_URL = "https://devshield-6.preview.emergentagent.com"
+BASE_URL = "https://ratelimit-clean.preview.emergentagent.com"
 
 class SecurityTester:
     def __init__(self, base_url: str):
