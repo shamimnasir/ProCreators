@@ -932,8 +932,8 @@ export default function Home() {
                   }`}
                 >
                   {tier.popular && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] px-6 py-2 text-sm font-bold text-foreground glow-primary">
-                      Most Popular
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] px-3 py-1 text-xs font-medium text-white">
+                      Limited Time Offer
                     </div>
                   )}
                   <div className="mb-8">
