@@ -1102,11 +1102,7 @@ agent_communication:
 
 test_plan:
   current_focus:
-    - "Zod Validation - Blog Creator API"
-    - "Zod Validation - Image Generation API"
-    - "Zod Validation - Video Generation API"
-    - "Zod Validation - Carousel Generation API"
-    - "Zod Validation - Text Generation API"
+    - "Video Generation API - Fix Syntax Errors"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
