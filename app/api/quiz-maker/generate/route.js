@@ -540,27 +540,37 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(quizMakerSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const { 
       action,
       topic,
-      quizType = 'academic',
+      quizType,
       gradeLevel,
-      questionCount = 10,
-      questionTypes = ['multiple-choice'],
-      difficulty = 'medium',
+      questionCount,
+      questionTypes,
+      difficulty,
       customPrompt,
       customTopic,
-      includeAnswerKey = true,
-      generateCover = true,
+      includeAnswerKey,
+      generateCover,
       customCoverPrompt,
-      primaryColor = '#1e40af',
-      secondaryColor = '#3b82f6',
-      paperSize = '8.5x11',
+      primaryColor,
+      secondaryColor,
+      paperSize,
       title: customTitle,
       authorName,
-      // For generating structure only
       quizContent
-    } = body
+    } = validation.data
     
     // Action: Generate quiz structure (questions only)
     if (action === 'generate-structure') {
