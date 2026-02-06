@@ -1139,7 +1139,7 @@ export async function POST(request) {
       let renderMethod = 'pdf-lib'
       
       if (needsHtmlPdf) {
-        , using HTML-to-PDF for proper text rendering...')
+        console.log('Using HTML-to-PDF for proper text rendering')
         try {
           const htmlContent = generateStorybookHTML(finalStory, {
             primaryColor,
