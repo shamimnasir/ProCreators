@@ -2,6 +2,47 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { z } from 'zod'
+import { validateRequest } from '@/lib/validation'
+
+// Business Plan input schema
+const businessPlanSchema = z.object({
+  planType: z.enum(['traditional', 'lean', 'pitch']).default('traditional'),
+  companyName: z.string().min(1, 'Company name is required').max(200),
+  companyDescription: z.string().max(2000).optional(),
+  industry: z.string().max(100).optional(),
+  businessStage: z.string().max(50).optional(),
+  legalStructure: z.string().max(50).optional(),
+  foundingDate: z.string().max(50).optional(),
+  location: z.string().max(200).optional(),
+  missionStatement: z.string().max(500).optional(),
+  visionStatement: z.string().max(500).optional(),
+  coreValues: z.string().max(500).optional(),
+  productsServices: z.string().max(2000).optional(),
+  problemSolved: z.string().max(1000).optional(),
+  uniqueValue: z.string().max(1000).optional(),
+  pricingModel: z.string().max(500).optional(),
+  targetMarket: z.string().max(1000).optional(),
+  marketSize: z.string().max(500).optional(),
+  competitors: z.string().max(1000).optional(),
+  competitiveAdvantage: z.string().max(1000).optional(),
+  founders: z.string().max(1000).optional(),
+  keyTeam: z.string().max(1000).optional(),
+  advisors: z.string().max(500).optional(),
+  hiringPlan: z.string().max(500).optional(),
+  operationsDescription: z.string().max(1000).optional(),
+  suppliers: z.string().max(500).optional(),
+  technologyStack: z.string().max(500).optional(),
+  revenueModel: z.string().max(1000).optional(),
+  startupCosts: z.string().max(500).optional(),
+  fundingNeeded: z.string().max(500).optional(),
+  fundingUse: z.string().max(1000).optional(),
+  projectedRevenue: z.string().max(500).optional(),
+  breakEvenTimeline: z.string().max(200).optional(),
+  shortTermGoals: z.string().max(1000).optional(),
+  longTermGoals: z.string().max(1000).optional(),
+  milestones: z.string().max(1000).optional()
+})
 
 // Business Plan Types
 const PLAN_TYPES = {
