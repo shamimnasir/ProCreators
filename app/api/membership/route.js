@@ -2,17 +2,49 @@
 import { NextResponse } from 'next/server'
 import { getUserMembership, MEMBERSHIP_PLANS } from '@/lib/membership'
 import { connectToDatabase } from '@/lib/mongodb'
-import { requireAuth } from '@/lib/auth-middleware'
+import { optionalAuth } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
-    // SECURITY: Require authentication
-    const auth = await requireAuth(request)
-    if (!auth.authenticated) {
-      return auth.response
+    const { searchParams } = new URL(request.url)
+    let userId = searchParams.get('userId')
+    
+    // Try to get userId from authentication if not provided
+    if (!userId) {
+      const auth = await optionalAuth(request)
+      if (auth) {
+        userId = auth.userId
+      }
     }
     
-    const userId = auth.userId
+    // If still no userId and we have auth header, try to validate it
+    if (!userId) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1]
+        if (token) {
+          const { db } = await connectToDatabase()
+          const session = await db.collection('sessions').findOne({
+            token,
+            expiresAt: { $gt: new Date() }
+          })
+          if (session) {
+            userId = session.userId
+          }
+        }
+      }
+    }
+    
+    if (!userId) {
+      return NextResponse.json({
+        success: true,
+        plan: 'free',
+        membershipCredits: 0,
+        purchasedCredits: 0,
+        totalCredits: 0,
+        subscription: null
+      })
+    }
     
     const { db } = await connectToDatabase()
     const user = await db.collection('users').findOne({ _id: userId })
