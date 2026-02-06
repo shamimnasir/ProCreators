@@ -312,14 +312,14 @@ async function generateWithModel(replicate, modelId, script, duration = 5, input
     // Check if it's a FileOutput object with url() method
     if (firstOutput && typeof firstOutput.url === 'function') {
       const videoUrl = firstOutput.url()
-      method:`, videoUrl)
+      console.log('FileOutput url() method:', videoUrl)
       return typeof videoUrl === 'string' ? videoUrl : videoUrl.toString()
     }
     
     // Check if it's a FileOutput with toString()
     if (firstOutput && typeof firstOutput.toString === 'function') {
       const videoUrl = firstOutput.toString()
-      :`, videoUrl)
+      console.log('FileOutput toString():', videoUrl)
       return videoUrl
     }
     
