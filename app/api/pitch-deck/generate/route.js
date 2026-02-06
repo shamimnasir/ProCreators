@@ -116,6 +116,17 @@ export async function POST(request) {
     }
 
     const body = await request.json()
+    
+    // SECURITY: Validate input with Zod schema
+    const validation = validateRequest(pitchDeckSchema, body)
+    if (!validation.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Validation failed',
+        errors: validation.errors
+      }, { status: 400 })
+    }
+    
     const {
       // Company Info
       companyName,
@@ -157,20 +168,13 @@ export async function POST(request) {
       financialProjections,
       
       // Style
-      deckStyle = 'classic',
+      deckStyle,
       
       // Contact
       presenterName,
       presenterTitle,
       contactEmail
-    } = body
-
-    if (!companyName) {
-      return NextResponse.json(
-        { success: false, error: 'Company name is required' },
-        { status: 400 }
-      )
-    }
+    } = validation.data
 
     // Language detection
     const allText = `${companyName} ${companyDescription || ''} ${problemStatement || ''} ${solution || ''}`
