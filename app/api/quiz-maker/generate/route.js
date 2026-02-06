@@ -625,7 +625,7 @@ export async function POST(request) {
       
       // Use HTML-to-PDF for complex scripts (better text rendering)
       if (needsHtmlPdf) {
-        , using HTML-to-PDF for proper text rendering...')
+        console.log('Using HTML-to-PDF for proper text rendering')
         
         try {
           const finalTitle = customTitle || content.title || 'Quiz'
