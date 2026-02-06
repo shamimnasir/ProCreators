@@ -837,14 +837,18 @@ export default function UnifiedPageManager() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 max-w-lg">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl">
           <TabsTrigger value="website" className="gap-2">
             <Globe className="h-4 w-4" />
-            Website Pages
+            Pages
+          </TabsTrigger>
+          <TabsTrigger value="blog" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Blog
           </TabsTrigger>
           <TabsTrigger value="tools" className="gap-2">
             <Wrench className="h-4 w-4" />
-            Tool Pages
+            Tools
           </TabsTrigger>
           <TabsTrigger value="menus" className="gap-2">
             <Menu className="h-4 w-4" />
