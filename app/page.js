@@ -453,10 +453,10 @@ export default function Home() {
                 <span className="text-foreground">Stop Paying for </span>
                 <span className="text-muted-foreground line-through">10 Different Tools</span>
                 <br />
-                <span className="text-[#a78bfa]">Get 70+ Tools in ONE</span>
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Get 70+ Tools in ONE</span>
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-emerald-400 font-bold">$19/month</span>
+                Canva + Jasper + Descript + Pictory + ElevenLabs + 65 more = <span className="text-orange-400 font-bold">$19/month</span>
                 <br />
                 <span className="text-sm text-[#a78bfa]">Your wallet just did a happy dance</span>
               </p>
