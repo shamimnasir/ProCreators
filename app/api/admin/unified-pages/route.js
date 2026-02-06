@@ -425,11 +425,12 @@ export async function PUT(request) {
   }
 }
 
-// DELETE - Reset page to default (removes customizations)
+// DELETE - Reset page to default OR delete custom page permanently
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url)
     const pageId = searchParams.get('pageId')
+    const permanent = searchParams.get('permanent') === 'true'
     
     if (!pageId) {
       return NextResponse.json({ success: false, error: 'pageId is required' }, { status: 400 })
@@ -437,7 +438,16 @@ export async function DELETE(request) {
     
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
+    const customCollection = db.collection(CUSTOM_PAGES_COLLECTION)
     
+    // Check if it's a custom page
+    const customPage = await customCollection.findOne({ pageId })
+    if (customPage) {
+      await customCollection.deleteOne({ pageId })
+      return NextResponse.json({ success: true, message: 'Custom page deleted permanently' })
+    }
+    
+    // For registry pages, just remove customizations
     await collection.deleteOne({ pageId })
     
     return NextResponse.json({ success: true, message: 'Page reset to default' })
