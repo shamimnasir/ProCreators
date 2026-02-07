@@ -1,15 +1,21 @@
 // CSRF Token API Route
 // Provides CSRF tokens for form submissions
 import { NextResponse } from 'next/server'
-import { generateCsrfToken } from '@/lib/csrf'
+import crypto from 'crypto'
+
+const CSRF_SECRET = process.env.CSRF_SECRET || process.env.SALT || 'procreators-csrf-secret'
 
 export async function GET(request) {
   try {
-    // Get session ID from auth header or generate anonymous one
-    const authHeader = request.headers.get('authorization')
-    const sessionId = authHeader?.split(' ')[1] || `anon_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+    // Generate a simpler CSRF token - just timestamp + signature
+    const timestamp = Date.now()
+    const data = `csrf:${timestamp}`
+    const signature = crypto
+      .createHmac('sha256', CSRF_SECRET)
+      .update(data)
+      .digest('hex')
     
-    const token = generateCsrfToken(sessionId)
+    const token = Buffer.from(`${timestamp}:${signature}`).toString('base64')
     
     return NextResponse.json({
       success: true,
