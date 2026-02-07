@@ -1076,12 +1076,70 @@ Examples:
                         />
                       </div>
                       <div>
-                        <Label>Cover Image URL</Label>
-                        <Input 
-                          value={selectedPost.coverImage || ''}
-                          onChange={(e) => setSelectedPost(p => ({ ...p, coverImage: e.target.value }))}
-                          placeholder="https://..."
-                        />
+                        <Label>Cover Image</Label>
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input 
+                              value={selectedPost.coverImage || ''}
+                              onChange={(e) => setSelectedPost(p => ({ ...p, coverImage: e.target.value }))}
+                              placeholder="https://... or upload an image"
+                              className="flex-1"
+                            />
+                            <label className="cursor-pointer">
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0]
+                                  if (!file) return
+                                  
+                                  const formData = new FormData()
+                                  formData.append('file', file)
+                                  formData.append('folder', 'blog')
+                                  
+                                  try {
+                                    toast({ title: 'Uploading...', description: 'Please wait' })
+                                    const res = await fetch('/api/upload', {
+                                      method: 'POST',
+                                      body: formData
+                                    })
+                                    const data = await res.json()
+                                    if (data.success) {
+                                      setSelectedPost(p => ({ ...p, coverImage: data.url }))
+                                      toast({ title: 'Uploaded!', description: 'Image uploaded successfully' })
+                                    } else {
+                                      throw new Error(data.error)
+                                    }
+                                  } catch (err) {
+                                    toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })
+                                  }
+                                }}
+                              />
+                              <Button type="button" variant="outline" size="icon" asChild>
+                                <span><Upload className="h-4 w-4" /></span>
+                              </Button>
+                            </label>
+                          </div>
+                          {selectedPost.coverImage && (
+                            <div className="relative rounded-lg overflow-hidden border aspect-video bg-muted">
+                              <img 
+                                src={selectedPost.coverImage} 
+                                alt="Cover preview" 
+                                className="w-full h-full object-cover"
+                                onError={(e) => e.target.style.display = 'none'}
+                              />
+                              <Button 
+                                size="sm" 
+                                variant="destructive" 
+                                className="absolute top-2 right-2"
+                                onClick={() => setSelectedPost(p => ({ ...p, coverImage: '' }))}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <Label>Featured Post</Label>
