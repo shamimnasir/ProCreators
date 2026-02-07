@@ -169,25 +169,6 @@ export function PhilosophySection() {
             </p>
           </div>
 
-          {/* Inspirational Quote */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="mb-16 text-center"
-          >
-            <div className="max-w-3xl mx-auto p-8 rounded-2xl bg-gradient-to-r from-[#7c3aed]/10 via-[#a78bfa]/10 to-[#7c3aed]/10 border border-[#7c3aed]/20">
-              <Quote className="h-10 w-10 text-[#a78bfa] mx-auto mb-4 opacity-50" />
-              <blockquote className="text-2xl md:text-3xl font-bold text-foreground mb-4 italic">
-                "The best AI is the one you don't have to think about using."
-              </blockquote>
-              <p className="text-muted-foreground">
-                — That's why we built ProCreators to be <span className="text-orange-400 font-semibold">stupidly simple</span>.
-              </p>
-            </div>
-          </motion.div>
-
           <div className="grid gap-8 md:grid-cols-3">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -231,23 +212,8 @@ export function PhilosophySection() {
               <p className="text-muted-foreground">We warned you. Once you start, you won't want to stop creating.</p>
             </motion.div>
           </div>
-
-          {/* Tagline Message */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="mt-12 text-center"
-          >
-            <p className="text-xl text-muted-foreground">
-              <Zap className="inline h-5 w-5 text-yellow-500 mr-2" />
-              <span className="text-foreground font-semibold">No learning curve.</span> No tutorials needed. Just 
-              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold"> click, create, and conquer.</span>
-            </p>
-          </motion.div>
           
-          {/* New: Who is ProCreators for? */}
+          {/* Who is ProCreators for? */}
           <div className="mt-16 text-center">
             <h3 className="text-2xl font-bold text-foreground mb-6">Who is ProCreators For?</h3>
             <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
