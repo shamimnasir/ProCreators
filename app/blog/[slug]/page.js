@@ -157,6 +157,7 @@ export default function BlogPostPage() {
           <div className="prose prose-lg dark:prose-invert max-w-none">
             {post.content ? (
               <ReactMarkdown
+                rehypePlugins={[rehypeRaw]}
                 components={{
                   h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
                   h2: ({ children }) => <h2 className="text-2xl font-bold mt-8 mb-4">{children}</h2>,
@@ -183,7 +184,11 @@ export default function BlogPostPage() {
                   ),
                   img: ({ src, alt }) => (
                     <img src={src} alt={alt} className="rounded-lg my-6" />
-                  )
+                  ),
+                  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                  b: ({ children }) => <strong className="font-bold">{children}</strong>,
+                  em: ({ children }) => <em className="italic">{children}</em>,
+                  i: ({ children }) => <em className="italic">{children}</em>
                 }}
               >
                 {post.content}
