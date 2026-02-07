@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Calendar, User, Clock, Share2, BookOpen, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Navbar, Footer } from '@/components/landing/MoreSections'
+import { Header } from '@/components/shared/Header'
+import { Footer } from '@/components/landing/MoreSections'
 import ReactMarkdown from 'react-markdown'
 
 export default function BlogPostPage() {
