@@ -219,7 +219,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/blog', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify(newPost)
       })
       const data = await res.json()
@@ -246,7 +246,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/blog', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify(selectedPost)
       })
       const data = await res.json()
