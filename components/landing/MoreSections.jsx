@@ -189,7 +189,80 @@ export function PopularToolsSection() {
   )
 }
 
+// Default footer menus (used as fallback)
+const DEFAULT_FOOTER_MENUS = {
+  footer_product: {
+    name: 'Product',
+    items: [
+      { id: 'fp1', label: 'All Features', link: '/#features' },
+      { id: 'fp2', label: 'Pricing', link: '/pricing' },
+      { id: 'fp3', label: 'Dashboard', link: '/dashboard' },
+      { id: 'fp4', label: 'Roadmap', link: '/roadmap' }
+    ]
+  },
+  footer_solutions: {
+    name: 'Solutions',
+    items: [
+      { id: 'fs1', label: 'Content Creators', link: '/solutions/creators' },
+      { id: 'fs2', label: 'Marketing Teams', link: '/solutions/marketers' },
+      { id: 'fs3', label: 'Agencies', link: '/solutions/agencies' },
+      { id: 'fs4', label: 'Educators', link: '/solutions/educators' }
+    ]
+  },
+  footer_resources: {
+    name: 'Resources',
+    items: [
+      { id: 'fr1', label: 'Help Center', link: '/docs' },
+      { id: 'fr2', label: 'Blog', link: '/blog' },
+      { id: 'fr3', label: 'Community', link: '/community' },
+      { id: 'fr4', label: 'Status', link: '/status' }
+    ]
+  },
+  footer_company: {
+    name: 'Company',
+    items: [
+      { id: 'fc1', label: 'About Us', link: '/about' },
+      { id: 'fc2', label: 'Careers', link: '/careers' },
+      { id: 'fc3', label: 'Contact', link: '/contact' }
+    ]
+  }
+}
+
+const DEFAULT_LEGAL_ITEMS = [
+  { id: 'fl1', label: 'Privacy Policy', link: '/privacy' },
+  { id: 'fl2', label: 'Terms of Service', link: '/terms' },
+  { id: 'fl3', label: 'Security', link: '/security' }
+]
+
 export function Footer() {
+  const [footerMenus, setFooterMenus] = useState(Object.values(DEFAULT_FOOTER_MENUS))
+  const [legalItems, setLegalItems] = useState(DEFAULT_LEGAL_ITEMS)
+
+  // Fetch dynamic footer menus
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        // Fetch footer columns
+        const footerRes = await fetch('/api/menus?location=footer')
+        const footerData = await footerRes.json()
+        if (footerData.success && footerData.menus?.length > 0) {
+          setFooterMenus(footerData.menus)
+        }
+
+        // Fetch legal/bottom links
+        const legalRes = await fetch('/api/menus?location=footer_bottom')
+        const legalData = await legalRes.json()
+        if (legalData.success && legalData.menu?.items?.length > 0) {
+          setLegalItems(legalData.menu.items)
+        }
+      } catch (error) {
+        console.error('Failed to fetch footer menus:', error)
+        // Keep default menus on error
+      }
+    }
+    fetchMenus()
+  }, [])
+
   return (
     <footer className="border-t border-border bg-background/80 backdrop-blur-xl">
       <div className="container px-6 py-16">
@@ -213,59 +286,41 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Product Column */}
-          <div>
-            <h3 className="text-foreground font-semibold mb-4">Product</h3>
-            <ul className="space-y-3">
-              <li><Link href="/#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm">All Features</Link></li>
-              <li><Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Pricing</Link></li>
-              <li><Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Dashboard</Link></li>
-              <li><Link href="/roadmap" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Roadmap</Link></li>
-            </ul>
-          </div>
-
-          {/* Solutions Column */}
-          <div>
-            <h3 className="text-foreground font-semibold mb-4">Solutions</h3>
-            <ul className="space-y-3">
-              <li><Link href="/solutions/creators" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Content Creators</Link></li>
-              <li><Link href="/solutions/marketers" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Marketing Teams</Link></li>
-              <li><Link href="/solutions/agencies" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Agencies</Link></li>
-              <li><Link href="/solutions/educators" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Educators</Link></li>
-            </ul>
-          </div>
-
-          {/* Resources Column */}
-          <div>
-            <h3 className="text-foreground font-semibold mb-4">Resources</h3>
-            <ul className="space-y-3">
-              <li><Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Help Center</Link></li>
-              <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Blog</Link></li>
-              <li><Link href="/community" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Community</Link></li>
-              <li><Link href="/status" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Status</Link></li>
-            </ul>
-          </div>
-
-          {/* Company Column */}
-          <div>
-            <h3 className="text-foreground font-semibold mb-4">Company</h3>
-            <ul className="space-y-3">
-              <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm">About Us</Link></li>
-              <li><Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Careers</Link></li>
-              <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Contact</Link></li>
-            </ul>
-          </div>
+          {/* Dynamic Footer Columns */}
+          {footerMenus.map((menu) => (
+            <div key={menu.menuId || menu.name}>
+              <h3 className="text-foreground font-semibold mb-4">{menu.name}</h3>
+              <ul className="space-y-3">
+                {(menu.items || []).map((item) => (
+                  <li key={item.id}>
+                    <Link 
+                      href={item.link} 
+                      className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* Bottom Footer */}
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 ProCreators. All rights reserved.
+            © {new Date().getFullYear()} ProCreators. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link>
-            <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Terms of Service</Link>
-            <Link href="/security" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Security</Link>
+            {legalItems.map((item) => (
+              <Link 
+                key={item.id}
+                href={item.link} 
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
