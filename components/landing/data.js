@@ -61,7 +61,7 @@ export const features = [
     description: 'Threads, carousels, quotes, LinkedIn posts - schedule weeks of content in minutes.'
   },
   {
-    icon: Sparkles,
+    icon: Zap,
     title: 'So Easy, Anyone Can Create',
     description: 'No design skills? No problem. Our AI does the heavy lifting - just click, create, and share.'
   },
