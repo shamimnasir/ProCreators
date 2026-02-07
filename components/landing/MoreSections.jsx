@@ -15,7 +15,7 @@ const allTools = [
   { name: 'Video Editor', icon: Video, desc: 'Trim, merge, and enhance videos', color: 'from-orange-500 to-amber-500' },
   { name: 'AI Image Editor', icon: Edit3, desc: 'Transform any image with AI magic', color: 'from-purple-500 to-violet-500' },
   { name: 'AI Thumbnail Maker', icon: Image, desc: 'Platform-optimized thumbnails with AI', color: 'from-green-500 to-emerald-500' },
-  { name: 'Photo Cards', icon: Sparkles, desc: 'Beautiful social media cards', color: 'from-pink-500 to-rose-500' },
+  { name: 'Photo Cards', icon: Heart, desc: 'Beautiful social media cards', color: 'from-pink-500 to-rose-500' },
   { name: 'Learning Cards', icon: GraduationCap, desc: 'Educational flashcards & study materials', color: 'from-cyan-500 to-teal-500' },
   { name: 'Carousels', icon: Grid3X3, desc: 'Multi-slide social media carousels', color: 'from-blue-500 to-indigo-500' },
   { name: 'Image Generator', icon: ImageIcon, desc: 'Create stunning AI-generated images', color: 'from-lime-500 to-green-500' },
