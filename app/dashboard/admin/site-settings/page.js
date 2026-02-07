@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import { 
   Settings, Palette, Home, Share2, FileText, BarChart3, 
   Save, Loader2, ExternalLink, Globe, Image, Type,
@@ -23,6 +24,7 @@ export default function SiteSettingsPage() {
   const [saving, setSaving] = useState({})
   const [activeTab, setActiveTab] = useState('branding')
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     fetchSettings()
