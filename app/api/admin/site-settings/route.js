@@ -144,6 +144,16 @@ export async function GET(request) {
 // POST - Update site settings
 export async function POST(request) {
   try {
+    // Verify CSRF token for mutations
+    const csrfResult = verifyCsrf(request)
+    if (!csrfResult.valid) {
+      return NextResponse.json({ 
+        success: false, 
+        error: csrfResult.error || 'CSRF validation failed',
+        code: 'CSRF_INVALID'
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     const { section, data } = body
     
