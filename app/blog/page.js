@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { BookOpen, Search, ArrowRight, Calendar, User, Clock, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { Navbar, Footer } from '@/components/landing/MoreSections'
+import { Header } from '@/components/shared/Header'
+import { Footer } from '@/components/landing/MoreSections'
 
 export default function BlogPage() {
   const [posts, setPosts] = useState([])
@@ -60,7 +61,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6">
