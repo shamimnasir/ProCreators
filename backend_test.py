@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, List
 
 # Base URL from environment
-BASE_URL = "https://blogmanager.preview.emergentagent.com"
+BASE_URL = "https://content-refactor.preview.emergentagent.com"
 
 class APITester:
     def __init__(self, base_url: str):
