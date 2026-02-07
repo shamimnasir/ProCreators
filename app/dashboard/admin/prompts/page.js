@@ -67,7 +67,7 @@ export default function AdminPromptsPage() {
     try {
       const response = await fetch('/api/admin/prompts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           nicheSlug,
           prompt: editedPrompts[nicheSlug]
