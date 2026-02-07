@@ -327,7 +327,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/menus', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify(selectedMenu)
       })
       const data = await res.json()
