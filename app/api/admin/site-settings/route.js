@@ -39,6 +39,7 @@ const DEFAULT_SETTINGS = {
   
   // Footer
   footer: {
+    footerDescription: 'The ultimate AI-powered content creation platform. From videos to ebooks, we help creators dominate every platform.',
     copyrightText: '© 2025 ProCreators. All rights reserved.',
     showSocialLinks: true,
     links: [
