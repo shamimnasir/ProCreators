@@ -72,7 +72,26 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { action, userId, toolId, transactionId, amount, reason, params } = body
+    let { action, userId, toolId, transactionId, amount, reason, params } = body
+    
+    // SECURITY: For history action, prefer Authorization header over body userId
+    if (action === 'history') {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1]
+        if (token) {
+          const { connectToDatabase } = await import('@/lib/mongodb')
+          const { db } = await connectToDatabase()
+          const session = await db.collection('sessions').findOne({
+            token,
+            expiresAt: { $gt: new Date() }
+          })
+          if (session) {
+            userId = session.userId
+          }
+        }
+      }
+    }
     
     switch (action) {
       case 'check': {
