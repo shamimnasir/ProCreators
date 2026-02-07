@@ -120,6 +120,10 @@ export function PhilosophySection() {
               <span className="text-foreground">Why We're </span>
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Different</span>
             </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto mt-4">
+              AI tools today are complicated. We're here to change that. 
+              <span className="text-orange-400 font-semibold"> ProCreators makes AI so easy that a kid can use it and get things done.</span>
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -164,6 +168,34 @@ export function PhilosophySection() {
               <h3 className="text-xl font-bold text-foreground mb-3">Addictively Good</h3>
               <p className="text-muted-foreground">We warned you. Once you start, you won't want to stop creating.</p>
             </motion.div>
+          </div>
+          
+          {/* New: Who is ProCreators for? */}
+          <div className="mt-16 text-center">
+            <h3 className="text-2xl font-bold text-foreground mb-6">Who is ProCreators For?</h3>
+            <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+              {[
+                { emoji: '🎬', label: 'Content Creators', desc: 'Create viral videos, thumbnails & posts' },
+                { emoji: '💼', label: 'Job Seekers', desc: 'Build resumes, cover letters & portfolios' },
+                { emoji: '🏢', label: 'Business Builders', desc: 'Generate pitches, plans & marketing' },
+                { emoji: '🛠️', label: 'Product Makers', desc: 'Design ebooks, courses & digital assets' },
+                { emoji: '📚', label: 'Students & Teachers', desc: 'Create study materials & lessons' },
+                { emoji: '🚀', label: 'Anyone with Ideas', desc: 'Turn concepts into reality' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  viewport={{ once: true }}
+                  className="px-5 py-3 rounded-xl bg-white/5 border border-border hover:border-[#7c3aed]/50 hover:bg-white/10 transition-all"
+                >
+                  <span className="text-2xl mr-2">{item.emoji}</span>
+                  <span className="text-foreground font-medium">{item.label}</span>
+                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
