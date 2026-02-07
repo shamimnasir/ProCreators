@@ -103,7 +103,27 @@ export function ToolsShowcase() {
           </p>
         </div>
 
-        {/* Simplified tools grid - just popular tools */}
+        {/* Full Tool Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+          {allTools.map((tool, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.05 }}
+              viewport={{ once: true }}
+              className="group p-6 rounded-2xl border border-border bg-gradient-to-b from-muted/30 to-transparent hover:border-[#7c3aed]/50 hover:bg-muted/50 transition-all duration-300 cursor-pointer"
+            >
+              <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${tool.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <tool.icon className="h-6 w-6 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-2">{tool.name}</h3>
+              <p className="text-sm text-muted-foreground">{tool.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Quick access pills */}
         <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
           {popularTools.map((tool, i) => (
             <motion.div 
