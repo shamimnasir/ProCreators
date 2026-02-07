@@ -1239,7 +1239,7 @@ export default function UnifiedPageManager() {
                                       if (url) insertAtCursor('[', `](${url})`, 'link text')
                                     }}
                                   >
-                                    <Link className="h-4 w-4" />
+                                    <LinkIcon className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>Insert Link</TooltipContent>
