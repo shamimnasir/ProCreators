@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Target, Check, Lightbulb, Rocket, Brain, AlertTriangle, 
   Video, Mic, Image, Presentation, FileText, BookOpen, Quote, MessageSquare,
   ListTodo, Newspaper, ScrollText, GraduationCap, BookMarked, Baby,
-  Scissors, Edit3, Grid3X3, Sparkles } from 'lucide-react'
+  Scissors, Edit3, Grid3X3, Sparkles, Image as ImageIcon, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
 import { useCases, popularTools } from './data'
