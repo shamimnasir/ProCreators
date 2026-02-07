@@ -61,9 +61,6 @@ export function StatsSection() {
               viewport={{ once: true }}
               className="text-center group"
             >
-              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] group-hover:scale-110 transition-transform">
-                <stat.icon className="h-6 w-6 text-white" />
-              </div>
               <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">
                 {stat.number}
               </div>
