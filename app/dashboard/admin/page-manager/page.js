@@ -268,7 +268,10 @@ export default function UnifiedPageManager() {
   const deleteBlogPost = async (postId) => {
     if (!confirm('Delete this post permanently?')) return
     try {
-      const res = await fetch(`/api/admin/blog?postId=${postId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/blog?postId=${postId}`, { 
+        method: 'DELETE',
+        headers: { ...getCsrfHeaders() }
+      })
       const data = await res.json()
       if (data.success) {
         toast({ title: 'Deleted', description: 'Post has been removed' })
@@ -291,7 +294,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/unified-pages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           action: 'create-new',
           title: newPage.title,
