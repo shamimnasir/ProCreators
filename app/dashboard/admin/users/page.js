@@ -14,6 +14,7 @@ import {
   ChevronLeft, ChevronRight, Plus, Minus, UserCog, Trash2, Shield
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,7 @@ export default function AdminUsersPage() {
   const [planFilter, setPlanFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
+  const { getCsrfHeaders } = useCsrf()
   const [actionDialogOpen, setActionDialogOpen] = useState(false)
   const [currentAction, setCurrentAction] = useState(null)
   const [actionParams, setActionParams] = useState({})
