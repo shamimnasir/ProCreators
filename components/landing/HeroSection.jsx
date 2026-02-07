@@ -162,6 +162,19 @@ export function HeroSection({ onGetStarted, onExplore }) {
               14-day free trial • No credit card required • Cancel anytime
             </p>
 
+            {/* Easy to use badge */}
+            <div className="flex flex-wrap justify-center gap-4 pt-2">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30">
+                <span className="text-green-400 text-sm font-medium">✓ So easy, even a kid can create</span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30">
+                <span className="text-blue-400 text-sm font-medium">✓ No AI skills required</span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30">
+                <span className="text-purple-400 text-sm font-medium">✓ 70+ tools, one platform</span>
+              </div>
+            </div>
+
             {/* Tool badges */}
             <div className="pt-4">
               <p className="text-sm text-muted-foreground mb-4">Integrated AI Models:</p>
