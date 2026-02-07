@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -8,10 +8,38 @@ import { Menu, X, Moon, Sun } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { useTheme } from 'next-themes'
 
+// Default navigation items (used as fallback)
+const DEFAULT_NAV_ITEMS = [
+  { id: 'h1', label: 'Features', link: '/#features' },
+  { id: 'h2', label: 'Tools', link: '/#tools' },
+  { id: 'h3', label: 'Pricing', link: '/pricing' },
+  { id: 'h4', label: 'Roadmap', link: '/roadmap' },
+  { id: 'h5', label: 'Blog', link: '/blog' },
+  { id: 'h6', label: 'Dashboard', link: '/dashboard' }
+]
+
 export function Header() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [navItems, setNavItems] = useState(DEFAULT_NAV_ITEMS)
+
+  // Fetch dynamic navigation from Menu API
+  useEffect(() => {
+    const fetchNavigation = async () => {
+      try {
+        const res = await fetch('/api/menus?location=header')
+        const data = await res.json()
+        if (data.success && data.menu?.items?.length > 0) {
+          setNavItems(data.menu.items)
+        }
+      } catch (error) {
+        console.error('Failed to fetch navigation:', error)
+        // Keep default items on error
+      }
+    }
+    fetchNavigation()
+  }, [])
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
@@ -21,12 +49,15 @@ export function Header() {
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="/#features" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Features</Link>
-          <Link href="/#tools" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Tools</Link>
-          <Link href="/#pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Pricing</Link>
-          <Link href="/roadmap" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Roadmap</Link>
-          <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Blog</Link>
-          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Dashboard</Link>
+          {navItems.map((item) => (
+            <Link 
+              key={item.id} 
+              href={item.link} 
+              className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -59,12 +90,16 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
           <div className="container px-6 py-6 space-y-4">
-            <Link href="/#features" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Features</Link>
-            <Link href="/#tools" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Tools</Link>
-            <Link href="/#pricing" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/roadmap" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Roadmap</Link>
-            <Link href="/blog" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
-            <Link href="/dashboard" className="block text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+            {navItems.map((item) => (
+              <Link 
+                key={item.id}
+                href={item.link} 
+                className="block text-muted-foreground hover:text-foreground transition-colors" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
             <div className="pt-4 border-t border-border space-y-3">
               <Button
                 variant="ghost"
