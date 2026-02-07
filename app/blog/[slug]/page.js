@@ -64,7 +64,7 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
+        <Header />
         <div className="flex items-center justify-center py-40">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -76,7 +76,7 @@ export default function BlogPostPage() {
   if (error || !post) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
+        <Header />
         <div className="container py-40 text-center">
           <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
           <h1 className="text-3xl font-bold mb-4">Post Not Found</h1>
@@ -97,7 +97,7 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
       
       <article className="pt-32 pb-20">
         {/* Header */}
