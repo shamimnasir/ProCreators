@@ -584,6 +584,13 @@ export async function GET(request) {
       page = await customCollection.findOne({ pageId })
     }
     
+    // If page exists but has empty contentBlocks, fall back to default template
+    if (page && (!page.contentBlocks || page.contentBlocks.length === 0) && DEFAULT_TEMPLATES[pageId]) {
+      const template = DEFAULT_TEMPLATES[pageId]
+      page.contentBlocks = template.contentBlocks
+      // Keep other metadata from database (title, metaTitle, metaDescription, etc.)
+    }
+    
     // If still not found, use default template
     if (!page) {
       // Check if we have a default template for this page
