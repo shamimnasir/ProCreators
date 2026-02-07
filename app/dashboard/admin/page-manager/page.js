@@ -15,7 +15,7 @@ import {
   Search, Filter, RefreshCw, ExternalLink, CheckCircle, XCircle,
   Map, CreditCard, BookOpen, FileQuestion, Video, BarChart, Building,
   GraduationCap, Lock, Activity, Users2, Briefcase, Settings, Database,
-  Check, X, Wrench, Layout, Code, Menu, Link2, PlusCircle
+  Check, X, Wrench, Layout, Code, Menu, Link2, PlusCircle, Upload, Image
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
