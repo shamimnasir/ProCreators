@@ -4,7 +4,7 @@
 import { 
   Video, Film, BookOpen, FileText, Mic, Layers, TrendingUp, Rocket, Heart,
   Megaphone, BadgeDollarSign, Building2, GraduationCap, Briefcase,
-  Image as ImageIcon, Sparkles
+  Image as ImageIcon, Zap
 } from 'lucide-react'
 
 export const homepageFAQs = [
