@@ -333,6 +333,21 @@ backend:
           agent: "testing"
           comment: "✅ ZOD VALIDATION WORKING: All validation tests passed. Missing prompt correctly rejected with 400 status and 'Validation failed' error. Invalid aspect ratio correctly rejected with proper error structure. Zod schema validates: prompt (required, max 2000), userId, transactionId, creditsCharged, toolId, style, aspectRatio (enum). API returns proper JSON with success/imageUrl structure."
 
+  - task: "Billing Page Authentication Refactor"
+    implemented: true
+    working: true
+    file: "/app/app/api/credits/route.js, /app/app/api/membership/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "BILLING PAGE AUTH REFACTOR COMPLETED: Updated /api/credits (GET & POST), /api/membership (GET), and frontend billing page to use Authorization header (Bearer token) instead of userId query parameter. All APIs now extract userId from session token as primary method with fallback to query param for backward compatibility."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE BILLING AUTHENTICATION TESTING COMPLETED: All 7 test cases passed with 100% success rate. GET /api/credits: ✅ WITH auth returns credits info (400 credits, creator plan), ✅ WITHOUT auth returns 401 'Authentication required', ✅ WITH invalid token returns 401. GET /api/membership: ✅ WITH auth returns membership info (creator plan, active subscription), ✅ WITHOUT auth returns default free plan response. POST /api/credits (action: history): ✅ WITH auth returns credit history (empty array), ✅ WITHOUT auth returns 401. Authentication refactor working perfectly - all APIs properly validate Bearer tokens and return appropriate responses for authenticated/unauthenticated requests."
+
 frontend:
   - task: "Refactored Homepage Components Rendering"
     implemented: true
