@@ -185,7 +185,7 @@ export function StaticPage({ pageId }) {
     const fetchPage = async () => {
       try {
         // Fetch from unified CMS API (supports both unified_pages and custom_pages)
-        const res = await fetch(`/api/pages/${pageId}`)
+        const res = await fetch(`/api/content-pages?pageId=${pageId}`)
         const data = await res.json()
         if (data.success) {
           setPage(data.page)
