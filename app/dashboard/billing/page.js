@@ -169,7 +169,7 @@ export default function BillingPage() {
     }
   }
 
-  const pollPaymentStatus = async (sessionId, currentUserId, attempts = 0) => {
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
     const maxAttempts = 5
     
     if (attempts >= maxAttempts) {
@@ -190,8 +190,8 @@ export default function BillingPage() {
           title: '🎉 Payment Successful!',
           description: `${data.credits} credits have been added to your account.`,
         })
-        fetchCredits(currentUserId)
-        fetchTransactions(currentUserId)
+        fetchCredits()
+        fetchTransactions()
         return
       } else if (data.status === 'expired') {
         toast({
@@ -213,12 +213,15 @@ export default function BillingPage() {
     setPurchasing(packageId)
     
     try {
+      const sessionToken = localStorage.getItem('sessionToken')
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`
+        },
         body: JSON.stringify({
           packageId,
-          userId: userId,
           originUrl: window.location.origin
         })
       })
