@@ -155,6 +155,16 @@ export async function GET(request) {
 // POST - Create new menu
 export async function POST(request) {
   try {
+    // Verify CSRF token for mutations
+    const csrfResult = verifyCsrf(request)
+    if (!csrfResult.valid) {
+      return NextResponse.json({ 
+        success: false, 
+        error: csrfResult.error || 'CSRF validation failed',
+        code: 'CSRF_INVALID'
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     const { name, location, column, items = [] } = body
     
@@ -191,6 +201,16 @@ export async function POST(request) {
 // PUT - Update menu
 export async function PUT(request) {
   try {
+    // Verify CSRF token for mutations
+    const csrfResult = verifyCsrf(request)
+    if (!csrfResult.valid) {
+      return NextResponse.json({ 
+        success: false, 
+        error: csrfResult.error || 'CSRF validation failed',
+        code: 'CSRF_INVALID'
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     const { menuId, name, items, column } = body
     
