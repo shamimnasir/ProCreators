@@ -1,21 +1,7 @@
 // Site Settings API - Manage branding, social links, analytics, and more
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
-import { verifyCsrfToken } from '@/lib/csrf'
-
-// Helper to verify CSRF for mutations
-function verifyCsrf(request) {
-  const csrfToken = request.headers.get('x-csrf-token')
-  const authHeader = request.headers.get('authorization')
-  const sessionId = authHeader?.split(' ')[1] || `anon_${Date.now()}`
-  
-  // In development, allow requests without CSRF for easier testing
-  if (process.env.NODE_ENV === 'development' && !csrfToken) {
-    return { valid: true }
-  }
-  
-  return verifyCsrfToken(csrfToken, sessionId)
-}
+import { verifyCsrf } from '@/lib/csrf-verify'
 
 const DEFAULT_SETTINGS = {
   // Branding
