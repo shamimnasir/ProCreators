@@ -61,9 +61,9 @@ export const features = [
     description: 'Threads, carousels, quotes, LinkedIn posts - schedule weeks of content in minutes.'
   },
   {
-    icon: Mic,
-    title: 'Voice Clone Magic',
-    description: 'Clone your voice once. Create unlimited content in ANY language. Yes, even Bangla!'
+    icon: Sparkles,
+    title: 'So Easy, Anyone Can Create',
+    description: 'No design skills? No problem. Our AI does the heavy lifting - just click, create, and share.'
   },
   {
     icon: Rocket,
