@@ -1,8 +1,7 @@
 // Membership API - Get user membership status and credits breakdown
 import { NextResponse } from 'next/server'
-import { getUserMembership, MEMBERSHIP_PLANS } from '@/lib/membership'
+import { MEMBERSHIP_PLANS } from '@/lib/membership'
 import { connectToDatabase } from '@/lib/mongodb'
-import { optionalAuth } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
