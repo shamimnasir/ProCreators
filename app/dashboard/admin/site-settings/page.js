@@ -49,7 +49,7 @@ export default function SiteSettingsPage() {
     try {
       const res = await fetch('/api/admin/site-settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({ section, data: settings[section] })
       })
       const data = await res.json()
