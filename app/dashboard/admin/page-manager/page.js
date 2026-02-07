@@ -76,7 +76,53 @@ export default function UnifiedPageManager() {
   const [showCreatePostModal, setShowCreatePostModal] = useState(false)
   const [newPage, setNewPage] = useState({ title: '', type: 'content', category: 'Custom' })
   const [newPost, setNewPost] = useState({ title: '', category: 'Uncategorized', excerpt: '' })
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const contentEditorRef = useRef(null)
   const { toast } = useToast()
+
+  // Rich text editor helper - insert text at cursor position
+  const insertAtCursor = (before, after = '', placeholder = '') => {
+    const textarea = contentEditorRef.current
+    if (!textarea) return
+    
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const content = selectedPost.content || ''
+    const selectedText = content.substring(start, end) || placeholder
+    
+    const newContent = content.substring(0, start) + before + selectedText + after + content.substring(end)
+    setSelectedPost(p => ({ ...p, content: newContent }))
+    
+    // Restore focus and cursor position
+    setTimeout(() => {
+      textarea.focus()
+      const newPos = start + before.length + selectedText.length + after.length
+      textarea.setSelectionRange(newPos, newPos)
+    }, 0)
+  }
+
+  // Upload and insert image into content
+  const uploadContentImage = async (file) => {
+    setUploadingImage(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', 'blog')
+    
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        insertAtCursor(`\n![Image](${data.url})\n`, '', '')
+        toast({ title: 'Image uploaded!', description: 'Image inserted into content' })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   useEffect(() => {
     if (activeTab === 'website') {
