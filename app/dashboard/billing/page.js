@@ -91,12 +91,13 @@ export default function BillingPage() {
     }
   }
 
-  const fetchCredits = async (uid) => {
-    const currentUserId = uid || userId
+  const fetchCredits = async () => {
     try {
       const sessionToken = localStorage.getItem('sessionToken')
-      const res = await fetch(`/api/credits?userId=${currentUserId}`, {
-        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      if (!sessionToken) return
+      
+      const res = await fetch('/api/credits', {
+        headers: { 'Authorization': `Bearer ${sessionToken}` }
       })
       const data = await res.json()
       if (data.success) {
@@ -110,12 +111,13 @@ export default function BillingPage() {
     }
   }
 
-  const fetchMembership = async (uid) => {
-    const currentUserId = uid || userId
+  const fetchMembership = async () => {
     try {
       const sessionToken = localStorage.getItem('sessionToken')
-      const res = await fetch(`/api/membership?userId=${currentUserId}`, {
-        headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
+      if (!sessionToken) return
+      
+      const res = await fetch('/api/membership', {
+        headers: { 'Authorization': `Bearer ${sessionToken}` }
       })
       const data = await res.json()
       if (data.success) {
@@ -129,12 +131,11 @@ export default function BillingPage() {
     }
   }
 
-  const fetchPackagesWithDiscount = async (uid) => {
-    const currentUserId = uid || userId
+  const fetchPackagesWithDiscount = async () => {
     try {
       const sessionToken = localStorage.getItem('sessionToken')
-      // Pass userId to get subscriber-specific discounts
-      const res = await fetch(`/api/stripe/checkout?userId=${currentUserId}`, {
+      // Pass Authorization header for subscriber-specific discounts
+      const res = await fetch('/api/stripe/checkout', {
         headers: sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}
       })
       const data = await res.json()
@@ -146,17 +147,18 @@ export default function BillingPage() {
     }
   }
 
-  const fetchTransactions = async (uid) => {
-    const currentUserId = uid || userId
+  const fetchTransactions = async () => {
     try {
       const sessionToken = localStorage.getItem('sessionToken')
+      if (!sessionToken) return
+      
       const res = await fetch('/api/credits', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
+          'Authorization': `Bearer ${sessionToken}`
         },
-        body: JSON.stringify({ action: 'history', userId: currentUserId })
+        body: JSON.stringify({ action: 'history' })
       })
       const data = await res.json()
       if (data.success) {
