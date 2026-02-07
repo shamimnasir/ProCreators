@@ -244,6 +244,16 @@ export async function PUT(request) {
 // DELETE - Delete post
 export async function DELETE(request) {
   try {
+    // Verify CSRF token for mutations
+    const csrfResult = verifyCsrf(request)
+    if (!csrfResult.valid) {
+      return NextResponse.json({ 
+        success: false, 
+        error: csrfResult.error || 'CSRF validation failed',
+        code: 'CSRF_INVALID'
+      }, { status: 403 })
+    }
+
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('postId')
     
