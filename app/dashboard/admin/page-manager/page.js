@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,7 @@ import {
   Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, ImagePlus, Link as LinkIcon, Type
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import Link from 'next/link'
 
 // Icon mapping
