@@ -184,7 +184,8 @@ export function StaticPage({ pageId }) {
   useEffect(() => {
     const fetchPage = async () => {
       try {
-        const res = await fetch(`/api/static-pages/${pageId}`)
+        // Fetch from unified CMS API (supports both unified_pages and custom_pages)
+        const res = await fetch(`/api/pages/${pageId}`)
         const data = await res.json()
         if (data.success) {
           setPage(data.page)
