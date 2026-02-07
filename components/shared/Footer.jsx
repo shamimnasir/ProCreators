@@ -144,7 +144,7 @@ export function Footer() {
         {/* Bottom Footer */}
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 ProCreators. All rights reserved.
+            {footer.copyrightText}
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Privacy Policy</Link>
