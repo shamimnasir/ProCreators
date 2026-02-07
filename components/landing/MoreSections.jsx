@@ -2,10 +2,33 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Target, Check, Lightbulb, Rocket, Brain, AlertTriangle } from 'lucide-react'
+import { Target, Check, Lightbulb, Rocket, Brain, AlertTriangle, 
+  Video, Mic, Image, Presentation, FileText, BookOpen, Quote, MessageSquare,
+  ListTodo, Newspaper, ScrollText, GraduationCap, BookMarked, Baby,
+  Scissors, Edit3, Grid3X3, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
 import { useCases, popularTools } from './data'
+
+// Comprehensive tool list with icons and descriptions
+const allTools = [
+  { name: 'Video Editor', icon: Video, desc: 'Trim, merge, and enhance videos', color: 'from-orange-500 to-amber-500' },
+  { name: 'Voice Clone', icon: Mic, desc: 'Clone any voice for unlimited TTS', color: 'from-purple-500 to-violet-500' },
+  { name: 'AI Thumbnail Maker', icon: Image, desc: 'Platform-optimized thumbnails with AI', color: 'from-green-500 to-emerald-500' },
+  { name: 'Photo Cards', icon: Sparkles, desc: 'Beautiful social media cards', color: 'from-pink-500 to-rose-500' },
+  { name: 'Learning Cards', icon: GraduationCap, desc: 'Educational flashcards & study materials', color: 'from-cyan-500 to-teal-500' },
+  { name: 'Carousels', icon: Grid3X3, desc: 'Multi-slide social media carousels', color: 'from-blue-500 to-indigo-500' },
+  { name: 'Image Editor', icon: Edit3, desc: 'AI-powered image editing & enhancement', color: 'from-lime-500 to-green-500' },
+  { name: 'Slides Maker', icon: Presentation, desc: 'Full presentation decks in minutes', color: 'from-orange-500 to-red-500' },
+  { name: 'Quotes Generator', icon: Quote, desc: 'Inspiring quotes for social media', color: 'from-yellow-500 to-orange-500' },
+  { name: 'Thread Creator', icon: MessageSquare, desc: 'Engaging Twitter/X threads', color: 'from-sky-500 to-blue-500' },
+  { name: 'List Maker', icon: ListTodo, desc: 'Comprehensive lists & listicles', color: 'from-rose-500 to-pink-500' },
+  { name: 'News Articles', icon: Newspaper, desc: 'Professional news-style content', color: 'from-red-500 to-rose-500' },
+  { name: 'Long-Form Articles', icon: FileText, desc: '1500+ word in-depth content', color: 'from-amber-500 to-yellow-500' },
+  { name: 'Tutorials', icon: ScrollText, desc: 'Step-by-step how-to guides', color: 'from-teal-500 to-cyan-500' },
+  { name: 'Ebook Generator', icon: BookOpen, desc: 'Complete ebooks with chapters & covers', color: 'from-indigo-500 to-purple-500' },
+  { name: 'Storybook Maker', icon: Baby, desc: "Children's stories with illustrations", color: 'from-fuchsia-500 to-pink-500' },
+]
 
 export function UseCasesSection() {
   return (
