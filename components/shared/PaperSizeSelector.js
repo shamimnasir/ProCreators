@@ -79,7 +79,7 @@ export default function PaperSizeSelector({
       </Select>
       {currentSize && showDescription && (
         <p className="text-xs text-muted-foreground">
-          {currentSize.inches.width}" × {currentSize.inches.height}" — {currentSize.description}
+          {currentSize.inches.width}" × {currentSize.inches.height}" - {currentSize.description}
         </p>
       )}
     </div>
