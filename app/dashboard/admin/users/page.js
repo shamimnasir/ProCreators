@@ -89,7 +89,7 @@ export default function AdminUsersPage() {
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           action: currentAction,
           userId: selectedUser._id,
