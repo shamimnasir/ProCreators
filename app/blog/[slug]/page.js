@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/landing/MoreSections'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 
 export default function BlogPostPage() {
   const params = useParams()
