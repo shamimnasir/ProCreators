@@ -61,11 +61,11 @@ export default function BillingPage() {
       return
     }
     
-    // Now fetch data with the correct userId - packages need userId for discounts
-    fetchCredits(currentUserId)
-    fetchMembership(currentUserId)
-    fetchPackagesWithDiscount(currentUserId)
-    fetchTransactions(currentUserId)
+    // Now fetch data using Authorization header (no userId params needed)
+    fetchCredits()
+    fetchMembership()
+    fetchPackagesWithDiscount()
+    fetchTransactions()
     
     // Check for payment success/cancel
     const sessionId = searchParams.get('session_id')
@@ -78,8 +78,8 @@ export default function BillingPage() {
         title: '🎉 Subscription Activated!',
         description: 'Welcome to your new plan! Your credits have been added.',
       })
-      fetchCredits(currentUserId)
-      fetchMembership(currentUserId)
+      fetchCredits()
+      fetchMembership()
     } else if (sessionId && success) {
       pollPaymentStatus(sessionId, currentUserId)
     } else if (canceled) {
