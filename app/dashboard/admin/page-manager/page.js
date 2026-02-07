@@ -1030,12 +1030,22 @@ export default function UnifiedPageManager() {
                         />
                       </div>
                       <div>
-                        <Label>Content (Supports Markdown)</Label>
+                        <Label>Content (Supports Markdown & HTML)</Label>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Use **bold**, *italic*, ## Heading, or HTML tags like &lt;h2&gt;, &lt;b&gt;, &lt;img&gt;
+                        </p>
                         <Textarea 
                           value={selectedPost.content || ''}
                           onChange={(e) => setSelectedPost(p => ({ ...p, content: e.target.value }))}
                           rows={15}
-                          placeholder="Write your blog post content here. You can use Markdown formatting..."
+                          placeholder="Write your blog post content here...
+
+Examples:
+## My Heading (Markdown)
+**Bold text** or <b>Bold text</b>
+*Italic* or <i>italic</i>
+![Image](https://example.com/image.jpg)
+<img src='url' alt='description' />"
                           className="font-mono text-sm"
                         />
                       </div>
