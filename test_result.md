@@ -537,17 +537,50 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "3.2"
-  test_sequence: 5
+  version: "3.3"
+  test_sequence: 6
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Billing Page Auth Refactor"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+    - agent: "main"
+      message: "BILLING PAGE AUTH REFACTOR COMPLETED:
+      
+      **Changes Made:**
+      
+      1) **/app/app/api/credits/route.js** - GET endpoint:
+         - Now extracts userId from Authorization header (Bearer token) as primary method
+         - Falls back to query param for backward compatibility
+         - Returns 401 if no authentication found
+      
+      2) **/app/app/api/credits/route.js** - POST endpoint (history action):
+         - Now extracts userId from Authorization header for the 'history' action
+         - Returns 401 if not authenticated
+      
+      3) **/app/app/api/membership/route.js** - GET endpoint:
+         - Simplified to use Authorization header as primary method
+         - Removed unused optionalAuth import
+         - Falls back to query param for backward compatibility
+      
+      4) **/app/app/dashboard/billing/page.js** - Frontend:
+         - Removed userId query parameters from all API calls
+         - All fetch calls now use Authorization header only
+         - fetchCredits(), fetchMembership(), fetchPackagesWithDiscount(), fetchTransactions() all updated
+         - handlePurchase() now includes Authorization header
+         - pollPaymentStatus() updated to not require userId parameter
+      
+      **Testing Required:**
+      1. Test /api/credits GET with valid session token - should return credits
+      2. Test /api/credits GET without token - should return 401
+      3. Test /api/membership GET with valid session token - should return membership info
+      4. Test /api/credits POST with action=history and valid token - should return history
+      5. Test billing page loads correctly for authenticated user"
     - agent: "testing"
       message: "✅ BUSINESS PLAN GENERATOR API TESTING COMPLETED SUCCESSFULLY:
       
