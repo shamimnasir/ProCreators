@@ -17,7 +17,7 @@ import {
   Map, CreditCard, BookOpen, FileQuestion, Video, BarChart, Building,
   GraduationCap, Lock, Activity, Users2, Briefcase, Settings, Database,
   Check, X, Wrench, Layout, Code, Menu, Link2, PlusCircle, Upload, Image,
-  Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, ImagePlus, Link, Type
+  Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, ImagePlus, Link as LinkIcon, Type
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
