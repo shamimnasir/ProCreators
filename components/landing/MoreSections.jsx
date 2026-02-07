@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Target, Check, Lightbulb, Rocket, Brain, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
