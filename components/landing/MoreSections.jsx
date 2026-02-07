@@ -74,6 +74,10 @@ export function ToolsShowcase() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Every tool you need. Zero excuses left.
           </p>
+          <p className="text-base text-muted-foreground max-w-3xl mx-auto mt-4">
+            <span className="text-orange-400 font-semibold">So simple, even a 10-year-old can create stunning content.</span>
+            {' '}From content creators to job seekers, business builders to product makers — we've made AI ridiculously easy for everyone.
+          </p>
         </div>
 
         {/* Simplified tools grid - just popular tools */}
