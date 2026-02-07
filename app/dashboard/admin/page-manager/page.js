@@ -965,9 +965,33 @@ export default function UnifiedPageManager() {
                 <div className="flex items-center gap-2">
                   <Button 
                     variant={selectedPost.isPublished ? 'outline' : 'default'}
-                    onClick={() => {
-                      setSelectedPost(p => ({ ...p, isPublished: !p.isPublished }))
+                    onClick={async () => {
+                      const newPublished = !selectedPost.isPublished
+                      setSaving(true)
+                      try {
+                        const res = await fetch('/api/admin/blog', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ 
+                            postId: selectedPost.postId, 
+                            isPublished: newPublished 
+                          })
+                        })
+                        const data = await res.json()
+                        if (data.success) {
+                          toast({ title: newPublished ? 'Published!' : 'Unpublished', description: `Post is now ${newPublished ? 'live' : 'a draft'}` })
+                          setSelectedPost(data.post)
+                          fetchBlogPosts()
+                        } else {
+                          throw new Error(data.error)
+                        }
+                      } catch (error) {
+                        toast({ title: 'Error', description: error.message, variant: 'destructive' })
+                      } finally {
+                        setSaving(false)
+                      }
                     }}
+                    disabled={saving}
                   >
                     {selectedPost.isPublished ? 'Unpublish' : 'Publish'}
                   </Button>
