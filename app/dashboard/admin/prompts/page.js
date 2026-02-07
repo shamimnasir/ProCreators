@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import { Save, RotateCcw, Eye, AlertCircle } from 'lucide-react'
 import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 
@@ -18,6 +19,7 @@ export default function AdminPromptsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     loadPrompts()
