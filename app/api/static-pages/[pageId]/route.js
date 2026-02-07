@@ -511,6 +511,68 @@ const DEFAULT_TEMPLATES = {
         }
       }
     ]
+  },
+  faq: {
+    title: 'Frequently Asked Questions',
+    metaTitle: 'FAQ | ProCreators',
+    metaDescription: 'Find answers to common questions about ProCreators AI content creation platform.',
+    contentBlocks: [
+      {
+        id: 'hero-1',
+        type: 'hero',
+        content: {
+          title: 'Frequently Asked Questions',
+          subtitle: 'Find answers to common questions about ProCreators',
+          alignment: 'center'
+        }
+      },
+      {
+        id: 'faq-general',
+        type: 'faq',
+        content: {
+          title: 'General Questions',
+          items: [
+            { question: 'What is ProCreators?', answer: 'ProCreators is an AI-powered content creation platform that helps you generate professional videos, images, documents, and more using advanced AI technology.' },
+            { question: 'How does the free trial work?', answer: 'Start with our free trial to explore all features. You get 100 credits to test AI tools. No credit card required to sign up.' },
+            { question: 'What types of content can I create?', answer: 'You can create AI videos, social media graphics, business documents, ebooks, presentations, quizzes, storybooks, and much more with our 70+ AI tools.' }
+          ]
+        }
+      },
+      {
+        id: 'faq-pricing',
+        type: 'faq',
+        content: {
+          title: 'Pricing & Billing',
+          items: [
+            { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express) and PayPal. Enterprise customers can also pay via invoice.' },
+            { question: 'Can I cancel my subscription anytime?', answer: 'Yes, you can cancel your subscription at any time from your dashboard. Your access continues until the end of your billing period.' },
+            { question: 'Do you offer refunds?', answer: 'We offer a 7-day money-back guarantee for new subscribers. Contact our support team if you are not satisfied with the service.' }
+          ]
+        }
+      },
+      {
+        id: 'faq-technical',
+        type: 'faq',
+        content: {
+          title: 'Technical Questions',
+          items: [
+            { question: 'What file formats are supported?', answer: 'We support various formats including MP4 for videos, PNG/JPG for images, PDF for documents, and more depending on the tool.' },
+            { question: 'Is my content stored securely?', answer: 'Yes, all content is encrypted and stored securely. We use industry-standard security practices to protect your data.' },
+            { question: 'Can I use the content commercially?', answer: 'Yes, all content you create with ProCreators can be used for commercial purposes. You retain full rights to your creations.' }
+          ]
+        }
+      },
+      {
+        id: 'cta-1',
+        type: 'cta',
+        content: {
+          title: 'Still Have Questions?',
+          subtitle: 'Our support team is here to help',
+          buttonText: 'Contact Support',
+          buttonLink: '/contact'
+        }
+      }
+    ]
   }
 }
 
