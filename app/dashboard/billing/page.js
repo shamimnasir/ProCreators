@@ -81,7 +81,7 @@ export default function BillingPage() {
       fetchCredits()
       fetchMembership()
     } else if (sessionId && success) {
-      pollPaymentStatus(sessionId, currentUserId)
+      pollPaymentStatus(sessionId)
     } else if (canceled) {
       toast({
         title: 'Payment Canceled',
