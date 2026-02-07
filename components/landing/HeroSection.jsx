@@ -120,7 +120,9 @@ export function HeroSection({ onGetStarted, onExplore }) {
               <span className="text-[#a78bfa]">ProCreators</span>
               <span className="text-foreground">,</span>
               <br />
-              <span className="text-foreground">because it's </span>
+              <span className="text-foreground">because its made AI so </span>
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">EASY</span>
+              <span className="text-foreground"> and </span>
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">ADDICTIVE</span>
             </h1>
 
