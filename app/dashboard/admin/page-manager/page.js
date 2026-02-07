@@ -1078,23 +1078,221 @@ export default function UnifiedPageManager() {
                         />
                       </div>
                       <div>
-                        <Label>Content (Supports Markdown & HTML)</Label>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          Use **bold**, *italic*, ## Heading, or HTML tags like &lt;h2&gt;, &lt;b&gt;, &lt;img&gt;
-                        </p>
+                        <Label className="mb-2 block">Content Editor</Label>
+                        
+                        {/* Rich Text Toolbar */}
+                        <TooltipProvider>
+                          <div className="flex flex-wrap items-center gap-1 p-2 bg-muted/50 rounded-t-lg border border-b-0">
+                            {/* Headings */}
+                            <div className="flex items-center gap-0.5 border-r pr-2 mr-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('# ', '\n', 'Heading 1')}
+                                  >
+                                    <span className="text-xs font-bold">H1</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Heading 1</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('## ', '\n', 'Heading 2')}
+                                  >
+                                    <span className="text-xs font-bold">H2</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Heading 2</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('### ', '\n', 'Heading 3')}
+                                  >
+                                    <span className="text-xs font-bold">H3</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Heading 3</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            
+                            {/* Text Formatting */}
+                            <div className="flex items-center gap-0.5 border-r pr-2 mr-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('**', '**', 'bold text')}
+                                  >
+                                    <Bold className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Bold</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('*', '*', 'italic text')}
+                                  >
+                                    <Italic className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Italic</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            
+                            {/* Lists */}
+                            <div className="flex items-center gap-0.5 border-r pr-2 mr-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('- ', '\n', 'list item')}
+                                  >
+                                    <List className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Bullet List</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('1. ', '\n', 'numbered item')}
+                                  >
+                                    <ListOrdered className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Numbered List</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            
+                            {/* Quote & Code */}
+                            <div className="flex items-center gap-0.5 border-r pr-2 mr-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('> ', '\n', 'quote')}
+                                  >
+                                    <Quote className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Blockquote</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => insertAtCursor('`', '`', 'code')}
+                                  >
+                                    <Code className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Inline Code</TooltipContent>
+                              </Tooltip>
+                            </div>
+                            
+                            {/* Link & Image */}
+                            <div className="flex items-center gap-0.5">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => {
+                                      const url = prompt('Enter URL:')
+                                      if (url) insertAtCursor('[', `](${url})`, 'link text')
+                                    }}
+                                  >
+                                    <Link className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Insert Link</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <label className="cursor-pointer">
+                                    <input
+                                      type="file"
+                                      accept="image/jpeg,image/png,image/gif,image/webp"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0]
+                                        if (file) uploadContentImage(file)
+                                        e.target.value = ''
+                                      }}
+                                    />
+                                    <Button 
+                                      type="button" 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-8 w-8 p-0"
+                                      asChild
+                                      disabled={uploadingImage}
+                                    >
+                                      <span>
+                                        {uploadingImage ? (
+                                          <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                          <ImagePlus className="h-4 w-4" />
+                                        )}
+                                      </span>
+                                    </Button>
+                                  </label>
+                                </TooltipTrigger>
+                                <TooltipContent>Upload Image</TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </TooltipProvider>
+                        
+                        {/* Content Textarea */}
                         <Textarea 
+                          ref={contentEditorRef}
                           value={selectedPost.content || ''}
                           onChange={(e) => setSelectedPost(p => ({ ...p, content: e.target.value }))}
                           rows={15}
                           placeholder="Write your blog post content here...
 
-Examples:
-## My Heading (Markdown)
-**Bold text** or <b>Bold text</b>
-*Italic* or <i>italic</i>
-![Image](https://example.com/image.jpg)
-<img src='url' alt='description' />"
-                          className="font-mono text-sm"
+Select text and click formatting buttons above, or type:
+• Markdown: ## Heading, **bold**, *italic*
+• HTML: <h2>Heading</h2>, <b>bold</b>"
+                          className="font-mono text-sm rounded-t-none border-t-0 focus:ring-0"
                         />
                       </div>
                     </CardContent>
