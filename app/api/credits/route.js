@@ -17,11 +17,35 @@ import { isFeatureEnabled } from '@/lib/featureControls'
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
     const toolId = searchParams.get('toolId')
     
+    // SECURITY: Get userId from Authorization header (preferred) or fallback to query param
+    let userId = null
+    const authHeader = request.headers.get('authorization')
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1]
+      if (token) {
+        // Dynamically import to avoid circular dependencies
+        const { connectToDatabase } = await import('@/lib/mongodb')
+        const { db } = await connectToDatabase()
+        const session = await db.collection('sessions').findOne({
+          token,
+          expiresAt: { $gt: new Date() }
+        })
+        if (session) {
+          userId = session.userId
+        }
+      }
+    }
+    
+    // Fallback to query param for backward compatibility (will be deprecated)
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
+      userId = searchParams.get('userId')
+    }
+    
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
     
     const creditInfo = await getUserCredits(userId)

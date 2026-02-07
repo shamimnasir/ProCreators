@@ -6,33 +6,28 @@ import { optionalAuth } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url)
-    let userId = searchParams.get('userId')
+    let userId = null
     
-    // Try to get userId from authentication if not provided
-    if (!userId) {
-      const auth = await optionalAuth(request)
-      if (auth) {
-        userId = auth.userId
+    // SECURITY: Primary method - get userId from Authorization header
+    const authHeader = request.headers.get('authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1]
+      if (token) {
+        const { db } = await connectToDatabase()
+        const session = await db.collection('sessions').findOne({
+          token,
+          expiresAt: { $gt: new Date() }
+        })
+        if (session) {
+          userId = session.userId
+        }
       }
     }
     
-    // If still no userId and we have auth header, try to validate it
+    // Fallback to query param for backward compatibility (will be deprecated)
     if (!userId) {
-      const authHeader = request.headers.get('authorization')
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1]
-        if (token) {
-          const { db } = await connectToDatabase()
-          const session = await db.collection('sessions').findOne({
-            token,
-            expiresAt: { $gt: new Date() }
-          })
-          if (session) {
-            userId = session.userId
-          }
-        }
-      }
+      const { searchParams } = new URL(request.url)
+      userId = searchParams.get('userId')
     }
     
     if (!userId) {
