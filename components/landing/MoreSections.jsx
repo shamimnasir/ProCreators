@@ -289,7 +289,9 @@ export function Footer() {
           {/* Dynamic Footer Columns */}
           {footerMenus.map((menu) => (
             <div key={menu.menuId || menu.name}>
-              <h3 className="text-foreground font-semibold mb-4">{menu.name}</h3>
+              <h3 className="text-foreground font-semibold mb-4">
+                {menu.name.replace(/^Footer\s*-\s*/i, '')}
+              </h3>
               <ul className="space-y-3">
                 {(menu.items || []).map((item) => (
                   <li key={item.id}>
