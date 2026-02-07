@@ -80,6 +80,7 @@ export default function UnifiedPageManager() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const contentEditorRef = useRef(null)
   const { toast } = useToast()
+  const { csrfToken, getCsrfHeaders } = useCsrf()
 
   // Rich text editor helper - insert text at cursor position
   const insertAtCursor = (before, after = '', placeholder = '') => {
