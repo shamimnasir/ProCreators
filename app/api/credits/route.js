@@ -180,7 +180,7 @@ export async function POST(request) {
       case 'history': {
         // Get credit history
         if (!userId) {
-          return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
+          return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
         }
         
         const history = await getCreditHistory(userId)
