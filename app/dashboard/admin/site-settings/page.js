@@ -355,6 +355,17 @@ export default function SiteSettingsPage() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="footerDescription">Footer Description</Label>
+                  <Textarea
+                    id="footerDescription"
+                    value={settings.footer.footerDescription || ''}
+                    onChange={(e) => updateSettings('footer', 'footerDescription', e.target.value)}
+                    placeholder="The ultimate AI-powered content creation platform..."
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">This text appears in the footer's "About" section next to your logo</p>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="copyrightText">Copyright Text</Label>
                   <Input
                     id="copyrightText"
