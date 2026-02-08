@@ -4,10 +4,9 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { addCredits } from '@/lib/credits'
 import { refillMembershipCredits, changeSubscription, MEMBERSHIP_PLANS, addPurchasedCredits } from '@/lib/membership'
 import { v4 as uuidv4 } from 'uuid'
-import Stripe from 'stripe'
+import { getStripe } from '@/lib/services'
 
-// Initialize Stripe at module level for better performance
-const stripe = new Stripe(process.env.STRIPE_API_KEY)
+const stripe = getStripe()
 
 export async function POST(request) {
   let rawBody
