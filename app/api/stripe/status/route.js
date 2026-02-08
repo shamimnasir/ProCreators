@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { addCredits } from '@/lib/credits'
+import { getStripe, isStripeConfigured } from '@/lib/services'
 
 export async function GET(request) {
   try {
@@ -15,15 +16,14 @@ export async function GET(request) {
       )
     }
     
-    const STRIPE_API_KEY = process.env.STRIPE_API_KEY
-    if (!STRIPE_API_KEY) {
+    if (!isStripeConfigured()) {
       return NextResponse.json(
         { success: false, error: 'Stripe not configured' },
         { status: 500 }
       )
     }
     
-    const stripe = require('stripe')(STRIPE_API_KEY)
+    const stripe = getStripe()
     const { db } = await connectToDatabase()
     
     // Get session from Stripe
