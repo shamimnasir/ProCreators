@@ -8,6 +8,7 @@ import { requireAuth } from '@/lib/auth-middleware'
 import { validateRequest, subscriptionCheckoutSchema } from '@/lib/validation'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { logSecurityEvent, SECURITY_EVENTS } from '@/lib/security-logger'
+import { getStripe, isStripeConfigured } from '@/lib/services'
 
 export async function POST(request) {
   try {
@@ -52,10 +53,9 @@ export async function POST(request) {
       )
     }
     
-    const STRIPE_API_KEY = process.env.STRIPE_API_KEY
-    if (!STRIPE_API_KEY) {
+    if (!isStripeConfigured()) {
       return NextResponse.json(
-        { success: false, error: 'Stripe not configured. Add STRIPE_API_KEY to .env' },
+        { success: false, error: 'Stripe not configured' },
         { status: 500 }
       )
     }
@@ -75,7 +75,7 @@ export async function POST(request) {
     const cancelUrl = `${originUrl}/pricing?canceled=true`
     
     // Create Stripe checkout session for subscription
-    const stripe = require('stripe')(STRIPE_API_KEY)
+    const stripe = getStripe()
     
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
