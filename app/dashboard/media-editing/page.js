@@ -1,64 +1,95 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Edit3, 
-  Sparkles,
-  ArrowRight,
-  Video,
-  ImageIcon,
-  Scissors,
-  Type,
-  Music,
-  Wand2,
-  Layers,
-  Maximize,
-  Film
-} from 'lucide-react'
+import { Film } from 'lucide-react'
+import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
+
+const FEATURED_TOOLS = [
+  {
+    id: 'ai-video-studio',
+    name: 'Video Studio',
+    description: 'Complete AI video creation suite with faceless videos',
+    icon: '🎬',
+    href: '/dashboard/tools/ai-video-studio',
+    useCase: 'YouTube, TikTok, Reels',
+    badge: 'Pro',
+    gradient: 'from-violet-500 to-purple-500',
+    features: ['Faceless Videos', 'Auto Subtitles', 'Voice Over']
+  },
+  {
+    id: 'video-editor',
+    name: 'Video Editor',
+    description: 'Professional video editing with AI-powered features',
+    icon: '✂️',
+    href: '/dashboard/tools/video-editor',
+    useCase: 'All Video Editing',
+    badge: 'New',
+    gradient: 'from-blue-500 to-cyan-500',
+    features: ['Trim & Cut', 'Effects', 'Transitions']
+  },
+  {
+    id: 'thumbnail-maker',
+    name: 'Thumbnail Maker',
+    description: 'Create click-worthy thumbnails that boost CTR',
+    icon: '🖼️',
+    href: '/dashboard/tools/thumbnail-maker',
+    useCase: 'YouTube, Videos',
+    badge: 'Hot',
+    gradient: 'from-red-500 to-orange-500',
+    features: ['Templates', 'Custom Text', 'HD Export']
+  }
+]
 
 const MEDIA_CATEGORIES = [
   {
     id: 'video',
-    name: 'Video Editing',
-    description: 'Edit and enhance videos',
+    name: 'Video Creation',
+    description: 'Create stunning videos',
     icon: '🎬',
-    color: 'from-red-500 to-orange-500',
+    color: 'from-violet-500 to-purple-500',
     tools: [
       {
-        id: 'video-editor',
-        name: 'AI Video Editor',
-        description: 'Full-featured video editing with AI assistance',
+        id: 'ai-video-studio',
+        name: 'Video Studio',
+        description: 'Complete AI video creation suite',
         icon: '🎬',
-        href: '/dashboard/tools/video-editor',
-        useCase: 'Complete video editing',
-        badge: 'Powerful'
+        href: '/dashboard/tools/ai-video-studio',
+        useCase: 'YouTube, TikTok, Reels',
+        badge: 'Pro'
       },
       {
-        id: 'auto-subtitles',
-        name: 'Auto Subtitles',
-        description: 'Automatic captions and subtitles for any video',
-        icon: '📝',
-        href: '/dashboard/tools/auto-subtitles',
-        useCase: 'Accessibility, reach',
-        badge: 'Popular'
+        id: 'video-editor',
+        name: 'Video Editor',
+        description: 'Professional video editing',
+        icon: '✂️',
+        href: '/dashboard/tools/video-editor',
+        useCase: 'All video editing',
+        badge: 'New'
+      },
+      {
+        id: 'quick-reels',
+        name: 'Quick Reels',
+        description: 'Short-form videos in seconds',
+        icon: '⚡',
+        href: '/dashboard/tools/quick-reels',
+        useCase: 'Reels, Shorts, TikTok',
+        badge: 'Fast'
       }
     ]
   },
   {
-    id: 'image',
-    name: 'Image Editing',
-    description: 'Edit and enhance images',
+    id: 'images',
+    name: 'Image Tools',
+    description: 'Image editing and enhancement',
     icon: '🖼️',
     color: 'from-blue-500 to-cyan-500',
     tools: [
       {
         id: 'image-editor',
-        name: 'AI Image Studio',
+        name: 'Image Studio',
         description: 'Generate, edit, upscale & compress images',
         icon: '🖼️',
         href: '/dashboard/tools/image-editor',
@@ -72,49 +103,49 @@ const MEDIA_CATEGORIES = [
     name: 'Thumbnails & Covers',
     description: 'Create click-worthy thumbnails',
     icon: '🖼️',
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-red-500 to-orange-500',
     tools: [
       {
         id: 'thumbnail-maker',
         name: 'Thumbnail Maker',
-        description: 'YouTube thumbnails that get clicks',
-        icon: '🎯',
+        description: 'Click-worthy YouTube thumbnails',
+        icon: '🖼️',
         href: '/dashboard/tools/thumbnail-maker',
         useCase: 'YouTube, videos',
-        badge: 'CTR Booster'
+        badge: 'Hot'
       },
       {
-        id: 'cover-maker',
+        id: 'cover-image-creator',
         name: 'Cover Image Creator',
-        description: 'Social media covers and banners',
-        icon: '🖼️',
+        description: 'Professional cover images',
+        icon: '🎨',
         href: '/dashboard/tools/cover-image-creator',
-        useCase: 'Profiles, pages',
-        badge: 'New'
+        useCase: 'Social, blogs',
+        badge: ''
       },
       {
-        id: 'podcast-cover',
+        id: 'podcast-cover-maker',
         name: 'Podcast Cover Maker',
         description: 'Professional podcast artwork',
-        icon: '🎧',
+        icon: '🎙️',
         href: '/dashboard/tools/podcast-cover-maker',
         useCase: 'Spotify, Apple Podcasts',
-        badge: 'New'
+        badge: ''
       }
     ]
   },
   {
     id: 'audio',
-    name: 'Audio Editing',
-    description: 'Edit and enhance audio',
-    icon: '🎧',
+    name: 'Audio Tools',
+    description: 'Audio editing and enhancement',
+    icon: '🎵',
     color: 'from-green-500 to-emerald-500',
     tools: [
       {
         id: 'audio-editor',
         name: 'Audio Editor',
-        description: 'Cut, trim, and edit audio files',
-        icon: '🎧',
+        description: 'Edit and enhance audio files',
+        icon: '🎵',
         href: '/dashboard/tools/audio-editor',
         useCase: 'Podcasts, music',
         badge: ''
@@ -122,19 +153,28 @@ const MEDIA_CATEGORIES = [
       {
         id: 'noise-remover',
         name: 'Noise Remover',
-        description: 'AI-powered background noise removal',
+        description: 'Remove background noise from audio',
         icon: '🔇',
         href: '/dashboard/tools/noise-remover',
         useCase: 'Clean audio',
-        badge: 'AI Magic'
+        badge: ''
       },
       {
         id: 'voice-enhancer',
         name: 'Voice Enhancer',
-        description: 'Improve voice clarity and quality',
-        icon: '🎙️',
+        description: 'Enhance voice recordings',
+        icon: '🎤',
         href: '/dashboard/tools/voice-enhancer',
-        useCase: 'Podcasts, voiceovers',
+        useCase: 'Voice-overs, podcasts',
+        badge: ''
+      },
+      {
+        id: 'auto-subtitles',
+        name: 'Auto Subtitles',
+        description: 'Add subtitles automatically',
+        icon: '📝',
+        href: '/dashboard/tools/auto-subtitles',
+        useCase: 'Accessibility, reach',
         badge: ''
       }
     ]
@@ -145,102 +185,61 @@ export default function MediaEditingPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 p-8 text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
-              <Edit3 className="h-8 w-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Media Editor</h1>
-              <p className="text-white/80">Image, Audio & Video editing tools powered by AI</p>
-            </div>
-          </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Wand2 className="h-5 w-5 mb-2" />
-              <p className="text-2xl font-bold">AI</p>
-              <p className="text-xs text-white/70">Enhanced</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Layers className="h-5 w-5 mb-2" />
-              <p className="text-2xl font-bold">Pro</p>
-              <p className="text-xs text-white/70">Quality</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Maximize className="h-5 w-5 mb-2" />
-              <p className="text-2xl font-bold">4K</p>
-              <p className="text-xs text-white/70">Support</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Film className="h-5 w-5 mb-2" />
-              <p className="text-2xl font-bold">Fast</p>
-              <p className="text-xs text-white/70">Export</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
+      <PageHero
+        title="Media Editing"
+        subtitle="Professional video, image, and audio editing tools"
+        icon={<Film className="h-7 w-7" />}
+        gradient="from-violet-600 via-purple-600 to-blue-600"
+        emoji="🎥"
+        stats={[
+          { value: 'Pro', label: 'Quality' },
+          { value: '4K', label: 'Support' },
+          { value: 'Fast', label: 'Export' },
+          { value: 'Easy', label: 'To Use' }
+        ]}
+      />
 
-      {/* Formats Banner */}
-      <Card className="border-dashed bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Supports:</span>
-              <div className="flex gap-2 flex-wrap">
-                {['MP4', 'MOV', 'PNG', 'JPG', 'GIF', 'MP3', 'WAV', 'WebM'].map((format) => (
-                  <Badge key={format} variant="secondary" className="bg-white dark:bg-slate-900 font-mono text-xs">
-                    {format}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Featured Tools */}
+      <div>
+        <div className="flex items-center gap-2 mb-5">
+          <Film className="h-5 w-5 text-violet-500" />
+          <h2 className="text-xl font-bold">Featured Tools</h2>
+          <Badge className="bg-gradient-to-r from-violet-600 to-blue-600 text-white">Media</Badge>
+        </div>
+        <div className="grid gap-5 md:grid-cols-3">
+          {FEATURED_TOOLS.map((tool) => (
+            <FeaturedToolCard key={tool.id} tool={tool} />
+          ))}
+        </div>
+      </div>
 
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
-          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
             🎯 All Tools
           </TabsTrigger>
           {MEDIA_CATEGORIES.map((cat) => (
             <TabsTrigger 
               key={cat.id} 
               value={cat.id}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
               {cat.icon} {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="mt-6">
-          <div className="space-y-8">
+        <TabsContent value="all" className="mt-8">
+          <div className="space-y-10">
             {MEDIA_CATEGORIES.map((category) => (
               <div key={category.id}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                    <span className="text-xl">{category.icon}</span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">{category.name}</h2>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
-                  </div>
-                </div>
-                
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <CategoryHeader category={category} />
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {category.tools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} categoryColor={category.color} />
+                    <ToolCard key={tool.id} tool={tool} gradient={category.color} />
                   ))}
                 </div>
               </div>
@@ -249,20 +248,11 @@ export default function MediaEditingPage() {
         </TabsContent>
 
         {MEDIA_CATEGORIES.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mt-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
-                <span className="text-2xl">{category.icon}</span>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">{category.name}</h2>
-                <p className="text-muted-foreground">{category.description}</p>
-              </div>
-            </div>
-            
+          <TabsContent key={category.id} value={category.id} className="mt-8">
+            <CategoryHeader category={category} />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {category.tools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} categoryColor={category.color} expanded />
+                <ToolCard key={tool.id} tool={tool} gradient={category.color} expanded />
               ))}
             </div>
           </TabsContent>
@@ -270,91 +260,30 @@ export default function MediaEditingPage() {
       </Tabs>
 
       {/* Tips */}
-      <Card className="bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-950/30 dark:to-blue-950/30 border-slate-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-            <Sparkles className="h-5 w-5" />
-            Pro Editing Tips
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-violet-200/50 dark:border-violet-800/30">
+        <CardContent className="py-6">
+          <h3 className="font-bold text-violet-800 dark:text-violet-200 mb-4 flex items-center gap-2">
+            <Film className="h-5 w-5" />
+            Media Creation Tips
+          </h3>
           <div className="grid md:grid-cols-4 gap-4">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🎬</span>
-              <div>
-                <p className="font-medium text-slate-900 dark:text-slate-100">Start with Trim</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">Remove unwanted parts first</p>
+            {[
+              { emoji: '🎬', title: 'Hook First', desc: 'Grab attention in first 3 seconds' },
+              { emoji: '📱', title: 'Mobile First', desc: 'Optimize for vertical viewing' },
+              { emoji: '🔊', title: 'Good Audio', desc: 'Audio quality is crucial' },
+              { emoji: '📝', title: 'Add Captions', desc: '85% watch without sound' }
+            ].map((tip) => (
+              <div key={tip.title} className="flex items-start gap-3">
+                <span className="text-2xl">{tip.emoji}</span>
+                <div>
+                  <p className="font-medium text-violet-900 dark:text-violet-100">{tip.title}</p>
+                  <p className="text-sm text-violet-700 dark:text-violet-300">{tip.desc}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🔊</span>
-              <div>
-                <p className="font-medium text-slate-900 dark:text-slate-100">Fix Audio First</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">Clean audio improves quality</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🎨</span>
-              <div>
-                <p className="font-medium text-slate-900 dark:text-slate-100">Color Correct</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">Consistent look matters</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">💾</span>
-              <div>
-                <p className="font-medium text-slate-900 dark:text-slate-100">Export Right</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">Choose format for platform</p>
-              </div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
-  )
-}
-
-function ToolCard({ tool, categoryColor, expanded = false }) {
-  const CardWrapper = tool.comingSoon ? 'div' : Link
-  const wrapperProps = tool.comingSoon ? {} : { href: tool.href }
-  
-  return (
-    <CardWrapper {...wrapperProps}>
-      <Card className={`group h-full transition-all border-2 ${tool.comingSoon ? 'opacity-75 cursor-not-allowed' : 'hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:border-primary/50'}`}>
-        <CardHeader className={expanded ? "pb-2" : "pb-1"}>
-          <div className="flex items-start justify-between">
-            <div className="text-3xl mb-2">{tool.icon}</div>
-            {tool.badge && (
-              <Badge className={`${tool.comingSoon ? 'bg-gradient-to-r from-gray-400 to-gray-500' : `bg-gradient-to-r ${categoryColor}`} text-white text-[10px]`}>
-                {tool.badge}
-              </Badge>
-            )}
-          </div>
-          <CardTitle className={`${tool.comingSoon ? '' : 'group-hover:text-primary'} transition-colors ${expanded ? "text-lg" : "text-base"}`}>
-            {tool.name}
-          </CardTitle>
-          <CardDescription className={expanded ? "" : "text-xs line-clamp-2"}>
-            {tool.description}
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          {expanded && tool.useCase && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs text-muted-foreground">Best for:</span>
-              <Badge variant="outline" className="text-[10px]">{tool.useCase}</Badge>
-            </div>
-          )}
-          <div className="flex items-center justify-between">
-            {!expanded && tool.useCase && (
-              <span className="text-xs text-muted-foreground">{tool.useCase}</span>
-            )}
-            <span className={`text-xs text-muted-foreground ${tool.comingSoon ? '' : 'group-hover:text-primary'} flex items-center gap-1 ml-auto`}>
-              {tool.comingSoon ? 'Coming Soon' : 'Open'} <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-    </CardWrapper>
   )
 }
