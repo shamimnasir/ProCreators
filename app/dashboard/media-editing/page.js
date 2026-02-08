@@ -154,38 +154,7 @@ const MEDIA_CATEGORIES = [
     description: 'Convert between formats',
     icon: '🔄',
     color: 'from-amber-500 to-yellow-500',
-    tools: [
-      {
-        id: 'video-converter',
-        name: 'Video Converter',
-        description: 'Convert videos to any format',
-        icon: '🎬',
-        href: '/dashboard/tools/video-converter',
-        useCase: 'MP4, MOV, WebM',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'audio-converter',
-        name: 'Audio Converter',
-        description: 'Convert audio files',
-        icon: '🎥',
-        href: '/dashboard/tools/audio-converter',
-        useCase: 'MP3, WAV, AAC',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'gif-maker',
-        name: 'GIF Maker',
-        description: 'Create GIFs from videos',
-        icon: '🎞️',
-        href: '/dashboard/tools/gif-maker',
-        useCase: 'Memes, reactions',
-        badge: 'Coming Soon',
-        comingSoon: true
-      }
-    ]
+    tools: []
   }
 ]
 
