@@ -29,31 +29,22 @@ const IMAGE_CATEGORIES = [
     color: 'from-blue-500 to-cyan-500',
     tools: [
       {
-        id: 'ai-product-photos',
-        name: 'AI Product Photos',
-        description: 'Generate stunning product images for e-commerce',
-        icon: '📸',
-        href: '/dashboard/tools/ai-product-photos',
-        useCase: 'Amazon, Shopify, eBay listings',
+        id: 'cover-image-creator',
+        name: 'Cover Image Creator',
+        description: 'Create stunning cover images and banners',
+        icon: '🖼️',
+        href: '/dashboard/tools/cover-image-creator',
+        useCase: 'Social media, blogs',
         badge: 'Popular'
       },
       {
-        id: 'bg-remover',
-        name: 'Background Remover',
-        description: 'Remove & replace backgrounds instantly',
-        icon: '✂️',
-        href: '/dashboard/tools/bg-remover',
-        useCase: 'Clean product shots',
-        badge: 'Essential'
-      },
-      {
-        id: 'product-mockup',
-        name: 'Product Mockup Generator',
-        description: 'Place products on lifestyle backgrounds',
-        icon: '🖼️',
-        href: '/dashboard/tools/product-mockup',
-        useCase: 'Marketing materials',
-        badge: ''
+        id: 'thumbnail-maker',
+        name: 'Thumbnail Maker',
+        description: 'Eye-catching thumbnails for videos',
+        icon: '🎬',
+        href: '/dashboard/tools/thumbnail-maker',
+        useCase: 'YouTube, videos',
+        badge: 'Hot'
       }
     ]
   },
@@ -65,15 +56,6 @@ const IMAGE_CATEGORIES = [
     color: 'from-purple-500 to-pink-500',
     tools: [
       {
-        id: 'ai-headshots',
-        name: 'AI Headshot Generator',
-        description: 'Professional headshots from any photo',
-        icon: '👔',
-        href: '/dashboard/tools/ai-headshots',
-        useCase: 'LinkedIn, resume, team pages',
-        badge: 'Trending'
-      },
-      {
         id: 'avatar-creator',
         name: 'AI Avatar Creator',
         description: 'Create unique cartoon/artistic avatars',
@@ -81,51 +63,6 @@ const IMAGE_CATEGORIES = [
         href: '/dashboard/tools/avatar-creator',
         useCase: 'Social media, gaming',
         badge: 'Fun'
-      },
-      {
-        id: 'profile-enhancer',
-        name: 'Profile Photo Enhancer',
-        description: 'Enhance and beautify any portrait',
-        icon: '✨',
-        href: '/dashboard/tools/profile-enhancer',
-        useCase: 'Social profiles',
-        badge: ''
-      }
-    ]
-  },
-  {
-    id: 'branding',
-    name: 'Branding & Design',
-    description: 'Logos, graphics, and brand assets',
-    icon: '🎨',
-    color: 'from-orange-500 to-red-500',
-    tools: [
-      {
-        id: 'logo-generator',
-        name: 'AI Logo Generator',
-        description: 'Create professional logos in seconds',
-        icon: '🎯',
-        href: '/dashboard/tools/logo-generator',
-        useCase: 'Startups, rebranding',
-        badge: 'Hot'
-      },
-      {
-        id: 'brand-kit',
-        name: 'Brand Kit Creator',
-        description: 'Generate complete brand identity',
-        icon: '📋',
-        href: '/dashboard/tools/brand-kit',
-        useCase: 'New businesses',
-        badge: ''
-      },
-      {
-        id: 'icon-generator',
-        name: 'Icon & Illustration Maker',
-        description: 'Custom icons and illustrations',
-        icon: '🖌️',
-        href: '/dashboard/tools/icon-generator',
-        useCase: 'Apps, websites',
-        badge: ''
       }
     ]
   },
@@ -143,24 +80,6 @@ const IMAGE_CATEGORIES = [
         icon: '🖼️',
         href: '/dashboard/tools/image-editor',
         useCase: 'Photo editing',
-        badge: ''
-      },
-      {
-        id: 'upscaler',
-        name: 'Image Upscaler',
-        description: 'Enhance resolution up to 4x',
-        icon: '🔍',
-        href: '/dashboard/tools/upscaler',
-        useCase: 'Print-ready images',
-        badge: 'Useful'
-      },
-      {
-        id: 'style-transfer',
-        name: 'Style Transfer',
-        description: 'Apply artistic styles to photos',
-        icon: '🎨',
-        href: '/dashboard/tools/style-transfer',
-        useCase: 'Artistic effects',
         badge: ''
       }
     ]
