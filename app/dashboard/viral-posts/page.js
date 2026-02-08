@@ -151,15 +151,6 @@ const VIRAL_CATEGORIES = [
         href: '/dashboard/tools/photo-cards',
         useCase: 'Stories, posts',
         badge: ''
-      },
-      {
-        id: 'infographics',
-        name: 'Infographic Maker',
-        description: 'Data-driven visual content',
-        icon: '📊',
-        href: '/dashboard/tools/infographics',
-        useCase: 'Educational content',
-        badge: ''
       }
     ]
   },
@@ -178,87 +169,6 @@ const VIRAL_CATEGORIES = [
         href: '/dashboard/tools/news',
         useCase: 'Trending topics',
         badge: 'Trending'
-      },
-      {
-        id: 'hot-takes',
-        name: 'Hot Takes Generator',
-        description: 'Controversial opinions that spark debate',
-        icon: '🔥',
-        href: '/dashboard/tools/hot-takes',
-        useCase: 'Engagement bait',
-        badge: 'Spicy'
-      }
-    ]
-  },
-  {
-    id: 'educational',
-    name: 'Educational Posts',
-    description: 'Teach and provide value',
-    icon: '🎓',
-    color: 'from-green-500 to-emerald-500',
-    tools: [
-      {
-        id: 'tutorials',
-        name: 'Tutorial Creator',
-        description: 'Step-by-step how-to posts',
-        icon: '📖',
-        href: '/dashboard/tools/tutorials',
-        useCase: 'Teaching, guides',
-        badge: 'Value'
-      },
-      {
-        id: 'tips-tricks',
-        name: 'Tips & Tricks Posts',
-        description: 'Quick tips that get saved and shared',
-        icon: '💡',
-        href: '/dashboard/tools/tips-tricks',
-        useCase: 'High save rate',
-        badge: ''
-      },
-      {
-        id: 'myth-busters',
-        name: 'Myth Buster Posts',
-        description: 'Debunk myths and misconceptions',
-        icon: '❌',
-        href: '/dashboard/tools/myth-busters',
-        useCase: 'Controversy, shares',
-        badge: ''
-      }
-    ]
-  },
-  {
-    id: 'engagement',
-    name: 'Engagement Posts',
-    description: 'Maximize interaction',
-    icon: '💬',
-    color: 'from-purple-500 to-violet-500',
-    tools: [
-      {
-        id: 'polls',
-        name: 'Poll & Question Posts',
-        description: 'Interactive polls that drive comments',
-        icon: '🗳️',
-        href: '/dashboard/tools/polls',
-        useCase: 'Comments, engagement',
-        badge: 'Interactive'
-      },
-      {
-        id: 'fill-blank',
-        name: 'Fill-in-the-Blank Posts',
-        description: 'Engagement hooks that get responses',
-        icon: '❓',
-        href: '/dashboard/tools/fill-blank',
-        useCase: 'Comment farming',
-        badge: ''
-      },
-      {
-        id: 'this-or-that',
-        name: 'This or That Posts',
-        description: 'Choice posts that spark debate',
-        icon: '⚖️',
-        href: '/dashboard/tools/this-or-that',
-        useCase: 'Engagement',
-        badge: ''
       }
     ]
   }
