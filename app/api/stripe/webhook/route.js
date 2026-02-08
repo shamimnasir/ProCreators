@@ -4,33 +4,54 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { addCredits } from '@/lib/credits'
 import { refillMembershipCredits, changeSubscription, MEMBERSHIP_PLANS, addPurchasedCredits } from '@/lib/membership'
 import { v4 as uuidv4 } from 'uuid'
+import Stripe from 'stripe'
+
+// Initialize Stripe at module level for better performance
+const stripe = new Stripe(process.env.STRIPE_API_KEY)
 
 export async function POST(request) {
+  let rawBody
+  
   try {
-    const body = await request.text()
+    // Get raw body as text for signature verification
+    rawBody = await request.text()
     const sig = request.headers.get('stripe-signature')
     
-    const STRIPE_API_KEY = process.env.STRIPE_API_KEY
     const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
     
-    const stripe = require('stripe')(STRIPE_API_KEY)
+    // Log incoming webhook for debugging
+    console.log('[Stripe Webhook] Received request')
+    console.log('[Stripe Webhook] Signature present:', !!sig)
+    console.log('[Stripe Webhook] Secret configured:', !!WEBHOOK_SECRET && WEBHOOK_SECRET !== 'whsec_placeholder')
+    console.log('[Stripe Webhook] Body length:', rawBody?.length || 0)
     
     let event
     
     // Verify webhook signature if secret is configured
     if (WEBHOOK_SECRET && WEBHOOK_SECRET !== 'whsec_placeholder') {
-      try {
-        event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET)
-      } catch (err) {
-        console.error('Webhook signature verification failed:', err.message)
+      if (!sig) {
+        console.error('[Stripe Webhook] Missing stripe-signature header')
         return NextResponse.json(
-          { error: 'Webhook signature verification failed' },
+          { error: 'Missing stripe-signature header' },
+          { status: 400 }
+        )
+      }
+      
+      try {
+        event = stripe.webhooks.constructEvent(rawBody, sig, WEBHOOK_SECRET)
+        console.log('[Stripe Webhook] Signature verified successfully for event:', event.type)
+      } catch (err) {
+        console.error('[Stripe Webhook] Signature verification failed:', err.message)
+        console.error('[Stripe Webhook] Signature used:', sig?.substring(0, 50) + '...')
+        return NextResponse.json(
+          { error: `Webhook signature verification failed: ${err.message}` },
           { status: 400 }
         )
       }
     } else {
       // In dev mode without webhook secret, parse body directly
-      event = JSON.parse(body)
+      console.log('[Stripe Webhook] Running in dev mode without signature verification')
+      event = JSON.parse(rawBody)
     }
     
     const { db } = await connectToDatabase()
