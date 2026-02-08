@@ -305,13 +305,29 @@ export async function POST(request) {
       }
     }
     
-    return NextResponse.json({ received: true })
+    console.log('[Stripe Webhook] Processing complete for event:', event.type)
+    return NextResponse.json({ received: true, eventType: event.type })
     
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('[Stripe Webhook] Handler error:', error.message)
+    console.error('[Stripe Webhook] Stack:', error.stack)
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: 'Webhook handler failed', message: error.message },
       { status: 500 }
     )
   }
+}
+
+// GET endpoint for health checks and debugging
+export async function GET(request) {
+  const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
+  const STRIPE_API_KEY = process.env.STRIPE_API_KEY
+  
+  return NextResponse.json({
+    status: 'ok',
+    endpoint: '/api/stripe/webhook',
+    stripeConfigured: !!STRIPE_API_KEY,
+    webhookSecretConfigured: !!WEBHOOK_SECRET && WEBHOOK_SECRET !== 'whsec_placeholder',
+    timestamp: new Date().toISOString()
+  })
 }
