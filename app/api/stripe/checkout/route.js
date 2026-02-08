@@ -169,8 +169,9 @@ export async function POST(request) {
     const successUrl = `${originUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`
     const cancelUrl = `${originUrl}/dashboard/billing?canceled=true`
     
-    // Create Stripe checkout session
-    const stripe = require('stripe')(STRIPE_API_KEY)
+    // Create Stripe checkout session using centralized service
+    const { getStripe } = await import('@/lib/services')
+    const stripe = getStripe()
     
     // Build product description with discount info
     const description = discount > 0 
