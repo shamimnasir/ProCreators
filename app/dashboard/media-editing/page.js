@@ -64,15 +64,6 @@ const MEDIA_CATEGORIES = [
         href: '/dashboard/tools/image-editor',
         useCase: 'Complete image editing',
         badge: 'All-in-One'
-      },
-      {
-        id: 'bg-remover',
-        name: 'Background Remover',
-        description: 'Remove backgrounds in one click',
-        icon: '✂️',
-        href: '/dashboard/tools/bg-remover',
-        useCase: 'Product photos, portraits',
-        badge: 'Hot'
       }
     ]
   },
