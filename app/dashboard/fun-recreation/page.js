@@ -44,16 +44,6 @@ const FUN_CATEGORIES = [
         href: '/dashboard/tools/joke-generator',
         useCase: 'Ice breakers, entertainment',
         badge: ''
-      },
-      {
-        id: 'roast-generator',
-        name: 'Roast Generator',
-        description: 'Friendly roasts and comebacks',
-        icon: '🔥',
-        href: '/dashboard/tools/roast-generator',
-        useCase: 'Fun with friends',
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   },
@@ -72,26 +62,6 @@ const FUN_CATEGORIES = [
         href: '/dashboard/tools/avatar-creator',
         useCase: 'Profile pics, gaming',
         badge: 'Popular'
-      },
-      {
-        id: 'character-creator',
-        name: 'Character Generator',
-        description: 'Design original characters',
-        icon: '🧙',
-        href: '/dashboard/tools/character-creator',
-        useCase: 'Stories, games, art',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'pet-avatar',
-        name: 'Pet Portrait AI',
-        description: 'Turn pet photos into art',
-        icon: '🐶',
-        href: '/dashboard/tools/pet-avatar',
-        useCase: 'Pet lovers',
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   },
@@ -110,26 +80,6 @@ const FUN_CATEGORIES = [
         href: '/dashboard/tools/story-writer',
         useCase: 'Entertainment, kids',
         badge: 'Creative'
-      },
-      {
-        id: 'poem-generator',
-        name: 'Poem Generator',
-        description: 'Write poems for any occasion',
-        icon: '🌹',
-        href: '/dashboard/tools/poem-generator',
-        useCase: 'Special occasions',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'song-lyrics',
-        name: 'Song Lyrics Writer',
-        description: 'Generate lyrics for your music',
-        icon: '🎵',
-        href: '/dashboard/tools/song-lyrics',
-        useCase: 'Musicians, karaoke',
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   },
@@ -148,26 +98,6 @@ const FUN_CATEGORIES = [
         href: '/dashboard/tools/love-letter',
         useCase: 'Anniversaries, Valentine\'s',
         badge: 'Romantic'
-      },
-      {
-        id: 'pickup-lines',
-        name: 'Pickup Line Generator',
-        description: 'Creative and funny pickup lines',
-        icon: '😉',
-        href: '/dashboard/tools/pickup-lines',
-        useCase: 'Dating, fun',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'apology-letter',
-        name: 'Apology Message Generator',
-        description: 'Sincere apologies that work',
-        icon: '🙏',
-        href: '/dashboard/tools/apology-letter',
-        useCase: 'Making amends',
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   },
@@ -186,26 +116,6 @@ const FUN_CATEGORIES = [
         href: '/dashboard/tools/fortune-teller',
         useCase: 'Entertainment',
         badge: 'Mystical'
-      },
-      {
-        id: 'trivia-generator',
-        name: 'Trivia Question Generator',
-        description: 'Create trivia games on any topic',
-        icon: '❓',
-        href: '/dashboard/tools/trivia-generator',
-        useCase: 'Game nights, parties',
-        badge: 'Coming Soon',
-        comingSoon: true
-      },
-      {
-        id: 'would-you-rather',
-        name: 'Would You Rather Generator',
-        description: 'Fun dilemma questions',
-        icon: '🤔',
-        href: '/dashboard/tools/would-you-rather',
-        useCase: 'Parties, ice breakers',
-        badge: 'Coming Soon',
-        comingSoon: true
       }
     ]
   }
