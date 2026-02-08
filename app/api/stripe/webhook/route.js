@@ -341,14 +341,20 @@ export async function POST(request) {
 
 // GET endpoint for health checks and debugging
 export async function GET(request) {
-  const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
+  const WEBHOOK_SECRET_PRIMARY = process.env.STRIPE_WEBHOOK_SECRET
+  const WEBHOOK_SECRET_SECONDARY = process.env.STRIPE_WEBHOOK_SECRET_2
   const STRIPE_API_KEY = process.env.STRIPE_API_KEY
+  
+  const secretsConfigured = [
+    WEBHOOK_SECRET_PRIMARY,
+    WEBHOOK_SECRET_SECONDARY
+  ].filter(s => s && s !== 'whsec_placeholder').length
   
   return NextResponse.json({
     status: 'ok',
     endpoint: '/api/stripe/webhook',
     stripeConfigured: !!STRIPE_API_KEY,
-    webhookSecretConfigured: !!WEBHOOK_SECRET && WEBHOOK_SECRET !== 'whsec_placeholder',
+    webhookSecretsConfigured: secretsConfigured,
     timestamp: new Date().toISOString()
   })
 }
