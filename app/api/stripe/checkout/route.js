@@ -142,14 +142,6 @@ export async function POST(request) {
       )
     }
     
-    const STRIPE_API_KEY = process.env.STRIPE_API_KEY
-    if (!STRIPE_API_KEY) {
-      return NextResponse.json(
-        { success: false, error: 'Stripe not configured' },
-        { status: 500 }
-      )
-    }
-    
     // Check user's subscription for discount
     const { db } = await connectToDatabase()
     const user = await db.collection('users').findOne({ _id: userId })
