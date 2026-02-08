@@ -147,14 +147,6 @@ const MEDIA_CATEGORIES = [
         badge: ''
       }
     ]
-  },
-  {
-    id: 'convert',
-    name: 'Format Conversion',
-    description: 'Convert between formats',
-    icon: '🔄',
-    color: 'from-amber-500 to-yellow-500',
-    tools: []
   }
 ]
 
