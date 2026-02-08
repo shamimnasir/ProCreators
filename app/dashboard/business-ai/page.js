@@ -66,31 +66,22 @@ const BUSINESS_CATEGORIES = [
     color: 'from-blue-500 to-cyan-500',
     tools: [
       {
-        id: 'social-calendar',
-        name: 'Social Media Calendar',
-        description: 'Plan months of content in minutes',
-        icon: '📅',
-        href: '/dashboard/tools/social-calendar',
-        useCase: 'Content planning',
-        badge: 'Time Saver'
-      },
-      {
-        id: 'social-captions',
-        name: 'Caption Generator',
-        description: 'Engaging captions for Instagram, TikTok',
-        icon: '✍️',
-        href: '/dashboard/tools/social-captions',
+        id: 'linkedin-posts',
+        name: 'Social Media Posts',
+        description: 'Engaging posts for all platforms',
+        icon: '📝',
+        href: '/dashboard/tools/linkedin-posts',
         useCase: 'Daily posts',
         badge: 'Popular'
       },
       {
-        id: 'hashtag-generator',
-        name: 'Hashtag Generator',
-        description: 'Trending hashtags for maximum reach',
-        icon: '#️⃣',
-        href: '/dashboard/tools/hashtag-generator',
-        useCase: 'Instagram, Twitter',
-        badge: ''
+        id: 'carousels',
+        name: 'Carousel Creator',
+        description: 'Swipeable carousel posts',
+        icon: '🎠',
+        href: '/dashboard/tools/carousels',
+        useCase: 'Instagram, LinkedIn',
+        badge: 'Hot'
       }
     ]
   },
@@ -111,48 +102,12 @@ const BUSINESS_CATEGORIES = [
         badge: 'New'
       },
       {
-        id: 'subject-lines',
-        name: 'Subject Line Generator',
-        description: 'Open-worthy subject lines',
+        id: 'professional-email',
+        name: 'Professional Email Writer',
+        description: 'Business emails that get responses',
         icon: '✉️',
-        href: '/dashboard/tools/subject-lines',
-        useCase: 'Higher open rates',
-        badge: ''
-      }
-    ]
-  },
-  {
-    id: 'customer',
-    name: 'Customer Communication',
-    description: 'Better customer relationships',
-    icon: '⭐',
-    color: 'from-green-500 to-emerald-500',
-    tools: [
-      {
-        id: 'review-responder',
-        name: 'Review Responder',
-        description: 'Professional responses to customer reviews',
-        icon: '⭐',
-        href: '/dashboard/tools/review-responder',
-        useCase: 'Google, Yelp reviews',
-        badge: 'Essential'
-      },
-      {
-        id: 'faq-generator',
-        name: 'FAQ Generator',
-        description: 'Comprehensive FAQ pages from your content',
-        icon: '❓',
-        href: '/dashboard/tools/faq-generator',
-        useCase: 'Website, support',
-        badge: ''
-      },
-      {
-        id: 'chatbot-scripts',
-        name: 'Chatbot Script Writer',
-        description: 'Conversational scripts for chatbots',
-        icon: '🤖',
-        href: '/dashboard/tools/chatbot-scripts',
-        useCase: 'Customer service',
+        href: '/dashboard/tools/professional-email',
+        useCase: 'Business communication',
         badge: ''
       }
     ]
