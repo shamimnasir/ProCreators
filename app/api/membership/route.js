@@ -56,6 +56,32 @@ export async function GET(request) {
     
     const plan = MEMBERSHIP_PLANS[user.plan] || MEMBERSHIP_PLANS.free
     
+    // Calculate credits - handle legacy users who only have 'credits' field
+    let membershipCredits = user.membershipCredits || 0
+    let purchasedCredits = user.purchasedCredits || 0
+    
+    // If user has 'credits' but no membershipCredits/purchasedCredits, migrate the value
+    if (membershipCredits === 0 && purchasedCredits === 0 && user.credits > 0) {
+      purchasedCredits = user.credits // Legacy credits become purchased credits
+      
+      // Also update the user record to migrate the data structure
+      try {
+        await db.collection('users').updateOne(
+          { _id: userId },
+          { 
+            $set: { 
+              purchasedCredits: user.credits,
+              membershipCredits: 0
+            }
+          }
+        )
+      } catch (e) {
+        console.error('Error migrating user credits:', e)
+      }
+    }
+    
+    const totalCredits = membershipCredits + purchasedCredits
+    
     return NextResponse.json({
       success: true,
       plan: user.plan || 'free',
@@ -65,9 +91,9 @@ export async function GET(request) {
         monthlyCredits: plan.monthlyCredits,
         features: plan.features
       },
-      membershipCredits: user.membershipCredits || 0,
-      purchasedCredits: user.purchasedCredits || 0,
-      totalCredits: (user.membershipCredits || 0) + (user.purchasedCredits || 0),
+      membershipCredits,
+      purchasedCredits,
+      totalCredits,
       subscription: {
         status: user.subscriptionStatus || 'none',
         renewsAt: user.subscriptionRenewsAt || null,
