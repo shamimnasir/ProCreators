@@ -888,100 +888,120 @@ export default function SocialMediaPostCreator() {
             </div>
           </div>
 
-          {/* Post Variations */}
+          {/* Post Variations - Now as Thread View */}
           {result.posts && result.posts.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Flame className="h-5 w-5 text-orange-500" />
-                    Generated Posts
+                    {result.posts.length > 1 ? `Thread (${result.posts.length} posts)` : 'Generated Post'}
                   </CardTitle>
-                  <div className="flex gap-1">
-                    {result.posts.map((_, idx) => (
-                      <Button
-                        key={idx}
-                        size="sm"
-                        variant={activeVariation === idx ? 'default' : 'outline'}
-                        onClick={() => setActiveVariation(idx)}
-                        className={activeVariation === idx ? 'bg-purple-600' : ''}
-                      >
-                        {idx + 1}
-                      </Button>
-                    ))}
-                  </div>
+                  <Button 
+                    className={`bg-gradient-to-r ${selectedPlatform?.color}`}
+                    onClick={() => {
+                      // Copy all posts as a thread
+                      const fullThread = result.posts.map((post, idx) => {
+                        let text = result.posts.length > 1 ? `${idx + 1}/ ` : ''
+                        text += post.content
+                        if (post.hashtags?.length && idx === result.posts.length - 1) {
+                          text += '\n\n' + post.hashtags.map(t => '#' + t).join(' ')
+                        }
+                        return text
+                      }).join('\n\n---\n\n')
+                      handleCopy(fullThread, 'full-thread')
+                    }}
+                  >
+                    {copied['full-thread'] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+                    {copied['full-thread'] ? 'Copied!' : 'Copy All'}
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Active Post Preview */}
-                  <div className={`bg-white border rounded-xl p-6 shadow-lg`}>
-                    {/* Platform Header Mock */}
-                    <div className="flex items-start gap-3 mb-4 pb-4 border-b">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${selectedPlatform?.color} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
-                        {selectedPlatform?.icon}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">Your Name</p>
-                        <p className="text-sm text-gray-500">Your headline • {selectedPlatform?.name}</p>
-                        <p className="text-xs text-gray-400">Just now</p>
-                      </div>
-                    </div>
-                    
-                    {/* Post Content */}
-                    <div className="whitespace-pre-wrap text-gray-800 leading-relaxed mb-4">
-                      {result.posts[activeVariation]?.content}
-                    </div>
-                    
-                    {/* Hashtags */}
-                    {result.posts[activeVariation]?.hashtags && result.posts[activeVariation].hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {result.posts[activeVariation].hashtags.map((tag, i) => (
-                          <span key={i} className="text-purple-600 text-sm">#{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Engagement Preview */}
-                    <div className="flex items-center gap-4 pt-4 border-t text-gray-500 text-sm">
-                      <span className="flex items-center gap-1"><ThumbsUp className="h-4 w-4" /> Like</span>
-                      <span className="flex items-center gap-1"><MessageSquare className="h-4 w-4" /> Comment</span>
-                      <span className="flex items-center gap-1"><Share2 className="h-4 w-4" /> Share</span>
-                    </div>
-                  </div>
-                  
-                  {/* Copy Button */}
-                  <div className="flex gap-2">
-                    <Button 
-                      className={`flex-1 bg-gradient-to-r ${selectedPlatform?.color}`}
-                      onClick={() => handleCopy(
-                        result.posts[activeVariation]?.content + 
-                        (result.posts[activeVariation]?.hashtags?.length ? '\n\n' + result.posts[activeVariation].hashtags.map(t => '#' + t).join(' ') : ''),
-                        `post-${activeVariation}`
+                  {/* All Posts in Thread View */}
+                  {result.posts.map((post, idx) => (
+                    <div key={idx} className={`bg-white border rounded-xl p-6 shadow-sm ${idx > 0 ? 'border-l-4 border-l-purple-500' : 'shadow-lg'}`}>
+                      {/* Post Number Badge for Threads */}
+                      {result.posts.length > 1 && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <Badge className="bg-purple-600 text-white">{idx + 1}/{result.posts.length}</Badge>
+                          {idx === 0 && <Badge variant="outline" className="text-purple-600">Thread Start</Badge>}
+                          {idx === result.posts.length - 1 && result.posts.length > 1 && <Badge variant="outline" className="text-green-600">Final Post</Badge>}
+                        </div>
                       )}
-                    >
-                      {copied[`post-${activeVariation}`] ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-                      {copied[`post-${activeVariation}`] ? 'Copied!' : 'Copy Post'}
-                    </Button>
+                      
+                      {/* Platform Header Mock - Only on first post */}
+                      {idx === 0 && (
+                        <div className="flex items-start gap-3 mb-4 pb-4 border-b">
+                          <div className={`w-12 h-12 bg-gradient-to-br ${selectedPlatform?.color} rounded-full flex items-center justify-center text-white font-bold text-lg`}>
+                            {selectedPlatform?.icon}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">Your Name</p>
+                            <p className="text-sm text-gray-500">Your headline • {selectedPlatform?.name}</p>
+                            <p className="text-xs text-gray-400">Just now</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Post Content */}
+                      <div className="whitespace-pre-wrap text-gray-800 leading-relaxed mb-4">
+                        {result.posts.length > 1 && <span className="text-purple-600 font-semibold">{idx + 1}/ </span>}
+                        {post.content}
+                      </div>
+                      
+                      {/* Hashtags - Only on last post */}
+                      {post.hashtags && post.hashtags.length > 0 && idx === result.posts.length - 1 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {post.hashtags.map((tag, i) => (
+                            <span key={i} className="text-purple-600 text-sm">#{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Copy Individual Post Button */}
+                      <div className="flex justify-end">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopy(
+                            (result.posts.length > 1 ? `${idx + 1}/ ` : '') + post.content + 
+                            (post.hashtags?.length && idx === result.posts.length - 1 ? '\n\n' + post.hashtags.map(t => '#' + t).join(' ') : ''),
+                            `post-${idx}`
+                          )}
+                        >
+                          {copied[`post-${idx}`] ? <Check className="h-3 w-3 mr-1" /> : <Copy className="h-3 w-3 mr-1" />}
+                          {copied[`post-${idx}`] ? 'Copied!' : 'Copy'}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Engagement Preview */}
+                  <div className="flex items-center gap-4 pt-4 border-t text-gray-500 text-sm">
+                    <span className="flex items-center gap-1"><ThumbsUp className="h-4 w-4" /> Like</span>
+                    <span className="flex items-center gap-1"><MessageSquare className="h-4 w-4" /> Comment</span>
+                    <span className="flex items-center gap-1"><Share2 className="h-4 w-4" /> Share</span>
                   </div>
 
-                  {/* Post Analysis */}
-                  {result.posts[activeVariation]?.analysis && (
+                  {/* Post Analysis - Show for first post */}
+                  {result.posts[0]?.analysis && (
                     <div className="grid grid-cols-3 gap-3 mt-4">
                       <div className="bg-purple-50 p-3 rounded-lg text-center">
                         <Eye className="h-5 w-5 mx-auto text-purple-600 mb-1" />
                         <p className="text-xs text-gray-600">Hook Strength</p>
-                        <p className="font-bold text-purple-700">{result.posts[activeVariation].analysis.hookStrength || 'Strong'}</p>
+                        <p className="font-bold text-purple-700">{result.posts[0].analysis.hookStrength || 'Strong'}</p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg text-center">
                         <TrendingUp className="h-5 w-5 mx-auto text-green-600 mb-1" />
                         <p className="text-xs text-gray-600">Viral Potential</p>
-                        <p className="font-bold text-green-700">{result.posts[activeVariation].analysis.viralPotential || 'High'}</p>
+                        <p className="font-bold text-green-700">{result.posts[0].analysis.viralPotential || 'High'}</p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg text-center">
                         <MessageSquare className="h-5 w-5 mx-auto text-blue-600 mb-1" />
                         <p className="text-xs text-gray-600">Engagement Type</p>
-                        <p className="font-bold text-blue-700">{result.posts[activeVariation].analysis.engagementType || 'Comments'}</p>
+                        <p className="font-bold text-blue-700">{result.posts[0].analysis.engagementType || 'Comments'}</p>
                       </div>
                     </div>
                   )}
