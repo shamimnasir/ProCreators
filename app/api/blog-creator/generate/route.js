@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 
 // Blog generation input schema
 const blogCreatorSchema = z.object({
@@ -76,6 +77,8 @@ async function runLLM(prompt, systemPrompt) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  
   try {
     // SECURITY: Rate limiting for blog generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
@@ -83,6 +86,34 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
     
+    
+    // Get user ID and check credits
+    const userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, 'blog-creator')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    const deductResult = await deductCredits(userId, 'blog-creator')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    const transactionId = deductResult.transactionId
+
     const body = await request.json()
     
     // SECURITY: Validate input with Zod schema

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 
 // Helper to call the Python script for text generation
 async function generateWithGemini(prompt, systemMessage = 'You are an expert educator creating flashcard content.') {
@@ -471,12 +472,42 @@ function getFlashcardsFromDatabase(topic, count, difficulty, category) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
       return rateLimitCheck.response
     }
+
+    
+    // Get user ID and check credits
+    const userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, 'flashcards')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    const deductResult = await deductCredits(userId, 'flashcards')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    const transactionId = deductResult.transactionId
 
     const body = await request.json()
     const { topic, count = 20, difficulty = 'medium', category, useAI = true } = body

@@ -7,6 +7,7 @@ import path from 'path'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { spawn } from 'child_process'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
