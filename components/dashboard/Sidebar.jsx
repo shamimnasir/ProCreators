@@ -67,15 +67,9 @@ const ADMIN_EMAILS = [
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
-    name: 'AI Video Studio',
+    name: 'Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
-    children: []
-  },
-  {
-    name: 'Quick Video Studio',
-    href: '/dashboard/tools/quick-reels',
-    icon: Video,
     children: [
       { name: 'Mini Stories', href: '/dashboard/tools/quick-reels/mini-stories', icon: BookOpen },
       { name: 'Motivational', href: '/dashboard/tools/quick-reels/motivational', icon: Zap },
@@ -85,15 +79,8 @@ const navigation = [
       { name: 'Kids Learning', href: '/dashboard/tools/quick-reels/kids-learning', icon: GraduationCap },
       { name: 'Business Promos', href: '/dashboard/tools/quick-reels/business-promo', icon: CreditCard },
       { name: 'Horror Stories', href: '/dashboard/tools/quick-reels/horror', icon: Video },
-      { name: 'Relationship Advice', href: '/dashboard/tools/quick-reels/relationship', icon: MessageSquare },
-      { name: 'Documentary Style', href: '/dashboard/tools/quick-reels/documentary', icon: Film },
-      { name: 'Festival Themed', href: '/dashboard/tools/quick-reels/festival', icon: Sparkles },
-      { name: 'Custom Creation', href: '/dashboard/tools/quick-reels/generic', icon: Edit3 },
       { name: 'Story Video Reels', href: '/dashboard/tools/story-reels', icon: Sparkles },
-      { name: 'Quick Video Generator', href: '/dashboard/tools/reels', icon: Film },
       { name: 'Long Form', href: '/dashboard/tools/long-form', icon: VideoIcon },
-      { name: 'Auto Reels', href: '/dashboard/tools/auto-reels', icon: Zap },
-      { name: 'Auto Long Form', href: '/dashboard/tools/auto-longform', icon: Zap },
     ]
   },
   {
