@@ -56,63 +56,54 @@ const navigation = [
     name: 'AI Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
-    badge: 'Pro',
     children: []
   },
   {
     name: 'Quick Video Studio',
     href: '/dashboard/tools/quick-reels',
     icon: Video,
-    badge: '',
     children: []
   },
   {
     name: 'Viral Post Creation',
     href: '/dashboard/viral-posts',
     icon: Sparkles,
-    badge: '',
     children: []
   },
   {
     name: 'Digital Products',
     href: '/dashboard/digital-products',
     icon: ShoppingBag,
-    badge: 'Hot',
     children: []
   },
   {
     name: 'Media Editor',
     href: '/dashboard/media-editing',
     icon: Edit3,
-    badge: '',
     children: []
   },
   {
     name: 'Students & Teachers',
     href: '/dashboard/students-teachers',
     icon: GraduationCap,
-    badge: 'New',
     children: []
   },
   {
     name: 'Jobs & Career',
     href: '/dashboard/jobs-career',
     icon: Briefcase,
-    badge: 'New',
     children: []
   },
   {
     name: 'Business & Marketing',
     href: '/dashboard/business-ai',
     icon: TrendingUp,
-    badge: 'New',
     children: []
   },
   {
     name: 'Fun & Recreation',
     href: '/dashboard/fun-recreation',
     icon: GamepadIcon,
-    badge: 'New',
     children: []
   },
   { name: 'Library', href: '/dashboard/library', icon: Library },
