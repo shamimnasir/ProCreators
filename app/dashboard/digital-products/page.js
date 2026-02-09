@@ -157,8 +157,7 @@ export default function DigitalProductsPage() {
       {/* Quick Tips Section */}
       <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-            <Sparkles className="h-5 w-5" />
+          <CardTitle className="text-amber-800 dark:text-amber-200">
             Pro Tips for Selling Digital Products
           </CardTitle>
         </CardHeader>
