@@ -246,9 +246,15 @@ export default function SocialMediaPostCreator() {
     setResult(null)
     
     try {
+      // Get session token for authentication
+      const sessionToken = localStorage.getItem('sessionToken')
+      
       const res = await fetch('/api/linkedin-posts/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(sessionToken && { 'Authorization': `Bearer ${sessionToken}` })
+        },
         body: JSON.stringify({
           platform,
           topic,
