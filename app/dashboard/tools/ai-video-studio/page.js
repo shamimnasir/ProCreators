@@ -688,11 +688,18 @@ export default function AIVideoStudioPage() {
     }
   }
 
+  // Helper function to get niches for quick mode category
+  const getNichesForCategory = (categoryId) => {
+    const category = NICHE_CATEGORIES.find(c => c.id === categoryId)
+    if (!category) return []
+    return category.niches.map(nicheId => QUICK_REELS_NICHES.find(n => n.id === nicheId)).filter(Boolean)
+  }
+  
   // ==================== GALLERY VIEW ====================
   if (view === 'gallery') {
     return (
       <div className="space-y-6">
-        {/* Hero Header */}
+        {/* Unified Hero Header with Mode Switcher */}
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-8 text-white">
           <div className="absolute inset-0 bg-black/10" />
           <div className="relative z-10">
@@ -700,35 +707,95 @@ export default function AIVideoStudioPage() {
               <div className="p-3 bg-white/20 rounded-xl backdrop-blur">
                 <Film className="h-8 w-8" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">AI Video Studio</h1>
-                <p className="text-white/80">Professional AI-Powered Video Creation</p>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold">Video Studio</h1>
+                <p className="text-white/80">Create AI-Powered Videos for Any Platform</p>
               </div>
-              <Badge className="ml-auto bg-white/20 text-white border-0">Pro</Badge>
+              <CreditCostBadge toolId={studioMode === 'quick' ? 'quick-reels' : 'ai-video-studio'} />
             </div>
             
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                <Wand2 className="h-5 w-5 mb-2" />
-                <p className="text-2xl font-bold">AI Engine</p>
-                <p className="text-xs text-white/70">Cinema Quality</p>
+            {/* Mode Switcher Tabs */}
+            <div className="flex items-center gap-3 mt-6 mb-4">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-1 flex gap-1">
+                <button
+                  onClick={() => setStudioMode('quick')}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                    studioMode === 'quick' 
+                      ? 'bg-white text-purple-700 shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Zap className="h-4 w-4" />
+                  Quick Mode
+                </button>
+                <button
+                  onClick={() => setStudioMode('ai')}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                    studioMode === 'ai' 
+                      ? 'bg-white text-purple-700 shadow-lg' 
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  AI Mode
+                </button>
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                <Clock className="h-5 w-5 mb-2" />
-                <p className="text-2xl font-bold">5s - 2m</p>
-                <p className="text-xs text-white/70">Video Duration</p>
+              <div className="hidden md:block text-sm text-white/70 ml-2">
+                {studioMode === 'quick' 
+                  ? '1-click preset videos • Best for beginners' 
+                  : 'Full control • Custom templates'}
               </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                <Grid className="h-5 w-5 mb-2" />
-                <p className="text-2xl font-bold">{AI_VIDEO_TEMPLATES.length}+</p>
-                <p className="text-xs text-white/70">Templates</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                <Zap className="h-5 w-5 mb-2" />
-                <p className="text-2xl font-bold">4K</p>
-                <p className="text-xs text-white/70">Max Resolution</p>
-              </div>
+            </div>
+            
+            {/* Stats - Change based on mode */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {studioMode === 'quick' ? (
+                <>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Play className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">13 Niches</p>
+                    <p className="text-xs text-white/70">Content Types</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Clock className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">15s - 2m</p>
+                    <p className="text-xs text-white/70">Video Length</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Sparkles className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">AI Scripts</p>
+                    <p className="text-xs text-white/70">Auto-Generated</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Zap className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">1-Click</p>
+                    <p className="text-xs text-white/70">Quick Export</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Wand2 className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">AI Engine</p>
+                    <p className="text-xs text-white/70">Cinema Quality</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Clock className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">5s - 2m</p>
+                    <p className="text-xs text-white/70">Video Duration</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Grid className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">{AI_VIDEO_TEMPLATES.length}+</p>
+                    <p className="text-xs text-white/70">Templates</p>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+                    <Zap className="h-5 w-5 mb-2" />
+                    <p className="text-2xl font-bold">4K</p>
+                    <p className="text-xs text-white/70">Max Resolution</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           
@@ -737,7 +804,139 @@ export default function AIVideoStudioPage() {
           <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
         </div>
 
-        {/* Custom Creation CTA - Highlighted at top */}
+        {/* ==================== QUICK MODE CONTENT ==================== */}
+        {studioMode === 'quick' && (
+          <>
+            {/* Platform Badges */}
+            <Card className="border-dashed bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                      Perfect for:
+                    </span>
+                    <div className="flex gap-2 flex-wrap">
+                      {['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Facebook Reels'].map((platform) => (
+                        <Badge key={platform} variant="secondary" className="bg-white dark:bg-purple-900">
+                          {platform}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Category Tabs */}
+            <Tabs defaultValue="all" onValueChange={setQuickModeCategory}>
+              <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
+                <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  All Videos
+                </TabsTrigger>
+                {NICHE_CATEGORIES.map((cat) => (
+                  <TabsTrigger 
+                    key={cat.id} 
+                    value={cat.id}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {cat.icon} {cat.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {/* All Videos View */}
+              <TabsContent value="all" className="mt-6">
+                <div className="space-y-8">
+                  {NICHE_CATEGORIES.map((category) => (
+                    <div key={category.id}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
+                          <span className="text-xl">{category.icon}</span>
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold">{category.name}</h2>
+                          <p className="text-sm text-muted-foreground">{category.description}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {getNichesForCategory(category.id).map((niche) => (
+                          <NicheCard key={niche.id} niche={niche} categoryColor={category.color} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              {/* Individual Category Views */}
+              {NICHE_CATEGORIES.map((category) => (
+                <TabsContent key={category.id} value={category.id} className="mt-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
+                      <span className="text-2xl">{category.icon}</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{category.name}</h2>
+                      <p className="text-muted-foreground">{category.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {getNichesForCategory(category.id).map((niche) => (
+                      <NicheCard key={niche.id} niche={niche} categoryColor={category.color} expanded />
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+
+            {/* Pro Tips Section */}
+            <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
+              <CardHeader>
+                <CardTitle className="text-amber-800 dark:text-amber-200">
+                  Pro Tips for Viral Videos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                      <span className="text-lg">1️⃣</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-amber-900 dark:text-amber-100">Hook in 3 Seconds</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">Grab attention immediately</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                      <span className="text-lg">2️⃣</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-amber-900 dark:text-amber-100">Post Consistently</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">3-5 videos per week</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full text-amber-600 dark:text-amber-300">
+                      <span className="text-lg">3️⃣</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-amber-900 dark:text-amber-100">Trending Audio</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300">Boost discoverability</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* ==================== AI MODE CONTENT ==================== */}
+        {studioMode === 'ai' && (
+          <>
+            {/* Custom Creation CTA - Highlighted at top */}
         <Card 
           className="border-2 border-primary/50 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
           onClick={() => handleSelectTemplate({
