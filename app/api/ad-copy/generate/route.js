@@ -413,6 +413,11 @@ Generate ${variationCount} distinctly different ad variations. Each should have 
       }
     }
 
+    // Complete credit transaction on success
+    if (transactionId) {
+      await completeTransaction(transactionId)
+    }
+
     return NextResponse.json({
       success: true,
       data: result,
@@ -424,11 +429,19 @@ Generate ${variationCount} distinctly different ad variations. Each should have 
         tone,
         variationCount,
         productName
-      }
+      },
+      creditsUsed: creditCheck.cost,
+      remainingCredits: deductResult.newBalance
     })
 
   } catch (error) {
     console.error('Ad Copy Generator Error:', error)
+    
+    // Refund credits on failure
+    if (transactionId) {
+      await refundCredits(transactionId, error.message || 'Ad copy generation failed')
+    }
+    
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate ad copy' },
       { status: 500 }
