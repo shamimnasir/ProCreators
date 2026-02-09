@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -17,7 +18,8 @@ import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
-  Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library
+  Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library,
+  TrendingUp, ArrowRight, Users, Rocket
 } from 'lucide-react'
 
 // Import configurations
@@ -46,7 +48,95 @@ import {
   SUPPORTED_TTS_LANGUAGES 
 } from '@/config/voice-config'
 
+// Import Quick Reels niches
+import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
+
+// Quick Mode Categories
+const NICHE_CATEGORIES = [
+  {
+    id: 'storytelling',
+    name: 'Storytelling',
+    icon: '📖',
+    description: 'Captivating narratives and tales',
+    color: 'from-purple-500 to-pink-500',
+    niches: ['mini-stories', 'horror', 'kids-stories', 'transformation']
+  },
+  {
+    id: 'educational',
+    name: 'Educational',
+    icon: '🧠',
+    description: 'Learn and teach with engaging content',
+    color: 'from-blue-500 to-cyan-500',
+    niches: ['facts-explainer', 'kids-learning', 'documentary']
+  },
+  {
+    id: 'emotional',
+    name: 'Emotional & Lifestyle',
+    icon: '❤️',
+    description: 'Connect with hearts and minds',
+    color: 'from-red-500 to-pink-500',
+    niches: ['motivational', 'relationship', 'gratitude']
+  },
+  {
+    id: 'entertainment',
+    name: 'Entertainment',
+    icon: '🎉',
+    description: 'Fun content that entertains',
+    color: 'from-yellow-500 to-orange-500',
+    niches: ['comedy', 'festival', 'generic']
+  },
+  {
+    id: 'business',
+    name: 'Business & Marketing',
+    icon: '💼',
+    description: 'Promote and grow your brand',
+    color: 'from-indigo-500 to-purple-500',
+    niches: ['business-promo', 'product-review']
+  }
+]
+
+// Niche Card Component for Quick Mode
+function NicheCard({ niche, categoryColor, expanded = false }) {
+  const href = niche.customPage || `/dashboard/tools/quick-reels/${niche.slug}`
+  
+  return (
+    <Link href={href}>
+      <Card className={`group h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-2 hover:border-primary/50 ${niche.cardBg}`}>
+        <CardHeader className={expanded ? "pb-2" : "pb-1"}>
+          <div className="flex items-start justify-between">
+            <div className={`text-3xl mb-2 group-hover:scale-110 transition-transform`}>{niche.icon}</div>
+          </div>
+          <CardTitle className={`group-hover:text-primary transition-colors ${expanded ? "text-lg" : "text-base"}`}>
+            {niche.name}
+          </CardTitle>
+          <CardDescription className={expanded ? "" : "text-xs line-clamp-2"}>
+            {niche.tagline}
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          {expanded && (
+            <p className="text-sm text-muted-foreground mb-3">
+              {niche.description}
+            </p>
+          )}
+          
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1 ml-auto">
+              Create Video <ArrowRight className="h-3 w-3" />
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  )
+}
+
 export default function AIVideoStudioPage() {
+  // Mode state: 'quick' or 'ai'
+  const [studioMode, setStudioMode] = useState('quick')
+  const [quickModeCategory, setQuickModeCategory] = useState('all')
+  
   // View state: 'gallery' or 'create'
   const [view, setView] = useState('gallery')
   
