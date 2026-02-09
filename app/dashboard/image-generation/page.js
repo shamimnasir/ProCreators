@@ -15,7 +15,6 @@ const FEATURED_TOOLS = [
     icon: '🖼️',
     href: '/dashboard/tools/cover-image-creator',
     useCase: 'Social media, Blogs',
-    badge: 'Popular',
     gradient: 'from-blue-500 to-cyan-500',
     features: ['Templates', 'Custom Sizes', 'Brand Colors']
   },
@@ -26,7 +25,6 @@ const FEATURED_TOOLS = [
     icon: '🎬',
     href: '/dashboard/tools/thumbnail-maker',
     useCase: 'YouTube, Videos',
-    badge: 'Hot',
     gradient: 'from-red-500 to-orange-500',
     features: ['Click-Worthy', 'A/B Test', 'HD Export']
   },
@@ -37,7 +35,6 @@ const FEATURED_TOOLS = [
     icon: '🎭',
     href: '/dashboard/tools/avatar-creator',
     useCase: 'Social media, Gaming',
-    badge: 'Fun',
     gradient: 'from-purple-500 to-pink-500',
     features: ['Multiple Styles', 'Customizable', 'High Quality']
   }
@@ -58,7 +55,6 @@ const IMAGE_CATEGORIES = [
         icon: '🖼️',
         href: '/dashboard/tools/cover-image-creator',
         useCase: 'Social media, blogs',
-        badge: 'Popular'
       },
       {
         id: 'thumbnail-maker',
@@ -67,7 +63,6 @@ const IMAGE_CATEGORIES = [
         icon: '🎬',
         href: '/dashboard/tools/thumbnail-maker',
         useCase: 'YouTube, videos',
-        badge: 'Hot'
       }
     ]
   },
@@ -85,7 +80,6 @@ const IMAGE_CATEGORIES = [
         icon: '🎭',
         href: '/dashboard/tools/avatar-creator',
         useCase: 'Social media, gaming',
-        badge: 'Fun'
       }
     ]
   },
@@ -103,7 +97,6 @@ const IMAGE_CATEGORIES = [
         icon: '🖼️',
         href: '/dashboard/tools/image-editor',
         useCase: 'Photo editing',
-        badge: ''
       }
     ]
   }
@@ -120,7 +113,6 @@ export default function ImageGenerationPage() {
         subtitle="Create stunning visuals with AI-powered tools"
         icon={<Camera className="h-7 w-7" />}
         gradient="from-violet-600 via-purple-600 to-fuchsia-600"
-        emoji="🎨"
         stats={[
           { value: '1-Click', label: 'Generation' },
           { value: '10 sec', label: 'Avg Speed' },

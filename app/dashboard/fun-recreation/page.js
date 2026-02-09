@@ -15,7 +15,6 @@ const FEATURED_TOOLS = [
     icon: '😂',
     href: '/dashboard/tools/meme-generator',
     useCase: 'Social media, Group chats',
-    badge: 'Viral',
     gradient: 'from-yellow-500 to-orange-500',
     features: ['Templates', 'Custom Text', 'Trending Formats']
   },
@@ -26,7 +25,6 @@ const FEATURED_TOOLS = [
     icon: '🎭',
     href: '/dashboard/tools/avatar-creator',
     useCase: 'Profile pics, Gaming',
-    badge: 'Popular',
     gradient: 'from-purple-500 to-pink-500',
     features: ['Multiple Styles', 'Customizable', 'HD Export']
   },
@@ -37,7 +35,6 @@ const FEATURED_TOOLS = [
     icon: '📖',
     href: '/dashboard/tools/story-writer',
     useCase: 'Entertainment, Kids',
-    badge: 'Creative',
     gradient: 'from-blue-500 to-cyan-500',
     features: ['Multiple Genres', 'Character AI', 'Plot Twists']
   }
@@ -58,7 +55,6 @@ const FUN_CATEGORIES = [
         icon: '😂',
         href: '/dashboard/tools/meme-generator',
         useCase: 'Social media, group chats',
-        badge: 'Viral'
       },
       {
         id: 'joke-generator',
@@ -67,7 +63,6 @@ const FUN_CATEGORIES = [
         icon: '🤣',
         href: '/dashboard/tools/joke-generator',
         useCase: 'Ice breakers, entertainment',
-        badge: ''
       }
     ]
   },
@@ -85,7 +80,6 @@ const FUN_CATEGORIES = [
         icon: '🎭',
         href: '/dashboard/tools/avatar-creator',
         useCase: 'Profile pics, gaming',
-        badge: 'Popular'
       }
     ]
   },
@@ -103,7 +97,6 @@ const FUN_CATEGORIES = [
         icon: '📖',
         href: '/dashboard/tools/story-writer',
         useCase: 'Entertainment, kids',
-        badge: 'Creative'
       }
     ]
   },
@@ -121,7 +114,6 @@ const FUN_CATEGORIES = [
         icon: '💌',
         href: '/dashboard/tools/love-letter',
         useCase: "Anniversaries, Valentine's",
-        badge: 'Romantic'
       }
     ]
   },
@@ -139,7 +131,6 @@ const FUN_CATEGORIES = [
         icon: '🔮',
         href: '/dashboard/tools/fortune-teller',
         useCase: 'Entertainment',
-        badge: 'Mystical'
       }
     ]
   }
@@ -156,7 +147,6 @@ export default function FunRecreationPage() {
         subtitle="Create entertaining content with AI"
         icon={<Sparkles className="h-7 w-7" />}
         gradient="from-yellow-500 via-orange-500 to-pink-500"
-        emoji="🎉"
         stats={[
           { value: 'Fun', label: 'Guaranteed' },
           { value: 'Viral', label: 'Potential' },

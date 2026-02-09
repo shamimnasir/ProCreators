@@ -34,7 +34,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📊',
         href: '/dashboard/tools/slides-maker',
         useCase: 'Class presentations, lectures',
-        badge: 'Most Used'
       },
       {
         id: 'lesson-planner',
@@ -43,7 +42,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📋',
         href: '/dashboard/tools/lesson-planner',
         useCase: 'Teachers, trainers',
-        badge: 'For Teachers',
         isBuilt: true
       }
     ]
@@ -62,7 +60,6 @@ const EDUCATION_CATEGORIES = [
         icon: '🎴',
         href: '/dashboard/tools/learning-cards',
         useCase: 'Exam prep, memorization',
-        badge: 'Popular',
         isBuilt: true
       },
       {
@@ -72,7 +69,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📖',
         href: '/dashboard/tools/storybook-maker',
         useCase: 'K-12, language learning',
-        badge: 'Creative',
         isBuilt: true
       },
       {
@@ -82,7 +78,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📕',
         href: '/dashboard/tools/ebook-maker',
         useCase: 'Course materials, guides',
-        badge: '',
         isBuilt: true
       },
       {
@@ -92,7 +87,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/study-notes',
         useCase: 'Note-taking, revision',
-        badge: 'New',
         isBuilt: true
       }
     ]
@@ -111,7 +105,6 @@ const EDUCATION_CATEGORIES = [
         icon: '❓',
         href: '/dashboard/tools/quiz-maker',
         useCase: 'Testing, self-assessment',
-        badge: 'Smart',
         isBuilt: true
       },
       {
@@ -121,7 +114,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📄',
         href: '/dashboard/tools/worksheet-maker',
         useCase: 'Practice, homework',
-        badge: 'Popular',
         isBuilt: true
       },
       {
@@ -131,7 +123,6 @@ const EDUCATION_CATEGORIES = [
         icon: '🎨',
         href: '/dashboard/tools/activity-book',
         useCase: 'K-12, homeschool',
-        badge: '',
         isBuilt: true
       },
       {
@@ -141,7 +132,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/exam-prep',
         useCase: 'Board exams, certifications',
-        badge: 'New',
         isBuilt: true
       }
     ]
@@ -160,7 +150,6 @@ const EDUCATION_CATEGORIES = [
         icon: '✍️',
         href: '/dashboard/tools/essay-helper',
         useCase: 'Academic writing',
-        badge: 'New',
         isBuilt: true
       },
       {
@@ -170,7 +159,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📚',
         href: '/dashboard/tools/citation-generator',
         useCase: 'Research papers',
-        badge: 'New',
         isBuilt: true
       },
       {
@@ -180,7 +168,6 @@ const EDUCATION_CATEGORIES = [
         icon: '✅',
         href: '/dashboard/tools/grammar-checker',
         useCase: 'All writing',
-        badge: 'New',
         isBuilt: true
       },
       {
@@ -190,7 +177,6 @@ const EDUCATION_CATEGORIES = [
         icon: '🪄',
         href: '/dashboard/tools/ai-humanizer',
         useCase: 'Content rewriting',
-        badge: 'New',
         isBuilt: true
       }
     ]
@@ -209,7 +195,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📅',
         href: '/dashboard/tools/planner-maker',
         useCase: 'Time management, schedules',
-        badge: '',
         isBuilt: true
       },
       {
@@ -219,7 +204,6 @@ const EDUCATION_CATEGORIES = [
         icon: '✅',
         href: '/dashboard/tools/checklist-maker',
         useCase: 'Task tracking, goals',
-        badge: '',
         isBuilt: true
       },
       {
@@ -229,7 +213,6 @@ const EDUCATION_CATEGORIES = [
         icon: '📓',
         href: '/dashboard/tools/journal-maker',
         useCase: 'Reflection, growth tracking',
-        badge: '',
         isBuilt: true
       }
     ]

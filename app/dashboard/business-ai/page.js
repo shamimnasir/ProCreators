@@ -15,7 +15,6 @@ const FEATURED_TOOLS = [
     icon: '🎯',
     href: '/dashboard/tools/ad-copy',
     useCase: 'Facebook, Google, TikTok',
-    badge: 'Best Seller',
     gradient: 'from-red-500 to-orange-500',
     features: ['Multi-Platform', 'A/B Variants', 'Hook Templates']
   },
@@ -26,7 +25,6 @@ const FEATURED_TOOLS = [
     icon: '💼',
     href: '/dashboard/tools/business-plan',
     useCase: 'Investors, Banks',
-    badge: 'Comprehensive',
     gradient: 'from-amber-500 to-yellow-500',
     features: ['Financial Projections', 'Market Analysis', 'PDF Export']
   },
@@ -37,7 +35,6 @@ const FEATURED_TOOLS = [
     icon: '📧',
     href: '/dashboard/tools/email-campaigns',
     useCase: 'Email Marketing',
-    badge: 'New',
     gradient: 'from-purple-500 to-pink-500',
     features: ['Sequences', 'Newsletters', 'Templates']
   }
@@ -58,7 +55,6 @@ const BUSINESS_CATEGORIES = [
         icon: '🎯',
         href: '/dashboard/tools/ad-copy',
         useCase: 'Facebook, Google, TikTok ads',
-        badge: 'Best Seller'
       },
       {
         id: 'marketing-strategy',
@@ -67,7 +63,6 @@ const BUSINESS_CATEGORIES = [
         icon: '📊',
         href: '/dashboard/tools/marketing-strategy',
         useCase: 'Campaign planning',
-        badge: ''
       },
       {
         id: 'landing-page-copy',
@@ -76,7 +71,6 @@ const BUSINESS_CATEGORIES = [
         icon: '📄',
         href: '/dashboard/tools/landing-page-copy',
         useCase: 'Websites, funnels',
-        badge: 'New'
       }
     ]
   },
@@ -94,7 +88,6 @@ const BUSINESS_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'Daily posts',
-        badge: 'Popular'
       },
       {
         id: 'carousels',
@@ -103,7 +96,6 @@ const BUSINESS_CATEGORIES = [
         icon: '🎠',
         href: '/dashboard/tools/carousels',
         useCase: 'Instagram, LinkedIn',
-        badge: 'Hot'
       }
     ]
   },
@@ -121,7 +113,6 @@ const BUSINESS_CATEGORIES = [
         icon: '📧',
         href: '/dashboard/tools/email-campaigns',
         useCase: 'Email marketing',
-        badge: 'New'
       },
       {
         id: 'professional-email',
@@ -130,7 +121,6 @@ const BUSINESS_CATEGORIES = [
         icon: '✉️',
         href: '/dashboard/tools/professional-email',
         useCase: 'Business communication',
-        badge: ''
       }
     ]
   },
@@ -148,7 +138,6 @@ const BUSINESS_CATEGORIES = [
         icon: '💼',
         href: '/dashboard/tools/business-plan',
         useCase: 'Investors, banks',
-        badge: 'Comprehensive'
       },
       {
         id: 'pitch-deck',
@@ -157,7 +146,6 @@ const BUSINESS_CATEGORIES = [
         icon: '📊',
         href: '/dashboard/tools/pitch-deck',
         useCase: 'Fundraising',
-        badge: ''
       },
       {
         id: 'swot-analysis',
@@ -166,7 +154,6 @@ const BUSINESS_CATEGORIES = [
         icon: '⚖️',
         href: '/dashboard/tools/swot-analysis',
         useCase: 'Strategy planning',
-        badge: ''
       }
     ]
   }
@@ -183,7 +170,6 @@ export default function BusinessAIPage() {
         subtitle="Grow your business with AI-powered tools"
         icon={<TrendingUp className="h-7 w-7" />}
         gradient="from-orange-500 via-red-500 to-pink-600"
-        emoji="📈"
         stats={[
           { value: '10x', label: 'Faster Copy' },
           { value: 'Pro', label: 'Quality' },

@@ -34,7 +34,6 @@ const CAREER_CATEGORIES = [
         icon: '📄',
         href: '/dashboard/tools/resume-builder',
         useCase: 'Job applications',
-        badge: 'Essential'
       },
       {
         id: 'cover-letter',
@@ -43,7 +42,6 @@ const CAREER_CATEGORIES = [
         icon: '✉️',
         href: '/dashboard/tools/cover-letter',
         useCase: 'Applications',
-        badge: 'Popular'
       },
       {
         id: 'job-matcher',
@@ -52,7 +50,6 @@ const CAREER_CATEGORIES = [
         icon: '🎯',
         href: '/dashboard/tools/job-matcher',
         useCase: 'Optimization',
-        badge: 'Smart'
       }
     ]
   },
@@ -70,7 +67,6 @@ const CAREER_CATEGORIES = [
         icon: '🎤',
         href: '/dashboard/tools/interview-prep',
         useCase: 'Mock interviews',
-        badge: 'Hot'
       },
       {
         id: 'salary-negotiator',
@@ -79,7 +75,6 @@ const CAREER_CATEGORIES = [
         icon: '💰',
         href: '/dashboard/tools/salary-negotiator',
         useCase: 'Negotiations',
-        badge: 'New'
       }
     ]
   },
@@ -97,7 +92,6 @@ const CAREER_CATEGORIES = [
         icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'Personal branding',
-        badge: 'Hot'
       },
       {
         id: 'networking-message',
@@ -106,7 +100,6 @@ const CAREER_CATEGORIES = [
         icon: '📨',
         href: '/dashboard/tools/networking-message',
         useCase: 'Outreach',
-        badge: ''
       }
     ]
   },
@@ -124,7 +117,6 @@ const CAREER_CATEGORIES = [
         icon: '📧',
         href: '/dashboard/tools/professional-email',
         useCase: 'Work communication',
-        badge: 'Daily Use'
       }
     ]
   }
