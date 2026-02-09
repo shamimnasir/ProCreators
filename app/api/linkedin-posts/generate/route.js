@@ -270,7 +270,7 @@ export async function POST(request) {
         error: deductResult.error || 'Failed to process credits'
       }, { status: 402 })
     }
-    const transactionId = deductResult.transactionId
+    transactionId = deductResult.transactionId
 
     const body = await request.json()
     const {
