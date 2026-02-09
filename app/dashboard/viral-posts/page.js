@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Sparkles } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const FEATURED_TOOLS = [
@@ -16,7 +16,6 @@ const FEATURED_TOOLS = [
     icon: '📱',
     href: '/dashboard/tools/linkedin-posts',
     useCase: 'All Platforms',
-    badge: 'Popular',
     gradient: 'from-blue-500 to-indigo-500',
     features: ['Multi-platform', 'Engagement AI', 'Hashtag Suggest']
   },
@@ -24,10 +23,9 @@ const FEATURED_TOOLS = [
     id: 'content-humanizer',
     name: 'Content Humanizer',
     description: 'Transform AI text into natural human-like content that bypasses detection',
-    icon: '✨',
+    icon: '✍️',
     href: '/dashboard/tools/content-humanizer',
     useCase: 'AI Detection Bypass',
-    badge: 'Pro',
     gradient: 'from-purple-500 to-pink-500',
     features: ['Bypass Detection', 'Natural Tone', 'Style Match']
   },
@@ -38,7 +36,6 @@ const FEATURED_TOOLS = [
     icon: '🧵',
     href: '/dashboard/tools/threads',
     useCase: 'Twitter/X, LinkedIn',
-    badge: 'Viral',
     gradient: 'from-rose-500 to-orange-500',
     features: ['Hook First Line', 'Story Arc', 'CTA Builder']
   }
@@ -58,17 +55,15 @@ const VIRAL_CATEGORIES = [
         description: 'Viral posts for 7 platforms with AI generation',
         icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
-        useCase: 'All social platforms',
-        badge: 'Hot'
+        useCase: 'All social platforms'
       },
       {
         id: 'content-humanizer',
         name: 'Content Humanizer',
         description: 'Make AI text sound natural & bypass detection',
-        icon: '✨',
+        icon: '✍️',
         href: '/dashboard/tools/content-humanizer',
-        useCase: 'AI Detection Bypass',
-        badge: 'Pro'
+        useCase: 'AI Detection Bypass'
       },
       {
         id: 'blog-creator',
@@ -76,8 +71,7 @@ const VIRAL_CATEGORIES = [
         description: 'SEO articles, affiliate content & product reviews',
         icon: '📝',
         href: '/dashboard/tools/blog-creator',
-        useCase: 'Blogs, SEO, Affiliate',
-        badge: 'New'
+        useCase: 'Blogs, SEO, Affiliate'
       },
       {
         id: 'threads',
@@ -85,8 +79,7 @@ const VIRAL_CATEGORIES = [
         description: 'Create viral Twitter/X threads that get engagement',
         icon: '🧵',
         href: '/dashboard/tools/threads',
-        useCase: 'Twitter/X, LinkedIn',
-        badge: 'Viral'
+        useCase: 'Twitter/X, LinkedIn'
       },
       {
         id: 'quotes',
@@ -94,8 +87,7 @@ const VIRAL_CATEGORIES = [
         description: 'Beautiful quote images for social media',
         icon: '💬',
         href: '/dashboard/tools/quotes',
-        useCase: 'Instagram, Pinterest',
-        badge: 'Popular'
+        useCase: 'Instagram, Pinterest'
       },
       {
         id: 'lists',
@@ -103,8 +95,7 @@ const VIRAL_CATEGORIES = [
         description: 'Engaging listicles and top 10 posts',
         icon: '📋',
         href: '/dashboard/tools/lists',
-        useCase: 'All platforms',
-        badge: ''
+        useCase: 'All platforms'
       }
     ]
   },
@@ -121,8 +112,7 @@ const VIRAL_CATEGORIES = [
         description: 'Swipeable carousel posts for Instagram',
         icon: '🎠',
         href: '/dashboard/tools/carousels',
-        useCase: 'Instagram, LinkedIn',
-        badge: 'Hot'
+        useCase: 'Instagram, LinkedIn'
       },
       {
         id: 'photo-cards',
@@ -130,8 +120,7 @@ const VIRAL_CATEGORIES = [
         description: 'Stunning photo cards with text overlays',
         icon: '🌅',
         href: '/dashboard/tools/photo-cards',
-        useCase: 'Stories, posts',
-        badge: ''
+        useCase: 'Stories, posts'
       }
     ]
   },
@@ -148,8 +137,7 @@ const VIRAL_CATEGORIES = [
         description: 'Breaking news style posts',
         icon: '📰',
         href: '/dashboard/tools/news',
-        useCase: 'Trending topics',
-        badge: 'Trending'
+        useCase: 'Trending topics'
       }
     ]
   }
@@ -164,9 +152,8 @@ export default function ViralPostsPage() {
       <PageHero
         title="Viral Content Creation"
         subtitle="Create content that breaks the algorithm"
-        icon={<Sparkles className="h-7 w-7" />}
+        icon={<TrendingUp className="h-7 w-7" />}
         gradient="from-rose-500 via-pink-500 to-purple-600"
-        emoji="🚀"
         stats={[
           { value: '10x', label: 'More Views' },
           { value: '5x', label: 'Engagement' },
@@ -196,9 +183,7 @@ export default function ViralPostsPage() {
       {/* Featured Tools */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-5 w-5 text-purple-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">Top Picks</Badge>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((tool) => (
@@ -211,7 +196,7 @@ export default function ViralPostsPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
-            🎯 All Posts
+            All Posts
           </TabsTrigger>
           {VIRAL_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -219,7 +204,7 @@ export default function ViralPostsPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -254,8 +239,7 @@ export default function ViralPostsPage() {
       {/* Viral Tips */}
       <Card className="bg-gradient-to-r from-rose-50 to-purple-50 dark:from-rose-950/30 dark:to-purple-950/30 border-rose-200/50 dark:border-rose-800/30">
         <CardContent className="py-6">
-          <h3 className="font-bold text-rose-800 dark:text-rose-200 mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+          <h3 className="font-bold text-rose-800 dark:text-rose-200 mb-4">
             Viral Content Formula
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
