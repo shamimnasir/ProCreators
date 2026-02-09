@@ -20,32 +20,23 @@ export async function POST(request) {
     
     const body = await request.json()
     
-    // SECURITY: Zod validation
-    const validation = validateRequest(librarySaveSchema, {
-      userId: auth?.userId || body.userId,
-      content: body.content,
-      type: body.type,
-      title: body.title,
-      description: body.description,
-      metadata: body.metadata,
-      videoUrl: body.videoUrl,
-      script: body.script,
-      filePath: body.filePath,
-      fileSize: body.fileSize
-    })
-    
-    if (!validation.success) {
+    // Basic validation
+    if (!body.type || typeof body.type !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
-        errors: validation.errors
+        error: 'Type is required'
       }, { status: 400 })
     }
     
-    const validatedData = validation.data
+    if (!body.title || typeof body.title !== 'string') {
+      return NextResponse.json({
+        success: false,
+        error: 'Title is required'
+      }, { status: 400 })
+    }
     
     // Check required content
-    if (!validatedData.content && !validatedData.videoUrl && !validatedData.filePath) {
+    if (!body.content && !body.videoUrl && !body.filePath) {
       return NextResponse.json(
         { success: false, error: 'Content, video URL, or file path is required' },
         { status: 400 }
