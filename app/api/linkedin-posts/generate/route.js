@@ -598,14 +598,9 @@ Return ONLY JSON - no markdown.`
       }))
     }
 
-    // Deduct credits after successful generation
-    const deductResult = await deductCredits(userId, 'linkedin-posts', { platform, topic })
-    if (!deductResult.success) {
-      console.error('Failed to deduct credits:', deductResult.error)
-      // Still return the content but log the error
-    } else {
-      // Complete the transaction
-      await completeTransaction(deductResult.transactionId)
+    // Complete the credit transaction on success
+    if (transactionId) {
+      await completeTransaction(transactionId)
     }
 
     return NextResponse.json({
