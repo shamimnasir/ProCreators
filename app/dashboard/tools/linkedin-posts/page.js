@@ -293,20 +293,32 @@ export default function SocialMediaPostCreator() {
           if (posts.length > 0) {
             const mainPost = posts[0]
             const selectedPlatformData = PLATFORMS.find(p => p.id === platform)
+            
+            // Format all posts as a complete thread for library
+            const fullThreadContent = posts.map((post, idx) => {
+              let text = posts.length > 1 ? `${idx + 1}/ ` : ''
+              text += post.content || post
+              // Add hashtags only to the last post
+              if (post.hashtags?.length && idx === posts.length - 1) {
+                text += '\n\n' + post.hashtags.map(t => '#' + t).join(' ')
+              }
+              return text
+            }).join('\n\n---\n\n')
+            
             await saveToLibrary({
               type: 'social-media-post',
               category: 'text',
-              title: `${selectedPlatformData?.name || platform} Post: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
-              description: `${selectedPlatformData?.name || platform} post about ${topic.substring(0, 100)}`,
-              content: mainPost.content || mainPost,
+              title: `${selectedPlatformData?.name || platform} ${posts.length > 1 ? 'Thread' : 'Post'}: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
+              description: `${selectedPlatformData?.name || platform} ${posts.length > 1 ? `thread (${posts.length} posts)` : 'post'} about ${topic.substring(0, 100)}`,
+              content: fullThreadContent,
               metadata: {
                 platform,
                 postFormat,
                 topic,
                 tone,
-                hook: mainPost.hook || null,
                 hashtags: mainPost.hashtags || [],
-                variations: posts.length,
+                postsCount: posts.length,
+                isThread: posts.length > 1,
                 contentType: 'social-post'
               }
             })
