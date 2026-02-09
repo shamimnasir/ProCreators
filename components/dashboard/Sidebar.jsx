@@ -326,12 +326,12 @@ export function Sidebar() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 shrink-0"
+                          className="h-7 w-7 shrink-0 rounded-md hover:bg-sidebar-accent"
                           onClick={() => toggleSection(item.name)}
                         >
                           <ChevronRight 
                             className={cn(
-                              "h-4 w-4 transition-transform",
+                              "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
                               expandedSections[item.name] && "rotate-90"
                             )} 
                           />
