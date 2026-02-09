@@ -8,6 +8,16 @@ import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/componen
 
 const FEATURED_TOOLS = [
   {
+    id: 'video-editor',
+    name: 'Video Editor',
+    description: 'Professional video editing with trimming, effects & transitions',
+    icon: '🎬',
+    href: '/dashboard/tools/video-editor',
+    useCase: 'All Video Editing',
+    gradient: 'from-purple-500 to-pink-500',
+    features: ['Trim & Cut', 'Effects', 'Transitions']
+  },
+  {
     id: 'image-editor',
     name: 'Image Studio',
     description: 'Complete AI image generation, editing, upscaling & compression',
@@ -16,16 +26,6 @@ const FEATURED_TOOLS = [
     useCase: 'All Image Needs',
     gradient: 'from-blue-500 to-cyan-500',
     features: ['AI Generate', 'Edit', 'Upscale']
-  },
-  {
-    id: 'thumbnail-maker',
-    name: 'Thumbnail Maker',
-    description: 'Create click-worthy thumbnails that boost CTR',
-    icon: '🎨',
-    href: '/dashboard/tools/thumbnail-maker',
-    useCase: 'YouTube, Videos',
-    gradient: 'from-red-500 to-orange-500',
-    features: ['Templates', 'Custom Text', 'HD Export']
   },
   {
     id: 'audio-editor',
