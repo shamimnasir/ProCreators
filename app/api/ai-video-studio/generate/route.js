@@ -1235,6 +1235,7 @@ function parsePromptToScenes(prompt, numScenes) {
 
 export async function POST(request) {
   const jobId = randomUUID()
+  let transactionId = null
   
   try {
     // SECURITY: Rate limiting for AI video studio
@@ -1242,6 +1243,34 @@ export async function POST(request) {
     if (rateLimitCheck.limited) {
       return rateLimitCheck.response
     }
+    
+    // Get user ID and check credits
+    const userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    // Check and deduct credits upfront
+    const creditCheck = await checkCredits(userId, 'ai-video-studio')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    const deductResult = await deductCredits(userId, 'ai-video-studio')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    transactionId = deductResult.transactionId
     
     // Parse request
     const formData = await request.formData()
