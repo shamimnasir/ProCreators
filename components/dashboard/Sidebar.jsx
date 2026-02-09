@@ -120,15 +120,14 @@ const navigation = [
     href: '/dashboard/media-editing',
     icon: Edit3,
     children: [
-      { name: 'AI Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
-      { name: 'Video Editor', href: '/dashboard/tools/video-editor', icon: VideoIcon },
-      { name: 'Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
+      { name: 'Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
       { name: 'Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
       { name: 'Cover Image Creator', href: '/dashboard/tools/cover-image-creator', icon: ImageIcon },
       { name: 'Podcast Cover Maker', href: '/dashboard/tools/podcast-cover-maker', icon: Mic },
       { name: 'Audio Editor', href: '/dashboard/tools/audio-editor', icon: Music },
       { name: 'Noise Remover', href: '/dashboard/tools/noise-remover', icon: Volume2 },
       { name: 'Voice Enhancer', href: '/dashboard/tools/voice-enhancer', icon: Mic },
+      { name: 'Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
     ]
   },
   {
