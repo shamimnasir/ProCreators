@@ -348,8 +348,8 @@ export default function SocialMediaPostCreator() {
     <div className="space-y-6">
       {/* Auto-save Drafts Manager */}
       <AutoSaveDraftsManager
-        toolId="social-media-posts"
-        currentDraft={{
+        toolType="social-media-posts"
+        getCurrentData={() => ({
           platform,
           topic,
           postFormat,
@@ -368,9 +368,10 @@ export default function SocialMediaPostCreator() {
           themePageNiche,
           instagramStyle,
           generateImage,
-          logoUrl
-        }}
-        onLoadDraft={(draft) => {
+          logoUrl,
+          title: topic || 'Social Media Post'
+        })}
+        loadDraftData={(draft) => {
           if (draft.platform) setPlatform(draft.platform)
           if (draft.topic) setTopic(draft.topic)
           if (draft.postFormat) setPostFormat(draft.postFormat)
@@ -391,7 +392,30 @@ export default function SocialMediaPostCreator() {
           if (draft.generateImage !== undefined) setGenerateImage(draft.generateImage)
           if (draft.logoUrl) setLogoUrl(draft.logoUrl)
         }}
-        hasContent={topic.length > 0}
+        onStartNew={() => {
+          setPlatform('linkedin')
+          setTopic('')
+          setPostFormat('authority-builder')
+          setHookStyle('bold-statement')
+          setTone('professional')
+          setIndustry('')
+          setTargetAudience('')
+          setKeyPoints('')
+          setPersonalStory('')
+          setCtaType('comment')
+          setIncludeEmojis(true)
+          setIncludeHashtags(true)
+          setPostLength('medium')
+          setSpecificNumbers('')
+          setSubreddit('')
+          setThemePageNiche('')
+          setInstagramStyle('motivational')
+          setGenerateImage(false)
+          setLogoUrl('')
+        }}
+        dependencies={[topic, platform, tone, industry, keyPoints]}
+        autoSaveEnabled={true}
+        debounceMs={3000}
       />
       
       {/* Header */}
