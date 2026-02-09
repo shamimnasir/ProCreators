@@ -56,18 +56,18 @@ export async function POST(request) {
     }
 
     // Determine content category
-    let category = 'text'
-    const type = validatedData.type
+    let category = body.category || 'text'
+    const type = body.type
     if (type === 'video' || type === 'reel' || type === 'short' || type === 'story-reel') {
       category = 'video'
     } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
       category = 'image'
-    } else if (['slides-maker', 'ebook', 'journal', 'planner', 'worksheet', 'checklist', 'study-notes', 'essay-helper', 'exam-prep', 'citation-generator', 'quiz-maker', 'flashcards', 'lesson-planner', 'activity-book', 'storybook'].includes(type)) {
+    } else if (['slides-maker', 'ebook', 'journal', 'planner', 'worksheet', 'checklist', 'study-notes', 'essay-helper', 'exam-prep', 'citation-generator', 'quiz-maker', 'flashcards', 'lesson-planner', 'activity-book', 'storybook', 'social-media-post'].includes(type)) {
       category = 'document'
     }
 
     // Get user ID (prefer authenticated, fallback to body)
-    const userId = auth?.userId || validatedData.userId || 'anonymous'
+    const userId = auth?.userId || body.userId || 'anonymous'
 
     // Calculate expiration: 30 days from now
     const expiresAt = new Date()
@@ -78,16 +78,16 @@ export async function POST(request) {
     const document = {
       id: documentId,
       userId,
-      content: validatedData.content ? sanitizeText(validatedData.content.substring(0, 5000000)) : '',
-      videoUrl: validatedData.videoUrl ? sanitizeUrl(validatedData.videoUrl) : null,
-      filePath: validatedData.filePath || null,
-      fileSize: validatedData.fileSize || null,
-      script: validatedData.script ? sanitizeText(validatedData.script.substring(0, 50000)) : null,
+      content: body.content ? sanitizeText(String(body.content).substring(0, 5000000)) : '',
+      videoUrl: body.videoUrl ? sanitizeUrl(body.videoUrl) : null,
+      filePath: body.filePath || null,
+      fileSize: body.fileSize || null,
+      script: body.script ? sanitizeText(String(body.script).substring(0, 50000)) : null,
       type,
       category,
-      title: sanitizeText(validatedData.title.substring(0, 500)),
-      description: validatedData.description ? sanitizeText(validatedData.description.substring(0, 2000)) : '',
-      metadata: validatedData.metadata || {},
+      title: sanitizeText(String(body.title).substring(0, 500)),
+      description: body.description ? sanitizeText(String(body.description).substring(0, 2000)) : '',
+      metadata: body.metadata || {},
       createdAt: new Date(),
       expiresAt,
     }
