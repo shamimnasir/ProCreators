@@ -214,8 +214,7 @@ export default function FunRecreationPage() {
       {/* Fun Tips */}
       <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30 border-yellow-200/50 dark:border-yellow-800/30">
         <CardContent className="py-6">
-          <h3 className="font-bold text-yellow-800 dark:text-yellow-200 mb-4 flex items-center gap-2">
-            <Gamepad2 className="h-5 w-5" />
+          <h3 className="font-bold text-yellow-800 dark:text-yellow-200 mb-4">
             Fun Content Tips
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
