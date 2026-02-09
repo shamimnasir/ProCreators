@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Edit3 } from 'lucide-react'
+import { Edit3, Image as ImageIcon } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const FEATURED_TOOLS = [
@@ -132,93 +132,6 @@ const MEDIA_CATEGORIES = [
     ]
   }
 ]
-    color: 'from-blue-500 to-cyan-500',
-    tools: [
-      {
-        id: 'image-editor',
-        name: 'Image Studio',
-        description: 'Generate, edit, upscale & compress images',
-        icon: '🖼️',
-        href: '/dashboard/tools/image-editor',
-        useCase: 'Complete image editing'
-      }
-    ]
-  },
-  {
-    id: 'thumbnails',
-    name: 'Thumbnails & Covers',
-    description: 'Create click-worthy thumbnails',
-    icon: '🖼️',
-    color: 'from-red-500 to-orange-500',
-    tools: [
-      {
-        id: 'thumbnail-maker',
-        name: 'Thumbnail Maker',
-        description: 'Click-worthy YouTube thumbnails',
-        icon: '🖼️',
-        href: '/dashboard/tools/thumbnail-maker',
-        useCase: 'YouTube, videos'
-      },
-      {
-        id: 'cover-image-creator',
-        name: 'Cover Image Creator',
-        description: 'Professional cover images',
-        icon: '🎨',
-        href: '/dashboard/tools/cover-image-creator',
-        useCase: 'Social, blogs'
-      },
-      {
-        id: 'podcast-cover-maker',
-        name: 'Podcast Cover Maker',
-        description: 'Professional podcast artwork',
-        icon: '🎙️',
-        href: '/dashboard/tools/podcast-cover-maker',
-        useCase: 'Spotify, Apple Podcasts'
-      }
-    ]
-  },
-  {
-    id: 'audio',
-    name: 'Audio Tools',
-    description: 'Audio editing and enhancement',
-    icon: '🎵',
-    color: 'from-green-500 to-emerald-500',
-    tools: [
-      {
-        id: 'audio-editor',
-        name: 'Audio Editor',
-        description: 'Edit and enhance audio files',
-        icon: '🎵',
-        href: '/dashboard/tools/audio-editor',
-        useCase: 'Podcasts, music'
-      },
-      {
-        id: 'noise-remover',
-        name: 'Noise Remover',
-        description: 'Remove background noise from audio',
-        icon: '🔇',
-        href: '/dashboard/tools/noise-remover',
-        useCase: 'Clean audio'
-      },
-      {
-        id: 'voice-enhancer',
-        name: 'Voice Enhancer',
-        description: 'Enhance voice recordings',
-        icon: '🎤',
-        href: '/dashboard/tools/voice-enhancer',
-        useCase: 'Voice-overs, podcasts'
-      },
-      {
-        id: 'auto-subtitles',
-        name: 'Auto Subtitles',
-        description: 'Add subtitles automatically',
-        icon: '📝',
-        href: '/dashboard/tools/auto-subtitles',
-        useCase: 'Accessibility, reach'
-      }
-    ]
-  }
-]
 
 export default function MediaEditingPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -228,9 +141,9 @@ export default function MediaEditingPage() {
       {/* Hero Header */}
       <PageHero
         title="Media Editor"
-        subtitle="Professional video, image, and audio editing tools"
-        icon={<Film className="h-7 w-7" />}
-        gradient="from-violet-600 via-purple-600 to-blue-600"
+        subtitle="Professional image and audio editing tools"
+        icon={<Edit3 className="h-7 w-7" />}
+        gradient="from-blue-600 via-cyan-600 to-teal-500"
         stats={[
           { value: 'Pro', label: 'Quality' },
           { value: '4K', label: 'Support' },
@@ -296,23 +209,23 @@ export default function MediaEditingPage() {
       </Tabs>
 
       {/* Tips */}
-      <Card className="bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-violet-200/50 dark:border-violet-800/30">
+      <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200/50 dark:border-blue-800/30">
         <CardContent className="py-6">
-          <h3 className="font-bold text-violet-800 dark:text-violet-200 mb-4">
-            Media Creation Tips
+          <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-4">
+            Media Editing Tips
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { emoji: '🎬', title: 'Hook First', desc: 'Grab attention in first 3 seconds' },
-              { emoji: '📱', title: 'Mobile First', desc: 'Optimize for vertical viewing' },
-              { emoji: '🔊', title: 'Good Audio', desc: 'Audio quality is crucial' },
-              { emoji: '📝', title: 'Add Captions', desc: '85% watch without sound' }
+              { emoji: '🖼️', title: 'High Resolution', desc: 'Start with quality source files' },
+              { emoji: '🎨', title: 'Consistent Style', desc: 'Maintain brand colors and fonts' },
+              { emoji: '🔊', title: 'Clean Audio', desc: 'Remove noise before editing' },
+              { emoji: '💾', title: 'Save Originals', desc: 'Keep backups of source files' }
             ].map((tip) => (
               <div key={tip.title} className="flex items-start gap-3">
                 <span className="text-2xl">{tip.emoji}</span>
                 <div>
-                  <p className="font-medium text-violet-900 dark:text-violet-100">{tip.title}</p>
-                  <p className="text-sm text-violet-700 dark:text-violet-300">{tip.desc}</p>
+                  <p className="font-medium text-blue-900 dark:text-blue-100">{tip.title}</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">{tip.desc}</p>
                 </div>
               </div>
             ))}
