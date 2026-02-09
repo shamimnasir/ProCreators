@@ -234,6 +234,8 @@ const PLATFORM_GUIDES = {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
