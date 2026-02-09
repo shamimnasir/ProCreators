@@ -260,6 +260,16 @@ export async function POST(request) {
       }, { status: 402 })
     }
 
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, 'linkedin-posts')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    const transactionId = deductResult.transactionId
+
     const body = await request.json()
     const {
       platform = 'linkedin',
