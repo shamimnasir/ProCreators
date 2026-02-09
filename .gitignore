@@ -349,3 +349,5 @@ node_modules/chromium/lib/chromium/chrome-linux/chrome
 *.env.*
 .next/dev/cache/turbopack/da605e0c/00002586.sst
 .next/dev/cache/turbopack/da605e0c/00002587.sst
+.next/dev/cache/turbopack/da605e0c/00002841.sst
+.next/dev/cache/turbopack/da605e0c/00002842.sst
