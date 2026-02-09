@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Film } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
@@ -15,7 +14,6 @@ const FEATURED_TOOLS = [
     icon: '🎬',
     href: '/dashboard/tools/ai-video-studio',
     useCase: 'YouTube, TikTok, Reels',
-    badge: 'Pro',
     gradient: 'from-violet-500 to-purple-500',
     features: ['Faceless Videos', 'Auto Subtitles', 'Voice Over']
   },
@@ -26,7 +24,6 @@ const FEATURED_TOOLS = [
     icon: '✂️',
     href: '/dashboard/tools/video-editor',
     useCase: 'All Video Editing',
-    badge: 'New',
     gradient: 'from-blue-500 to-cyan-500',
     features: ['Trim & Cut', 'Effects', 'Transitions']
   },
@@ -37,7 +34,6 @@ const FEATURED_TOOLS = [
     icon: '🖼️',
     href: '/dashboard/tools/thumbnail-maker',
     useCase: 'YouTube, Videos',
-    badge: 'Hot',
     gradient: 'from-red-500 to-orange-500',
     features: ['Templates', 'Custom Text', 'HD Export']
   }
@@ -57,8 +53,7 @@ const MEDIA_CATEGORIES = [
         description: 'Complete AI video creation suite',
         icon: '🎬',
         href: '/dashboard/tools/ai-video-studio',
-        useCase: 'YouTube, TikTok, Reels',
-        badge: 'Pro'
+        useCase: 'YouTube, TikTok, Reels'
       },
       {
         id: 'video-editor',
@@ -66,8 +61,7 @@ const MEDIA_CATEGORIES = [
         description: 'Professional video editing',
         icon: '✂️',
         href: '/dashboard/tools/video-editor',
-        useCase: 'All video editing',
-        badge: 'New'
+        useCase: 'All video editing'
       },
       {
         id: 'quick-reels',
@@ -75,8 +69,7 @@ const MEDIA_CATEGORIES = [
         description: 'Short-form videos in seconds',
         icon: '⚡',
         href: '/dashboard/tools/quick-reels',
-        useCase: 'Reels, Shorts, TikTok',
-        badge: 'Fast'
+        useCase: 'Reels, Shorts, TikTok'
       }
     ]
   },
@@ -93,8 +86,7 @@ const MEDIA_CATEGORIES = [
         description: 'Generate, edit, upscale & compress images',
         icon: '🖼️',
         href: '/dashboard/tools/image-editor',
-        useCase: 'Complete image editing',
-        badge: 'All-in-One'
+        useCase: 'Complete image editing'
       }
     ]
   },
@@ -111,8 +103,7 @@ const MEDIA_CATEGORIES = [
         description: 'Click-worthy YouTube thumbnails',
         icon: '🖼️',
         href: '/dashboard/tools/thumbnail-maker',
-        useCase: 'YouTube, videos',
-        badge: 'Hot'
+        useCase: 'YouTube, videos'
       },
       {
         id: 'cover-image-creator',
@@ -120,8 +111,7 @@ const MEDIA_CATEGORIES = [
         description: 'Professional cover images',
         icon: '🎨',
         href: '/dashboard/tools/cover-image-creator',
-        useCase: 'Social, blogs',
-        badge: ''
+        useCase: 'Social, blogs'
       },
       {
         id: 'podcast-cover-maker',
@@ -129,8 +119,7 @@ const MEDIA_CATEGORIES = [
         description: 'Professional podcast artwork',
         icon: '🎙️',
         href: '/dashboard/tools/podcast-cover-maker',
-        useCase: 'Spotify, Apple Podcasts',
-        badge: ''
+        useCase: 'Spotify, Apple Podcasts'
       }
     ]
   },
@@ -147,8 +136,7 @@ const MEDIA_CATEGORIES = [
         description: 'Edit and enhance audio files',
         icon: '🎵',
         href: '/dashboard/tools/audio-editor',
-        useCase: 'Podcasts, music',
-        badge: ''
+        useCase: 'Podcasts, music'
       },
       {
         id: 'noise-remover',
@@ -156,8 +144,7 @@ const MEDIA_CATEGORIES = [
         description: 'Remove background noise from audio',
         icon: '🔇',
         href: '/dashboard/tools/noise-remover',
-        useCase: 'Clean audio',
-        badge: ''
+        useCase: 'Clean audio'
       },
       {
         id: 'voice-enhancer',
@@ -165,8 +152,7 @@ const MEDIA_CATEGORIES = [
         description: 'Enhance voice recordings',
         icon: '🎤',
         href: '/dashboard/tools/voice-enhancer',
-        useCase: 'Voice-overs, podcasts',
-        badge: ''
+        useCase: 'Voice-overs, podcasts'
       },
       {
         id: 'auto-subtitles',
@@ -174,8 +160,7 @@ const MEDIA_CATEGORIES = [
         description: 'Add subtitles automatically',
         icon: '📝',
         href: '/dashboard/tools/auto-subtitles',
-        useCase: 'Accessibility, reach',
-        badge: ''
+        useCase: 'Accessibility, reach'
       }
     ]
   }
@@ -188,11 +173,10 @@ export default function MediaEditingPage() {
     <div className="space-y-8">
       {/* Hero Header */}
       <PageHero
-        title="Media Editing"
+        title="Media Editor"
         subtitle="Professional video, image, and audio editing tools"
         icon={<Film className="h-7 w-7" />}
         gradient="from-violet-600 via-purple-600 to-blue-600"
-        emoji="🎥"
         stats={[
           { value: 'Pro', label: 'Quality' },
           { value: '4K', label: 'Support' },
@@ -204,9 +188,7 @@ export default function MediaEditingPage() {
       {/* Featured Tools */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <Film className="h-5 w-5 text-violet-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
-          <Badge className="bg-gradient-to-r from-violet-600 to-blue-600 text-white">Media</Badge>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((tool) => (
@@ -219,7 +201,7 @@ export default function MediaEditingPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
-            🎯 All Tools
+            All Tools
           </TabsTrigger>
           {MEDIA_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -227,7 +209,7 @@ export default function MediaEditingPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -262,8 +244,7 @@ export default function MediaEditingPage() {
       {/* Tips */}
       <Card className="bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border-violet-200/50 dark:border-violet-800/30">
         <CardContent className="py-6">
-          <h3 className="font-bold text-violet-800 dark:text-violet-200 mb-4 flex items-center gap-2">
-            <Film className="h-5 w-5" />
+          <h3 className="font-bold text-violet-800 dark:text-violet-200 mb-4">
             Media Creation Tips
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
