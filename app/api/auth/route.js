@@ -100,17 +100,22 @@ export async function POST(request) {
         // Create user with bcrypt hashed password
         const userId = uuidv4()
         const hashedPassword = await hashPassword(password)
+        const initialCredits = 50 // Free starter credits
         const newUser = {
           _id: userId,
           email: sanitizedEmail,
           name: (name || '').substring(0, 100).trim(),
           passwordHash: hashedPassword,
-          credits: 50, // Free starter credits
+          credits: initialCredits, // Legacy field for backward compatibility
+          membershipCredits: 0, // Monthly subscription credits (reset monthly)
+          purchasedCredits: initialCredits, // Free credits go here (they never expire)
           plan: 'free',
           emailVerified: false,
           verificationToken,
           verificationTokenExpiry: tokenExpiry,
           accountStatus: 'pending_verification',
+          totalCreditsUsed: 0,
+          generationsToday: 0,
           createdAt: new Date(),
           lastActiveAt: new Date()
         }
