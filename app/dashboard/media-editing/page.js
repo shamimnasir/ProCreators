@@ -41,6 +41,23 @@ const FEATURED_TOOLS = [
 
 const MEDIA_CATEGORIES = [
   {
+    id: 'video',
+    name: 'Video Tools',
+    description: 'Video editing and enhancement',
+    icon: '🎬',
+    color: 'from-purple-500 to-pink-500',
+    tools: [
+      {
+        id: 'video-editor',
+        name: 'Video Editor',
+        description: 'Professional video editing with trimming, effects & transitions',
+        icon: '🎬',
+        href: '/dashboard/tools/video-editor',
+        useCase: 'Complete video editing'
+      }
+    ]
+  },
+  {
     id: 'images',
     name: 'Image Tools',
     description: 'Image editing and enhancement',
