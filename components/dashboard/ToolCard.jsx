@@ -99,7 +99,7 @@ export function FeaturedToolCard({ tool }) {
           )} />
           
           <div className="p-6">
-            {/* Icon and Badge Row */}
+            {/* Icon Row */}
             <div className="flex items-start justify-between mb-4">
               <div className={cn(
                 "w-14 h-14 rounded-xl flex items-center justify-center text-3xl",
@@ -108,15 +108,6 @@ export function FeaturedToolCard({ tool }) {
               )}>
                 {tool.icon}
               </div>
-              {tool.badge && (
-                <span className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-semibold",
-                  `bg-gradient-to-r ${tool.gradient || 'from-purple-500 to-pink-500'}`,
-                  "text-white shadow-lg"
-                )}>
-                  {tool.badge}
-                </span>
-              )}
             </div>
             
             {/* Title */}
