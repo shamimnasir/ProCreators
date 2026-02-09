@@ -614,11 +614,17 @@ Return ONLY JSON - no markdown.`
         postLength
       },
       creditsUsed: creditCheck.cost,
-      remainingCredits: deductResult.success ? deductResult.newBalance : creditCheck.currentBalance - creditCheck.cost
+      remainingCredits: deductResult.newBalance
     })
 
   } catch (error) {
     console.error('Social media post generation error:', error)
+    
+    // Refund credits if generation failed
+    if (transactionId) {
+      await refundCredits(transactionId, error.message || 'Generation failed')
+    }
+    
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to generate posts'
