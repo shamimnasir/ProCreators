@@ -102,7 +102,6 @@ const navigation = [
     icon: Sparkles,
     children: [
       { name: 'Content Humanizer', href: '/dashboard/tools/content-humanizer', icon: Edit3 },
-      { name: 'Threads', href: '/dashboard/tools/threads', icon: MessageSquare },
       { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
       { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
       { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
