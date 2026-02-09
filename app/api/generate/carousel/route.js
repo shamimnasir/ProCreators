@@ -4,6 +4,7 @@ import { generateImage } from '@/lib/gemini-image'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 
 // Carousel generation input schema
 const carouselGenerationSchema = z.object({

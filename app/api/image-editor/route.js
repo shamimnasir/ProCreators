@@ -4,6 +4,7 @@ import path from 'path'
 import { writeFile, mkdir } from 'fs/promises'
 import { randomUUID } from 'crypto'
 import { getCollection } from '@/lib/mongodb'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 
 export const maxDuration = 120
 export const dynamic = 'force-dynamic'
