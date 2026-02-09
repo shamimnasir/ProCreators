@@ -346,6 +346,54 @@ export default function SocialMediaPostCreator() {
 
   return (
     <div className="space-y-6">
+      {/* Auto-save Drafts Manager */}
+      <AutoSaveDraftsManager
+        toolId="social-media-posts"
+        currentDraft={{
+          platform,
+          topic,
+          postFormat,
+          hookStyle,
+          tone,
+          industry,
+          targetAudience,
+          keyPoints,
+          personalStory,
+          ctaType,
+          includeEmojis,
+          includeHashtags,
+          postLength,
+          specificNumbers,
+          subreddit,
+          themePageNiche,
+          instagramStyle,
+          generateImage,
+          logoUrl
+        }}
+        onLoadDraft={(draft) => {
+          if (draft.platform) setPlatform(draft.platform)
+          if (draft.topic) setTopic(draft.topic)
+          if (draft.postFormat) setPostFormat(draft.postFormat)
+          if (draft.hookStyle) setHookStyle(draft.hookStyle)
+          if (draft.tone) setTone(draft.tone)
+          if (draft.industry) setIndustry(draft.industry)
+          if (draft.targetAudience) setTargetAudience(draft.targetAudience)
+          if (draft.keyPoints) setKeyPoints(draft.keyPoints)
+          if (draft.personalStory) setPersonalStory(draft.personalStory)
+          if (draft.ctaType) setCtaType(draft.ctaType)
+          if (draft.includeEmojis !== undefined) setIncludeEmojis(draft.includeEmojis)
+          if (draft.includeHashtags !== undefined) setIncludeHashtags(draft.includeHashtags)
+          if (draft.postLength) setPostLength(draft.postLength)
+          if (draft.specificNumbers) setSpecificNumbers(draft.specificNumbers)
+          if (draft.subreddit) setSubreddit(draft.subreddit)
+          if (draft.themePageNiche) setThemePageNiche(draft.themePageNiche)
+          if (draft.instagramStyle) setInstagramStyle(draft.instagramStyle)
+          if (draft.generateImage !== undefined) setGenerateImage(draft.generateImage)
+          if (draft.logoUrl) setLogoUrl(draft.logoUrl)
+        }}
+        hasContent={topic.length > 0}
+      />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
