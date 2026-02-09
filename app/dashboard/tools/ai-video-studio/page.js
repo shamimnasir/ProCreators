@@ -1080,7 +1080,7 @@ export default function AIVideoStudioPage() {
           </div>
         )}
 
-        {/* Pro Tips Section */}
+        {/* Pro Tips Section - AI Mode specific */}
         <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
@@ -1120,6 +1120,8 @@ export default function AIVideoStudioPage() {
             </div>
           </CardContent>
         </Card>
+          </>
+        )}
       </div>
     )
   }
