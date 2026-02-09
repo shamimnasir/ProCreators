@@ -28,17 +28,10 @@ export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expan
       <div className={cn(
         "group relative h-full rounded-2xl p-[1px] transition-all duration-300",
         "bg-gradient-to-br from-border via-border to-border",
-        "hover:from-primary/50 hover:via-primary/30 hover:to-primary/50",
-        `hover:shadow-2xl ${shadowClass}`
+        "hover:from-primary/40 hover:via-primary/20 hover:to-primary/40",
+        `hover:shadow-xl ${shadowClass}`
       )}>
         <div className="relative h-full rounded-2xl bg-card overflow-hidden">
-          {/* Subtle gradient overlay on hover */}
-          <div className={cn(
-            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-            `bg-gradient-to-br ${gradient}`,
-            "opacity-[0.03] dark:opacity-[0.08]"
-          )} />
-          
           <div className="relative p-5">
             {/* Icon and Badge Row */}
             <div className="flex items-start justify-between mb-4">
