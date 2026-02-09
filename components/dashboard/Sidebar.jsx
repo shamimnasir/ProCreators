@@ -359,7 +359,7 @@ export function Sidebar() {
                           )}
                           <ChevronRight 
                             className={cn(
-                              "ml-auto h-4 w-4 transition-transform",
+                              "ml-auto h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
                               expandedSections[item.name] && "rotate-90"
                             )} 
                           />
