@@ -134,8 +134,12 @@ function NicheCard({ niche, categoryColor, expanded = false }) {
 }
 
 export default function AIVideoStudioPage() {
+  // Read mode from URL params
+  const searchParams = useSearchParams()
+  const initialMode = searchParams.get('mode') === 'quick' ? 'quick' : 'quick'  // Default to quick mode
+  
   // Mode state: 'quick' or 'ai'
-  const [studioMode, setStudioMode] = useState('quick')
+  const [studioMode, setStudioMode] = useState(initialMode)
   const [quickModeCategory, setQuickModeCategory] = useState('all')
   
   // View state: 'gallery' or 'create'
