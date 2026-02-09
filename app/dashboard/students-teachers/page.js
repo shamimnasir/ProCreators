@@ -349,8 +349,7 @@ export default function StudentsTeachersPage() {
       {/* Tips */}
       <Card className="bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-950/30 dark:to-cyan-950/30 border-emerald-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200">
-            <Sparkles className="h-5 w-5" />
+          <CardTitle className="text-emerald-800 dark:text-emerald-200">
             Study Tips
           </CardTitle>
         </CardHeader>
