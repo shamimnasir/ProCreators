@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sparkles } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
@@ -160,7 +160,6 @@ export default function FunRecreationPage() {
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-yellow-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
-          <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">Fun Picks</Badge>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((tool) => (
@@ -173,7 +172,7 @@ export default function FunRecreationPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
-            🎯 All Fun
+            All Fun
           </TabsTrigger>
           {FUN_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -181,7 +180,7 @@ export default function FunRecreationPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>

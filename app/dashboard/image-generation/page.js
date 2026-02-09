@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Camera } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
@@ -126,7 +126,6 @@ export default function ImageGenerationPage() {
         <div className="flex items-center gap-2 mb-5">
           <Camera className="h-5 w-5 text-purple-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">Image</Badge>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((tool) => (
@@ -139,7 +138,7 @@ export default function ImageGenerationPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
-            🎯 All Images
+            All Images
           </TabsTrigger>
           {IMAGE_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -147,7 +146,7 @@ export default function ImageGenerationPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>

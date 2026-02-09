@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
@@ -183,7 +183,6 @@ export default function BusinessAIPage() {
         <div className="flex items-center gap-2 mb-5">
           <TrendingUp className="h-5 w-5 text-orange-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
-          <Badge className="bg-gradient-to-r from-orange-600 to-red-600 text-white">Business</Badge>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {FEATURED_TOOLS.map((tool) => (
@@ -196,7 +195,7 @@ export default function BusinessAIPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full">
-            🎯 All Tools
+            All Tools
           </TabsTrigger>
           {BUSINESS_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -204,7 +203,7 @@ export default function BusinessAIPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>

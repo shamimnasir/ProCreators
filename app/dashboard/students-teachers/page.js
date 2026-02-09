@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
@@ -289,7 +289,7 @@ export default function StudentsTeachersPage() {
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            🎯 All Tools
+            All Tools
           </TabsTrigger>
           {EDUCATION_CATEGORIES.map((cat) => (
             <TabsTrigger 
@@ -297,7 +297,7 @@ export default function StudentsTeachersPage() {
               value={cat.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
-              {cat.icon} {cat.name}
+              {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -425,7 +425,6 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
           {expanded && tool.useCase && (
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs text-muted-foreground">Best for:</span>
-              <Badge variant="outline" className="text-[10px]">{tool.useCase}</Badge>
             </div>
           )}
           <div className="flex items-center justify-between">
