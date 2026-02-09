@@ -179,8 +179,7 @@ export function PageHero({
   subtitle, 
   icon, 
   gradient = 'from-purple-600 via-violet-600 to-indigo-600',
-  stats = [],
-  emoji
+  stats = []
 }) {
   return (
     <div className={cn(
@@ -212,7 +211,6 @@ export function PageHero({
       </div>
       
       {/* Decorations */}
-      {emoji && <div className="absolute top-4 right-4 text-4xl opacity-80">{emoji}</div>}
       <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
     </div>
