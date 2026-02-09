@@ -4,6 +4,43 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { checkCredits, deductCredits, completeTransaction } from '@/lib/credits'
+import { cookies } from 'next/headers'
+import { connectToDatabase } from '@/lib/mongodb'
+
+// Get user ID from session
+async function getUserIdFromSession(request) {
+  try {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session_token')?.value
+    
+    if (!sessionToken) {
+      // Check Authorization header
+      const authHeader = request.headers.get('Authorization')
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7)
+        const { db } = await connectToDatabase()
+        const session = await db.collection('sessions').findOne({ 
+          token,
+          expiresAt: { $gt: new Date() }
+        })
+        return session?.userId || null
+      }
+      return null
+    }
+    
+    const { db } = await connectToDatabase()
+    const session = await db.collection('sessions').findOne({ 
+      token: sessionToken,
+      expiresAt: { $gt: new Date() }
+    })
+    
+    return session?.userId || null
+  } catch (error) {
+    console.error('Error getting user from session:', error)
+    return null
+  }
+}
 
 // Helper to run LLM using Python script
 async function runLLM(prompt, systemPrompt = 'You are a social media content expert.') {
