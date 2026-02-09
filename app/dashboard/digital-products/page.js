@@ -11,7 +11,7 @@ import {
   TrendingUp, 
   DollarSign, 
   ExternalLink,
-  Sparkles,
+  Zap,
   ArrowRight,
   Star
 } from 'lucide-react'
