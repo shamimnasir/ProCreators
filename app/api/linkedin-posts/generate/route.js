@@ -232,6 +232,25 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
+    // Get user ID from session
+    const userId = await getUserIdFromSession(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+
+    // Check if user has enough credits
+    const creditCheck = await checkCredits(userId, 'linkedin-posts')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+
     const body = await request.json()
     const {
       platform = 'linkedin',
