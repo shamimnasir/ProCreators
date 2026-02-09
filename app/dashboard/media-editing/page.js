@@ -3,81 +3,135 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Film } from 'lucide-react'
+import { Edit3 } from 'lucide-react'
 import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const FEATURED_TOOLS = [
   {
-    id: 'ai-video-studio',
-    name: 'Video Studio',
-    description: 'Complete AI video creation suite with faceless videos',
-    icon: '🎬',
-    href: '/dashboard/tools/ai-video-studio',
-    useCase: 'YouTube, TikTok, Reels',
-    gradient: 'from-violet-500 to-purple-500',
-    features: ['Faceless Videos', 'Auto Subtitles', 'Voice Over']
-  },
-  {
-    id: 'video-editor',
-    name: 'Video Editor',
-    description: 'Professional video editing with AI-powered features',
-    icon: '✂️',
-    href: '/dashboard/tools/video-editor',
-    useCase: 'All Video Editing',
+    id: 'image-editor',
+    name: 'Image Studio',
+    description: 'Complete AI image generation, editing, upscaling & compression',
+    icon: '🖼️',
+    href: '/dashboard/tools/image-editor',
+    useCase: 'All Image Needs',
     gradient: 'from-blue-500 to-cyan-500',
-    features: ['Trim & Cut', 'Effects', 'Transitions']
+    features: ['AI Generate', 'Edit', 'Upscale']
   },
   {
     id: 'thumbnail-maker',
     name: 'Thumbnail Maker',
     description: 'Create click-worthy thumbnails that boost CTR',
-    icon: '🖼️',
+    icon: '🎨',
     href: '/dashboard/tools/thumbnail-maker',
     useCase: 'YouTube, Videos',
     gradient: 'from-red-500 to-orange-500',
     features: ['Templates', 'Custom Text', 'HD Export']
+  },
+  {
+    id: 'audio-editor',
+    name: 'Audio Editor',
+    description: 'Edit, enhance and clean up your audio files',
+    icon: '🎵',
+    href: '/dashboard/tools/audio-editor',
+    useCase: 'Podcasts, Voice-overs',
+    gradient: 'from-green-500 to-emerald-500',
+    features: ['Trim & Cut', 'Noise Remove', 'Enhance']
   }
 ]
 
 const MEDIA_CATEGORIES = [
   {
-    id: 'video',
-    name: 'Video Creation',
-    description: 'Create stunning videos',
-    icon: '🎬',
-    color: 'from-violet-500 to-purple-500',
-    tools: [
-      {
-        id: 'ai-video-studio',
-        name: 'Video Studio',
-        description: 'Complete AI video creation suite',
-        icon: '🎬',
-        href: '/dashboard/tools/ai-video-studio',
-        useCase: 'YouTube, TikTok, Reels'
-      },
-      {
-        id: 'video-editor',
-        name: 'Video Editor',
-        description: 'Professional video editing',
-        icon: '✂️',
-        href: '/dashboard/tools/video-editor',
-        useCase: 'All video editing'
-      },
-      {
-        id: 'quick-reels',
-        name: 'Quick Reels',
-        description: 'Short-form videos in seconds',
-        icon: '⚡',
-        href: '/dashboard/tools/quick-reels',
-        useCase: 'Reels, Shorts, TikTok'
-      }
-    ]
-  },
-  {
     id: 'images',
     name: 'Image Tools',
     description: 'Image editing and enhancement',
     icon: '🖼️',
+    color: 'from-blue-500 to-cyan-500',
+    tools: [
+      {
+        id: 'image-editor',
+        name: 'Image Studio',
+        description: 'Generate, edit, upscale & compress images',
+        icon: '🖼️',
+        href: '/dashboard/tools/image-editor',
+        useCase: 'Complete image editing'
+      }
+    ]
+  },
+  {
+    id: 'thumbnails',
+    name: 'Thumbnails & Covers',
+    description: 'Create click-worthy thumbnails',
+    icon: '🎨',
+    color: 'from-red-500 to-orange-500',
+    tools: [
+      {
+        id: 'thumbnail-maker',
+        name: 'Thumbnail Maker',
+        description: 'Click-worthy YouTube thumbnails',
+        icon: '🎨',
+        href: '/dashboard/tools/thumbnail-maker',
+        useCase: 'YouTube, videos'
+      },
+      {
+        id: 'cover-image-creator',
+        name: 'Cover Image Creator',
+        description: 'Professional cover images',
+        icon: '🖼️',
+        href: '/dashboard/tools/cover-image-creator',
+        useCase: 'Social, blogs'
+      },
+      {
+        id: 'podcast-cover-maker',
+        name: 'Podcast Cover Maker',
+        description: 'Professional podcast artwork',
+        icon: '🎙️',
+        href: '/dashboard/tools/podcast-cover-maker',
+        useCase: 'Spotify, Apple Podcasts'
+      }
+    ]
+  },
+  {
+    id: 'audio',
+    name: 'Audio Tools',
+    description: 'Audio editing and enhancement',
+    icon: '🎵',
+    color: 'from-green-500 to-emerald-500',
+    tools: [
+      {
+        id: 'audio-editor',
+        name: 'Audio Editor',
+        description: 'Edit and enhance audio files',
+        icon: '🎵',
+        href: '/dashboard/tools/audio-editor',
+        useCase: 'Podcasts, music'
+      },
+      {
+        id: 'noise-remover',
+        name: 'Noise Remover',
+        description: 'Remove background noise from audio',
+        icon: '🔇',
+        href: '/dashboard/tools/noise-remover',
+        useCase: 'Clean audio'
+      },
+      {
+        id: 'voice-enhancer',
+        name: 'Voice Enhancer',
+        description: 'Enhance voice recordings',
+        icon: '🎤',
+        href: '/dashboard/tools/voice-enhancer',
+        useCase: 'Voice-overs, podcasts'
+      },
+      {
+        id: 'auto-subtitles',
+        name: 'Auto Subtitles',
+        description: 'Add subtitles automatically',
+        icon: '📝',
+        href: '/dashboard/tools/auto-subtitles',
+        useCase: 'Accessibility, reach'
+      }
+    ]
+  }
+]
     color: 'from-blue-500 to-cyan-500',
     tools: [
       {
