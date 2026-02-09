@@ -28,16 +28,6 @@ const FEATURED_TOOLS = [
     useCase: 'AI Detection Bypass',
     gradient: 'from-purple-500 to-pink-500',
     features: ['Bypass Detection', 'Natural Tone', 'Style Match']
-  },
-  {
-    id: 'threads',
-    name: 'Thread Generator',
-    description: 'Create viral Twitter/X threads that hook readers and drive engagement',
-    icon: '🧵',
-    href: '/dashboard/tools/threads',
-    useCase: 'Twitter/X, LinkedIn',
-    gradient: 'from-rose-500 to-orange-500',
-    features: ['Hook First Line', 'Story Arc', 'CTA Builder']
   }
 ]
 
@@ -52,7 +42,7 @@ const VIRAL_CATEGORIES = [
       {
         id: 'social-media-posts',
         name: 'Social Media Post Creator',
-        description: 'Viral posts for 7 platforms with AI generation',
+        description: 'Viral posts & threads for 7 platforms with AI generation',
         icon: '📱',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'All social platforms'
@@ -72,14 +62,6 @@ const VIRAL_CATEGORIES = [
         icon: '📝',
         href: '/dashboard/tools/blog-creator',
         useCase: 'Blogs, SEO, Affiliate'
-      },
-      {
-        id: 'threads',
-        name: 'Thread Generator',
-        description: 'Create viral Twitter/X threads that get engagement',
-        icon: '🧵',
-        href: '/dashboard/tools/threads',
-        useCase: 'Twitter/X, LinkedIn'
       },
       {
         id: 'quotes',
