@@ -33,7 +33,7 @@ export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expan
       )}>
         <div className="relative h-full rounded-2xl bg-card overflow-hidden">
           <div className="relative p-5">
-            {/* Icon and Badge Row */}
+            {/* Icon Row */}
             <div className="flex items-start justify-between mb-4">
               <div className={cn(
                 "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
@@ -42,15 +42,6 @@ export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expan
               )}>
                 {tool.icon}
               </div>
-              {tool.badge && (
-                <span className={cn(
-                  "px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide",
-                  "bg-muted text-muted-foreground",
-                  "group-hover:bg-primary/10 group-hover:text-primary transition-colors"
-                )}>
-                  {tool.badge}
-                </span>
-              )}
             </div>
             
             {/* Title */}
