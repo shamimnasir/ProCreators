@@ -19,8 +19,36 @@ export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
 export async function POST(request) {
   const jobId = randomUUID()
   const tempDir = `/tmp/story-reels-${jobId}`
+  let transactionId = null
   
   try {
+    // Get user ID and check credits first
+    const userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, 'quick-reels')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    const deductResult = await deductCredits(userId, 'quick-reels')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    transactionId = deductResult.transactionId
+    
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
