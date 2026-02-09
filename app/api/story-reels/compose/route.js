@@ -772,6 +772,11 @@ export async function POST(request) {
       // Don't fail the request if library save fails
     }
 
+    // Complete credit transaction on success
+    if (transactionId) {
+      await completeTransaction(transactionId)
+    }
+
     return NextResponse.json({
       success: true,
       videoUrl,
@@ -781,11 +786,18 @@ export async function POST(request) {
       resolution,
       clipCount: videoFiles.length,
       videoSize: videoBuffer.length,
-      message: 'Story video created successfully with Google Cloud TTS!'
+      message: 'Story video created successfully with Google Cloud TTS!',
+      creditsUsed: creditCheck.cost,
+      remainingCredits: deductResult.newBalance
     })
 
   } catch (error) {
     console.error(`[${jobId}] Composition error:`, error)
+    
+    // Refund credits on failure
+    if (transactionId) {
+      await refundCredits(transactionId, error.message || 'Video composition failed')
+    }
     
     // Cleanup on error
     try {
