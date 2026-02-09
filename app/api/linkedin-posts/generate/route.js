@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
-import { checkCredits, deductCredits, completeTransaction } from '@/lib/credits'
+import { checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 import { cookies } from 'next/headers'
 import { connectToDatabase } from '@/lib/mongodb'
 
