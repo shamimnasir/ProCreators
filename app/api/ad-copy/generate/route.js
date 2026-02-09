@@ -133,12 +133,41 @@ async function callLLM(prompt, systemPrompt) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
       return rateLimitCheck.response
     }
+
+    // Get user ID and check credits
+    const userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, 'ad-copy')
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    const deductResult = await deductCredits(userId, 'ad-copy')
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: deductResult.error || 'Failed to process credits'
+      }, { status: 402 })
+    }
+    transactionId = deductResult.transactionId
 
     const body = await request.json()
     const {
