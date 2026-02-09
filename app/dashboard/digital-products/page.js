@@ -49,7 +49,7 @@ export default function DigitalProductsPage() {
               <p className="text-xs text-white/70">Profit Margin</p>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Sparkles className="h-5 w-5 mb-2" />
+              <Zap className="h-5 w-5 mb-2" />
               <p className="text-2xl font-bold">AI-Powered</p>
               <p className="text-xs text-white/70">Fast Creation</p>
             </div>
