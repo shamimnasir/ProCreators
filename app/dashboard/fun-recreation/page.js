@@ -145,7 +145,7 @@ export default function FunRecreationPage() {
       <PageHero
         title="Fun & Recreation"
         subtitle="Create entertaining content with AI"
-        icon={<Sparkles className="h-7 w-7" />}
+        icon={<Gamepad2 className="h-7 w-7" />}
         gradient="from-yellow-500 via-orange-500 to-pink-500"
         stats={[
           { value: 'Fun', label: 'Guaranteed' },
@@ -158,7 +158,6 @@ export default function FunRecreationPage() {
       {/* Featured Tools */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
           <h2 className="text-xl font-bold">Featured Tools</h2>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
