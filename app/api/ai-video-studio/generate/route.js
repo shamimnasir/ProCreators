@@ -1417,16 +1417,29 @@ export async function POST(request) {
       narrationMode
     })
     
+    // Complete the credit transaction on success
+    if (transactionId) {
+      await completeTransaction(transactionId)
+    }
+    
     return NextResponse.json({
       success: true,
       ...result,
       provider: 'ffmpeg',
       narrationMode,
-      models: videos.map(v => v.model).filter(Boolean)
+      models: videos.map(v => v.model).filter(Boolean),
+      creditsUsed: creditCheck.cost,
+      remainingCredits: deductResult.newBalance
     })
     
   } catch (error) {
     console.error(`[${jobId}] Video generation error:`, error)
+    
+    // Refund credits on failure
+    if (transactionId) {
+      await refundCredits(transactionId, error.message || 'Video generation failed')
+    }
+    
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate video' },
       { status: 500 }
