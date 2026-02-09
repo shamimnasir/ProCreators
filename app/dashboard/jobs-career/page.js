@@ -252,8 +252,7 @@ export default function JobsCareerPage() {
       {/* Tips */}
       <Card className="bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-950/30 dark:to-blue-950/30 border-slate-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-            <Sparkles className="h-5 w-5" />
+          <CardTitle className="text-slate-800 dark:text-slate-200">
             Job Search Tips
           </CardTitle>
         </CardHeader>
