@@ -11,31 +11,40 @@ import { connectToDatabase } from '@/lib/mongodb'
 // Get user ID from session
 async function getUserIdFromSession(request) {
   try {
-    const cookieStore = await cookies()
-    const sessionToken = cookieStore.get('session_token')?.value
+    // Check Authorization header first (primary method)
+    const authHeader = request.headers.get('Authorization')
+    console.log('Auth header:', authHeader ? 'Present' : 'Missing')
     
-    if (!sessionToken) {
-      // Check Authorization header
-      const authHeader = request.headers.get('Authorization')
-      if (authHeader?.startsWith('Bearer ')) {
-        const token = authHeader.substring(7)
-        const { db } = await connectToDatabase()
-        const session = await db.collection('sessions').findOne({ 
-          token,
-          expiresAt: { $gt: new Date() }
-        })
-        return session?.userId || null
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      console.log('Token from header (first 20 chars):', token.substring(0, 20))
+      const { db } = await connectToDatabase()
+      const session = await db.collection('sessions').findOne({ 
+        token,
+        expiresAt: { $gt: new Date() }
+      })
+      console.log('Session found:', session ? 'Yes' : 'No')
+      if (session?.userId) {
+        console.log('User ID from session:', session.userId)
+        return session.userId
       }
-      return null
     }
     
-    const { db } = await connectToDatabase()
-    const session = await db.collection('sessions').findOne({ 
-      token: sessionToken,
-      expiresAt: { $gt: new Date() }
-    })
+    // Fallback to cookies
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session_token')?.value
+    console.log('Cookie session_token:', sessionToken ? 'Present' : 'Missing')
     
-    return session?.userId || null
+    if (sessionToken) {
+      const { db } = await connectToDatabase()
+      const session = await db.collection('sessions').findOne({ 
+        token: sessionToken,
+        expiresAt: { $gt: new Date() }
+      })
+      return session?.userId || null
+    }
+    
+    return null
   } catch (error) {
     console.error('Error getting user from session:', error)
     return null
