@@ -181,7 +181,7 @@ Generate detailed cinematic video prompt.`
     name: 'Motivation + B-Roll Video',
     shortName: 'Motivation',
     description: 'Type a quote → AI builds a professional motivational montage.',
-    icon: '💪',
+    icon: 'TrendingUp',
     category: 'social-content',
     isPopular: true,
     isNew: false,
