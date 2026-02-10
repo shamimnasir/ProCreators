@@ -134,7 +134,7 @@ Generate the motivational script now.`
     slug: 'facts-explainer',
     description: 'Educational facts and science explainers',
     tagline: 'Educate with fascinating facts',
-    icon: '🧠',
+    icon: 'Lightbulb',
     color: 'from-blue-500 to-cyan-500',
     cardBg: 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30',
     promptTemplate: `You are an expert science communicator and educational content creator specializing in making complex information accessible and viral-worthy for short-form video.
