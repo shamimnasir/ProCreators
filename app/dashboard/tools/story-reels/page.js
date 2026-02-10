@@ -40,6 +40,36 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 
+// Icon component mapping for professional Lucide icons
+const ICON_COMPONENTS = {
+  'BookOpen': BookOpen,
+  'TrendingUp': TrendingUp,
+  'Lightbulb': Lightbulb,
+  'Smile': Smile,
+  'Star': Star,
+  'GraduationCap': GraduationCap,
+  'Briefcase': Briefcase,
+  'Skull': Skull,
+  'Heart': Heart,
+  'Film': Film,
+  'PartyPopper': PartyPopper,
+  'Wand2': Wand2,
+  'ShoppingBag': ShoppingBag,
+  'RefreshCw': RefreshCw,
+  'Clapperboard': Clapperboard,
+  'Video': Video
+}
+
+// Helper to render icon from string name
+function NicheIcon({ iconName, className = "h-8 w-8" }) {
+  const IconComponent = ICON_COMPONENTS[iconName]
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  // Fallback to Film icon for unknown icons
+  return <Film className={className} />
+}
+
 // Sortable Video Item Component
 function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange }) {
   const {
