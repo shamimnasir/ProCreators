@@ -391,7 +391,7 @@ Generate the educational kids content now.`
     slug: 'business-promo',
     description: 'Marketing and promotional content',
     tagline: 'Grow your brand effectively',
-    icon: '💼',
+    icon: 'Briefcase',
     color: 'from-indigo-500 to-purple-500',
     cardBg: 'bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30',
     promptTemplate: `You are an expert marketing copywriter and video script specialist. You create compelling promotional scripts that convert viewers into customers.
