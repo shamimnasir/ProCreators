@@ -1,41 +1,51 @@
 // AI Video Studio - Template Gallery Configuration
 // Each template is a pre-configured use case with system prompts, default settings, and UI hints
 
+// Icon name mapping for Lucide React icons
+export const TEMPLATE_ICON_MAP = {
+  'popular': 'Flame',
+  'social-content': 'Smartphone',
+  'explainers': 'FileText',
+  'storytelling': 'Drama',
+  'business': 'Briefcase',
+  'personal': 'Gift'
+}
+
 export const TEMPLATE_CATEGORIES = [
   {
     id: 'popular',
     name: 'Popular',
-    icon: '🔥',
+    icon: 'Flame',
     description: 'Most used templates'
   },
   {
     id: 'social-content',
     name: 'Social Content',
-    icon: '📱',
+    icon: 'Smartphone',
     description: 'Reels, Stories & Viral Content'
   },
   {
     id: 'explainers',
     name: 'Explainers & Facts',
-    icon: '📰',
+    icon: 'FileText',
     description: 'Educational & News Content'
   },
   {
     id: 'storytelling',
     name: 'Storytelling',
-    icon: '🎭',
+    icon: 'Clapperboard',
     description: 'Drama, Horror & Fiction'
   },
   {
     id: 'business',
     name: 'Business',
-    icon: '💼',
+    icon: 'Briefcase',
     description: 'Ads, Reviews & Promotions'
   },
   {
     id: 'personal',
     name: 'Personal',
-    icon: '🎉',
+    icon: 'Gift',
     description: 'Celebrations & Tributes'
   }
 ]
