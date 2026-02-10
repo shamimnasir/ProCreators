@@ -72,7 +72,20 @@ const ICON_COMPONENTS = {
   'RefreshCw': RefreshCw,
   'Zap': Zap,
   'Users': Users,
-  'Rocket': Rocket
+  'Rocket': Rocket,
+  'Flame': Flame,
+  'Smartphone': Smartphone,
+  'FileText': FileText,
+  'Clapperboard': Clapperboard,
+  'Gift': Gift,
+  'Camera': Camera,
+  'Globe': Globe,
+  'Music': Music,
+  'MessageSquare': MessageSquare,
+  'Search': Search,
+  'Sparkles': Sparkles,
+  'ShoppingCart': ShoppingCart,
+  'Bot': Bot
 }
 
 // Helper to render icon from string name
