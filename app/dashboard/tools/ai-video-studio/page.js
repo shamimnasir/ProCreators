@@ -1067,9 +1067,9 @@ export default function AIVideoStudioPage() {
                 <TabsTrigger 
                   key={cat.id}
                   value={cat.id}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5"
                 >
-                  {cat.icon} {cat.name}
+                  <NicheIcon iconName={cat.icon} className="h-4 w-4" /> {cat.name}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -1086,13 +1086,19 @@ export default function AIVideoStudioPage() {
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <span className="text-3xl">{template.icon}</span>
+                  <div className="p-2 rounded-lg bg-white/20">
+                    <NicheIcon iconName={template.icon} className="h-6 w-6" />
+                  </div>
                   <div className="flex gap-1">
                     {template.isPopular && (
-                      <Badge className="bg-white/20 text-white text-xs border-0">🔥 Popular</Badge>
+                      <Badge className="bg-white/20 text-white text-xs border-0 flex items-center gap-1">
+                        <Flame className="h-3 w-3" /> Popular
+                      </Badge>
                     )}
                     {template.isNew && (
-                      <Badge className="bg-white/20 text-white text-xs border-0">✨ New</Badge>
+                      <Badge className="bg-white/20 text-white text-xs border-0 flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" /> New
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -1115,7 +1121,7 @@ export default function AIVideoStudioPage() {
                     {template.defaultSettings.duration}s
                   </span>
                   <span className="flex items-center gap-1">
-                    {template.defaultSettings.format === 'portrait' ? <Smartphone className="h-3 w-3" /> : template.defaultSettings.format === 'square' ? <span className="text-xs">⬜</span> : <Monitor className="h-3 w-3" />}
+                    {template.defaultSettings.format === 'portrait' ? <Smartphone className="h-3 w-3" /> : template.defaultSettings.format === 'square' ? <Grid className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
                     {template.defaultSettings.format === 'portrait' ? '9:16' : template.defaultSettings.format === 'square' ? '1:1' : '16:9'}
                   </span>
                 </div>
