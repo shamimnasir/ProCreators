@@ -434,7 +434,7 @@ Generate chat story video prompt.`
     name: 'True Crime Micro-Story',
     shortName: 'True Crime',
     description: 'Paste a case → AI produces dark cinematic scenes + narration.',
-    icon: '🔍',
+    icon: 'Search',
     category: 'storytelling',
     isPopular: false,
     isNew: false,
