@@ -649,7 +649,7 @@ Generate the documentary narration now.`
     slug: 'festival',
     description: 'Celebration and festive content',
     tagline: 'Celebrate moments together',
-    icon: '🎉',
+    icon: 'PartyPopper',
     color: 'from-fuchsia-500 to-purple-500',
     cardBg: 'bg-gradient-to-br from-fuchsia-50 to-purple-50 dark:from-fuchsia-950/30 dark:to-purple-950/30',
     promptTemplate: `You are a celebration content creator specializing in festive, joyful videos that bring people together and capture the spirit of special occasions.
