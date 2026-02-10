@@ -255,7 +255,7 @@ Generate the comedy script now.`
     slug: 'kids-stories',
     description: 'Playful moral stories for children',
     tagline: 'Engaging tales for young minds',
-    icon: '🦄',
+    icon: 'Star',
     color: 'from-pink-500 to-rose-500',
     cardBg: 'bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30',
     promptTemplate: `You are a beloved children's storyteller creating magical, engaging stories for young viewers aged 4-8 years old. Your stories are warm, safe, and always teach a gentle lesson.
