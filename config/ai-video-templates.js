@@ -573,7 +573,7 @@ Generate avatar presenter prompt.`
     name: 'Personal Tribute Video',
     shortName: 'Tributes',
     description: 'Upload photos → AI makes a birthday, wedding, romance, or memorial reel.',
-    icon: '💝',
+    icon: 'Heart',
     category: 'personal',
     isPopular: true,
     isNew: false,
