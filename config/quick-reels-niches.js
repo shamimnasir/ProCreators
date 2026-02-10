@@ -317,7 +317,7 @@ Generate the children's story now.`
     slug: 'kids-learning',
     description: 'ABC, 123, colors, and educational content',
     tagline: 'Fun learning for children',
-    icon: '🎨',
+    icon: 'GraduationCap',
     color: 'from-green-500 to-emerald-500',
     cardBg: 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30',
     promptTemplate: `You are an early childhood education specialist creating fun, engaging learning content for children aged 3-7. Your content makes learning feel like play.
