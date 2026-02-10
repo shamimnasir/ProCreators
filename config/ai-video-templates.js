@@ -469,7 +469,7 @@ Generate true crime video prompt.`
     name: 'Folklore & Mythology Animation',
     shortName: 'Folklore',
     description: 'Input a myth/legend → AI animates it with cultural visuals.',
-    icon: '🐉',
+    icon: 'Sparkles',
     category: 'storytelling',
     isPopular: false,
     isNew: false,
