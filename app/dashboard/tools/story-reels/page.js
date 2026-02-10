@@ -1426,7 +1426,9 @@ Product URL: ${scrapeData.product.url}`
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <span className="text-4xl">{nicheIcon}</span>
+            <div className="p-2 rounded-lg bg-primary/10">
+              <NicheIcon iconName={nicheIcon} className="h-8 w-8 text-primary" />
+            </div>
             {nicheName}
           </h1>
           <p className="text-muted-foreground">{nicheDescription}</p>
