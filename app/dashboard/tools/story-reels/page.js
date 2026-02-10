@@ -17,7 +17,9 @@ import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Sparkles, Video, Mic, Upload, Download, 
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
-  GripVertical, Trash2, Plus, ImagePlus, Search
+  GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
+  TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
+  Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import {
