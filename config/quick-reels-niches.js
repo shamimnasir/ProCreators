@@ -588,7 +588,7 @@ Generate the relationship wisdom content now.`
     slug: 'documentary',
     description: 'Historical and factual mini-documentaries',
     tagline: 'Explore history and facts',
-    icon: '🎬',
+    icon: 'Film',
     color: 'from-teal-500 to-cyan-500',
     cardBg: 'bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30',
     promptTemplate: `You are a documentary filmmaker and historian creating compelling mini-documentaries that bring history and facts to life in an engaging, cinematic way.
