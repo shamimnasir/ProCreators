@@ -20,7 +20,8 @@ import {
   Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
   Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library,
-  TrendingUp, ArrowRight, Users, Rocket
+  TrendingUp, ArrowRight, Users, Rocket, BookOpen, Lightbulb, Smile,
+  GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw
 } from 'lucide-react'
 
 // Import configurations
