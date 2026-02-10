@@ -777,7 +777,7 @@ Generate the custom script now based on the user's request.`
     slug: 'product-review',
     description: 'Create engaging product review videos from any URL',
     tagline: 'Professional product reviews in seconds',
-    icon: '🛍️',
+    icon: 'ShoppingBag',
     color: 'from-blue-500 to-cyan-500',
     cardBg: 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30',
     promptTemplate: `You are a professional product reviewer creating engaging, honest short-form video reviews. Your goal is to inform viewers about a product's key features, pros, cons, and overall value in an entertaining way.
