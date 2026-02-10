@@ -398,7 +398,7 @@ Generate educational micro-lecture prompt.`
     name: 'Animated Chat Story Generator',
     shortName: 'Chat Stories',
     description: 'Type a conversation → AI converts it into an animated messenger story.',
-    icon: '💬',
+    icon: 'MessageSquare',
     category: 'storytelling',
     isPopular: false,
     isNew: true,
