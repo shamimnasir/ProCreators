@@ -194,7 +194,7 @@ Generate the educational script now.`
     slug: 'comedy',
     description: 'Localized humor and relatable content',
     tagline: 'Make them laugh and share',
-    icon: '😂',
+    icon: 'Smile',
     color: 'from-yellow-500 to-amber-500',
     cardBg: 'bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30',
     promptTemplate: `You are a comedy writer specializing in viral, relatable humor for short-form video content. Your comedy is observational, clever, and universally shareable.
