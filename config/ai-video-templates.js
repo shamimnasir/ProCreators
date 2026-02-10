@@ -607,7 +607,7 @@ Generate tribute video prompt.`
     name: 'Headshot-to-Influencer Video',
     shortName: 'Influencer',
     description: 'Upload a selfie → AI creates a lifestyle reel. Perfect for personal branding.',
-    icon: '🌟',
+    icon: 'Star',
     category: 'personal',
     isPopular: false,
     isNew: true,
