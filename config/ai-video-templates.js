@@ -289,7 +289,7 @@ Generate funny meme video prompt.`
     name: 'Local Language Explainer',
     shortName: 'Explainers',
     description: 'Type one idea → AI generates visuals + voiceover + captions in Bengali, Hindi, Filipino, etc.',
-    icon: '🌍',
+    icon: 'Globe',
     category: 'explainers',
     isPopular: true,
     isNew: false,
