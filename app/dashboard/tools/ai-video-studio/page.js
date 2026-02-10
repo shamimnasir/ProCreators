@@ -21,7 +21,8 @@ import {
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
   Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library,
   TrendingUp, ArrowRight, Users, Rocket, BookOpen, Lightbulb, Smile,
-  GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw
+  GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw,
+  Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot
 } from 'lucide-react'
 
 // Import configurations
