@@ -458,7 +458,7 @@ Generate the promotional script now.`
     slug: 'horror',
     description: 'Atmospheric creepy micro-stories',
     tagline: 'Spine-chilling short tales',
-    icon: '👻',
+    icon: 'Skull',
     color: 'from-gray-700 to-gray-900',
     cardBg: 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900/30 dark:to-gray-950/30',
     promptTemplate: `You are a master of atmospheric horror, specializing in creepy micro-stories that build tension and leave viewers with chills. Your horror is psychological, not graphic.
