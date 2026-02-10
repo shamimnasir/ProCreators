@@ -524,7 +524,7 @@ Generate the horror story now.`
     slug: 'relationship',
     description: 'Emotional guidance and communication tips',
     tagline: 'Navigate relationships wisely',
-    icon: '❤️',
+    icon: 'Heart',
     color: 'from-red-500 to-pink-500',
     cardBg: 'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30',
     promptTemplate: `You are a compassionate relationship counselor and communication expert creating supportive, wisdom-filled content that helps people navigate love, friendships, and connections.
