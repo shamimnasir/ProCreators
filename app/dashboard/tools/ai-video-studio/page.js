@@ -51,14 +51,44 @@ import {
 } from '@/config/voice-config'
 
 // Import Quick Reels niches
-import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
+import { QUICK_REELS_NICHES, NICHE_ICON_MAP } from '@/config/quick-reels-niches'
+
+// Icon component mapping for professional Lucide icons
+const ICON_COMPONENTS = {
+  'BookOpen': BookOpen,
+  'TrendingUp': TrendingUp,
+  'Lightbulb': Lightbulb,
+  'Smile': Smile,
+  'Star': Star,
+  'GraduationCap': GraduationCap,
+  'Briefcase': Briefcase,
+  'Skull': Skull,
+  'Heart': Heart,
+  'Film': Film,
+  'PartyPopper': PartyPopper,
+  'Wand2': Wand2,
+  'ShoppingBag': ShoppingBag,
+  'RefreshCw': RefreshCw,
+  'Zap': Zap,
+  'Users': Users,
+  'Rocket': Rocket
+}
+
+// Helper to render icon from string name
+function NicheIcon({ iconName, className = "h-6 w-6" }) {
+  const IconComponent = ICON_COMPONENTS[iconName]
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  return <Wand2 className={className} />
+}
 
 // Quick Mode Categories
 const NICHE_CATEGORIES = [
   {
     id: 'storytelling',
     name: 'Storytelling',
-    icon: '📖',
+    icon: 'BookOpen',
     description: 'Captivating narratives and tales',
     color: 'from-purple-500 to-pink-500',
     niches: ['mini-stories', 'horror', 'kids-stories', 'transformation']
@@ -66,7 +96,7 @@ const NICHE_CATEGORIES = [
   {
     id: 'educational',
     name: 'Educational',
-    icon: '🧠',
+    icon: 'Lightbulb',
     description: 'Learn and teach with engaging content',
     color: 'from-blue-500 to-cyan-500',
     niches: ['facts-explainer', 'kids-learning', 'documentary']
@@ -74,7 +104,7 @@ const NICHE_CATEGORIES = [
   {
     id: 'emotional',
     name: 'Emotional & Lifestyle',
-    icon: '❤️',
+    icon: 'Heart',
     description: 'Connect with hearts and minds',
     color: 'from-red-500 to-pink-500',
     niches: ['motivational', 'relationship', 'gratitude']
@@ -82,7 +112,7 @@ const NICHE_CATEGORIES = [
   {
     id: 'entertainment',
     name: 'Entertainment',
-    icon: '🎉',
+    icon: 'PartyPopper',
     description: 'Fun content that entertains',
     color: 'from-yellow-500 to-orange-500',
     niches: ['comedy', 'festival', 'generic']
@@ -90,7 +120,7 @@ const NICHE_CATEGORIES = [
   {
     id: 'business',
     name: 'Business & Marketing',
-    icon: '💼',
+    icon: 'Briefcase',
     description: 'Promote and grow your brand',
     color: 'from-indigo-500 to-purple-500',
     niches: ['business-promo', 'product-review']
