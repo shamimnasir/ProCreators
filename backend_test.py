@@ -22,7 +22,7 @@ import uuid
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://bugfix-central-109.preview.emergentagent.com"
+BASE_URL = "https://pro-interface-11.preview.emergentagent.com"
 TEST_USER_EMAIL = f"test-billing-{uuid.uuid4().hex[:8]}@example.com"
 TEST_USER_PASSWORD = "TestPassword123"
 TEST_USER_NAME = "Test User Billing"
