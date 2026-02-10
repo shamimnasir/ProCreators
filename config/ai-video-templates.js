@@ -222,7 +222,7 @@ Generate motivational video prompt with specific B-roll scenes.`
     name: 'Slideshow-to-Reel Converter',
     shortName: 'Photo Reels',
     description: 'Upload 10 photos → Transform into an aesthetic trending reel with music and effects.',
-    icon: '📸',
+    icon: 'Camera',
     category: 'social-content',
     isPopular: false,
     isNew: true,
