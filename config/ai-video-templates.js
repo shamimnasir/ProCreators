@@ -139,7 +139,7 @@ Generate a compelling promotional video prompt with specific visual directions.`
     name: 'Script → Cinematic Video',
     shortName: 'Cinematic',
     description: '4-6 lines are enough. Produce dramatic, cinematic reels that feel expensive.',
-    icon: '🎬',
+    icon: 'Clapperboard',
     category: 'storytelling',
     isPopular: true,
     isNew: false,
