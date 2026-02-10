@@ -712,7 +712,7 @@ Generate the celebration content now.`
     slug: 'generic',
     description: 'Create videos on any topic you choose',
     tagline: 'Your vision, your video',
-    icon: '✨',
+    icon: 'Wand2',
     color: 'from-violet-500 to-purple-500',
     cardBg: 'bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30',
     promptTemplate: `You are a versatile content creator who can adapt to any topic, style, or tone. Your job is to create engaging short-form video scripts based on whatever the user requests.
