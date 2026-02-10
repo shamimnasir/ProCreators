@@ -57,7 +57,7 @@ export const AI_VIDEO_TEMPLATES = [
     name: 'Auto Short-Story Reels',
     shortName: 'Story Reels',
     description: 'Write → Animate → Post. Convert simple ideas into ready videos with narration, scenes, and pacing.',
-    icon: '📖',
+    icon: 'BookOpen',
     category: 'social-content',
     isPopular: true,
     isNew: false,
