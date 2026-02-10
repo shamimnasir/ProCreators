@@ -875,9 +875,9 @@ export default function AIVideoStudioPage() {
                   <TabsTrigger 
                     key={cat.id} 
                     value={cat.id}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5"
                   >
-                    {cat.icon} {cat.name}
+                    <NicheIcon iconName={cat.icon} className="h-4 w-4" /> {cat.name}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -889,7 +889,7 @@ export default function AIVideoStudioPage() {
                     <div key={category.id}>
                       <div className="flex items-center gap-3 mb-4">
                         <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                          <span className="text-xl">{category.icon}</span>
+                          <NicheIcon iconName={category.icon} className="h-5 w-5" />
                         </div>
                         <div>
                           <h2 className="text-xl font-bold">{category.name}</h2>
@@ -912,7 +912,7 @@ export default function AIVideoStudioPage() {
                 <TabsContent key={category.id} value={category.id} className="mt-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
-                      <span className="text-2xl">{category.icon}</span>
+                      <NicheIcon iconName={category.icon} className="h-6 w-6" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold">{category.name}</h2>
