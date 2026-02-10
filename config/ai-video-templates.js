@@ -98,7 +98,7 @@ User's story idea: {userInput}`
     name: 'Small Business Promo Ads',
     shortName: 'Business Ads',
     description: 'Upload photos → Get a polished TikTok/Facebook ad. Perfect for restaurants, salons, freelancers.',
-    icon: '💼',
+    icon: 'Briefcase',
     category: 'business',
     isPopular: true,
     isNew: false,
