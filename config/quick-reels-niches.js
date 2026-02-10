@@ -76,7 +76,7 @@ Generate the script now.`
     slug: 'motivational',
     description: 'Discipline, growth, and self-worth content',
     tagline: 'Inspire and empower your audience',
-    icon: '💪',
+    icon: 'TrendingUp',
     color: 'from-orange-500 to-red-500',
     cardBg: 'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30',
     promptTemplate: `You are an elite motivational content creator who specializes in creating high-impact, viral short-form videos that inspire immediate action and mindset shifts.
