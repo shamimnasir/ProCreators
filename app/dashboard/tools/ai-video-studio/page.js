@@ -136,7 +136,9 @@ function NicheCard({ niche, categoryColor, expanded = false }) {
       <Card className={`group h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-2 hover:border-primary/50 ${niche.cardBg}`}>
         <CardHeader className={expanded ? "pb-2" : "pb-1"}>
           <div className="flex items-start justify-between">
-            <div className={`text-3xl mb-2 group-hover:scale-110 transition-transform`}>{niche.icon}</div>
+            <div className={`mb-2 group-hover:scale-110 transition-transform p-2 rounded-lg bg-gradient-to-br ${categoryColor || 'from-primary/20 to-primary/10'}`}>
+              <NicheIcon iconName={niche.icon} className="h-6 w-6 text-foreground" />
+            </div>
           </div>
           <CardTitle className={`group-hover:text-primary transition-colors ${expanded ? "text-lg" : "text-base"}`}>
             {niche.name}
