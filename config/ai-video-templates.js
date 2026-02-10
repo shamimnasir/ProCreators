@@ -504,7 +504,7 @@ Generate folklore animation prompt.`
     name: 'Product Review Video',
     shortName: 'Reviews',
     description: 'Paste Amazon/product link → AI creates a review video with visuals + voice.',
-    icon: '🛒',
+    icon: 'ShoppingCart',
     category: 'business',
     isPopular: true,
     isNew: false,
