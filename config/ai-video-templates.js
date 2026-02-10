@@ -255,7 +255,7 @@ Generate photo animation directions.`
     name: 'Instant Meme Video Generator',
     shortName: 'Meme Videos',
     description: 'Upload a face → It becomes the character in a trending meme clip. Fast humor, no editing.',
-    icon: '😂',
+    icon: 'Smile',
     category: 'social-content',
     isPopular: false,
     isNew: true,
