@@ -364,7 +364,7 @@ Generate beat-synced fact video prompt.`
     name: 'AI Educational Micro-Lecture',
     shortName: 'Micro-Lecture',
     description: 'Type a topic → Get a TED-style 20-second video with visuals.',
-    icon: '🎓',
+    icon: 'GraduationCap',
     category: 'explainers',
     isPopular: false,
     isNew: false,
