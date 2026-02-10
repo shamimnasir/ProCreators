@@ -861,7 +861,7 @@ Generate an engaging, honest product review script now.`
     slug: 'transformation-video',
     description: 'Cinematic before/after and evolution videos',
     tagline: 'Transform anything with AI magic',
-    icon: '🔄',
+    icon: 'RefreshCw',
     color: 'from-violet-500 to-purple-600',
     cardBg: 'bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30',
     isNew: true,
