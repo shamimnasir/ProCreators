@@ -330,7 +330,7 @@ Generate explainer video prompt with visual directions.`
     name: 'Music + Fact Video Generator',
     shortName: 'Beat Facts',
     description: 'The "facts with music beat" trend. Facts synced to trending audio.',
-    icon: '🎵',
+    icon: 'Music',
     category: 'explainers',
     isPopular: false,
     isNew: true,
