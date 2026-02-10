@@ -1,6 +1,24 @@
 // Quick Video Reels & Shorts - Niche Configuration
 // Each niche has its own specialized prompt template for better content generation
 
+// Icon name mapping for Lucide React icons (render these dynamically)
+export const NICHE_ICON_MAP = {
+  'mini-stories': 'BookOpen',
+  'motivational': 'TrendingUp',
+  'facts-explainer': 'Lightbulb',
+  'comedy': 'Smile',
+  'kids-stories': 'Star',
+  'kids-learning': 'GraduationCap',
+  'business-promo': 'Briefcase',
+  'horror': 'Skull',
+  'relationship': 'Heart',
+  'documentary': 'Film',
+  'festival': 'PartyPopper',
+  'generic': 'Wand2',
+  'product-review': 'ShoppingBag',
+  'transformation': 'RefreshCw'
+}
+
 export const QUICK_REELS_NICHES = [
   {
     id: 'mini-stories',
@@ -8,7 +26,7 @@ export const QUICK_REELS_NICHES = [
     slug: 'mini-stories',
     description: 'Moral, emotional, twist endings, and folklore tales',
     tagline: 'Short stories with powerful messages',
-    icon: '📖',
+    icon: 'BookOpen',
     color: 'from-purple-500 to-pink-500',
     cardBg: 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30',
     promptTemplate: `You are a master storyteller specializing in viral short-form video scripts. Your task is to create emotionally gripping micro-stories that captivate viewers within the first 3 seconds and keep them watching until the end.
