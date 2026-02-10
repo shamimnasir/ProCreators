@@ -538,7 +538,7 @@ Generate product review video prompt.`
     name: 'AI Avatar Presenter',
     shortName: 'Avatar',
     description: 'Pick an avatar → Paste script → Ready to publish. Perfect for faceless channels.',
-    icon: '🤖',
+    icon: 'Bot',
     category: 'business',
     isPopular: false,
     isNew: true,
