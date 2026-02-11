@@ -17,13 +17,13 @@ import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Sparkles, Video, Image as ImageIcon, Upload, Download, 
+  Loader2, Video, Image as ImageIcon, Upload, Download, 
   Play, Wand2, Monitor, Smartphone, Clock, Zap, Film, ArrowLeft,
   Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library,
   TrendingUp, ArrowRight, Users, Rocket, BookOpen, Lightbulb, Smile,
   GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw,
   Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot
-, Wand2 , Zap } from 'lucide-react'
+} from 'lucide-react'
 
 // Import configurations
 import { DURATION_OPTIONS, FORMAT_OPTIONS } from '@/config/ai-video-usecases'
