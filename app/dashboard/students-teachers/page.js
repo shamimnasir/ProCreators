@@ -433,13 +433,11 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
       }`}>
         <CardHeader className={expanded ? "pb-2" : "pb-1"}>
           <div className="flex items-start justify-between">
-            <div className="text-3xl mb-2">{tool.icon}</div>
+            <div className={`p-2.5 rounded-xl bg-gradient-to-br ${categoryColor} text-white mb-2`}>
+              <EduIcon iconName={tool.icon} className="h-5 w-5" />
+            </div>
             {tool.badge && (
-              <Badge className={`${
-                tool.badge === 'Coming Soon' 
-                  ? 'bg-gray-400 text-white' 
-                  : `bg-gradient-to-r ${categoryColor} text-white`
-              } text-[10px]`}>
+              <Badge variant={tool.badge === 'Coming Soon' ? 'secondary' : 'default'} className="text-[10px]">
                 {tool.badge}
               </Badge>
             )}
