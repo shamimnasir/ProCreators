@@ -67,7 +67,6 @@ function extractDialogueFromScript(script, language = 'en') {
           
           if (hasBengali || hasDevanagari) {
             dialogues.push(dialogue.trim())
-            }..."`)
           }
         } else {
           dialogues.push(dialogue.trim())

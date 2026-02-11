@@ -40,9 +40,6 @@ export async function POST(request) {
         const response = await result.response
         enhancedPrompt = response.text().trim()
         
-        )
-        )
-        
       } catch (aiError) {
         console.error('[Enhance Prompt] AI enhancement failed:', aiError.message)
         // Fall back to original prompt with basic enhancements
