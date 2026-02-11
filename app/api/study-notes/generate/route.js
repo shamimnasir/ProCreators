@@ -195,7 +195,6 @@ function drawText(page, text, options, banglaFont = null, fallbackFont = null) {
   }
   
   // Last resort - skip the text
-  )
 }
 
 // Draw a rounded rectangle

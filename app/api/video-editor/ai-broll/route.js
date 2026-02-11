@@ -327,7 +327,6 @@ async function getVideoDuration(path) {
 // Run FFmpeg
 function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    .join(' ')}...`)
     const proc = spawn('ffmpeg', args)
     let err = ''
     proc.stderr.on('data', d => err += d)
