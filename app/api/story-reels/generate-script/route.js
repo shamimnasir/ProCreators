@@ -99,9 +99,6 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
 4. The output will be read aloud as-is, so include ONLY speakable story content`
     
     finalSystemMessage = finalSystemMessage + languageEnforcement
-    
-    :', finalSystemMessage.substring(0, 200))
-    ')
 
     let userPrompt = ''
     

@@ -468,7 +468,6 @@ async function downloadAndCacheImages(imageUrls) {
       
       // Validate image size (should be at least 1KB)
       if (buffer.length < 1024) {
-        , skipping`)
         continue
       }
       
@@ -476,7 +475,6 @@ async function downloadAndCacheImages(imageUrls) {
       
       // Return the local URL path
       cachedImages.push(`/product-images-cache/${filename}`)
-      }KB)`)
       
     } catch (error) {
       console.error(`[Image Cache] Error downloading image ${i + 1}:`, error.message)
