@@ -164,7 +164,6 @@ export async function POST(request) {
     } catch (e) {}
     
     const stats = await stat(outputPath)
-    }MB`)
     
     return NextResponse.json({
       success: true,

@@ -165,8 +165,6 @@ export async function POST(request) {
 // Helper: Run FFmpeg command
 async function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    .join(' '), '...')
-    
     const ffmpeg = spawn('ffmpeg', args)
     
     let stderr = ''
