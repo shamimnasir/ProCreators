@@ -1,5 +1,5 @@
 const nextConfig = {
-  // output: 'standalone', // Temporarily disabled to save disk space during build
+  output: 'standalone',
   images: {
     unoptimized: true,
   },
