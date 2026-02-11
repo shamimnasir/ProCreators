@@ -75,8 +75,6 @@ export async function POST(request) {
     await mkdir(tempDir, { recursive: true })
     await mkdir(OUTPUT_DIR, { recursive: true })
     
-    }`)
-    
     let currentInput = inputPath
     const results = {}
     

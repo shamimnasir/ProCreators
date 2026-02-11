@@ -136,13 +136,9 @@ export async function POST(request) {
       outputPath
     ]
     
-    }...`)
-    
     await runFFmpeg(args, jobId)
     
     const stats = await stat(outputPath)
-    
-    }KB`)
     
     return NextResponse.json({
       success: true,
