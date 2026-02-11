@@ -301,8 +301,6 @@ export async function POST(request) {
           }
           // Other voices (Neural2, Wavenet, Standard) don't need model parameter
         }
-
-        )
         
         const request = {
           input: { text: script },
