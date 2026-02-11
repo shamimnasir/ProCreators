@@ -98,7 +98,6 @@ export async function POST(request) {
       try {
         if (coverImageStyle === 'custom' && customImagePrompt) {
           // User provided custom description
-          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
