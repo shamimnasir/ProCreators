@@ -224,8 +224,6 @@ async function mergeWithXfade(clips, output, transition, duration, soundPath, jo
     // Remove trailing semicolon
     filterComplex = filterComplex.slice(0, -1)
     
-    }...`)
-    
     // Build input args
     const inputArgs = clips.flatMap(c => ['-i', c])
     

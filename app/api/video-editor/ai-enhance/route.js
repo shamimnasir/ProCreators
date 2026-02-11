@@ -108,19 +108,9 @@ export async function POST(request) {
       
       // Log detected fillers
       if (fillerSegments.length > 0) {
-        .join(', ')}`)
-      } else {
-        }
-      
-      const fillerSegments = detectFillerWords(transcript, fillerWords)
-      results.fillersDetected = fillerSegments.length
-      results.fillerDuration = fillerSegments.reduce((sum, s) => sum + (s.end - s.start), 0)
-      
-      if (fillerSegments.length > 0) {
         const outputPath = join(tempDir, `fillers-removed.mp4`)
         await removeSegments(currentInput, outputPath, fillerSegments, jobId)
         currentInput = outputPath
-        }s)`)
       }
     }
     
