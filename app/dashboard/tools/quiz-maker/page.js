@@ -16,7 +16,8 @@ import {
   HelpCircle, Download, Loader2, DollarSign,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, BookOpen, Brain,
-  GraduationCap, Palette, FileText, Zap, Wand2} from 'lucide-react'
+  GraduationCap, Palette, FileText, Zap, Wand2, Star
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
