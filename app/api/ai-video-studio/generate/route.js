@@ -1934,8 +1934,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   let modelIndex = 0
   let consecutiveFailures = 0
   
-  `).join(' → ')}`)
-  
   for (let i = 0; i < numClips; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
