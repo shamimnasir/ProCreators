@@ -493,7 +493,6 @@ export async function POST(request) {
             }
           } catch (formatError) {
             // Try the other format
-            failed, trying alternative...`)
             embeddedImage = format === 'png' 
               ? await pdfDoc.embedJpg(imageBytes) 
               : await pdfDoc.embedPng(imageBytes)

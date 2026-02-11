@@ -1957,8 +1957,6 @@ async function generateActivityPages(body) {
       activities = Object.keys(ACTIVITY_GENERATORS)
     }
     
-    }`)
-    
     const generatedPages = []
     
     // Distribute activities across pages

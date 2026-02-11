@@ -126,8 +126,6 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     // Check if user provided a topic/context (from script box or custom topic input)
     const hasUserTopic = customTopic && customTopic.trim().length > 0
     
-    )
-    
     if (hasUserTopic) {
       // User provided a topic - use it as the basis for generation
       userPrompt = `Create ${nicheInstruction} for a short video based on this topic/idea:
