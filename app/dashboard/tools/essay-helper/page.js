@@ -20,7 +20,7 @@ import {
   ListOrdered, AlignLeft, RefreshCw, Eye,
   Wand2, FileEdit, Quote, Layers, GraduationCap,
   Upload, FileUp, X, File
-, Wand2 } from 'lucide-react'
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
