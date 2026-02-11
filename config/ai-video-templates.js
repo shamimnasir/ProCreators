@@ -259,7 +259,7 @@ Generate photo animation directions.`
     category: 'social-content',
     isPopular: false,
     isNew: true,
-    color: 'from-yellow-500 to-amber-500',
+    color: 'from-yellow-500 to-yellow-600',
     perfectFor: ['Meme pages', 'TikTok roasts', 'Birthday jokes', 'Office humor'],
     defaultSettings: {
       mode: 'image-to-video',
