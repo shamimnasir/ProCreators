@@ -1656,8 +1656,6 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
         cleanResult = cleanResult.substring(firstBrace, lastBrace + 1)
       }
       
-      )
-      
       // Try to parse JSON, with fallback
       let aiContent
       try {

@@ -291,11 +291,6 @@ export async function POST(request) {
     const cleanAuthor = stripEmojis(authorName) || ''
     const cleanTitle = stripEmojis(title) || ''
     
-    ?.length || 0}`)
-    if (customCoverPrompt) {
-      }...`)
-    }
-    
     // If pages are provided (from editor), use them. Otherwise generate new ones.
     let coloringPages = pages
     if (!coloringPages || coloringPages.length === 0) {

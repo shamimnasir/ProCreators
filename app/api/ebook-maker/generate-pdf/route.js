@@ -555,8 +555,6 @@ export async function POST(request) {
         
         await library.insertOne(libraryEntry)
         
-        :', filePath)
-        
         return NextResponse.json({
           success: true,
           url: `/ebooks/${filename}`,
