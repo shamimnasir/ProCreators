@@ -280,7 +280,6 @@ export async function POST(request) {
         }
         
         const languageName = ttsLanguage === 'bn' ? 'Bengali' : 'English'
-        `)
 
         // Construct the request - omit ssmlGender when using specific voice name
         // Google TTS will use the voice's natural gender
