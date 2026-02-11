@@ -542,7 +542,7 @@ Generate product review video prompt.`
     category: 'business',
     isPopular: false,
     isNew: true,
-    color: 'from-indigo-500 to-purple-500',
+    color: 'from-purple-500 to-purple-600',
     perfectFor: ['Faceless channels', 'Teachers', 'Marketers', 'Daily reels creators'],
     defaultSettings: {
       mode: 'text-to-video',
