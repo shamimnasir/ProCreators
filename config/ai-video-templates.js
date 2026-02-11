@@ -508,7 +508,7 @@ Generate folklore animation prompt.`
     category: 'business',
     isPopular: true,
     isNew: false,
-    color: 'from-orange-500 to-amber-500',
+    color: 'from-cyan-500 to-cyan-600',
     perfectFor: ['Affiliate marketers', 'Product reviewers', 'E-commerce influencers'],
     defaultSettings: {
       mode: 'image-to-video',
