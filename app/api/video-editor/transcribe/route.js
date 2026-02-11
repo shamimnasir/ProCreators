@@ -218,7 +218,6 @@ export async function POST(request) {
             end: word.end,
             type: 'filler_sound'
           })
-          : "${word.word}"`)
           matched = true
           break
         }
