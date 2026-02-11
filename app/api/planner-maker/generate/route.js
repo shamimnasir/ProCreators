@@ -506,8 +506,6 @@ export async function POST(request) {
       width: sizeConfig?.points?.width || 432,
       height: sizeConfig?.points?.height || 648
     }
-    
-    `)
 
     // Generate AI content
     const content = await generatePlannerContent(plannerType, customTitle, pageCount, customInstructions, customHabits)
