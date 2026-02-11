@@ -23,14 +23,14 @@ const EDUCATION_CATEGORIES = [
     id: 'presentations',
     name: 'Presentations & Slides',
     description: 'Create engaging presentations',
-    icon: '📊',
-    color: 'from-blue-500 to-indigo-500',
+    icon: 'Presentation',
+    color: 'from-blue-500 to-blue-600',
     tools: [
       {
         id: 'slides-maker',
         name: 'AI Presentation Maker',
         description: 'Create professional slides in minutes',
-        icon: '📊',
+        icon: 'Presentation',
         href: '/dashboard/tools/slides-maker',
         useCase: 'Class presentations, lectures',
       },
@@ -38,7 +38,7 @@ const EDUCATION_CATEGORIES = [
         id: 'lesson-planner',
         name: 'Lesson Plan Generator',
         description: 'AI-powered lesson plans with objectives, activities & assessments',
-        icon: '📋',
+        icon: 'ClipboardList',
         href: '/dashboard/tools/lesson-planner',
         useCase: 'Teachers, trainers',
         isBuilt: true
@@ -49,14 +49,14 @@ const EDUCATION_CATEGORIES = [
     id: 'study',
     name: 'Study & Learning',
     description: 'Tools to help students learn',
-    icon: '📚',
-    color: 'from-green-500 to-emerald-500',
+    icon: 'BookOpen',
+    color: 'from-emerald-500 to-emerald-600',
     tools: [
       {
         id: 'learning-cards',
         name: 'Flashcard Creator',
         description: 'Generate study flashcards from any topic',
-        icon: '🎴',
+        icon: 'Layers',
         href: '/dashboard/tools/learning-cards',
         useCase: 'Exam prep, memorization',
         isBuilt: true
@@ -65,7 +65,7 @@ const EDUCATION_CATEGORIES = [
         id: 'storybook-maker',
         name: 'Storybook Creator',
         description: 'Create illustrated educational stories',
-        icon: '📖',
+        icon: 'BookOpen',
         href: '/dashboard/tools/storybook-maker',
         useCase: 'K-12, language learning',
         isBuilt: true
@@ -74,7 +74,7 @@ const EDUCATION_CATEGORIES = [
         id: 'ebook-maker',
         name: 'eBook Creator',
         description: 'Create comprehensive educational eBooks',
-        icon: '📕',
+        icon: 'BookMarked',
         href: '/dashboard/tools/ebook-maker',
         useCase: 'Course materials, guides',
         isBuilt: true
@@ -83,7 +83,7 @@ const EDUCATION_CATEGORIES = [
         id: 'study-notes',
         name: 'Study Notes Generator',
         description: 'Summarize textbooks and lectures',
-        icon: '📝',
+        icon: 'FileText',
         href: '/dashboard/tools/study-notes',
         useCase: 'Note-taking, revision',
         isBuilt: true
@@ -94,14 +94,14 @@ const EDUCATION_CATEGORIES = [
     id: 'assessment',
     name: 'Quizzes & Assessment',
     description: 'Create tests and quizzes',
-    icon: '❓',
-    color: 'from-purple-500 to-pink-500',
+    icon: 'FileQuestion',
+    color: 'from-purple-500 to-purple-600',
     tools: [
       {
         id: 'quiz-maker',
         name: 'Quiz & Test Creator',
         description: 'Auto-generate quizzes with PDF export in any language',
-        icon: '❓',
+        icon: 'FileQuestion',
         href: '/dashboard/tools/quiz-maker',
         useCase: 'Testing, self-assessment',
         isBuilt: true
@@ -110,7 +110,7 @@ const EDUCATION_CATEGORIES = [
         id: 'worksheet-maker',
         name: 'Worksheet Generator',
         description: 'Create printable educational worksheets',
-        icon: '📄',
+        icon: 'FileText',
         href: '/dashboard/tools/worksheet-maker',
         useCase: 'Practice, homework',
         isBuilt: true
@@ -119,7 +119,7 @@ const EDUCATION_CATEGORIES = [
         id: 'activity-book',
         name: 'Activity Book Creator',
         description: 'Design fun learning activity books',
-        icon: '🎨',
+        icon: 'Palette',
         href: '/dashboard/tools/activity-book',
         useCase: 'K-12, homeschool',
         isBuilt: true
@@ -128,7 +128,7 @@ const EDUCATION_CATEGORIES = [
         id: 'exam-prep',
         name: 'Exam Prep Assistant',
         description: 'Practice questions and mock tests',
-        icon: '📝',
+        icon: 'ClipboardList',
         href: '/dashboard/tools/exam-prep',
         useCase: 'Board exams, certifications',
         isBuilt: true
@@ -139,14 +139,14 @@ const EDUCATION_CATEGORIES = [
     id: 'writing',
     name: 'Writing & Essays',
     description: 'Help with academic writing',
-    icon: '✍️',
-    color: 'from-orange-500 to-red-500',
+    icon: 'PenTool',
+    color: 'from-rose-500 to-rose-600',
     tools: [
       {
         id: 'essay-helper',
         name: 'Essay Helper',
         description: 'Structure and improve essays',
-        icon: '✍️',
+        icon: 'PenTool',
         href: '/dashboard/tools/essay-helper',
         useCase: 'Academic writing',
         isBuilt: true
@@ -155,7 +155,7 @@ const EDUCATION_CATEGORIES = [
         id: 'citation-generator',
         name: 'Citation Generator',
         description: 'Generate citations in any format',
-        icon: '📚',
+        icon: 'BookMarked',
         href: '/dashboard/tools/citation-generator',
         useCase: 'Research papers',
         isBuilt: true
@@ -164,7 +164,7 @@ const EDUCATION_CATEGORIES = [
         id: 'grammar-checker',
         name: 'Grammar & Style Checker',
         description: 'Polish your academic writing',
-        icon: '✅',
+        icon: 'CheckSquare',
         href: '/dashboard/tools/grammar-checker',
         useCase: 'All writing',
         isBuilt: true
@@ -173,7 +173,7 @@ const EDUCATION_CATEGORIES = [
         id: 'ai-humanizer',
         name: 'AI Humanizer',
         description: 'Make AI text sound human & bypass detectors',
-        icon: '🪄',
+        icon: 'Wand2',
         href: '/dashboard/tools/ai-humanizer',
         useCase: 'Content rewriting',
         isBuilt: true
@@ -184,14 +184,14 @@ const EDUCATION_CATEGORIES = [
     id: 'planning',
     name: 'Planning & Organization',
     description: 'Tools for planning and organization',
-    icon: '📅',
-    color: 'from-cyan-500 to-blue-500',
+    icon: 'Calendar',
+    color: 'from-cyan-500 to-cyan-600',
     tools: [
       {
         id: 'planner-maker',
         name: 'Study Planner',
         description: 'Create customized study planners',
-        icon: '📅',
+        icon: 'Calendar',
         href: '/dashboard/tools/planner-maker',
         useCase: 'Time management, schedules',
         isBuilt: true
@@ -200,7 +200,7 @@ const EDUCATION_CATEGORIES = [
         id: 'checklist-maker',
         name: 'Checklist Creator',
         description: 'Build task and study checklists',
-        icon: '✅',
+        icon: 'CheckSquare',
         href: '/dashboard/tools/checklist-maker',
         useCase: 'Task tracking, goals',
         isBuilt: true
@@ -209,7 +209,7 @@ const EDUCATION_CATEGORIES = [
         id: 'journal-maker',
         name: 'Learning Journal',
         description: 'Create reflection and learning journals',
-        icon: '📓',
+        icon: 'BookOpen',
         href: '/dashboard/tools/journal-maker',
         useCase: 'Reflection, growth tracking',
         isBuilt: true
