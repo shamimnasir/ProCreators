@@ -226,7 +226,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   }
   
   // ASS Header with UTF-8 BOM
-  let ass = `\ufeff[Script Info]
+  let ass = String.fromCharCode(0xFEFF) + `[Script Info]
 Title: AI Video Studio Captions
 ScriptType: v4.00+
 WrapStyle: 0
