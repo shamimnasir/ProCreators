@@ -200,25 +200,26 @@ export function FeaturedToolCard({ tool }) {
     <Link href={tool.href} className="block">
       <div className={cn(
         "group relative h-full rounded-2xl p-[2px] transition-all duration-300",
-        `bg-gradient-to-br ${tool.gradient || 'from-purple-500 to-pink-500'}`,
+        `bg-gradient-to-br ${tool.gradient || 'from-purple-500 to-purple-600'}`,
         "hover:shadow-2xl hover:shadow-purple-500/25 hover:scale-[1.02]"
       )}>
         <div className="relative h-full rounded-2xl bg-card overflow-hidden">
           {/* Gradient accent line */}
           <div className={cn(
             "h-1 w-full",
-            `bg-gradient-to-r ${tool.gradient || 'from-purple-500 to-pink-500'}`
+            `bg-gradient-to-r ${tool.gradient || 'from-purple-500 to-purple-600'}`
           )} />
           
           <div className="p-6">
             {/* Icon Row */}
             <div className="flex items-start justify-between mb-4">
               <div className={cn(
-                "w-14 h-14 rounded-xl flex items-center justify-center text-3xl",
-                "bg-muted/50 group-hover:scale-110 transition-transform duration-300",
-                "ring-2 ring-border/50"
+                "w-14 h-14 rounded-xl flex items-center justify-center",
+                `bg-gradient-to-br ${tool.gradient || 'from-purple-500 to-purple-600'}`,
+                "text-white group-hover:scale-110 transition-transform duration-300",
+                "shadow-md"
               )}>
-                {tool.icon}
+                <ToolIcon icon={tool.icon} className="h-6 w-6" />
               </div>
             </div>
             
