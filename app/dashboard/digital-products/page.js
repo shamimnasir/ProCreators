@@ -13,9 +13,54 @@ import {
   ExternalLink,
   Zap,
   ArrowRight,
-  Star
+  Star,
+  FileText,
+  Calendar,
+  ClipboardList,
+  Palette,
+  BookOpen,
+  CheckSquare,
+  BookMarked,
+  UtensilsCrossed,
+  FileQuestion,
+  Layout,
+  Presentation,
+  GraduationCap,
+  Layers,
+  Baby,
+  Puzzle,
+  Target
 } from 'lucide-react'
 import { DIGITAL_PRODUCT_CATEGORIES } from '@/config/digital-products'
+
+// Icon component mapping
+const ICON_MAP = {
+  'FileText': FileText,
+  'Calendar': Calendar,
+  'ClipboardList': ClipboardList,
+  'Palette': Palette,
+  'BookOpen': BookOpen,
+  'CheckSquare': CheckSquare,
+  'BookMarked': BookMarked,
+  'UtensilsCrossed': UtensilsCrossed,
+  'FileQuestion': FileQuestion,
+  'Layout': Layout,
+  'Presentation': Presentation,
+  'GraduationCap': GraduationCap,
+  'Layers': Layers,
+  'Baby': Baby,
+  'Puzzle': Puzzle,
+  'Target': Target
+}
+
+// Helper to render icon
+function ProductIcon({ iconName, className = "h-5 w-5" }) {
+  const IconComponent = ICON_MAP[iconName]
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  return <FileText className={className} />
+}
 
 export default function DigitalProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
