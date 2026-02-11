@@ -13,7 +13,7 @@ import {
   Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
   RefreshCw, Heart, ChevronDown, ChevronUp, Image
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

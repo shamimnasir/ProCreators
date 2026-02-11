@@ -17,7 +17,7 @@ import {
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, Save, Pipette, ImagePlus,
   FileText, AlertTriangle
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

@@ -23,7 +23,7 @@ import {
   TrendingUp, ArrowRight, Users, Rocket, BookOpen, Lightbulb, Smile,
   GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw,
   Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 
 // Import configurations
 import { DURATION_OPTIONS, FORMAT_OPTIONS } from '@/config/ai-video-usecases'

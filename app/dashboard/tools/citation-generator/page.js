@@ -18,7 +18,7 @@ import {
   BookOpen, Globe, Newspaper, Video, Mic,
   GraduationCap, Link2, RefreshCw, FileDown,
   BookMarked, Library, ExternalLink, Search
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

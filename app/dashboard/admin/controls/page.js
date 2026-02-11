@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { 
   AlertTriangle, Power, Shield, Zap, Video, Image, Music, 
   FileText, Type, Loader2, RefreshCw, History, AlertCircle
-} from 'lucide-react'
+, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   AlertDialog,

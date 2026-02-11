@@ -16,7 +16,7 @@ import {
   Upload, CheckCircle, X, ChevronDown, ChevronUp, FileUp, Copy, RefreshCw,
   Mail, Phone, MapPin, Linkedin, Award, GraduationCap, Wrench, Camera,
   Edit3, Check, User, AlertCircle, Users, Target
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import html2canvas from 'html2canvas'

@@ -20,7 +20,7 @@ import {
   GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
   TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
   Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import {
   DndContext,

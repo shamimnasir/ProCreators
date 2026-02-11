@@ -19,7 +19,7 @@ import {
   Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,
   Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay,
   Plus, Trash2, Move, Bold, AlignLeft, AlignCenter, AlignRight
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 
 // Bengali-friendly fonts available in most systems
 const TEXT_FONTS = [

@@ -18,7 +18,7 @@ import {
   Check, Mail, Send, Heart, UserPlus, Handshake,
   Linkedin, Twitter, Building, GraduationCap, Calendar,
   ArrowLeft, AlertCircle, ThumbsUp, Clock, Zap
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'

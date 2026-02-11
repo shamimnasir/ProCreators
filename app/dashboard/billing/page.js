@@ -9,7 +9,7 @@ import {
   CreditCard, Calendar, TrendingUp, Coins, Sparkles, 
   Loader2, Check, Zap, Crown, Building2, Star, RefreshCw,
   ArrowRight, Clock, Infinity
-} from 'lucide-react'
+, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'

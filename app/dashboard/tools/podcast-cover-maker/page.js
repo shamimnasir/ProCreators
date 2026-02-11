@@ -15,7 +15,7 @@ import {
   Wand2, Upload, Download, ImageIcon, Sparkles, RefreshCw,
   Zap, Target, X, Copy, Headphones, Mic, Radio, Music,
   Layers, Play, Volume2
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 
 // Platform specifications
 const PLATFORM_SPECS = [

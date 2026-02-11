@@ -14,7 +14,7 @@ import {
   Upload, Download, Play, Pause, Volume2, Mic,
   RefreshCw, X, FileAudio, Waves, Sparkles, Zap,
   FastForward, Rewind, Radio, Podcast, Speech, Music2, Video
-} from 'lucide-react'
+, Wand2 , Zap } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 
 // Voice enhancement presets

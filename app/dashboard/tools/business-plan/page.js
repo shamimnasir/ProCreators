@@ -20,7 +20,7 @@ import {
   Lightbulb, Target, DollarSign, Layers, PieChart, Briefcase,
   CheckCircle2, ChevronRight, Download, Eye, Globe, Rocket,
   ClipboardList, Settings, Shield, Award, LineChart
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

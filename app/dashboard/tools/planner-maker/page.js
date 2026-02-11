@@ -13,7 +13,7 @@ import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Download, Sparkles, ArrowLeft, 
   CheckCircle, DollarSign, Palette, User, Image
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

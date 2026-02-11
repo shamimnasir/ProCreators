@@ -18,7 +18,7 @@ import {
   FileText, Upload, FileUp, File, X, Wand2,
   BookOpen, Lightbulb, Target, BarChart3,
   Type, AlignLeft, Zap, Eye, PenTool
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

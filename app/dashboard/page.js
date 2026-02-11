@@ -25,7 +25,7 @@ import {
   Star,
   Crown,
   Layers
-} from 'lucide-react'
+, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 

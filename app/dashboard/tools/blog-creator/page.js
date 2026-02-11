@@ -22,7 +22,7 @@ import {
   ShoppingCart, Award, List, FileCheck, Wand2,
   Bot, User, Shield, AlertCircle, AlertTriangle,
   PenTool, Brain, Eye, Settings2
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

@@ -18,7 +18,7 @@ import {
   ChevronDown, ChevronUp, RefreshCw, BookOpen, Brain,
   GraduationCap, Target, Users, Lightbulb, ClipboardList,
   PenTool, PlayCircle, CheckSquare, Palette
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

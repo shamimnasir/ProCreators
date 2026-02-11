@@ -18,7 +18,7 @@ import {
   FileText, Briefcase, TrendingUp, Lightbulb, RefreshCw, Upload,
   ChevronRight, Award, Zap, Shield, ArrowUp, ArrowDown, Minus,
   Copy, Check, FileUp, X, ExternalLink
-} from 'lucide-react'
+, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 // Score color helper
