@@ -334,7 +334,7 @@ Generate explainer video prompt with visual directions.`
     category: 'explainers',
     isPopular: false,
     isNew: true,
-    color: 'from-violet-500 to-purple-500',
+    color: 'from-violet-500 to-violet-600',
     perfectFor: ['TikTok facts', 'History facts', 'Celebrity facts', 'Top 5/10 content'],
     defaultSettings: {
       mode: 'text-to-video',
