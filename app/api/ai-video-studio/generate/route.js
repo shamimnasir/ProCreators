@@ -1428,8 +1428,6 @@ export async function POST(request) {
 
 // ==================== SHOTSTACK GENERATION ====================
 async function generateWithShotstack({ jobId, mode, prompt, duration, format, templateId, imageFile, videoSource }) {
-  ...`)
-  
   const apiKey = process.env.SHOTSTACK_API_KEY
   if (!apiKey) {
     throw new Error('Shotstack API key not configured')

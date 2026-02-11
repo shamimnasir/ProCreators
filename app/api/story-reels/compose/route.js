@@ -626,7 +626,7 @@ export async function POST(request) {
           reject(err)
         })
         .on('progress', (progress) => {
-          }%`)
+          // Progress logging
         })
         .run()
     })
