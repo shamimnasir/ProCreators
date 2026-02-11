@@ -414,11 +414,8 @@ async function compileVideoWithFFmpeg({
             // Use the voice's actual language code to avoid mismatch errors
             voiceConfig.languageCode = voiceLanguageCode
             voiceConfig.name = selectedVoice
-            `)
           }
-        } else {
-          // No specific voice selected - use default for the language
-          }
+        }
         
         const ttsRequest = {
           input: { text: ttsText },  // Use extracted dialogue or full text
