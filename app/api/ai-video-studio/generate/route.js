@@ -1482,7 +1482,7 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
           throw new Error('Replicate also failed')
         }
       } catch (replicateError) {
-        console.error(`[${jobId}] ⚠️ Replicate fallback also failed, using stock videos:`, replicateError.message)
+        console.error(`[${jobId}] WARNING: Replicate fallback also failed, using stock videos:`, replicateError.message)
         const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
         const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
