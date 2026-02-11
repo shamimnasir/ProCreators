@@ -144,8 +144,6 @@ function extractDialogueFromScript(script, language = 'en') {
     ? Math.round((1 - dialogueOnly.length / script.length) * 100) 
     : 0
   
-  `)
-  
   return {
     dialogueOnly,
     fullScript: script,
