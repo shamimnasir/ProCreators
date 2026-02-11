@@ -376,7 +376,6 @@ Return ONLY valid JSON.`
         searchedAt: new Date().toISOString()
       }
       
-      ===\n`)
       return examInfo
     }
     return null
