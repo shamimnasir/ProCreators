@@ -325,8 +325,6 @@ async function compileVideoWithFFmpeg({
           return { index, path: null, success: false }
         }
         
-        }...`)
-        
         if (videoUrl.startsWith('/')) {
           // Local file - copy it
           const localPath = join(process.cwd(), 'public', videoUrl)
