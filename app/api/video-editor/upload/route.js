@@ -47,8 +47,6 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    `)
-    
     if (chunkIndex === 0) {
       // First chunk - create new file
       await writeFile(tempPath, buffer)
