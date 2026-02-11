@@ -379,7 +379,6 @@ export async function POST(request) {
           resolve(duration) // Fallback to target duration
         } else {
           const audioDuration = metadata.format.duration
-          `)
           resolve(audioDuration)
         }
       })
