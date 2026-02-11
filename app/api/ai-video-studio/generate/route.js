@@ -380,10 +380,8 @@ async function compileVideoWithFFmpeg({
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
           spokenText = extracted.dialogueOnly // Captions should match spoken text
-        } else {
-          }
-      } else {
         }
+      }
       
       try {
         const client = new textToSpeech.TextToSpeechClient({
@@ -1985,7 +1983,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
       const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
       
       if (videoUrl) {
-        }...`)
         videos.push({
           url: videoUrl,
           prompt: scenePrompt,
