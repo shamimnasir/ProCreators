@@ -1637,8 +1637,6 @@ IMPORTANT: All content MUST be specifically about "${theme}". Make it fun, educa
 
     const result = await runLLM(prompt, 'You are a creative children\'s activity book content generator. Generate fun, educational, age-appropriate content. Return ONLY valid JSON, no markdown formatting.')
     
-    .substring(0, 500))
-    
     if (result && result.success && result.content) {
       // Clean up the result - remove markdown code blocks if present
       let cleanResult = result.content.trim()
