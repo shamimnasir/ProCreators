@@ -212,7 +212,7 @@ export default function NoiseRemoverPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-              <Sparkles className="h-8 w-8" />
+              <Zap className="h-8 w-8" />
             </div>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">

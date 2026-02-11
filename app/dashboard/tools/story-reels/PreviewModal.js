@@ -264,7 +264,7 @@ export default function PreviewModal({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-500" />
+            <Zap className="w-5 h-5 text-purple-500" />
             Preview & Customize Your Video
           </DialogTitle>
           <DialogDescription>
@@ -514,7 +514,7 @@ export default function PreviewModal({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2" />
+                    <Wand2 className="w-4 h-4 mr-2" />
                     Generate Final HD Video
                   </>
                 )}

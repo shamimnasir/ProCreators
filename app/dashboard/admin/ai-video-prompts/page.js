@@ -298,7 +298,7 @@ export default function AIVideoPromptsPage() {
                 {/* System Prompt */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
+                    <Zap className="h-4 w-4" />
                     System Prompt (AI Instructions)
                   </Label>
                   <Textarea

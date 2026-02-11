@@ -1879,7 +1879,7 @@ Product URL: ${scrapeData.product.url}`
           <Tabs value={voiceOption} onValueChange={setVoiceOption} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="tts">
-                <Sparkles className="h-4 w-4 mr-1" />
+                <Wand2 className="h-4 w-4 mr-1" />
                 AI Voice Studio
               </TabsTrigger>
               <TabsTrigger value="upload">

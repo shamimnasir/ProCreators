@@ -377,7 +377,7 @@ export default function BillingPage() {
       {/* Credit Packages */}
       <div>
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-yellow-500" />
+          <Zap className="h-6 w-6 text-yellow-500" />
           Buy Extra Credits
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
