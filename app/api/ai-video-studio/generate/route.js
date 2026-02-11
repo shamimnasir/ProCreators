@@ -600,7 +600,6 @@ async function compileVideoWithFFmpeg({
         
         const captionsPath = join(tempDir, 'captions.ass')
         await writeFile(captionsPath, captionContent)
-        `)
         
         // Burn captions into video
         const escapedPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')

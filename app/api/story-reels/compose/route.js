@@ -391,11 +391,8 @@ export async function POST(request) {
     const targetWidth = resolution === '4k' ? '1216' : resolution === '2k' ? '810' : resolution === '1080p' ? '1080' : '720'
     const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
     
-    `)
-    
     // Calculate duration per clip based on ACTUAL AUDIO DURATION (not target duration)
     const durationPerClip = actualAudioDuration / videoFiles.length
-    } seconds (based on ${actualAudioDuration.toFixed(2)}s audio)`)
     
     // Step 3a: Normalize each clip individually - PARALLELIZED
     // Track which clips are images, stock videos, or custom uploads
