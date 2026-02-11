@@ -22,7 +22,7 @@ import uuid
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://interface-polish-10.preview.emergentagent.com"
+BASE_URL = "https://syntaxfix-2.preview.emergentagent.com"
 TEST_USER_EMAIL = f"test-billing-{uuid.uuid4().hex[:8]}@example.com"
 TEST_USER_PASSWORD = "TestPassword123"
 TEST_USER_NAME = "Test User Billing"
