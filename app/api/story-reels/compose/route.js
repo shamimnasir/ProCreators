@@ -430,8 +430,6 @@ export async function POST(request) {
           // Trim first 3 seconds ONLY for stock videos (not images, UGC, or custom)
           if (clipType && clipType.type === 'stock') {
             cmd.inputOptions(['-ss', '3'])
-            } else if (clipType && clipType.type === 'image') {
-            `)
           } else if (clipType && clipType.type === 'ugc') {
             `)
           }
