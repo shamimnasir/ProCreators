@@ -53,8 +53,6 @@ export async function POST(request) {
     const preset = VIDEO_PRESETS[outputPreset] || VIDEO_PRESETS['youtube-hd']
     const keepOriginal = outputPreset === 'original'
     
-    `)
-    
     // Generate transition sound
     let soundPath = null
     if (transitionSound && transitionSound !== 'none') {

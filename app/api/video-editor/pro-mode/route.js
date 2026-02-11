@@ -136,8 +136,6 @@ export async function POST(request) {
     
     const stats = await require('fs/promises').stat(finalPath)
     
-    }MB`)
-    
     return NextResponse.json({
       success: true,
       jobId,
