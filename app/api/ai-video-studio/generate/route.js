@@ -634,7 +634,6 @@ async function compileVideoWithFFmpeg({
     } else {
       // No captions - just copy the video
       require('fs').copyFileSync(videoWithAudioPath, finalVideoPath)
-      `)
     }
     
     // Step 7: Save to public folder
