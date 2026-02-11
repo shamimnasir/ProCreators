@@ -1468,14 +1468,13 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
         throw new Error('No AI videos generated')
       }
     } catch (falError) {
-      console.error(`[${jobId}] ⚠️ Fal.ai failed, trying Replicate fallback:`, falError.message)
+      console.error(`[${jobId}] WARNING: Fal.ai failed, trying Replicate fallback:`, falError.message)
       
       try {
         // Fallback to Replicate
         const replicateVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
         
         if (replicateVideos.length > 0) {
-          `)
           aiVideos = replicateVideos
           editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, replicateVideos, jobId)
         } else {
