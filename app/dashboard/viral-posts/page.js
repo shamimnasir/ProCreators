@@ -139,18 +139,6 @@ export default function ViralPostsPage() {
         </CardContent>
       </Card>
 
-      {/* Featured Tools */}
-      <div>
-        <div className="flex items-center gap-2 mb-5">
-          <h2 className="text-xl font-bold">Featured Tools</h2>
-        </div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {FEATURED_TOOLS.map((tool) => (
-            <FeaturedToolCard key={tool.id} tool={tool} />
-          ))}
-        </div>
-      </div>
-
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
