@@ -2254,11 +2254,12 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
           
           if (status === 'done') {
             imageUrl = statusData.data?.attributes?.url
-            } else if (status === 'failed') {
-            console.error(`[${jobId}] ❌ Image ${index + 1} failed`)
+            break
+          } else if (status === 'failed') {
+            console.error(`[${jobId}] Image ${index + 1} failed`)
             break
           } else if (attempts % 5 === 0) {
-            `)
+            console.log(`[${jobId}] Image ${index + 1} still processing...`)
           }
         }
       }
