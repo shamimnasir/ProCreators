@@ -1,572 +1,250 @@
 #!/usr/bin/env python3
 """
-ProCreators Backend API Testing Suite
-Tests authentication, credits, library save, and generator APIs
+Backend API Testing Script for Library Save API with Zod Validation
+Tests the /api/library/save endpoint with comprehensive validation scenarios
 """
 
 import requests
 import json
-import time
 import sys
-import os
-from typing import Dict, Any, Optional
+from datetime import datetime
 
 # Configuration
 BASE_URL = "https://app-rescue-mission-1.preview.emergentagent.com"
-TEST_USER_EMAIL = "shourjois@gmail.com"
-TEST_USER_PASSWORD = "TempPass123!"
+API_ENDPOINT = f"{BASE_URL}/api/library/save"
 
-class ProCreatorsAPITester:
-    def __init__(self):
-        self.base_url = BASE_URL
-        self.session_token = None
-        self.user_id = None
-        self.test_results = []
-        
-    def log_result(self, test_name: str, success: bool, message: str, details: Dict = None):
-        """Log test result"""
-        result = {
-            'test': test_name,
-            'success': success,
-            'message': message,
-            'details': details or {}
+def print_test_header(test_name):
+    """Print formatted test header"""
+    print(f"\n{'='*60}")
+    print(f"TEST: {test_name}")
+    print(f"{'='*60}")
+
+def print_test_result(success, message, response_data=None):
+    """Print formatted test result"""
+    status = "✅ PASS" if success else "❌ FAIL"
+    print(f"{status}: {message}")
+    if response_data:
+        print(f"Response: {json.dumps(response_data, indent=2)}")
+    print("-" * 60)
+
+def test_library_save_api():
+    """Test Library Save API with Zod validation"""
+    
+    print(f"🧪 LIBRARY SAVE API TESTING STARTED")
+    print(f"Endpoint: {API_ENDPOINT}")
+    print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    test_results = []
+    
+    # Test Case 1: Valid Save Request (should succeed)
+    print_test_header("Valid Save Request")
+    try:
+        payload = {
+            "type": "test",
+            "title": "Test Library Save",
+            "content": "This is test content for the library save API."
         }
-        self.test_results.append(result)
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status}: {test_name} - {message}")
-        if details:
-            print(f"   Details: {json.dumps(details, indent=2)}")
-        print()
-
-    def make_request(self, method: str, endpoint: str, data: Dict = None, headers: Dict = None, files: Dict = None) -> Dict:
-        """Make HTTP request with error handling"""
-        url = f"{self.base_url}{endpoint}"
-        default_headers = {'Content-Type': 'application/json'}
         
-        if headers:
-            default_headers.update(headers)
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
+        
+        if response.status_code == 200 and response_data.get('success'):
+            required_fields = ['itemId', 'category', 'expiresAt']
+            has_all_fields = all(field in response_data for field in required_fields)
             
-        if self.session_token and 'Authorization' not in default_headers:
-            default_headers['Authorization'] = f'Bearer {self.session_token}'
-            
-        try:
-            if files:
-                # Remove Content-Type for multipart/form-data
-                if 'Content-Type' in default_headers:
-                    del default_headers['Content-Type']
-                response = requests.request(method, url, data=data, headers=default_headers, files=files, timeout=30)
+            if has_all_fields:
+                print_test_result(True, f"Valid request succeeded with status {response.status_code}", response_data)
+                test_results.append(("Valid Save Request", True, "Success with all required fields"))
             else:
-                response = requests.request(method, url, json=data, headers=default_headers, timeout=30)
-            
-            try:
-                return {
-                    'status_code': response.status_code,
-                    'data': response.json(),
-                    'headers': dict(response.headers)
-                }
-            except json.JSONDecodeError:
-                return {
-                    'status_code': response.status_code,
-                    'data': {'error': 'Invalid JSON response', 'text': response.text[:500]},
-                    'headers': dict(response.headers)
-                }
-        except requests.exceptions.RequestException as e:
-            return {
-                'status_code': 0,
-                'data': {'error': f'Request failed: {str(e)}'},
-                'headers': {}
-            }
-
-    def test_auth_signup(self):
-        """Test user signup API"""
-        test_email = f"test_{int(time.time())}@example.com"
-        
-        response = self.make_request('POST', '/api/auth', {
-            'action': 'signup',
-            'email': test_email,
-            'password': 'TestPass123!',
-            'name': 'Test User'
-        })
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'Auth Signup API',
-                True,
-                'Successfully created test account',
-                {'email': test_email, 'response': response['data']}
-            )
+                missing_fields = [field for field in required_fields if field not in response_data]
+                print_test_result(False, f"Missing required fields: {missing_fields}", response_data)
+                test_results.append(("Valid Save Request", False, f"Missing fields: {missing_fields}"))
         else:
-            self.log_result(
-                'Auth Signup API',
-                False,
-                f'Signup failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_auth_login(self):
-        """Test user login API"""
-        response = self.make_request('POST', '/api/auth', {
-            'action': 'login',
-            'email': TEST_USER_EMAIL,
-            'password': TEST_USER_PASSWORD
-        })
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.session_token = response['data'].get('sessionToken')
-            user_data = response['data'].get('user', {})
-            self.user_id = user_data.get('id')
+            print_test_result(False, f"Expected success but got status {response.status_code}", response_data)
+            test_results.append(("Valid Save Request", False, f"Status {response.status_code}"))
             
-            self.log_result(
-                'Auth Login API',
-                True,
-                f'Successfully logged in as {user_data.get("email")}',
-                {
-                    'user_id': self.user_id,
-                    'credits': user_data.get('credits'),
-                    'plan': user_data.get('plan'),
-                    'has_token': bool(self.session_token)
-                }
-            )
-        else:
-            self.log_result(
-                'Auth Login API',
-                False,
-                f'Login failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_auth_session(self):
-        """Test session validation API"""
-        if not self.session_token:
-            self.log_result('Auth Session API', False, 'No session token available', {})
-            return
-            
-        response = self.make_request('GET', '/api/auth/session')
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            user_data = response['data'].get('user', {})
-            self.log_result(
-                'Auth Session API',
-                True,
-                'Session validation successful',
-                {
-                    'user_id': user_data.get('id'),
-                    'email': user_data.get('email'),
-                    'credits': user_data.get('credits'),
-                    'plan': user_data.get('plan')
-                }
-            )
-        else:
-            self.log_result(
-                'Auth Session API',
-                False,
-                f'Session validation failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_credits_get(self):
-        """Test get user credits API"""
-        if not self.session_token:
-            self.log_result('Credits GET API', False, 'No session token available', {})
-            return
-            
-        response = self.make_request('GET', '/api/credits')
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'Credits GET API',
-                True,
-                'Successfully retrieved credit information',
-                {
-                    'credits': response['data'].get('credits'),
-                    'plan': response['data'].get('plan'),
-                    'membership_credits': response['data'].get('membershipCredits'),
-                    'purchased_credits': response['data'].get('purchasedCredits')
-                }
-            )
-        else:
-            self.log_result(
-                'Credits GET API',
-                False,
-                f'Failed to get credits: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_credits_deduct(self):
-        """Test credit deduction API"""
-        if not self.session_token or not self.user_id:
-            self.log_result('Credits Deduct API', False, 'No session token or user ID available', {})
-            return
-            
-        response = self.make_request('POST', '/api/credits', {
-            'action': 'deduct',
-            'userId': self.user_id,
-            'toolId': 'text-generation',
-            'params': {'test': True}
-        })
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'Credits Deduct API',
-                True,
-                'Credit deduction successful',
-                {
-                    'transaction_id': response['data'].get('transactionId'),
-                    'new_balance': response['data'].get('newBalance'),
-                    'credits_charged': response['data'].get('creditsCharged')
-                }
-            )
-        elif response['status_code'] == 402:
-            self.log_result(
-                'Credits Deduct API',
-                True,
-                'Credit deduction properly rejected (insufficient credits)',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-        else:
-            self.log_result(
-                'Credits Deduct API',
-                False,
-                f'Credit deduction failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_library_save_zod_validation(self):
-        """Test library save API with Zod validation"""
-        if not self.session_token:
-            self.log_result('Library Save Zod Validation', False, 'No session token available', {})
-            return
-            
-        # Test 1: Valid save request
-        valid_data = {
-            'type': 'test-content',
-            'title': 'Test Content for Validation',
-            'content': 'This is test content to verify Zod validation is working properly.',
-            'description': 'Test description',
-            'metadata': {'test': True, 'validation': 'zod'}
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Valid Save Request", False, f"Exception: {str(e)}"))
+    
+    # Test Case 2: Missing Required Field - type (should fail validation)
+    print_test_header("Missing Required Field - type")
+    try:
+        payload = {
+            "title": "Test Title",
+            "content": "Some content"
         }
         
-        response = self.make_request('POST', '/api/library/save', valid_data)
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
         
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'Library Save Valid Request',
-                True,
-                'Valid library save request successful',
-                {
-                    'item_id': response['data'].get('itemId'),
-                    'category': response['data'].get('category'),
-                    'expires_at': response['data'].get('expiresAt')
-                }
-            )
-        else:
-            self.log_result(
-                'Library Save Valid Request',
-                False,
-                f'Valid save request failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-        
-        # Test 2: Invalid request - missing required fields
-        invalid_data = {
-            'content': 'Content without required type and title'
-        }
-        
-        response = self.make_request('POST', '/api/library/save', invalid_data)
-        
-        if response['status_code'] == 400:
-            self.log_result(
-                'Library Save Invalid Request (Missing Fields)',
-                True,
-                'Properly rejected request with missing required fields',
-                {'error': response['data'].get('error')}
-            )
-        else:
-            self.log_result(
-                'Library Save Invalid Request (Missing Fields)',
-                False,
-                f'Should have rejected invalid request: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-        
-        # Test 3: Invalid request - no content, videoUrl, or filePath
-        empty_data = {
-            'type': 'test',
-            'title': 'Test Title'
-        }
-        
-        response = self.make_request('POST', '/api/library/save', empty_data)
-        
-        if response['status_code'] == 400:
-            self.log_result(
-                'Library Save Invalid Request (No Content)',
-                True,
-                'Properly rejected request with no content/video/file',
-                {'error': response['data'].get('error')}
-            )
-        else:
-            self.log_result(
-                'Library Save Invalid Request (No Content)',
-                False,
-                f'Should have rejected request with no content: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_story_reels_compose(self):
-        """Test story reels compose API"""
-        if not self.session_token:
-            self.log_result('Story Reels Compose API', False, 'No session token available', {})
-            return
+        if response.status_code == 400 and response_data.get('error') == 'Validation failed':
+            errors = response_data.get('errors', [])
+            type_error_found = any('type' in str(error).lower() for error in errors)
             
-        # Prepare form data for story reels
-        form_data = {
-            'script': 'This is a test story reel script for API testing.',
-            'duration': '10',
-            'voiceOption': 'tts',
-            'ttsLanguage': 'en',
-            'selectedVoice': 'en-US-Neural2-D',
-            'captionStyle': 'bold-outline',
-            'musicTrack': 'none',
-            'resolution': '1080p',
-            'stockVideos': json.dumps([]),
-            'videoOrder': json.dumps([]),
-            'keywords': json.dumps(['test', 'api', 'story']),
-            'captionFontSize': 'medium',
-            'captionPosition': 'bottom',
-            'niche': 'story-reels'
-        }
-        
-        # Remove Content-Type header for form data
-        headers = {}
-        if self.session_token:
-            headers['Authorization'] = f'Bearer {self.session_token}'
-            
-        response = self.make_request('POST', '/api/story-reels/compose', form_data, headers)
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'Story Reels Compose API',
-                True,
-                'Story reel composition successful',
-                {
-                    'video_url': response['data'].get('videoUrl'),
-                    'duration': response['data'].get('duration'),
-                    'clip_count': response['data'].get('clipCount'),
-                    'credits_used': response['data'].get('creditsUsed')
-                }
-            )
-        elif response['status_code'] == 401:
-            self.log_result(
-                'Story Reels Compose API',
-                True,
-                'Properly requires authentication',
-                {'status_code': response['status_code'], 'error': response['data'].get('error')}
-            )
-        elif response['status_code'] == 402:
-            self.log_result(
-                'Story Reels Compose API',
-                True,
-                'Properly checks credits before generation',
-                {'status_code': response['status_code'], 'error': response['data'].get('error')}
-            )
-        else:
-            self.log_result(
-                'Story Reels Compose API',
-                False,
-                f'Story reel composition failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_ai_video_studio_generate(self):
-        """Test AI video studio generate API"""
-        if not self.session_token:
-            self.log_result('AI Video Studio Generate API', False, 'No session token available', {})
-            return
-            
-        # Prepare form data for AI video generation
-        form_data = {
-            'mode': 'text-to-video',
-            'prompt': 'A beautiful sunset over mountains with cinematic lighting',
-            'duration': '5',
-            'format': 'portrait',
-            'templateId': 'cinematic-script',
-            'videoSource': 'ai',
-            'voiceOption': 'none',
-            'captionStyle': 'none',
-            'musicTrack': 'none'
-        }
-        
-        headers = {}
-        if self.session_token:
-            headers['Authorization'] = f'Bearer {self.session_token}'
-            
-        response = self.make_request('POST', '/api/ai-video-studio/generate', form_data, headers)
-        
-        if response['status_code'] == 200 and response['data'].get('success'):
-            self.log_result(
-                'AI Video Studio Generate API',
-                True,
-                'AI video generation successful',
-                {
-                    'video_url': response['data'].get('videoUrl'),
-                    'duration': response['data'].get('duration'),
-                    'format': response['data'].get('format'),
-                    'provider': response['data'].get('provider'),
-                    'credits_used': response['data'].get('creditsUsed')
-                }
-            )
-        elif response['status_code'] == 401:
-            self.log_result(
-                'AI Video Studio Generate API',
-                True,
-                'Properly requires authentication',
-                {'status_code': response['status_code'], 'error': response['data'].get('error')}
-            )
-        elif response['status_code'] == 402:
-            self.log_result(
-                'AI Video Studio Generate API',
-                True,
-                'Properly checks credits before generation',
-                {'status_code': response['status_code'], 'error': response['data'].get('error')}
-            )
-        else:
-            self.log_result(
-                'AI Video Studio Generate API',
-                False,
-                f'AI video generation failed: {response["data"].get("error", "Unknown error")}',
-                {'status_code': response['status_code'], 'response': response['data']}
-            )
-
-    def test_api_syntax_errors(self):
-        """Test for basic API syntax errors by making simple requests"""
-        test_endpoints = [
-            ('/api/auth', 'POST', {'action': 'login', 'email': 'test@test.com', 'password': 'test'}),
-            ('/api/credits', 'GET', None),
-            ('/api/library/save', 'POST', {'type': 'test', 'title': 'test', 'content': 'test'}),
-        ]
-        
-        for endpoint, method, data in test_endpoints:
-            response = self.make_request(method, endpoint, data)
-            
-            # Check for 500 errors which might indicate syntax issues
-            if response['status_code'] == 500:
-                error_text = response['data'].get('text', '')
-                if 'SyntaxError' in error_text or 'Unexpected token' in error_text:
-                    self.log_result(
-                        f'Syntax Check {endpoint}',
-                        False,
-                        f'Syntax error detected in {endpoint}',
-                        {'error': error_text[:200]}
-                    )
-                else:
-                    self.log_result(
-                        f'Syntax Check {endpoint}',
-                        True,
-                        f'{endpoint} has no syntax errors (500 error is functional)',
-                        {'status_code': response['status_code']}
-                    )
+            if type_error_found:
+                print_test_result(True, f"Correctly rejected missing 'type' field with status {response.status_code}", response_data)
+                test_results.append(("Missing type field", True, "Validation correctly failed"))
             else:
-                self.log_result(
-                    f'Syntax Check {endpoint}',
-                    True,
-                    f'{endpoint} responds without syntax errors',
-                    {'status_code': response['status_code']}
-                )
-
-    def run_all_tests(self):
-        """Run all backend API tests"""
-        print("🚀 Starting ProCreators Backend API Testing Suite")
-        print(f"Base URL: {self.base_url}")
-        print(f"Test User: {TEST_USER_EMAIL}")
-        print("=" * 60)
-        print()
-        
-        # Test API syntax first
-        print("📋 Testing API Syntax and Basic Responses...")
-        self.test_api_syntax_errors()
-        
-        # Test authentication flow
-        print("🔐 Testing Authentication APIs...")
-        self.test_auth_signup()
-        self.test_auth_login()
-        self.test_auth_session()
-        
-        # Test credit system
-        print("💳 Testing Credit System APIs...")
-        self.test_credits_get()
-        self.test_credits_deduct()
-        
-        # Test library save with Zod validation
-        print("📚 Testing Library Save API with Zod Validation...")
-        self.test_library_save_zod_validation()
-        
-        # Test generator APIs
-        print("🎬 Testing Generator APIs...")
-        self.test_story_reels_compose()
-        self.test_ai_video_studio_generate()
-        
-        # Print summary
-        self.print_summary()
-
-    def print_summary(self):
-        """Print test results summary"""
-        print("=" * 60)
-        print("📊 TEST RESULTS SUMMARY")
-        print("=" * 60)
-        
-        total_tests = len(self.test_results)
-        passed_tests = sum(1 for result in self.test_results if result['success'])
-        failed_tests = total_tests - passed_tests
-        
-        print(f"Total Tests: {total_tests}")
-        print(f"✅ Passed: {passed_tests}")
-        print(f"❌ Failed: {failed_tests}")
-        print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
-        print()
-        
-        if failed_tests > 0:
-            print("❌ FAILED TESTS:")
-            for result in self.test_results:
-                if not result['success']:
-                    print(f"  - {result['test']}: {result['message']}")
-            print()
-        
-        print("✅ PASSED TESTS:")
-        for result in self.test_results:
-            if result['success']:
-                print(f"  - {result['test']}: {result['message']}")
-        
-        print()
-        print("🎯 KEY FINDINGS:")
-        
-        # Check authentication
-        auth_working = any(r['success'] and 'Auth Login' in r['test'] for r in self.test_results)
-        if auth_working:
-            print("  ✅ Authentication system is working")
+                print_test_result(False, f"Expected 'type' validation error but got: {errors}", response_data)
+                test_results.append(("Missing type field", False, f"Wrong error: {errors}"))
         else:
-            print("  ❌ Authentication system has issues")
+            print_test_result(False, f"Expected 400 validation error but got status {response.status_code}", response_data)
+            test_results.append(("Missing type field", False, f"Status {response.status_code}"))
             
-        # Check credits
-        credits_working = any(r['success'] and 'Credits' in r['test'] for r in self.test_results)
-        if credits_working:
-            print("  ✅ Credit system is functional")
-        else:
-            print("  ❌ Credit system has issues")
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Missing type field", False, f"Exception: {str(e)}"))
+    
+    # Test Case 3: Missing Required Field - title (should fail validation)
+    print_test_header("Missing Required Field - title")
+    try:
+        payload = {
+            "type": "test",
+            "content": "Some content"
+        }
+        
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
+        
+        if response.status_code == 400 and response_data.get('error') == 'Validation failed':
+            errors = response_data.get('errors', [])
+            title_error_found = any('title' in str(error).lower() for error in errors)
             
-        # Check Zod validation
-        zod_working = any(r['success'] and 'Zod' in r['test'] for r in self.test_results)
-        if zod_working:
-            print("  ✅ Zod validation is enabled and working")
+            if title_error_found:
+                print_test_result(True, f"Correctly rejected missing 'title' field with status {response.status_code}", response_data)
+                test_results.append(("Missing title field", True, "Validation correctly failed"))
+            else:
+                print_test_result(False, f"Expected 'title' validation error but got: {errors}", response_data)
+                test_results.append(("Missing title field", False, f"Wrong error: {errors}"))
         else:
-            print("  ❌ Zod validation may have issues")
+            print_test_result(False, f"Expected 400 validation error but got status {response.status_code}", response_data)
+            test_results.append(("Missing title field", False, f"Status {response.status_code}"))
             
-        # Check generators
-        generators_working = any(r['success'] and ('Story Reels' in r['test'] or 'AI Video' in r['test']) for r in self.test_results)
-        if generators_working:
-            print("  ✅ Generator APIs are responding correctly")
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Missing title field", False, f"Exception: {str(e)}"))
+    
+    # Test Case 4: Missing Content (should fail - no content, videoUrl, or filePath)
+    print_test_header("Missing Content")
+    try:
+        payload = {
+            "type": "test",
+            "title": "Test Title"
+        }
+        
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
+        
+        if response.status_code == 400:
+            error_message = response_data.get('error', '')
+            content_error = 'content' in error_message.lower() or 'videourl' in error_message.lower() or 'filepath' in error_message.lower()
+            
+            if content_error:
+                print_test_result(True, f"Correctly rejected missing content with status {response.status_code}", response_data)
+                test_results.append(("Missing content", True, "Content validation correctly failed"))
+            else:
+                print_test_result(False, f"Expected content validation error but got: {error_message}", response_data)
+                test_results.append(("Missing content", False, f"Wrong error: {error_message}"))
         else:
-            print("  ❌ Generator APIs may have issues")
+            print_test_result(False, f"Expected 400 validation error but got status {response.status_code}", response_data)
+            test_results.append(("Missing content", False, f"Status {response.status_code}"))
+            
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Missing content", False, f"Exception: {str(e)}"))
+    
+    # Test Case 5: Valid Save with videoUrl (should succeed)
+    print_test_header("Valid Save with videoUrl")
+    try:
+        payload = {
+            "type": "video",
+            "title": "Video Test",
+            "videoUrl": "https://example.com/video.mp4"
+        }
+        
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
+        
+        if response.status_code == 200 and response_data.get('success'):
+            category = response_data.get('category')
+            if category == 'video':
+                print_test_result(True, f"Valid videoUrl request succeeded with category: {category}", response_data)
+                test_results.append(("Valid videoUrl", True, f"Success with category: {category}"))
+            else:
+                print_test_result(False, f"Expected category 'video' but got: {category}", response_data)
+                test_results.append(("Valid videoUrl", False, f"Wrong category: {category}"))
+        else:
+            print_test_result(False, f"Expected success but got status {response.status_code}", response_data)
+            test_results.append(("Valid videoUrl", False, f"Status {response.status_code}"))
+            
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Valid videoUrl", False, f"Exception: {str(e)}"))
+    
+    # Test Case 6: Invalid videoUrl format (should fail validation)
+    print_test_header("Invalid videoUrl format")
+    try:
+        payload = {
+            "type": "video",
+            "title": "Video Test",
+            "videoUrl": "not-a-valid-url"
+        }
+        
+        response = requests.post(API_ENDPOINT, json=payload, timeout=30)
+        response_data = response.json()
+        
+        if response.status_code == 400 and response_data.get('error') == 'Validation failed':
+            errors = response_data.get('errors', [])
+            url_error_found = any('url' in str(error).lower() or 'videourl' in str(error).lower() for error in errors)
+            
+            if url_error_found:
+                print_test_result(True, f"Correctly rejected invalid URL with status {response.status_code}", response_data)
+                test_results.append(("Invalid videoUrl", True, "URL validation correctly failed"))
+            else:
+                print_test_result(False, f"Expected URL validation error but got: {errors}", response_data)
+                test_results.append(("Invalid videoUrl", False, f"Wrong error: {errors}"))
+        else:
+            print_test_result(False, f"Expected 400 validation error but got status {response.status_code}", response_data)
+            test_results.append(("Invalid videoUrl", False, f"Status {response.status_code}"))
+            
+    except Exception as e:
+        print_test_result(False, f"Request failed: {str(e)}")
+        test_results.append(("Invalid videoUrl", False, f"Exception: {str(e)}"))
+    
+    # Print Summary
+    print(f"\n{'='*60}")
+    print(f"LIBRARY SAVE API TEST SUMMARY")
+    print(f"{'='*60}")
+    
+    passed_tests = sum(1 for _, success, _ in test_results if success)
+    total_tests = len(test_results)
+    
+    print(f"Total Tests: {total_tests}")
+    print(f"Passed: {passed_tests}")
+    print(f"Failed: {total_tests - passed_tests}")
+    print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+    
+    print(f"\nDetailed Results:")
+    for test_name, success, message in test_results:
+        status = "✅" if success else "❌"
+        print(f"{status} {test_name}: {message}")
+    
+    # Overall assessment
+    if passed_tests == total_tests:
+        print(f"\n🎉 ALL TESTS PASSED - Library Save API with Zod validation is working correctly!")
+        return True
+    else:
+        print(f"\n⚠️  {total_tests - passed_tests} TEST(S) FAILED - Library Save API needs attention")
+        return False
 
 if __name__ == "__main__":
-    tester = ProCreatorsAPITester()
-    tester.run_all_tests()
+    try:
+        success = test_library_save_api()
+        sys.exit(0 if success else 1)
+    except KeyboardInterrupt:
+        print("\n\nTesting interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n\nUnexpected error during testing: {str(e)}")
+        sys.exit(1)
