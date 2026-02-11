@@ -473,7 +473,7 @@ Generate true crime video prompt.`
     category: 'storytelling',
     isPopular: false,
     isNew: false,
-    color: 'from-amber-600 to-red-600',
+    color: 'from-red-500 to-red-600',
     perfectFor: ['Ghost stories', 'Deshi myths', 'African/Indian tales', 'Horror channels'],
     defaultSettings: {
       mode: 'text-to-video',
