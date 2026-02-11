@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2, CheckCircle, XCircle, Sparkles } from 'lucide-react'
 
-export default function VerifyEmailPage() {
+function VerifyEmailPageContent() {
   const [status, setStatus] = useState('verifying') // verifying, success, error
   const [message, setMessage] = useState('')
   const router = useRouter()
