@@ -864,8 +864,6 @@ function extractKeywordsFromScript(script, count = 5) {
 // Search stock videos by keywords using the Quick Reels Hub API
 async function searchStockVideosByKeywords(keywords, count = 3) {
   try {
-    }`)
-    
     // Use the existing search-videos API from Quick Reels Hub
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
     const response = await fetch(`${baseUrl}/api/story-reels/search-videos`, {
