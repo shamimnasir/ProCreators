@@ -16,8 +16,7 @@ import {
   DollarSign, Loader2, Target, TrendingUp, 
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   Mail, Phone, Shield, Award, ChevronDown, ChevronUp,
-  Briefcase, Users, AlertCircle, Check, Zap, Heart
-} from 'lucide-react'
+  Briefcase, Users, AlertCircle, Check, Zap, Heart, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

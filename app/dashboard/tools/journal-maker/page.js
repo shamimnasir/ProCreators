@@ -12,8 +12,7 @@ import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Download, BookOpen, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
-  RefreshCw, Heart, ChevronDown, ChevronUp, Image
-} from 'lucide-react'
+  RefreshCw, Heart, ChevronDown, ChevronUp, Image, Zap, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

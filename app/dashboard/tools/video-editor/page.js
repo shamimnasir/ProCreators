@@ -23,6 +23,7 @@ import {
   Trash2, Zap, Clock, FileText, Mic, Settings, Film, Plus,
   HardDrive, FolderOpen, Save, FilePlus, Info, ShieldAlert, Layers,
   MoveUp, MoveDown, Timer, Waves, Library, CheckCircle, Search
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { videoStorage } from '@/lib/video-storage'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

@@ -13,8 +13,7 @@ import {
   Loader2, Download, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
   GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe,
-  Pipette
-} from 'lucide-react'
+  Pipette, Zap, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

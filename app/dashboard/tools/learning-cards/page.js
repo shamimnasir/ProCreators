@@ -14,8 +14,7 @@ import {
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
   Plus, FlipVertical, Layers, Palette, BookOpen, GraduationCap,
   Brain, Target, Lightbulb, X, Copy, Eye, RotateCcw, Scissors,
-  FileText, AlignLeft, Grid, Minus
-} from 'lucide-react'
+  FileText, AlignLeft, Grid, Minus, Zap, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'

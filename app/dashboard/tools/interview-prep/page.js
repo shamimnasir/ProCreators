@@ -18,8 +18,7 @@ import {
   Play, Pause, SkipForward, RotateCcw, Target, TrendingUp, 
   Lightbulb, Clock, Award, MessageSquare, ChevronRight, ChevronDown,
   ThumbsUp, ThumbsDown, Copy, Check, HelpCircle, Briefcase,
-  Star, BookOpen, Volume2, Timer, ArrowRight, RefreshCw
-} from 'lucide-react'
+  Star, BookOpen, Volume2, Timer, ArrowRight, RefreshCw, Zap, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

@@ -15,8 +15,7 @@ import {
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
   LayoutGrid, List, Calendar, Kanban, Target, Heart, Briefcase,
   GraduationCap, Users, Palette, Eye, FileJson, FileText, Copy,
-  Plus, Settings, Database, Table, LayoutDashboard, Zap, Globe
-} from 'lucide-react'
+  Plus, Settings, Database, Table, LayoutDashboard, Zap, Globe, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'

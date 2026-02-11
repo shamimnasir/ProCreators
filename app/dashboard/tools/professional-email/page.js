@@ -17,8 +17,7 @@ import {
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   Check, Send, Clock, AlertCircle, FileText,
   ArrowLeft, Zap, User, Building, Calendar,
-  ThumbsUp, Bell, Heart, Users, XCircle
-} from 'lucide-react'
+  ThumbsUp, Bell, Heart, Users, XCircle, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'

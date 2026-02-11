@@ -15,7 +15,7 @@ import {
   Wand2, Upload, Download, ImageIcon, RefreshCw,
   Zap, Target, Palette, X, Copy, FrameIcon, Layers,
   Facebook, Twitter, Linkedin, Youtube, Instagram, Plus, Globe
-
+} from 'lucide-react'
 // Platform presets with exact dimensions
 const PLATFORM_PRESETS = [
   { 

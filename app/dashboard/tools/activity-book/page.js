@@ -17,8 +17,7 @@ import {
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, Save, AlertTriangle,
   FileText, Grid3X3, Search, BookOpen, Gamepad2, Brain,
-  Baby, GraduationCap, Users, Target, Palette
-} from 'lucide-react'
+  Baby, GraduationCap, Users, Target, Palette, Zap, Wand2} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
