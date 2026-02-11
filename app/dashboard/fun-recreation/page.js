@@ -95,7 +95,7 @@ const FUN_CATEGORIES = [
         id: 'fortune-teller',
         name: 'Fortune Teller',
         description: 'Fun predictions and horoscopes',
-        icon: 'Sparkles',
+        icon: 'Zap',
         href: '/dashboard/tools/fortune-teller',
         useCase: 'Entertainment',
       }
