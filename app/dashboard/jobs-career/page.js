@@ -218,16 +218,16 @@ export default function JobsCareerPage() {
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
-          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            All Tools
+          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5">
+            <Briefcase className="h-4 w-4" /> All Tools
           </TabsTrigger>
           {CAREER_CATEGORIES.map((cat) => (
             <TabsTrigger 
               key={cat.id} 
               value={cat.id}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5"
             >
-              {cat.name}
+              <CareerIcon iconName={cat.icon} className="h-4 w-4" /> {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -237,8 +237,8 @@ export default function JobsCareerPage() {
             {CAREER_CATEGORIES.map((category) => (
               <div key={category.id}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                    <span className="text-xl">{category.icon}</span>
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
+                    <CareerIcon iconName={category.icon} className="h-5 w-5" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">{category.name}</h2>
