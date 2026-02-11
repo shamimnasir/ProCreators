@@ -1033,7 +1033,7 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
         prediction = await statusResponse.json()
         
         if (attempts % 10 === 0) {
-          `)
+          // Still polling...
         }
       }
       
@@ -2069,7 +2069,7 @@ async function generateAIVideosWithReplicate(prompt, duration, dimensions, jobId
         result = await statusResponse.json()
         
         if (attempts % 10 === 0) {
-          `)
+          // Still polling...
         }
       }
       
