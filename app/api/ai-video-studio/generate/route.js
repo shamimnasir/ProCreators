@@ -1578,11 +1578,10 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const statusData = await statusResponse.json()
     const status = statusData.response?.status
     
-    `)
-    
     if (status === 'done') {
       videoUrl = statusData.response?.url
-      } else if (status === 'failed') {
+      break
+    } else if (status === 'failed') {
       // If Shotstack composition fails but we have AI videos, return them
       if (generatedAIVideos.length > 0) {
         const firstAIVideo = generatedAIVideos[0]
