@@ -130,7 +130,6 @@ export async function POST(request) {
             const customFile = customVideoFiles[clipInfo.customIdx]
             const buffer = Buffer.from(await customFile.arrayBuffer())
             await writeFile(videoPath, buffer)
-            `)
             return { index: i, path: videoPath, success: true }
           } else if (stockVideos[clipInfo.stockIdx]) {
             // Handle stock video URL, UGC video, or product image
