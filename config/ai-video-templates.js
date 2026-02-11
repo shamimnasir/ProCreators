@@ -293,7 +293,7 @@ Generate funny meme video prompt.`
     category: 'explainers',
     isPopular: true,
     isNew: false,
-    color: 'from-green-500 to-emerald-500',
+    color: 'from-emerald-500 to-emerald-600',
     perfectFor: ['News explainers', 'Trending breakdowns', 'Facts channels', 'Regional creators'],
     defaultSettings: {
       mode: 'text-to-video',
