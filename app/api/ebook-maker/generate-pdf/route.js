@@ -580,11 +580,10 @@ export async function POST(request) {
         
         // For custom prompts, use the user's description directly
         if (coverImageStyle === 'custom' && customImagePrompt) {
-          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl
-            }
+          }
         } else {
           // Use theme-based prompt
           const themeKey = getEbookTheme(genre)

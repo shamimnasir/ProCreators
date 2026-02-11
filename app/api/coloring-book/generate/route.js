@@ -335,7 +335,7 @@ export async function POST(request) {
           }
         }
         
-        .length}/${coloringPages.length} pages have images`)
+        // Validation complete
       }
     }
     
