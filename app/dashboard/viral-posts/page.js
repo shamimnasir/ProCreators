@@ -6,30 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp } from 'lucide-react'
-import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
-
-const FEATURED_TOOLS = [
-  {
-    id: 'linkedin-posts',
-    name: 'Social Media Posts',
-    description: 'Create viral posts for 7+ platforms with AI that understands engagement',
-    icon: 'Smartphone',
-    href: '/dashboard/tools/linkedin-posts',
-    useCase: 'All Platforms',
-    gradient: 'from-blue-500 to-blue-600',
-    features: ['Multi-platform', 'Engagement AI', 'Hashtag Suggest']
-  },
-  {
-    id: 'content-humanizer',
-    name: 'Content Humanizer',
-    description: 'Transform AI text into natural human-like content that bypasses detection',
-    icon: 'PenTool',
-    href: '/dashboard/tools/content-humanizer',
-    useCase: 'AI Detection Bypass',
-    gradient: 'from-purple-500 to-purple-600',
-    features: ['Bypass Detection', 'Natural Tone', 'Style Match']
-  }
-]
+import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const VIRAL_CATEGORIES = [
   {
