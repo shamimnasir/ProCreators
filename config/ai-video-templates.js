@@ -577,7 +577,7 @@ Generate avatar presenter prompt.`
     category: 'personal',
     isPopular: true,
     isNew: false,
-    color: 'from-pink-500 to-red-500',
+    color: 'from-fuchsia-500 to-fuchsia-600',
     perfectFor: ['Anniversaries', 'Proposal videos', 'Birthday reels', 'Memorial videos'],
     defaultSettings: {
       mode: 'image-to-video',
