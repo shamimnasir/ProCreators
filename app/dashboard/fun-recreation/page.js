@@ -5,40 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Gamepad2 } from 'lucide-react'
-import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
-
-const FEATURED_TOOLS = [
-  {
-    id: 'meme-generator',
-    name: 'Meme Generator',
-    description: 'Create viral memes with AI assistance for social media',
-    icon: 'Smile',
-    href: '/dashboard/tools/meme-generator',
-    useCase: 'Social media, Group chats',
-    gradient: 'from-amber-500 to-amber-600',
-    features: ['Templates', 'Custom Text', 'Trending Formats']
-  },
-  {
-    id: 'avatar-creator',
-    name: 'Avatar Creator',
-    description: 'Create unique cartoon or artistic avatars in any style',
-    icon: 'Users',
-    href: '/dashboard/tools/avatar-creator',
-    useCase: 'Profile pics, Gaming',
-    gradient: 'from-purple-500 to-purple-600',
-    features: ['Multiple Styles', 'Customizable', 'HD Export']
-  },
-  {
-    id: 'story-writer',
-    name: 'Story Writer',
-    description: 'Generate creative stories and tales for any occasion',
-    icon: 'BookOpen',
-    href: '/dashboard/tools/story-writer',
-    useCase: 'Entertainment, Kids',
-    gradient: 'from-blue-500 to-blue-600',
-    features: ['Multiple Genres', 'Character AI', 'Plot Twists']
-  }
-]
+import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const FUN_CATEGORIES = [
   {
