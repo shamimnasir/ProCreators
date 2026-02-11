@@ -405,14 +405,17 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
-              {popularTools.map((tool) => (
-                <Link key={tool.name} href={tool.href}>
-                  <div className={`p-3 rounded-xl ${tool.color} hover:scale-105 transition-transform cursor-pointer`}>
-                    <span className="text-xl mb-1 block">{tool.icon}</span>
-                    <span className="text-xs font-medium">{tool.name}</span>
-                  </div>
-                </Link>
-              ))}
+              {popularTools.map((tool) => {
+                const IconComponent = tool.icon
+                return (
+                  <Link key={tool.name} href={tool.href}>
+                    <div className={`p-3 rounded-xl ${tool.color} hover:scale-105 transition-transform cursor-pointer`}>
+                      <IconComponent className="h-5 w-5 mb-1" />
+                      <span className="text-xs font-medium">{tool.name}</span>
+                    </div>
+                  </Link>
+                )
+              })}
             </CardContent>
           </Card>
 
