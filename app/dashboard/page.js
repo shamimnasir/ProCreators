@@ -250,7 +250,7 @@ export default function DashboardPage() {
           {/* Quick Actions */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-purple-500" />
+              <Zap className="h-5 w-5 text-purple-500" />
               <h2 className="text-lg font-semibold">Quick Actions</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
