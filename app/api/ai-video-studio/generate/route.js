@@ -2017,8 +2017,6 @@ async function generateAIVideosWithReplicate(prompt, duration, dimensions, jobId
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
     
-    ...`)
-    
     try {
       // Use MiniMax video model on Replicate
       const response = await fetch('https://api.replicate.com/v1/predictions', {
