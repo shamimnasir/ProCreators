@@ -23,7 +23,8 @@ import {
   Palette,
   PenTool,
   Star,
-  Crown
+  Crown,
+  Layers
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
