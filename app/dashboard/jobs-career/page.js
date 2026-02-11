@@ -260,7 +260,7 @@ export default function JobsCareerPage() {
           <TabsContent key={category.id} value={category.id} className="mt-6">
             <div className="flex items-center gap-3 mb-6">
               <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
-                <span className="text-2xl">{category.icon}</span>
+                <CareerIcon iconName={category.icon} className="h-6 w-6" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold">{category.name}</h2>
