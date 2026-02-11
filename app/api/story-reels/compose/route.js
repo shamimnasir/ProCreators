@@ -712,7 +712,7 @@ export async function POST(request) {
           { expireAfterSeconds: 0 }
         )
       } catch (indexError) {
-        ')
+        // Index may already exist, ignore error
       }
 
       // Calculate expiration: 30 days from now
