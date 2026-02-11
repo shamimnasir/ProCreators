@@ -6,7 +6,7 @@ Quick Zod Validation Test - Focus on validation responses only
 import requests
 import json
 
-BASE_URL = "https://pro-interface-11.preview.emergentagent.com"
+BASE_URL = "https://interface-polish-10.preview.emergentagent.com"
 
 def test_validation(endpoint, test_name, payload, expected_status=400):
     """Test validation only - quick timeout"""
