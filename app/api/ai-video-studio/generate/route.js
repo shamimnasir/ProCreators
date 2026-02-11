@@ -1818,13 +1818,12 @@ Add subtle camera movement, depth, and professional lighting effects.`
           timeout: 180000, // 3 min timeout
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              }
+              console.log(`[${jobId}] Model ${model.name} processing...`)
+            }
           }
         })
         
-        .substring(0, 300))
         const videoUrl = extractVideoUrl(result.data)
-        .substring(0, 100)}`)
         
         if (videoUrl && typeof videoUrl === 'string') {
           videos.push({
