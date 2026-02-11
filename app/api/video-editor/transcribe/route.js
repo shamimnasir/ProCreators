@@ -146,7 +146,6 @@ export async function POST(request) {
       }
     }
     
-    }...`)
     // Detect filler words - comprehensive list including Bengali and English
     const englishFillers = [
       'um', 'uh', 'uhh', 'umm', 'ummm', 'uhm', 'hmm', 'hm', 'mmm', 'mm',

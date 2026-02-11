@@ -369,8 +369,6 @@ async function cropVideo(input, output, aspectRatio = '9:16', position = 'center
     }
   }
   
-  `)
-  
   await runFFmpeg([
     '-i', input,
     '-vf', `crop=${outW}:${outH}:${cropX}:${cropY}`,
