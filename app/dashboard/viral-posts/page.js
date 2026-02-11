@@ -13,20 +13,20 @@ const FEATURED_TOOLS = [
     id: 'linkedin-posts',
     name: 'Social Media Posts',
     description: 'Create viral posts for 7+ platforms with AI that understands engagement',
-    icon: '📱',
+    icon: 'Smartphone',
     href: '/dashboard/tools/linkedin-posts',
     useCase: 'All Platforms',
-    gradient: 'from-blue-500 to-indigo-500',
+    gradient: 'from-blue-500 to-blue-600',
     features: ['Multi-platform', 'Engagement AI', 'Hashtag Suggest']
   },
   {
     id: 'content-humanizer',
     name: 'Content Humanizer',
     description: 'Transform AI text into natural human-like content that bypasses detection',
-    icon: '✍️',
+    icon: 'PenTool',
     href: '/dashboard/tools/content-humanizer',
     useCase: 'AI Detection Bypass',
-    gradient: 'from-purple-500 to-pink-500',
+    gradient: 'from-purple-500 to-purple-600',
     features: ['Bypass Detection', 'Natural Tone', 'Style Match']
   }
 ]
@@ -36,14 +36,14 @@ const VIRAL_CATEGORIES = [
     id: 'text',
     name: 'Text Content',
     description: 'Viral text posts and threads',
-    icon: '📝',
-    color: 'from-blue-500 to-indigo-500',
+    icon: 'FileText',
+    color: 'from-blue-500 to-blue-600',
     tools: [
       {
         id: 'social-media-posts',
         name: 'Social Media Post Creator',
         description: 'Viral posts & threads for 7 platforms with AI generation',
-        icon: '📱',
+        icon: 'Smartphone',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'All social platforms'
       },
@@ -51,7 +51,7 @@ const VIRAL_CATEGORIES = [
         id: 'content-humanizer',
         name: 'Content Humanizer',
         description: 'Make AI text sound natural & bypass detection',
-        icon: '✍️',
+        icon: 'PenTool',
         href: '/dashboard/tools/content-humanizer',
         useCase: 'AI Detection Bypass'
       },
@@ -59,7 +59,7 @@ const VIRAL_CATEGORIES = [
         id: 'blog-creator',
         name: 'Blog Post Creator',
         description: 'SEO articles, affiliate content & product reviews',
-        icon: '📝',
+        icon: 'FileText',
         href: '/dashboard/tools/blog-creator',
         useCase: 'Blogs, SEO, Affiliate'
       },
@@ -67,7 +67,7 @@ const VIRAL_CATEGORIES = [
         id: 'quotes',
         name: 'Quote Maker',
         description: 'Beautiful quote images for social media',
-        icon: '💬',
+        icon: 'MessageSquare',
         href: '/dashboard/tools/quotes',
         useCase: 'Instagram, Pinterest'
       },
@@ -75,7 +75,7 @@ const VIRAL_CATEGORIES = [
         id: 'lists',
         name: 'List Post Creator',
         description: 'Engaging listicles and top 10 posts',
-        icon: '📋',
+        icon: 'ListOrdered',
         href: '/dashboard/tools/lists',
         useCase: 'All platforms'
       }
@@ -85,14 +85,14 @@ const VIRAL_CATEGORIES = [
     id: 'visual',
     name: 'Visual Content',
     description: 'Eye-catching visual posts',
-    icon: '🖼️',
-    color: 'from-pink-500 to-rose-500',
+    icon: 'Image',
+    color: 'from-pink-500 to-pink-600',
     tools: [
       {
         id: 'carousels',
         name: 'Carousel Creator',
         description: 'Swipeable carousel posts for Instagram',
-        icon: '🎠',
+        icon: 'Layers',
         href: '/dashboard/tools/carousels',
         useCase: 'Instagram, LinkedIn'
       },
@@ -100,7 +100,7 @@ const VIRAL_CATEGORIES = [
         id: 'photo-cards',
         name: 'Photo Cards',
         description: 'Stunning photo cards with text overlays',
-        icon: '🌅',
+        icon: 'Sunset',
         href: '/dashboard/tools/photo-cards',
         useCase: 'Stories, posts'
       }
@@ -110,14 +110,14 @@ const VIRAL_CATEGORIES = [
     id: 'news',
     name: 'News & Trends',
     description: 'Trending content creation',
-    icon: '📰',
-    color: 'from-orange-500 to-amber-500',
+    icon: 'Newspaper',
+    color: 'from-amber-500 to-amber-600',
     tools: [
       {
         id: 'news',
         name: 'News Post Generator',
         description: 'Breaking news style posts',
-        icon: '📰',
+        icon: 'Newspaper',
         href: '/dashboard/tools/news',
         useCase: 'Trending topics'
       }
