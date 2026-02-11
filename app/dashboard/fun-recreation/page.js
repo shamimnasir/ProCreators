@@ -12,30 +12,30 @@ const FEATURED_TOOLS = [
     id: 'meme-generator',
     name: 'Meme Generator',
     description: 'Create viral memes with AI assistance for social media',
-    icon: '😂',
+    icon: 'Smile',
     href: '/dashboard/tools/meme-generator',
     useCase: 'Social media, Group chats',
-    gradient: 'from-yellow-500 to-orange-500',
+    gradient: 'from-amber-500 to-amber-600',
     features: ['Templates', 'Custom Text', 'Trending Formats']
   },
   {
     id: 'avatar-creator',
     name: 'Avatar Creator',
     description: 'Create unique cartoon or artistic avatars in any style',
-    icon: '🎭',
+    icon: 'Users',
     href: '/dashboard/tools/avatar-creator',
     useCase: 'Profile pics, Gaming',
-    gradient: 'from-purple-500 to-pink-500',
+    gradient: 'from-purple-500 to-purple-600',
     features: ['Multiple Styles', 'Customizable', 'HD Export']
   },
   {
     id: 'story-writer',
     name: 'Story Writer',
     description: 'Generate creative stories and tales for any occasion',
-    icon: '📖',
+    icon: 'BookOpen',
     href: '/dashboard/tools/story-writer',
     useCase: 'Entertainment, Kids',
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-blue-500 to-blue-600',
     features: ['Multiple Genres', 'Character AI', 'Plot Twists']
   }
 ]
@@ -45,14 +45,14 @@ const FUN_CATEGORIES = [
     id: 'memes',
     name: 'Memes & Humor',
     description: 'Create viral memes and jokes',
-    icon: '😂',
-    color: 'from-yellow-500 to-orange-500',
+    icon: 'Smile',
+    color: 'from-amber-500 to-amber-600',
     tools: [
       {
         id: 'meme-generator',
         name: 'Meme Generator',
         description: 'Create viral memes with AI assistance',
-        icon: '😂',
+        icon: 'Smile',
         href: '/dashboard/tools/meme-generator',
         useCase: 'Social media, group chats',
       },
@@ -60,7 +60,7 @@ const FUN_CATEGORIES = [
         id: 'joke-generator',
         name: 'Joke Generator',
         description: 'Generate jokes on any topic',
-        icon: '🤣',
+        icon: 'Lightbulb',
         href: '/dashboard/tools/joke-generator',
         useCase: 'Ice breakers, entertainment',
       }
@@ -70,14 +70,14 @@ const FUN_CATEGORIES = [
     id: 'avatars',
     name: 'Avatars & Characters',
     description: 'Create unique digital identities',
-    icon: '🎭',
-    color: 'from-purple-500 to-pink-500',
+    icon: 'Users',
+    color: 'from-purple-500 to-purple-600',
     tools: [
       {
         id: 'avatar-creator',
         name: 'Avatar Creator',
         description: 'Create unique avatars in any style',
-        icon: '🎭',
+        icon: 'Users',
         href: '/dashboard/tools/avatar-creator',
         useCase: 'Profile pics, gaming',
       }
@@ -87,14 +87,14 @@ const FUN_CATEGORIES = [
     id: 'stories',
     name: 'Stories & Writing',
     description: 'Creative writing and storytelling',
-    icon: '📖',
-    color: 'from-blue-500 to-cyan-500',
+    icon: 'BookOpen',
+    color: 'from-blue-500 to-blue-600',
     tools: [
       {
         id: 'story-writer',
         name: 'Story Writer',
         description: 'Generate creative stories and tales',
-        icon: '📖',
+        icon: 'BookOpen',
         href: '/dashboard/tools/story-writer',
         useCase: 'Entertainment, kids',
       }
@@ -104,14 +104,14 @@ const FUN_CATEGORIES = [
     id: 'love',
     name: 'Love & Relationships',
     description: 'Express your feelings',
-    icon: '💕',
-    color: 'from-pink-500 to-rose-500',
+    icon: 'Heart',
+    color: 'from-pink-500 to-pink-600',
     tools: [
       {
         id: 'love-letter',
         name: 'Love Letter Generator',
         description: 'Romantic letters for your special someone',
-        icon: '💌',
+        icon: 'Heart',
         href: '/dashboard/tools/love-letter',
         useCase: "Anniversaries, Valentine's",
       }
@@ -121,14 +121,14 @@ const FUN_CATEGORIES = [
     id: 'fun',
     name: 'Fun & Games',
     description: 'Entertainment and activities',
-    icon: '🎮',
-    color: 'from-green-500 to-emerald-500',
+    icon: 'Gamepad2',
+    color: 'from-emerald-500 to-emerald-600',
     tools: [
       {
         id: 'fortune-teller',
         name: 'Fortune Teller',
         description: 'Fun predictions and horoscopes',
-        icon: '🔮',
+        icon: 'Sparkles',
         href: '/dashboard/tools/fortune-teller',
         useCase: 'Entertainment',
       }
