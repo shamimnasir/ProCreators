@@ -15,22 +15,50 @@ import {
   Target,
   TrendingUp,
   Award,
-  Users
+  Users,
+  Mail,
+  DollarSign,
+  Send,
+  Smartphone,
+  UserCheck
 } from 'lucide-react'
+
+// Icon component mapping
+const ICON_MAP = {
+  'FileText': FileText,
+  'Mail': Mail,
+  'Target': Target,
+  'Mic': Mic,
+  'DollarSign': DollarSign,
+  'Smartphone': Smartphone,
+  'Send': Send,
+  'Users': Users,
+  'Briefcase': Briefcase,
+  'UserCheck': UserCheck
+}
+
+// Helper to render icon
+function CareerIcon({ iconName, className = "h-5 w-5" }) {
+  const IconComponent = ICON_MAP[iconName]
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  return <Briefcase className={className} />
+}
 
 const CAREER_CATEGORIES = [
   {
     id: 'applications',
     name: 'Job Applications',
     description: 'Stand out from the crowd',
-    icon: '📄',
-    color: 'from-blue-500 to-indigo-500',
+    icon: 'FileText',
+    color: 'from-blue-500 to-blue-600',
     tools: [
       {
         id: 'resume-builder',
         name: 'AI Resume Builder',
         description: 'Create ATS-friendly resumes that get interviews',
-        icon: '📄',
+        icon: 'FileText',
         href: '/dashboard/tools/resume-builder',
         useCase: 'Job applications',
       },
@@ -38,7 +66,7 @@ const CAREER_CATEGORIES = [
         id: 'cover-letter',
         name: 'Cover Letter Generator',
         description: 'Personalized cover letters for each application',
-        icon: '✉️',
+        icon: 'Mail',
         href: '/dashboard/tools/cover-letter',
         useCase: 'Applications',
       },
@@ -46,7 +74,7 @@ const CAREER_CATEGORIES = [
         id: 'job-matcher',
         name: 'Job Description Analyzer',
         description: 'Match your resume to job requirements',
-        icon: '🎯',
+        icon: 'Target',
         href: '/dashboard/tools/job-matcher',
         useCase: 'Optimization',
       }
@@ -56,14 +84,14 @@ const CAREER_CATEGORIES = [
     id: 'interview',
     name: 'Interview Prep',
     description: 'Ace your interviews',
-    icon: '🎤',
-    color: 'from-green-500 to-emerald-500',
+    icon: 'Mic',
+    color: 'from-emerald-500 to-emerald-600',
     tools: [
       {
         id: 'interview-prep',
         name: 'Interview Prep Coach',
         description: 'Practice with AI-generated questions',
-        icon: '🎤',
+        icon: 'Mic',
         href: '/dashboard/tools/interview-prep',
         useCase: 'Mock interviews',
       },
@@ -71,7 +99,7 @@ const CAREER_CATEGORIES = [
         id: 'salary-negotiator',
         name: 'Salary Negotiation Helper',
         description: 'Scripts and strategies for better offers',
-        icon: '💰',
+        icon: 'DollarSign',
         href: '/dashboard/tools/salary-negotiator',
         useCase: 'Negotiations',
       }
@@ -81,14 +109,14 @@ const CAREER_CATEGORIES = [
     id: 'networking',
     name: 'Professional Networking',
     description: 'Build your network',
-    icon: '🤝',
-    color: 'from-purple-500 to-pink-500',
+    icon: 'Users',
+    color: 'from-purple-500 to-purple-600',
     tools: [
       {
         id: 'social-media-posts',
         name: 'Social Media Post Creator',
         description: 'Viral posts for LinkedIn, X, Facebook & more',
-        icon: '📱',
+        icon: 'Smartphone',
         href: '/dashboard/tools/linkedin-posts',
         useCase: 'Personal branding',
       },
@@ -96,7 +124,7 @@ const CAREER_CATEGORIES = [
         id: 'networking-message',
         name: 'Networking Message Generator',
         description: 'Cold outreach that gets responses',
-        icon: '📨',
+        icon: 'Send',
         href: '/dashboard/tools/networking-message',
         useCase: 'Outreach',
       }
@@ -106,14 +134,14 @@ const CAREER_CATEGORIES = [
     id: 'communication',
     name: 'Professional Communication',
     description: 'Write better at work',
-    icon: '📧',
-    color: 'from-orange-500 to-red-500',
+    icon: 'Mail',
+    color: 'from-rose-500 to-rose-600',
     tools: [
       {
         id: 'email-writer',
         name: 'Professional Email Writer',
         description: 'Clear, professional emails in seconds',
-        icon: '📧',
+        icon: 'Mail',
         href: '/dashboard/tools/professional-email',
         useCase: 'Work communication',
       }
