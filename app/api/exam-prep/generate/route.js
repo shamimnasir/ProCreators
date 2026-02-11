@@ -143,7 +143,6 @@ async function webSearch(query, numResults = 5, retryCount = 0) {
     })
     
     if (!response.ok) {
-      , retrying...`)
       if (retryCount < 2) {
         return webSearch(query, numResults, retryCount + 1)
       }

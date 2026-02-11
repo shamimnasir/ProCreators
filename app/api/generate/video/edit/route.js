@@ -74,7 +74,7 @@ export async function POST(request) {
     try {
       const { stderr } = await execAsync(ffmpegCmd, { maxBuffer: 10 * 1024 * 1024 })
       if (stderr) {
-        )
+        // Log stderr if needed
       }
     } catch (execError) {
       console.error('[FFmpeg] Execution error:', execError.message)

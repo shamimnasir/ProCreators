@@ -76,7 +76,6 @@ function safeDrawText(page, text, options) {
     page.drawText(text, options)
     return true
   } catch (e) {
-    )
     // For complex scripts, the font may not support all glyphs
     // Try to draw what we can
     try {
