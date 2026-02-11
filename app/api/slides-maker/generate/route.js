@@ -80,8 +80,6 @@ export async function POST(request) {
       )
     }
 
-    `)
-
     const typeContext = PRESENTATION_TYPES[presentationType] || PRESENTATION_TYPES['business']
     
     // Detect if topic contains non-ASCII characters (likely non-English)
