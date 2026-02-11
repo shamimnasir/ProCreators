@@ -1951,7 +1951,8 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         logs: true,
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
-            }
+            console.log(`[${jobId}] Model ${selectedModel.name} processing...`)
+          }
         }
       })
       
