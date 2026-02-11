@@ -179,7 +179,7 @@ function NicheCard({ niche, categoryColor, expanded = false }) {
   )
 }
 
-export default function AIVideoStudioPage() {
+function AIVideoStudioPageContent() {
   // Read mode from URL params
   const searchParams = useSearchParams()
   const initialMode = searchParams.get('mode') === 'quick' ? 'quick' : 'quick'  // Default to quick mode
