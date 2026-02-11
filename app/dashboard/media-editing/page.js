@@ -11,30 +11,30 @@ const FEATURED_TOOLS = [
     id: 'video-editor',
     name: 'Video Editor',
     description: 'Professional video editing with trimming, effects & transitions',
-    icon: '🎬',
+    icon: 'Film',
     href: '/dashboard/tools/video-editor',
     useCase: 'All Video Editing',
-    gradient: 'from-purple-500 to-pink-500',
+    gradient: 'from-purple-500 to-purple-600',
     features: ['Trim & Cut', 'Effects', 'Transitions']
   },
   {
     id: 'image-editor',
     name: 'Image Studio',
     description: 'Complete AI image generation, editing, upscaling & compression',
-    icon: '🖼️',
+    icon: 'Image',
     href: '/dashboard/tools/image-editor',
     useCase: 'All Image Needs',
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-blue-500 to-blue-600',
     features: ['AI Generate', 'Edit', 'Upscale']
   },
   {
     id: 'audio-editor',
     name: 'Audio Editor',
     description: 'Edit, enhance and clean up your audio files',
-    icon: '🎵',
+    icon: 'Music',
     href: '/dashboard/tools/audio-editor',
     useCase: 'Podcasts, Voice-overs',
-    gradient: 'from-green-500 to-emerald-500',
+    gradient: 'from-emerald-500 to-emerald-600',
     features: ['Trim & Cut', 'Noise Remove', 'Enhance']
   }
 ]
@@ -44,14 +44,14 @@ const MEDIA_CATEGORIES = [
     id: 'video',
     name: 'Video Tools',
     description: 'Video editing and enhancement',
-    icon: '🎬',
-    color: 'from-purple-500 to-pink-500',
+    icon: 'Film',
+    color: 'from-purple-500 to-purple-600',
     tools: [
       {
         id: 'video-editor',
         name: 'Video Editor',
         description: 'Professional video editing with trimming, effects & transitions',
-        icon: '🎬',
+        icon: 'Film',
         href: '/dashboard/tools/video-editor',
         useCase: 'Complete video editing'
       }
@@ -61,14 +61,14 @@ const MEDIA_CATEGORIES = [
     id: 'images',
     name: 'Image Tools',
     description: 'Image editing and enhancement',
-    icon: '🖼️',
-    color: 'from-blue-500 to-cyan-500',
+    icon: 'Image',
+    color: 'from-blue-500 to-blue-600',
     tools: [
       {
         id: 'image-editor',
         name: 'Image Studio',
         description: 'Generate, edit, upscale & compress images',
-        icon: '🖼️',
+        icon: 'Image',
         href: '/dashboard/tools/image-editor',
         useCase: 'Complete image editing'
       }
@@ -78,14 +78,14 @@ const MEDIA_CATEGORIES = [
     id: 'thumbnails',
     name: 'Thumbnails & Covers',
     description: 'Create click-worthy thumbnails',
-    icon: '🎨',
-    color: 'from-red-500 to-orange-500',
+    icon: 'Palette',
+    color: 'from-rose-500 to-rose-600',
     tools: [
       {
         id: 'thumbnail-maker',
         name: 'Thumbnail Maker',
         description: 'Click-worthy YouTube thumbnails',
-        icon: '🎨',
+        icon: 'Palette',
         href: '/dashboard/tools/thumbnail-maker',
         useCase: 'YouTube, videos'
       },
@@ -93,7 +93,7 @@ const MEDIA_CATEGORIES = [
         id: 'cover-image-creator',
         name: 'Cover Image Creator',
         description: 'Professional cover images',
-        icon: '🖼️',
+        icon: 'Image',
         href: '/dashboard/tools/cover-image-creator',
         useCase: 'Social, blogs'
       },
@@ -101,7 +101,7 @@ const MEDIA_CATEGORIES = [
         id: 'podcast-cover-maker',
         name: 'Podcast Cover Maker',
         description: 'Professional podcast artwork',
-        icon: '🎙️',
+        icon: 'Mic',
         href: '/dashboard/tools/podcast-cover-maker',
         useCase: 'Spotify, Apple Podcasts'
       }
@@ -111,14 +111,14 @@ const MEDIA_CATEGORIES = [
     id: 'audio',
     name: 'Audio Tools',
     description: 'Audio editing and enhancement',
-    icon: '🎵',
-    color: 'from-green-500 to-emerald-500',
+    icon: 'Music',
+    color: 'from-emerald-500 to-emerald-600',
     tools: [
       {
         id: 'audio-editor',
         name: 'Audio Editor',
         description: 'Edit and enhance audio files',
-        icon: '🎵',
+        icon: 'Music',
         href: '/dashboard/tools/audio-editor',
         useCase: 'Podcasts, music'
       },
@@ -126,7 +126,7 @@ const MEDIA_CATEGORIES = [
         id: 'noise-remover',
         name: 'Noise Remover',
         description: 'Remove background noise from audio',
-        icon: '🔇',
+        icon: 'Volume2',
         href: '/dashboard/tools/noise-remover',
         useCase: 'Clean audio'
       },
@@ -134,7 +134,7 @@ const MEDIA_CATEGORIES = [
         id: 'voice-enhancer',
         name: 'Voice Enhancer',
         description: 'Enhance voice recordings',
-        icon: '🎤',
+        icon: 'Mic',
         href: '/dashboard/tools/voice-enhancer',
         useCase: 'Voice-overs, podcasts'
       },
@@ -142,7 +142,7 @@ const MEDIA_CATEGORIES = [
         id: 'auto-subtitles',
         name: 'Auto Subtitles',
         description: 'Add subtitles automatically',
-        icon: '📝',
+        icon: 'Subtitles',
         href: '/dashboard/tools/auto-subtitles',
         useCase: 'Accessibility, reach'
       }
