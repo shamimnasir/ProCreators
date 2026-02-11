@@ -204,7 +204,6 @@ export async function POST(request) {
         )
       }
       
-      }..." with style: ${style}`)
       
       result = await executeNanoBanana({
         action: 'generate',
@@ -225,7 +224,6 @@ export async function POST(request) {
         )
       }
       
-      }..."`)
       
       result = await executeNanoBanana({
         action: 'edit',
@@ -253,7 +251,6 @@ export async function POST(request) {
         )
       }
       
-      }..."`)
       
       result = await executeNanoBanana({
         action: 'fuse',

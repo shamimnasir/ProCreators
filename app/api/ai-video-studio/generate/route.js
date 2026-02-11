@@ -380,7 +380,6 @@ async function compileVideoWithFFmpeg({
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
           spokenText = extracted.dialogueOnly // Captions should match spoken text
-          }..."`)
         } else {
           }
       } else {
@@ -1009,7 +1008,6 @@ async function generateAIVideoScenes(prompt, duration, format, jobId) {
   // Generate scenes in parallel (up to 2 at a time to avoid rate limits)
   for (let i = 0; i < scenes.length; i++) {
     const scene = scenes[i]
-    }..."`)
     
     try {
       // Use ZeroScope for text-to-video
@@ -1968,7 +1966,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
       dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
     }`
     
-    }..."`)
     
     try {
       const result = await fal.subscribe(selectedModel.endpoint, {
@@ -2233,7 +2230,6 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
       dimensions.height > dimensions.width ? 'vertical composition, portrait orientation' : 'wide cinematic shot, landscape orientation'
     }, 8K resolution, photorealistic`
     
-    }..."`)
     
     try {
       // Create image using Shotstack Create API

@@ -189,7 +189,6 @@ async function webSearch(query, numResults = 5, retryCount = 0) {
       if (results.length >= numResults) break
     }
     
-    }..." found ${results.length} results`)
     return results
   } catch (error) {
     if (error.name === 'AbortError') {
