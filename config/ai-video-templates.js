@@ -368,7 +368,7 @@ Generate beat-synced fact video prompt.`
     category: 'explainers',
     isPopular: false,
     isNew: false,
-    color: 'from-blue-500 to-indigo-500',
+    color: 'from-indigo-500 to-indigo-600',
     perfectFor: ['Science explainers', 'School channels', 'Teacher creators', 'Learning pages'],
     defaultSettings: {
       mode: 'text-to-video',
