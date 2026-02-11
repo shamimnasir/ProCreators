@@ -12,7 +12,6 @@ import {
   Video,
   Zap,
   ArrowRight,
-  Sparkles,
   Calendar,
   Target,
   Trophy,
@@ -25,7 +24,7 @@ import {
   Star,
   Crown,
   Layers
-, Zap } from 'lucide-react'
+} from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
