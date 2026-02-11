@@ -83,7 +83,7 @@ export async function POST(request) {
     const imageClips = stockVideos.filter(v => v.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(v.url))
     const videoClips = stockVideos.filter(v => !imageClips.includes(v))
     if (imageClips.length > 0) {
-      => `${i+1}. ${img.url.substring(0, 80)}...`))
+      // Image clips found
     }
 
     // Step 1: Process all video clips (stock videos + custom uploads) - PARALLELIZED

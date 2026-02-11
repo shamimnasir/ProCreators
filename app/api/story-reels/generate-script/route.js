@@ -50,8 +50,6 @@ export async function POST(request) {
           nichePrompt = nicheConfig.promptTemplate
         }
       }
-    } else {
-      ')
     }
 
     // Default system message for original story-reels (backward compatibility)
