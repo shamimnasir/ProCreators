@@ -751,7 +751,6 @@ export async function POST(request) {
       }
 
       await libraryCollection.insertOne(libraryDoc)
-      `)
     } catch (saveError) {
       console.error(`[${jobId}] Failed to auto-save to library:`, saveError)
       // Don't fail the request if library save fails
