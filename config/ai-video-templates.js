@@ -402,7 +402,7 @@ Generate educational micro-lecture prompt.`
     category: 'storytelling',
     isPopular: false,
     isNew: true,
-    color: 'from-green-500 to-teal-500',
+    color: 'from-teal-500 to-teal-600',
     perfectFor: ['Gossip channels', 'Relationship drama', 'Gen-Z storytelling', 'Text horror'],
     defaultSettings: {
       mode: 'text-to-video',
