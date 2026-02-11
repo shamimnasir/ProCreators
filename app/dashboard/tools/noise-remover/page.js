@@ -14,7 +14,7 @@ import {
   Upload, Download, Play, Pause, Volume2, VolumeX, Wand2,
   RefreshCw, X, FileAudio, Waves, Zap, CheckCircle,
   FastForward, Rewind, ArrowRight
-, Wand2, Zap } from 'lucide-react'
+} from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 
 // Noise reduction levels
