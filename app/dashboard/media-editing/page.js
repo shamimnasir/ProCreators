@@ -4,40 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Edit3, Image as ImageIcon } from 'lucide-react'
-import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
-
-const FEATURED_TOOLS = [
-  {
-    id: 'video-editor',
-    name: 'Video Editor',
-    description: 'Professional video editing with trimming, effects & transitions',
-    icon: 'Film',
-    href: '/dashboard/tools/video-editor',
-    useCase: 'All Video Editing',
-    gradient: 'from-purple-500 to-purple-600',
-    features: ['Trim & Cut', 'Effects', 'Transitions']
-  },
-  {
-    id: 'image-editor',
-    name: 'Image Studio',
-    description: 'Complete AI image generation, editing, upscaling & compression',
-    icon: 'Image',
-    href: '/dashboard/tools/image-editor',
-    useCase: 'All Image Needs',
-    gradient: 'from-blue-500 to-blue-600',
-    features: ['AI Generate', 'Edit', 'Upscale']
-  },
-  {
-    id: 'audio-editor',
-    name: 'Audio Editor',
-    description: 'Edit, enhance and clean up your audio files',
-    icon: 'Music',
-    href: '/dashboard/tools/audio-editor',
-    useCase: 'Podcasts, Voice-overs',
-    gradient: 'from-emerald-500 to-emerald-600',
-    features: ['Trim & Cut', 'Noise Remove', 'Enhance']
-  }
-]
+import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const MEDIA_CATEGORIES = [
   {
