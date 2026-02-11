@@ -499,13 +499,13 @@ frontend:
           agent: "main"
           comment: "✅ TESTED: Full end-to-end test completed. Generated tutorial about 'How to make a perfect cup of tea'. Content displayed correctly in UI. Verified in MongoDB: saved with type='tutorial', title='Tutorial: How to make a perfect cup of tea', userTier='free', expiresAt set to 7 days from creation (Dec 4 → Dec 11). Library page displays the saved tutorial. Only Download button visible (no Save button)."
   
-  - task: "Library Save API with Expiration"
+  - task: "Library Save API with Expiration and Zod Validation"
     implemented: true
     working: true
     file: "/app/app/api/library/save/route.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: "NA"
           agent: "main"
@@ -513,6 +513,9 @@ frontend:
         - working: true
           agent: "main"
           comment: "✅ TESTED: Direct API test with curl successful. Saved test tutorial content, returned success response with itemId. Verified tier-based expiration works correctly (free tier = 7 days). Library collection now has 7 items including the auto-saved tutorial."
+        - working: "NA"
+          agent: "main"
+          comment: "ZOD VALIDATION ENABLED: Re-enabled Zod validation using librarySaveSchema. Now validates: type (required, max 50), title (required, max 500), content (max 5MB), description (max 2000), videoUrl (valid URL, max 2000), script (max 50000), filePath (max 1000), fileSize (positive, max 500MB), metadata (object). Uses validateRequest() function with proper error structure."
 
   - task: "Marketing Strategy Generate API"
     implemented: true
