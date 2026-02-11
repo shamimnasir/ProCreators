@@ -137,7 +137,6 @@ export async function POST(request) {
     if (coverImageStyle !== 'gradient') {
       try {
         if (coverImageStyle === 'custom' && customImagePrompt) {
-          }...`)
           const imageResult = await generateCoverImage('default-elegant', customImagePrompt)
           if (imageResult.success && imageResult.imageUrl) {
             coverImageUrl = imageResult.imageUrl

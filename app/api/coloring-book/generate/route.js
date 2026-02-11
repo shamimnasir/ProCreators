@@ -27,8 +27,6 @@ async function generateColoringPageImage(description, difficulty) {
       
       const fullPrompt = `Black and white coloring page, ${styleGuide}: ${description}. Pure black line art on white background, no shading, no gradients, no fill colors, no gray tones - only black outlines on pure white background, ready to be colored in. High contrast printable coloring book page.`
       
-      }...`)
-      
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
       const inputData = JSON.stringify({

@@ -148,7 +148,6 @@ export async function POST(request) {
     if (coverImageStyle && coverImageStyle !== 'gradient') {
       try {
         const themePrompt = customImagePrompt || `professional ${guideType} guide cover, educational, step-by-step tutorial, knowledge sharing, modern design`
-        }...`)
         const imageResult = await generateCoverImage('default-elegant', themePrompt)
         if (imageResult.success && imageResult.imageUrl) {
           coverImageUrl = imageResult.imageUrl
