@@ -1,8 +1,119 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { 
+  ArrowRight, Smartphone, PenTool, FileText, MessageSquare, ListOrdered,
+  Image, Sunset, Newspaper, Video, Film, Mic, Music, Scissors,
+  Sparkles, Volume2, Subtitles, Wand2, BookOpen, Briefcase, GraduationCap,
+  Heart, Star, Lightbulb, Smile, TrendingUp, Users, Target, Mail,
+  Palette, Layout, Layers, Camera, Share2, Globe, Zap, Award, Gift,
+  Coffee, Gamepad2, Dumbbell, Calendar, ClipboardList, Brain, Rocket,
+  FileCheck, PenLine, MessageCircle, Send, ShoppingBag, DollarSign,
+  Building2, Presentation, BarChart3, PieChart, LineChart, Megaphone,
+  Search, CheckSquare, BookMarked, FileQuestion, Calculator, Puzzle,
+  Baby, Palette as ColorPalette, StickyNote, Receipt
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// Icon mapping from string names to Lucide components
+const ICON_MAP = {
+  // Social & Content
+  'Smartphone': Smartphone,
+  'PenTool': PenTool,
+  'FileText': FileText,
+  'MessageSquare': MessageSquare,
+  'ListOrdered': ListOrdered,
+  'Image': Image,
+  'Sunset': Sunset,
+  'Newspaper': Newspaper,
+  'Layers': Layers,
+  'Share2': Share2,
+  
+  // Video & Media
+  'Video': Video,
+  'Film': Film,
+  'Mic': Mic,
+  'Music': Music,
+  'Scissors': Scissors,
+  'Camera': Camera,
+  'Subtitles': Subtitles,
+  'Volume2': Volume2,
+  
+  // AI & Creative
+  'Sparkles': Sparkles,
+  'Wand2': Wand2,
+  'Brain': Brain,
+  'Rocket': Rocket,
+  'Zap': Zap,
+  
+  // Business
+  'Briefcase': Briefcase,
+  'Building2': Building2,
+  'Presentation': Presentation,
+  'BarChart3': BarChart3,
+  'PieChart': PieChart,
+  'LineChart': LineChart,
+  'Target': Target,
+  'DollarSign': DollarSign,
+  'Megaphone': Megaphone,
+  'ShoppingBag': ShoppingBag,
+  
+  // Education
+  'GraduationCap': GraduationCap,
+  'BookOpen': BookOpen,
+  'BookMarked': BookMarked,
+  'FileQuestion': FileQuestion,
+  'Calculator': Calculator,
+  'Puzzle': Puzzle,
+  'ClipboardList': ClipboardList,
+  'CheckSquare': CheckSquare,
+  'FileCheck': FileCheck,
+  
+  // Communication
+  'Mail': Mail,
+  'Send': Send,
+  'MessageCircle': MessageCircle,
+  'PenLine': PenLine,
+  
+  // Lifestyle & Fun
+  'Heart': Heart,
+  'Star': Star,
+  'Lightbulb': Lightbulb,
+  'Smile': Smile,
+  'TrendingUp': TrendingUp,
+  'Users': Users,
+  'Award': Award,
+  'Gift': Gift,
+  'Coffee': Coffee,
+  'Gamepad2': Gamepad2,
+  'Dumbbell': Dumbbell,
+  'Calendar': Calendar,
+  'Baby': Baby,
+  'StickyNote': StickyNote,
+  'Receipt': Receipt,
+  
+  // Design
+  'Palette': Palette,
+  'Layout': Layout,
+  'Globe': Globe,
+  'Search': Search,
+  'ColorPalette': ColorPalette
+}
+
+// Helper to render icon - supports both Lucide icon names and emojis (for backwards compat)
+function ToolIcon({ icon, className = "h-6 w-6" }) {
+  // If it's a Lucide icon name (string starting with uppercase letter)
+  if (typeof icon === 'string' && ICON_MAP[icon]) {
+    const IconComponent = ICON_MAP[icon]
+    return <IconComponent className={className} />
+  }
+  // If icon is already a React element
+  if (typeof icon === 'object' && icon !== null) {
+    return icon
+  }
+  // Fallback to displaying as-is (for emojis or other strings)
+  return <span className="text-2xl">{icon}</span>
+}
 
 // Modern Tool Card with gradient border and hover effects
 export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expanded = false }) {
