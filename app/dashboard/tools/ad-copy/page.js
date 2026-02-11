@@ -18,6 +18,7 @@ import {
   Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
   Lightbulb, Info, Layers, Brain, Megaphone, Heart,
   Clock, DollarSign, Eye, MousePointer, Share2, Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

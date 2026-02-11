@@ -19,6 +19,7 @@ import {
   Bot, User, Shield, Zap, Settings2,
   CheckCircle, AlertTriangle, ArrowRight, Eye,
   Shuffle, PenTool, Brain, Target
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

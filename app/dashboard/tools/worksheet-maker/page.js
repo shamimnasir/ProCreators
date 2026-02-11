@@ -14,6 +14,7 @@ import {
   FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
   GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe,
   Pipette
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

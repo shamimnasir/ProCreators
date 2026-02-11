@@ -20,6 +20,7 @@ import {
   Quote, BarChart3, Columns, ListChecks, Plus,
   Trash2, Upload, Image as ImageIcon, Type,
   AlignLeft, AlignCenter, AlignRight, Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

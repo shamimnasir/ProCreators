@@ -21,6 +21,7 @@ import {
   Zap, Globe, Megaphone, Heart, Brain, CheckCircle2,
   AlertTriangle, FileText, Download, FileDown, Printer,
   Upload, X, ImageIcon
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

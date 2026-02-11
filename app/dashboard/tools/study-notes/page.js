@@ -18,6 +18,7 @@ import {
   BookOpen, Brain, Target, Lightbulb, Upload,
   PenTool, Copy, Eye, RefreshCw, Palette, GraduationCap,
   FileUp, X, ListOrdered, AlignLeft, Hash
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

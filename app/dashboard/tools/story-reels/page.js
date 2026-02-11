@@ -20,6 +20,7 @@ import {
   GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
   TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
   Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard
+} from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import {
   DndContext,
@@ -29,6 +30,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
+} from 'lucide-react'
 import {
   arrayMove,
   SortableContext,
@@ -36,6 +38,7 @@ import {
   useSortable,
   rectSortingStrategy,
 } from '@dnd-kit/sortable'
+} from 'lucide-react'
 import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 
