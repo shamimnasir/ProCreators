@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, 
   RefreshCw, Zap, BarChart3, Target, CheckCircle
-, Zap } from 'lucide-react'
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export default function CostAnalyticsPage() {
