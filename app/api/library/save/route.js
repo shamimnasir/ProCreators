@@ -20,23 +20,21 @@ export async function POST(request) {
     
     const body = await request.json()
     
-    // Basic validation
-    if (!body.type || typeof body.type !== 'string') {
+    // SECURITY: Zod validation for all input fields
+    const validation = validateRequest(librarySaveSchema, body)
+    if (!validation.success) {
       return NextResponse.json({
         success: false,
-        error: 'Type is required'
+        error: 'Validation failed',
+        errors: validation.errors
       }, { status: 400 })
     }
     
-    if (!body.title || typeof body.title !== 'string') {
-      return NextResponse.json({
-        success: false,
-        error: 'Title is required'
-      }, { status: 400 })
-    }
+    // Use validated data from Zod (sanitized and type-checked)
+    const validatedBody = validation.data
     
-    // Check required content
-    if (!body.content && !body.videoUrl && !body.filePath) {
+    // Check required content (at least one content source must be provided)
+    if (!validatedBody.content && !validatedBody.videoUrl && !validatedBody.filePath) {
       return NextResponse.json(
         { success: false, error: 'Content, video URL, or file path is required' },
         { status: 400 }
