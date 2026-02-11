@@ -15,8 +15,43 @@ import {
   PenTool,
   Clock,
   Users,
-  Award
+  Award,
+  Presentation,
+  ClipboardList,
+  Layers,
+  BookMarked,
+  FileQuestion,
+  Palette,
+  CheckSquare,
+  Wand2,
+  Calendar
 } from 'lucide-react'
+
+// Icon component mapping
+const ICON_MAP = {
+  'Presentation': Presentation,
+  'ClipboardList': ClipboardList,
+  'BookOpen': BookOpen,
+  'Layers': Layers,
+  'BookMarked': BookMarked,
+  'FileText': FileText,
+  'FileQuestion': FileQuestion,
+  'Palette': Palette,
+  'PenTool': PenTool,
+  'CheckSquare': CheckSquare,
+  'Wand2': Wand2,
+  'Calendar': Calendar,
+  'GraduationCap': GraduationCap
+}
+
+// Helper to render icon
+function EduIcon({ iconName, className = "h-5 w-5" }) {
+  const IconComponent = ICON_MAP[iconName]
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  return <BookOpen className={className} />
+}
 
 const EDUCATION_CATEGORIES = [
   {
