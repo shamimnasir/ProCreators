@@ -205,7 +205,6 @@ export async function POST(request) {
           end: word.end,
           type: 'filler'
         })
-        : "${word.word}"`)
         continue
       }
       
