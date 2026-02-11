@@ -75,8 +75,6 @@ export async function POST(request) {
     }
     // If auto, Whisper will detect language automatically
     
-    } (lang: ${detectedLanguage || 'auto-detect'})`)
-    
     const whisperResult = await new Promise((resolve, reject) => {
       const whisper = spawn(whisperPath, whisperArgs)
       

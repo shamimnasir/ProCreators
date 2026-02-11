@@ -462,7 +462,6 @@ export async function POST(request) {
     
     // Determine if we need Puppeteer (for non-Latin scripts)
     const requiresUnicode = worksheetRequiresUnicode(cover, sections, bonusQuestions)
-    : ${requiresUnicode}`)
     
     let pdfBytes
     let pageCount = 0

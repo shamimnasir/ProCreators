@@ -75,8 +75,6 @@ export async function POST(request) {
         }, { status: 400 })
       }
       
-      }MB)`)
-      
       return NextResponse.json({
         success: true,
         complete: true,
