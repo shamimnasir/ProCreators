@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +15,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 // SECURITY: No demo user fallback
-export default function BillingPage() {
+function BillingPageContent() {
   const [membershipCredits, setMembershipCredits] = useState(0)
   const [purchasedCredits, setPurchasedCredits] = useState(0)
   const [credits, setCredits] = useState(null)
