@@ -30,7 +30,7 @@ import {
   Baby,
   Puzzle,
   Target
-, Zap } from 'lucide-react'
+} from 'lucide-react'
 import { DIGITAL_PRODUCT_CATEGORIES } from '@/config/digital-products'
 
 // Icon component mapping
