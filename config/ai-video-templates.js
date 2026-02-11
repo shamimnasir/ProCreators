@@ -611,7 +611,7 @@ Generate tribute video prompt.`
     category: 'personal',
     isPopular: false,
     isNew: true,
-    color: 'from-fuchsia-500 to-pink-500',
+    color: 'from-lime-500 to-lime-600',
     perfectFor: ['Instagram influencers', 'Models', 'Fitness creators', 'Personal brands'],
     defaultSettings: {
       mode: 'image-to-video',
