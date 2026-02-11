@@ -147,11 +147,12 @@ export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expan
             {/* Icon Row */}
             <div className="flex items-start justify-between mb-4">
               <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-                "bg-muted/50 group-hover:scale-110 transition-transform duration-300",
-                "ring-1 ring-border/50"
+                "w-12 h-12 rounded-xl flex items-center justify-center",
+                `bg-gradient-to-br ${gradient}`,
+                "text-white group-hover:scale-110 transition-transform duration-300",
+                "shadow-sm"
               )}>
-                {tool.icon}
+                <ToolIcon icon={tool.icon} className="h-5 w-5" />
               </div>
             </div>
             
