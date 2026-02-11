@@ -167,8 +167,6 @@ export async function POST(request) {
     const margins = getMargins(estimatedPages, false)
     const margin = margins.inside.points
     
-    , margin: ${margin}pt`)
-    
     const colors = {
       modern: { primary: rgb(0.1, 0.1, 0.3), accent: rgb(0.3, 0.5, 0.8), bg: rgb(0.95, 0.97, 1) },
       minimal: { primary: rgb(0, 0, 0), accent: rgb(0.5, 0.5, 0.5), bg: rgb(1, 1, 1) },

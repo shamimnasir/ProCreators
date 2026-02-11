@@ -175,8 +175,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown. Use plain ASCII.`
     }
     chapter.content = combinedContent.trim()
     
-    `)
-    
     return NextResponse.json({
       success: true,
       chapter

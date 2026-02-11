@@ -91,8 +91,6 @@ async function generateCoverImage(theme, customTheme, primaryColor, customCoverP
         ? `${customCoverPrompt}. Professional book cover quality, vibrant colors, artistic and eye-catching design.`
         : `Beautiful coloring book cover design for "${themeDesc}" theme. Artistic elegant design with decorative borders, suitable for a coloring book cover, vibrant colors representing ${themeDesc}, professional book cover quality, no text on the image.`
       
-      }...`)
-      
       const scriptPath = path.join(process.cwd(), 'scripts', 'generate_image_nano_banana.py')
       
       const inputData = JSON.stringify({
