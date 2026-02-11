@@ -5,40 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingUp } from 'lucide-react'
-import { ToolCard, FeaturedToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
-
-const FEATURED_TOOLS = [
-  {
-    id: 'ad-copy',
-    name: 'Ad Copy Generator',
-    description: 'High-converting ad copy for Facebook, Google, TikTok and more',
-    icon: 'Target',
-    href: '/dashboard/tools/ad-copy',
-    useCase: 'Facebook, Google, TikTok',
-    gradient: 'from-rose-500 to-rose-600',
-    features: ['Multi-Platform', 'A/B Variants', 'Hook Templates']
-  },
-  {
-    id: 'business-plan',
-    name: 'Business Plan Generator',
-    description: 'Complete business plans ready for investors and banks',
-    icon: 'Briefcase',
-    href: '/dashboard/tools/business-plan',
-    useCase: 'Investors, Banks',
-    gradient: 'from-amber-500 to-amber-600',
-    features: ['Financial Projections', 'Market Analysis', 'PDF Export']
-  },
-  {
-    id: 'email-campaigns',
-    name: 'Email Campaigns',
-    description: 'Complete email sequences and newsletters that convert',
-    icon: 'Mail',
-    href: '/dashboard/tools/email-campaigns',
-    useCase: 'Email Marketing',
-    gradient: 'from-purple-500 to-purple-600',
-    features: ['Sequences', 'Newsletters', 'Templates']
-  }
-]
+import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const BUSINESS_CATEGORIES = [
   {
