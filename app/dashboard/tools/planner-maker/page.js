@@ -12,8 +12,8 @@ import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Download, ArrowLeft, 
-  CheckCircle, DollarSign, Palette, User, Image
-, Wand2 } from 'lucide-react'
+  CheckCircle, DollarSign, Palette, User, Image, Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
