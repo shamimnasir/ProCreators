@@ -787,8 +787,6 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'Exam name required' }, { status: 400 })
       }
       
-      `)
-      
       // Use hybrid approach: web search + LLM
       const examInfo = await searchExamInfo(examName, examId)
       
