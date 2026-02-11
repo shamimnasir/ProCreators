@@ -306,7 +306,7 @@ For each script include:
             ) : (
               <div className="flex h-96 items-center justify-center rounded-lg border-2 border-dashed">
                 <div className="text-center">
-                  <Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <Zap className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">Fill in the details to generate scripts</p>
                 </div>
               </div>

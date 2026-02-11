@@ -447,7 +447,7 @@ export default function QuizMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  <Zap className="h-5 w-5 text-yellow-500" />
                   Step 1: Quiz Setup
                 </CardTitle>
                 <CardDescription>Configure your quiz type, topic, and settings</CardDescription>

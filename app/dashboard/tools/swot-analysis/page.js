@@ -567,7 +567,7 @@ export default function SwotAnalysisPage() {
                     <Card className="bg-blue-50 border-blue-200">
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-3">
-                          <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+                          <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
                           <div>
                             <p className="font-semibold text-blue-800 mb-1">Executive Summary</p>
                             <p className="text-blue-700">{result.data.executiveSummary}</p>

@@ -814,7 +814,7 @@ export default function AIVideoStudioPage() {
                     <p className="text-xs text-white/70">Video Length</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <Sparkles className="h-5 w-5 mb-2" />
+                    <Zap className="h-5 w-5 mb-2" />
                     <p className="text-2xl font-bold">AI Scripts</p>
                     <p className="text-xs text-white/70">Auto-Generated</p>
                   </div>

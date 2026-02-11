@@ -414,7 +414,7 @@ export default function JournalMakerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <Zap className="h-5 w-5 text-yellow-500" />
               Step 1: Choose Your Journal Type
             </CardTitle>
             <CardDescription>Select a journal style and AI will create the perfect prompts</CardDescription>

@@ -353,7 +353,7 @@ export default function WorksheetMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  <Zap className="h-5 w-5 text-yellow-500" />
                   Step 1: What Would You Like to Teach?
                 </CardTitle>
                 <CardDescription>Select subject and topic for AI-generated questions</CardDescription>

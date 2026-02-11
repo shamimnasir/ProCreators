@@ -1116,7 +1116,7 @@ export default function FlashcardMakerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <Zap className="h-5 w-5 text-yellow-500" />
               Step 3: AI-Powered Content Generation
             </CardTitle>
             <CardDescription>
@@ -1126,7 +1126,7 @@ export default function FlashcardMakerPage() {
           <CardContent className="space-y-6">
             {/* AI Badge */}
             <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 rounded-lg border border-purple-200 dark:border-purple-800">
-              <Sparkles className="h-5 w-5 text-purple-500" />
+              <Zap className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="font-medium text-sm">Powered by AI</p>
                 <p className="text-xs text-muted-foreground">Using Gemini 2.0 Flash for intelligent content generation</p>

@@ -461,7 +461,7 @@ export default function ColoringBookPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  <Zap className="h-5 w-5 text-yellow-500" />
                   Step 1: Choose Your Theme
                 </CardTitle>
                 <CardDescription>Select a preset theme or create your own custom niche</CardDescription>

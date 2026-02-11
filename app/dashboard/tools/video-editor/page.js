@@ -1623,7 +1623,7 @@ export default function VideoEditorPage() {
             {/* Comprehensive Features Grid */}
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
+                <Zap className="h-5 w-5 text-purple-500" />
                 Professional Features
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -2243,7 +2243,7 @@ export default function VideoEditorPage() {
                 <Card className="border-pink-500/30 bg-gradient-to-br from-pink-500/5 to-rose-500/5">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-pink-500" />
+                      <Zap className="h-4 w-4 text-pink-500" />
                       AI Enhancement
                       <Badge variant="outline" className="ml-auto text-xs">Pro</Badge>
                     </CardTitle>

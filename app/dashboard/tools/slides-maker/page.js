@@ -781,7 +781,7 @@ export default function SlidesMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" />
+                  <Zap className="h-5 w-5 text-yellow-500" />
                   What's your presentation about?
                 </CardTitle>
                 <CardDescription>
@@ -909,7 +909,7 @@ export default function SlidesMakerPage() {
             <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-500" />
+                  <Zap className="h-5 w-5 text-blue-500" />
                   AI-Powered Features
                 </CardTitle>
               </CardHeader>

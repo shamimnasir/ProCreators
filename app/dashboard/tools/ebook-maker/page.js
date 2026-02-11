@@ -1129,7 +1129,7 @@ export default function EbookMakerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <Zap className="h-5 w-5 text-yellow-500" />
               Step 1: What is Your Ebook About?
             </CardTitle>
             <CardDescription>Enter your topic and AI will create a detailed outline</CardDescription>
