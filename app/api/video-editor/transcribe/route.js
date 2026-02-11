@@ -233,7 +233,6 @@ export async function POST(request) {
             end: word.end,
             type: 'filler_bengali'
           })
-          : "${word.word}"`)
           break
         }
       }
