@@ -1081,41 +1081,41 @@ export default function AIVideoStudioPage() {
           {displayTemplates.map((template) => (
             <Card 
               key={template.id}
-              className={`cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 bg-gradient-to-br ${template.color} text-white overflow-hidden border-0`}
+              className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 bg-card border hover:border-primary/50 overflow-hidden group"
               onClick={() => handleSelectTemplate(template)}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <div className="p-2 rounded-lg bg-white/20">
-                    <NicheIcon iconName={template.icon} className="h-6 w-6" />
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${template.color} text-white`}>
+                    <NicheIcon iconName={template.icon} className="h-5 w-5" />
                   </div>
                   <div className="flex gap-1">
                     {template.isPopular && (
-                      <Badge className="bg-white/20 text-white text-xs border-0 flex items-center gap-1">
-                        <Flame className="h-3 w-3" /> Popular
+                      <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                        <Flame className="h-3 w-3 text-orange-500" /> Popular
                       </Badge>
                     )}
                     {template.isNew && (
-                      <Badge className="bg-white/20 text-white text-xs border-0 flex items-center gap-1">
-                        <Sparkles className="h-3 w-3" /> New
+                      <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                        <Sparkles className="h-3 w-3 text-primary" /> New
                       </Badge>
                     )}
                   </div>
                 </div>
-                <CardTitle className="text-lg">{template.name}</CardTitle>
-                <CardDescription className="text-white/80 text-sm">
+                <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors">{template.name}</CardTitle>
+                <CardDescription className="text-sm line-clamp-2">
                   {template.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="flex flex-wrap gap-1 mt-2">
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   {template.perfectFor.slice(0, 2).map((tag, idx) => (
-                    <span key={idx} className="text-xs bg-white/20 px-2 py-0.5 rounded">
+                    <span key={idx} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
                       {tag}
                     </span>
                   ))}
                 </div>
-                <div className="flex items-center gap-3 mt-3 text-xs text-white/70">
+                <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {template.defaultSettings.duration}s
