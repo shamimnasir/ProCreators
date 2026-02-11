@@ -12,7 +12,7 @@ import os
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://syntaxfix-2.preview.emergentagent.com"
+BASE_URL = "https://app-rescue-mission-1.preview.emergentagent.com"
 TEST_USER_EMAIL = "shourjois@gmail.com"
 TEST_USER_PASSWORD = "TempPass123!"
 
