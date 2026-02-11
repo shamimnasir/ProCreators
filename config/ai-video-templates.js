@@ -102,7 +102,7 @@ User's story idea: {userInput}`
     category: 'business',
     isPopular: true,
     isNew: false,
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-blue-500 to-blue-600',
     perfectFor: ['Local ads', 'Product promotions', 'Real estate', 'Restaurants & cafes'],
     defaultSettings: {
       mode: 'image-to-video',
