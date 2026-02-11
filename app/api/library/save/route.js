@@ -53,9 +53,9 @@ export async function POST(request) {
       // Index might already exist, that's okay
     }
 
-    // Determine content category
-    let category = body.category || 'text'
-    const type = body.type
+    // Determine content category from validated type
+    const type = validatedBody.type
+    let category = 'text'
     if (type === 'video' || type === 'reel' || type === 'short' || type === 'story-reel') {
       category = 'video'
     } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
@@ -64,28 +64,28 @@ export async function POST(request) {
       category = 'document'
     }
 
-    // Get user ID (prefer authenticated, fallback to body)
-    const userId = auth?.userId || body.userId || 'anonymous'
+    // Get user ID (prefer authenticated, fallback to validated body)
+    const userId = auth?.userId || validatedBody.userId || 'anonymous'
 
     // Calculate expiration: 30 days from now
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 30)
 
-    // Build document with sanitized values
+    // Build document with sanitized values (Zod already validates max lengths)
     const documentId = randomUUID()
     const document = {
       id: documentId,
       userId,
-      content: body.content ? sanitizeText(String(body.content).substring(0, 5000000)) : '',
-      videoUrl: body.videoUrl ? sanitizeUrl(body.videoUrl) : null,
-      filePath: body.filePath || null,
-      fileSize: body.fileSize || null,
-      script: body.script ? sanitizeText(String(body.script).substring(0, 50000)) : null,
+      content: validatedBody.content ? sanitizeText(validatedBody.content) : '',
+      videoUrl: validatedBody.videoUrl ? sanitizeUrl(validatedBody.videoUrl) : null,
+      filePath: validatedBody.filePath || null,
+      fileSize: validatedBody.fileSize || null,
+      script: validatedBody.script ? sanitizeText(validatedBody.script) : null,
       type,
       category,
-      title: sanitizeText(String(body.title).substring(0, 500)),
-      description: body.description ? sanitizeText(String(body.description).substring(0, 2000)) : '',
-      metadata: body.metadata || {},
+      title: sanitizeText(validatedBody.title),
+      description: validatedBody.description ? sanitizeText(validatedBody.description) : '',
+      metadata: validatedBody.metadata || {},
       createdAt: new Date(),
       expiresAt,
     }
