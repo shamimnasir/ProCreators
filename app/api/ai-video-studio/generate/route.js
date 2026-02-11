@@ -493,9 +493,6 @@ async function compileVideoWithFFmpeg({
         // Apply 3-second trim ONLY for stock videos (skip watermarks/intros)
         if (videoMeta.type === 'stock') {
           cmd.inputOptions(['-ss', '3']) // Skip first 3 seconds
-          `)
-        } else {
-          `)
         }
         
         // Build basic video filter string
