@@ -185,7 +185,7 @@ Generate detailed cinematic video prompt.`
     category: 'social-content',
     isPopular: true,
     isNew: false,
-    color: 'from-orange-500 to-red-500',
+    color: 'from-orange-500 to-orange-600',
     perfectFor: ['Gym influencers', 'Life coaches', 'Productivity pages', 'Quote pages'],
     defaultSettings: {
       mode: 'text-to-video',
