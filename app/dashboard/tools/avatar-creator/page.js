@@ -360,7 +360,7 @@ export default function AvatarCreatorPage() {
       <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
         <CardHeader>
           <CardTitle className="text-purple-800 dark:text-purple-200 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Avatar Creation Tips
           </CardTitle>
         </CardHeader>

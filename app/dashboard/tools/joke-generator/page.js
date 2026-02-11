@@ -131,7 +131,7 @@ export default function JokeGeneratorPage() {
           </p>
         </div>
         <Badge className="bg-yellow-100 text-yellow-800">
-          <Sparkles className="h-3 w-3 mr-1" />
+          <Zap className="h-3 w-3 mr-1" />
           Instant Laughs
         </Badge>
       </div>
@@ -289,7 +289,7 @@ export default function JokeGeneratorPage() {
       <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30">
         <CardHeader>
           <CardTitle className="text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Pro Comedy Tips
           </CardTitle>
         </CardHeader>

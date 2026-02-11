@@ -410,7 +410,7 @@ export default function CoverLetterPage() {
           <p className="text-muted-foreground mt-1">Create personalized, compelling cover letters</p>
         </div>
         <Badge className="bg-purple-100 text-purple-800">
-          <Sparkles className="h-3 w-3 mr-1" />ATS-Optimized
+          <Zap className="h-3 w-3 mr-1" />ATS-Optimized
         </Badge>
       </div>
 

@@ -442,7 +442,7 @@ CONTENT:`
                   selectedModel === 'nano-banana-pro' ? 'bg-white text-indigo-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Sparkles className="h-4 w-4 inline mr-1" />
+                <Zap className="h-4 w-4 inline mr-1" />
                 Pro HD
               </button>
             </div>

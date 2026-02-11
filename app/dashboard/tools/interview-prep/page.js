@@ -510,7 +510,7 @@ export default function InterviewPrepPage() {
           <p className="text-muted-foreground mt-1">Practice with AI-generated questions & get instant feedback</p>
         </div>
         <Badge className="bg-green-100 text-green-800">
-          <Sparkles className="h-3 w-3 mr-1" />STAR Method
+          <Zap className="h-3 w-3 mr-1" />STAR Method
         </Badge>
       </div>
 

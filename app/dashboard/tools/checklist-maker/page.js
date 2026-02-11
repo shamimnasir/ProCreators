@@ -809,7 +809,7 @@ export default function ChecklistMakerPage() {
           <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-200">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
-                <Sparkles className="h-4 w-4" />
+                <Zap className="h-4 w-4" />
                 Pro Tips
               </CardTitle>
             </CardHeader>

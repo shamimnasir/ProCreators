@@ -505,7 +505,7 @@ export default function QuizMakerPage() {
                 {quizType === 'custom' && (
                   <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 space-y-3">
                     <Label className="text-purple-700 dark:text-purple-300 font-medium flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
+                      <Zap className="h-4 w-4" />
                       Describe Your Quiz
                     </Label>
                     <Textarea

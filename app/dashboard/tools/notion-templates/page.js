@@ -696,7 +696,7 @@ export default function NotionTemplateMakerPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-5 w-5" />
+                      <Zap className="h-5 w-5" />
                       <span className="font-semibold">Full Content</span>
                       <Badge variant="secondary">AI Powered</Badge>
                     </div>

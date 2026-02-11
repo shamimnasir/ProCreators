@@ -342,7 +342,7 @@ export default function StoryWriterPage() {
       <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
         <CardHeader>
           <CardTitle className="text-amber-800 dark:text-amber-200 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Storytelling Tips
           </CardTitle>
         </CardHeader>

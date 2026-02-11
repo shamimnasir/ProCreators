@@ -559,7 +559,7 @@ export default function JobMatcherPage() {
           <p className="text-muted-foreground mt-1">Match your resume to job requirements & optimize for ATS</p>
         </div>
         <Badge className="bg-blue-100 text-blue-800">
-          <Sparkles className="h-3 w-3 mr-1" />Smart Match
+          <Zap className="h-3 w-3 mr-1" />Smart Match
         </Badge>
       </div>
 

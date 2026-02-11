@@ -147,7 +147,7 @@ export default function MemeGeneratorPage() {
           </p>
         </div>
         <Badge className="bg-yellow-100 text-yellow-800">
-          <Sparkles className="h-3 w-3 mr-1" />
+          <Zap className="h-3 w-3 mr-1" />
           Fun & Viral
         </Badge>
       </div>

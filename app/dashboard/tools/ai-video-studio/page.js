@@ -788,7 +788,7 @@ export default function AIVideoStudioPage() {
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Zap className="h-4 w-4" />
                   AI Mode
                 </button>
               </div>
@@ -1009,7 +1009,7 @@ export default function AIVideoStudioPage() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl text-white">
-                  <Sparkles className="h-6 w-6" />
+                  <Zap className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-violet-900 dark:text-violet-100">
@@ -1097,7 +1097,7 @@ export default function AIVideoStudioPage() {
                     )}
                     {template.isNew && (
                       <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                        <Sparkles className="h-3 w-3 text-primary" /> New
+                        <Zap className="h-3 w-3 text-primary" /> New
                       </Badge>
                     )}
                   </div>
@@ -1294,7 +1294,7 @@ export default function AIVideoStudioPage() {
               {/* Video Source Selection */}
               <div className="space-y-3 pt-4 border-t">
                 <Label className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
+                  <Zap className="h-4 w-4" />
                   Video Scene Source
                 </Label>
                 <RadioGroup value={videoSource} onValueChange={setVideoSource} className="space-y-3">

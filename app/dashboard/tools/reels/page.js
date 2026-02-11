@@ -471,7 +471,7 @@ export default function ReelsPage() {
                 <SelectContent>
                   <SelectItem value="pro">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
+                      <Zap className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Pro Edit / Quality Mode</div>
                         <div className="text-xs text-muted-foreground">Premium Models - Highest Quality</div>
@@ -480,7 +480,7 @@ export default function ReelsPage() {
                   </SelectItem>
                   <SelectItem value="fast">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
+                      <Zap className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Fast Social Mode</div>
                         <div className="text-xs text-muted-foreground">Optimized Models - Quick & High Quality</div>

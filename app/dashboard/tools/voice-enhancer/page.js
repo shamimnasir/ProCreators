@@ -264,7 +264,7 @@ export default function VoiceEnhancerPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="h-5 w-5" /> Voice Enhancement
+                <Zap className="h-5 w-5" /> Voice Enhancement
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">

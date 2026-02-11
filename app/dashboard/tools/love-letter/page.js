@@ -310,7 +310,7 @@ export default function LoveLetterPage() {
       <Card className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30">
         <CardHeader>
           <CardTitle className="text-pink-800 dark:text-pink-200 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Tips for the Perfect Love Letter
           </CardTitle>
         </CardHeader>
