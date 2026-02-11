@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Download, Sparkles, Loader2, 
+  FileText, Download, Loader2, 
   ArrowLeft, Plus, Trash2, CheckCircle, Copy,
   BookOpen, Globe, Newspaper, Video, Mic,
   GraduationCap, Link2, RefreshCw, FileDown,

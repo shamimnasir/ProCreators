@@ -13,12 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Download, Sparkles, Loader2, Clock,
+  FileText, Download, Loader2, Clock,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   BookOpen, Brain, Target, Lightbulb, Upload,
   PenTool, Copy, Eye, RefreshCw, Palette, GraduationCap,
   FileUp, X, ListOrdered, AlignLeft, Hash
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

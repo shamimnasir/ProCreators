@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Download, ArrowLeft, ArrowRight, Sparkles, CheckCircle,
+  Loader2, Download, ArrowLeft, ArrowRight, CheckCircle,
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
   Plus, FlipVertical, Layers, Palette, BookOpen, GraduationCap,
   Brain, Target, Lightbulb, X, Copy, Eye, RotateCcw, Scissors,
   FileText, AlignLeft, Grid, Minus
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'

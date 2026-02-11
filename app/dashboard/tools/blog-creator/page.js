@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Sparkles, Loader2, Target, TrendingUp, 
+  FileText, Loader2, Target, TrendingUp, 
   Copy, RefreshCw, CheckCircle, Lightbulb, Search,
   DollarSign, Star, BarChart3, BookOpen, Zap,
   ChevronDown, ChevronUp, Check, Edit3, Hash,

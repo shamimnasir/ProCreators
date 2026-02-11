@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Save, RotateCcw, Plus, Trash2, AlertCircle, Video, Sparkles , Zap } from 'lucide-react'
+import { Save, RotateCcw, Plus, Trash2, AlertCircle, Video , Zap } from 'lucide-react'
 import { AI_VIDEO_TEMPLATES } from '@/config/ai-video-templates'
 
 export default function AIVideoPromptsPage() {

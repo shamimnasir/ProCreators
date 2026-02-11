@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  GraduationCap, Download, Sparkles, Loader2, Clock,
+  GraduationCap, Download, Loader2, Clock,
   ArrowLeft, ArrowRight, CheckCircle, XCircle, Edit3,
   BookOpen, Brain, Target, Trophy, Search, Globe,
   FileText, Timer, Play, RotateCcw, Eye, RefreshCw,

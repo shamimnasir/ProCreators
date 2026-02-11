@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Download, Sparkles, Loader2, Briefcase, Plus, Trash2, 
+  FileText, Download, Loader2, Briefcase, Plus, Trash2, 
   Upload, CheckCircle, X, ChevronDown, ChevronUp, FileUp, Copy, RefreshCw,
   Mail, Phone, MapPin, Linkedin, Award, GraduationCap, Wrench, Camera,
   Edit3, Check, User, AlertCircle, Users, Target

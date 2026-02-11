@@ -14,14 +14,14 @@ import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Target, Copy, Sparkles, Loader2, Wand2, RefreshCw,
+  Target, Copy, Loader2, Wand2, RefreshCw,
   Check, ArrowLeft, TrendingUp, Users, BarChart3,
   Lightbulb, Building2, DollarSign, Calendar, Layers,
   PieChart, ArrowUpRight, ArrowDownRight, Minus, Shield,
   Zap, Globe, Megaphone, Heart, Brain, CheckCircle2,
   AlertTriangle, FileText, Download, FileDown, Printer,
   Upload, X, ImageIcon
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

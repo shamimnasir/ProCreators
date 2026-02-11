@@ -13,11 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  DollarSign, Sparkles, Loader2, Target, TrendingUp, 
+  DollarSign, Loader2, Target, TrendingUp, 
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   Mail, Phone, Shield, Award, ChevronDown, ChevronUp,
   Briefcase, Users, AlertCircle, Check, Zap, Heart
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

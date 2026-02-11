@@ -15,12 +15,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Mail, Copy, Sparkles, Loader2, Wand2, RefreshCw,
+  Mail, Copy, Loader2, Wand2, RefreshCw,
   Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
   Lightbulb, Target, Send, Clock, Calendar, Layers,
   MousePointer, Eye, CheckCircle2, ChevronRight, Download,
   FileText, Heart, Bell, Gift, Megaphone, UserPlus, ShoppingCart
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

@@ -13,12 +13,12 @@ import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Puzzle, Download, Sparkles, Loader2, DollarSign, Image,
+  Puzzle, Download, Loader2, DollarSign, Image,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, Save, AlertTriangle,
   FileText, Grid3X3, Search, BookOpen, Gamepad2, Brain,
   Baby, GraduationCap, Users, Target, Palette
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

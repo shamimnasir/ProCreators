@@ -14,12 +14,12 @@ import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import { 
-  Share2, Sparkles, Loader2, Target, TrendingUp, 
+  Share2, Loader2, Target, TrendingUp, 
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   ThumbsUp, Eye, Zap, Flame, Award,
   ChevronDown, ChevronUp, Check, Edit3, Hash,
   Users, Briefcase, BookOpen, Heart, AlertTriangle, ExternalLink
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'

@@ -11,13 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Download, BookOpen, Sparkles, ArrowLeft, ArrowRight,
+  Loader2, Download, BookOpen, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
   RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp,
   Type, Image, Layout, FolderOpen, Clock, FilePlus,
   Heading1, Heading2, Heading3, Quote, ListOrdered, 
   Lightbulb, AlertTriangle, Info, MessageSquare
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'

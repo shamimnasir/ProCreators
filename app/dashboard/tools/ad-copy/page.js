@@ -14,11 +14,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Target, Copy, Sparkles, Loader2, Wand2, RefreshCw,
+  Target, Copy, Loader2, Wand2, RefreshCw,
   Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
   Lightbulb, Info, Layers, Brain, Megaphone, Heart,
   Clock, DollarSign, Eye, MousePointer, Share2, Play
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

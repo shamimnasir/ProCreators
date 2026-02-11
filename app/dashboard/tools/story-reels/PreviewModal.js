@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { 
   Play, Pause, Volume2, VolumeX, Edit2, Check, X, 
-  Sparkles, Download, Loader2, AlertCircle
-, Wand2 , Zap } from 'lucide-react'
+  Download, Loader2, AlertCircle
+, Wand2, Zap } from 'lucide-react'
 
 export default function PreviewModal({ 
   open, 

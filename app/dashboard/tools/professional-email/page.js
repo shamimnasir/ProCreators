@@ -13,12 +13,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Mail, Sparkles, Loader2, Target, 
+  Mail, Loader2, Target, 
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   Check, Send, Clock, AlertCircle, FileText,
   ArrowLeft, Zap, User, Building, Calendar,
   ThumbsUp, Bell, Heart, Users, XCircle
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'

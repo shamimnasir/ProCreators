@@ -11,12 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Download, ArrowLeft, ArrowRight, Sparkles, CheckCircle,
+  Loader2, Download, ArrowLeft, ArrowRight, CheckCircle,
   FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
   LayoutGrid, List, Calendar, Kanban, Target, Heart, Briefcase,
   GraduationCap, Users, Palette, Eye, FileJson, FileText, Copy,
   Plus, Settings, Database, Table, LayoutDashboard, Zap, Globe
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'

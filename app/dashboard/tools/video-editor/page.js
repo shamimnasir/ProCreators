@@ -20,10 +20,10 @@ import { useCredits } from '@/components/CreditBalance'
 import {
   Video, Upload, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
   Scissors, Type, Wand2, Music, Palette, Download, Loader2, Check, X,
-  Trash2, Zap, Clock, FileText, Mic, Settings, Sparkles, Film, Plus,
+  Trash2, Zap, Clock, FileText, Mic, Settings, Film, Plus,
   HardDrive, FolderOpen, Save, FilePlus, Info, ShieldAlert, Layers,
   MoveUp, MoveDown, Timer, Waves, Library, CheckCircle, Search
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { videoStorage } from '@/lib/video-storage'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

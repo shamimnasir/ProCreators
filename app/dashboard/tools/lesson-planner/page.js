@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Download, Sparkles, Loader2, Clock,
+  FileText, Download, Loader2, Clock,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, BookOpen, Brain,
   GraduationCap, Target, Users, Lightbulb, ClipboardList,

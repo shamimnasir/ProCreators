@@ -12,9 +12,9 @@ import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
   Upload, Download, Play, Pause, Volume2, Mic,
-  RefreshCw, X, FileAudio, Waves, Sparkles, Zap,
+  RefreshCw, X, FileAudio, Waves, Zap,
   FastForward, Rewind, Radio, Podcast, Speech, Music2, Video
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 
 // Voice enhancement presets

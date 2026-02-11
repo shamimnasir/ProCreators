@@ -15,11 +15,11 @@ import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Wand2, Upload, Download, ImageIcon, Type, Sparkles, RefreshCw,
+  Wand2, Upload, Download, ImageIcon, Type, RefreshCw,
   Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,
   Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay,
   Plus, Trash2, Move, Bold, AlignLeft, AlignCenter, AlignRight
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 
 // Bengali-friendly fonts available in most systems
 const TEXT_FONTS = [
@@ -125,7 +125,7 @@ STYLE: High-contrast, dark moody background with bright glowing foreground eleme
     promptModifier: `PROFESSIONAL HIGH-CTR THUMBNAIL (Purple+Yellow Complementary):
 BACKGROUND: Deep DARK PURPLE (#1a0033) to BLACK gradient as base. Add GLOWING YELLOW (#FFD700) accent elements.
 LIGHTING: Dramatic yellow rim light creating glow effect, purple ambient fill.
-EFFECTS: Sparkles, subtle magic/creative energy particles, soft glow halos.
+EFFECTS: subtle magic/creative energy particles, soft glow halos.
 COLORS: Limit to 3 colors - dark purple background, bright yellow accents, white text.
 STYLE: High-contrast, mysterious dark background with eye-catching yellow highlights. Creative/educational feel.`
   },

@@ -15,7 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  FileText, Copy, Sparkles, Loader2, Wand2, RefreshCw,
+  FileText, Copy, Loader2, Wand2, RefreshCw,
   Check, ArrowLeft, TrendingUp, Users, BarChart3, Building2,
   Lightbulb, Target, DollarSign, Layers, PieChart, Briefcase,
   CheckCircle2, ChevronRight, Download, Eye, Globe, Rocket,

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { 
-  CreditCard, Calendar, TrendingUp, Coins, Sparkles, 
+  CreditCard, Calendar, TrendingUp, Coins, 
   Loader2, Check, Zap, Crown, Building2, Star, RefreshCw,
   ArrowRight, Clock, Infinity
 , Zap } from 'lucide-react'

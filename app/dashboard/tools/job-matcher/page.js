@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Target, Sparkles, Loader2, CheckCircle, XCircle, AlertTriangle,
+  Target, Loader2, CheckCircle, XCircle, AlertTriangle,
   FileText, Briefcase, TrendingUp, Lightbulb, RefreshCw, Upload,
   ChevronRight, Award, Zap, Shield, ArrowUp, ArrowDown, Minus,
   Copy, Check, FileUp, X, ExternalLink

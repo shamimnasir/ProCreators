@@ -13,14 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Presentation, Download, Sparkles, Loader2, 
+  Presentation, Download, Loader2, 
   ArrowLeft, ArrowRight, CheckCircle, Eye,
   ChevronLeft, ChevronRight, Edit3, RefreshCw,
   Palette, Users, Target, FileText, Layout,
   Quote, BarChart3, Columns, ListChecks, Plus,
   Trash2, Upload, Image as ImageIcon, Type,
   AlignLeft, AlignCenter, AlignRight, Wand2
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

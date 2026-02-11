@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Download, Sparkles, ArrowLeft, 
+  Loader2, Download, ArrowLeft, 
   CheckCircle, DollarSign, Palette, User, Image
 , Wand2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'

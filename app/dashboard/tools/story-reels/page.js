@@ -15,12 +15,12 @@ import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Sparkles, Video, Mic, Upload, Download, 
+  Loader2, Video, Mic, Upload, Download, 
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
   GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
   TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
   Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import {
   DndContext,

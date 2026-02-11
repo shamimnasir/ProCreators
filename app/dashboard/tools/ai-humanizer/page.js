@@ -14,12 +14,12 @@ import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Sparkles, Loader2, ArrowLeft, Copy, RefreshCw,
+  Loader2, ArrowLeft, Copy, RefreshCw,
   FileText, Upload, FileUp, File, X, Wand2,
   Bot, User, Shield, Zap, Settings2,
   CheckCircle, AlertTriangle, ArrowRight, Eye,
   Shuffle, PenTool, Brain, Target
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

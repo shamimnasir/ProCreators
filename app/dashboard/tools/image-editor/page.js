@@ -16,11 +16,11 @@ import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Wand2, Upload, Download, Sparkles, Image as ImageIcon, Palette,
+  Wand2, Upload, Download, Image as ImageIcon, Palette,
   Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,
   Pencil, Combine, Zap, User, ShoppingBag, Film, Smile, Target,
   ChevronRight, Check, Star, Heart, Loader2, ArrowUpRight, ArrowDownRight
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 
 // ==================== UPSCALE SECTION COMPONENT ====================
 function UpscaleSection({ onUpscaleComplete }) {

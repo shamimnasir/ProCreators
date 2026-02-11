@@ -13,11 +13,11 @@ import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Palette, Download, Sparkles, Loader2, DollarSign, Image,
+  Palette, Download, Loader2, DollarSign, Image,
   ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
   ChevronDown, ChevronUp, RefreshCw, Save, Pipette, ImagePlus,
   FileText, AlertTriangle
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

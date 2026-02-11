@@ -10,11 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
-  Loader2, Download, Sparkles, ArrowLeft, ArrowRight,
+  Loader2, Download, ArrowLeft, ArrowRight,
   FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
   GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe,
   Pipette
-, Wand2 , Zap } from 'lucide-react'
+, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
