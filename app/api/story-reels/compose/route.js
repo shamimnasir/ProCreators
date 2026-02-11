@@ -465,8 +465,6 @@ export async function POST(request) {
             
             // VIRAL STYLE: Bold colored box with high-contrast text
             videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
-            
-            } text overlay to clip ${i + 1}: "${textOverlay.text}" at ${position}`)
           }
           
           cmd.outputOptions([
