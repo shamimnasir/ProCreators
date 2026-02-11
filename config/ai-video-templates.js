@@ -61,7 +61,7 @@ export const AI_VIDEO_TEMPLATES = [
     category: 'social-content',
     isPopular: true,
     isNew: false,
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-rose-500 to-rose-600',
     perfectFor: ['Storytelling channels', 'Relationship drama', 'Moral stories', 'Motivational content'],
     defaultSettings: {
       mode: 'text-to-video',
