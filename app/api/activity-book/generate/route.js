@@ -1947,8 +1947,6 @@ async function generateActivityPages(body) {
     
     const themeToUse = customTheme || theme
     
-    }`)
-    
     // Filter out special markers like '__none__' and ensure we have valid activities
     let activities = selectedActivities && selectedActivities.length > 0 
       ? selectedActivities.filter(a => a !== '__none__' && ACTIVITY_GENERATORS[a])
