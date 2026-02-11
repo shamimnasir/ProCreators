@@ -143,7 +143,7 @@ Generate a compelling promotional video prompt with specific visual directions.`
     category: 'storytelling',
     isPopular: true,
     isNew: false,
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-amber-500 to-amber-600',
     perfectFor: ['Short films', 'Emotional reels', 'Sci-fi/fantasy', 'Premium content'],
     defaultSettings: {
       mode: 'text-to-video',
