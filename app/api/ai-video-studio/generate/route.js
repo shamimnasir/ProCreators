@@ -1334,26 +1334,24 @@ export async function POST(request) {
       }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
-      ...`)
       
       // Extract keywords from script for stock video search
       const keywords = extractKeywordsFromScript(prompt, 5)
-      }`)
       
       // Try to generate 1-2 AI videos for key scenes
       try {
         const aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
         if (aiVideos.length > 0) {
           videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
-          }
-      } catch (e) {
         }
+      } catch (e) {
+        // AI generation failed, continue with stock
+      }
       
       // Search and add stock videos based on keywords (with 3-second trim later)
       const numStockClips = Math.max(2, Math.ceil(duration / 5) - videos.length)
       const stockVideos = await searchStockVideosByKeywords(keywords, numStockClips)
       videos.push(...stockVideos.map(v => ({ ...v, type: 'stock' })))
-      `)
       
     } else {
       // AI only mode (stock-only is now removed)

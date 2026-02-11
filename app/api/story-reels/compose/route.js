@@ -523,14 +523,13 @@ export async function POST(request) {
         })
         .on('progress', (progress) => {
           if (progress.percent) {
-            }%`)
+            // Progress logging
           }
         })
         .run()
     })
 
     // Step 4: Generate ASS captions file synced with actual audio duration
-    }s)...`)
     const captionsPath = join(tempDir, 'captions.ass')
     const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
     await writeFile(captionsPath, captionContent, 'utf8')
