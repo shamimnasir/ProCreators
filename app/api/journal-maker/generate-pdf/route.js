@@ -127,8 +127,6 @@ export async function POST(request) {
     const margin = Math.min(50, pageWidth * 0.08) // Scale margin with page size
     const contentWidth = pageWidth - (margin * 2)
     
-    `)
-    
     const colors = PDF_COLOR_SCHEMES[colorScheme] || PDF_COLOR_SCHEMES['lavender']
     const coverStyleObj = COVER_STYLES[coverStyle] || COVER_STYLES['floral']
     
