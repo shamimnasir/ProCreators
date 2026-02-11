@@ -438,7 +438,7 @@ Generate chat story video prompt.`
     category: 'storytelling',
     isPopular: false,
     isNew: false,
-    color: 'from-gray-700 to-gray-900',
+    color: 'from-slate-600 to-slate-700',
     perfectFor: ['Horror & mystery', 'True crime pages', 'Paranormal channels'],
     defaultSettings: {
       mode: 'text-to-video',
