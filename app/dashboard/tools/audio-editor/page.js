@@ -17,7 +17,6 @@ import {
   Upload, Download, Play, Pause, Scissors, Volume2, Music,
   RefreshCw, X, Plus, Clock, Zap, FileAudio, Layers, Wand2,
   FastForward, Rewind, VolumeX, Waves, Merge, ArrowRight
-, Wand2, Zap } from 'lucide-react'
 
 // Format options
 const FORMATS = [

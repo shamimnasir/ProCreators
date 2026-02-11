@@ -20,7 +20,6 @@ import {
   Play, Clock, FileText, Zap, ChevronDown, ChevronUp,
   Check, Edit3, Hash, Eye, ThumbsUp, AlertCircle,
   Video, Mic, PenTool, BookOpen, ArrowLeft, Timer
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'

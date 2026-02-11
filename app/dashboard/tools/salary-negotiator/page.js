@@ -17,7 +17,6 @@ import {
   Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
   Mail, Phone, Shield, Award, ChevronDown, ChevronUp,
   Briefcase, Users, AlertCircle, Check, Zap, Heart
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

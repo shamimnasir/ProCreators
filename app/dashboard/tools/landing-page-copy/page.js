@@ -21,7 +21,6 @@ import {
   HelpCircle, Shield, Star, ChevronRight, Layout, Eye,
   MousePointer, DollarSign, Download, CheckCircle2, XCircle,
   ArrowRight, Quote, Rocket, Heart
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

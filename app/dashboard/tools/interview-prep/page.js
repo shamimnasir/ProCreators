@@ -19,7 +19,6 @@ import {
   Lightbulb, Clock, Award, MessageSquare, ChevronRight, ChevronDown,
   ThumbsUp, ThumbsDown, Copy, Check, HelpCircle, Briefcase,
   Star, BookOpen, Volume2, Timer, ArrowRight, RefreshCw
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 

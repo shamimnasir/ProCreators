@@ -17,7 +17,6 @@ import {
   Type, Image, Layout, FolderOpen, Clock, FilePlus,
   Heading1, Heading2, Heading3, Quote, ListOrdered, 
   Lightbulb, AlertTriangle, Info, MessageSquare
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'

@@ -20,7 +20,6 @@ import {
   Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,
   Pencil, Combine, Zap, User, ShoppingBag, Film, Smile, Target,
   ChevronRight, Check, Star, Heart, Loader2, ArrowUpRight, ArrowDownRight
-, Wand2, Zap } from 'lucide-react'
 
 // ==================== UPSCALE SECTION COMPONENT ====================
 function UpscaleSection({ onUpscaleComplete }) {

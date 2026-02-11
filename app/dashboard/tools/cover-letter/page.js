@@ -17,7 +17,6 @@ import {
   CheckCircle, Copy, RefreshCw, User, Building2,
   FileText, Target, Award, Lightbulb, ChevronDown, ChevronUp,
   Phone, MapPin, Linkedin, Edit3, Check, X, AlertCircle
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import html2canvas from 'html2canvas'

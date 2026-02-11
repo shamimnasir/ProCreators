@@ -18,7 +18,6 @@ import {
   Check, ArrowLeft, TrendingUp, Shield, Target,
   Lightbulb, AlertTriangle, CheckCircle2, ChevronRight, 
   Download, Building2, Zap, BarChart3
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

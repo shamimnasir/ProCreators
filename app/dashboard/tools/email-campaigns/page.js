@@ -20,7 +20,6 @@ import {
   Lightbulb, Target, Send, Clock, Calendar, Layers,
   MousePointer, Eye, CheckCircle2, ChevronRight, Download,
   FileText, Heart, Bell, Gift, Megaphone, UserPlus, ShoppingCart
-, Wand2, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'

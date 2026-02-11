@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast'
 import { 
   Play, Pause, Volume2, VolumeX, Edit2, Check, X, 
   Download, Loader2, AlertCircle
-, Wand2, Zap } from 'lucide-react'
 
 export default function PreviewModal({ 
   open, 
