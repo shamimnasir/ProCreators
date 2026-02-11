@@ -18,8 +18,8 @@ import {
   ArrowLeft, ArrowRight, CheckCircle, XCircle, Edit3,
   BookOpen, Brain, Target, Trophy, Search, Globe,
   FileText, Timer, Play, RotateCcw, Eye, RefreshCw,
-  AlertCircle, BookMarked, Award, Zap
-, Wand2 } from 'lucide-react'
+  AlertCircle, BookMarked, Award, Zap, Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
