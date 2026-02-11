@@ -612,8 +612,6 @@ function getTargetDimensions(resolution, sourceInfo) {
 
 async function runFFmpeg(args, jobId) {
   return new Promise((resolve, reject) => {
-    .join(' '), '...')
-    
     const ffmpeg = spawn('ffmpeg', args)
     
     let stderr = ''
