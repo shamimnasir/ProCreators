@@ -67,8 +67,6 @@ export async function POST(request) {
     const arrayBuffer = await response.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
     await writeFile(cachedPath, buffer)
-    
-    `)
 
     return NextResponse.json({
       success: true,

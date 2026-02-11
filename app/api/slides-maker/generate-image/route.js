@@ -54,8 +54,6 @@ export async function POST(request) {
       }
     }
     
-    + '...')
-    
     const result = await generateImage(imagePrompt, 'gemini-3-pro-image-preview', 'standard', '1792x1024')
     
     if (result.success && result.imageUrl) {
