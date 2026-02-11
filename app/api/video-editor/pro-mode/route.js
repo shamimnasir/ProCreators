@@ -520,7 +520,7 @@ function generateASS(transcript, style, dimensions) {
   
   const s = styles[style] || styles['bold-outline']
   
-  let ass = `\ufeff[Script Info]
+  let ass = String.fromCharCode(0xFEFF) + `[Script Info]
 Title: Video Editor Captions
 ScriptType: v4.00+
 PlayResX: ${width}

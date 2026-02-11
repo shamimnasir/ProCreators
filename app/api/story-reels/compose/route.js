@@ -957,7 +957,7 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   }
   
   // ASS Header with UTF-8 support for Bengali
-  let ass = `\ufeff[Script Info]
+  let ass = String.fromCharCode(0xFEFF) + `[Script Info]
 Title: Story Reels Captions
 ScriptType: v4.00+
 WrapStyle: 0
