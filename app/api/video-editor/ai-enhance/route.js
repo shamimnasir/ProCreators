@@ -137,8 +137,6 @@ export async function POST(request) {
     
     const stats = await stat(finalOutput)
     
-    }MB`)
-    
     return NextResponse.json({
       success: true,
       jobId,

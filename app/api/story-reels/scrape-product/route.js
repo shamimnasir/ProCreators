@@ -537,7 +537,6 @@ async function downloadAndCacheVideos(videoUrls) {
       
       // Validate video size (should be at least 10KB)
       if (buffer.length < 10240) {
-        , skipping`)
         continue
       }
       
@@ -548,7 +547,6 @@ async function downloadAndCacheVideos(videoUrls) {
         url: `/product-videos-cache/${filename}`,
         type: 'ugc-video'
       })
-      }KB)`)
       
     } catch (error) {
       console.error(`[Video Cache] Error downloading video ${i + 1}:`, error.message)
