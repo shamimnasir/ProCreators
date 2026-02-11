@@ -322,16 +322,16 @@ export default function StudentsTeachersPage() {
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
         <TabsList className="flex-wrap h-auto gap-2 bg-transparent p-0">
-          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            All Tools
+          <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5">
+            <GraduationCap className="h-4 w-4" /> All Tools
           </TabsTrigger>
           {EDUCATION_CATEGORIES.map((cat) => (
             <TabsTrigger 
               key={cat.id} 
               value={cat.id}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5"
             >
-              {cat.name}
+              <EduIcon iconName={cat.icon} className="h-4 w-4" /> {cat.name}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -341,8 +341,8 @@ export default function StudentsTeachersPage() {
             {EDUCATION_CATEGORIES.map((category) => (
               <div key={category.id}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${category.color} text-white`}>
-                    <span className="text-xl">{category.icon}</span>
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
+                    <EduIcon iconName={category.icon} className="h-5 w-5" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">{category.name}</h2>
@@ -364,7 +364,7 @@ export default function StudentsTeachersPage() {
           <TabsContent key={category.id} value={category.id} className="mt-6">
             <div className="flex items-center gap-3 mb-6">
               <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} text-white`}>
-                <span className="text-2xl">{category.icon}</span>
+                <EduIcon iconName={category.icon} className="h-6 w-6" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold">{category.name}</h2>
