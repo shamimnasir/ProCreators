@@ -226,7 +226,7 @@ Generate motivational video prompt with specific B-roll scenes.`
     category: 'social-content',
     isPopular: false,
     isNew: true,
-    color: 'from-pink-500 to-rose-500',
+    color: 'from-pink-500 to-pink-600',
     perfectFor: ['Travel pages', 'Photography', 'Birthday reels', 'Romantic content'],
     defaultSettings: {
       mode: 'image-to-video',
