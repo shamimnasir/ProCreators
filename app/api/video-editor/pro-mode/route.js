@@ -56,9 +56,8 @@ export async function POST(request) {
     // Step 1: Download B-roll videos if requested
     let brollVideos = []
     if (addBroll && brollKeywords.length > 0) {
-      }`)
       brollVideos = await fetchBrollVideos(brollKeywords, tempDir, jobId)
-      }
+    }
     
     // Step 2: Build segments to remove (fillers + silences)
     const segmentsToRemove = []
