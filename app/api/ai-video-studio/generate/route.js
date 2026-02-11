@@ -1495,14 +1495,14 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     }
   } else if (videoSource === 'hybrid') {
     // Hybrid: Mix AI-generated video with stock footage
-    ...`)
     
     let aiVideos = []
     try {
       // Generate 1-2 AI video clips for key moments
       aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
     } catch (error) {
-      }
+      console.error(`[${jobId}] AI video generation failed for hybrid, using only stock:`, error.message)
+    }
     
     // Fetch stock videos for B-roll
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)

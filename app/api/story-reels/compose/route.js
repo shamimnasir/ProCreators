@@ -813,8 +813,6 @@ function generateASSCaptions(script, duration, captionStyle, targetHeight, targe
   // Average reading speed for Bengali: ~10-12 characters per second for narration
   const charsPerSecond = totalChars / duration
   
-  }`)
-  
   // Base font size - SIGNIFICANTLY INCREASED for portrait videos
   // Portrait 1080x1920 needs much larger fonts than landscape
   const baseFontSize = height >= 2160 ? 72 : height >= 1920 ? 64 : height >= 1440 ? 56 : height >= 1280 ? 48 : 40
