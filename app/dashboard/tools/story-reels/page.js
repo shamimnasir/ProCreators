@@ -29,7 +29,6 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-} from 'lucide-react'
 import {
   arrayMove,
   SortableContext,
@@ -37,7 +36,6 @@ import {
   useSortable,
   rectSortingStrategy,
 } from '@dnd-kit/sortable'
-} from 'lucide-react'
 import { CSS } from '@dnd-kit/utilities'
 import MusicPicker from './MusicPicker'
 

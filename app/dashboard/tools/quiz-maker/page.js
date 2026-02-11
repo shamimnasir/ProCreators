@@ -28,7 +28,7 @@ const QUIZ_TYPES = [
   { id: 'personality', name: 'Personality Quiz', icon: Brain, description: 'Self-discovery quizzes' },
   { id: 'assessment', name: 'Knowledge Assessment', icon: FileText, description: 'Professional skill evaluation' },
   { id: 'practice', name: 'Practice Exam', icon: BookOpen, description: 'Exam preparation material' },
-  { id: 'custom', name: 'Custom Quiz', icon: description: 'Create from your own prompt' }
+  { id: 'custom', name: 'Custom Quiz', icon: Star, description: 'Create from your own prompt' }
 ]
 
 // Topics from the image - organized by category
