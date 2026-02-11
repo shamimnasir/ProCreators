@@ -249,9 +249,11 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
       <Card className="group h-full transition-all border-2 hover:shadow-lg hover:-translate-y-1 cursor-pointer hover:border-primary/50">
         <CardHeader className={expanded ? "pb-2" : "pb-1"}>
           <div className="flex items-start justify-between">
-            <div className="text-3xl mb-2">{tool.icon}</div>
+            <div className={`p-2.5 rounded-xl bg-gradient-to-br ${categoryColor} text-white mb-2`}>
+              <ProductIcon iconName={tool.icon} className="h-5 w-5" />
+            </div>
             {tool.badge && (
-              <Badge className={`bg-gradient-to-r ${categoryColor} text-white text-[10px]`}>
+              <Badge variant="secondary" className="text-[10px]">
                 {tool.badge}
               </Badge>
             )}
