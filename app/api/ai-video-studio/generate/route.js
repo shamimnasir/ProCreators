@@ -1512,14 +1512,11 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
   } else {
     // Stock Videos: Original implementation
     const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-    }`)
     
     const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
     // Build video with stock footage backgrounds
     editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
   }
-  
-  .substring(0, 500))
   
   // Submit render request
   const renderResponse = await fetch(`${baseUrl}/render`, {
