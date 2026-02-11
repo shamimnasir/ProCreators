@@ -2839,6 +2839,5 @@ function extractVideoUrl(output) {
   // Handle nested video object
   if (output.data?.video?.url) return output.data.video.url
   
-  .substring(0, 200))
   return null
 }
