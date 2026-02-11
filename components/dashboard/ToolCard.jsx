@@ -272,11 +272,11 @@ export function CategoryHeader({ category }) {
   return (
     <div className="flex items-center gap-3 mb-5">
       <div className={cn(
-        "w-10 h-10 rounded-xl flex items-center justify-center text-xl",
+        "w-10 h-10 rounded-xl flex items-center justify-center",
         `bg-gradient-to-br ${category.color}`,
-        "text-white shadow-lg"
+        "text-white shadow-sm"
       )}>
-        {category.icon}
+        <ToolIcon icon={category.icon} className="h-5 w-5" />
       </div>
       <div>
         <h2 className="text-lg font-bold">{category.name}</h2>
