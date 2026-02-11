@@ -1997,7 +1997,7 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   if (videos.length > 0) {
     const modelUsed = [...new Set(videos.map(v => v.model))].join(', ')
     const totalCost = videos.reduce((sum, v) => sum + v.cost, 0)
-    }`)
+    console.log(`[${jobId}] Generated ${videos.length} videos using ${modelUsed}, estimated cost: $${totalCost.toFixed(4)}`)
   }
   
   return videos
