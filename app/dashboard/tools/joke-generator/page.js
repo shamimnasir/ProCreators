@@ -226,7 +226,7 @@ export default function JokeGeneratorPage() {
                 {generating ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Jokes...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Jokes</>  
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Jokes</>  
                 )}
               </Button>
             </div>

@@ -1185,7 +1185,7 @@ export default function FlashcardMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate {aiCount} Flashcards</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate {aiCount} Flashcards</>
                 )}
               </Button>
             </div>

@@ -1193,7 +1193,7 @@ export default function EbookMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Outline</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Outline</>
                 )}
               </Button>
             </div>
@@ -1352,7 +1352,7 @@ export default function EbookMakerPage() {
                     onClick={generateAllChapters}
                     disabled={loading}
                   >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
                     Generate All Content
                   </Button>
                 </div>

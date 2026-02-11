@@ -223,7 +223,7 @@ export default function MemeGeneratorPage() {
             {generating ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Meme...</>
             ) : (
-              <><Sparkles className="mr-2 h-4 w-4" /> Generate Meme</>
+              <><Wand2 className="mr-2 h-4 w-4" /> Generate Meme</>
             )}
           </Button>
 
@@ -268,7 +268,7 @@ export default function MemeGeneratorPage() {
                 {generating ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> AI is Thinking...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate AI Meme</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate AI Meme</>
                 )}
               </Button>
             </CardContent>
@@ -304,7 +304,7 @@ export default function MemeGeneratorPage() {
                 {generating ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Create Custom Meme</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Create Custom Meme</>
                 )}
               </Button>
             </CardContent>

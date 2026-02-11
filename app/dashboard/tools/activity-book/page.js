@@ -666,7 +666,7 @@ export default function ActivityBookPage() {
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Activities...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Activity Pages</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate {pageCount} Activity Pages</>
                     )}
                   </Button>
                 </div>
@@ -1039,7 +1039,7 @@ export default function ActivityBookPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Activity Book PDF...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Activity Book PDF</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Activity Book PDF</>
                 )}
               </Button>
             </div>

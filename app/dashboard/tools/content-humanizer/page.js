@@ -508,7 +508,7 @@ export default function ContentHumanizerPage() {
                   {loading ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Humanizing...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Humanize Text</>
+                    <><Wand2 className="h-4 w-4 mr-2" /> Humanize Text</>
                   )}
                 </Button>
               </div>

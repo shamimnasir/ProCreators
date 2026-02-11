@@ -437,7 +437,7 @@ export default function WorksheetMakerPage() {
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Worksheet</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate Worksheet</>
                     )}
                   </Button>
                 </div>

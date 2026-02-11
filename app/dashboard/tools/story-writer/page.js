@@ -246,7 +246,7 @@ export default function StoryWriterPage() {
               {generating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Crafting Your Story...</>
               ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Story</>  
+                <><Wand2 className="mr-2 h-4 w-4" /> Generate Story</>  
               )}
             </Button>
 

@@ -593,7 +593,7 @@ export default function ColoringBookPage() {
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Page Ideas...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {pageCount} Page Ideas</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate {pageCount} Page Ideas</>
                     )}
                   </Button>
                 </div>
@@ -940,7 +940,7 @@ export default function ColoringBookPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating PDF...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Coloring Book PDF</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Coloring Book PDF</>
                 )}
               </Button>
             </div>

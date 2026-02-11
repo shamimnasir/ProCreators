@@ -805,7 +805,7 @@ export default function EssayHelperPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate {selectedMode?.name}</>                )}
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate {selectedMode?.name}</>                )}
               </Button>
             </div>
           </CardContent>

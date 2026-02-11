@@ -760,7 +760,7 @@ export default function ChecklistMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating (15-30s)...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-5 w-5" /> Generate {isTracker ? 'Tracker' : 'Checklist'}</>
+                  <><Wand2 className="mr-2 h-5 w-5" /> Generate {isTracker ? 'Tracker' : 'Checklist'}</>
                 )}
               </Button>
 

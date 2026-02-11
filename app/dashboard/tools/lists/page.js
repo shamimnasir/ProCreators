@@ -221,7 +221,7 @@ export default function ListsPage() {
               className="flex-1"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Wand2 className="mr-2 h-4 w-4" />
               Generate List
             </Button>
 

@@ -1074,7 +1074,7 @@ export default function SlidesMakerPage() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Wand2 className="mr-2 h-4 w-4" />
                     Generate
                   </>
                 )}

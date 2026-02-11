@@ -884,7 +884,7 @@ export default function ExamPrepPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Searching Web & Generating...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Practice Questions</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Practice Questions</>
                 )}
               </Button>
             </div>

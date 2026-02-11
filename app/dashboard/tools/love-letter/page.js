@@ -235,7 +235,7 @@ export default function LoveLetterPage() {
               {generating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Writing with Love...</>
               ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Love Letter</>  
+                <><Wand2 className="mr-2 h-4 w-4" /> Generate Love Letter</>  
               )}
             </Button>
 

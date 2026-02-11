@@ -465,7 +465,7 @@ export default function JournalMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Structure...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Journal Structure</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Journal Structure</>
                 )}
               </Button>
             </div>

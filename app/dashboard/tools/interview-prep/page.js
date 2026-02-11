@@ -627,7 +627,7 @@ export default function InterviewPrepPage() {
             {generating ? (
               <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Generating Questions...</>
             ) : (
-              <><Sparkles className="mr-2 h-6 w-6" />Generate Interview Questions</>
+              <><Wand2 className="mr-2 h-6 w-6" />Generate Interview Questions</>
             )}
           </Button>
 

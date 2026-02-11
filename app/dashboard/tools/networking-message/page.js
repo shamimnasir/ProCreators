@@ -496,7 +496,7 @@ export default function NetworkingMessagePage() {
                   {generating ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Crafting Message...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Generate Networking Message</>
+                    <><Wand2 className="h-4 w-4 mr-2" /> Generate Networking Message</>
                   )}
                 </Button>
               </div>
@@ -728,7 +728,7 @@ export default function NetworkingMessagePage() {
                   disabled={generating}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" /> Regenerate
+                  <Wand2 className="h-4 w-4 mr-2" /> Regenerate
                 </Button>
               </div>
             </>

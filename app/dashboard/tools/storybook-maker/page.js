@@ -481,7 +481,7 @@ export default function StorybookMakerPage() {
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Story...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Story with AI</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate Story with AI</>
                     )}
                   </Button>
                 </div>
@@ -727,7 +727,7 @@ export default function StorybookMakerPage() {
                   {generatingIllustrations ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                   ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate All Illustrations</>
+                    <><Wand2 className="mr-2 h-4 w-4" /> Generate All Illustrations</>
                   )}
                 </Button>
               </div>
@@ -884,7 +884,7 @@ export default function StorybookMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Storybook PDF...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Storybook PDF</>
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Storybook PDF</>
                 )}
               </Button>
             </div>

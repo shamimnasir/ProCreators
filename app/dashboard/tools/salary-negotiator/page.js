@@ -570,7 +570,7 @@ export default function SalaryNegotiatorPage() {
             {generating ? (
               <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Crafting Your Strategy...</>
             ) : (
-              <><Sparkles className="mr-2 h-6 w-6" />Generate Negotiation Strategy</>         
+              <><Wand2 className="mr-2 h-6 w-6" />Generate Negotiation Strategy</>         
             )}
           </Button>
 

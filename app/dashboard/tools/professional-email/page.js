@@ -473,7 +473,7 @@ export default function ProfessionalEmailPage() {
                   {generating ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Writing Email...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Generate Professional Email</>
+                    <><Wand2 className="h-4 w-4 mr-2" /> Generate Professional Email</>
                   )}
                 </Button>
               </div>
@@ -715,7 +715,7 @@ export default function ProfessionalEmailPage() {
                   disabled={generating}
                   className="bg-orange-600 hover:bg-orange-700"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" /> Regenerate
+                  <Wand2 className="h-4 w-4 mr-2" /> Regenerate
                 </Button>
               </div>
             </>

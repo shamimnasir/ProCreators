@@ -991,7 +991,7 @@ export default function EmailCampaignPage() {
                       disabled={generating}
                       className="bg-purple-600 hover:bg-purple-700"
                     >
-                      <Sparkles className="h-4 w-4 mr-2" /> Regenerate
+                      <Wand2 className="h-4 w-4 mr-2" /> Regenerate
                     </Button>
                   </div>
                 </>

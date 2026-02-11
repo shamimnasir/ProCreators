@@ -430,7 +430,7 @@ export default function GrammarCheckerPage() {
                   {loading ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analyzing...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Check Grammar & Style</>
+                    <><Wand2 className="h-4 w-4 mr-2" /> Check Grammar & Style</>
                   )}
                 </Button>
               </div>

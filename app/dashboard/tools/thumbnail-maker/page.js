@@ -1166,7 +1166,7 @@ export default function ThumbnailMakerPage() {
                       </>
                     ) : (
                       <>
-                        <Sparkles className="h-5 w-5 mr-2" />
+                        <Wand2 className="h-5 w-5 mr-2" />
                         Enhance to High-CTR
                       </>
                     )}

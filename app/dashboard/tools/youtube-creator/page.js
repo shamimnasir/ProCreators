@@ -757,7 +757,7 @@ export default function YouTubeCreatorPage() {
                   {generating ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating Content...</>
                   ) : (
-                    <><Sparkles className="h-4 w-4 mr-2" /> Generate YouTube Content</>
+                    <><Wand2 className="h-4 w-4 mr-2" /> Generate YouTube Content</>
                   )}
                 </Button>
               </div>
@@ -961,7 +961,7 @@ export default function YouTubeCreatorPage() {
                   disabled={generating}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" /> Regenerate
+                  <Wand2 className="h-4 w-4 mr-2" /> Regenerate
                 </Button>
               </div>
             </>

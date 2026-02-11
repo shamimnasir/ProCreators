@@ -520,7 +520,7 @@ export default function PlannerMakerPage() {
                     {generating ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Planner (15-30s)...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Planner</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate Planner</>
                     )}
                   </Button>
 
@@ -698,7 +698,7 @@ export default function PlannerMakerPage() {
                     {generating ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate Planner</>
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate Planner</>
                     )}
                   </Button>
                 </div>

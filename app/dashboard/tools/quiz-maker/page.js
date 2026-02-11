@@ -626,7 +626,7 @@ export default function QuizMakerPage() {
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Questions...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" /> Generate {questionCount} Questions</>  
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate {questionCount} Questions</>  
                     )}
                   </Button>
                 </div>
@@ -980,7 +980,7 @@ export default function QuizMakerPage() {
                 {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Quiz PDF...</>
                 ) : (
-                  <><Sparkles className="mr-2 h-4 w-4" /> Generate Quiz PDF</>  
+                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Quiz PDF</>  
                 )}
               </Button>
             </div>

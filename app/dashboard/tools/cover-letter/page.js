@@ -697,7 +697,7 @@ export default function CoverLetterPage() {
             {generating ? (
               <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating Cover Letter...</>
             ) : (
-              <><Sparkles className="mr-2 h-6 w-6" />Generate Cover Letter</>
+              <><Wand2 className="mr-2 h-6 w-6" />Generate Cover Letter</>
             )}
           </Button>
 

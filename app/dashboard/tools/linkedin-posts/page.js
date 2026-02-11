@@ -877,7 +877,7 @@ export default function SocialMediaPostCreator() {
               {generating ? (
                 <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating {selectedPlatform?.name} Posts...</>
               ) : (
-                <><Sparkles className="mr-2 h-6 w-6" />Generate {selectedPlatform?.name} Posts</>         
+                <><Wand2 className="mr-2 h-6 w-6" />Generate {selectedPlatform?.name} Posts</>         
               )}
             </Button>
           </div>
@@ -895,7 +895,7 @@ export default function SocialMediaPostCreator() {
                 <RefreshCw className="h-4 w-4 mr-2" />Create New
               </Button>
               <Button variant="outline" onClick={handleGenerate}>
-                <Sparkles className="h-4 w-4 mr-2" />Regenerate
+                <Wand2 className="h-4 w-4 mr-2" />Regenerate
               </Button>
             </div>
           </div>

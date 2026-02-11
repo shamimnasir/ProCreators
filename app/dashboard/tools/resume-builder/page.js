@@ -937,7 +937,7 @@ Senior Software Engineer at Google (2020 - Present)
 
 
             <Button size="lg" className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || (!rawInfo && !personalInfo.name)}>
-            {generating ? <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating Resume...</> : <><Sparkles className="mr-2 h-6 w-6" />Generate Professional Resume</>}
+            {generating ? <><Loader2 className="mr-2 h-6 w-6 animate-spin" />Creating Resume...</> : <><Wand2 className="mr-2 h-6 w-6" />Generate Professional Resume</>}
           </Button>
 
 

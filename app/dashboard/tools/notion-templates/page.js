@@ -716,7 +716,7 @@ export default function NotionTemplateMakerPage() {
                   {loading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
                   ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Generate Template</>
+                    <><Wand2 className="mr-2 h-4 w-4" /> Generate Template</>
                   )}
                 </Button>
               </div>

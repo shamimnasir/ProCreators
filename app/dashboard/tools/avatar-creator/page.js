@@ -250,7 +250,7 @@ export default function AvatarCreatorPage() {
               {generating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Avatar Concept...</>
               ) : (
-                <><Sparkles className="mr-2 h-4 w-4" /> Generate Avatar Concept</>  
+                <><Wand2 className="mr-2 h-4 w-4" /> Generate Avatar Concept</>  
               )}
             </Button>
 

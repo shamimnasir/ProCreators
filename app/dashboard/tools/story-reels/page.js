@@ -1434,7 +1434,7 @@ Product URL: ${scrapeData.product.url}`
           <p className="text-muted-foreground">{nicheDescription}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
-          <Sparkles className="h-4 w-4 mr-2" />
+          <Wand2 className="h-4 w-4 mr-2" />
           AI Voice Studio
         </Badge>
       </div>
@@ -1615,7 +1615,7 @@ Product URL: ${scrapeData.product.url}`
                     </>
                   ) : (
                     <>
-                      <Sparkles className="mr-2 h-4 w-4" />
+                      <Wand2 className="mr-2 h-4 w-4" />
                       Scrape & Generate
                     </>
                   )}
@@ -1681,7 +1681,7 @@ Product URL: ${scrapeData.product.url}`
               className="flex-1"
             >
               {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Wand2 className="mr-2 h-4 w-4" />
               {(() => {
                 const buttonTexts = {
                   'mini-stories': 'Generate AI Story',

@@ -1617,7 +1617,7 @@ export default function AIVideoStudioPage() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-5 w-5" />
+                    <Wand2 className="mr-2 h-5 w-5" />
                     Generate Video
                   </>
                 )}

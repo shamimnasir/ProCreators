@@ -614,7 +614,7 @@ export default function BlogCreatorPage() {
             <CreditCostBadge toolId="blog-creator" />
 
             <Button size="lg" className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 h-14 text-lg" onClick={handleGenerate} disabled={generating || !topic}>
-            {generating ? (<><Loader2 className="mr-2 h-6 w-6 animate-spin" />Generating {selectedType?.name}...</>) : (<><Sparkles className="mr-2 h-6 w-6" />Generate Blog Post</>)}
+            {generating ? (<><Loader2 className="mr-2 h-6 w-6 animate-spin" />Generating {selectedType?.name}...</>) : (<><Wand2 className="mr-2 h-6 w-6" />Generate Blog Post</>)}
           </Button>
 
           </div>
@@ -699,7 +699,7 @@ export default function BlogCreatorPage() {
                     </p>
                   </div>
                   <Button onClick={humanizeContent} disabled={humanizing} className="bg-white text-purple-600 hover:bg-gray-100">
-                    {humanizing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Humanizing...</> : <><Sparkles className="h-4 w-4 mr-2" />Humanize Now</>}
+                    {humanizing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Humanizing...</> : <><Wand2 className="h-4 w-4 mr-2" />Humanize Now</>}
                   </Button>
                 </div>
               </CardContent>

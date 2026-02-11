@@ -2331,7 +2331,7 @@ export default function VideoEditorPage() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-4 w-4 mr-2" />
+                          <Wand2 className="h-4 w-4 mr-2" />
                           {clips.length > 1 ? `Merge ${clips.length} Clips` : 'Process Video'}
                         </>
                       )}
@@ -2700,7 +2700,7 @@ export default function VideoEditorPage() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Wand2 className="h-4 w-4 mr-2" />
                   Create {creatorType === 'intro' ? 'Intro' : 'Outro'}
                 </>
               )}

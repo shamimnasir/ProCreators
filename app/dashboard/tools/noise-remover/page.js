@@ -325,7 +325,7 @@ export default function NoiseRemoverPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 mr-2" />
+                      <Wand2 className="h-5 w-5 mr-2" />
                       Remove Background Noise
                     </>
                   )}

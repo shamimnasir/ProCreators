@@ -207,7 +207,7 @@ export default function FortuneTellerPage() {
                   {generating ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Consulting the Spirits...</>
                   ) : (
-                    <><Sparkles className="mr-2 h-4 w-4" /> Reveal My Fortune</>  
+                    <><Wand2 className="mr-2 h-4 w-4" /> Reveal My Fortune</>  
                   )}
                 </Button>
               </div>
