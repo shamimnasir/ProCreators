@@ -83,7 +83,6 @@ const ICON_COMPONENTS = {
   'Music': Music,
   'MessageSquare': MessageSquare,
   'Search': Search,
-  'Sparkles': Sparkles,
   'ShoppingCart': ShoppingCart,
   'Bot': Bot
 }
