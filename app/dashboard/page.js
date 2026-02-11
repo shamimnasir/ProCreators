@@ -71,12 +71,12 @@ const quickActions = [
 
 // Popular tools
 const popularTools = [
-  { name: 'Quick Reels', href: '/dashboard/tools/quick-reels', icon: '⚡', color: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  { name: 'Thumbnails', href: '/dashboard/tools/thumbnail-maker', icon: '🖼️', color: 'bg-blue-100 dark:bg-blue-900/30' },
-  { name: 'Blog Writer', href: '/dashboard/tools/blog-creator', icon: '📝', color: 'bg-green-100 dark:bg-green-900/30' },
-  { name: 'Ad Copy', href: '/dashboard/tools/ad-copy', icon: '🎯', color: 'bg-red-100 dark:bg-red-900/30' },
-  { name: 'Carousels', href: '/dashboard/tools/carousels', icon: '🎠', color: 'bg-purple-100 dark:bg-purple-900/30' },
-  { name: 'Story Writer', href: '/dashboard/tools/story-writer', icon: '📖', color: 'bg-pink-100 dark:bg-pink-900/30' },
+  { name: 'Quick Reels', href: '/dashboard/tools/quick-reels', icon: Zap, color: 'bg-amber-100 dark:bg-amber-900/30' },
+  { name: 'Thumbnails', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon, color: 'bg-blue-100 dark:bg-blue-900/30' },
+  { name: 'Blog Writer', href: '/dashboard/tools/blog-creator', icon: FileText, color: 'bg-green-100 dark:bg-green-900/30' },
+  { name: 'Ad Copy', href: '/dashboard/tools/ad-copy', icon: Target, color: 'bg-red-100 dark:bg-red-900/30' },
+  { name: 'Carousels', href: '/dashboard/tools/carousels', icon: Layers, color: 'bg-purple-100 dark:bg-purple-900/30' },
+  { name: 'Story Writer', href: '/dashboard/tools/story-writer', icon: BookOpen, color: 'bg-pink-100 dark:bg-pink-900/30' },
 ]
 
 // Map category to icon
