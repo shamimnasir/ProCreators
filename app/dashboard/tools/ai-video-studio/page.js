@@ -544,7 +544,10 @@ function AIVideoStudioPageContent() {
       const response = await fetch('/api/ai-video-studio/generate', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+        }
       })
       
       clearInterval(progressInterval)
