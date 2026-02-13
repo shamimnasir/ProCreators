@@ -858,6 +858,53 @@ function AIVideoStudioPageContent() {
         {/* ==================== QUICK MODE CONTENT ==================== */}
         {studioMode === 'quick' && (
           <>
+            {/* Custom Creation - Highlighted at TOP */}
+            <Card 
+              className="border-2 border-emerald-400 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-cyan-950/40 cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              onClick={() => {
+                setStudioMode('ai')
+                handleSelectTemplate({
+                  id: 'custom',
+                  name: 'Custom Creation',
+                  shortName: 'Custom',
+                  description: 'Start from scratch with full control',
+                  icon: '✨',
+                  category: 'custom',
+                  color: 'from-emerald-500 to-teal-600',
+                  perfectFor: ['Advanced users', 'Custom projects'],
+                  defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
+                  inputType: 'prompt',
+                  inputPlaceholder: 'Describe your video in detail...'
+                })
+              }}
+            >
+              {/* Highlight Badge */}
+              <div className="absolute top-0 right-0 bg-gradient-to-l from-orange-500 to-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                FEATURED
+              </div>
+              <CardContent className="py-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white shadow-lg">
+                      <Zap className="h-7 w-7" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xl text-emerald-800 dark:text-emerald-100">
+                        Custom Creation
+                      </h3>
+                      <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                        Your vision, your video • Full creative control • Any style you imagine
+                      </p>
+                    </div>
+                  </div>
+                  <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md">
+                    <Play className="h-4 w-4 mr-2" />
+                    Create Video
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Platform Badges */}
             <Card className="border-dashed bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
               <CardContent className="py-4">
