@@ -1161,7 +1161,10 @@ Product URL: ${scrapeData.product.url}`
       const response = await fetch('/api/story-reels/compose', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+        }
       })
 
       clearInterval(progressInterval)
@@ -1286,7 +1289,10 @@ Product URL: ${scrapeData.product.url}`
       const response = await fetch('/api/story-reels/compose', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+        }
       })
 
       clearInterval(progressInterval)
