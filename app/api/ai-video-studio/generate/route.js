@@ -1260,7 +1260,7 @@ export async function POST(request) {
     // Parse request
     const formData = await request.formData()
     const mode = formData.get('mode') // 'image-to-video', 'text-to-video', 'slideshow'
-    const prompt = formData.get('prompt') || ''
+    let prompt = formData.get('prompt') || ''
     const duration = parseInt(formData.get('duration') || '5')
     const format = formData.get('format') || 'portrait'
     const templateId = formData.get('templateId') || 'custom'
@@ -1275,6 +1275,33 @@ export async function POST(request) {
     const captionStyle = formData.get('captionStyle') || 'bold-outline'
     const musicTrack = formData.get('musicTrack') || 'none'
     const narrationMode = formData.get('narrationMode') || 'dialogue-only' // 'full' or 'dialogue-only'
+    
+    // AUTO-GENERATE SCRIPT: If prompt looks like a command, generate actual content
+    const commandPatterns = /^(create|make|generate|write|produce|build|craft|design)\s+(a|an|the)?\s*(video|content|script|story|reel)?\s*(about|on|for|regarding|of)/i
+    if (commandPatterns.test(prompt.trim()) && voiceOption === 'tts') {
+      console.log(`[${jobId}] Detected command-style prompt, generating script...`)
+      try {
+        const scriptResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ai-video-studio/enhance-prompt`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            useCaseId: templateId,
+            duration,
+            format,
+            language: ttsLanguage
+          })
+        })
+        const scriptData = await scriptResponse.json()
+        if (scriptData.success && scriptData.enhancedPrompt) {
+          console.log(`[${jobId}] Script generated successfully (${scriptData.enhancedPrompt.length} chars)`)
+          prompt = scriptData.enhancedPrompt
+        }
+      } catch (scriptError) {
+        console.error(`[${jobId}] Script generation failed:`, scriptError.message)
+        // Continue with original prompt
+      }
+    }
     
     // Check if imageFile is actually a file or just a string
     const hasValidImage = imageFile && typeof imageFile !== 'string' && imageFile.size > 0
