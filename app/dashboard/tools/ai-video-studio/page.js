@@ -543,7 +543,8 @@ function AIVideoStudioPageContent() {
       
       const response = await fetch('/api/ai-video-studio/generate', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       })
       
       clearInterval(progressInterval)
