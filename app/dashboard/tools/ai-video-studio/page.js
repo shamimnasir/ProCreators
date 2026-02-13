@@ -128,7 +128,7 @@ const NICHE_CATEGORIES = [
     icon: 'PartyPopper',
     description: 'Fun content that entertains',
     color: 'from-yellow-500 to-orange-500',
-    niches: ['comedy', 'festival', 'generic']
+    niches: ['comedy', 'festival']
   },
   {
     id: 'business',
