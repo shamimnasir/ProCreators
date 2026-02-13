@@ -3,7 +3,7 @@ import { getUseCaseById } from '@/config/ai-video-usecases'
 
 export async function POST(request) {
   try {
-    const { prompt, useCaseId, platform, duration, format } = await request.json()
+    const { prompt, useCaseId, platform, duration, format, language } = await request.json()
 
     if (!prompt) {
       return NextResponse.json(
@@ -12,33 +12,56 @@ export async function POST(request) {
       )
     }
 
-    const useCase = getUseCaseById(useCaseId)
-    
-    // For 'make-anything', enhance minimally to preserve user intent
-    // For specific use cases, apply the full system prompt
+    const useCase = getUseCaseById(useCaseId) || { id: useCaseId, name: 'Custom' }
     
     let enhancedPrompt = prompt
     
     // Check if we have Emergent LLM key for prompt enhancement
     const emergentKey = process.env.EMERGENT_LLM_KEY
     
-    if (emergentKey && useCaseId !== 'make-anything') {
+    // Detect if this is a command-style prompt that needs script generation
+    const commandPatterns = /^(create|make|generate|write|produce|build|craft|design)\s+(a|an|the)?\s*(video|content|script|story|reel)?\s*(about|on|for|regarding|of)/i
+    const isCommandPrompt = commandPatterns.test(prompt.trim())
+    
+    if (emergentKey && (isCommandPrompt || useCaseId === 'custom' || useCaseId !== 'make-anything')) {
       try {
-        // Use Gemini for prompt enhancement
+        // Use Gemini for prompt enhancement / script generation
         const { GoogleGenerativeAI } = require('@google/generative-ai')
         const genAI = new GoogleGenerativeAI(emergentKey)
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
         
-        // Build the enhancement prompt
-        const systemPrompt = useCase.promptTemplate
-          .replace('{userPrompt}', prompt)
-          .replace('{platform}', platform || 'instagram')
-          .replace('{duration}', duration || 5)
-          .replace('{format}', format || 'portrait')
+        let systemPrompt
+        
+        if (isCommandPrompt) {
+          // Generate an actual script from the command prompt
+          systemPrompt = `You are a professional video scriptwriter. The user gave you a command: "${prompt}"
+
+Create a ${duration || 30}-second video script based on this topic. The script should:
+1. Be engaging and suitable for voiceover narration
+2. Have a clear beginning, middle, and end
+3. Use vivid, descriptive language
+4. Be approximately ${Math.round((duration || 30) * 2.5)} words (for natural speech pacing)
+5. NOT include any instructions, meta-commentary, or "Create a video about..." - just the actual script content
+
+Output ONLY the script text, nothing else. No titles, no formatting marks, just the spoken content.`
+        } else if (useCase?.promptTemplate) {
+          // Use existing use case template
+          systemPrompt = useCase.promptTemplate
+            .replace('{userPrompt}', prompt)
+            .replace('{platform}', platform || 'instagram')
+            .replace('{duration}', duration || 5)
+            .replace('{format}', format || 'portrait')
+        } else {
+          // Generic enhancement
+          systemPrompt = `Enhance this video prompt for better AI generation. Make it more descriptive and visual while keeping the core meaning: "${prompt}". Output only the enhanced prompt.`
+        }
         
         const result = await model.generateContent(systemPrompt)
         const response = await result.response
         enhancedPrompt = response.text().trim()
+        
+        // Clean up any unwanted prefixes
+        enhancedPrompt = enhancedPrompt.replace(/^(script:|here's the script:|video script:)/i, '').trim()
         
       } catch (aiError) {
         console.error('[Enhance Prompt] AI enhancement failed:', aiError.message)
@@ -54,7 +77,8 @@ export async function POST(request) {
       success: true,
       originalPrompt: prompt,
       enhancedPrompt,
-      useCase: useCase.name
+      useCase: useCase.name,
+      wasScriptGenerated: isCommandPrompt
     })
 
   } catch (error) {
@@ -79,7 +103,7 @@ function enhancePromptBasic(prompt, useCase, format) {
     'cinematic-broll': 'Cinematic b-roll footage: '
   }
   
-  const prefix = useCasePrefixes[useCase.id] || ''
+  const prefix = useCasePrefixes[useCase?.id] || ''
   
   return `${prefix}${prompt}${formatSuffix}, smooth motion, high quality`
 }
