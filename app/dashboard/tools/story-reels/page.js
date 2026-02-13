@@ -1160,7 +1160,8 @@ Product URL: ${scrapeData.product.url}`
 
       const response = await fetch('/api/story-reels/compose', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       })
 
       clearInterval(progressInterval)
@@ -1284,7 +1285,8 @@ Product URL: ${scrapeData.product.url}`
 
       const response = await fetch('/api/story-reels/compose', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       })
 
       clearInterval(progressInterval)
