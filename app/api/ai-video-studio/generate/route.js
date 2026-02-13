@@ -464,7 +464,7 @@ async function compileVideoWithFFmpeg({
     // Get actual audio duration if we have audio
     let actualDuration = duration
     if (hasAudio && existsSync(audioPath)) {
-      actualDuration = await new Promise((resolve) => {
+      const audioDuration = await new Promise((resolve) => {
         ffmpeg.ffprobe(audioPath, (err, metadata) => {
           if (err) {
             resolve(duration)
@@ -473,6 +473,10 @@ async function compileVideoWithFFmpeg({
           }
         })
       })
+      // Use the LONGER of: requested duration or audio duration
+      // This ensures minimum duration is always respected
+      actualDuration = Math.max(duration, audioDuration)
+      console.log(`[${jobId}] Duration: requested=${duration}s, audio=${audioDuration}s, using=${actualDuration}s`)
       }
     
     // Step 3: Normalize and trim each clip
