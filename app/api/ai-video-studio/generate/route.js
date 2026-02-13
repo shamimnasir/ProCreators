@@ -1226,8 +1226,12 @@ export async function POST(request) {
     }
     
     // Get user ID and check credits
+    console.log('[AI-VIDEO-STUDIO] Checking authentication...')
+    console.log('[AI-VIDEO-STUDIO] Cookie header:', request.headers.get('cookie') ? 'present' : 'missing')
     const userId = await getUserIdFromRequest(request)
+    console.log('[AI-VIDEO-STUDIO] User ID result:', userId)
     if (!userId) {
+      console.log('[AI-VIDEO-STUDIO] Authentication failed - no userId found')
       return NextResponse.json({
         success: false,
         error: 'Authentication required. Please log in to use this tool.'
