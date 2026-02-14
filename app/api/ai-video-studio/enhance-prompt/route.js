@@ -27,12 +27,15 @@ export async function POST(request) {
     console.log('[enhance-prompt] isCommandPrompt:', isCommandPrompt)
     console.log('[enhance-prompt] useCaseId:', useCaseId)
     
-    if (emergentKey && (isCommandPrompt || useCaseId === 'custom' || useCaseId !== 'make-anything')) {
+    // Use GOOGLE_API_KEY for direct Gemini calls, fallback to EMERGENT_LLM_KEY
+    const apiKey = process.env.GOOGLE_API_KEY || emergentKey
+    
+    if (apiKey && (isCommandPrompt || useCaseId === 'custom' || useCaseId !== 'make-anything')) {
       try {
         console.log('[enhance-prompt] Using Gemini for enhancement...')
         // Use Gemini for prompt enhancement / script generation
         const { GoogleGenerativeAI } = require('@google/generative-ai')
-        const genAI = new GoogleGenerativeAI(emergentKey)
+        const genAI = new GoogleGenerativeAI(apiKey)
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
         
         let systemPrompt
