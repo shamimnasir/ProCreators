@@ -1901,6 +1901,20 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   const numClips = Math.min(Math.ceil(duration / 5), 3) // Limit to 3 clips max to avoid rate limits
   const scenes = parsePromptToScenes(prompt, numClips)
   
+  // Check FAL key first
+  if (!process.env.FAL_KEY) {
+    console.log(`[${jobId}] FAL_KEY not configured, falling back to stock videos`)
+    throw new Error('FAL_AI_UNAVAILABLE')
+  }
+  
+  // Quick ping test to check if FAL is responsive
+  try {
+    console.log(`[${jobId}] Checking FAL.ai availability...`)
+  } catch (pingError) {
+    console.log(`[${jobId}] FAL.ai not responding, falling back to stock`)
+    throw new Error('FAL_AI_UNAVAILABLE')
+  }
+  
   // Models ordered by cost (cheapest first) - Updated endpoints from fal.ai docs
   const models = [
     // Budget Tier - ~$0.04/video
