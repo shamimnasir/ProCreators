@@ -1353,8 +1353,6 @@ function AIVideoStudioPageContent() {
                   Video Scene Source
                 </Label>
                 <RadioGroup value={videoSource} onValueChange={setVideoSource} className="space-y-3">
-                  {/* Hidden stock option - removed from UI but kept for compatibility */}
-                  <RadioGroupItem value="stock" id="stock" className="hidden" />
                   
                   <div 
                     className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
@@ -1397,6 +1395,28 @@ function AIVideoStudioPageContent() {
                       </p>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                         📹 3-second auto-trim • 🔍 Smart keyword search • 📝 Text overlay
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      videoSource === 'stock' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setVideoSource('stock')}
+                  >
+                    <RadioGroupItem value="stock" id="stock" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📹</span>
+                        <Label htmlFor="stock" className="font-semibold cursor-pointer">Stock Videos Only</Label>
+                        <Badge className="text-xs bg-gradient-to-r from-green-500 to-emerald-500">Fast & Reliable</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        HD stock footage from Pexels • No AI wait time • Great for quick videos
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        ⚡ Instant generation • 🎬 Professional footage • 🔄 No rate limits
                       </p>
                     </div>
                   </div>
