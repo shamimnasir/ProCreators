@@ -2034,21 +2034,27 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         }
         
         consecutiveFailures++
-      
-      // Try next model after failure
-      if (modelIndex < models.length - 1) {
-        modelIndex++
-        selectedModel = models[modelIndex]
-        consecutiveFailures = 0
-        i-- // Retry this clip
+        
+        // Try next model after failure
+        if (modelIndex < models.length - 1) {
+          modelIndex++
+          selectedModel = models[modelIndex]
+          consecutiveFailures = 0
+        }
+        retryCount++
       }
+    }
+    
+    // If we exhausted retries without success, move to next clip
+    if (!clipGenerated) {
+      console.log(`[${jobId}] Could not generate clip ${i + 1} after ${maxRetries} retries, skipping...`)
     }
   }
   
   // Log summary
   if (videos.length > 0) {
     const modelUsed = [...new Set(videos.map(v => v.model))].join(', ')
-    const totalCost = videos.reduce((sum, v) => sum + v.cost, 0)
+    const totalCost = videos.reduce((sum, v) => sum + (v.cost || 0), 0)
     console.log(`[${jobId}] Generated ${videos.length} videos using ${modelUsed}, estimated cost: $${totalCost.toFixed(4)}`)
   }
   
