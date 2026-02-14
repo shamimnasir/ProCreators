@@ -23,8 +23,13 @@ export async function POST(request) {
     const commandPatterns = /^(create|make|generate|write|produce|build|craft|design)\s+(a|an|the)?\s*(video|content|script|story|reel)?\s*(about|on|for|regarding|of)/i
     const isCommandPrompt = commandPatterns.test(prompt.trim())
     
+    console.log('[enhance-prompt] emergentKey exists:', !!emergentKey)
+    console.log('[enhance-prompt] isCommandPrompt:', isCommandPrompt)
+    console.log('[enhance-prompt] useCaseId:', useCaseId)
+    
     if (emergentKey && (isCommandPrompt || useCaseId === 'custom' || useCaseId !== 'make-anything')) {
       try {
+        console.log('[enhance-prompt] Using Gemini for enhancement...')
         // Use Gemini for prompt enhancement / script generation
         const { GoogleGenerativeAI } = require('@google/generative-ai')
         const genAI = new GoogleGenerativeAI(emergentKey)
