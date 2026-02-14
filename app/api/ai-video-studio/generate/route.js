@@ -1493,9 +1493,28 @@ export async function POST(request) {
       }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
+      console.log(`[${jobId}] Using hybrid mode (AI + Stock)`)
       
-      // Extract keywords from script for stock video search
-      const keywords = extractKeywordsFromScript(prompt, 5)
+      // Use AI-powered keyword extraction for better video matching
+      const numClips = Math.ceil(duration / 3)
+      let keywords = []
+      
+      try {
+        const keywordResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/story-reels/extract-keywords`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ script: prompt, duration })
+        })
+        const keywordData = await keywordResponse.json()
+        
+        if (keywordData.success && keywordData.keywords) {
+          keywords = keywordData.keywords
+          console.log(`[${jobId}] AI extracted keywords: ${keywords.join(', ')}`)
+        }
+      } catch (keywordError) {
+        console.error(`[${jobId}] AI keyword extraction failed:`, keywordError.message)
+        keywords = extractKeywordsFromScript(prompt, numClips)
+      }
       
       // Try to generate 1-2 AI videos for key scenes
       try {
@@ -1504,13 +1523,35 @@ export async function POST(request) {
           videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
         }
       } catch (e) {
-        // AI generation failed, continue with stock
+        console.log(`[${jobId}] AI video generation skipped, using stock only`)
       }
       
-      // Search and add stock videos based on keywords (with 3-second trim later)
-      const numStockClips = Math.max(2, Math.ceil(duration / 5) - videos.length)
-      const stockVideos = await searchStockVideosByKeywords(keywords, numStockClips)
-      videos.push(...stockVideos.map(v => ({ ...v, type: 'stock' })))
+      // Search and add stock videos based on keywords
+      const numStockClips = Math.max(2, numClips - videos.length)
+      
+      try {
+        const searchResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/story-reels/search-videos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keywords: keywords.slice(0, numStockClips) })
+        })
+        const searchData = await searchResponse.json()
+        
+        if (searchData.success && searchData.videos) {
+          videos.push(...searchData.videos.map(v => ({
+            url: v.url,
+            keyword: v.keyword,
+            thumbnail: v.thumbnail,
+            duration: v.duration || 5,
+            source: v.source || 'pexels',
+            type: 'stock'
+          })))
+        }
+      } catch (searchError) {
+        console.error(`[${jobId}] Video search failed:`, searchError.message)
+        const stockVideos = await searchStockVideosByKeywords(keywords, numStockClips)
+        videos.push(...stockVideos.map(v => ({ ...v, type: 'stock' })))
+      }
       
     } else {
       // AI only mode (stock-only is now removed)
