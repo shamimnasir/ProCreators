@@ -1898,7 +1898,7 @@ Add subtle camera movement, depth, and professional lighting effects.`
 // Reference: https://fal.ai/pricing
 async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   const videos = []
-  const numClips = Math.ceil(duration / 5) // Each clip is ~5 seconds
+  const numClips = Math.min(Math.ceil(duration / 5), 3) // Limit to 3 clips max to avoid rate limits
   const scenes = parsePromptToScenes(prompt, numClips)
   
   // Models ordered by cost (cheapest first) - Updated endpoints from fal.ai docs
@@ -1969,54 +1969,71 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   let modelIndex = 0
   let consecutiveFailures = 0
   
+  // Generate clips SEQUENTIALLY to avoid rate limits
   for (let i = 0; i < numClips; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
       dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
     }`
     
+    // Add delay between requests to avoid rate limits (except for first request)
+    if (i > 0) {
+      console.log(`[${jobId}] Waiting 3s before next clip to avoid rate limits...`)
+      await new Promise(r => setTimeout(r, 3000))
+    }
     
-    try {
-      const result = await fal.subscribe(selectedModel.endpoint, {
-        input: {
-          prompt: cinematicPrompt,
-          aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
-          duration: '5'
-        },
-        logs: true,
-        onQueueUpdate: (update) => {
-          if (update.status === 'IN_PROGRESS') {
-            console.log(`[${jobId}] Model ${selectedModel.name} processing...`)
+    let clipGenerated = false
+    let retryCount = 0
+    const maxRetries = 2
+    
+    while (!clipGenerated && retryCount < maxRetries) {
+      try {
+        console.log(`[${jobId}] Generating clip ${i + 1}/${numClips} with ${selectedModel.name}...`)
+        const result = await fal.subscribe(selectedModel.endpoint, {
+          input: {
+            prompt: cinematicPrompt,
+            aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
+            duration: '5'
+          },
+          logs: true,
+          onQueueUpdate: (update) => {
+            if (update.status === 'IN_PROGRESS') {
+              console.log(`[${jobId}] Model ${selectedModel.name} processing...`)
+            }
           }
-        }
-      })
-      
-      // Extract video URL from result (different models return in different formats)
-      const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
-      
-      if (videoUrl) {
-        videos.push({
-          url: videoUrl,
-          prompt: scenePrompt,
-          model: selectedModel.name,
-          tier: selectedModel.tier,
-          cost: selectedModel.costPerSecond * 5,
-          index: i
         })
-        consecutiveFailures = 0 // Reset on success
-      } else {
-        consecutiveFailures++
-        // Try next model after 2 consecutive failures
-        if (consecutiveFailures >= 2 && modelIndex < models.length - 1) {
-          modelIndex++
-          selectedModel = models[modelIndex]
-          consecutiveFailures = 0
+        
+        // Extract video URL from result (different models return in different formats)
+        const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
+        
+        if (videoUrl) {
+          videos.push({
+            url: videoUrl,
+            prompt: scenePrompt,
+            model: selectedModel.name,
+            tier: selectedModel.tier,
+            cost: selectedModel.costPerSecond * 5,
+            index: i
+          })
+          consecutiveFailures = 0 // Reset on success
+          clipGenerated = true
+          console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully with ${selectedModel.name}`)
+        } else {
+          throw new Error('No video URL in response')
         }
-        i-- // Retry this clip
-      }
-    } catch (error) {
-      console.error(`[${jobId}] ❌ Clip ${i + 1} failed with ${selectedModel.name}:`, error.message)
-      consecutiveFailures++
+      } catch (error) {
+        const errorMsg = error.message || ''
+        console.error(`[${jobId}] ❌ Clip ${i + 1} failed with ${selectedModel.name}:`, errorMsg)
+        
+        // Check for rate limit / concurrent generation errors
+        if (errorMsg.includes('concurrent') || errorMsg.includes('rate') || errorMsg.includes('limit') || errorMsg.includes('too many')) {
+          console.log(`[${jobId}] Rate limit hit, waiting 10s before retry...`)
+          await new Promise(r => setTimeout(r, 10000))
+          retryCount++
+          continue
+        }
+        
+        consecutiveFailures++
       
       // Try next model after failure
       if (modelIndex < models.length - 1) {
