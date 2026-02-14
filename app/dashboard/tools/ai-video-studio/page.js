@@ -22,7 +22,7 @@ import {
   Type, Music, Mic, ChevronRight, Info, Search, Grid, Star, X, Library,
   TrendingUp, ArrowRight, Users, Rocket, BookOpen, Lightbulb, Smile,
   GraduationCap, Briefcase, Skull, Heart, PartyPopper, ShoppingBag, RefreshCw,
-  Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot
+  Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot, Check
 } from 'lucide-react'
 
 // Import configurations
