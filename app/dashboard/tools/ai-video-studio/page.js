@@ -1427,25 +1427,30 @@ function AIVideoStudioPageContent() {
               <div className="space-y-3 pt-4 border-t">
                 <div className={`p-4 rounded-lg border ${
                   videoSource === 'ai' ? 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200 dark:border-purple-800' :
+                  videoSource === 'stock' ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800' :
                   'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-200 dark:border-blue-800'
                 }`}>
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">
-                      {videoSource === 'ai' ? '🤖' : '✨'}
+                      {videoSource === 'ai' ? '🤖' : videoSource === 'stock' ? '📹' : '✨'}
                     </span>
                     <div>
                       <p className={`font-semibold ${
                         videoSource === 'ai' ? 'text-purple-900 dark:text-purple-100' :
+                        videoSource === 'stock' ? 'text-green-900 dark:text-green-100' :
                         'text-cyan-900 dark:text-cyan-100'
                       }`}>
                         {videoSource === 'ai' ? 'AI Video Generation' : 
+                         videoSource === 'stock' ? 'Stock Videos Only' :
                          'AI + Stock Mix (Best Value)'}
                       </p>
                       <p className={`text-xs ${
                         videoSource === 'ai' ? 'text-purple-700 dark:text-purple-300' :
+                        videoSource === 'stock' ? 'text-green-700 dark:text-green-300' :
                         'text-cyan-700 dark:text-cyan-300'
                       }`}>
                         {videoSource === 'ai' ? 'Quick → Standard → Cinema → Ultra quality cascade' : 
+                         videoSource === 'stock' ? 'Fast & reliable • No AI wait time • Professional HD footage' :
                          'AI scenes + 3s auto-trim stock clips (keyword-searched)'}
                       </p>
                     </div>
