@@ -1125,7 +1125,7 @@ function AIVideoStudioPageContent() {
                     Create Custom Video from Scratch
                   </h3>
                   <p className="text-sm text-violet-700 dark:text-violet-300">
-                    Full control • Any style • Your imagination
+                    Full control • Script editor • Video clips • Voice & music
                   </p>
                 </div>
               </div>
