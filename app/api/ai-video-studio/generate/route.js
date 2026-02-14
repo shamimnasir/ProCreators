@@ -1435,10 +1435,61 @@ export async function POST(request) {
     } else if (videoSource === 'stock') {
       // Stock videos only mode - fast and reliable
       console.log(`[${jobId}] Using stock videos only mode`)
-      const keywords = extractKeywordsFromScript(prompt, 5)
-      videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
+      
+      // Use AI-powered keyword extraction for better video matching
+      const numClips = Math.ceil(duration / 3) // 3-second clips
+      let keywords = []
+      
+      try {
+        // Call the AI-powered keyword extraction API
+        const keywordResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/story-reels/extract-keywords`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ script: prompt, duration })
+        })
+        const keywordData = await keywordResponse.json()
+        
+        if (keywordData.success && keywordData.keywords) {
+          keywords = keywordData.keywords
+          console.log(`[${jobId}] AI extracted keywords: ${keywords.join(', ')}`)
+        }
+      } catch (keywordError) {
+        console.error(`[${jobId}] AI keyword extraction failed:`, keywordError.message)
+      }
+      
+      // Fallback to basic extraction if AI failed
+      if (keywords.length === 0) {
+        keywords = extractKeywordsFromScript(prompt, numClips)
+        console.log(`[${jobId}] Basic extracted keywords: ${keywords.join(', ')}`)
+      }
+      
+      // Search videos using the extracted keywords via the proper API
+      try {
+        const searchResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/story-reels/search-videos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keywords })
+        })
+        const searchData = await searchResponse.json()
+        
+        if (searchData.success && searchData.videos && searchData.videos.length > 0) {
+          videos = searchData.videos.map(v => ({
+            url: v.url,
+            keyword: v.keyword,
+            thumbnail: v.thumbnail,
+            duration: v.duration || 5,
+            source: v.source || 'pexels',
+            type: 'stock'
+          }))
+          console.log(`[${jobId}] Found ${videos.length} stock videos via search API`)
+        }
+      } catch (searchError) {
+        console.error(`[${jobId}] Video search API failed:`, searchError.message)
+      }
+      
+      // Final fallback to direct fetch if API failed
       if (videos.length === 0) {
-        videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+        videos = await fetchStockVideos(keywords, numClips)
       }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
