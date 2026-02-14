@@ -723,24 +723,64 @@ function AIVideoStudioPageContent() {
       default:
         return (
           <div className="space-y-4">
-            <Label>{inputType === 'chat' ? 'Chat Conversation' : inputType === 'facts' ? 'Enter Facts' : 'Your Content'}</Label>
+            <Label>{inputType === 'chat' ? 'Chat Conversation' : inputType === 'facts' ? 'Enter Facts' : 'Your Script / Prompt'}</Label>
+            
+            {/* Important instruction for users */}
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-xs text-amber-800 dark:text-amber-200">
+                <strong>💡 Tip:</strong> Enter a topic/idea (e.g., "rain and storms") and click <strong>"Generate Script with AI"</strong> below. 
+                Or write your own script as pure narration text (avoid stage directions like "(SOUND of rain)" - they'll be read aloud).
+              </p>
+            </div>
+            
             <Textarea
-              placeholder={selectedTemplate?.inputPlaceholder || 'Enter your content...'}
+              placeholder={selectedTemplate?.inputPlaceholder || 'Enter a topic idea like "benefits of meditation" OR write your own script as spoken narration...'}
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(e) => {
+                setPrompt(e.target.value)
+                setEnhancedPrompt('') // Clear enhanced when user edits
+              }}
               rows={inputType === 'chat' || inputType === 'facts' ? 8 : 5}
               className="font-mono text-sm"
             />
-            <div className="flex justify-end">
-              <Button variant="outline" size="sm" onClick={handleEnhancePrompt} disabled={!prompt.trim()}>
-                <Wand2 className="h-4 w-4 mr-1" />
-                Enhance with AI
+            
+            {/* AI Script Generation - Made more prominent */}
+            <div className="flex flex-col gap-2">
+              <Button 
+                variant={enhancedPrompt ? "outline" : "default"}
+                className={!enhancedPrompt ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" : ""}
+                onClick={handleEnhancePrompt} 
+                disabled={!prompt.trim()}
+              >
+                <Wand2 className="h-4 w-4 mr-2" />
+                {enhancedPrompt ? 'Regenerate Script' : '✨ Generate Script with AI (Recommended)'}
               </Button>
+              {!enhancedPrompt && prompt.trim() && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Click above to convert your idea into a professional video script
+                </p>
+              )}
             </div>
+            
             {enhancedPrompt && (
               <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                <Label className="text-green-700 dark:text-green-300 text-xs">Enhanced:</Label>
-                <p className="text-sm mt-1">{enhancedPrompt}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="text-green-700 dark:text-green-300 text-xs flex items-center gap-1">
+                    <Check className="h-3 w-3" /> AI-Generated Script (Ready for Video)
+                  </Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs"
+                    onClick={() => {
+                      setPrompt(enhancedPrompt)
+                      setEnhancedPrompt('')
+                    }}
+                  >
+                    Edit Script
+                  </Button>
+                </div>
+                <p className="text-sm mt-1 whitespace-pre-wrap">{enhancedPrompt}</p>
               </div>
             )}
           </div>
