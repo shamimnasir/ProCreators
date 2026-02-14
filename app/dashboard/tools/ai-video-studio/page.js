@@ -914,20 +914,8 @@ function AIVideoStudioPageContent() {
             <Card 
               className="border-2 border-emerald-400 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-cyan-950/40 cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
               onClick={() => {
-                setStudioMode('ai')
-                handleSelectTemplate({
-                  id: 'custom',
-                  name: 'Custom Creation',
-                  shortName: 'Custom',
-                  description: 'Start from scratch with full control',
-                  icon: '✨',
-                  category: 'custom',
-                  color: 'from-emerald-500 to-teal-600',
-                  perfectFor: ['Advanced users', 'Custom projects'],
-                  defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
-                  inputType: 'prompt',
-                  inputPlaceholder: 'Describe your video in detail...'
-                })
+                // Use the full Story Reels interface for Custom Creation
+                setView('custom-creation')
               }}
             >
               {/* Highlight Badge */}
