@@ -191,7 +191,7 @@ function AIVideoStudioPageContent() {
   const [studioMode, setStudioMode] = useState(initialMode)
   const [quickModeCategory, setQuickModeCategory] = useState('all')
   
-  // View state: 'gallery' or 'create'
+  // View state: 'gallery', 'create', or 'custom-creation'
   const [view, setView] = useState('gallery')
   
   // Template selection
