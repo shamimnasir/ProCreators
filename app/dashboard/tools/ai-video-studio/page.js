@@ -590,7 +590,12 @@ function AIVideoStudioPageContent() {
         throw new Error(data.error)
       }
     } catch (error) {
-      toast({ title: 'Generation Failed', description: error.message + ' (Credits refunded)', variant: 'destructive' })
+      // Enhanced error message for common issues
+      let errorMessage = error.message
+      if (errorMessage.includes('concurrent') || errorMessage.includes('too many')) {
+        errorMessage = 'AI video servers are busy. Please wait 1-2 minutes and try again, or use Stock videos instead.'
+      }
+      toast({ title: 'Generation Failed', description: errorMessage + ' (Credits refunded)', variant: 'destructive' })
     } finally {
       setGenerating(false)
     }
