@@ -1112,19 +1112,7 @@ function AIVideoStudioPageContent() {
             {/* Custom Creation CTA - Highlighted at top */}
         <Card 
           className="border-2 border-primary/50 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
-          onClick={() => handleSelectTemplate({
-            id: 'custom',
-            name: 'Custom Creation',
-            shortName: 'Custom',
-            description: 'Start from scratch with full control',
-            icon: '✨',
-            category: 'custom',
-            color: 'from-gray-500 to-gray-600',
-            perfectFor: ['Advanced users', 'Custom projects'],
-            defaultSettings: { mode: 'text-to-video', duration: 15, format: 'portrait' },
-            inputType: 'prompt',
-            inputPlaceholder: 'Describe your video in detail...'
-          })}
+          onClick={() => setView('custom-creation')}
         >
           <CardContent className="py-5">
             <div className="flex items-center justify-between gap-4">
