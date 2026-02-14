@@ -1367,6 +1367,14 @@ export async function POST(request) {
           videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         }
       }
+    } else if (videoSource === 'stock') {
+      // Stock videos only mode - fast and reliable
+      console.log(`[${jobId}] Using stock videos only mode`)
+      const keywords = extractKeywordsFromScript(prompt, 5)
+      videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
+      if (videos.length === 0) {
+        videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+      }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
       
