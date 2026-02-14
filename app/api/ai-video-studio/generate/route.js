@@ -27,6 +27,28 @@ fal.config({
 // Extracts only dialogue (quoted text) from a script for TTS
 // This reduces TTS cost by ~70% and creates more natural narration
 
+// ==================== STRIP STAGE/CAMERA DIRECTIONS ====================
+// Removes instructions in parentheses that shouldn't be narrated
+// e.g., "(SOUND of thunder)", "(Camera pans)", "(Voiceover)", etc.
+function stripStageDirections(text) {
+  if (!text || typeof text !== 'string') return text
+  
+  // Remove common stage/camera/sound direction patterns
+  let cleaned = text
+    // Remove anything in parentheses that looks like a direction
+    .replace(/\([^)]*(?:SOUND|sound|Sound|CAMERA|camera|Camera|CUT|cut|Cut|FADE|fade|Fade|PAN|pan|Pan|ZOOM|zoom|Zoom|MUSIC|music|Music|SFX|sfx|VOICEOVER|voiceover|Voiceover|VO|V\.O\.|SHOT|shot|Shot|SCENE|scene|Scene|INT\.|EXT\.|CONTINUOUS|continuous|TRANSITION|transition|DISSOLVE|dissolve|MONTAGE|montage|B-ROLL|b-roll|ROAR|roar|THUNDER|thunder|RAIN|rain|WIND|wind|WHISPER|whisper|SILENCE|silence|PAUSE|pause|BEAT|beat)[^)]*\)/gi, '')
+    // Remove square bracket directions
+    .replace(/\[[^\]]*(?:SOUND|CAMERA|CUT|FADE|MUSIC|SFX|SHOT|SCENE)[^\]]*\]/gi, '')
+    // Remove asterisk-wrapped directions like *thunder rumbles*
+    .replace(/\*[^*]*(?:sound|thunder|rain|music|pause|beat|silence|sfx)[^*]*\*/gi, '')
+    // Clean up multiple spaces and newlines
+    .replace(/\s+/g, ' ')
+    .replace(/\s*\n\s*/g, '\n')
+    .trim()
+  
+  return cleaned
+}
+
 // ==================== SMART DIALOGUE EXTRACTION ====================
 // Extracts dialogue from scripts using multiple detection methods
 // Supports: English, Bengali, Hindi quotes and dialogue indicators
