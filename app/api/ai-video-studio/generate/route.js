@@ -853,6 +853,25 @@ const PROVIDERS = {
 function extractKeywordsFromScript(script, count = 5) {
   if (!script) return ['nature', 'people', 'lifestyle']
   
+  // First, strip stage directions as they shouldn't affect keyword extraction
+  const cleanScript = stripStageDirections(script)
+  
+  // Visual/concrete noun keywords that work well for stock video search
+  const visualKeywords = [
+    'rain', 'storm', 'thunder', 'lightning', 'clouds', 'sky', 'sun', 'sunset', 'sunrise',
+    'ocean', 'sea', 'beach', 'waves', 'water', 'river', 'lake', 'mountain', 'forest',
+    'city', 'street', 'building', 'car', 'road', 'bridge', 'train', 'plane', 'airport',
+    'people', 'crowd', 'family', 'children', 'couple', 'friends', 'office', 'meeting',
+    'food', 'cooking', 'restaurant', 'coffee', 'wine', 'dinner', 'breakfast',
+    'fitness', 'running', 'gym', 'yoga', 'sports', 'football', 'basketball',
+    'technology', 'computer', 'phone', 'laptop', 'coding', 'startup', 'business',
+    'nature', 'flowers', 'trees', 'garden', 'animals', 'birds', 'dogs', 'cats',
+    'night', 'stars', 'moon', 'fire', 'candle', 'light', 'shadow', 'dark',
+    'love', 'heart', 'wedding', 'birthday', 'celebration', 'party', 'dance',
+    'music', 'concert', 'guitar', 'piano', 'singing', 'microphone',
+    'travel', 'adventure', 'vacation', 'hotel', 'flight', 'passport'
+  ]
+  
   // Common stop words to ignore
   const stopWords = new Set([
     'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
@@ -867,32 +886,48 @@ function extractKeywordsFromScript(script, count = 5) {
     'such', 'no', 'any', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours',
     'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers',
     'it', 'its', 'they', 'them', 'their', 'this', 'that', 'these', 'those',
+    'sound', 'camera', 'cut', 'fade', 'scene', 'shot', 'voiceover', 'narrator',
+    'video', 'create', 'make', 'show', 'display', 'like', 'isn', 'doesn', 'won',
     // Bengali stop words
     'এবং', 'কিন্তু', 'যে', 'এই', 'সেই', 'তার', 'আমি', 'তুমি', 'সে', 'আমরা',
     'তোমরা', 'তারা', 'কি', 'কে', 'কোথায়', 'কখন', 'কেন', 'কিভাবে'
   ])
   
-  // Extract meaningful words
-  const words = script
+  // Extract words
+  const words = cleanScript
     .toLowerCase()
-    .replace(/["""''।,!?.:;()\[\]{}]/g, ' ')
+    .replace(/["""''।,!?.:;()\[\]{}\*]/g, ' ')
     .split(/\s+/)
-    .filter(word => word.length > 3 && !stopWords.has(word))
+    .filter(word => word.length > 2 && !stopWords.has(word))
   
-  // Count word frequency
+  // Prioritize visual keywords found in the script
+  const foundVisualKeywords = []
+  for (const keyword of visualKeywords) {
+    if (cleanScript.toLowerCase().includes(keyword)) {
+      foundVisualKeywords.push(keyword)
+    }
+  }
+  
+  // Count word frequency for remaining words
   const wordCount = {}
   words.forEach(word => {
-    wordCount[word] = (wordCount[word] || 0) + 1
+    if (!visualKeywords.includes(word)) {
+      wordCount[word] = (wordCount[word] || 0) + 1
+    }
   })
   
-  // Sort by frequency and get top keywords
+  // Sort by frequency
   const sortedWords = Object.entries(wordCount)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, count * 2)
+    .slice(0, count)
     .map(([word]) => word)
   
-  // Return unique keywords
-  return sortedWords.length > 0 ? sortedWords.slice(0, count) : ['nature', 'people', 'lifestyle']
+  // Combine: visual keywords first, then frequent words
+  const result = [...new Set([...foundVisualKeywords, ...sortedWords])].slice(0, count)
+  
+  console.log(`[Keywords] Extracted from script: ${result.join(', ')}`)
+  
+  return result.length > 0 ? result : ['nature', 'people', 'lifestyle']
 }
 
 // Search stock videos by keywords using the Quick Reels Hub API
