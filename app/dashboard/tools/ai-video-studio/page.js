@@ -25,6 +25,9 @@ import {
   Flame, FileText, Clapperboard, Gift, Camera, Globe, MessageSquare, ShoppingCart, Bot, Check
 } from 'lucide-react'
 
+// Import Story Reels component for Custom Creation mode
+import StoryReelsPage from '@/app/dashboard/tools/story-reels/page'
+
 // Import configurations
 import { DURATION_OPTIONS, FORMAT_OPTIONS } from '@/config/ai-video-usecases'
 import { 
