@@ -395,13 +395,21 @@ async function compileVideoWithFFmpeg({
       // Generate TTS with Google Cloud
       // Extract dialogue if narration mode is 'dialogue-only' (default)
       let ttsText = prompt
+      
+      // ALWAYS strip stage/camera/sound directions from TTS
+      ttsText = stripStageDirections(ttsText)
+      
       if (narrationMode !== 'full') {
-        const extracted = extractDialogueFromScript(prompt, ttsLanguage)
+        const extracted = extractDialogueFromScript(ttsText, ttsLanguage)
         if (extracted.dialogueOnly && extracted.dialogueOnly.length > 0) {
           ttsText = extracted.dialogueOnly
           spokenText = extracted.dialogueOnly // Captions should match spoken text
         }
       }
+      
+      // Final cleanup - strip any remaining directions
+      ttsText = stripStageDirections(ttsText)
+      spokenText = stripStageDirections(ttsText)
       
       try {
         const client = new textToSpeech.TextToSpeechClient({
