@@ -798,6 +798,41 @@ function AIVideoStudioPageContent() {
     return category.niches.map(nicheId => QUICK_REELS_NICHES.find(n => n.id === nicheId)).filter(Boolean)
   }
   
+  // ==================== CUSTOM CREATION VIEW (Full Story Reels Interface) ====================
+  if (view === 'custom-creation') {
+    return (
+      <div className="space-y-4">
+        {/* Back Button Header */}
+        <div className="flex items-center gap-4 mb-2">
+          <Button variant="ghost" size="icon" onClick={() => setView('gallery')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                <Zap className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Custom Creation</h1>
+                <p className="text-muted-foreground text-sm">Full creative control with script, video clips, voice & music</p>
+              </div>
+            </div>
+          </div>
+          <CreditCostBadge toolId="story-reels" />
+        </div>
+        
+        {/* Full Story Reels Interface */}
+        <StoryReelsPage
+          niche="generic"
+          nicheName="Custom Video"
+          nicheIcon="Zap"
+          nicheDescription="Create any type of video with full creative control - write your own script or generate with AI"
+          showCustomTopicInput={true}
+        />
+      </div>
+    )
+  }
+  
   // ==================== GALLERY VIEW ====================
   if (view === 'gallery') {
     return (
