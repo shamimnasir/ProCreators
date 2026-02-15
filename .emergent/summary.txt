@@ -1,0 +1,342 @@
+<analysis>
+
+<original_problem_statement>
+The user's initial goal was to enhance the AI Video Studio by merging features from the Story Reels tool, fixing bugs, and improving AI capabilities.
+
+During the previous session, the user's focus shifted to correcting a fundamental flaw in the AI video generation logic. Key requests were:
+1.  **Fix Broken UI Flow (Initial task):** The user reported that selecting a video creation mode (e.g., AI Videos) did not correctly configure the UI on the subsequent page.
+2.  **Correct AI Video Generation Logic (Chat 48):** The user pointed out that using keyword extraction for AI video generation is incorrect. They proposed a more logical flow: generating a script, then generating descriptive scene prompts from the script, using those prompts to generate individual AI video clips, and finally merging them.
+3.  **Investigate Generation Failures (Chat 129, 168):** After the new flow was implemented, the user reported two critical failures:
+    *   A 520 error (server timeout/crash) when trying to generate a video.
+    *   After a fix was applied, the UI indicated a video was successfully generated and saved, but the video was not found in the library.
+
+</original_problem_statement>
+**User's preferred language**: English
+
+**what currently exists?**
+The agent successfully fixed the initial UI flow issue by modifying the  and  pages to pass props, ensuring the UI correctly reflects the chosen mode (Stock vs. AI).
+
+More significantly, the agent implemented the user's requested AI video generation flow:
+1.  **New API for Scene Prompts**: Created a new endpoint  that uses an AI model to generate descriptive scene prompts from a user's script.
+2.  **Updated Frontend UI**: The  was heavily modified. In AI mode, it now has a Generate Scene Prompts button and a UI to display and edit these prompts.
+3.  **Updated Backend Logic**: The main video composition endpoint  was updated to accept these scene prompts and use them to generate individual AI video clips via Fal.ai before merging them.
+4.  **Bug Fix**: A temporary fix was implemented to bypass the video preview generation for AI mode, which was causing server crashes as it was incorrectly looking for stock footage.
+
+**Last working item**:
+    - Last item agent was working: The user reported that after a video generation process, the UI showed a success message stating the video was saved to the library, but the video is missing. The agent had just started to investigate by checking server logs.
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? Manual testing by  and log inspection. The next agent needs to trace the entire  request for the AI flow.
+    - User Testing Done: Y (User confirmed the bug)
+
+**All Pending/In progress Issue list**:
+  - Issue 1: Video generated but not saved to library. (P0)
+  - Issue 2: The Quick AI Video flow is untested and may be broken. (P1)
+  
+  Issues Detail:
+  - Issue 1: 
+     - Description: The final step of the AI video generation process is failing silently. The frontend receives a success response, but the video is not persisted to the user's library. The video file itself might not be getting created or saved correctly after the FFmpeg process.
+     - Attempted fixes: None. The issue was just reported.
+     - Next debug checklist: 
+        1. Check the supervisor logs ( GET /api/auth/session 200 in 8ms (compile: 1795µs, render: 6ms)
+ GET /api/auth/session 200 in 8ms (compile: 1794µs, render: 6ms)
+ GET /api/dashboard/stats?userId=ai-video-debug-1 200 in 12ms (compile: 1758µs, render: 10ms)
+ GET /dashboard/tools/ai-video-studio 200 in 16ms (compile: 2ms, render: 14ms)
+ GET /api/auth/session 200 in 31ms (compile: 3ms, render: 28ms)
+ GET /api/pages/ai-video-studio 200 in 44ms (compile: 33ms, render: 11ms)
+ GET /api/story-reels/list-voices?language=en 200 in 184ms (compile: 9ms, render: 175ms)
+ GET /api/auth/session 200 in 8ms (compile: 1954µs, render: 6ms)
+ GET /api/credits?userId=demo-user-001 200 in 6ms (compile: 3ms, render: 3ms)
+ GET /api/pages/ai-video-studio 200 in 6ms (compile: 1684µs, render: 4ms)
+ GET /api/story-reels/list-voices?language=en 200 in 92ms (compile: 6ms, render: 86ms)
+ GET /api/credits?userId=demo-user-001 200 in 5ms (compile: 1618µs, render: 4ms)
+ GET /api/auth/session 200 in 8ms (compile: 1598µs, render: 6ms)
+ GET /api/story-reels/list-voices?language=en 200 in 127ms (compile: 6ms, render: 120ms)
+ GET /api/credits?userId=demo-user-001 200 in 5ms (compile: 1691µs, render: 4ms)
+ GET /api/auth/session 200 in 6ms (compile: 1428µs, render: 5ms)
+ GET /api/story-reels/list-voices?language=en 200 in 103ms (compile: 5ms, render: 98ms)
+ GET /api/credits?userId=demo-user-001 200 in 7ms (compile: 1736µs, render: 6ms)
+ POST /api/story-reels/generate-scene-prompts 200 in 7.3s (compile: 2ms, render: 7.3s)
+[Preview d8cb1d7b-6ac3-4312-aa8b-ffbe1c450161] 📹 Processing 0 clips...
+[Preview d8cb1d7b-6ac3-4312-aa8b-ffbe1c450161] Error: Error: Failed to download any stock videos
+    at POST (app/api/story-reels/generate-preview/route.js:226:13)
+  224 |
+  225 |     if (videoFiles.length === 0) {
+> 226 |       throw new Error('Failed to download any stock videos')
+      |             ^
+  227 |     }
+  228 |
+  229 |     // Step 2: Generate or use audio
+ POST /api/story-reels/generate-preview 500 in 262ms (compile: 90ms, render: 173ms)
+[Preview 00a2c9d4-0802-41dc-8af5-468053fbba66] 📹 Processing 0 clips...
+[Preview 00a2c9d4-0802-41dc-8af5-468053fbba66] Error: Error: Failed to download any stock videos
+    at POST (app/api/story-reels/generate-preview/route.js:226:13)
+  224 |
+  225 |     if (videoFiles.length === 0) {
+> 226 |       throw new Error('Failed to download any stock videos')
+      |             ^
+  227 |     }
+  228 |
+  229 |     // Step 2: Generate or use audio
+ POST /api/story-reels/generate-preview 500 in 99ms (compile: 13ms, render: 87ms)
+[Preview 57dd9c8d-229d-4916-a90f-ea5b14e80de1] 📹 Processing 0 clips...
+[Preview 57dd9c8d-229d-4916-a90f-ea5b14e80de1] Error: Error: Failed to download any stock videos
+    at POST (app/api/story-reels/generate-preview/route.js:226:13)
+  224 |
+  225 |     if (videoFiles.length === 0) {
+> 226 |       throw new Error('Failed to download any stock videos')
+      |             ^
+  227 |     }
+  228 |
+  229 |     // Step 2: Generate or use audio
+ POST /api/story-reels/generate-preview 500 in 77ms (compile: 6ms, render: 71ms)
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ Compiled in 2.3s
+✓ Compiled in 336ms
+✓ Compiled in 330ms
+ GET / 200 in 143ms (compile: 4ms, render: 139ms)
+ GET /api/menus?location=footer 200 in 16ms (compile: 6ms, render: 11ms)
+ GET /api/menus?location=footer_bottom 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /api/site-settings 200 in 6ms (compile: 1768µs, render: 5ms)
+yarn run v1.22.22
+$ bash setup-dependencies.sh
+🔧 Checking system dependencies...
+📦 Installing ffmpeg...
+✅ ffmpeg installed successfully
+📦 Installing Noto fonts for international text support...
+✅ Noto fonts installed
+⚠️  chromium not found - PDF generation may not work
+✅ ffprobe available
+📦 Checking Next.js version...
+✅ Current Next.js: ^16.1.2
+✅ Dependency check complete!
+$ NODE_OPTIONS='--max-old-space-size=1024' next dev --hostname 0.0.0.0 --port 3000
+▲ Next.js 16.1.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+- Environments: .env
+
+✓ Starting...
+Instrumentation: regenerator-runtime polyfill loaded
+✓ Ready in 1674ms
+⚠ Cross origin request detected from reel-composer-ai.cluster-0.preview.emergentcf.cloud to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[ToolPageExtraContent] {
+  toolId: 'ai-video-studio',
+  loading: true,
+  error: null,
+  hasPageData: false,
+  blocksCount: undefined
+}
+[ToolPageExtraContent] Still loading...
+ GET /dashboard/tools/ai-video-studio 200 in 902ms (compile: 633ms, render: 269ms)
+Connected to MongoDB
+Connected to MongoDB
+ GET /api/credits?userId=demo-user-001 200 in 200ms (compile: 163ms, render: 37ms)
+ GET /api/auth/session 200 in 204ms (compile: 107ms, render: 96ms)
+ GET /api/pages/ai-video-studio 200 in 934ms (compile: 922ms, render: 12ms)
+ GET /api/auth/session 200 in 11ms (compile: 3ms, render: 7ms)
+ GET /api/credits?userId=ai-video-debug-1 200 in 8ms (compile: 2ms, render: 6ms)
+ GET /api/auth/session 200 in 12ms (compile: 1810µs, render: 11ms)
+ GET /api/auth/session 200 in 13ms (compile: 3ms, render: 11ms)
+ GET /api/credits?userId=demo-user-001 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /api/story-reels/list-voices?language=en 200 in 509ms (compile: 261ms, render: 248ms)
+ GET / 200 in 199ms (compile: 28ms, render: 171ms)
+ GET /?x_request_source=preview 200 in 81ms (compile: 4ms, render: 77ms)
+ GET /api/menus?location=footer 200 in 51ms (compile: 41ms, render: 10ms)
+ GET /api/menus?location=footer_bottom 200 in 7ms (compile: 1984µs, render: 5ms)
+ GET /api/site-settings 200 in 42ms (compile: 33ms, render: 9ms)
+ GET /api/auth/session 200 in 11ms (compile: 2ms, render: 9ms)
+ GET /api/story-reels/list-voices?language=en 200 in 126ms (compile: 9ms, render: 117ms)
+ GET /api/auth/session 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/credits?userId=demo-user-001 200 in 7ms (compile: 1780µs, render: 6ms)
+ GET /api/story-reels/list-voices?language=en 200 in 97ms (compile: 8ms, render: 88ms)
+ GET /api/credits?userId=demo-user-001 200 in 7ms (compile: 2ms, render: 5ms)
+ GET /api/auth/session 200 in 11ms (compile: 2ms, render: 8ms)
+ GET /api/story-reels/list-voices?language=en 200 in 135ms (compile: 11ms, render: 124ms)
+ GET /api/auth/session 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/credits?userId=demo-user-001 200 in 7ms (compile: 1698µs, render: 6ms)
+ GET /api/story-reels/list-voices?language=en 200 in 107ms (compile: 9ms, render: 98ms)
+ GET /api/credits?userId=demo-user-001 200 in 7ms (compile: 1892µs, render: 5ms)
+ POST /api/story-reels/generate-scene-prompts 200 in 6.6s (compile: 47ms, render: 6.6s)
+⚠ Cross origin request detected from reel-composer-ai.preview.emergentagent.com to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[getUserIdFromRequest] Session token from request cookie header: missing
+[getUserIdFromRequest] Session token from next/headers: missing
+[getUserIdFromRequest] Auth header: present
+[getUserIdFromRequest] Session from Bearer: 3b1a266d-13f4-4242-94bf-bf3926f725c9
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Video source: ai-standard, Credit tool: quick-reels-ai-standard
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] 🤖 AI Video Mode: ai-standard
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] 📝 Scene Prompts: 5 provided
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Using 5 pre-generated scene prompts
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Generating AI clip 1/5 with Standard Quality...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] ❌ AI clip 1 failed with Standard Quality: Unauthorized
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Generating AI clip 1/5 with Standard Plus...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] ❌ AI clip 1 failed with Standard Plus: Unauthorized
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Generating AI clip 1/5 with Standard Fast...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] ❌ AI clip 1 failed with Standard Fast: Unauthorized
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Could not generate AI clip 1, will fall back to stock
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Waiting 3s before next AI clip...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Could not generate AI clip 2, will fall back to stock
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Waiting 3s before next AI clip...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Could not generate AI clip 3, will fall back to stock
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Waiting 3s before next AI clip...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Could not generate AI clip 4, will fall back to stock
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Waiting 3s before next AI clip...
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Could not generate AI clip 5, will fall back to stock
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] ✅ Generated 0 AI video clips
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] ⚠️ No AI videos generated, falling back to stock videos
+[ed8c9d08-738c-4157-bb49-5ea87ddc4d03] Composition error: Error: Failed to process any video clips
+    at POST (app/api/story-reels/compose/route.js:502:13)
+  500 |
+  501 |     if (videoFiles.length === 0) {
+> 502 |       throw new Error('Failed to process any video clips')
+      |             ^
+  503 |     }
+  504 |     
+  505 |     // Step 2: Generate or use voice audio
+ POST /api/story-reels/compose 500 in 13.7s (compile: 1339ms, render: 12.3s)
+ GET /dashboard/library 200 in 303ms (compile: 204ms, render: 99ms)
+ GET /api/auth/session 200 in 11ms (compile: 2ms, render: 8ms)
+ GET /api/credits?userId=demo-user-001 200 in 8ms (compile: 2ms, render: 6ms)
+ GET /api/auth/session 200 in 8ms (compile: 1949µs, render: 6ms)
+ GET /api/auth/session 200 in 11ms (compile: 2ms, render: 9ms)
+ GET /api/credits?userId=ai-video-debug-1 200 in 9ms (compile: 4ms, render: 4ms)
+ GET /api/auth/session 200 in 10ms (compile: 2ms, render: 8ms)
+ GET /api/library/list?userId=ai-video-debug-1 200 in 43ms (compile: 32ms, render: 11ms)
+[ToolPageExtraContent] {
+  toolId: 'ai-video-studio',
+  loading: true,
+  error: null,
+  hasPageData: false,
+  blocksCount: undefined
+}
+[ToolPageExtraContent] Still loading...
+ GET /dashboard/tools/ai-video-studio 200 in 118ms (compile: 2ms, render: 116ms)
+ GET /api/pages/ai-video-studio 200 in 62ms (compile: 45ms, render: 18ms)
+ GET /api/credits?userId=demo-user-001 200 in 15ms (compile: 7ms, render: 8ms)
+ GET /api/auth/session 200 in 77ms (compile: 49ms, render: 27ms)
+ GET /api/story-reels/list-voices?language=en 200 in 380ms (compile: 15ms, render: 365ms)
+ GET /api/auth/session 200 in 29ms (compile: 2ms, render: 27ms)
+ GET /api/credits?userId=ai-video-debug-1 200 in 8ms (compile: 4ms, render: 4ms)
+ GET /api/auth/session 200 in 9ms (compile: 1906µs, render: 7ms)
+ GET /api/auth/session 200 in 10ms (compile: 1742µs, render: 9ms)
+ GET /api/credits?userId=demo-user-001 200 in 9ms (compile: 1615µs, render: 7ms)
+ GET /api/auth/session 200 in 27ms (compile: 1698µs, render: 25ms)
+ GET /api/story-reels/list-voices?language=en 200 in 108ms (compile: 12ms, render: 96ms)
+ GET /api/credits?userId=demo-user-001 200 in 8ms (compile: 4ms, render: 5ms)
+ GET /api/auth/session 200 in 9ms (compile: 2ms, render: 7ms)
+ GET /api/story-reels/list-voices?language=en 200 in 96ms (compile: 8ms, render: 88ms)
+ GET /api/credits?userId=demo-user-001 200 in 10ms (compile: 2ms, render: 8ms)
+ GET /dashboard/library 200 in 17ms (compile: 2ms, render: 15ms)
+ GET /api/auth/session 200 in 8ms (compile: 1953µs, render: 6ms)
+ GET /api/auth/session 200 in 8ms (compile: 1915µs, render: 6ms)
+ GET /api/library/list?userId=ai-video-debug-1 200 in 7ms (compile: 1754µs, render: 5ms)
+yarn run v1.22.22
+$ bash setup-dependencies.sh
+🔧 Checking system dependencies...
+📦 Installing ffmpeg...) for errors during the final stages of the  call.
+        2. Examine . Specifically, check the logic after the  command execution.
+        3. Verify the database interaction logic. Is the function to save the video metadata to the database being called correctly? Are there any silent errors from the database client?
+        4. Check if the final video file is being written to the expected temporary or permanent location on the server's file system ( or a public directory).
+     - Why fix this issue and what will be achieved with the fix? This is a critical bug blocking the core feature. Fixing it will make the primary AI video generation flow functional.
+     - Status:  IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Backend
+     - Blocked on other issue: None
+
+  - Issue 2:
+     - Description: The user's initial 520 error was on the Quick AI Video flow, which uses a different endpoint (). The agent's fixes were applied to the Custom AI Video flow. The Quick AI flow is completely unverified and likely suffers from timeout issues or other bugs.
+     - Attempted fixes: None.
+     - Next debug checklist:
+        1. Review the logic in .
+        2. Perform an end-to-end test of the Quick AI Video feature.
+        3. Check server logs for timeouts or errors related to the Fal.ai API calls within this specific route.
+     - Why fix this issue and what will be achieved with this? This will ensure all user-facing video generation features are functional.
+     - Status:  NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Backend
+     - Blocked on other issue: None
+
+**In progress Task List**:
+  - Task 1:  Complete and stabilize the AI Video Generation feature.
+     - Where to resume: Begin debugging Issue #1 immediately by inspecting server logs and the  file.
+     - What will be achieved with this? A fully working, end-to-end AI video creation tool as requested by the user.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on something: Blocked on fixing Issue #1.
+
+**Upcoming and Future Tasks**
+- **P0: Upgrade to latest AI models**: A pending task from a previous session. The user asked to upgrade to latest model for AI video generation. The agent only changed display names, not the actual model identifiers in the API calls to Fal.ai in  and .
+- **P1: Re-verify Preview & Customize Modal**: The  functionality may have been affected by recent changes and needs re-verification.
+- **P2: Refactor Video Generation to a Background Job**: To solve timeout issues like the 520 error permanently, the  and AI generation processes should be moved to a background job queue.
+
+**Completed work in this session**
+- **UI Flow Fix**: Fixed the UI mode selection bug by passing props from  to  to correctly configure the UI.
+- **Scene Prompt Generation API**: Created a new endpoint  to generate descriptive prompts from a script.
+- **New AI Video UI**: Reworked the  UI to support the new prompt-based flow, including a button to generate prompts and an editable list of prompts.
+- **Backend AI Logic Rework**: Updated  to use scene prompts for generating video clips, replacing the flawed keyword-based logic.
+- **Preview Crash Fix**: Modified  to bypass the preview step for AI videos, preventing a server crash.
+
+**Earlier issues found/mentioned but not fixed**
+- The list of pending issues from the previous handover summary (timeout UX, 404 on video downloads, Zod validation error) have not been addressed in this session.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **AI-Powered Prompt Generation**: Using Google Gemini via  to transform a narrative script into a series of visual scene descriptions for a video generation model.
+- **Conditional Rendering/Logic**: Extensive use of  checks in the frontend and backend to create two distinct user paths within the same tool (Stock vs. AI).
+- **Prop-based State Passing**: Passing state (mode, title) via React props between parent-child components ( -> ) instead of URL params.
+- **API Orchestration**: The  route orchestrates multiple steps: voiceover generation (TTS), AI video clip generation (Fal.ai), and video merging (FFmpeg).
+
+**All files of reference**
+- **New:**
+  - : Created to handle the generation of visual prompts from a script.
+- **Heavily Modified:**
+  - : Complete UI and logic overhaul to support the new prompt-based AI workflow.
+  - : Backend logic rewritten to generate AI videos from a list of prompts.
+- **Modified:**
+  - : Updated to pass props down to the Story Reels component.
+
+**key api endpoints**
+- : **(NEW)** Takes a script, returns an array of scene prompts.
+- : **(MODIFIED)** Now accepts  in the form data for the AI workflow.
+
+**Critical Info for New Agent**
+- **Your immediate priority is the P0 bug**: The user cannot get their final video. You must debug why a successful video generation isn't saving the video to the user's library. Start by tracing the  execution in the server logs. Check for errors after the  process completes and during the database save operation.
+- **The user's workflow is completely blocked.** Do not work on anything else until the user can successfully generate and view an AI video from the custom flow.
+- After fixing the main bug, you should test the Quick AI Video flow, as it's a separate code path that is currently untested and likely broken.
+- Remember the user's request to upgrade the AI models is still outstanding. This should be addressed after the core functionality is stable.
+
+**Last 10 User Messages and any pending HUMAN messages**
+- **Chat 168**: User reports that a video was generated and the UI said it was saved, but it's not in the library. **Status: UNRESOLVED. This is the highest priority pending issue.**
+- **Chat 129**: User reports a 520 error when generating Quick AI Videos. **Status: PARTIALLY ADDRESSED. The agent fixed a crash in the *custom* AI flow, but the *quick* flow remains untested.**
+- **Chat 50**: User confirms and approves the agent's plan to proceed with the new, correct AI video generation logic. **Status: DONE.**
+- **Chat 48**: User provides critical feedback, explaining the correct workflow for AI video generation (script -> prompts -> clips -> merge) and points out the flaw in the old keyword-based approach. **Status: ADDRESSED. This initiated the major rework in this session.**
+
+**Project Health Check:**
+- **Broken**: The primary feature, custom AI video generation, is broken at the final step. The user cannot retrieve the generated video, making the entire flow unusable.
+
+**3rd Party Integrations**
+- Google Gemini — uses . (Used for scene prompt generation).
+- Fal.ai — uses . (Used for AI video clip generation).
+- Pexels — uses .
+- Google Cloud Text-to-Speech — uses .
+- Replicate — uses .
+- Stripe (Payments)
+- Mailgun (Email)
+- FFmpeg — System-level dependency.
+
+**Testing status**
+  - Testing agent used after significant changes: NO
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: []
+  - Known regressions: The main AI video generation flow is not saving the final product.
+
+**What agent forgot to execute**
+- **Upgrade to Latest AI Models**: This task from a previous session remains incomplete. The agent only changed the display names of the models, not the underlying model identifiers used in the API calls to Fal.ai.
+
+</analysis>
