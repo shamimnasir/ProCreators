@@ -1083,6 +1083,13 @@ Product URL: ${scrapeData.product.url}`
         })
       }
 
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        const text = await response.text()
+        console.error('Generate preview failed:', response.status, text.substring(0, 200))
+        throw new Error(`Server error: ${response.status}`)
+      }
+
       const data = await response.json()
       if (data.success) {
         setPreviewData(data)
@@ -1095,6 +1102,7 @@ Product URL: ${scrapeData.product.url}`
         throw new Error(data.error)
       }
     } catch (error) {
+      console.error('Preview generation error:', error)
       toast({
         title: "Error",
         description: error.message || "Failed to generate preview",
