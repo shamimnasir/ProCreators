@@ -93,6 +93,9 @@ Return ONLY a valid JSON array of ${numClips} scene objects.`
 
     // Parse AI response to extract scene prompts array
     let scenePrompts = []
+    let characterDescription = ''
+    let visualStyle = ''
+    
     try {
       // Clean up the response to extract JSON
       let cleanedResponse = result.content
@@ -100,16 +103,31 @@ Return ONLY a valid JSON array of ${numClips} scene objects.`
         .replace(/```\n?/g, '')
         .trim()
       
-      // Find the JSON array
-      const jsonMatch = cleanedResponse.match(/\[[\s\S]*\]/)
+      // Find the JSON array or object
+      const jsonMatch = cleanedResponse.match(/[\[{][\s\S]*[\]}]/)
       if (jsonMatch) {
         cleanedResponse = jsonMatch[0]
       }
       
-      scenePrompts = JSON.parse(cleanedResponse)
+      const parsed = JSON.parse(cleanedResponse)
       
-      if (!Array.isArray(scenePrompts)) {
-        throw new Error('Response is not an array')
+      // Handle new format with characterDescription and visualStyle
+      if (parsed.scenes && Array.isArray(parsed.scenes)) {
+        characterDescription = parsed.characterDescription || ''
+        visualStyle = parsed.visualStyle || ''
+        scenePrompts = parsed.scenes
+      } else if (Array.isArray(parsed)) {
+        // Handle old format (direct array)
+        // Check if first item has nested structure
+        if (parsed[0]?.scenes) {
+          characterDescription = parsed[0].characterDescription || ''
+          visualStyle = parsed[0].visualStyle || ''
+          scenePrompts = parsed[0].scenes
+        } else {
+          scenePrompts = parsed
+        }
+      } else {
+        throw new Error('Response is not in expected format')
       }
 
       // Validate and clean each scene prompt
