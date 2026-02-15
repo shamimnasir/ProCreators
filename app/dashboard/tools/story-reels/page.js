@@ -625,6 +625,70 @@ export default function StoryReelsPage({
     }
   }
 
+  // Generate Scene Prompts (for AI mode) - converts script to visual prompts for AI video generation
+  const handleGenerateScenePrompts = async () => {
+    if (!script.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter or generate a script first",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setGeneratingPrompts(true)
+    try {
+      const response = await fetch('/api/story-reels/generate-scene-prompts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ script, duration })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setScenePrompts(data.scenePrompts)
+        toast({
+          title: "Scene Prompts Generated! 🎬",
+          description: `Created ${data.scenePrompts.length} visual prompts for AI video generation`
+        })
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setGeneratingPrompts(false)
+    }
+  }
+
+  // Update a single scene prompt
+  const updateScenePrompt = (index, newPrompt) => {
+    setScenePrompts(prev => prev.map((scene, i) => 
+      i === index ? { ...scene, prompt: newPrompt, fullPrompt: `${newPrompt}, ${scene.cameraStyle}, ${scene.mood} mood, cinematic lighting, professional quality, 4K resolution` } : scene
+    ))
+  }
+
+  // Remove a scene prompt
+  const removeScenePrompt = (index) => {
+    setScenePrompts(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Add a new scene prompt
+  const addScenePrompt = () => {
+    const newScene = {
+      sceneNumber: scenePrompts.length + 1,
+      prompt: '',
+      mood: 'cinematic',
+      cameraStyle: 'medium shot',
+      fullPrompt: ''
+    }
+    setScenePrompts(prev => [...prev, newScene])
+  }
+
   // Search Stock Videos - Smart: calculates needed clips based on duration (3 sec per clip)
   const handleSearchVideos = async () => {
     if (keywords.length === 0) {
