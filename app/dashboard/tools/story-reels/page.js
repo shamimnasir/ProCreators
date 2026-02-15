@@ -1244,6 +1244,23 @@ Product URL: ${scrapeData.product.url}`
     setProgress(0)
 
     try {
+      // Validate session before starting long operation
+      const sessionToken = localStorage.getItem('sessionToken')
+      if (!sessionToken) {
+        throw new Error('Session expired. Please log in again.')
+      }
+      
+      // Verify session is still valid
+      const sessionCheck = await fetch('/api/auth/session', {
+        headers: { 'Authorization': `Bearer ${sessionToken}` }
+      })
+      const sessionData = await sessionCheck.json()
+      if (!sessionData.success) {
+        localStorage.removeItem('sessionToken')
+        throw new Error('Session expired. Please log in again.')
+      }
+      console.log('[Compose] Verified session for user:', sessionData.user?.email)
+      
       const formData = new FormData()
       formData.append('script', previewSettings.captions.map(c => c.text).join(' '))
       formData.append('duration', duration)
