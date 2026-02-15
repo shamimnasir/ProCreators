@@ -91,11 +91,20 @@ export async function POST(request) {
     const { pipeline } = require('stream/promises')
     const pLimit = (await import('p-limit')).default
     
-    // Limit concurrent operations to avoid overwhelming the system
-    const limit = pLimit(5) // Process max 5 clips at once
+    // Limit concurrent operations - increased for faster processing
+    const limit = pLimit(8) // Process max 8 clips at once
     
     // Determine total clips based on video order or just stock videos (backward compatibility)
-    const totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
+    // IMPORTANT: Limit to max 15 clips to avoid timeout issues
+    const MAX_CLIPS = 15
+    let totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
+    if (totalClips > MAX_CLIPS) {
+      console.log(`[${jobId}] ⚠️ Limiting clips from ${totalClips} to ${MAX_CLIPS} to avoid timeout`)
+      totalClips = MAX_CLIPS
+      // Also limit the arrays
+      if (videoOrder.length > MAX_CLIPS) videoOrder.length = MAX_CLIPS
+      if (stockVideos.length > MAX_CLIPS) stockVideos.length = MAX_CLIPS
+    }
     
     // Pre-calculate indices for each clip BEFORE parallel execution
     const clipIndices = []
