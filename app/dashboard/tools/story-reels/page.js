@@ -1055,8 +1055,12 @@ Product URL: ${scrapeData.product.url}`
         formData.append('voiceFile', voiceFile)
       }
 
+      // Get auth token for authenticated request
+      const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null
+
       const response = await fetch('/api/story-reels/generate-preview', {
         method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData
       })
 
