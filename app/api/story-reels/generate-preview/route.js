@@ -28,16 +28,58 @@ export async function POST(request) {
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
-    // Parse form data
-    const formData = await request.formData()
-    const script = formData.get('script')
-    const duration = parseInt(formData.get('duration'))
-    const voiceOption = formData.get('voiceOption') || 'tts'
-    const ttsLanguage = formData.get('ttsLanguage')
-    const selectedVoice = formData.get('selectedVoice')
-    const voiceFile = formData.get('voiceFile')
-    const stockVideos = JSON.parse(formData.get('stockVideos'))
-    const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
+    // Parse request data - handle both FormData and JSON
+    let script, duration, voiceOption, ttsLanguage, selectedVoice, voiceFile, stockVideos, videoOrder
+    
+    const contentType = request.headers.get('content-type') || ''
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Parse FormData
+      const formData = await request.formData()
+      script = formData.get('script')
+      duration = parseInt(formData.get('duration'))
+      voiceOption = formData.get('voiceOption') || 'tts'
+      ttsLanguage = formData.get('ttsLanguage')
+      selectedVoice = formData.get('selectedVoice')
+      voiceFile = formData.get('voiceFile')
+      stockVideos = JSON.parse(formData.get('stockVideos'))
+      videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
+    } else if (contentType.includes('application/json')) {
+      // Parse JSON
+      const body = await request.json()
+      script = body.script
+      duration = parseInt(body.duration)
+      voiceOption = body.voiceOption || 'tts'
+      ttsLanguage = body.ttsLanguage
+      selectedVoice = body.selectedVoice
+      voiceFile = null // Cannot send files via JSON
+      stockVideos = body.stockVideos || []
+      videoOrder = body.videoOrder || []
+    } else {
+      // Try FormData first, fallback to JSON
+      try {
+        const formData = await request.formData()
+        script = formData.get('script')
+        duration = parseInt(formData.get('duration'))
+        voiceOption = formData.get('voiceOption') || 'tts'
+        ttsLanguage = formData.get('ttsLanguage')
+        selectedVoice = formData.get('selectedVoice')
+        voiceFile = formData.get('voiceFile')
+        stockVideos = JSON.parse(formData.get('stockVideos'))
+        videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
+      } catch (parseError) {
+        // Try JSON as fallback
+        const body = await request.json()
+        script = body.script
+        duration = parseInt(body.duration)
+        voiceOption = body.voiceOption || 'tts'
+        ttsLanguage = body.ttsLanguage
+        selectedVoice = body.selectedVoice
+        voiceFile = null
+        stockVideos = body.stockVideos || []
+        videoOrder = body.videoOrder || []
+      }
+    }
 
     // Step 1: Download stock videos and process images (using streams)
     console.log(`[Preview ${jobId}] 📹 Processing ${stockVideos.length} clips...`)
