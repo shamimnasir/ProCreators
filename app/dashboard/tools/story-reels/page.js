@@ -1390,6 +1390,40 @@ Product URL: ${scrapeData.product.url}`
     }
   }
 
+  // Poll job status for async video generation
+  const pollJobStatus = async (jobId) => {
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const response = await fetch(`/api/story-reels/job-status?jobId=${jobId}`)
+          const data = await response.json()
+          
+          if (!data.success) {
+            reject(new Error(data.error || 'Failed to get job status'))
+            return
+          }
+          
+          // Update progress
+          setProgress(data.progress || 0)
+          setProgressMessage(data.progressMessage || '')
+          
+          if (data.status === 'completed') {
+            resolve(data)
+          } else if (data.status === 'failed') {
+            reject(new Error(data.error || 'Video generation failed'))
+          } else {
+            // Continue polling every 3 seconds
+            setTimeout(poll, 3000)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      }
+      
+      poll()
+    })
+  }
+
   // Compose Final Video (Direct - without preview)
   const handleCompose = async () => {
     // Validation
@@ -1413,6 +1447,7 @@ Product URL: ${scrapeData.product.url}`
 
     setComposing(true)
     setProgress(0)
+    setProgressMessage('Preparing...')
 
     try {
       // Validate session before starting long operation
@@ -1499,41 +1534,99 @@ Product URL: ${scrapeData.product.url}`
         formData.append('voiceFile', voiceFile)
       }
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setProgress(prev => Math.min(prev + 5, 90))
-      }, 2000)
+      // Use async endpoint for longer videos (> 45 seconds) with AI
+      const useAsync = duration > 45 && videoSource.startsWith('ai-')
+      const endpoint = useAsync ? '/api/story-reels/compose-async' : '/api/story-reels/compose'
+      
+      console.log(`[Compose] Using ${useAsync ? 'async' : 'sync'} endpoint for ${duration}s ${videoSource} video`)
 
-      const response = await fetch('/api/story-reels/compose', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+      if (!useAsync) {
+        // Simulate progress for sync mode
+        const progressInterval = setInterval(() => {
+          setProgress(prev => Math.min(prev + 5, 90))
+        }, 2000)
+        
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+          }
+        })
+
+        clearInterval(progressInterval)
+
+        // Check if response is OK before parsing JSON
+        if (!response.ok) {
+          const text = await response.text()
+          console.error('Compose failed:', response.status, text.substring(0, 200))
+          throw new Error(`Server error: ${response.status}`)
         }
-      })
 
-      clearInterval(progressInterval)
-
-      // Check if response is OK before parsing JSON
-      if (!response.ok) {
-        const text = await response.text()
-        console.error('Compose failed:', response.status, text.substring(0, 200))
-        throw new Error(`Server error: ${response.status}`)
-      }
-
-      const data = await response.json()
-      if (data.success) {
-        setProgress(100)
-        setVideoData(data)
-        toast({
-          title: "Success!",
-          description: "Your story video is ready!"
+        const data = await response.json()
+        if (data.success) {
+          setProgress(100)
+          setProgressMessage('Video ready!')
+          setVideoData(data)
+          toast({
+            title: "Success!",
+            description: "Your story video is ready!"
+          })
+        } else {
+          throw new Error(data.error)
+        }
+      } else {
+        // Async mode - submit and poll for status
+        setProgressMessage('Submitting job...')
+        
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+          }
         })
         
-        // Auto-save is now handled by backend in /api/story-reels/compose
-      } else {
-        throw new Error(data.error)
+        if (!response.ok) {
+          const text = await response.text()
+          throw new Error(`Server error: ${response.status}`)
+        }
+        
+        const data = await response.json()
+        
+        if (!data.success) {
+          throw new Error(data.error)
+        }
+        
+        const jobId = data.jobId
+        setCurrentJobId(jobId)
+        
+        // Show estimated time
+        const estMinutes = Math.ceil(data.estimatedTime / 60)
+        toast({
+          title: "🎬 Video Generation Started",
+          description: `Generating ${duration}s video. Estimated time: ${estMinutes} minutes. Please wait...`,
+          duration: 10000
+        })
+        
+        // Poll for job completion
+        setProgressMessage(`Generating ${duration}s video...`)
+        const result = await pollJobStatus(jobId)
+        
+        // Video completed!
+        setVideoData({
+          success: true,
+          videoUrl: result.videoUrl,
+          captionsUrl: result.captionsUrl,
+          duration: result.duration
+        })
+        
+        toast({
+          title: "🎉 Video Ready!",
+          description: "Your video has been generated and saved to your Library!"
+        })
       }
     } catch (error) {
       console.error('Compose error:', error)
@@ -1558,6 +1651,8 @@ Product URL: ${scrapeData.product.url}`
       }
     } finally {
       setComposing(false)
+      setCurrentJobId(null)
+      setProgressMessage('')
     }
   }
 
