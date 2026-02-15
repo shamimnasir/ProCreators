@@ -1198,6 +1198,13 @@ Product URL: ${scrapeData.product.url}`
 
       clearInterval(progressInterval)
 
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        const text = await response.text()
+        console.error('Final video compose failed:', response.status, text.substring(0, 200))
+        throw new Error(`Server error: ${response.status}`)
+      }
+
       const data = await response.json()
       if (data.success) {
         setProgress(100)
@@ -1212,6 +1219,7 @@ Product URL: ${scrapeData.product.url}`
         throw new Error(data.error)
       }
     } catch (error) {
+      console.error('Final video error:', error)
       toast({
         title: "Error",
         description: error.message || "Failed to generate final video",
