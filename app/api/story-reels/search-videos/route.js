@@ -122,13 +122,15 @@ export async function POST(request) {
       return 'people lifestyle'
     }
 
-    // Search function for a single keyword
-    const searchKeyword = async (keyword) => {
+    // Search function for a single keyword - returns up to `limit` videos
+    const searchKeyword = async (keyword, limit = 2) => {
       const searchTerm = quickTranslate(keyword)
+      const videos = []
+      
       // Priority 1: Try Pexels Videos first (best quality and relevance)
       if (pexelsKey) {
         try {
-          const pexelsVideosUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchTerm)}&per_page=3&orientation=portrait`
+          const pexelsVideosUrl = `https://api.pexels.com/videos/search?query=${encodeURIComponent(searchTerm)}&per_page=${limit}&orientation=portrait`
           const pexelsResponse = await fetch(pexelsVideosUrl, {
             headers: { 'Authorization': pexelsKey },
             signal: AbortSignal.timeout(5000) // 5 second timeout
@@ -136,72 +138,82 @@ export async function POST(request) {
           const pexelsData = await pexelsResponse.json()
           
           if (pexelsData.videos && pexelsData.videos.length > 0) {
-            const video = pexelsData.videos[0]
-            // Get the best quality video file (HD or SD)
-            const videoFile = video.video_files.find(f => f.quality === 'hd') || video.video_files[0]
-            
-            return {
-              id: video.id,
-              keyword,
-              url: videoFile.link,
-              thumbnail: video.image,
-              duration: video.duration || 5,
-              width: videoFile.width,
-              height: videoFile.height,
-              quality: videoFile.quality || 'hd',
-              source: 'pexels'
+            for (const video of pexelsData.videos.slice(0, limit)) {
+              // Get the best quality video file (HD or SD)
+              const videoFile = video.video_files.find(f => f.quality === 'hd') || video.video_files[0]
+              
+              videos.push({
+                id: video.id,
+                keyword,
+                url: videoFile.link,
+                thumbnail: video.image,
+                duration: video.duration || 5,
+                width: videoFile.width,
+                height: videoFile.height,
+                quality: videoFile.quality || 'hd',
+                source: 'pexels'
+              })
             }
-          } else {
-            }
+          }
         } catch (error) {
           console.error(`[Pexels] Error for ${keyword}:`, error.message)
         }
       }
       
-      // Priority 2: Fallback to Pixabay Videos
-      if (pixabayKey) {
+      // If we still need more videos, try Pixabay
+      if (videos.length < limit && pixabayKey) {
         try {
-          const pixabayUrl = `https://pixabay.com/api/videos/?key=${pixabayKey}&q=${encodeURIComponent(searchTerm)}&per_page=3&orientation=vertical`
+          const neededFromPixabay = limit - videos.length
+          const pixabayUrl = `https://pixabay.com/api/videos/?key=${pixabayKey}&q=${encodeURIComponent(searchTerm)}&per_page=${neededFromPixabay}&orientation=vertical`
           const pixabayResponse = await fetch(pixabayUrl, { 
             signal: AbortSignal.timeout(5000) // 5 second timeout
           })
           const pixabayData = await pixabayResponse.json()
           
           if (pixabayData.hits && pixabayData.hits.length > 0) {
-            const video = pixabayData.hits[0]
-            const videoFile = video.videos.medium || video.videos.small || video.videos.large
-            
-            return {
-              id: video.id,
-              keyword,
-              url: videoFile.url,
-              thumbnail: video.userImageURL,
-              duration: video.duration || 5,
-              width: videoFile.width,
-              height: videoFile.height,
-              quality: 'medium',
-              source: 'pixabay'
+            for (const video of pixabayData.hits.slice(0, neededFromPixabay)) {
+              const videoFile = video.videos.medium || video.videos.small || video.videos.large
+              
+              videos.push({
+                id: video.id,
+                keyword,
+                url: videoFile.url,
+                thumbnail: video.userImageURL,
+                duration: video.duration || 5,
+                width: videoFile.width,
+                height: videoFile.height,
+                quality: 'medium',
+                source: 'pixabay'
+              })
             }
-          } else {
-            }
+          }
         } catch (error) {
           console.error(`[Pixabay] Error for ${keyword}:`, error.message)
         }
       }
       
-      return null // No video found for this keyword
+      return videos
     }
+
+    // Calculate how many videos per keyword to fetch
+    // E.g., 10 clips needed with 5 keywords = 2 videos per keyword
+    const videosPerKeyword = Math.max(1, Math.ceil(requiredClips / keywords.length))
+    console.log(`[Video Search] Fetching up to ${videosPerKeyword} videos per keyword`)
 
     // Search all keywords IN PARALLEL (much faster!)
     const startTime = Date.now()
     
-    const searchPromises = keywords.map(keyword => searchKeyword(keyword))
+    const searchPromises = keywords.map(keyword => searchKeyword(keyword, videosPerKeyword))
     const results = await Promise.all(searchPromises)
     
-    // Filter out null results
-    const videos = results.filter(v => v !== null)
+    // Flatten and limit to required clips
+    let videos = results.flat().filter(v => v !== null)
+    
+    // Limit to exactly what we need
+    videos = videos.slice(0, requiredClips)
     
     const endTime = Date.now()
+    console.log(`[Video Search] Found ${videos.length}/${requiredClips} videos in ${endTime - startTime}ms`)
     if (videos.length === 0) {
       // Try generic fallback if no videos found
       const fallbackKeywords = ['nature', 'people', 'lifestyle', 'city', 'abstract']
