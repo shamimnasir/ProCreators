@@ -288,16 +288,23 @@ export async function POST(request) {
     
     if (isAIMode) {
       console.log(`[${jobId}] 🤖 AI Video Mode: ${videoSource}`)
+      console.log(`[${jobId}] 📝 Scene Prompts: ${scenePrompts.length} provided`)
       
       // Extract tier from video source (e.g., 'ai-essential' -> 'essential')
       const aiTier = videoSource.replace('ai-', '')
       
+      // Validate scene prompts for AI mode
+      if (scenePrompts.length === 0) {
+        console.log(`[${jobId}] ⚠️ No scene prompts provided, will generate from script`)
+      }
+      
       try {
-        aiGeneratedVideos = await generateAIVideoClips(script, duration, dimensions, aiTier, jobId)
+        aiGeneratedVideos = await generateAIVideoClips(script, duration, dimensions, aiTier, jobId, scenePrompts)
         console.log(`[${jobId}] ✅ Generated ${aiGeneratedVideos.length} AI video clips`)
         
         if (aiGeneratedVideos.length === 0) {
           console.log(`[${jobId}] ⚠️ No AI videos generated, falling back to stock videos`)
+        }
         }
       } catch (aiError) {
         console.error(`[${jobId}] ❌ AI video generation failed:`, aiError.message)
