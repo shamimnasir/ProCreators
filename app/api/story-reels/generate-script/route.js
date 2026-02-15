@@ -12,7 +12,7 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
-    const { duration, language, niche, customTopic } = await request.json()
+    const { duration, language, niche, customTopic, scriptFormat } = await request.json()
     
     // Support both short-form (10-60s) and long-form (up to 10 min / 600s) videos
     if (!duration || duration < 10 || duration > 600) {
@@ -24,6 +24,10 @@ export async function POST(request) {
 
     const languageText = language === 'bn' ? 'in Bengali language' : 'in English language'
     const languageName = language === 'bn' ? 'Bengali' : 'English'
+    
+    // Determine script format: 'cinematic' (screenplay) or 'narration' (voiceover)
+    // Default to 'cinematic' for long-form (>60s), 'narration' for short-form
+    const format = scriptFormat || (duration > 60 ? 'cinematic' : 'narration')
 
     // Get niche-specific prompt template or use default
     let nichePrompt = ''
@@ -53,8 +57,70 @@ export async function POST(request) {
       }
     }
 
-    // Default system message for original story-reels (backward compatibility)
-    const defaultSystemMessage = `You are a professional viral story writer for TikTok, Instagram Reels, and YouTube Shorts.
+    // CINEMATIC SCREENPLAY FORMAT - Professional video production format
+    const cinematicSystemMessage = `You are an expert CINEMATIC SCREENWRITER and VIDEO DIRECTOR for viral video content.
+
+YOUR TASK: Write a professional SCREENPLAY FORMAT script that is PRODUCTION-READY for video creation.
+
+## MANDATORY SCREENPLAY FORMAT ##
+
+Your script MUST include these elements in proper screenplay format:
+
+1. **SCENE HEADINGS** (Sluglines):
+   - Format: INT./EXT. LOCATION – TIME OF DAY
+   - Example: INT. SMALL APARTMENT – NIGHT
+   - Example: EXT. CITY PARK – MORNING
+
+2. **VISUAL DESCRIPTIONS** (Action lines):
+   - Describe what we SEE on screen
+   - Include character actions, emotions, setting details
+   - Write in present tense, third person
+   - Be specific and visual
+
+3. **CAMERA/EDIT DIRECTIONS**:
+   - Use: FADE IN, FADE OUT, CUT TO:, DISSOLVE TO:
+   - Use: MONTAGE for sequence of quick shots
+   - Use: CLOSE UP, WIDE SHOT, TRACKING SHOT when needed
+
+4. **CHARACTER DIALOGUE**:
+   - Character name in CAPS, centered
+   - Dialogue below, indented
+   - Parentheticals for tone: (softly), (angry), (V.O.) for voiceover
+   
+   Example:
+   JACK
+   (warmly)
+   I've been where you are, young man.
+
+5. **NARRATOR VOICEOVER**:
+   - Use: NARRATOR (V.O.)
+   - For storytelling moments between scenes
+
+6. **TEXT ON SCREEN**:
+   - For any title cards, quotes, or end messages
+   - Format: TEXT ON SCREEN: "Your message here"
+
+## STRUCTURE FOR ${Math.ceil(duration / 60)} MINUTE VIDEO ##
+
+- Opening Hook (first 10-15 seconds): Grab attention immediately
+- Setup: Establish characters, setting, conflict
+- Rising Action: Build tension, show struggle
+- Climax: The turning point or revelation
+- Resolution: Satisfying conclusion with emotional payoff
+- Call-to-Action/Logo: Brand moment at the end
+
+## DIALOGUE GUIDELINES ##
+
+- Include meaningful dialogue between characters (not just narration)
+- Make dialogue feel natural and conversational
+- Use dialogue to reveal character and advance plot
+- Balance dialogue with visual storytelling
+- Include emotional beats and pauses
+
+Write ${languageText}. Create approximately ${Math.ceil(duration / 60) * 150}-${Math.ceil(duration / 60) * 200} words of screenplay content.`
+
+    // NARRATION FORMAT - For voiceover-based short videos (TikTok, Reels, Shorts)
+    const narrationSystemMessage = `You are a professional viral story writer for TikTok, Instagram Reels, and YouTube Shorts.
 
 CRITICAL INSTRUCTIONS:
 1. Write ${languageText}
@@ -74,8 +140,16 @@ OUTPUT RULES (VERY IMPORTANT):
 
 The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
-    // Use niche-specific prompt or default
-    let finalSystemMessage = nichePrompt || defaultSystemMessage
+    // Select system message based on format
+    let finalSystemMessage
+    if (nichePrompt) {
+      // Use niche-specific prompt if available
+      finalSystemMessage = nichePrompt
+    } else if (format === 'cinematic') {
+      finalSystemMessage = cinematicSystemMessage
+    } else {
+      finalSystemMessage = narrationSystemMessage
+    }
     
     // Replace placeholders in the prompt template
     finalSystemMessage = finalSystemMessage
@@ -91,13 +165,11 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
 3. DO NOT mix English and Bengali
 4. Every single word must be in Bengali script (বাংলা অক্ষর)
 5. DO NOT include any timing references like "সেকেন্ড" (seconds) or duration information
-6. Output ONLY the story narration - no meta-text, no instructions, no labels
-7. The output will be read aloud as-is, so include ONLY speakable story content`
+6. Scene headings (INT./EXT.) can remain in English for production clarity`
       : `\n\n## CRITICAL REQUIREMENTS ##
 1. Write the entire script in English only
 2. DO NOT include any timing references like "seconds" or duration information
-3. Output ONLY the story narration - no meta-text, no instructions, no labels
-4. The output will be read aloud as-is, so include ONLY speakable story content`
+3. Make it emotionally engaging and production-ready`
     
     finalSystemMessage = finalSystemMessage + languageEnforcement
 
@@ -121,15 +193,34 @@ The story should be approximately ${Math.floor(duration * 2.5)} words.`
     
     const nicheInstruction = nicheInstructions[niche] || 'a compelling script'
     
-    // Approximate word count based on duration (no mention of seconds in output)
-    const wordCount = Math.floor(duration * 2.5)
+    // Approximate word count based on duration and format
+    const wordCount = format === 'cinematic' 
+      ? Math.ceil(duration / 60) * 175 // Screenplay format has more structure
+      : Math.floor(duration * 2.5)      // Narration is spoken at ~2.5 words/sec
     
     // Check if user provided a topic/context (from script box or custom topic input)
     const hasUserTopic = customTopic && customTopic.trim().length > 0
     
     if (hasUserTopic) {
       // User provided a topic - use it as the basis for generation
-      userPrompt = `Create ${nicheInstruction} for a short video based on this topic/idea:
+      if (format === 'cinematic') {
+        userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute video based on this story:
+
+STORY/TOPIC: "${customTopic}"
+
+Requirements:
+- Language: ${languageName} (scene headings can be in English)
+- Format: Professional screenplay with scene headings, dialogue, camera directions
+- Include: INT./EXT. sluglines, character dialogue with names, NARRATOR (V.O.), visual descriptions
+- Include: MONTAGE sequences, CUT TO:, FADE IN/OUT where appropriate
+- Include: Meaningful character dialogue (not just narration)
+- Structure: Hook → Setup → Conflict → Climax → Resolution
+- End with: TEXT ON SCREEN for brand/message and LOGO placement
+
+CRITICAL: Follow the user's story EXACTLY. Include all characters, plot points, and emotional beats they described.
+Write in proper SCREENPLAY FORMAT that a video production team can use directly.`
+      } else {
+        userPrompt = `Create ${nicheInstruction} for a short video based on this topic/idea:
 
 USER'S TOPIC: "${customTopic}"
 
@@ -145,9 +236,24 @@ Requirements:
 CRITICAL: Your content MUST be based on the user's topic above. Do not ignore it.
 Output ONLY the narration text. No meta-information, no timing references, no labels.
 Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
+      }
     } else {
       // No user topic - generate freely based on niche
-      userPrompt = `Create ${nicheInstruction} for a short video.
+      if (format === 'cinematic') {
+        userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute ${nicheInstruction} video.
+
+Requirements:
+- Language: ${languageName} (scene headings can be in English)
+- Format: Professional screenplay with scene headings, dialogue, camera directions
+- Include: INT./EXT. sluglines, character dialogue with names, NARRATOR (V.O.), visual descriptions
+- Include: MONTAGE sequences, CUT TO:, FADE IN/OUT where appropriate
+- Include: Meaningful character dialogue (not just narration)
+- Structure: Hook → Setup → Conflict → Climax → Resolution
+- End with: TEXT ON SCREEN for brand/message
+
+Write in proper SCREENPLAY FORMAT that a video production team can use directly.`
+      } else {
+        userPrompt = `Create ${nicheInstruction} for a short video.
 
 Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
@@ -159,6 +265,7 @@ Requirements:
 
 IMPORTANT: Output ONLY the narration text. No meta-information, no timing references, no labels.
 Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
+      }
     }
 
     const result = await generateText(userPrompt, finalSystemMessage)
