@@ -961,14 +961,14 @@ function AIVideoStudioPageContent() {
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white shadow-lg">
-                      <Zap className="h-7 w-7" />
+                      <Film className="h-7 w-7" />
                     </div>
                     <div>
                       <h3 className="font-bold text-xl text-emerald-800 dark:text-emerald-100">
-                        Custom Creation
+                        Custom Video Creation
                       </h3>
                       <p className="text-sm text-emerald-700 dark:text-emerald-300">
-                        Your vision, your video • Full creative control • Any style you imagine
+                        Choose Stock or AI videos • Full creative control • Your script, your vision
                       </p>
                     </div>
                   </div>
