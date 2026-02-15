@@ -1128,14 +1128,31 @@ Product URL: ${scrapeData.product.url}`
       toast({ title: "Error", description: "Script is required", variant: "destructive" })
       return
     }
-    // Stock videos only required for stock mode - AI mode generates videos from script
-    if (videoSource === 'stock' && stockVideos.length === 0) {
+    
+    const isAIMode = videoSource && videoSource.startsWith('ai-')
+    
+    // AI mode requires scene prompts, Stock mode requires stock videos
+    if (isAIMode && scenePrompts.length === 0) {
+      toast({ title: "Error", description: "Please generate scene prompts first", variant: "destructive" })
+      return
+    }
+    if (!isAIMode && stockVideos.length === 0) {
       toast({ title: "Error", description: "Please search and select stock videos", variant: "destructive" })
       return
     }
     if (voiceOption === 'tts' && !selectedVoice && availableVoices.length > 0) {
       toast({ title: "Error", description: "Please select a voice", variant: "destructive" })
       return
+    }
+
+    // For AI mode, go directly to compose (AI videos take too long to preview)
+    if (isAIMode) {
+      toast({
+        title: "🤖 AI Video Mode",
+        description: "AI videos are generated directly. Starting video creation...",
+      })
+      // Call handleCompose directly for AI mode
+      return handleCompose()
     }
 
     setGeneratingPreview(true)
