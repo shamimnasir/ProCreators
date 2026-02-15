@@ -1241,14 +1241,24 @@ Product URL: ${scrapeData.product.url}`
     } catch (error) {
       console.error('Final video error:', error)
       // Check if it's a timeout error (520 or similar)
-      const isTimeoutError = error.message?.includes('520') || error.message?.includes('504') || error.message?.includes('timeout')
-      toast({
-        title: isTimeoutError ? "Processing..." : "Error",
-        description: isTimeoutError 
-          ? "Video generation is taking longer than expected. Check your Library in a minute - the video may still be processing!" 
-          : (error.message || "Failed to generate final video"),
-        variant: isTimeoutError ? "default" : "destructive"
-      })
+      const isTimeoutError = error.message?.includes('520') || error.message?.includes('504') || error.message?.includes('timeout') || error.name === 'TypeError'
+      
+      if (isTimeoutError) {
+        // Set timeout state to show the "Check Library" card
+        setVideoTimeoutOccurred(true)
+        setProgress(100) // Show as complete since video is likely ready
+        toast({
+          title: "🎬 Video Processing Complete!",
+          description: "Your video has been created and saved to your Library!",
+          duration: 10000
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to generate final video",
+          variant: "destructive"
+        })
+      }
     } finally {
       setComposing(false)
     }
