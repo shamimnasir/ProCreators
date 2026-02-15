@@ -200,8 +200,16 @@ export async function POST(request) {
             videoFiles.push(videoPath)
           } else {
             // External stock video - download it
-            const response = await fetch(video.url)
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+            console.log(`[Preview ${jobId}] Downloading video ${i}: ${video.url.substring(0, 100)}...`)
+            const response = await fetch(video.url, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; VideoComposer/1.0)'
+              }
+            })
+            if (!response.ok) {
+              console.error(`[Preview ${jobId}] Video download failed: HTTP ${response.status}`)
+              throw new Error(`HTTP ${response.status}`)
+            }
             
             const fileStream = require('fs').createWriteStream(videoPath)
             await pipeline(Readable.fromWeb(response.body), fileStream)
