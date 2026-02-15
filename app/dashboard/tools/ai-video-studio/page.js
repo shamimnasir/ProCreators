@@ -800,6 +800,9 @@ function AIVideoStudioPageContent() {
   
   // ==================== CUSTOM CREATION VIEW (Full Story Reels Interface) ====================
   if (view === 'custom-creation') {
+    // Determine which mode was selected (Stock or AI)
+    const isAIMode = studioMode === 'ai'
+    
     return (
       <div className="space-y-4">
         {/* Back Button Header */}
@@ -809,25 +812,38 @@ function AIVideoStudioPageContent() {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-                <Film className="h-6 w-6" />
+              <div className={`p-2 rounded-lg bg-gradient-to-br ${isAIMode ? 'from-violet-500 to-purple-600' : 'from-emerald-500 to-teal-600'} text-white`}>
+                {isAIMode ? <Zap className="h-6 w-6" /> : <Film className="h-6 w-6" />}
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Custom Video Creation</h1>
-                <p className="text-muted-foreground text-sm">Choose Stock or AI videos • Full creative control with script, voice & music</p>
+                <h1 className="text-2xl font-bold">
+                  {isAIMode ? 'Custom AI Video Creation' : 'Custom Stock Video Creation'}
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  {isAIMode 
+                    ? 'AI-generated clips from your script • Full creative control • Premium quality'
+                    : 'HD Stock footage • Full creative control with script, voice & music'}
+                </p>
               </div>
             </div>
           </div>
           <CreditCostBadge toolId="story-reels" />
         </div>
         
-        {/* Full Story Reels Interface */}
+        {/* Full Story Reels Interface - Pass the mode */}
         <StoryReelsPage
           niche="generic"
           nicheName="Custom Video"
-          nicheIcon="Film"
-          nicheDescription="Create any type of video with full creative control - choose Stock or AI generated video clips"
+          nicheIcon={isAIMode ? "Zap" : "Film"}
+          nicheDescription={isAIMode 
+            ? "Create AI-powered videos with full creative control"
+            : "Create videos with HD stock footage and full creative control"}
           showCustomTopicInput={true}
+          defaultVideoSource={isAIMode ? 'ai' : 'stock'}
+          pageTitle={isAIMode ? 'Custom AI Video' : 'Custom Stock Video'}
+          pageSubtitle={isAIMode 
+            ? 'AI generates video clips from your script • Premium quality'
+            : 'HD stock footage from Pexels • Fast & reliable'}
         />
       </div>
     )
