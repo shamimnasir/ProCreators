@@ -486,9 +486,10 @@ export async function POST(request) {
               '-vf', videoFilter,
               '-t', String(durationPerClip),
               '-c:v', 'libx264',
-              '-preset', 'veryfast', // Changed from ultrafast
-              '-crf', '23', // Better quality
+              '-preset', 'ultrafast', // Fastest encoding for speed
+              '-crf', '26', // Slightly lower quality for speed
               '-pix_fmt', 'yuv420p',
+              '-threads', '0', // Use all available threads
               '-an' // Remove audio from individual clips
             ])
             .output(normalizedPath)
