@@ -282,11 +282,15 @@ export default function StoryReelsPage({
   const [productData, setProductData] = useState(null)
   const [productMedia, setProductMedia] = useState([]) // Images/videos from product URL
   
-  // Keywords & Videos
+  // Keywords & Videos (for Stock mode)
   const [keywords, setKeywords] = useState([])
   const [extracting, setExtracting] = useState(false)
   const [stockVideos, setStockVideos] = useState([])
   const [loadingVideos, setLoadingVideos] = useState(false)
+  
+  // Scene Prompts (for AI mode)
+  const [scenePrompts, setScenePrompts] = useState([])
+  const [generatingPrompts, setGeneratingPrompts] = useState(false)
   
   // Voice state - simplified with Google Cloud TTS
   const [ttsLanguage, setTtsLanguage] = useState('en') // Default to English for all niches
