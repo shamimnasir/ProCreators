@@ -3125,6 +3125,25 @@ Product URL: ${scrapeData.product.url}`
           </CardContent>
         </Card>
       )}
+        </div>
+
+        {/* Sidebar - Drafts Manager - 1 column */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-6">
+            <AutoSaveDraftsManager
+              toolType={`story-reels-${niche}`}
+              getCurrentData={getCurrentDraftData}
+              loadDraftData={loadDraftData}
+              onStartNew={handleStartNew}
+              dependencies={[script, duration, scenePrompts, videoSource, customTopic]}
+              autoSaveEnabled={true}
+              debounceMs={3000}
+              minStepForAutoSave={1}
+              currentStep={script ? 1 : 0}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Preview Modal */}
       <PreviewModal
