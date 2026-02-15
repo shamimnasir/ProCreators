@@ -351,6 +351,76 @@ export default function StoryReelsPage({
     }
   }, [videoData?.videoUrl, videoTimeoutOccurred])
 
+  // ==========================================
+  // Draft Management Functions
+  // ==========================================
+  
+  // Get current data for saving draft
+  const getCurrentDraftData = useCallback(() => {
+    return {
+      title: customTopic || `${nicheName} Draft`,
+      script,
+      duration,
+      customTopic,
+      scriptFormat,
+      scenePrompts,
+      videoSource,
+      ttsLanguage,
+      languageVariant,
+      selectedVoice,
+      captionStyle,
+      captionFontSize,
+      captionPosition,
+      resolution,
+      keywords,
+      stockVideos,
+      // Store the selected stock video indices
+      selectedStockVideos: stockVideos.filter(v => v.selected).map(v => v.id)
+    }
+  }, [script, duration, customTopic, scriptFormat, scenePrompts, videoSource, 
+      ttsLanguage, languageVariant, selectedVoice, captionStyle, captionFontSize, 
+      captionPosition, resolution, keywords, stockVideos, nicheName])
+
+  // Load draft data
+  const loadDraftData = useCallback((data) => {
+    if (data.script) setScript(data.script)
+    if (data.duration) setDuration(data.duration)
+    if (data.customTopic) setCustomTopic(data.customTopic)
+    if (data.scriptFormat) setScriptFormat(data.scriptFormat)
+    if (data.scenePrompts) setScenePrompts(data.scenePrompts)
+    if (data.videoSource) setVideoSource(data.videoSource)
+    if (data.ttsLanguage) setTtsLanguage(data.ttsLanguage)
+    if (data.languageVariant) setLanguageVariant(data.languageVariant)
+    if (data.selectedVoice) setSelectedVoice(data.selectedVoice)
+    if (data.captionStyle) setCaptionStyle(data.captionStyle)
+    if (data.captionFontSize) setCaptionFontSize(data.captionFontSize)
+    if (data.captionPosition) setCaptionPosition(data.captionPosition)
+    if (data.resolution) setResolution(data.resolution)
+    if (data.keywords) setKeywords(data.keywords)
+    if (data.stockVideos) {
+      // Restore stock videos with selection state
+      const restoredVideos = data.stockVideos.map(v => ({
+        ...v,
+        selected: data.selectedStockVideos?.includes(v.id) || false
+      }))
+      setStockVideos(restoredVideos)
+    }
+  }, [])
+
+  // Start new draft
+  const handleStartNew = useCallback(() => {
+    setScript('')
+    setDuration(30)
+    setCustomTopic('')
+    setScriptFormat('auto')
+    setScenePrompts([])
+    setKeywords([])
+    setStockVideos([])
+    setVideoData(null)
+    setProgress(0)
+    setProgressMessage('')
+  }, [])
+
   // Load voices when language changes
   useEffect(() => {
     if (voiceOption === 'tts') {
