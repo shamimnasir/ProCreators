@@ -2900,10 +2900,15 @@ Product URL: ${scrapeData.product.url}`
           {composing && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Creating your video...</span>
+                <span>{progressMessage || 'Creating your video...'}</span>
                 <span>{progress}%</span>
               </div>
               <Progress value={progress} className="w-full" />
+              {duration > 45 && videoSource.startsWith('ai-') && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  ⏱️ Generating {Math.ceil(duration / 5)} AI clips. This may take several minutes. You can leave this page - video will be saved to Library.
+                </p>
+              )}
             </div>
           )}
         </CardContent>
