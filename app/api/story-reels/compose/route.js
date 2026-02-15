@@ -451,35 +451,46 @@ export async function POST(request) {
           
           // Add text overlay if present - VIRAL COLORED BOX STYLE
           if (textOverlay && textOverlay.text) {
-            const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
+            // Escape special characters for ffmpeg
+            const text = textOverlay.text
+              .replace(/\\/g, '\\\\')
+              .replace(/'/g, "'\\''")
+              .replace(/:/g, "\\:")
+              .replace(/\[/g, "\\[")
+              .replace(/\]/g, "\\]")
+            
             const position = textOverlay.position || 'top'
             const color = textOverlay.color || 'yellow'
             
-            // Viral font size - bold and impossible to miss
-            const fontSize = parseInt(targetHeight) >= 1920 ? 80 : 68
+            // Viral font size - bold and impossible to miss  
+            const fontSize = parseInt(targetHeight) >= 1920 ? 72 : 60
             
-            // Safe positioning for 9:16 format - stays within frame
+            // Calculate Y position based on user selection
             let yPosition
             if (position === 'top') {
-              yPosition = '200' // Safe from top edge
+              yPosition = '150' // Near top
             } else if (position === 'center') {
               yPosition = '(h-text_h)/2'
             } else { // bottom
-              yPosition = 'h-text_h-200' // Safe from bottom edge
+              yPosition = 'h-text_h-250' // Near bottom, above captions
             }
             
             // COLOR CONFIGURATION - Viral TikTok/Reels style
             const colorConfig = {
-              yellow: { boxcolor: 'yellow', fontcolor: 'black' },
-              red: { boxcolor: 'red', fontcolor: 'white' },
-              green: { boxcolor: 'green', fontcolor: 'white' },
-              blue: { boxcolor: 'blue', fontcolor: 'white' }
+              yellow: { boxcolor: 'yellow@0.9', fontcolor: 'black' },
+              red: { boxcolor: 'red@0.9', fontcolor: 'white' },
+              green: { boxcolor: 'green@0.9', fontcolor: 'white' },
+              blue: { boxcolor: 'blue@0.9', fontcolor: 'white' }
             }
             
             const config = colorConfig[color] || colorConfig.yellow
             
-            // VIRAL STYLE: Bold colored box with high-contrast text
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
+            // Calculate text width for wrapping (80% of video width)
+            const maxTextWidth = Math.floor(parseInt(targetWidth) * 0.85)
+            
+            // VIRAL STYLE: Bold colored box with high-contrast text + LINE WRAPPING
+            // Using line_spacing and text width constraint for proper wrapping
+            videoFilter += `,drawtext=text='${text}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=20:line_spacing=10`
           }
           
           cmd.outputOptions([
