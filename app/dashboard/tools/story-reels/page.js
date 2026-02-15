@@ -1035,34 +1035,53 @@ Product URL: ${scrapeData.product.url}`
     setGeneratingPreview(true)
 
     try {
-      const formData = new FormData()
-      formData.append('script', script)
-      formData.append('duration', duration)
-      formData.append('voiceOption', voiceOption)
-      formData.append('ttsLanguage', ttsLanguage)
-      formData.append('selectedVoice', selectedVoice || '')
-      formData.append('stockVideos', JSON.stringify(stockVideos))
-      
-      // Include video order with text overlays for preview
-      formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({
-        index: i,
-        isCustom: !!v.isCustom,
-        textOverlay: v.textOverlay || null
-      }))))
-      
-      // Include uploaded/recorded audio for preview
-      if (voiceOption === 'upload' && voiceFile) {
-        formData.append('voiceFile', voiceFile)
-      }
-
       // Get auth token for authenticated request
       const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
 
-      const response = await fetch('/api/story-reels/generate-preview', {
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-        body: formData
-      })
+      let response
+      
+      // Use FormData only when we have a file to upload, otherwise use JSON (more reliable)
+      if (voiceOption === 'upload' && voiceFile) {
+        const formData = new FormData()
+        formData.append('script', script)
+        formData.append('duration', duration)
+        formData.append('voiceOption', voiceOption)
+        formData.append('ttsLanguage', ttsLanguage)
+        formData.append('selectedVoice', selectedVoice || '')
+        formData.append('stockVideos', JSON.stringify(stockVideos))
+        formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({
+          index: i,
+          isCustom: !!v.isCustom,
+          textOverlay: v.textOverlay || null
+        }))))
+        formData.append('voiceFile', voiceFile)
+
+        response = await fetch('/api/story-reels/generate-preview', {
+          method: 'POST',
+          headers,
+          body: formData
+        })
+      } else {
+        // Use JSON for better compatibility (no file upload needed)
+        response = await fetch('/api/story-reels/generate-preview', {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            script,
+            duration,
+            voiceOption,
+            ttsLanguage,
+            selectedVoice: selectedVoice || '',
+            stockVideos,
+            videoOrder: stockVideos.map((v, i) => ({
+              index: i,
+              isCustom: !!v.isCustom,
+              textOverlay: v.textOverlay || null
+            }))
+          })
+        })
+      }
 
       const data = await response.json()
       if (data.success) {
