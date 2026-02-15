@@ -1064,7 +1064,6 @@ Product URL: ${scrapeData.product.url}`
       if (data.success) {
         setPreviewData(data)
         setShowPreview(true)
-        await complete(creditResult.transactionId)
         toast({
           title: "Preview Ready!",
           description: "Make your adjustments and generate the final video"
