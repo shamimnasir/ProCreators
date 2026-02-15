@@ -456,7 +456,7 @@ export default function PreviewModal({
 
               {/* Caption Position */}
               <div className="space-y-2">
-                <Label>Position</Label>
+                <Label>Caption Position</Label>
                 <Select value={captionPosition} onValueChange={setCaptionPosition}>
                   <SelectTrigger>
                     <SelectValue />
@@ -465,6 +465,21 @@ export default function PreviewModal({
                     <SelectItem value="top">Top</SelectItem>
                     <SelectItem value="center">Center</SelectItem>
                     <SelectItem value="bottom">Bottom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Video Orientation */}
+              <div className="space-y-2">
+                <Label>Video Orientation</Label>
+                <Select value={videoOrientation} onValueChange={setVideoOrientation}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="portrait">📱 Portrait (9:16) - TikTok/Reels</SelectItem>
+                    <SelectItem value="landscape">🖥️ Landscape (16:9) - YouTube</SelectItem>
+                    <SelectItem value="square">⬛ Square (1:1) - Instagram</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
