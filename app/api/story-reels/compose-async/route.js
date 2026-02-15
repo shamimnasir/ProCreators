@@ -544,10 +544,10 @@ export async function POST(request) {
     
     console.log(`[${jobId}] Duration: ${duration}, VideoSource: ${videoSource}`)
     
-    // Validate duration (max 3 minutes = 180 seconds)
-    if (duration > 180) {
-      console.log(`[${jobId}] Duration ${duration} exceeds 180s limit`)
-      return NextResponse.json({ success: false, error: 'Maximum duration is 3 minutes (180 seconds)' }, { status: 400 })
+    // Validate duration (max 10 minutes = 600 seconds for long-form videos)
+    if (duration > 600) {
+      console.log(`[${jobId}] Duration ${duration} exceeds 600s limit`)
+      return NextResponse.json({ success: false, error: 'Maximum duration is 10 minutes (600 seconds)' }, { status: 400 })
     }
     
     // Determine credit cost
