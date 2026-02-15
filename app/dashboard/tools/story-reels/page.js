@@ -1917,6 +1917,42 @@ Product URL: ${scrapeData.product.url}`
             </div>
           </div>
 
+          {/* Script Format Selector */}
+          <div className="space-y-2">
+            <Label>Script Format</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={scriptFormat === 'auto' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setScriptFormat('auto')}
+                className="text-xs"
+              >
+                🎯 Auto
+              </Button>
+              <Button
+                variant={scriptFormat === 'cinematic' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setScriptFormat('cinematic')}
+                className="text-xs"
+              >
+                🎬 Screenplay
+              </Button>
+              <Button
+                variant={scriptFormat === 'narration' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setScriptFormat('narration')}
+                className="text-xs"
+              >
+                🎙️ Voiceover
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {scriptFormat === 'auto' && 'Auto: Screenplay for long-form, Voiceover for short-form'}
+              {scriptFormat === 'cinematic' && 'Screenplay: Full production format with scenes, dialogue, camera directions'}
+              {scriptFormat === 'narration' && 'Voiceover: Simple narration text for TTS voiceover'}
+            </p>
+          </div>
+
           {showCustomTopicInput && (
             <div className="space-y-2">
               <Label>
