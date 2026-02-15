@@ -1553,9 +1553,9 @@ Product URL: ${scrapeData.product.url}`
             <div className="p-2 rounded-lg bg-primary/10">
               <NicheIcon iconName={nicheIcon} className="h-8 w-8 text-primary" />
             </div>
-            {nicheName}
+            {pageTitle || nicheName}
           </h1>
-          <p className="text-muted-foreground">{nicheDescription}</p>
+          <p className="text-muted-foreground">{pageSubtitle || nicheDescription}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           <Wand2 className="h-4 w-4 mr-2" />
