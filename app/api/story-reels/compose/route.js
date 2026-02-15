@@ -451,28 +451,56 @@ export async function POST(request) {
           
           // Add text overlay if present - VIRAL COLORED BOX STYLE
           if (textOverlay && textOverlay.text) {
+            const position = textOverlay.position || 'top'
+            const color = textOverlay.color || 'yellow'
+            
+            // Viral font size - bold and impossible to miss  
+            const fontSize = parseInt(targetHeight) >= 1920 ? 64 : 52
+            
+            // Calculate approximate characters per line (based on font size and video width)
+            const charsPerLine = Math.floor(parseInt(targetWidth) / (fontSize * 0.55))
+            
+            // Split text into lines for wrapping
+            const words = textOverlay.text.split(' ')
+            let lines = []
+            let currentLine = ''
+            
+            for (const word of words) {
+              if ((currentLine + ' ' + word).trim().length <= charsPerLine) {
+                currentLine = (currentLine + ' ' + word).trim()
+              } else {
+                if (currentLine) lines.push(currentLine)
+                currentLine = word
+              }
+            }
+            if (currentLine) lines.push(currentLine)
+            
+            // Limit to max 3 lines
+            if (lines.length > 3) {
+              lines = lines.slice(0, 3)
+              lines[2] = lines[2] + '...'
+            }
+            
+            // Join with newline character for ffmpeg
+            const wrappedText = lines.join('\\n')
+            
             // Escape special characters for ffmpeg
-            const text = textOverlay.text
+            const text = wrappedText
               .replace(/\\/g, '\\\\')
               .replace(/'/g, "'\\''")
               .replace(/:/g, "\\:")
               .replace(/\[/g, "\\[")
               .replace(/\]/g, "\\]")
-            
-            const position = textOverlay.position || 'top'
-            const color = textOverlay.color || 'yellow'
-            
-            // Viral font size - bold and impossible to miss  
-            const fontSize = parseInt(targetHeight) >= 1920 ? 72 : 60
+              .replace(/\\\\n/g, '\n') // Restore newlines after escaping
             
             // Calculate Y position based on user selection
             let yPosition
             if (position === 'top') {
-              yPosition = '150' // Near top
+              yPosition = '120' // Near top
             } else if (position === 'center') {
               yPosition = '(h-text_h)/2'
             } else { // bottom
-              yPosition = 'h-text_h-250' // Near bottom, above captions
+              yPosition = 'h-text_h-280' // Near bottom, above captions
             }
             
             // COLOR CONFIGURATION - Viral TikTok/Reels style
@@ -485,12 +513,8 @@ export async function POST(request) {
             
             const config = colorConfig[color] || colorConfig.yellow
             
-            // Calculate text width for wrapping (80% of video width)
-            const maxTextWidth = Math.floor(parseInt(targetWidth) * 0.85)
-            
             // VIRAL STYLE: Bold colored box with high-contrast text + LINE WRAPPING
-            // Using line_spacing and text width constraint for proper wrapping
-            videoFilter += `,drawtext=text='${text}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=20:line_spacing=10`
+            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=18:line_spacing=8`
           }
           
           cmd.outputOptions([
