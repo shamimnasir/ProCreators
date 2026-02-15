@@ -535,6 +535,10 @@ export default function StoryReelsPage({
       // This allows users to type a topic/idea and have AI expand it
       const userTopic = script.trim() || (showCustomTopicInput ? customTopic : undefined)
       
+      // Determine the format to use
+      // 'auto' = let backend decide (cinematic for long-form, narration for short)
+      const formatToSend = scriptFormat === 'auto' ? undefined : scriptFormat
+      
       const response = await fetch('/api/story-reels/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -542,13 +546,17 @@ export default function StoryReelsPage({
           duration, 
           language: ttsLanguage,
           niche,
-          customTopic: userTopic
+          customTopic: userTopic,
+          scriptFormat: formatToSend
         })
       })
 
       const data = await response.json()
       if (data.success) {
         setScript(data.script)
+        
+        // Show which format was generated
+        const formatName = data.scriptFormat === 'cinematic' ? 'Cinematic Screenplay' : 'Voiceover Narration'
         
         // Auto-adjust duration based on generated script length
         const wordCount = data.script.trim().split(/\s+/).length
@@ -559,19 +567,19 @@ export default function StoryReelsPage({
           setDuration(estimatedSeconds)
           toast({
             title: "Success",
-            description: `${nicheName} script generated! Duration auto-adjusted to ${estimatedSeconds} seconds.`
+            description: `${formatName} generated! Duration auto-adjusted to ${estimatedSeconds} seconds.`
           })
         } else if (estimatedSeconds > 600) {
           setDuration(600)
           toast({
             title: "Success",
-            description: `${nicheName} script generated! Duration set to maximum (10 minutes). Note: Script is longer.`,
+            description: `${formatName} generated! Duration set to maximum (10 minutes).`,
             variant: "default"
           })
         } else {
           toast({
             title: "Success",
-            description: `${nicheName} script generated successfully!`
+            description: `${formatName} generated successfully!`
           })
         }
       } else {
