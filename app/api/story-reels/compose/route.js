@@ -1050,9 +1050,12 @@ export async function POST(request) {
         expiresAt,
       }
 
-      await libraryCollection.insertOne(libraryDoc)
+      const insertResult = await libraryCollection.insertOne(libraryDoc)
+      console.log(`[${jobId}] ✅ Video saved to library: ${libraryDoc.id}, userId: ${userId}, videoUrl: ${videoUrl}`)
+      console.log(`[${jobId}] MongoDB insertId: ${insertResult.insertedId}`)
     } catch (saveError) {
-      console.error(`[${jobId}] Failed to auto-save to library:`, saveError)
+      console.error(`[${jobId}] ❌ Failed to auto-save to library:`, saveError)
+      console.error(`[${jobId}] Save error details:`, saveError.message)
       // Don't fail the request if library save fails
     }
 
