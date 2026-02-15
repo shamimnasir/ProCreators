@@ -264,7 +264,38 @@ export async function POST(request) {
       // Image clips found
     }
 
-    // Step 1: Process all video clips (stock videos + custom uploads) - PARALLELIZED
+    // Determine video orientation dimensions
+    let dimensions = { width: 1080, height: 1920 } // Default portrait
+    if (videoOrientation === 'landscape') {
+      dimensions = { width: 1920, height: 1080 }
+    } else if (videoOrientation === 'square') {
+      dimensions = { width: 1080, height: 1080 }
+    }
+
+    // Step 0: Generate AI videos if AI mode is selected
+    let aiGeneratedVideos = []
+    const isAIMode = videoSource && videoSource.startsWith('ai-')
+    
+    if (isAIMode) {
+      console.log(`[${jobId}] 🤖 AI Video Mode: ${videoSource}`)
+      
+      // Extract tier from video source (e.g., 'ai-essential' -> 'essential')
+      const aiTier = videoSource.replace('ai-', '')
+      
+      try {
+        aiGeneratedVideos = await generateAIVideoClips(script, duration, dimensions, aiTier, jobId)
+        console.log(`[${jobId}] ✅ Generated ${aiGeneratedVideos.length} AI video clips`)
+        
+        if (aiGeneratedVideos.length === 0) {
+          console.log(`[${jobId}] ⚠️ No AI videos generated, falling back to stock videos`)
+        }
+      } catch (aiError) {
+        console.error(`[${jobId}] ❌ AI video generation failed:`, aiError.message)
+        // Will fall back to stock videos if they exist
+      }
+    }
+
+    // Step 1: Process all video clips (AI-generated, stock videos + custom uploads) - PARALLELIZED
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     const pLimit = (await import('p-limit')).default
@@ -272,16 +303,23 @@ export async function POST(request) {
     // Limit concurrent operations - increased for faster processing
     const limit = pLimit(8) // Process max 8 clips at once
     
+    // If AI mode and we have AI videos, use those instead of stock
+    let videosToProcess = stockVideos
+    if (isAIMode && aiGeneratedVideos.length > 0) {
+      videosToProcess = aiGeneratedVideos
+      console.log(`[${jobId}] Using ${aiGeneratedVideos.length} AI-generated videos`)
+    }
+    
     // Determine total clips based on video order or just stock videos (backward compatibility)
     // IMPORTANT: Limit to max 15 clips to avoid timeout issues
     const MAX_CLIPS = 15
-    let totalClips = videoOrder.length > 0 ? videoOrder.length : stockVideos.length
+    let totalClips = videoOrder.length > 0 ? videoOrder.length : videosToProcess.length
     if (totalClips > MAX_CLIPS) {
       console.log(`[${jobId}] ⚠️ Limiting clips from ${totalClips} to ${MAX_CLIPS} to avoid timeout`)
       totalClips = MAX_CLIPS
       // Also limit the arrays
       if (videoOrder.length > MAX_CLIPS) videoOrder.length = MAX_CLIPS
-      if (stockVideos.length > MAX_CLIPS) stockVideos.length = MAX_CLIPS
+      if (videosToProcess.length > MAX_CLIPS) videosToProcess.length = MAX_CLIPS
     }
     
     // Pre-calculate indices for each clip BEFORE parallel execution
