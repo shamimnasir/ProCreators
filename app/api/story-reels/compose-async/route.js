@@ -527,20 +527,28 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
+    console.log(`[${jobId}] Starting compose-async request`)
+    
     // Get user ID
     const userId = await getUserIdFromRequest(request)
     if (!userId) {
+      console.log(`[${jobId}] No userId found`)
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
+    console.log(`[${jobId}] User: ${userId}`)
     
     // Parse form data
     const formData = await request.formData()
     const videoSource = formData.get('videoSource') || 'stock'
     const duration = parseInt(formData.get('duration')) || 30
     
+    console.log(`[${jobId}] Duration: ${duration}, VideoSource: ${videoSource}`)
+    
     // Validate duration (max 3 minutes = 180 seconds)
     if (duration > 180) {
+      console.log(`[${jobId}] Duration ${duration} exceeds 180s limit`)
       return NextResponse.json({ success: false, error: 'Maximum duration is 3 minutes (180 seconds)' }, { status: 400 })
+    }
     }
     
     // Determine credit cost
