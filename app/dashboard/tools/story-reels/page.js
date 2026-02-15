@@ -1149,6 +1149,7 @@ Product URL: ${scrapeData.product.url}`
       formData.append('captionFontSize', previewSettings.captionFontSize || captionFontSize)
       formData.append('captionPosition', previewSettings.captionPosition || captionPosition)
       formData.append('videoOrientation', previewSettings.videoOrientation || 'portrait') // Add orientation
+      formData.append('videoSource', videoSource) // Add video source for AI/Stock mode
       // Send music properly from preview
       if (previewSettings.customMusicPath) {
         formData.append('musicTrack', 'custom')
