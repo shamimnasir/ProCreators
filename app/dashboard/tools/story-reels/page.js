@@ -2689,7 +2689,13 @@ Product URL: ${scrapeData.product.url}`
           {/* Preview Button (Recommended) */}
           <Button 
             onClick={handleGeneratePreview} 
-            disabled={generatingPreview || composing || !script.trim() || stockVideos.length === 0 || (voiceOption === 'tts' && !selectedVoice)}
+            disabled={
+              generatingPreview || 
+              composing || 
+              !script.trim() || 
+              (videoSource.startsWith('ai-') ? scenePrompts.length === 0 : stockVideos.length === 0) || 
+              (voiceOption === 'tts' && !selectedVoice)
+            }
             className="w-full"
             size="lg"
             variant="default"
@@ -2702,7 +2708,7 @@ Product URL: ${scrapeData.product.url}`
             ) : (
               <>
                 <Eye className="mr-2 h-5 w-5" />
-                Generate Preview & Customize
+                {videoSource.startsWith('ai-') ? 'Preview AI Video & Customize' : 'Generate Preview & Customize'}
               </>
             )}
           </Button>
