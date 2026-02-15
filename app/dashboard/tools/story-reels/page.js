@@ -1930,7 +1930,8 @@ Product URL: ${scrapeData.product.url}`
         </CardContent>
       </Card>
 
-      {/* Video Source Selection */}
+      {/* Video Source Selection - Only show if no default mode is locked */}
+      {!defaultVideoSource && (
       <Card className="border-2 border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
