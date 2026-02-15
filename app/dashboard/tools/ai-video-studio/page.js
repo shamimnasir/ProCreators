@@ -863,8 +863,8 @@ function AIVideoStudioPageContent() {
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <Zap className="h-4 w-4" />
-                  Quick Mode
+                  <Film className="h-4 w-4" />
+                  Quick & Custom Stock Videos
                 </button>
                 <button
                   onClick={() => setStudioMode('ai')}
@@ -875,13 +875,13 @@ function AIVideoStudioPageContent() {
                   }`}
                 >
                   <Zap className="h-4 w-4" />
-                  AI Mode
+                  Quick & Custom AI Videos
                 </button>
               </div>
               <div className="hidden md:block text-sm text-white/70 ml-2">
                 {studioMode === 'quick' 
-                  ? '1-click preset videos • Best for beginners' 
-                  : 'Full control • Custom templates'}
+                  ? 'Stock footage from Pexels • Fast & affordable' 
+                  : 'AI-generated videos • Premium quality'}
               </div>
             </div>
             
