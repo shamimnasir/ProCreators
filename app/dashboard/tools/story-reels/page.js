@@ -1283,6 +1283,7 @@ Product URL: ${scrapeData.product.url}`
       })
       
       formData.append('keywords', JSON.stringify(keywords))
+      formData.append('scenePrompts', JSON.stringify(scenePrompts)) // AI video scene prompts
       formData.append('voiceOption', voiceOption) // Use actual voice option (tts or upload)
       formData.append('ttsLanguage', ttsLanguage)
       formData.append('selectedVoice', previewSettings.selectedVoice || selectedVoice)
