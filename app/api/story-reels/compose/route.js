@@ -68,6 +68,7 @@ export async function POST(request) {
     const voiceFile = formData.get('voiceFile')
     const captionFontSize = formData.get('captionFontSize') || 'medium'
     const captionPosition = formData.get('captionPosition') || 'bottom'
+    const videoOrientation = formData.get('videoOrientation') || 'portrait' // portrait, landscape, square
     const customMusicPath = formData.get('customMusicPath') || null // For Freesound downloads
     const niche = formData.get('niche') || 'story-reels' // For Quick Reels categorization
     
