@@ -2056,6 +2056,31 @@ Product URL: ${scrapeData.product.url}`
           )}
         </CardContent>
       </Card>
+      )}
+
+      {/* Show locked mode indicator when defaultVideoSource is set */}
+      {defaultVideoSource && (
+        <Card className={`border-2 ${defaultVideoSource === 'stock' ? 'border-green-500 bg-green-50/50 dark:bg-green-950/20' : 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20'}`}>
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{defaultVideoSource === 'stock' ? '📹' : '🤖'}</span>
+              <div className="flex-1">
+                <h4 className="font-semibold">
+                  {defaultVideoSource === 'stock' ? 'Stock Video Mode' : 'AI Video Mode'}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {defaultVideoSource === 'stock' 
+                    ? 'Using HD stock footage from Pexels • Fast & reliable'
+                    : 'Using AI to generate video clips from your script • Premium quality'}
+                </p>
+              </div>
+              <Badge variant="secondary" className={defaultVideoSource === 'stock' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}>
+                {defaultVideoSource === 'stock' ? '25 credits' : '70+ credits'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Step 2: Stock Videos Preview - Only show for stock mode */}
       {(videoSource === 'stock' && stockVideos.length > 0) && (
