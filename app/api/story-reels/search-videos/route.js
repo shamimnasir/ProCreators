@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request) {
   try {
-    const { keywords } = await request.json()
+    const { keywords, duration, maxClips } = await request.json()
 
     if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
       return NextResponse.json(
@@ -10,6 +10,10 @@ export async function POST(request) {
         { status: 400 }
       )
     }
+
+    // Calculate how many clips we need (3 seconds per clip)
+    const requiredClips = maxClips || Math.ceil((duration || 30) / 3)
+    console.log(`[Video Search] Need ${requiredClips} clips for ${duration || 30}s video, ${keywords.length} keywords provided`)
 
     // Check for API keys - Pexels is preferred for videos
     const pexelsKey = process.env.PEXELS_API_KEY
