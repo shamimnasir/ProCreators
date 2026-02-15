@@ -2737,14 +2737,15 @@ Product URL: ${scrapeData.product.url}`
             </p>
           )}
 
-          {/* Direct Generation (Skip Preview) */}
+          {/* Direct Generation (Skip Preview) - Only for Stock mode */}
+          {!videoSource.startsWith('ai-') && (
           <Button 
             onClick={handleCompose} 
             disabled={
               composing || 
               generatingPreview || 
               !script.trim() || 
-              (videoSource.startsWith('ai-') ? scenePrompts.length === 0 : stockVideos.length === 0)
+              stockVideos.length === 0
             }
             className="w-full"
             size="lg"
@@ -2752,8 +2753,9 @@ Product URL: ${scrapeData.product.url}`
           >
             {composing && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             <Video className="mr-2 h-5 w-5" />
-            {videoSource.startsWith('ai-') ? 'Generate AI Video (Skip Preview)' : 'Generate Final Video (Skip Preview)'}
+            Generate Final Video (Skip Preview)
           </Button>
+          )}
           
           {/* Helpful hint for AI mode */}
           {videoSource.startsWith('ai-') && scenePrompts.length === 0 && script.trim() && (
