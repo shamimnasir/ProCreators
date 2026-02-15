@@ -549,7 +549,6 @@ export async function POST(request) {
       console.log(`[${jobId}] Duration ${duration} exceeds 180s limit`)
       return NextResponse.json({ success: false, error: 'Maximum duration is 3 minutes (180 seconds)' }, { status: 400 })
     }
-    }
     
     // Determine credit cost
     let creditToolId = 'quick-reels-stock'
