@@ -1895,12 +1895,29 @@ Product URL: ${scrapeData.product.url}`
             </CardTitle>
             <CardDescription className="flex items-center justify-between">
               <span>
-                {stockVideos.length} clips selected • Drag to reorder • Click ✕ to remove
-                {stockVideos.length > 15 && (
-                  <span className="text-orange-500 font-medium ml-2">
-                    ⚠️ Only first 15 clips will be used
-                  </span>
-                )}
+                {(() => {
+                  const requiredClips = Math.ceil(duration / 3)
+                  const currentClips = stockVideos.length
+                  const isEnough = currentClips >= requiredClips
+                  
+                  return (
+                    <>
+                      <span className={isEnough ? 'text-green-600 font-medium' : ''}>
+                        {currentClips}/{requiredClips} clips
+                      </span>
+                      <span className="text-muted-foreground"> for {duration}s video</span>
+                      {!isEnough && (
+                        <span className="text-amber-500 ml-2">
+                          (need {requiredClips - currentClips} more)
+                        </span>
+                      )}
+                      {isEnough && (
+                        <span className="text-green-600 ml-2">✓ Ready</span>
+                      )}
+                      <span className="text-muted-foreground ml-2">• Drag to reorder</span>
+                    </>
+                  )
+                })()}
               </span>
               <label className="cursor-pointer">
                 <input
