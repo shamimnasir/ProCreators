@@ -168,10 +168,15 @@ Return ONLY a valid JSON array of ${numClips} scene objects.`
     // Ensure we have exactly the right number
     scenePrompts = scenePrompts.slice(0, numClips)
 
-    // Add enhanced cinematic suffix to each prompt
+    // Add enhanced cinematic suffix to each prompt, including consistency info
+    const consistencyPrefix = characterDescription ? `${characterDescription}, ` : ''
+    const stylePrefix = visualStyle ? `${visualStyle} style, ` : ''
+    
     const enhancedPrompts = scenePrompts.map(scene => ({
       ...scene,
-      fullPrompt: `${scene.prompt}, ${scene.cameraStyle}, ${scene.mood} mood, cinematic lighting, professional quality, 4K resolution`
+      characterDescription,
+      visualStyle,
+      fullPrompt: `${consistencyPrefix}${scene.prompt}, ${scene.cameraStyle}, ${scene.mood} mood, ${stylePrefix}cinematic lighting, professional quality, 4K resolution`
     }))
 
     return NextResponse.json({
