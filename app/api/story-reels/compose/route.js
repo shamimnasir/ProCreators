@@ -7,14 +7,173 @@ import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { fal } from '@fal-ai/client'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
 ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
+// Configure Fal.ai client
+fal.config({
+  credentials: process.env.FAL_KEY
+})
+
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
+
+// AI Video Generation Tiers (generic names - no commercial branding)
+const AI_VIDEO_TIERS = {
+  essential: {
+    models: [
+      { name: 'Essential Fast', endpoint: 'fal-ai/pixverse/v5.5/text-to-video', costPerVideo: 0.04 },
+      { name: 'Essential Extended', endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p', costPerVideo: 0.05 }
+    ],
+    description: 'Budget-friendly fast videos',
+    creditCost: 50
+  },
+  standard: {
+    models: [
+      { name: 'Standard Quality', endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video', costPerSecond: 0.05 },
+      { name: 'Standard Plus', endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video', costPerSecond: 0.05 },
+      { name: 'Standard Fast', endpoint: 'fal-ai/sana-video', costPerSecond: 0.05 }
+    ],
+    description: 'Good quality reliable videos',
+    creditCost: 70
+  },
+  professional: {
+    models: [
+      { name: 'Professional HD', endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video', costPerSecond: 0.07 },
+      { name: 'Professional Ultra', endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video', costPerSecond: 0.08 }
+    ],
+    description: 'High quality professional videos',
+    creditCost: 100
+  },
+  cinema: {
+    models: [
+      { name: 'Cinema Quality', endpoint: 'fal-ai/veo3.1/fast', costPerSecond: 0.20 }
+    ],
+    description: 'Highest quality cinematic videos',
+    creditCost: 150
+  }
+}
+
+// Generate AI video clips using Fal.ai
+async function generateAIVideoClips(script, duration, dimensions, tier, jobId) {
+  const videos = []
+  const numClips = Math.min(Math.ceil(duration / 5), 3) // 5 seconds per clip, max 3 clips
+  
+  // Parse script into scene prompts
+  const scenes = parseScriptToScenes(script, numClips)
+  
+  // Get models for the selected tier
+  const tierConfig = AI_VIDEO_TIERS[tier] || AI_VIDEO_TIERS.essential
+  const models = tierConfig.models
+  
+  let currentModelIndex = 0
+  
+  for (let i = 0; i < numClips; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
+      dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
+    }`
+    
+    // Add delay between requests to avoid rate limits
+    if (i > 0) {
+      console.log(`[${jobId}] Waiting 3s before next AI clip...`)
+      await new Promise(r => setTimeout(r, 3000))
+    }
+    
+    let clipGenerated = false
+    let retryCount = 0
+    const maxRetries = 2
+    
+    while (!clipGenerated && retryCount < maxRetries && currentModelIndex < models.length) {
+      const model = models[currentModelIndex]
+      
+      try {
+        console.log(`[${jobId}] Generating AI clip ${i + 1}/${numClips} with ${model.name}...`)
+        
+        const result = await fal.subscribe(model.endpoint, {
+          input: {
+            prompt: cinematicPrompt,
+            aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
+            duration: '5'
+          },
+          logs: true,
+          onQueueUpdate: (update) => {
+            if (update.status === 'IN_PROGRESS') {
+              console.log(`[${jobId}] AI model processing...`)
+            }
+          }
+        })
+        
+        // Extract video URL from result
+        const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
+        
+        if (videoUrl) {
+          videos.push({
+            url: videoUrl,
+            keyword: `ai-scene-${i + 1}`,
+            type: 'ai-generated',
+            model: model.name,
+            tier: tier
+          })
+          clipGenerated = true
+          console.log(`[${jobId}] ✅ AI clip ${i + 1} generated with ${model.name}`)
+        } else {
+          throw new Error('No video URL in response')
+        }
+      } catch (error) {
+        const errorMsg = error.message || ''
+        console.error(`[${jobId}] ❌ AI clip ${i + 1} failed with ${model.name}:`, errorMsg)
+        
+        // Check for rate limit
+        if (errorMsg.includes('concurrent') || errorMsg.includes('rate') || errorMsg.includes('limit')) {
+          console.log(`[${jobId}] Rate limit hit, waiting 10s before retry...`)
+          await new Promise(r => setTimeout(r, 10000))
+          retryCount++
+          continue
+        }
+        
+        // Try next model
+        currentModelIndex++
+        retryCount = 0
+      }
+    }
+    
+    if (!clipGenerated) {
+      console.log(`[${jobId}] Could not generate AI clip ${i + 1}, will fall back to stock`)
+    }
+  }
+  
+  return videos
+}
+
+// Parse script into scene descriptions for AI generation
+function parseScriptToScenes(script, numScenes) {
+  if (!script) return ['cinematic scene']
+  
+  // Split by sentences
+  const sentences = script.split(/[.!?।]+/).filter(s => s.trim().length > 5)
+  
+  if (sentences.length === 0) {
+    return [script.substring(0, 200)]
+  }
+  
+  // Distribute sentences across scenes
+  const scenesPerPart = Math.ceil(sentences.length / numScenes)
+  const scenes = []
+  
+  for (let i = 0; i < numScenes; i++) {
+    const start = i * scenesPerPart
+    const end = Math.min(start + scenesPerPart, sentences.length)
+    const sceneText = sentences.slice(start, end).join('. ')
+    scenes.push(sceneText.substring(0, 300)) // Limit prompt length
+  }
+  
+  return scenes
+}
 
 export async function POST(request) {
   const jobId = randomUUID()
