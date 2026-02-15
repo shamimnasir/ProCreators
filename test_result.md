@@ -569,6 +569,37 @@ test_plan:
   test_priority: "high_first"
 
 agent_communication:
+    - agent: "main"
+      message: "LONG-FORM VIDEO SCRIPT GENERATION FIX COMPLETED:
+      
+      **Issue:** Users could not generate scripts for long-form videos (>60 seconds) because the backend API validation rejected any duration over 60 seconds.
+      
+      **Root Cause:** In /app/app/api/story-reels/generate-script/route.js, line 17-22, the validation was hardcoded:
+      ```javascript
+      if (!duration || duration < 10 || duration > 60) {
+        return NextResponse.json(
+          { success: false, error: 'Duration must be between 10 and 60 seconds' },
+          { status: 400 }
+        )
+      }
+      ```
+      
+      **Fix Applied:** Updated the validation to support durations up to 600 seconds (10 minutes):
+      ```javascript
+      if (!duration || duration < 10 || duration > 600) {
+        return NextResponse.json(
+          { success: false, error: 'Duration must be between 10 and 600 seconds (10 minutes)' },
+          { status: 400 }
+        )
+      }
+      ```
+      
+      **Testing Results:**
+      - ✅ Duration 180 seconds (3 min): Successfully generates script
+      - ✅ Duration 700 seconds: Correctly rejected with error message
+      - ✅ Short-form durations (10-60s) still work as expected
+      
+      The long-form video feature (2m-10m) is now unblocked for users."
     - agent: "testing"
       message: "✅ PROCREATORS BACKEND API TESTING COMPLETED SUCCESSFULLY:
       
