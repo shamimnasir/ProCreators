@@ -313,6 +313,8 @@ export default function StoryReelsPage({
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [progressMessage, setProgressMessage] = useState('')
+  const [currentJobId, setCurrentJobId] = useState(null)
   // Initialize videoSource based on defaultVideoSource prop
   // If 'stock' mode is passed, use 'stock'. If 'ai' mode is passed, default to 'ai-standard'
   const getInitialVideoSource = () => {
