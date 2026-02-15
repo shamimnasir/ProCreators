@@ -14,9 +14,10 @@ export async function POST(request) {
 
     const { duration, language, niche, customTopic } = await request.json()
     
-    if (!duration || duration < 10 || duration > 60) {
+    // Support both short-form (10-60s) and long-form (up to 10 min / 600s) videos
+    if (!duration || duration < 10 || duration > 600) {
       return NextResponse.json(
-        { success: false, error: 'Duration must be between 10 and 60 seconds' },
+        { success: false, error: 'Duration must be between 10 and 600 seconds (10 minutes)' },
         { status: 400 }
       )
     }
