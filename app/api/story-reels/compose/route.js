@@ -725,7 +725,7 @@ export async function POST(request) {
 
       const libraryDoc = {
         id: randomUUID(),
-        userId: 'default-user', // TODO: Replace with actual user ID when auth is implemented
+        userId: userId, // Use actual authenticated user ID
         content: script || '',
         videoUrl,
         filePath: videoUrl, // Same as videoUrl for backwards compatibility
