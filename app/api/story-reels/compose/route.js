@@ -59,20 +59,29 @@ const AI_VIDEO_TIERS = {
 }
 
 // Generate AI video clips using Fal.ai
-async function generateAIVideoClips(script, duration, dimensions, tier, jobId) {
+async function generateAIVideoClips(script, duration, dimensions, tier, jobId, preGeneratedPrompts = null) {
   const videos = []
-  const numClips = Math.min(Math.ceil(duration / 5), 3) // 5 seconds per clip, max 3 clips
+  const numClips = Math.min(Math.ceil(duration / 6), 10) // 6 seconds per clip, max 10 clips
   
-  // Parse script into scene prompts
-  const scenes = parseScriptToScenes(script, numClips)
+  // Use pre-generated prompts if available, otherwise parse script
+  let scenes
+  if (preGeneratedPrompts && preGeneratedPrompts.length > 0) {
+    // Use the fullPrompt from pre-generated prompts
+    scenes = preGeneratedPrompts.map(p => p.fullPrompt || p.prompt)
+    console.log(`[${jobId}] Using ${scenes.length} pre-generated scene prompts`)
+  } else {
+    scenes = parseScriptToScenes(script, numClips)
+    console.log(`[${jobId}] Generated ${scenes.length} scene prompts from script`)
+  }
   
   // Get models for the selected tier
   const tierConfig = AI_VIDEO_TIERS[tier] || AI_VIDEO_TIERS.essential
   const models = tierConfig.models
   
   let currentModelIndex = 0
+  const totalScenes = Math.min(scenes.length, numClips)
   
-  for (let i = 0; i < numClips; i++) {
+  for (let i = 0; i < totalScenes; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
     const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
       dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
