@@ -3081,7 +3081,7 @@ Product URL: ${scrapeData.product.url}`
         </Card>
       )}
 
-      {/* Video Preview */}
+      {/* Video Preview - Only shows when video is ACTUALLY ready */}
       {videoData?.videoUrl && (
         <Card ref={videoPreviewRef}>
           <CardHeader>
