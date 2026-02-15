@@ -308,6 +308,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   
   // Output state
   const [videoData, setVideoData] = useState(null)
+  const [videoTimeoutOccurred, setVideoTimeoutOccurred] = useState(false) // Track if timeout happened
   
   const { toast } = useToast()
   const { checkAndDeduct, refund, complete } = useCredits()
@@ -316,14 +317,14 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const audioChunksRef = useRef([])
   const videoPreviewRef = useRef(null)
 
-  // Auto-scroll to video preview when video is ready
+  // Auto-scroll to video preview when video is ready or timeout occurred
   useEffect(() => {
-    if (videoData?.videoUrl && videoPreviewRef.current) {
+    if ((videoData?.videoUrl || videoTimeoutOccurred) && videoPreviewRef.current) {
       setTimeout(() => {
         videoPreviewRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 500)
     }
-  }, [videoData?.videoUrl])
+  }, [videoData?.videoUrl, videoTimeoutOccurred])
 
   // Load voices when language changes
   useEffect(() => {
