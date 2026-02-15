@@ -1714,12 +1714,13 @@ Product URL: ${scrapeData.product.url}`
       const isTimeoutError = error.message?.includes('520') || error.message?.includes('504') || error.message?.includes('timeout') || error.name === 'TypeError'
       
       if (isTimeoutError) {
-        // Set timeout state to show the "Check Library" card
-        setVideoTimeoutOccurred(true)
-        setProgress(100) // Show as complete since video is likely ready
+        // Don't assume timeout = success - the video might have failed
+        // Instead, guide user to check library or retry
+        setProgress(0)
         toast({
-          title: "🎬 Video Processing Complete!",
-          description: "Your video has been created and saved to your Library!",
+          title: "⚠️ Connection Issue",
+          description: "The request timed out. Please check your Library to see if the video was created, or try again.",
+          variant: "default",
           duration: 10000
         })
       } else {
