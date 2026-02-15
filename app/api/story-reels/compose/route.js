@@ -356,11 +356,12 @@ export async function POST(request) {
             const buffer = Buffer.from(await customFile.arrayBuffer())
             await writeFile(videoPath, buffer)
             return { index: i, path: videoPath, success: true }
-          } else if (stockVideos[clipInfo.stockIdx]) {
-            // Handle stock video URL, UGC video, or product image
-            const video = stockVideos[clipInfo.stockIdx]
+          } else if (videosToProcess[clipInfo.stockIdx]) {
+            // Handle stock video URL, AI-generated video, UGC video, or product image
+            const video = videosToProcess[clipInfo.stockIdx]
             const isImage = video.type === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(video.url)
             const isUGCVideo = video.type === 'ugc-video'
+            const isAIGenerated = video.type === 'ai-generated'
             
             if (isImage) {
               // Download image and convert to video with motion effects
