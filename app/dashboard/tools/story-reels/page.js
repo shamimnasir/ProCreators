@@ -1866,10 +1866,12 @@ Product URL: ${scrapeData.product.url}`
             className="font-mono text-sm"
           />
 
-          {/* Smart Button Highlighting: If user has script content, highlight Extract Keywords, else highlight Generate */}
+          {/* Smart Button Highlighting: Different buttons for Stock vs AI mode */}
           {(() => {
             const hasUserScript = script.trim().length > 50 // User has typed/pasted substantial content
             const requiredClips = Math.ceil(duration / 3)
+            const isAIMode = videoSource && videoSource.startsWith('ai-')
+            const requiredAIClips = Math.ceil(duration / 6) // AI clips are ~6 seconds each
             
             return (
               <div className="space-y-3">
@@ -1900,21 +1902,41 @@ Product URL: ${scrapeData.product.url}`
                       return buttonTexts[niche] || 'Generate AI Story'
                     })()}
                   </Button>
-                  <Button 
-                    onClick={handleExtractKeywords} 
-                    disabled={!script.trim() || extracting}
-                    variant={hasUserScript ? "default" : "outline"}
-                    className="flex-1"
-                  >
-                    {extracting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Search className="mr-2 h-4 w-4" />
-                    Extract Keywords for Related Videos
-                  </Button>
+                  
+                  {/* Show different button based on mode */}
+                  {isAIMode ? (
+                    <Button 
+                      onClick={handleGenerateScenePrompts} 
+                      disabled={!script.trim() || generatingPrompts}
+                      variant={hasUserScript ? "default" : "outline"}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    >
+                      {generatingPrompts && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Zap className="mr-2 h-4 w-4" />
+                      Generate Scene Prompts for AI Video
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleExtractKeywords} 
+                      disabled={!script.trim() || extracting}
+                      variant={hasUserScript ? "default" : "outline"}
+                      className="flex-1"
+                    >
+                      {extracting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Search className="mr-2 h-4 w-4" />
+                      Extract Keywords for Related Videos
+                    </Button>
+                  )}
                 </div>
+                
                 {/* Show estimated clips needed */}
                 {script.trim() && (
                   <p className="text-xs text-muted-foreground text-center">
-                    📽️ Based on {duration}s duration, we'll find ~{requiredClips} video clips (3 sec each)
+                    {isAIMode ? (
+                      <>🤖 Based on {duration}s duration, AI will generate ~{requiredAIClips} video clips (6 sec each)</>
+                    ) : (
+                      <>📽️ Based on {duration}s duration, we'll find ~{requiredClips} video clips (3 sec each)</>
+                    )}
                   </p>
                 )}
               </div>
