@@ -1908,8 +1908,134 @@ Product URL: ${scrapeData.product.url}`
         </CardContent>
       </Card>
 
-      {/* Step 2: Stock Videos Preview */}
-      {stockVideos.length > 0 && (
+      {/* Video Source Selection */}
+      <Card className="border-2 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            Video Source
+          </CardTitle>
+          <CardDescription>
+            Choose how to generate video clips for your reel
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* Stock Videos - Default/Cheapest */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'stock' 
+                  ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
+                  : 'border-muted hover:border-green-300'
+              }`}
+              onClick={() => setVideoSource('stock')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">📹</span>
+                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">25 credits</Badge>
+              </div>
+              <h4 className="font-semibold">Stock Videos</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                HD stock footage from Pexels • Fast & reliable
+              </p>
+              {videoSource === 'stock' && <span className="text-green-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+
+            {/* AI Essential */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'ai-essential' 
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
+                  : 'border-muted hover:border-blue-300'
+              }`}
+              onClick={() => setVideoSource('ai-essential')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">🤖</span>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">50 credits</Badge>
+              </div>
+              <h4 className="font-semibold">AI Essential</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Budget-friendly AI videos • Good for simple scenes
+              </p>
+              {videoSource === 'ai-essential' && <span className="text-blue-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+
+            {/* AI Standard */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'ai-standard' 
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30' 
+                  : 'border-muted hover:border-purple-300'
+              }`}
+              onClick={() => setVideoSource('ai-standard')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">⭐</span>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">70 credits</Badge>
+              </div>
+              <h4 className="font-semibold">AI Standard</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Good quality • Reliable for most use cases
+              </p>
+              {videoSource === 'ai-standard' && <span className="text-purple-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+
+            {/* AI Professional */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'ai-professional' 
+                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30' 
+                  : 'border-muted hover:border-amber-300'
+              }`}
+              onClick={() => setVideoSource('ai-professional')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">🏆</span>
+                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">100 credits</Badge>
+              </div>
+              <h4 className="font-semibold">AI Professional</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                High quality • Cinematic motion • Best for marketing
+              </p>
+              {videoSource === 'ai-professional' && <span className="text-amber-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+
+            {/* AI Cinema */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'ai-cinema' 
+                  ? 'border-pink-500 bg-pink-50 dark:bg-pink-950/30' 
+                  : 'border-muted hover:border-pink-300'
+              }`}
+              onClick={() => setVideoSource('ai-cinema')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">💎</span>
+                <Badge variant="secondary" className="bg-pink-100 text-pink-700 text-xs">150 credits</Badge>
+              </div>
+              <h4 className="font-semibold">AI Cinema Quality</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Highest quality • Premium cinematic visuals
+              </p>
+              {videoSource === 'ai-cinema' && <span className="text-pink-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+          </div>
+
+          {/* Info about AI mode */}
+          {videoSource.startsWith('ai-') && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>🤖 AI Video Mode:</strong> Videos will be generated from your script using AI. 
+                No need to search for stock videos - just write your script and generate!
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Step 2: Stock Videos Preview - Only show for stock mode */}
+      {(videoSource === 'stock' && stockVideos.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
