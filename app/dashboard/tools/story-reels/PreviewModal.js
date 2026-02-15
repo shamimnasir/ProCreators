@@ -253,6 +253,7 @@ export default function PreviewModal({
       captionStyle,
       captionFontSize,
       captionPosition,
+      videoOrientation,
       selectedVoice,
       customMusicPath: customMusic?.path || null
     })
