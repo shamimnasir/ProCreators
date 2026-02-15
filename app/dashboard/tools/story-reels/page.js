@@ -1070,6 +1070,7 @@ Product URL: ${scrapeData.product.url}`
         formData.append('voiceOption', voiceOption)
         formData.append('ttsLanguage', ttsLanguage)
         formData.append('selectedVoice', selectedVoice || '')
+        formData.append('videoSource', videoSource) // Add video source
         formData.append('stockVideos', JSON.stringify(stockVideos))
         formData.append('videoOrder', JSON.stringify(stockVideos.map((v, i) => ({
           index: i,
