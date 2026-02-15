@@ -550,7 +550,6 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
           })
         }
       } else {
-        await refund(creditResult.transactionId, data.error)
         throw new Error(data.error)
       }
     } catch (error) {
