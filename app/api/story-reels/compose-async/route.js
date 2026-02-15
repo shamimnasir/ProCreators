@@ -558,24 +558,31 @@ export async function POST(request) {
     else if (videoSource === 'ai-professional') creditToolId = 'quick-reels-ai-professional'
     else if (videoSource === 'ai-cinema') creditToolId = 'quick-reels-ai-cinema'
     
+    console.log(`[${jobId}] Credit tool ID: ${creditToolId}`)
+    
     // For longer videos, multiply credits
     const durationMultiplier = Math.ceil(duration / 30) // Each 30s costs base rate
     
     // Check and deduct credits
     const creditCheck = await checkCredits(userId, creditToolId)
+    console.log(`[${jobId}] Credit check:`, JSON.stringify(creditCheck))
     const totalCost = creditCheck.cost * durationMultiplier
     
     if (creditCheck.currentBalance < totalCost) {
+      console.log(`[${jobId}] Insufficient credits: ${creditCheck.currentBalance} < ${totalCost}`)
       return NextResponse.json({
         success: false,
         error: `Insufficient credits. ${duration}s video costs ${totalCost} credits, you have ${creditCheck.currentBalance}.`
       }, { status: 402 })
     }
     
+    console.log(`[${jobId}] Deducting credits...`)
     const deductResult = await deductCredits(userId, creditToolId, { multiplier: durationMultiplier })
     if (!deductResult.success) {
+      console.log(`[${jobId}] Deduct failed:`, deductResult.error)
       return NextResponse.json({ success: false, error: deductResult.error }, { status: 402 })
     }
+    console.log(`[${jobId}] Credits deducted successfully`)
     
     // Extract all form data
     const formDataObj = {
