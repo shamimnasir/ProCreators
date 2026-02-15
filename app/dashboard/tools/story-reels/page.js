@@ -260,7 +260,16 @@ function SortableVideoItem({ video, index, totalCount, onRemove, onTextChange })
   )
 }
 
-export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Story Video Reels', nicheIcon = 'Film', nicheDescription = 'Create engaging story-based video reels', showCustomTopicInput = false }) {
+export default function StoryReelsPage({ 
+  niche = 'story-reels', 
+  nicheName = 'Story Video Reels', 
+  nicheIcon = 'Film', 
+  nicheDescription = 'Create engaging story-based video reels', 
+  showCustomTopicInput = false,
+  defaultVideoSource = null, // 'stock' or 'ai' - if set, locks the video source selector
+  pageTitle = null, // Optional custom page title
+  pageSubtitle = null // Optional custom page subtitle
+}) {
   // Script state
   const [script, setScript] = useState('')
   const [scriptLoading, setScriptLoading] = useState(false)
