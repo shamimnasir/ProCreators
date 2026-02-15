@@ -17,7 +17,7 @@ import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 const TOOL_TYPES = [
   { value: 'all', label: 'All Tools', icon: '🎯' },
   { value: 'ai-video-studio', label: 'AI Video Studio', icon: '🎬' },
-  { value: 'story-reels', label: 'Quick Video Reels', icon: '📹' },
+  { value: 'story-reel', label: 'Quick Video Reels', icon: '📹' },
   { value: 'script-to-ad', label: 'Script to Ad', icon: '📱' },
   { value: 'quote-maker', label: 'Quote Maker', icon: '💬' },
   { value: 'thread-generator', label: 'Thread Generator', icon: '🧵' },
