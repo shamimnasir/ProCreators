@@ -629,9 +629,10 @@ export async function POST(request) {
         .outputOptions([
           '-vf', captionFilter,
           '-c:v', 'libx264',
-          '-preset', 'fast', // Good balance of speed and quality
-          '-crf', '23',
+          '-preset', 'ultrafast', // Fastest encoding
+          '-crf', '26',
           '-pix_fmt', 'yuv420p',
+          '-threads', '0', // Use all available threads
           '-an'
         ])
         .output(captionedVideoPath)
