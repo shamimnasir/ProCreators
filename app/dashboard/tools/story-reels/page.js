@@ -2710,15 +2710,29 @@ Product URL: ${scrapeData.product.url}`
           {/* Direct Generation (Skip Preview) */}
           <Button 
             onClick={handleCompose} 
-            disabled={composing || generatingPreview || !script.trim() || stockVideos.length === 0}
+            disabled={
+              composing || 
+              generatingPreview || 
+              !script.trim() || 
+              (videoSource.startsWith('ai-') ? scenePrompts.length === 0 : stockVideos.length === 0)
+            }
             className="w-full"
             size="lg"
             variant="outline"
           >
             {composing && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
             <Video className="mr-2 h-5 w-5" />
-            Generate Final Video (Skip Preview)
+            {videoSource.startsWith('ai-') ? 'Generate AI Video (Skip Preview)' : 'Generate Final Video (Skip Preview)'}
           </Button>
+          
+          {/* Helpful hint for AI mode */}
+          {videoSource.startsWith('ai-') && scenePrompts.length === 0 && script.trim() && (
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <strong>💡 Next Step:</strong> Click "Generate Scene Prompts" above to create visual prompts for AI video generation.
+              </p>
+            </div>
+          )}
 
           {composing && (
             <div className="space-y-2">
