@@ -1858,7 +1858,14 @@ Product URL: ${scrapeData.product.url}`
               Step 2: Video Clip Selection
             </CardTitle>
             <CardDescription className="flex items-center justify-between">
-              <span>{stockVideos.length} clips selected • Drag to reorder • Click ✕ to remove</span>
+              <span>
+                {stockVideos.length} clips selected • Drag to reorder • Click ✕ to remove
+                {stockVideos.length > 15 && (
+                  <span className="text-orange-500 font-medium ml-2">
+                    ⚠️ Only first 15 clips will be used
+                  </span>
+                )}
+              </span>
               <label className="cursor-pointer">
                 <input
                   type="file"
