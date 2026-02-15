@@ -1360,10 +1360,14 @@ Product URL: ${scrapeData.product.url}`
       }
     } catch (error) {
       console.error('Compose error:', error)
+      // Check if it's a timeout error (520 or similar)
+      const isTimeoutError = error.message?.includes('520') || error.message?.includes('504') || error.message?.includes('timeout')
       toast({
-        title: "Error",
-        description: error.message || "Failed to compose video",
-        variant: "destructive"
+        title: isTimeoutError ? "Processing..." : "Error",
+        description: isTimeoutError 
+          ? "Video generation is taking longer than expected. Check your Library in a minute - the video may still be processing!" 
+          : (error.message || "Failed to compose video"),
+        variant: isTimeoutError ? "default" : "destructive"
       })
     } finally {
       setComposing(false)
