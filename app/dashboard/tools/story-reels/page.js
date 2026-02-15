@@ -1943,7 +1943,91 @@ Product URL: ${scrapeData.product.url}`
             )
           })()}
 
-          {keywords.length > 0 && (
+          {/* Scene Prompts Section (for AI mode) */}
+          {scenePrompts.length > 0 && videoSource.startsWith('ai-') && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-purple-500" />
+                  Scene Prompts for AI Video Generation
+                </Label>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                  {scenePrompts.length} clips × ~6s each
+                </Badge>
+              </div>
+              
+              <div className="space-y-3">
+                {scenePrompts.map((scene, index) => (
+                  <div 
+                    key={index} 
+                    className="p-4 border-2 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-200 dark:border-purple-800"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {scene.sceneNumber}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <Textarea
+                          value={scene.prompt}
+                          onChange={(e) => updateScenePrompt(index, e.target.value)}
+                          placeholder="Describe the visual scene for AI video generation..."
+                          rows={2}
+                          className="text-sm resize-none"
+                        />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="bg-purple-100 dark:bg-purple-900 px-2 py-0.5 rounded">
+                            {scene.cameraStyle}
+                          </span>
+                          <span className="bg-pink-100 dark:bg-pink-900 px-2 py-0.5 rounded">
+                            {scene.mood} mood
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                        onClick={() => removeScenePrompt(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={addScenePrompt}
+                  className="flex-1"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Scene
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleGenerateScenePrompts}
+                  disabled={generatingPrompts || !script.trim()}
+                >
+                  {generatingPrompts && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Regenerate All
+                </Button>
+              </div>
+              
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>💡 Tip:</strong> Edit prompts to customize your AI video. Be descriptive about visual elements, camera angles, and mood. Avoid text/dialogue in scenes.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Keywords Section (for Stock mode) */}
+          {keywords.length > 0 && !videoSource.startsWith('ai-') && (
             <div className="space-y-3 pt-4 border-t">
               <Label>Keywords for Video Selection (editable)</Label>
               <div className="flex flex-wrap gap-2">
