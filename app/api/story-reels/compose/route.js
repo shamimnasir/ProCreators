@@ -401,10 +401,24 @@ export async function POST(request) {
     })
 
     // Step 3: Normalize each clip individually, then concatenate
-    // Determine target dimensions for 9:16 portrait (vertical) format
-    // For Reels/Shorts, we need portrait orientation
-    const targetWidth = resolution === '4k' ? '1216' : resolution === '2k' ? '810' : resolution === '1080p' ? '1080' : '720'
-    const targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
+    // Determine target dimensions based on video orientation
+    let targetWidth, targetHeight
+    
+    if (videoOrientation === 'landscape') {
+      // Landscape 16:9 (YouTube)
+      targetWidth = resolution === '4k' ? '3840' : resolution === '2k' ? '2560' : resolution === '1080p' ? '1920' : '1280'
+      targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
+    } else if (videoOrientation === 'square') {
+      // Square 1:1 (Instagram)
+      targetWidth = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
+      targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1080' : '720'
+    } else {
+      // Portrait 9:16 (TikTok/Reels) - default
+      targetWidth = resolution === '4k' ? '1216' : resolution === '2k' ? '810' : resolution === '1080p' ? '1080' : '720'
+      targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
+    }
+    
+    console.log(`[${jobId}] 📐 Video orientation: ${videoOrientation}, Dimensions: ${targetWidth}x${targetHeight}`)
     
     // Calculate duration per clip based on ACTUAL AUDIO DURATION (not target duration)
     const durationPerClip = actualAudioDuration / videoFiles.length
