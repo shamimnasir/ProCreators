@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,6 +21,7 @@ import {
   TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
   Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard, Zap} from 'lucide-react'
 import PreviewModal from './PreviewModal'
+import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import {
   DndContext,
   closestCenter,
