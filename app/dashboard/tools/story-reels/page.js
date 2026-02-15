@@ -1184,7 +1184,7 @@ Product URL: ${scrapeData.product.url}`
         body: formData,
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+          'Authorization': `Bearer ${localStorage.getItem('session_token') || ''}`
         }
       })
 
@@ -1312,7 +1312,7 @@ Product URL: ${scrapeData.product.url}`
         body: formData,
         credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('sessionToken') || ''}`
+          'Authorization': `Bearer ${localStorage.getItem('session_token') || ''}`
         }
       })
 
