@@ -181,7 +181,7 @@ export async function POST(request) {
   let transactionId = null
   
   try {
-    // Get user ID and check credits first
+    // Get user ID first
     const userId = await getUserIdFromRequest(request)
     if (!userId) {
       return NextResponse.json({
@@ -190,7 +190,26 @@ export async function POST(request) {
       }, { status: 401 })
     }
     
-    const creditCheck = await checkCredits(userId, 'quick-reels')
+    // Parse form data early to get video source for dynamic pricing
+    const formData = await request.formData()
+    const videoSource = formData.get('videoSource') || 'stock' // 'stock', 'ai-essential', 'ai-standard', 'ai-professional', 'ai-cinema'
+    
+    // Determine credit tool ID based on video source
+    let creditToolId = 'quick-reels-stock' // Default: stock videos (cheapest)
+    if (videoSource === 'ai-essential') {
+      creditToolId = 'quick-reels-ai-essential'
+    } else if (videoSource === 'ai-standard') {
+      creditToolId = 'quick-reels-ai-standard'
+    } else if (videoSource === 'ai-professional') {
+      creditToolId = 'quick-reels-ai-professional'
+    } else if (videoSource === 'ai-cinema') {
+      creditToolId = 'quick-reels-ai-cinema'
+    }
+    
+    console.log(`[${jobId}] Video source: ${videoSource}, Credit tool: ${creditToolId}`)
+    
+    // Check and deduct credits based on video source
+    const creditCheck = await checkCredits(userId, creditToolId)
     if (!creditCheck.hasEnough) {
       return NextResponse.json({
         success: false,
@@ -199,7 +218,7 @@ export async function POST(request) {
       }, { status: 402 })
     }
     
-    const deductResult = await deductCredits(userId, 'quick-reels')
+    const deductResult = await deductCredits(userId, creditToolId)
     if (!deductResult.success) {
       return NextResponse.json({
         success: false,
@@ -211,8 +230,7 @@ export async function POST(request) {
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
     
-    // Parse form data
-    const formData = await request.formData()
+    // Continue parsing form data
     const script = formData.get('script')
     const duration = parseInt(formData.get('duration'))
     const voiceOption = formData.get('voiceOption') // 'tts' or 'upload'
