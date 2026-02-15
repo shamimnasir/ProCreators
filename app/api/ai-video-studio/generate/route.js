@@ -2081,65 +2081,74 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   }
   
   // Models ordered by cost (cheapest first) - Updated endpoints from fal.ai docs
+  // Using generic tier names for admin clarity
   const models = [
-    // Budget Tier - ~$0.04/video
+    // Essential Tier - ~$0.04/video (Budget-friendly)
     { 
-      name: 'Pixverse v5.5', 
+      name: 'Essential Fast', 
       endpoint: 'fal-ai/pixverse/v5.5/text-to-video',
       costPerVideo: 0.04,
-      tier: '💰 Budget',
+      tier: '💰 Essential',
+      tierKey: 'essential',
       inputFormat: { prompt: true, aspect_ratio: true }
     },
     { 
-      name: 'LongCat Distilled', 
+      name: 'Essential Extended', 
       endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p',
       costPerVideo: 0.05,
-      tier: '💰 Budget',
+      tier: '💰 Essential',
+      tierKey: 'essential',
       inputFormat: { prompt: true, aspect_ratio: true }
     },
-    // Value Tier - ~$0.05/second
+    // Standard Tier - ~$0.05/second (Good quality)
     { 
-      name: 'Wan 2.5', 
+      name: 'Standard Quality', 
       endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video',
       costPerSecond: 0.05,
-      tier: '⭐ Value',
+      tier: '⭐ Standard',
+      tierKey: 'standard',
       inputFormat: { prompt: true, resolution: true }
     },
     { 
-      name: 'Hunyuan 1.5', 
+      name: 'Standard Plus', 
       endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video',
       costPerSecond: 0.05,
-      tier: '⭐ Value',
+      tier: '⭐ Standard',
+      tierKey: 'standard',
       inputFormat: { prompt: true, aspect_ratio: true }
     },
     { 
-      name: 'Sana Video', 
+      name: 'Standard Fast', 
       endpoint: 'fal-ai/sana-video',
       costPerSecond: 0.05,
-      tier: '⭐ Value',
+      tier: '⭐ Standard',
+      tierKey: 'standard',
       inputFormat: { prompt: true }
     },
-    // Premium Tier - $0.07+/second
+    // Professional Tier - $0.07+/second (High quality)
     { 
-      name: 'Kling 2.5 Turbo Pro', 
+      name: 'Professional HD', 
       endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
       costPerSecond: 0.07,
-      tier: '🏆 Premium',
+      tier: '🏆 Professional',
+      tierKey: 'professional',
       inputFormat: { prompt: true, aspect_ratio: true, duration: true }
     },
     { 
-      name: 'Kling 2.6 Pro', 
+      name: 'Professional Ultra', 
       endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video',
       costPerSecond: 0.08,
-      tier: '🏆 Premium',
+      tier: '🏆 Professional',
+      tierKey: 'professional',
       inputFormat: { prompt: true, aspect_ratio: true }
     },
-    // Ultra Tier - $0.10+/second (highest quality)
+    // Cinema Tier - $0.20+/second (Highest quality)
     { 
-      name: 'Veo 3.1 Fast', 
+      name: 'Cinema Quality', 
       endpoint: 'fal-ai/veo3.1/fast',
       costPerSecond: 0.20,
-      tier: '💎 Ultra',
+      tier: '💎 Cinema',
+      tierKey: 'cinema',
       inputFormat: { prompt: true, aspect_ratio: true }
     }
   ]
