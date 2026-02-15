@@ -27,6 +27,13 @@ CRITICAL REQUIREMENTS:
 4. Prompts must be in ENGLISH regardless of script language
 5. Each prompt should be a detailed visual description (not the script text itself)
 
+CONSISTENCY GUIDELINES (VERY IMPORTANT):
+- If the video needs a human character, use the SAME character description in ALL scenes
+- Define a "main character" with specific features: age, gender, clothing, hair style
+- Example: "30-year-old man with short dark hair, blue business suit" - use this EXACT description in every scene with a person
+- For abstract/conceptual videos, maintain consistent visual style (colors, mood, lighting)
+- Use the same visual style throughout: if scene 1 is "modern minimalist", ALL scenes should be "modern minimalist"
+
 PROMPT WRITING GUIDELINES:
 - Describe the VISUAL scene, not the narration
 - Include: subject, action, setting, lighting, camera angle, mood
@@ -34,22 +41,33 @@ PROMPT WRITING GUIDELINES:
 - Use cinematic language (wide shot, close-up, tracking shot, etc.)
 - Avoid text/dialogue in the scene - AI video models can't generate text well
 - Keep each prompt under 200 characters for best results
+- ADD a consistent visual style tag to each prompt
 
 EXAMPLE TRANSFORMATIONS:
 Script: "Reduce risk more than you increase excitement. Guarantees and social proof beat hype."
-Scene Prompt: "Professional businessman in modern office confidently shaking hands with client, warm golden lighting, medium shot, trustworthy atmosphere"
+Scene Prompt: "30-year-old businessman in navy suit, confidently shaking hands in modern glass office, warm golden lighting, medium shot, professional corporate style"
 
 Script: "Make the next step obvious and easy. Confusion kills sales."
-Scene Prompt: "Clean minimalist interface with single glowing green button, finger confidently clicking, smooth animation, bright white background"
+Scene Prompt: "Same 30-year-old businessman in navy suit pointing at clean minimalist interface with glowing button, bright white office, close-up on hands, professional corporate style"
 
 OUTPUT FORMAT:
-Return a JSON array of objects with the following structure:
+Return a JSON array with:
+- "characterDescription": A consistent character description to use (if human needed)
+- "visualStyle": The consistent visual style for all scenes
+- "scenes": Array of scene objects
+
 [
   {
-    "sceneNumber": 1,
-    "prompt": "Detailed visual description for AI video generation",
-    "mood": "confident/exciting/calm/dramatic/etc",
-    "cameraStyle": "wide shot/close-up/tracking/aerial/etc"
+    "characterDescription": "30-year-old professional man with short dark hair wearing navy blue suit",
+    "visualStyle": "modern corporate, warm lighting, professional",
+    "scenes": [
+      {
+        "sceneNumber": 1,
+        "prompt": "Detailed visual description including character description and visual style",
+        "mood": "confident/exciting/calm/dramatic/etc",
+        "cameraStyle": "wide shot/close-up/tracking/aerial/etc"
+      }
+    ]
   }
 ]`
 
