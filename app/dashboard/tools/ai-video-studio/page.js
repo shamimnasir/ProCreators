@@ -810,11 +810,11 @@ function AIVideoStudioPageContent() {
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-                <Zap className="h-6 w-6" />
+                <Film className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Custom Creation</h1>
-                <p className="text-muted-foreground text-sm">Full creative control with script, video clips, voice & music</p>
+                <h1 className="text-2xl font-bold">Custom Video Creation</h1>
+                <p className="text-muted-foreground text-sm">Choose Stock or AI videos • Full creative control with script, voice & music</p>
               </div>
             </div>
           </div>
@@ -825,8 +825,8 @@ function AIVideoStudioPageContent() {
         <StoryReelsPage
           niche="generic"
           nicheName="Custom Video"
-          nicheIcon="Zap"
-          nicheDescription="Create any type of video with full creative control - write your own script or generate with AI"
+          nicheIcon="Film"
+          nicheDescription="Create any type of video with full creative control - choose Stock or AI generated video clips"
           showCustomTopicInput={true}
         />
       </div>
