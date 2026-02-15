@@ -70,15 +70,19 @@ export async function POST(request) {
       // Index might already exist, that's okay
     }
 
-    // Determine content category from validated type
+    // Determine content category from validated type OR explicit category param
     const type = validatedBody.type
-    let category = 'text'
-    if (type === 'video' || type === 'reel' || type === 'short' || type === 'story-reel') {
-      category = 'video'
-    } else if (type === 'photocard' || type === 'carousel' || type === 'image') {
-      category = 'image'
-    } else if (['slides-maker', 'ebook', 'journal', 'planner', 'worksheet', 'checklist', 'study-notes', 'essay-helper', 'exam-prep', 'citation-generator', 'quiz-maker', 'flashcards', 'lesson-planner', 'activity-book', 'storybook', 'social-media-post'].includes(type)) {
-      category = 'document'
+    let category = validatedBody.category || 'text' // Use explicit category if provided
+    
+    // Override category based on type if not explicitly provided
+    if (!validatedBody.category) {
+      if (type === 'video' || type === 'reel' || type === 'short' || type === 'story-reel' || type === 'ai-video-studio') {
+        category = 'video'
+      } else if (type === 'photocard' || type === 'carousel' || type === 'image' || type === 'image-generator') {
+        category = 'image'
+      } else if (['slides-maker', 'ebook', 'journal', 'planner', 'worksheet', 'checklist', 'study-notes', 'essay-helper', 'exam-prep', 'citation-generator', 'quiz-maker', 'flashcards', 'lesson-planner', 'activity-book', 'storybook', 'social-media-post'].includes(type)) {
+        category = 'document'
+      }
     }
 
     // Get user ID (prefer authenticated, fallback to validated body)
