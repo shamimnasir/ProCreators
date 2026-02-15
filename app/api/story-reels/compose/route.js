@@ -305,7 +305,6 @@ export async function POST(request) {
         if (aiGeneratedVideos.length === 0) {
           console.log(`[${jobId}] ⚠️ No AI videos generated, falling back to stock videos`)
         }
-        }
       } catch (aiError) {
         console.error(`[${jobId}] ❌ AI video generation failed:`, aiError.message)
         // Will fall back to stock videos if they exist
