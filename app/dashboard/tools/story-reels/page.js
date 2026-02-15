@@ -3037,50 +3037,6 @@ Product URL: ${scrapeData.product.url}`
         </CardContent>
       </Card>
 
-      {/* Video Ready - Check Library Card (shows when timeout occurs) */}
-      {videoTimeoutOccurred && !videoData?.videoUrl && (
-        <Card ref={videoPreviewRef} className="border-green-500 bg-green-50 dark:bg-green-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
-              <Check className="h-6 w-6" />
-              🎬 Video Successfully Created!
-            </CardTitle>
-            <CardDescription className="text-green-600 dark:text-green-500">
-              Your video has been generated and automatically saved to your Library
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 bg-white dark:bg-background rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm text-muted-foreground mb-4">
-                  The video took a bit longer to process, but it's ready! You can find it in your Library.
-                </p>
-                <div className="flex gap-3">
-                  <Button 
-                    onClick={() => window.location.href = '/dashboard/library'} 
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                  >
-                    <Play className="mr-2 h-4 w-4" />
-                    View in Library
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setVideoTimeoutOccurred(false)
-                      setProgress(0)
-                    }}
-                    className="flex-1"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Create Another Video
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Video Preview - Only shows when video is ACTUALLY ready */}
       {videoData?.videoUrl && (
         <Card ref={videoPreviewRef}>
