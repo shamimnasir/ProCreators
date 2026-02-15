@@ -275,6 +275,7 @@ export default function StoryReelsPage({
   const [scriptLoading, setScriptLoading] = useState(false)
   const [duration, setDuration] = useState(30)
   const [customTopic, setCustomTopic] = useState('')
+  const [scriptFormat, setScriptFormat] = useState('auto') // 'auto', 'cinematic', 'narration'
   
   // Product review specific state
   const [productUrl, setProductUrl] = useState('')
