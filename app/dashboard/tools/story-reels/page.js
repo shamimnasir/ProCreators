@@ -1734,43 +1734,60 @@ Product URL: ${scrapeData.product.url}`
             className="font-mono text-sm"
           />
 
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleGenerateScript} 
-              disabled={scriptLoading}
-              className="flex-1"
-            >
-              {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Wand2 className="mr-2 h-4 w-4" />
-              {(() => {
-                const buttonTexts = {
-                  'mini-stories': 'Generate AI Story',
-                  'motivational': 'Generate Motivation',
-                  'facts-explainer': 'Generate Facts',
-                  'comedy': 'Generate Comedy',
-                  'kids-stories': 'Generate Kids Story',
-                  'kids-learning': 'Generate Learning Content',
-                  'business-promo': 'Generate Promo Script',
-                  'horror': 'Generate Horror Story',
-                  'relationship': 'Generate Advice',
-                  'documentary': 'Generate Documentary',
-                  'festival': 'Generate Festival Content',
-                  'generic': 'Generate Custom Script'
-                }
-                return buttonTexts[niche] || 'Generate AI Story'
-              })()}
-            </Button>
-            <Button 
-              onClick={handleExtractKeywords} 
-              disabled={!script.trim() || extracting}
-              variant="outline"
-              className="flex-1"
-            >
-              {extracting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Film className="mr-2 h-4 w-4" />
-              Extract Keywords
-            </Button>
-          </div>
+          {/* Smart Button Highlighting: If user has script content, highlight Extract Keywords, else highlight Generate */}
+          {(() => {
+            const hasUserScript = script.trim().length > 50 // User has typed/pasted substantial content
+            const requiredClips = Math.ceil(duration / 3)
+            
+            return (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleGenerateScript} 
+                    disabled={scriptLoading}
+                    variant={hasUserScript ? "outline" : "default"}
+                    className="flex-1"
+                  >
+                    {scriptLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    {(() => {
+                      const buttonTexts = {
+                        'mini-stories': 'Generate AI Story',
+                        'motivational': 'Generate Motivation',
+                        'facts-explainer': 'Generate Facts',
+                        'comedy': 'Generate Comedy',
+                        'kids-stories': 'Generate Kids Story',
+                        'kids-learning': 'Generate Learning Content',
+                        'business-promo': 'Generate Promo Script',
+                        'horror': 'Generate Horror Story',
+                        'relationship': 'Generate Advice',
+                        'documentary': 'Generate Documentary',
+                        'festival': 'Generate Festival Content',
+                        'generic': 'Generate Custom Script'
+                      }
+                      return buttonTexts[niche] || 'Generate AI Story'
+                    })()}
+                  </Button>
+                  <Button 
+                    onClick={handleExtractKeywords} 
+                    disabled={!script.trim() || extracting}
+                    variant={hasUserScript ? "default" : "outline"}
+                    className="flex-1"
+                  >
+                    {extracting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    <Search className="mr-2 h-4 w-4" />
+                    Extract Keywords for Related Videos
+                  </Button>
+                </div>
+                {/* Show estimated clips needed */}
+                {script.trim() && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    📽️ Based on {duration}s duration, we'll find ~{requiredClips} video clips (3 sec each)
+                  </p>
+                )}
+              </div>
+            )
+          })()}
 
           {keywords.length > 0 && (
             <div className="space-y-3 pt-4 border-t">
