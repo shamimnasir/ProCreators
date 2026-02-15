@@ -309,7 +309,14 @@ export default function StoryReelsPage({
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [videoSource, setVideoSource] = useState('stock') // 'stock', 'ai-essential', 'ai-standard', 'ai-professional', 'ai-cinema'
+  // Initialize videoSource based on defaultVideoSource prop
+  // If 'stock' mode is passed, use 'stock'. If 'ai' mode is passed, default to 'ai-standard'
+  const getInitialVideoSource = () => {
+    if (defaultVideoSource === 'stock') return 'stock'
+    if (defaultVideoSource === 'ai') return 'ai-standard' // Default to standard AI tier
+    return 'stock' // Default if no mode specified
+  }
+  const [videoSource, setVideoSource] = useState(getInitialVideoSource()) // 'stock', 'ai-essential', 'ai-standard', 'ai-professional', 'ai-cinema'
   
   // Preview state
   const [showPreview, setShowPreview] = useState(false)
