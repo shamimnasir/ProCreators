@@ -43,6 +43,7 @@ export default function PreviewModal({
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [captionFontSize, setCaptionFontSize] = useState('medium')
   const [captionPosition, setCaptionPosition] = useState('bottom')
+  const [videoOrientation, setVideoOrientation] = useState('portrait') // portrait (9:16), landscape (16:9), square (1:1)
   const [selectedVoice, setSelectedVoice] = useState('')
   const [isRegeneratingVoice, setIsRegeneratingVoice] = useState(false)
   const [isGeneratingFinal, setIsGeneratingFinal] = useState(false)
