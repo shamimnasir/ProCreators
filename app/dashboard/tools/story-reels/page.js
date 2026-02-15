@@ -1873,8 +1873,8 @@ Product URL: ${scrapeData.product.url}`
           {duration > 60 && (
             <div className="space-y-2">
               <Label>Duration: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')} minutes</Label>
-              <div className="grid grid-cols-5 gap-2">
-                {[120, 180, 240, 360, 600].map((d) => (
+              <div className="grid grid-cols-4 gap-2">
+                {[90, 120, 150, 180].map((d) => (
                   <Button
                     key={d}
                     variant={duration === d ? 'default' : 'outline'}
@@ -1886,7 +1886,9 @@ Product URL: ${scrapeData.product.url}`
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Long-form videos use multiple stock clips stitched together
+                {videoSource.startsWith('ai-') 
+                  ? '🤖 AI videos up to 3 min. Uses async processing - video saved to Library when ready.'
+                  : 'Long-form videos use multiple stock clips stitched together'}
               </p>
             </div>
           )}
