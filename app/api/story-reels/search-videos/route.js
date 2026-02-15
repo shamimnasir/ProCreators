@@ -217,15 +217,16 @@ export async function POST(request) {
     if (videos.length === 0) {
       // Try generic fallback if no videos found
       const fallbackKeywords = ['nature', 'people', 'lifestyle', 'city', 'abstract']
-      const fallbackPromises = fallbackKeywords.map(k => searchKeyword(k))
+      const fallbackPromises = fallbackKeywords.map(k => searchKeyword(k, 2))
       const fallbackResults = await Promise.all(fallbackPromises)
-      const fallbackVideos = fallbackResults.filter(v => v !== null)
+      const fallbackVideos = fallbackResults.flat().filter(v => v !== null).slice(0, requiredClips)
       
       if (fallbackVideos.length > 0) {
         return NextResponse.json({
           success: true,
           videos: fallbackVideos,
           count: fallbackVideos.length,
+          requiredClips,
           keywords,
           note: 'Using generic videos as fallback'
         })
@@ -241,6 +242,7 @@ export async function POST(request) {
       success: true,
       videos,
       count: videos.length,
+      requiredClips,
       keywords
     })
 
