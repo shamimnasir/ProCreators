@@ -1299,6 +1299,7 @@ Product URL: ${scrapeData.product.url}`
       formData.append('captionStyle', captionStyle)
       formData.append('captionFontSize', captionFontSize)
       formData.append('captionPosition', captionPosition)
+      formData.append('videoSource', videoSource) // Add video source for AI/Stock mode
       // Send music from Freesound/AudioDB selection
       if (customMusic) {
         formData.append('musicTrack', 'custom')
@@ -1314,6 +1315,7 @@ Product URL: ${scrapeData.product.url}`
       
       const imageClips = urlVideos.filter(v => v.type === 'image')
       console.log('[Compose] Sending:', { 
+        videoSource,
         totalClips: stockVideos.length, 
         urlVideos: urlVideos.length, 
         customVideos: customVideos.length,
