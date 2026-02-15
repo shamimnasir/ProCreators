@@ -300,6 +300,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
   const [resolution, setResolution] = useState('1080p')
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [videoSource, setVideoSource] = useState('stock') // 'stock', 'ai-essential', 'ai-standard', 'ai-professional', 'ai-cinema'
   
   // Preview state
   const [showPreview, setShowPreview] = useState(false)
