@@ -1036,7 +1036,7 @@ Product URL: ${scrapeData.product.url}`
 
     try {
       // Get auth token for authenticated request
-      const token = typeof window !== 'undefined' ? localStorage.getItem('session_token') : null
+      const token = typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
 
       let response
