@@ -1861,13 +1861,17 @@ Product URL: ${scrapeData.product.url}`
         </Badge>
       </div>
 
-      {/* Step 1: Script Input */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            {(() => {
-              const stepTitles = {
+      {/* Main Content Grid with Drafts Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Content - 3 columns */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Step 1: Script Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                {(() => {
+                  const stepTitles = {
                 'mini-stories': 'Step 1: Create Your Story Script',
                 'motivational': 'Step 1: Create Your Motivation Script',
                 'facts-explainer': 'Step 1: Generate Educational Facts',
