@@ -213,8 +213,14 @@ export async function POST(request) {
                 await writeFile(videoPath, videoBuffer)
                 } else {
                 // External stock video - download it
-                const response = await fetch(video.url)
+                console.log(`[${jobId}] Downloading video from: ${video.url.substring(0, 100)}...`)
+                const response = await fetch(video.url, {
+                  headers: {
+                    'User-Agent': 'Mozilla/5.0 (compatible; VideoComposer/1.0)'
+                  }
+                })
                 if (!response.ok) {
+                  console.error(`[${jobId}] Video download failed: HTTP ${response.status} for ${video.url.substring(0, 100)}`)
                   throw new Error(`HTTP ${response.status}`)
                 }
                 
