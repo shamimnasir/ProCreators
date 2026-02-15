@@ -251,6 +251,7 @@ export async function POST(request) {
     const stockVideos = JSON.parse(formData.get('stockVideos') || '[]')
     const videoOrder = JSON.parse(formData.get('videoOrder') || '[]')
     const keywords = JSON.parse(formData.get('keywords') || '[]')
+    const scenePrompts = JSON.parse(formData.get('scenePrompts') || '[]') // AI video scene prompts
     const voiceFile = formData.get('voiceFile')
     const captionFontSize = formData.get('captionFontSize') || 'medium'
     const captionPosition = formData.get('captionPosition') || 'bottom'
