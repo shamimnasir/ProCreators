@@ -603,7 +603,7 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
     }
   }
 
-  // Search Stock Videos
+  // Search Stock Videos - Smart: calculates needed clips based on duration (3 sec per clip)
   const handleSearchVideos = async () => {
     if (keywords.length === 0) {
       toast({
@@ -616,10 +616,28 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
 
     setLoadingVideos(true)
     try {
+      // Calculate how many clips we need based on duration (3 seconds per clip)
+      const existingClipCount = stockVideos.length
+      const requiredClips = Math.ceil(duration / 3)
+      const clipsNeeded = Math.max(0, requiredClips - existingClipCount)
+      
+      if (clipsNeeded === 0 && existingClipCount > 0) {
+        toast({
+          title: "Enough Clips",
+          description: `You already have ${existingClipCount} clips for a ${duration}s video. Need ~${requiredClips} clips.`
+        })
+        setLoadingVideos(false)
+        return
+      }
+
       const response = await fetch('/api/story-reels/search-videos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords })
+        body: JSON.stringify({ 
+          keywords, 
+          duration,
+          maxClips: requiredClips // Tell API how many clips we need
+        })
       })
 
       const data = await response.json()
@@ -632,9 +650,10 @@ export default function StoryReelsPage({ niche = 'story-reels', nicheName = 'Sto
         }))
         // APPEND to existing clips (including product images) instead of replacing
         setStockVideos(prev => [...prev, ...videosWithIds])
+        const totalClips = stockVideos.length + data.videos.length
         toast({
-          title: "Success",
-          description: `Added ${data.videos.length} stock videos. Total clips: ${stockVideos.length + data.videos.length}`
+          title: "Videos Found!",
+          description: `Added ${data.videos.length} videos. Total: ${totalClips}/${requiredClips} clips needed.`
         })
       } else {
         throw new Error(data.error)
