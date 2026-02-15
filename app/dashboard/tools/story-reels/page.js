@@ -2717,18 +2717,25 @@ Product URL: ${scrapeData.product.url}`
             size="lg"
             variant="default"
           >
-            {generatingPreview ? (
+            {(generatingPreview || (composing && videoSource.startsWith('ai-'))) ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating Preview...
+                {videoSource.startsWith('ai-') ? 'Creating AI Video...' : 'Generating Preview...'}
               </>
             ) : (
               <>
-                <Eye className="mr-2 h-5 w-5" />
-                {videoSource.startsWith('ai-') ? 'Preview AI Video & Customize' : 'Generate Preview & Customize'}
+                {videoSource.startsWith('ai-') ? <Zap className="mr-2 h-5 w-5" /> : <Eye className="mr-2 h-5 w-5" />}
+                {videoSource.startsWith('ai-') ? '🤖 Generate AI Video' : 'Generate Preview & Customize'}
               </>
             )}
           </Button>
+          
+          {/* For AI mode, show info about direct generation */}
+          {videoSource.startsWith('ai-') && (
+            <p className="text-xs text-muted-foreground text-center">
+              AI videos are generated directly (preview not available for AI-generated clips)
+            </p>
+          )}
 
           {/* Direct Generation (Skip Preview) */}
           <Button 
