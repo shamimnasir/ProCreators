@@ -760,80 +760,80 @@ const TEMPLATE_VIDEO_KEYWORDS = {
 }
 
 // AI Video Generation Models - Updated June 2025
-// Pricing from fal.ai/pricing - Ordered by cost (cheapest first)
+// Using generic tier names for admin clarity - Ordered by cost (cheapest first)
 const AI_VIDEO_MODELS = {
-  // TIER 1: Budget-Friendly (~$0.04/video)
-  'pixverse': {
-    name: 'Pixverse v5.5',
+  // TIER 1: Essential (~$0.04/video) - Budget-friendly
+  'essential-fast': {
+    name: 'Essential Fast',
     endpoint: 'fal-ai/pixverse/v5.5/text-to-video',
     costPerVideo: 0.04,
     costPerSecond: 0.008,
-    description: 'Budget-friendly creative videos',
+    description: 'Budget-friendly fast videos',
     maxDuration: 5,
-    tier: 'budget'
+    tier: 'essential'
   },
-  'longcat': {
-    name: 'LongCat Distilled',
+  'essential-extended': {
+    name: 'Essential Extended',
     endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p',
     costPerVideo: 0.05,
     costPerSecond: 0.01,
-    description: 'Fast long-form video generation',
+    description: 'Extended duration budget option',
     maxDuration: 10,
-    tier: 'budget'
+    tier: 'essential'
   },
   
-  // TIER 2: Value (~$0.05/s)
-  'wan': {
-    name: 'Wan 2.5',
+  // TIER 2: Standard (~$0.05/s) - Good quality
+  'standard-quality': {
+    name: 'Standard Quality',
     endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video',
     costPerSecond: 0.05,
-    description: 'Reliable high-quality video',
+    description: 'Reliable good quality video',
     maxDuration: 5,
-    tier: 'value'
+    tier: 'standard'
   },
-  'hunyuan': {
-    name: 'Hunyuan 1.5',
+  'standard-plus': {
+    name: 'Standard Plus',
     endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video',
     costPerSecond: 0.05,
-    description: 'Tencent\'s best video model',
+    description: 'Enhanced standard quality',
     maxDuration: 5,
-    tier: 'value'
+    tier: 'standard'
   },
-  'sana': {
-    name: 'Sana Video',
+  'standard-fast': {
+    name: 'Standard Fast',
     endpoint: 'fal-ai/sana-video',
     costPerSecond: 0.05,
     description: 'Ultra-fast video generation',
     maxDuration: 5,
-    tier: 'value'
+    tier: 'standard'
   },
   
-  // TIER 3: Premium (~$0.07-0.08/s)
-  'kling-turbo': {
-    name: 'Kling 2.5 Turbo Pro',
+  // TIER 3: Professional (~$0.07-0.08/s) - High quality
+  'professional-hd': {
+    name: 'Professional HD',
     endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
     costPerSecond: 0.07,
-    description: 'Cinematic quality, fluid motion',
+    description: 'High quality, fluid motion',
     maxDuration: 10,
-    tier: 'premium'
+    tier: 'professional'
   },
-  'kling-26': {
-    name: 'Kling 2.6 Pro',
+  'professional-ultra': {
+    name: 'Professional Ultra',
     endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video',
     costPerSecond: 0.08,
-    description: 'Latest Kling with audio generation',
+    description: 'Latest professional quality',
     maxDuration: 10,
-    tier: 'premium'
+    tier: 'professional'
   },
   
-  // TIER 4: Ultra (~$0.20+/s - highest quality)
-  'veo': {
-    name: 'Veo 3.1 Fast',
+  // TIER 4: Cinema (~$0.20+/s) - Highest quality
+  'cinema-quality': {
+    name: 'Cinema Quality',
     endpoint: 'fal-ai/veo3.1/fast',
     costPerSecond: 0.20,
-    description: 'Google DeepMind\'s best video AI',
+    description: 'Highest quality cinematic video',
     maxDuration: 8,
-    tier: 'ultra'
+    tier: 'cinema'
   }
 }
 
