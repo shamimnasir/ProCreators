@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://script-to-reel-2.preview.emergentagent.com"
+BASE_URL = "https://studio-401-debug.preview.emergentagent.com"
 API_ENDPOINT = f"{BASE_URL}/api/library/save"
 
 def print_test_header(test_name):
