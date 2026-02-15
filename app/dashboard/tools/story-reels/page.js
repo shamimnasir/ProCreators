@@ -1044,7 +1044,8 @@ Product URL: ${scrapeData.product.url}`
       toast({ title: "Error", description: "Script is required", variant: "destructive" })
       return
     }
-    if (stockVideos.length === 0) {
+    // Stock videos only required for stock mode - AI mode generates videos from script
+    if (videoSource === 'stock' && stockVideos.length === 0) {
       toast({ title: "Error", description: "Please search and select stock videos", variant: "destructive" })
       return
     }
