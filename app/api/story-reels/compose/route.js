@@ -61,7 +61,11 @@ const AI_VIDEO_TIERS = {
 // Generate AI video clips using Fal.ai
 async function generateAIVideoClips(script, duration, dimensions, tier, jobId, preGeneratedPrompts = null) {
   const videos = []
-  const numClips = Math.min(Math.ceil(duration / 6), 10) // 6 seconds per clip, max 10 clips
+  // Each AI clip is ~5 seconds, calculate clips needed for target duration
+  // Add 1 extra clip to ensure we meet duration (better to have slightly more than less)
+  const numClips = Math.min(Math.ceil(duration / 5) + 1, 12) // 5 seconds per clip, max 12 clips
+  
+  console.log(`[${jobId}] Target duration: ${duration}s, generating ${numClips} clips (5s each)`)
   
   // Use pre-generated prompts if available, otherwise parse script
   let scenes
@@ -69,6 +73,12 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
     // Use the fullPrompt from pre-generated prompts
     scenes = preGeneratedPrompts.map(p => p.fullPrompt || p.prompt)
     console.log(`[${jobId}] Using ${scenes.length} pre-generated scene prompts`)
+    
+    // If we need more clips than prompts, repeat prompts to fill
+    while (scenes.length < numClips) {
+      scenes.push(scenes[scenes.length - 1])
+      console.log(`[${jobId}] Extended prompts to ${scenes.length} to meet duration`)
+    }
   } else {
     scenes = parseScriptToScenes(script, numClips)
     console.log(`[${jobId}] Generated ${scenes.length} scene prompts from script`)
