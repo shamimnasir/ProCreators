@@ -2090,6 +2090,251 @@ Add subtle camera movement, depth, and professional lighting effects.`
   return videos
 }
 
+// ==================== KLING VIDEO GENERATION WITH CONSISTENCY ====================
+// Primary AI video generator using Kling v2.5 Turbo ($0.07/second)
+// Supports: seed-based consistency and frame-chaining
+
+async function generateAIVideosWithKling(prompt, duration, dimensions, jobId, seed = null) {
+  const videos = []
+  const numClips = Math.min(Math.ceil(duration / 5), 6) // 5s per clip, max 6 clips
+  const scenes = parsePromptToScenes(prompt, numClips)
+  
+  if (!process.env.FAL_KEY) {
+    throw new Error('FAL_KEY not configured')
+  }
+  
+  // Determine aspect ratio
+  const aspectRatio = dimensions.height > dimensions.width ? '9:16' : '16:9'
+  
+  console.log(`[${jobId}] 🎬 Generating ${numClips} clips with Kling v2.5 Turbo (seed: ${seed || 'random'})`)
+  
+  for (let i = 0; i < numClips; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const cinematicPrompt = `${scenePrompt}, cinematic lighting, professional quality, smooth motion, consistent character appearance`
+    
+    // Add delay between requests to avoid rate limits (except first)
+    if (i > 0) {
+      console.log(`[${jobId}] Waiting 2s before next clip...`)
+      await new Promise(r => setTimeout(r, 2000))
+    }
+    
+    try {
+      console.log(`[${jobId}] Generating clip ${i + 1}/${numClips}: ${scenePrompt.substring(0, 50)}...`)
+      
+      const input = {
+        prompt: cinematicPrompt,
+        aspect_ratio: aspectRatio,
+        duration: '5' // 5 seconds per clip
+      }
+      
+      // Add seed for consistency if provided
+      if (seed !== null) {
+        input.seed = seed
+      }
+      
+      const result = await fal.subscribe('fal-ai/kling-video/v2.5-turbo/pro/text-to-video', {
+        input,
+        pollInterval: 3000,
+        timeout: 300000, // 5 min timeout
+        onQueueUpdate: (update) => {
+          if (update.status === 'IN_PROGRESS') {
+            console.log(`[${jobId}] Clip ${i + 1} processing...`)
+          }
+        }
+      })
+      
+      const videoUrl = extractVideoUrl(result.data)
+      
+      if (videoUrl) {
+        videos.push({
+          url: videoUrl,
+          prompt: scenePrompt,
+          model: 'Kling v2.5 Turbo',
+          cost: 0.35, // ~5s at $0.07/s
+          seed: seed,
+          index: i
+        })
+        console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully`)
+      } else {
+        console.error(`[${jobId}] ❌ Clip ${i + 1}: No video URL in response`)
+      }
+    } catch (error) {
+      console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
+      // Continue with next clip
+    }
+  }
+  
+  return videos
+}
+
+// ==================== KLING FRAME-CHAIN MODE ====================
+// Creates character consistency by using last frame of each clip as first frame of next
+// Flow: Text-to-Video → Extract Last Frame → Image-to-Video → Repeat
+
+async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions, jobId, seed) {
+  const videos = []
+  const numClips = Math.min(Math.ceil(duration / 5), 6)
+  const scenes = parsePromptToScenes(prompt, numClips)
+  
+  if (!process.env.FAL_KEY) {
+    throw new Error('FAL_KEY not configured')
+  }
+  
+  const aspectRatio = dimensions.height > dimensions.width ? '9:16' : '16:9'
+  const tempDir = `/tmp/kling-framechain-${jobId}`
+  
+  try {
+    await mkdir(tempDir, { recursive: true })
+  } catch (e) { /* ignore */ }
+  
+  console.log(`[${jobId}] 🔗 Starting Frame-Chain generation with ${numClips} clips`)
+  
+  let lastFrameUrl = null
+  
+  for (let i = 0; i < numClips; i++) {
+    const scenePrompt = scenes[i] || scenes[scenes.length - 1]
+    const cinematicPrompt = `${scenePrompt}, cinematic lighting, professional quality, smooth motion, consistent character appearance throughout`
+    
+    // Add delay between requests
+    if (i > 0) {
+      console.log(`[${jobId}] Waiting 3s before next clip...`)
+      await new Promise(r => setTimeout(r, 3000))
+    }
+    
+    try {
+      let videoUrl = null
+      
+      if (i === 0 || !lastFrameUrl) {
+        // First clip: Use text-to-video
+        console.log(`[${jobId}] Clip ${i + 1}/${numClips}: Text-to-Video (first clip)`)
+        
+        const input = {
+          prompt: cinematicPrompt,
+          aspect_ratio: aspectRatio,
+          duration: '5'
+        }
+        
+        if (seed !== null) {
+          input.seed = seed
+        }
+        
+        const result = await fal.subscribe('fal-ai/kling-video/v2.5-turbo/pro/text-to-video', {
+          input,
+          pollInterval: 3000,
+          timeout: 300000,
+          onQueueUpdate: (update) => {
+            if (update.status === 'IN_PROGRESS') {
+              console.log(`[${jobId}] Clip ${i + 1} text-to-video processing...`)
+            }
+          }
+        })
+        
+        videoUrl = extractVideoUrl(result.data)
+      } else {
+        // Subsequent clips: Use image-to-video with last frame
+        console.log(`[${jobId}] Clip ${i + 1}/${numClips}: Image-to-Video (using previous frame)`)
+        
+        const input = {
+          prompt: cinematicPrompt,
+          image_url: lastFrameUrl,
+          aspect_ratio: aspectRatio,
+          duration: '5'
+        }
+        
+        if (seed !== null) {
+          input.seed = seed
+        }
+        
+        const result = await fal.subscribe('fal-ai/kling-video/v1.5/pro/image-to-video', {
+          input,
+          pollInterval: 3000,
+          timeout: 300000,
+          onQueueUpdate: (update) => {
+            if (update.status === 'IN_PROGRESS') {
+              console.log(`[${jobId}] Clip ${i + 1} image-to-video processing...`)
+            }
+          }
+        })
+        
+        videoUrl = extractVideoUrl(result.data)
+      }
+      
+      if (videoUrl) {
+        videos.push({
+          url: videoUrl,
+          prompt: scenePrompt,
+          model: i === 0 ? 'Kling v2.5 T2V' : 'Kling v1.5 I2V',
+          cost: i === 0 ? 0.35 : 0.325, // T2V: $0.07/s, I2V: $0.065/s
+          seed: seed,
+          index: i,
+          frameChained: i > 0
+        })
+        console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully`)
+        
+        // Extract last frame for next clip
+        try {
+          lastFrameUrl = await extractLastFrameFromVideo(videoUrl, tempDir, jobId, i)
+          console.log(`[${jobId}] 📸 Extracted last frame for next clip`)
+        } catch (frameError) {
+          console.error(`[${jobId}] ⚠️ Could not extract last frame:`, frameError.message)
+          lastFrameUrl = null // Will fall back to text-to-video for next clip
+        }
+      } else {
+        console.error(`[${jobId}] ❌ Clip ${i + 1}: No video URL in response`)
+      }
+    } catch (error) {
+      console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
+      lastFrameUrl = null // Reset for next attempt
+    }
+  }
+  
+  // Cleanup temp directory
+  try {
+    await require('fs/promises').rm(tempDir, { recursive: true, force: true })
+  } catch (e) { /* ignore */ }
+  
+  return videos
+}
+
+// Extract last frame from video using FFmpeg and upload to temp storage
+async function extractLastFrameFromVideo(videoUrl, tempDir, jobId, clipIndex) {
+  const { Readable } = require('stream')
+  const { pipeline } = require('stream/promises')
+  
+  const videoPath = join(tempDir, `clip-${clipIndex}.mp4`)
+  const framePath = join(tempDir, `frame-${clipIndex}.jpg`)
+  
+  // Download video
+  const response = await fetch(videoUrl)
+  if (!response.ok) {
+    throw new Error(`Failed to download video: ${response.status}`)
+  }
+  
+  const fileStream = createWriteStream(videoPath)
+  await pipeline(Readable.fromWeb(response.body), fileStream)
+  
+  // Extract last frame using FFmpeg
+  await new Promise((resolve, reject) => {
+    ffmpeg(videoPath)
+      .outputOptions([
+        '-sseof', '-0.1', // Seek to 0.1s before end
+        '-vframes', '1',
+        '-q:v', '2' // High quality JPEG
+      ])
+      .output(framePath)
+      .on('end', resolve)
+      .on('error', reject)
+      .run()
+  })
+  
+  // Read frame and convert to base64 data URL
+  const frameBuffer = await readFile(framePath)
+  const base64Frame = frameBuffer.toString('base64')
+  const dataUrl = `data:image/jpeg;base64,${base64Frame}`
+  
+  return dataUrl
+}
+
 // Updated Fal.ai Video Models - June 2025
 // Order by cost: Cheapest first → Most expensive last
 // Reference: https://fal.ai/pricing
