@@ -1999,6 +1999,57 @@ Product URL: ${scrapeData.product.url}`
             </div>
           </div>
 
+          {/* Character Consistency Mode - Show for AI video modes */}
+          {(videoSource.startsWith('ai-') || defaultVideoSource === 'ai') && (
+            <div className="space-y-3 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 dark:border-purple-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎭</span>
+                <Label className="text-base font-semibold">Character Consistency</Label>
+                <Badge variant="secondary" className="text-[10px] bg-gradient-to-r from-purple-500 to-pink-500 text-white">NEW</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Keep characters looking consistent across all video clips
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={consistencyMode === 'none' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setConsistencyMode('none')}
+                  className={`flex flex-col items-center gap-1 h-auto py-2 ${consistencyMode === 'none' ? 'bg-gray-600' : ''}`}
+                >
+                  <span className="text-lg">⚡</span>
+                  <span className="text-xs font-medium">None</span>
+                  <span className="text-[10px] opacity-70">Fastest</span>
+                </Button>
+                <Button
+                  variant={consistencyMode === 'seed' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setConsistencyMode('seed')}
+                  className={`flex flex-col items-center gap-1 h-auto py-2 ${consistencyMode === 'seed' ? 'bg-blue-600' : ''}`}
+                >
+                  <span className="text-lg">🌱</span>
+                  <span className="text-xs font-medium">Seed</span>
+                  <span className="text-[10px] opacity-70">Balanced</span>
+                </Button>
+                <Button
+                  variant={consistencyMode === 'frame-chain' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setConsistencyMode('frame-chain')}
+                  className={`flex flex-col items-center gap-1 h-auto py-2 ${consistencyMode === 'frame-chain' ? 'bg-purple-600' : ''}`}
+                >
+                  <span className="text-lg">🔗</span>
+                  <span className="text-xs font-medium">Frame Chain</span>
+                  <span className="text-[10px] opacity-70">Best Quality</span>
+                </Button>
+              </div>
+              {consistencyMode === 'frame-chain' && (
+                <p className="text-xs text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 p-2 rounded">
+                  🔗 <strong>Frame Chaining</strong> uses the last frame of each clip as the first frame of the next, creating seamless character continuity.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Script Format Selector */}
           <div className="space-y-2">
             <Label>Script Format</Label>
