@@ -99,6 +99,13 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       const tierConfig = AI_VIDEO_TIERS[aiTier] || AI_VIDEO_TIERS.standard
       const models = tierConfig.models
       
+      // Get Replicate API key
+      const replicateApiKey = process.env.REPLICATE_API_TOKEN
+      if (!replicateApiKey) {
+        console.error(`[${jobId}] ❌ REPLICATE_API_TOKEN not configured`)
+        throw new Error('AI video service not configured')
+      }
+      
       // Prepare scene prompts
       let scenes = scenePrompts && scenePrompts.length > 0 
         ? scenePrompts.map(p => p.fullPrompt || p.prompt)
@@ -113,9 +120,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       
       for (let i = 0; i < numClips; i++) {
         const scenePrompt = scenes[i] || scenes[scenes.length - 1]
-        const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
-          dimensions.height > dimensions.width ? 'vertical portrait video, 9:16' : 'horizontal landscape video, 16:9'
-        }`
+        const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
         
         // Update progress
         const clipProgress = 10 + Math.floor((i / numClips) * 50)
@@ -137,34 +142,77 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           const model = models[currentModelIndex]
           
           try {
-            console.log(`[${jobId}] Generating clip ${i + 1}/${numClips} with ${model.name}...`)
+            console.log(`[${jobId}] Generating clip ${i + 1}/${numClips} with ${model.name} (Replicate)...`)
             
-            const result = await fal.subscribe(model.endpoint, {
-              input: {
-                prompt: cinematicPrompt,
-                aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
-                duration: '5'
+            // Create prediction on Replicate
+            const createResponse = await fetch('https://api.replicate.com/v1/predictions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${replicateApiKey}`,
+                'Content-Type': 'application/json'
               },
-              logs: false
+              body: JSON.stringify({
+                version: model.model,
+                input: {
+                  prompt: cinematicPrompt,
+                  prompt_optimizer: true
+                }
+              })
             })
             
-            const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url
+            if (!createResponse.ok) {
+              throw new Error(`Replicate API error: ${createResponse.status}`)
+            }
             
-            if (videoUrl) {
-              aiVideos.push({
-                url: videoUrl,
-                keyword: `ai-scene-${i + 1}`,
-                type: 'ai-generated',
-                model: model.name
+            let prediction = await createResponse.json()
+            
+            // Poll for completion (max 3 minutes per clip)
+            let attempts = 0
+            const maxAttempts = 90
+            
+            while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
+              await new Promise(r => setTimeout(r, 2000))
+              attempts++
+              
+              const statusResponse = await fetch(prediction.urls.get, {
+                headers: { 'Authorization': `Bearer ${replicateApiKey}` }
               })
-              clipGenerated = true
-              console.log(`[${jobId}] ✅ Clip ${i + 1} generated`)
+              prediction = await statusResponse.json()
+              
+              // Update progress periodically
+              if (attempts % 15 === 0) {
+                await updateJobStatus(jobId, {
+                  progressMessage: `Generating clip ${i + 1}/${numClips}... (${attempts * 2}s)`
+                })
+              }
+            }
+            
+            if (prediction.status === 'succeeded' && prediction.output) {
+              let videoUrl = prediction.output
+              if (Array.isArray(prediction.output)) {
+                videoUrl = prediction.output[0]
+              } else if (typeof prediction.output === 'object') {
+                videoUrl = prediction.output.url || prediction.output.video_url || prediction.output.video?.url
+              }
+              
+              if (videoUrl) {
+                aiVideos.push({
+                  url: videoUrl,
+                  keyword: `ai-scene-${i + 1}`,
+                  type: 'ai-generated',
+                  model: model.name
+                })
+                clipGenerated = true
+                console.log(`[${jobId}] ✅ Clip ${i + 1} generated`)
+              } else {
+                throw new Error('No video URL in response')
+              }
             } else {
-              throw new Error('No video URL')
+              throw new Error(prediction.error || 'Prediction failed or timeout')
             }
           } catch (error) {
             console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
-            if (error.message.includes('concurrent') || error.message.includes('rate')) {
+            if (error.message.includes('rate') || error.message.includes('429')) {
               await new Promise(r => setTimeout(r, 10000))
               retryCount++
             } else {
