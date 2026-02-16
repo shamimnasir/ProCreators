@@ -630,7 +630,8 @@ export async function POST(request) {
       videoOrientation: formData.get('videoOrientation') || 'portrait',
       customMusicPath: formData.get('customMusicPath'),
       niche: formData.get('niche') || 'story-reels',
-      videoSource
+      videoSource,
+      consistencyMode: formData.get('consistencyMode') || 'none' // User's selected character consistency mode
     }
     
     // Create job record
