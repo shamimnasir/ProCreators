@@ -93,163 +93,73 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     await updateJobStatus(jobId, { 
       status: 'generating_clips', 
       progress: 10, 
-      progressMessage: `Generating ${numClips} AI video clips...`,
+      progressMessage: `Generating ${numClips} AI video clips with Kling...`,
       totalClips: numClips
     })
     
-    // Generate AI video clips
+    // Get tier configuration
+    const tierConfig = AI_VIDEO_TIERS[aiTier] || AI_VIDEO_TIERS.standard
+    const consistencyMode = tierConfig.consistencyMode
+    
+    // Determine aspect ratio from orientation
+    let aspectRatio = '9:16' // Portrait default
+    if (videoOrientation === 'landscape') {
+      aspectRatio = '16:9'
+    } else if (videoOrientation === 'square') {
+      aspectRatio = '1:1'
+    }
+    
+    // Generate AI video clips using Kling with character consistency
     let aiVideos = []
     if (isAIMode) {
-      const tierConfig = AI_VIDEO_TIERS[aiTier] || AI_VIDEO_TIERS.standard
-      const models = tierConfig.models
-      
-      // Get Replicate API key
-      const replicateApiKey = process.env.REPLICATE_API_TOKEN
-      if (!replicateApiKey) {
-        console.error(`[${jobId}] ❌ REPLICATE_API_TOKEN not configured`)
+      // Check Fal.ai (Kling) availability
+      if (!isFalConfigured()) {
+        console.error(`[${jobId}] ❌ FAL_KEY not configured`)
         throw new Error('AI video service not configured')
       }
       
-      // Prepare scene prompts
-      let scenes = scenePrompts && scenePrompts.length > 0 
-        ? scenePrompts.map(p => p.fullPrompt || p.prompt)
-        : generateFallbackScenes(script, numClips)
-      
-      // Extend if needed
-      while (scenes.length < numClips) {
-        scenes.push(scenes[scenes.length - 1])
-      }
-      
-      let currentModelIndex = 0
-      
-      for (let i = 0; i < numClips; i++) {
-        const scenePrompt = scenes[i] || scenes[scenes.length - 1]
-        const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
+      try {
+        console.log(`[${jobId}] 🎬 Starting Kling video generation (${consistencyMode} consistency)...`)
         
-        // Update progress
-        const clipProgress = 10 + Math.floor((i / numClips) * 50)
-        await updateJobStatus(jobId, {
-          progress: clipProgress,
-          progressMessage: `Generating clip ${i + 1}/${numClips}...`,
-          clipsGenerated: i
+        // Use the centralized Kling service with consistency
+        const result = await generateConsistentVideoClips({
+          script,
+          duration: parseInt(duration),
+          aspectRatio,
+          consistencyMode,
+          characterDescription: null, // Will be extracted from script
+          jobId,
+          onProgress: async (progress) => {
+            await updateJobStatus(jobId, {
+              progress: 10 + Math.floor((progress.clipIndex / progress.totalClips) * 50),
+              progressMessage: progress.message,
+              clipsGenerated: progress.clipIndex
+            })
+          }
         })
         
-        // Add delay between requests
-        if (i > 0) {
-          await new Promise(r => setTimeout(r, 2000))
-        }
+        aiVideos = result.clips.map((clip, i) => ({
+          url: clip.url,
+          keyword: `ai-scene-${i + 1}`,
+          type: 'ai-generated',
+          model: 'Kling',
+          frameChained: clip.frameChained
+        }))
         
-        let clipGenerated = false
-        let retryCount = 0
+        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} clips with ${consistencyMode} consistency`)
         
-        while (!clipGenerated && retryCount < 2 && currentModelIndex < models.length) {
-          const model = models[currentModelIndex]
-          
-          try {
-            console.log(`[${jobId}] Generating clip ${i + 1}/${numClips} with ${model.name} (Replicate)...`)
-            
-            // Create prediction on Replicate
-            const createResponse = await fetch('https://api.replicate.com/v1/predictions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${replicateApiKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                version: model.model,
-                input: {
-                  prompt: cinematicPrompt,
-                  prompt_optimizer: true
-                }
-              })
-            })
-            
-            if (!createResponse.ok) {
-              throw new Error(`Replicate API error: ${createResponse.status}`)
-            }
-            
-            let prediction = await createResponse.json()
-            
-            // Poll for completion (max 3 minutes per clip)
-            let attempts = 0
-            const maxAttempts = 90
-            
-            console.log(`[${jobId}] Starting poll for clip ${i + 1}, prediction: ${prediction.id}`)
-            
-            while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
-              await new Promise(r => setTimeout(r, 2000))
-              attempts++
-              
-              try {
-                const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
-                
-                const statusResponse = await fetch(prediction.urls.get, {
-                  headers: { 'Authorization': `Bearer ${replicateApiKey}` },
-                  signal: controller.signal
-                })
-                clearTimeout(timeoutId)
-                
-                if (!statusResponse.ok) {
-                  console.log(`[${jobId}] Status check failed: ${statusResponse.status}`)
-                  continue // Retry
-                }
-                
-                prediction = await statusResponse.json()
-              } catch (pollError) {
-                console.log(`[${jobId}] Poll attempt ${attempts} failed:`, pollError.message)
-                // Continue to retry
-                continue
-              }
-              
-              // Update progress periodically
-              if (attempts % 15 === 0) {
-                console.log(`[${jobId}] Still polling clip ${i + 1}... (${attempts * 2}s, status: ${prediction.status})`)
-                await updateJobStatus(jobId, {
-                  progressMessage: `Generating clip ${i + 1}/${numClips}... (${attempts * 2}s)`
-                })
-              }
-            }
-            
-            console.log(`[${jobId}] Poll complete for clip ${i + 1}: status=${prediction.status}`)
-            
-            if (prediction.status === 'succeeded' && prediction.output) {
-              let videoUrl = prediction.output
-              if (Array.isArray(prediction.output)) {
-                videoUrl = prediction.output[0]
-              } else if (typeof prediction.output === 'object') {
-                videoUrl = prediction.output.url || prediction.output.video_url || prediction.output.video?.url
-              }
-              
-              if (videoUrl) {
-                aiVideos.push({
-                  url: videoUrl,
-                  keyword: `ai-scene-${i + 1}`,
-                  type: 'ai-generated',
-                  model: model.name
-                })
-                clipGenerated = true
-                console.log(`[${jobId}] ✅ Clip ${i + 1} generated`)
-              } else {
-                throw new Error('No video URL in response')
-              }
-            } else {
-              throw new Error(prediction.error || 'Prediction failed or timeout')
-            }
-          } catch (error) {
-            console.error(`[${jobId}] ❌ Clip ${i + 1} failed:`, error.message)
-            if (error.message.includes('rate') || error.message.includes('429')) {
-              await new Promise(r => setTimeout(r, 10000))
-              retryCount++
-            } else {
-              currentModelIndex++
-              retryCount = 0
-            }
-          }
-        }
+      } catch (klingError) {
+        console.error(`[${jobId}] ⚠️ Kling generation failed:`, klingError.message)
         
-        if (!clipGenerated) {
-          console.log(`[${jobId}] Skipping clip ${i + 1}`)
+        // Fallback to stock videos
+        console.log(`[${jobId}] Falling back to stock videos...`)
+        const keywords = extractKeywordsFromScript(script)
+        const stockResults = await getFallbackStockVideos(keywords, numClips, videoOrientation)
+        
+        if (stockResults.length > 0) {
+          aiVideos = stockResults
+        } else {
+          throw new Error('AI generation failed and no stock videos available')
         }
       }
       
