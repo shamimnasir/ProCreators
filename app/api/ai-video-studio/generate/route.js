@@ -1345,6 +1345,10 @@ export async function POST(request) {
     const musicTrack = formData.get('musicTrack') || 'none'
     const narrationMode = formData.get('narrationMode') || 'dialogue-only' // 'full' or 'dialogue-only'
     
+    // NEW: Character consistency options
+    const consistencyMode = formData.get('consistencyMode') || 'none' // 'none', 'seed', 'frame-chain'
+    const consistencySeed = formData.get('consistencySeed') ? parseInt(formData.get('consistencySeed')) : Math.floor(Math.random() * 2147483647)
+    
     // AUTO-GENERATE SCRIPT: If prompt looks like a command, generate actual content
     const commandPatterns = /^(create|make|generate|write|produce|build|craft|design)\s+(a|an|the)?\s*(video|content|script|story|reel)?\s*(about|on|for|regarding|of)/i
     if (commandPatterns.test(prompt.trim()) && voiceOption === 'tts') {
