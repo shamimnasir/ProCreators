@@ -7,47 +7,39 @@ import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
-import { fal } from '@fal-ai/client'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
 ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
-// Configure Fal.ai client
-fal.config({
-  credentials: process.env.FAL_KEY
-})
-
 export const maxDuration = 60 // Quick response - actual work happens in background
 export const dynamic = 'force-dynamic'
 
-// AI Video Generation Tiers
+// AI Video Generation Tiers - Using Replicate as primary provider
 const AI_VIDEO_TIERS = {
   essential: {
     models: [
-      { name: 'Essential Fast', endpoint: 'fal-ai/pixverse/v5.5/text-to-video', costPerVideo: 0.04 },
-      { name: 'Essential Extended', endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p', costPerVideo: 0.05 }
+      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.05 },
     ],
     creditCost: 50
   },
   standard: {
     models: [
-      { name: 'Standard Quality', endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video', costPerSecond: 0.05 },
-      { name: 'Standard Plus', endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video', costPerSecond: 0.05 },
-      { name: 'Standard Fast', endpoint: 'fal-ai/sana-video', costPerSecond: 0.05 }
+      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.10 },
+      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
     ],
     creditCost: 70
   },
   professional: {
     models: [
-      { name: 'Professional HD', endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video', costPerSecond: 0.07 },
-      { name: 'Professional Ultra', endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video', costPerSecond: 0.08 }
+      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
+      { name: 'Kling', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.20 },
     ],
     creditCost: 100
   },
   cinema: {
     models: [
-      { name: 'Cinema Quality', endpoint: 'fal-ai/veo3.1/fast', costPerSecond: 0.20 }
+      { name: 'Kling Pro', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.25 },
     ],
     creditCost: 150
   }
