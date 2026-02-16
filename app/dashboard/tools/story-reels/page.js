@@ -326,6 +326,9 @@ export default function StoryReelsPage({
   }
   const [videoSource, setVideoSource] = useState(getInitialVideoSource()) // 'stock', 'ai-essential', 'ai-standard', 'ai-professional', 'ai-cinema'
   
+  // Character Consistency Mode (for AI video generation)
+  const [consistencyMode, setConsistencyMode] = useState('none') // 'none', 'seed', 'frame-chain'
+  
   // Preview state
   const [showPreview, setShowPreview] = useState(false)
   const [previewData, setPreviewData] = useState(null)
