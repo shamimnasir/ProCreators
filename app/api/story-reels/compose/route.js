@@ -7,6 +7,11 @@ import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { 
+  generateConsistentVideoClips, 
+  isFalConfigured,
+  getFallbackStockVideos 
+} from '@/lib/services'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
@@ -16,46 +21,77 @@ export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
 
-// AI Video Generation Tiers - Using Replicate as primary provider
+// AI Video Generation Tiers - Now using Kling via Fal.ai
 const AI_VIDEO_TIERS = {
   essential: {
-    models: [
-      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.05 },
-    ],
-    description: 'Budget-friendly fast videos',
+    name: 'Essential',
+    description: 'Basic AI video, no consistency',
+    consistencyMode: 'none',
     creditCost: 50
   },
   standard: {
-    models: [
-      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.10 },
-      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
-    ],
-    description: 'Good quality reliable videos',
+    name: 'Standard',
+    description: 'Good quality with seed-based consistency',
+    consistencyMode: 'seed',
     creditCost: 70
   },
   professional: {
-    models: [
-      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
-      { name: 'Kling', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.20 },
-    ],
-    description: 'High quality professional videos',
+    name: 'Professional',
+    description: 'High quality with frame-chain consistency',
+    consistencyMode: 'frame-chain',
     creditCost: 100
   },
   cinema: {
-    models: [
-      { name: 'Kling Pro', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.25 },
-    ],
-    description: 'Highest quality cinematic videos',
+    name: 'Cinema',
+    description: 'Best quality with advanced frame-chain',
+    consistencyMode: 'frame-chain',
     creditCost: 150
   }
 }
 
-// Generate AI video clips using Replicate (primary) with fallback support
+// Generate AI video clips using Kling with character consistency
 async function generateAIVideoClips(script, duration, dimensions, tier, jobId, preGeneratedPrompts = null) {
-  const videos = []
-  const numClips = Math.min(Math.ceil(duration / 5) + 1, 12) // 5 seconds per clip, max 12 clips
+  const tierConfig = AI_VIDEO_TIERS[tier] || AI_VIDEO_TIERS.standard
   
-  console.log(`[${jobId}] Target duration: ${duration}s, generating ${numClips} clips (5s each)`)
+  // Determine aspect ratio
+  let aspectRatio = '9:16'
+  if (dimensions.width > dimensions.height) {
+    aspectRatio = '16:9'
+  } else if (dimensions.width === dimensions.height) {
+    aspectRatio = '1:1'
+  }
+  
+  console.log(`[${jobId}] Generating AI videos with Kling (${tierConfig.consistencyMode} consistency)`)
+  
+  if (!isFalConfigured()) {
+    throw new Error('FAL_KEY not configured')
+  }
+  
+  try {
+    const result = await generateConsistentVideoClips({
+      script,
+      duration,
+      aspectRatio,
+      consistencyMode: tierConfig.consistencyMode,
+      characterDescription: null,
+      jobId,
+      onProgress: (progress) => {
+        console.log(`[${jobId}] ${progress.message}`)
+      }
+    })
+    
+    return result.clips.map((clip, i) => ({
+      url: clip.url,
+      keyword: `ai-scene-${i + 1}`,
+      type: 'ai-generated',
+      model: 'Kling',
+      frameChained: clip.frameChained
+    }))
+  } catch (error) {
+    console.error(`[${jobId}] Kling generation failed:`, error.message)
+    throw error
+  }
+}
   
   // Use pre-generated prompts if available, otherwise parse script
   let scenes
