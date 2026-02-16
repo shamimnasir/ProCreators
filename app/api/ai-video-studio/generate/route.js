@@ -1666,12 +1666,12 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     const imageUrl = await uploadImageToShotstack(imageFile, apiKey, baseUrl, jobId)
     editJson = buildImageVideoEdit(imageUrl, prompt, duration, dimensions, templateId)
   } else if (videoSource === 'ai') {
-    // AI-Generated Video Scenes using Fal.ai
-    // Primary: Ovi/Pixverse (cheapest), then Wan/Minimax, then Kling, then Replicate
+    // AI-Generated Video Scenes using Replicate (primary) with Fal.ai fallback
     let aiVideos = []
     try {
-      // Generate AI video clips using Fal.ai
-      aiVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+      // Generate AI video clips using Replicate
+      console.log(`[${jobId}] 🎬 Generating AI clips with Replicate...`)
+      aiVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
       
       if (aiVideos.length > 0) {
         // Try to compose the AI videos with text overlays using Shotstack
@@ -1679,21 +1679,28 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
       } else {
         throw new Error('No AI videos generated')
       }
-    } catch (falError) {
-      console.error(`[${jobId}] WARNING: Fal.ai failed, trying Replicate fallback:`, falError.message)
+    } catch (replicateError) {
+      console.error(`[${jobId}] WARNING: Replicate failed, trying Fal.ai fallback:`, replicateError.message)
       
-      try {
-        // Fallback to Replicate
-        const replicateVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
-        
-        if (replicateVideos.length > 0) {
-          aiVideos = replicateVideos
-          editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, replicateVideos, jobId)
-        } else {
-          throw new Error('Replicate also failed')
+      // Only try Fal.ai if key exists
+      if (process.env.FAL_KEY) {
+        try {
+          const falVideos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+          
+          if (falVideos.length > 0) {
+            aiVideos = falVideos
+            editJson = buildAIVideoComposition(templateId, prompt, duration, dimensions, falVideos, jobId)
+          } else {
+            throw new Error('Fal.ai also failed')
+          }
+        } catch (falError) {
+          console.error(`[${jobId}] WARNING: Fal.ai fallback also failed, using stock videos:`, falError.message)
+          const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+          const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+          editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
         }
-      } catch (replicateError) {
-        console.error(`[${jobId}] WARNING: Replicate fallback also failed, using stock videos:`, replicateError.message)
+      } else {
+        console.log(`[${jobId}] No Fal.ai key, using stock videos as fallback`)
         const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
         const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
@@ -1710,8 +1717,8 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     
     let aiVideos = []
     try {
-      // Generate 1-2 AI video clips for key moments
-      aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
+      // Generate 1-2 AI video clips for key moments using Replicate
+      aiVideos = await generateAIVideosWithReplicate(prompt, Math.min(duration, 10), dimensions, jobId)
     } catch (error) {
       console.error(`[${jobId}] AI video generation failed for hybrid, using only stock:`, error.message)
     }
