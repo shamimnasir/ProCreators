@@ -1525,9 +1525,9 @@ export async function POST(request) {
         keywords = extractKeywordsFromScript(prompt, numClips)
       }
       
-      // Try to generate 1-2 AI videos for key scenes
+      // Try to generate 1-2 AI videos for key scenes using Replicate
       try {
-        const aiVideos = await generateAIVideosWithFal(prompt, Math.min(duration, 10), dimensions, jobId)
+        const aiVideos = await generateAIVideosWithReplicate(prompt, Math.min(duration, 10), dimensions, jobId)
         if (aiVideos.length > 0) {
           videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
         }
@@ -1563,19 +1563,22 @@ export async function POST(request) {
       }
       
     } else {
-      // AI only mode (stock-only is now removed)
+      // AI only mode - use Replicate as primary
       try {
-        videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+        videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
         
         if (videos.length === 0) {
           throw new Error('No AI videos generated')
         }
-        } catch (falError) {
-        console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
+        } catch (replicateError) {
+        console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
         
-        // Try Replicate as fallback
-        try {
-          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        // Try Fal.ai as fallback if key exists
+        if (process.env.FAL_KEY) {
+          try {
+            videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+          } catch (falError) {
+            // Final fallback: use hybrid mode
         } catch (replicateError) {
           // Final fallback: use hybrid mode
           const keywords = extractKeywordsFromScript(prompt, 5)
