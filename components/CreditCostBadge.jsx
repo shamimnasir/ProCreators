@@ -52,9 +52,9 @@ const TOOL_COSTS = {
   'photo-cards': 25,
   'carousels': 30,
   
-  // Video Processing (High cost)
+  // Video Processing (High cost) - Base costs for 30s duration
   'video-editor': 60,
-  'ai-video-studio': 80,
+  'ai-video-studio': 80,  // Base for 30s, scales with duration
   'quick-reels': 70,
   'auto-subtitles': 40,
   'auto-reels': 80,
@@ -75,8 +75,47 @@ const TOOL_COSTS = {
   'default': 20
 }
 
-export function CreditCostBadge({ toolId, className = '' }) {
-  const cost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
+// Video tools that scale by duration (base = 30s)
+const VIDEO_TOOLS_WITH_SCALING = [
+  'ai-video-studio',
+  'auto-reels', 
+  'auto-longform',
+  'story-reels',
+  'transformation-video',
+  'script-to-ad',
+  'talking-head'
+]
+
+// Calculate dynamic cost based on duration
+function calculateDynamicCost(toolId, duration = 30, consistencyMode = 'none') {
+  const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
+  
+  if (!VIDEO_TOOLS_WITH_SCALING.includes(toolId)) {
+    return baseCost
+  }
+  
+  // Scale by duration (base = 30s)
+  const durationMultiplier = duration / 30
+  let cost = Math.ceil(baseCost * durationMultiplier)
+  
+  // Minimum 25% of base cost
+  cost = Math.max(cost, Math.ceil(baseCost * 0.25))
+  
+  // Frame-chain premium (15%)
+  if (consistencyMode === 'frame-chain') {
+    cost = Math.ceil(cost * 1.15)
+  }
+  
+  return cost
+}
+
+export function CreditCostBadge({ toolId, duration, consistencyMode, className = '' }) {
+  const cost = duration 
+    ? calculateDynamicCost(toolId, duration, consistencyMode)
+    : TOOL_COSTS[toolId] || TOOL_COSTS['default']
+  
+  const isScaled = VIDEO_TOOLS_WITH_SCALING.includes(toolId) && duration
+  const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
   
   return (
     <TooltipProvider>
@@ -91,7 +130,17 @@ export function CreditCostBadge({ toolId, className = '' }) {
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>This generation costs {cost} credits</p>
+          {isScaled ? (
+            <div className="text-sm">
+              <p className="font-medium">{cost} credits for {duration}s video</p>
+              <p className="text-xs text-muted-foreground">Base: {baseCost} credits for 30s</p>
+              {consistencyMode === 'frame-chain' && (
+                <p className="text-xs text-purple-400">+15% for Frame-Chain consistency</p>
+              )}
+            </div>
+          ) : (
+            <p>This generation costs {cost} credits</p>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -99,16 +148,15 @@ export function CreditCostBadge({ toolId, className = '' }) {
 }
 
 // Hook version for dynamic cost fetching
-export function useCreditCost(toolId) {
-  const [cost, setCost] = useState(TOOL_COSTS[toolId] || TOOL_COSTS['default'])
+export function useCreditCost(toolId, duration = 30, consistencyMode = 'none') {
+  const [cost, setCost] = useState(calculateDynamicCost(toolId, duration, consistencyMode))
   const [loading, setLoading] = useState(false)
   
   useEffect(() => {
-    // Use local costs for instant display
-    setCost(TOOL_COSTS[toolId] || TOOL_COSTS['default'])
-  }, [toolId])
+    setCost(calculateDynamicCost(toolId, duration, consistencyMode))
+  }, [toolId, duration, consistencyMode])
   
   return { cost, loading }
 }
 
-export { TOOL_COSTS }
+export { TOOL_COSTS, calculateDynamicCost }
