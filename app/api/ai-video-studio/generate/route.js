@@ -10,6 +10,14 @@ import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { 
+  generateConsistentVideoClips, 
+  configureFal,
+  isFalConfigured,
+  getFallbackStockVideos,
+  enhancePromptForConsistency,
+  extractCharacterDescription
+} from '@/lib/services'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
@@ -19,9 +27,11 @@ export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 
 // Configure Fal.ai client
-fal.config({
-  credentials: process.env.FAL_KEY
-})
+if (process.env.FAL_KEY) {
+  fal.config({
+    credentials: process.env.FAL_KEY
+  })
+}
 
 // ==================== DIALOGUE EXTRACTION ====================
 // Extracts only dialogue (quoted text) from a script for TTS
