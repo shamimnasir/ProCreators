@@ -2,164 +2,164 @@
 <original_problem_statement>
 The user's initial goal was to fix a series of critical bugs in the AI Video Studio and enhance its script generation capabilities.
 
-Key requests during this session were:
-1.  **Fix Script Generation Blocker:** The user was blocked from generating a script for a long-form video because of a backend validation error that limited duration to 60 seconds.
-2.  **Improve Script Quality:** The user provided feedback that the app's generated scripts were simple prose and requested an improvement to generate scripts in a proper cinematic screenplay format, similar to a ChatGPT example they provided.
-3.  **Fix 400 Bad Request Error:** After deploying the script format changes, the user encountered a  error when trying to generate a 2-minute video.
-4.  **Add Auto-Save for Drafts:** To make testing easier, the user requested the implementation of an autodraftmanager component to save and load generated prompts and scenes.
-5.  **Fix Video Not Found Error:** The user repeatedly faced issues where the video generation process would either fail silently or the UI would report success, but the video would not appear in their library. This was traced to multiple underlying issues, including an invalid API key and a UI bug.
-6.  **Fix Invalid API Key:** The user reported that video generation was failing with an Unauthorized error. They provided the correct  multiple times after the agent mistakenly overwrote it.
-7.  **Fix False Success Messages:** The user reported that the UI would sometimes claim a video was generated successfully, particularly after a long wait or timeout, when the backend process had actually failed.
-
+During this session, the user's requests evolved:
+1.  **Fix 0KB Video File Bug:** The user reported that a successfully generated video appeared in their library but was a 0KB file, making it unplayable.
+2.  **Fix Connection Issue / Timeout Errors:** After initial fixes, the user encountered persistent Connection Issue errors, which were later identified as frontend request timeouts during long-running AI video generation tasks.
+3.  **Fix Fal.ai Unauthorized Errors:** The root cause of many generation failures was discovered to be Unauthorized errors from the Fal.ai API, indicating an invalid or expired API key.
+4.  **Find a Reliable Alternative to Fal.ai:** Frustrated with the unreliability of Fal.ai, the user requested the agent to find and implement a more stable AI video generation service. The agent identified Replicate as a suitable alternative, which was already partially integrated.
+5.  **Fix Stuck UI Progress Bar:** While using the new Replicate integration, the user's UI got stuck on Generating clip 1/7... even though the backend process was continuing, indicating a UI or status polling issue.
+6.  **Address Poor Video Quality:** After a video was finally generated, the user reported that the character was not consistent, was distorted, and the video was shorter than expected. They requested information on the model being used and its cost.
 </original_problem_statement>
 **User's preferred language**: English
 
 **what currently exists?**
-The agent has performed significant work, fixing several critical bugs and adding major new features.
-1.  **Script Generation:** The backend API at  has been enhanced. It now accepts a  parameter. Two distinct LLM prompts were created: one for the original  style and a new, more detailed one for a  format.
-2.  **Frontend UI:** The story-reels page () was updated to include a radio button selector, allowing users to choose between Narration and Cinematic Screenplay formats.
-3.  **Bug Fixes:**
-    *   The backend duration validation was fixed in two places: for script generation (up to 600s) and for async video composition (up to 600s).
-    *   The  was corrected in the  file after being mistakenly replaced.
-    *   A major UI bug was fixed where a network timeout was incorrectly interpreted as a successful video generation. The misleading success card was removed.
-4.  **Auto-Draft Feature:** The  component was integrated into the story-reels page. The UI was refactored into a grid to accommodate the draft manager in a sidebar, and the necessary data handling functions (, ) were added.
+The application has been significantly refactored to address multiple critical failures.
+1.  **Primary AI Provider is now Replicate:** The core video generation logic in both the Story Reels ( & ) and Quick AI Video Studio () has been modified to use **Replicate** as the primary service, with Fal.ai as a fallback.
+2.  **Asynchronous-First AI Generation:** A critical bug was fixed in the frontend () where short AI videos were using a synchronous API endpoint, causing timeouts. The logic has been changed to **always** use the asynchronous endpoint for any AI-based video generation, regardless of duration.
+3.  **0KB File Bug Mitigated:** A validation check has been added to the video composition routes. Before saving a video record to the database, the code now verifies that the generated MP4 file exists on disk and has a file size greater than zero. This prevents corrupted 0-byte entries from appearing in the user's library.
+4.  **Fragile Background Processing:** The async video generation relies on a fire-and-forget call within the API route's lifecycle. This has been proven to be unreliable, as the process hung silently and only resumed after a code change triggered a server hot-reload.
 
 **Last working item**:
-    - Last item agent was working: The agent was debugging a video not in library report from the user. It had successfully diagnosed and fixed multiple root causes: an incorrect , a backend duration validation error, and a frontend bug that showed a false success message. The agent confirmed with the correct key that a new video generation job was running successfully in the background. The final step of verifying the completed video in the user's library is pending.
-    - Status: USER VERIFICATION PENDING
-    - Agent Testing Done: Y (The agent verified via logs that the API key was working and the video generation job was processing clips.)
-    - Which testing method agent to use? manual testing by user. The next agent should ask the user to check their library to see if the video (a 7-clip video) has appeared. If not, the agent must inspect the backend logs for the final status of that job.
-    - User Testing Done: N (The user reported the issue before the generation was complete.)
+    - Last item agent was working: The user reported poor video quality (inconsistent character, distortion) from the newly integrated Replicate model and asked for details about the model and its cost. The agent had just initiated a web search to gather this information to answer the user's question.
+    - Status: IN PROGRESS
+    - Agent Testing Done: N/A (Responding to user query)
+    - Which testing method agent to use? N/A
+    - User Testing Done: Y (User tested the full flow and provided feedback on the output.)
 
 **All Pending/In progress Issue list**:
-  - Issue 1: End-to-end long-form video generation flow needs final verification. (P0)
-  - Issue 2: The background job system is not production-ready. (P1)
-  
+  - Issue 1: Poor AI Video Quality (Inconsistent/Distorted Characters). (P0)
+  - Issue 2: Fragile Background Processing for Async Jobs. (P1)
+  - Issue 3: Incomplete Video Generation (28s instead of expected length). (P1)
+
   Issues Detail:
   - Issue 1: 
-     - Description: The user last reported that a video was not in their library. The agent fixed the underlying bugs and confirmed the job was running, but the session ended before it could complete. The entire bug-fixing effort is unverified until the user confirms a video has been successfully created and saved.
-     - Attempted fixes: The agent fixed the , backend duration validation, and a false-positive UI bug.
+     - Description: The user's primary complaint is that the video generated by the Replicate model has poor quality, specifically lacking character consistency and showing distortions.
+     - Attempted fixes: None. This is a new issue based on the successful generation from Replicate.
      - Next debug checklist: 
-        1. Ask the user to check their library for the video.
-        2. If the video is not present, inspect the latest logs in  to find the final status of the job that was running at the end of the last session (it was processing clip 2 of 7). Look for either a completion message or an error.
-     - Why fix this issue and what will be achieved with the fix? This is the final validation for all the recent critical bug fixes. Resolving it will make the long-form video feature usable again.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? Backend (logs)
-     - Blocked on other issue: None
-
-  - Issue 2:
-     - Description: The current system for asynchronous video generation uses a simple in-memory  object and . This is a mock implementation. If the server restarts or crashes, any in-progress video generation jobs will be lost.
-     - Attempted fixes: The mock system was created as a proof-of-concept.
-     - Next debug checklist:
-        1. Choose a persistent job queue technology (e.g., BullMQ with Redis).
-        2. Refactor  to add jobs to the queue.
-        3. Create a separate worker process to consume jobs from the queue.
-        4. Update the job status endpoint () to read status from the job queue.
-     - Why fix this issue and what will be achieved with this? This will make long-form video generation reliable and scalable, preventing data loss on server restarts.
+        1.  Complete the web search to identify the exact Replicate model being used in  (likely ).
+        2.  Find the model's documentation on Replicate's website to understand its parameters.
+        3.  Investigate techniques for improving consistency, such as using a consistent  parameter if supported, or more advanced methods like IP-Adapter.
+        4.  Present the model details, cost, and a plan to improve quality to the user.
+     - Why fix this issue and what will be achieved with the fix? This is the main blocker to user satisfaction. The core video generation feature is not usable if the output quality is poor.
      - Status:  NOT STARTED
      - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Backend (and visual verification of output)
+     - Blocked on other issue: None.
+
+  - Issue 2:
+     - Description: The async video generation process, which runs after the API responds, is not robust. It was observed to hang silently during the polling of the Replicate API result. The process only resumed after a server hot-reload. This indicates the fire-and-forget approach is not reliable and can be killed or suspended by the Node.js environment.
+     - Attempted fixes: The agent added more logging and error handling to the Replicate polling loop in , which helped diagnose the problem but did not fix the underlying architectural flaw.
+     - Next debug checklist:
+        1.  Propose and implement a persistent job queue system (e.g., BullMQ with Redis), replacing the mock in-memory system in .
+        2.  Refactor  to add a job to the queue instead of processing it in-process.
+        3.  Create a separate worker process to consume jobs from the queue, ensuring generation is decoupled from the HTTP request lifecycle.
+     - Why fix this issue and what will be achieved with this? This will make long-form video generation reliable, preventing jobs from being silently killed and ensuring progress is not lost.
+     - Status:  NOT STARTED
+     - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Backend
-     - Blocked on other issue: Issue 1 must be resolved first.
+     - Blocked on other issue: None. This is a critical stability fix.
+
+  - Issue 3:
+     - Description: The user reported the generated video was only 28 seconds long. This could be a side-effect of the fragile background process (Issue 2), where the job may have terminated prematurely after generating some clips but before completing the final video composition.
+     - Attempted fixes: None.
+     - Next debug checklist:
+        1. After fixing the background processing (Issue 2), run a multi-clip generation test.
+        2. Check the logs of the new worker process to ensure all clips are generated and the final FFmpeg merge command is executed successfully.
+        3. Verify the final video in the library has the expected length.
+     - Why fix this issue and what will be achieved with this? Ensures the video product is complete and matches the user's request.
+     - Status: NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Backend
+     - Blocked on other issue: Issue 2: Fragile Background Processing for Async Jobs
 
 **In progress Task List**:
-  - Task 1:  Validate  functionality (P1)
+  - Task 1:  Respond to User About AI Model and Cost (P0)
  
  Task Detail:
   - Task 1: 
-     - Where to resume: The component has been added to the UI. The next step is for the user to test its functionality: can they see drafts being saved automatically? Can they load a previous draft successfully?
-     - What will be achieved with this? This will provide a significant quality-of-life improvement for users, especially when testing, preventing the loss of generated scripts and scenes.
-     - Status:  USER VERIFICATION PENDING
-     - Should Test frontend/backend/both after fix? Frontend
-     - Blocked on something: The main video generation flow (Issue 1) should be stable first.
+     - Where to resume: The agent was about to present the findings of a web search. The next agent must find the model name in the codebase, look up its details and pricing on the Replicate website, and present a clear answer to the user.
+     - What will be achieved with this? Addresses the user's direct question and sets the stage for discussing quality improvements.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? N/A
+     - Blocked on something: None.
 
 **Upcoming and Future Tasks**
-- **P1: Test Quick AI Video flow**: The Quick AI Video flow () has not been fully tested end-to-end since the  was fixed.
-- **P2: Upgrade to latest AI models**: A pending task. The agent has not investigated or upgraded the actual model identifiers used in the Fal.ai API calls.
-- **P3: Improve Character Consistency**: The current prompt-based approach is a best effort. Investigate more advanced techniques like IP-Adapter or using a consistent seed if the model supports it.
-- **P4: Enable videos longer than 3 minutes**: The UI and backend validation now support up to 10 minutes (600 seconds), but this requires a robust job queue (see Issue 2) and has not been stress-tested.
+- **P1: Implement Character Consistency:** Based on the user's feedback, research and implement a method to maintain character consistency across generated video clips using the Replicate API (e.g., using seeds, IP-Adapter).
+- **P2: Full End-to-End Test of Quick AI Video flow:** The agent modified  to use Replicate, but this flow has not been tested by the user since the change.
+- **P3: Test  functionality:** This was implemented in a previous session but user verification is still pending.
 
 **Completed work in this session**
-- **Fixed Script Duration Blocker**: Updated backend validation in  to allow durations up to 600 seconds.
-- **Implemented Cinematic Script Generation**: Added a new cinematic-screenplay format option with a dedicated LLM prompt. Implemented a UI selector on the frontend for users to choose the script format.
-- **Fixed Async Composition Duration Blocker**: Updated backend validation in  to allow video compositions up to 600 seconds.
-- **Implemented Auto-Draft Feature**: Integrated the  component into the story-reels page UI.
-- **Fixed False Positive Success UI**: Removed flawed logic in  that incorrectly showed a success message on network timeouts.
-- **Corrected Fal.ai API Key**: Diagnosed repeated Unauthorized errors and updated the  file with the correct, user-provided .
+- **Fixed 0KB Video Bug:** Added validation in  and  to ensure the video file is created successfully before saving to the database.
+- **Migrated from Fal.ai to Replicate:** Modified all video generation endpoints (, , ) to use Replicate as the primary AI video provider.
+- **Fixed Frontend Timeouts for AI Video:** Updated  to force all AI video generation requests to use the async API endpoint, preventing request timeouts.
+- **Diagnosed and Unstuck Hung Backend Process:** Identified that the background job had hung and that a server hot-reload resolved it, proving the fragility of the current background task implementation.
 
 **Earlier issues found/mentioned but not fixed**
-   - The list from the previous handover (timeout UX improvements, 404 on video downloads, Zod validation error) has not been addressed as the focus shifted to the critical generation flow.
-
-**Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork**: The missing video bug, which has multiple root causes. In this session, it re-emerged due to an invalid API key.
-  - **Recurrence count**: 3+
-  - **Status**: IN PROGRESS (The latest root cause was fixed, but final verification is pending).
+- The async job system was identified as a mock implementation in the previous session and remains so, but its unreliability is now a proven, critical issue.
+- Older pending issues (timeout UX improvements for non-AI tasks, 404 on video downloads, Zod validation error) remain unaddressed.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Conditional LLM Prompting**: The backend now uses different system prompts based on a  parameter to generate either narrative prose or a cinematic screenplay.
-- **UI State Management for Drafts**: Implemented functions (, ) to serialize and deserialize UI state for the new auto-save feature.
-- **API Key Management**: Diagnosed and corrected a critical issue where the wrong API key () was used for a third-party service (Fal.ai), leading to Unauthorized errors.
-- **Debugging Race Conditions/False Positives**: Identified and fixed a UI bug where the frontend made incorrect assumptions about the backend state after a network error, leading to a poor user experience.
+- **API Provider Migration:** Switched the primary AI video generation service from Fal.ai to Replicate due to reliability issues. This involved changing API call structures and response handling.
+- **Forcing Asynchronous API Usage:** Identified that long-running tasks were incorrectly using a synchronous API, causing UI timeouts. The frontend logic was corrected to enforce the use of the async endpoint for specific tasks.
+- **File System Validation:** Implemented checks using  to verify file creation and integrity before committing to a database, preventing data-on-disk vs. database-record mismatches.
+- **Debugging Hung Node.js Processes:** Discovered that a fire-and-forget background task can hang silently within a standard Next.js API route. This points to a fundamental architectural issue with the current async implementation.
 
 **key DB schema**
-  - **library**: 
-  - **Note**: The non-DB  object () is still in use for mock background processing. A new  mechanism was added, which likely uses local storage managed by .
-
-**changes in tech stack**
-  - No fundamental changes. The need for a persistent job queue (like Redis/BullMQ) is now critical.
+  - **library**:  - The  was central to debugging the 0KB issue.
+  - **jobs**:  - This is still an in-memory object in , not a real DB collection.
 
 **All files of reference**
 - **Heavily Modified:**
-  - : Added script format selector, integrated Auto-Save Drafts manager, refactored layout, and fixed the false-positive success message bug.
-  - : Completely overhauled to support dual script formats ( and ) with conditional prompting. Fixed duration validation.
+  - : Swapped Fal.ai for Replicate as the primary provider.
+  - : Added 0KB file validation and switched to Replicate.
+  - : Added 0KB file validation and switched to Replicate.
+  - : Changed logic to always use the async endpoint for AI video.
 - **Modified:**
-  - : Increased the maximum allowed duration from 180s to 600s.
-  - : Corrected the  value.
-- **Referenced:**
-  - : This existing component was integrated into the story-reels page.
+  - : Added more logging to the Replicate polling function.
 
 **key api endpoints**
-- : Now accepts an optional  in the body.
-- : Duration validation was changed.
+- : Now the primary endpoint for all AI video generation from the story-reels page.
+- : The frontend polls this endpoint to get the status of async jobs.
 
 **Critical Info for New Agent**
-- **IMMEDIATE PRIORITY:** Your first action should be to ask the user to check their library for the video that was generating at the end of the last session. Its successful creation will validate all the recent bug fixes. If it's not there, check the logs immediately.
-- **DO NOT CHANGE THE :** The correct Fal.ai key is now in the  file. The  is for different services (Gemini/Claude) and will cause Unauthorized errors with Fal.ai. Do not mix them up.
-- **VERIFY THE DRAFT MANAGER:** The  has been added to the UI, but its functionality needs to be tested by the user.
-- **THE MOCK JOB SYSTEM IS A RISK:** Remember that the background processing for long videos is not persistent. Any server restart will kill active jobs. After confirming the current flow works, proposing the migration to a real job queue (e.g., BullMQ) should be the next major step.
+- **IMMEDIATE PRIORITY:** Your first task is to answer the user's question about the AI model and its cost. Find the model name in the code (e.g., in ), look up its details on Replicate's website, and report back to the user.
+- **MAIN USER COMPLAINT:** The most important issue to solve next is the **poor video quality** (inconsistent characters, distortion). This is a blocker for the user.
+- **CRITICAL RELIABILITY RISK:** The background job system is **not reliable**. It has been proven to hang silently. After addressing the user's immediate quality concerns, you MUST prioritize replacing the mock in-memory job system with a robust job queue (e.g., BullMQ with Redis).
+- **API KEYS:** The app now depends on  from the  file for its core functionality.
 
 **Last 10 User Messages and any pending HUMAN messages**
-- **Msg 191:** User reports it says video is generated but nothing on the library. **Status: IN PROGRESS. This is the core of the pending verification.**
-- **Msg 184:** User (frustrated) provides the correct  for the 5th time and complains about the agent changing it. **Status: ADDRESSED. Agent apologized and fixed the key.**
-- **Msg 175:** User reports The video is not found on the library. **Status: ADDRESSED. This led to the discovery of the incorrect API key.**
-- **Msg 132:** User reports The video generation is still showing 400 err and requests the autodraftmanager component. **Status: ADDRESSED. Agent fixed the 400 error and implemented the draft manager.**
-- **Msg 91:** User reports Now its showing server error 400. **Status: ADDRESSED. This was caused by the agent's syntax error and a separate duration validation issue.**
-- **Msg 80:** User says use Emergent key. **Status: ADDRESSED. This was an incorrect instruction that the agent followed, leading to further errors.**
-- **Msg 69:** User reports an error: 30 prompts were generated and already 31 clips were generated and then showed this error message. **Status: ADDRESSED. This was the start of the deep-dive debug that uncovered the API key issue.**
-- **Msg 34/35:** User provides detailed feedback comparing the app's script output to ChatGPT and requests an improvement to a cinematic format. **Status: COMPLETED. The agent implemented this feature.**
+- **Msg 253:** User reports the generated video has inconsistent/distorted characters, is too short, and asks for the model name and cost. **Status: IN PROGRESS. This is the highest priority issue.**
+- **Msg 178:** User reports the UI is stuck on the progress bar. **Status: ADDRESSED. The agent found a hung backend process and fixed the immediate symptom, but the root cause (fragile async) remains.**
+- **Msg 129:** User reports a Connection Issue timeout. **Status: ADDRESSED. The agent fixed this by forcing AI video generation to use the async API endpoint.**
+- **Msg 92:** User suggests using the existing Replicate integration. **Status: COMPLETED. The agent successfully migrated the app to use Replicate.**
+- **Msg 87:** User, frustrated with Fal.ai, asks for a more reliable API alternative. **Status: COMPLETED.**
+- **Msg 80:** User reports a Connection Issue error. **Status: ADDRESSED. This led to the discovery of Unauthorized errors from Fal.ai.**
+- **Msg 5:** User reports the initial 0KB file issue. **Status: ADDRESSED. The agent added validation to prevent this from creating bad DB entries.**
 
 **Project Health Check:**
-- **Broken**: The primary feature (long-form video) is currently in an **unverified** state. It is no longer definitively broken, as multiple critical bugs have been fixed, but it cannot be considered working until a successful end-to-end generation is confirmed by the user.
-- **Mocked**: The backend job processing for long-form videos remains a non-persistent mock and is a critical point of failure.
+- **Broken**:
+    - **AI Video Quality:** The primary feature produces low-quality output (inconsistent characters), making it unusable for the user's purpose.
+- **Mocked**:
+    - **Asynchronous Job Processing:** The entire background task system is a non-persistent, unreliable mock that has been proven to fail under real-world conditions. This is a critical point of failure for any long-running task.
 
 **3rd Party Integrations**
+- **Replicate** — uses . **This is now the primary provider for AI video generation.**
+- **Fal.ai** — uses . Now a fallback provider.
 - Google Gemini — uses .
-- **Fal.ai** — uses . **This is a user-provided key. It was recently corrected after being mistakenly overwritten. Do not change it.**
 - Pexels — uses .
 - Google Cloud Text-to-Speech — uses .
-- FFmpeg — System-level dependency.
 
 **Testing status**
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None, but the primary feature's stability is pending verification.
+  - Known regressions: None, but the newly integrated primary feature (Replicate video generation) produces poor quality results.
 
 **What agent forgot to execute**
-- The agent made a critical error by replacing a valid, user-provided API key () with a generic, incompatible one () without understanding the services, causing significant delays and user frustration.
-- The agent initially missed that duration validation existed in two separate places ( and ), only fixing the first one initially. This suggests a lack of systematic impact analysis.
-- The older pending issues (timeout UX, 404 on downloads, Zod error) remain unaddressed.
+- The agent did not address the fundamental architectural flaw of the mock job system, even after proving it was unreliable. It only applied a temporary fix (restarting the process via hot-reload). The next major task must be to implement a proper job queue.
+- The agent did not verify the final length of the generated video after the user reported it was too short (28s).
+
 </analysis>
