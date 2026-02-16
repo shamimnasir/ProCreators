@@ -474,6 +474,9 @@ function AIVideoStudioPageContent() {
       formData.append('language', language)
       formData.append('videoSource', videoSource)
       
+      // Character consistency mode (for AI videos)
+      formData.append('consistencyMode', consistencyMode)
+      
       // Voice/TTS parameters
       formData.append('voiceOption', voiceOption)
       formData.append('ttsLanguage', ttsLanguage)
