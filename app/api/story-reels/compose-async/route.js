@@ -7,6 +7,12 @@ import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { 
+  generateConsistentVideoClips, 
+  isFalConfigured,
+  getFallbackStockVideos,
+  generateScenePromptsWithConsistency 
+} from '@/lib/services'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
@@ -15,32 +21,30 @@ ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 export const maxDuration = 60 // Quick response - actual work happens in background
 export const dynamic = 'force-dynamic'
 
-// AI Video Generation Tiers - Using Replicate as primary provider
+// AI Video Generation Tiers - Now using Kling via Fal.ai as primary
 const AI_VIDEO_TIERS = {
   essential: {
-    models: [
-      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.05 },
-    ],
+    name: 'Essential',
+    description: 'Basic AI video, no consistency',
+    consistencyMode: 'none',
     creditCost: 50
   },
   standard: {
-    models: [
-      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.10 },
-      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
-    ],
+    name: 'Standard',
+    description: 'Good quality with seed-based consistency',
+    consistencyMode: 'seed',
     creditCost: 70
   },
   professional: {
-    models: [
-      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
-      { name: 'Kling', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.20 },
-    ],
+    name: 'Professional',
+    description: 'High quality with frame-chain consistency',
+    consistencyMode: 'frame-chain',
     creditCost: 100
   },
   cinema: {
-    models: [
-      { name: 'Kling Pro', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.25 },
-    ],
+    name: 'Cinema',
+    description: 'Best quality with advanced frame-chain',
+    consistencyMode: 'frame-chain',
     creditCost: 150
   }
 }
