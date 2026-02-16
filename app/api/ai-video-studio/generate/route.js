@@ -1409,25 +1409,34 @@ export async function POST(request) {
         videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'ai') {
-      // Generate AI video clips using Fal.ai
+      // Generate AI video clips using Replicate (primary) with Fal.ai fallback
       try {
-        videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+        console.log(`[${jobId}] 🎬 Generating AI clips with Replicate (primary)...`)
+        videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
         
         if (videos.length === 0) {
-          throw new Error('No AI videos generated from Fal.ai')
+          throw new Error('No AI videos generated from Replicate')
         }
-        } catch (falError) {
-        console.error(`[${jobId}] ⚠️ Fal.ai failed:`, falError.message)
+        } catch (replicateError) {
+        console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
         
-        // Try Replicate as fallback
-        try {
-          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
-          
-          if (videos.length === 0) {
-            throw new Error('Replicate also failed')
+        // Try Fal.ai as fallback
+        if (process.env.FAL_KEY) {
+          try {
+            console.log(`[${jobId}] Trying Fal.ai as fallback...`)
+            videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
+            
+            if (videos.length === 0) {
+              throw new Error('Fal.ai also failed')
+            }
+            } catch (falError) {
+            console.error(`[${jobId}] ⚠️ Fal.ai also failed:`, falError.message)
+            const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+            videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
           }
-          } catch (replicateError) {
-          console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
+        } else {
+          // No Fal.ai key, fall back to stock
+          console.log(`[${jobId}] Falling back to stock videos`)
           const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
           videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         }
