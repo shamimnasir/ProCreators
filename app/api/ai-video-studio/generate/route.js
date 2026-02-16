@@ -1423,23 +1423,45 @@ export async function POST(request) {
         videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'ai') {
-      // Generate AI video clips using Kling (primary) with frame-chaining for consistency
+      // Generate AI video clips using centralized Kling service with character consistency
       console.log(`[${jobId}] 🎬 Generating AI clips with Kling (consistency: ${consistencyMode})...`)
       
       try {
-        // Use Kling with frame-chaining for character consistency
-        if (consistencyMode === 'frame-chain' && process.env.FAL_KEY) {
-          console.log(`[${jobId}] Using Frame-Chain mode for character consistency`)
-          videos = await generateAIVideosWithKlingFrameChain(prompt, duration, dimensions, jobId, consistencySeed)
-        } else if (consistencyMode === 'seed' && process.env.FAL_KEY) {
-          console.log(`[${jobId}] Using Seed mode for consistency (seed: ${consistencySeed})`)
-          videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, consistencySeed)
-        } else if (process.env.FAL_KEY) {
-          // Default Kling generation (no consistency)
-          videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, null)
-        } else {
+        if (!isFalConfigured()) {
           throw new Error('FAL_KEY not configured')
         }
+        
+        // Determine aspect ratio from dimensions
+        let aspectRatio = '9:16' // Portrait default
+        if (dimensions.width > dimensions.height) {
+          aspectRatio = '16:9'
+        } else if (dimensions.width === dimensions.height) {
+          aspectRatio = '1:1'
+        }
+        
+        // Use the centralized Kling service with consistency
+        const result = await generateConsistentVideoClips({
+          script: prompt,
+          duration: parseInt(duration),
+          aspectRatio,
+          consistencyMode,
+          characterDescription: null, // Will be auto-extracted from script
+          jobId,
+          onProgress: (progress) => {
+            console.log(`[${jobId}] ${progress.message}`)
+          }
+        })
+        
+        videos = result.clips.map((clip, i) => ({
+          url: clip.url,
+          keyword: `ai-scene-${i + 1}`,
+          type: 'ai-generated',
+          model: clip.model || 'Kling',
+          frameChained: clip.frameChained,
+          seed: result.seed
+        }))
+        
+        console.log(`[${jobId}] ✅ Generated ${videos.length} clips with ${consistencyMode} consistency`)
         
         if (videos.length === 0) {
           throw new Error('No AI videos generated from Kling')
@@ -1447,22 +1469,10 @@ export async function POST(request) {
       } catch (klingError) {
         console.error(`[${jobId}] ⚠️ Kling failed:`, klingError.message)
         
-        // Try Replicate MiniMax as fallback
-        try {
-          console.log(`[${jobId}] Trying Replicate MiniMax as fallback...`)
-          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
-          
-          if (videos.length === 0) {
-            throw new Error('Replicate also failed')
-          }
-        } catch (replicateError) {
-          console.error(`[${jobId}] ⚠️ Replicate also failed:`, replicateError.message)
-          
-          // Final fallback to stock videos
-          console.log(`[${jobId}] Falling back to stock videos`)
-          const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-          videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
-        }
+        // Fallback to stock videos
+        console.log(`[${jobId}] Falling back to stock videos`)
+        const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
+        videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'stock') {
       // Stock videos only mode - fast and reliable
