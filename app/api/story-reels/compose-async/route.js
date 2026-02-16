@@ -170,22 +170,44 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             let attempts = 0
             const maxAttempts = 90
             
+            console.log(`[${jobId}] Starting poll for clip ${i + 1}, prediction: ${prediction.id}`)
+            
             while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
               await new Promise(r => setTimeout(r, 2000))
               attempts++
               
-              const statusResponse = await fetch(prediction.urls.get, {
-                headers: { 'Authorization': `Bearer ${replicateApiKey}` }
-              })
-              prediction = await statusResponse.json()
+              try {
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+                
+                const statusResponse = await fetch(prediction.urls.get, {
+                  headers: { 'Authorization': `Bearer ${replicateApiKey}` },
+                  signal: controller.signal
+                })
+                clearTimeout(timeoutId)
+                
+                if (!statusResponse.ok) {
+                  console.log(`[${jobId}] Status check failed: ${statusResponse.status}`)
+                  continue // Retry
+                }
+                
+                prediction = await statusResponse.json()
+              } catch (pollError) {
+                console.log(`[${jobId}] Poll attempt ${attempts} failed:`, pollError.message)
+                // Continue to retry
+                continue
+              }
               
               // Update progress periodically
               if (attempts % 15 === 0) {
+                console.log(`[${jobId}] Still polling clip ${i + 1}... (${attempts * 2}s, status: ${prediction.status})`)
                 await updateJobStatus(jobId, {
                   progressMessage: `Generating clip ${i + 1}/${numClips}... (${attempts * 2}s)`
                 })
               }
             }
+            
+            console.log(`[${jobId}] Poll complete for clip ${i + 1}: status=${prediction.status}`)
             
             if (prediction.status === 'succeeded' && prediction.output) {
               let videoUrl = prediction.output
