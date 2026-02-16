@@ -1499,6 +1499,69 @@ function AIVideoStudioPageContent() {
                 </RadioGroup>
               </div>
 
+              {/* Character Consistency Mode (only for AI videos) */}
+              {videoSource === 'ai' && (
+                <div className="space-y-3 pt-4 border-t">
+                  <Label className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Character Consistency
+                    <Badge variant="secondary" className="text-[10px]">NEW</Badge>
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Keep characters looking consistent across all video clips
+                  </p>
+                  <RadioGroup value={consistencyMode} onValueChange={setConsistencyMode} className="space-y-2">
+                    <div 
+                      className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        consistencyMode === 'none' ? 'border-muted bg-muted/20' : 'border-muted hover:border-muted-foreground/30'
+                      }`}
+                      onClick={() => setConsistencyMode('none')}
+                    >
+                      <RadioGroupItem value="none" id="consistency-none" className="mt-0.5" />
+                      <div className="flex-1">
+                        <Label htmlFor="consistency-none" className="font-medium cursor-pointer">None (Default)</Label>
+                        <p className="text-xs text-muted-foreground">Each clip generated independently • Fastest</p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        consistencyMode === 'seed' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/30'
+                      }`}
+                      onClick={() => setConsistencyMode('seed')}
+                    >
+                      <RadioGroupItem value="seed" id="consistency-seed" className="mt-0.5" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="consistency-seed" className="font-medium cursor-pointer">Seed-Based</Label>
+                          <Badge className="text-[10px] bg-blue-500">Basic</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Same random seed across clips • Some style consistency</p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        consistencyMode === 'frame-chain' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/30'
+                      }`}
+                      onClick={() => setConsistencyMode('frame-chain')}
+                    >
+                      <RadioGroupItem value="frame-chain" id="consistency-frame" className="mt-0.5" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="consistency-frame" className="font-medium cursor-pointer">Frame Chaining</Label>
+                          <Badge className="text-[10px] bg-gradient-to-r from-purple-500 to-pink-500">Best Quality</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Uses last frame of each clip as first frame of next • Best character consistency</p>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                          🔗 Links clips visually • 🎬 Cinematic flow • ⏱️ Slightly longer processing
+                        </p>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
+
               {/* Video Info */}
               <div className="space-y-3 pt-4 border-t">
                 <div className={`p-4 rounded-lg border ${
