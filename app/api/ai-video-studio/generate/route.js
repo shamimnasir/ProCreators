@@ -1576,27 +1576,23 @@ export async function POST(request) {
       }
       
     } else {
-      // AI only mode - use Replicate as primary
+      // AI only mode - use Kling as primary with Replicate fallback
       try {
-        videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        if (process.env.FAL_KEY) {
+          console.log(`[${jobId}] 🎬 Using Kling for AI-only mode`)
+          videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, null)
+        } else {
+          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        }
         
         if (videos.length === 0) {
           throw new Error('No AI videos generated')
         }
-        } catch (replicateError) {
-        console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
-        
-        // Try Fal.ai as fallback if key exists
-        if (process.env.FAL_KEY) {
-          try {
-            videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
-          } catch (falError) {
-            // Final fallback: use hybrid mode
-        } catch (replicateError) {
-          // Final fallback: use hybrid mode
-          const keywords = extractKeywordsFromScript(prompt, 5)
-          videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
-        }
+      } catch (aiError) {
+        console.error(`[${jobId}] ⚠️ AI generation failed:`, aiError.message)
+        // Final fallback: use stock videos
+        const keywords = extractKeywordsFromScript(prompt, 5)
+        videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
       }
     }
     
