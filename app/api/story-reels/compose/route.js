@@ -7,62 +7,52 @@ import ffmpeg from 'fluent-ffmpeg'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { getCollection } from '@/lib/mongodb'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
-import { fal } from '@fal-ai/client'
 
 // Set ffmpeg path
 ffmpeg.setFfmpegPath('/usr/bin/ffmpeg')
 ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 
-// Configure Fal.ai client
-fal.config({
-  credentials: process.env.FAL_KEY
-})
-
 export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
 
-// AI Video Generation Tiers (generic names - no commercial branding)
+// AI Video Generation Tiers - Using Replicate as primary provider
 const AI_VIDEO_TIERS = {
   essential: {
     models: [
-      { name: 'Essential Fast', endpoint: 'fal-ai/pixverse/v5.5/text-to-video', costPerVideo: 0.04 },
-      { name: 'Essential Extended', endpoint: 'fal-ai/longcat-video/distilled/text-to-video/720p', costPerVideo: 0.05 }
+      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.05 },
     ],
     description: 'Budget-friendly fast videos',
     creditCost: 50
   },
   standard: {
     models: [
-      { name: 'Standard Quality', endpoint: 'fal-ai/wan/v2.2-a14b/text-to-video', costPerSecond: 0.05 },
-      { name: 'Standard Plus', endpoint: 'fal-ai/hunyuan-video-v1.5/text-to-video', costPerSecond: 0.05 },
-      { name: 'Standard Fast', endpoint: 'fal-ai/sana-video', costPerSecond: 0.05 }
+      { name: 'MiniMax Video', provider: 'replicate', model: 'minimax/video-01', costPerVideo: 0.10 },
+      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
     ],
     description: 'Good quality reliable videos',
     creditCost: 70
   },
   professional: {
     models: [
-      { name: 'Professional HD', endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video', costPerSecond: 0.07 },
-      { name: 'Professional Ultra', endpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video', costPerSecond: 0.08 }
+      { name: 'Luma Ray2', provider: 'replicate', model: 'luma/ray', costPerVideo: 0.15 },
+      { name: 'Kling', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.20 },
     ],
     description: 'High quality professional videos',
     creditCost: 100
   },
   cinema: {
     models: [
-      { name: 'Cinema Quality', endpoint: 'fal-ai/veo3.1/fast', costPerSecond: 0.20 }
+      { name: 'Kling Pro', provider: 'replicate', model: 'fofr/kling-video', costPerVideo: 0.25 },
     ],
     description: 'Highest quality cinematic videos',
     creditCost: 150
   }
 }
 
-// Generate AI video clips using Fal.ai
+// Generate AI video clips using Replicate (primary) with fallback support
 async function generateAIVideoClips(script, duration, dimensions, tier, jobId, preGeneratedPrompts = null) {
   const videos = []
-  // Each AI clip is ~5 seconds, calculate clips needed for target duration
-  // Add 1 extra clip to ensure we meet duration (better to have slightly more than less)
   const numClips = Math.min(Math.ceil(duration / 5) + 1, 12) // 5 seconds per clip, max 12 clips
   
   console.log(`[${jobId}] Target duration: ${duration}s, generating ${numClips} clips (5s each)`)
@@ -70,7 +60,6 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
   // Use pre-generated prompts if available, otherwise parse script
   let scenes
   if (preGeneratedPrompts && preGeneratedPrompts.length > 0) {
-    // Use the fullPrompt from pre-generated prompts
     scenes = preGeneratedPrompts.map(p => p.fullPrompt || p.prompt)
     console.log(`[${jobId}] Using ${scenes.length} pre-generated scene prompts`)
     
