@@ -379,13 +379,40 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       progressMessage: 'Saving to library...'
     })
     
+    // Verify final video exists and has content
+    if (!existsSync(finalVideoPath)) {
+      throw new Error('Final video file was not created')
+    }
+    
+    const finalVideoStats = await require('fs/promises').stat(finalVideoPath)
+    if (finalVideoStats.size === 0) {
+      throw new Error('Final video file is empty (0 bytes)')
+    }
+    
+    console.log(`[${jobId}] ✅ Final video size: ${(finalVideoStats.size / 1024 / 1024).toFixed(2)} MB`)
+    
     // Save to public folder
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
+    
+    // Double-check buffer has content
+    if (!videoBuffer || videoBuffer.length === 0) {
+      throw new Error('Failed to read final video file - buffer is empty')
+    }
+    
     const publicDir = '/app/public/story-reels'
     if (!existsSync(publicDir)) await mkdir(publicDir, { recursive: true })
     
     const publicVideoPath = join(publicDir, `${jobId}.mp4`)
     await writeFile(publicVideoPath, videoBuffer)
+    
+    // Verify the public file was written correctly
+    const publicFileStats = await require('fs/promises').stat(publicVideoPath)
+    if (publicFileStats.size !== videoBuffer.length) {
+      throw new Error(`Public video file size mismatch: expected ${videoBuffer.length}, got ${publicFileStats.size}`)
+    }
+    
+    console.log(`[${jobId}] ✅ Video saved to public folder: ${publicVideoPath}`)
+    
     const videoUrl = `/story-reels/${jobId}.mp4`
     
     // Save to library
