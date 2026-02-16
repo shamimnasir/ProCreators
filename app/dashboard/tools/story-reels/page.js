@@ -2611,6 +2611,86 @@ Product URL: ${scrapeData.product.url}`
                 {defaultVideoSource === 'stock' ? '25 credits' : '70+ credits'}
               </Badge>
             </div>
+            
+            {/* Character Consistency Mode for AI mode */}
+            {defaultVideoSource === 'ai' && (
+              <div className="mt-4 pt-4 border-t space-y-3">
+                <Label className="flex items-center gap-2 text-base font-semibold">
+                  🎭 Character Consistency
+                  <Badge variant="secondary" className="text-[10px] bg-gradient-to-r from-purple-500 to-pink-500 text-white">NEW</Badge>
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Keep characters looking consistent across all video clips
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div 
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      consistencyMode === 'none' 
+                        ? 'border-gray-400 bg-gray-50 dark:bg-gray-900/30' 
+                        : 'border-muted hover:border-gray-300'
+                    }`}
+                    onClick={() => setConsistencyMode('none')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">⚡</span>
+                      <Badge variant="outline" className="text-xs">Fastest</Badge>
+                    </div>
+                    <h4 className="font-semibold">None</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Each clip independent • Quick generation
+                    </p>
+                    {consistencyMode === 'none' && <span className="text-gray-600 text-xs font-medium">✓ Selected</span>}
+                  </div>
+
+                  <div 
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      consistencyMode === 'seed' 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
+                        : 'border-muted hover:border-blue-300'
+                    }`}
+                    onClick={() => setConsistencyMode('seed')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">🌱</span>
+                      <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">Balanced</Badge>
+                    </div>
+                    <h4 className="font-semibold">Seed-Based</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Same style seed • Some consistency
+                    </p>
+                    {consistencyMode === 'seed' && <span className="text-blue-600 text-xs font-medium">✓ Selected</span>}
+                  </div>
+
+                  <div 
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      consistencyMode === 'frame-chain' 
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30' 
+                        : 'border-muted hover:border-purple-300'
+                    }`}
+                    onClick={() => setConsistencyMode('frame-chain')}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">🔗</span>
+                      <Badge variant="outline" className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white">Best Quality</Badge>
+                    </div>
+                    <h4 className="font-semibold">Frame Chaining</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Links clips visually • Best consistency
+                    </p>
+                    {consistencyMode === 'frame-chain' && <span className="text-purple-600 text-xs font-medium">✓ Selected</span>}
+                  </div>
+                </div>
+                
+                {consistencyMode === 'frame-chain' && (
+                  <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <p className="text-sm text-purple-800 dark:text-purple-200">
+                      <strong>🔗 Frame Chaining:</strong> Uses the last frame of each clip as the first frame of the next, 
+                      creating seamless character continuity. Takes slightly longer but produces the best results!
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
