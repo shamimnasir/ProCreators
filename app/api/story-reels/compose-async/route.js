@@ -73,7 +73,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       script, duration, voiceOption, ttsLanguage, selectedVoice,
       captionStyle, musicTrack, resolution, stockVideos, videoOrder,
       scenePrompts, voiceFile, captionFontSize, captionPosition,
-      videoOrientation, customMusicPath, niche, videoSource
+      videoOrientation, customMusicPath, niche, videoSource,
+      consistencyMode: userConsistencyMode // User's selected consistency mode
     } = formDataObj
     
     // Determine video dimensions
@@ -99,7 +100,10 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     
     // Get tier configuration
     const tierConfig = AI_VIDEO_TIERS[aiTier] || AI_VIDEO_TIERS.standard
-    const consistencyMode = tierConfig.consistencyMode
+    // Use user's selected consistency mode if provided, otherwise use tier default
+    const consistencyMode = userConsistencyMode || tierConfig.consistencyMode || 'none'
+    
+    console.log(`[${jobId}] Using consistency mode: ${consistencyMode} (user: ${userConsistencyMode}, tier default: ${tierConfig.consistencyMode})`)
     
     // Determine aspect ratio from orientation
     let aspectRatio = '9:16' // Portrait default
