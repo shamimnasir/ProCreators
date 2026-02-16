@@ -212,6 +212,9 @@ function AIVideoStudioPageContent() {
   const [language, setLanguage] = useState('en')
   const [videoSource, setVideoSource] = useState('ai') // 'ai' or 'hybrid' (removed 'stock')
   
+  // NEW: Character Consistency Mode
+  const [consistencyMode, setConsistencyMode] = useState('none') // 'none', 'seed', 'frame-chain'
+  
   // Voice/TTS state (reused from Quick Reels Hub)
   const [ttsLanguage, setTtsLanguage] = useState('en')
   const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'none'
