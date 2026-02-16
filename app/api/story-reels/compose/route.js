@@ -73,6 +73,13 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
     console.log(`[${jobId}] Generated ${scenes.length} scene prompts from script`)
   }
   
+  // Get Replicate API key
+  const replicateApiKey = process.env.REPLICATE_API_TOKEN
+  if (!replicateApiKey) {
+    console.error(`[${jobId}] ❌ REPLICATE_API_TOKEN not configured`)
+    return videos // Return empty, will fall back to stock
+  }
+  
   // Get models for the selected tier
   const tierConfig = AI_VIDEO_TIERS[tier] || AI_VIDEO_TIERS.essential
   const models = tierConfig.models
@@ -82,14 +89,12 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
   
   for (let i = 0; i < totalScenes; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
-    const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional, ${
-      dimensions.height > dimensions.width ? 'vertical portrait video, 9:16 aspect ratio' : 'horizontal landscape video, 16:9 aspect ratio'
-    }`
+    const cinematicPrompt = `${scenePrompt}, cinematic, high quality, professional video`
     
     // Add delay between requests to avoid rate limits
     if (i > 0) {
-      console.log(`[${jobId}] Waiting 3s before next AI clip...`)
-      await new Promise(r => setTimeout(r, 3000))
+      console.log(`[${jobId}] Waiting 2s before next AI clip...`)
+      await new Promise(r => setTimeout(r, 2000))
     }
     
     let clipGenerated = false
@@ -100,44 +105,83 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
       const model = models[currentModelIndex]
       
       try {
-        console.log(`[${jobId}] Generating AI clip ${i + 1}/${numClips} with ${model.name}...`)
+        console.log(`[${jobId}] Generating AI clip ${i + 1}/${numClips} with ${model.name} (Replicate)...`)
         
-        const result = await fal.subscribe(model.endpoint, {
-          input: {
-            prompt: cinematicPrompt,
-            aspect_ratio: dimensions.height > dimensions.width ? '9:16' : '16:9',
-            duration: '5'
+        // Create prediction on Replicate
+        const createResponse = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${replicateApiKey}`,
+            'Content-Type': 'application/json'
           },
-          logs: true,
-          onQueueUpdate: (update) => {
-            if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] AI model processing...`)
+          body: JSON.stringify({
+            version: model.model,
+            input: {
+              prompt: cinematicPrompt,
+              prompt_optimizer: true
             }
-          }
+          })
         })
         
-        // Extract video URL from result
-        const videoUrl = result.data?.video?.url || result.data?.video_url || result.data?.url || result.data?.output?.url
+        if (!createResponse.ok) {
+          const errorText = await createResponse.text()
+          throw new Error(`Replicate API error ${createResponse.status}: ${errorText}`)
+        }
         
-        if (videoUrl) {
-          videos.push({
-            url: videoUrl,
-            keyword: `ai-scene-${i + 1}`,
-            type: 'ai-generated',
-            model: model.name,
-            tier: tier
+        let prediction = await createResponse.json()
+        console.log(`[${jobId}] Prediction created: ${prediction.id}, status: ${prediction.status}`)
+        
+        // Poll for completion (max 3 minutes per clip)
+        let attempts = 0
+        const maxAttempts = 90 // 90 * 2s = 3 minutes
+        
+        while (!['succeeded', 'failed', 'canceled'].includes(prediction.status) && attempts < maxAttempts) {
+          await new Promise(r => setTimeout(r, 2000))
+          attempts++
+          
+          const statusResponse = await fetch(prediction.urls.get, {
+            headers: { 'Authorization': `Bearer ${replicateApiKey}` }
           })
-          clipGenerated = true
-          console.log(`[${jobId}] ✅ AI clip ${i + 1} generated with ${model.name}`)
+          prediction = await statusResponse.json()
+          
+          if (attempts % 15 === 0) {
+            console.log(`[${jobId}] Still processing clip ${i + 1}... (${attempts * 2}s)`)
+          }
+        }
+        
+        if (prediction.status === 'succeeded' && prediction.output) {
+          // Handle different output formats
+          let videoUrl = prediction.output
+          if (Array.isArray(prediction.output)) {
+            videoUrl = prediction.output[0]
+          } else if (typeof prediction.output === 'object') {
+            videoUrl = prediction.output.url || prediction.output.video_url || prediction.output.video?.url
+          }
+          
+          if (videoUrl) {
+            videos.push({
+              url: videoUrl,
+              keyword: `ai-scene-${i + 1}`,
+              type: 'ai-generated',
+              model: model.name,
+              tier: tier
+            })
+            clipGenerated = true
+            console.log(`[${jobId}] ✅ AI clip ${i + 1} generated with ${model.name}`)
+          } else {
+            throw new Error('No video URL in response')
+          }
+        } else if (prediction.status === 'failed') {
+          throw new Error(prediction.error || 'Prediction failed')
         } else {
-          throw new Error('No video URL in response')
+          throw new Error('Prediction timeout')
         }
       } catch (error) {
         const errorMsg = error.message || ''
         console.error(`[${jobId}] ❌ AI clip ${i + 1} failed with ${model.name}:`, errorMsg)
         
         // Check for rate limit
-        if (errorMsg.includes('concurrent') || errorMsg.includes('rate') || errorMsg.includes('limit')) {
+        if (errorMsg.includes('rate') || errorMsg.includes('limit') || errorMsg.includes('429')) {
           console.log(`[${jobId}] Rate limit hit, waiting 10s before retry...`)
           await new Promise(r => setTimeout(r, 10000))
           retryCount++
