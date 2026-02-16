@@ -445,7 +445,12 @@ function AIVideoStudioPageContent() {
     }
     
     // Deduct credits first (video is expensive)
-    const creditResult = await checkAndDeduct('ai-video-studio', { duration })
+    // Pass duration and consistency mode for accurate pricing
+    const creditResult = await checkAndDeduct('ai-video-studio', { 
+      duration, 
+      consistencyMode,
+      videoSource 
+    })
     if (!creditResult.success) {
       toast({
         title: 'Insufficient Credits',
