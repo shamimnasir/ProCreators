@@ -1413,33 +1413,42 @@ export async function POST(request) {
         videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'ai') {
-      // Generate AI video clips using Replicate (primary) with Fal.ai fallback
+      // Generate AI video clips using Kling (primary) with frame-chaining for consistency
+      console.log(`[${jobId}] 🎬 Generating AI clips with Kling (consistency: ${consistencyMode})...`)
+      
       try {
-        console.log(`[${jobId}] 🎬 Generating AI clips with Replicate (primary)...`)
-        videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+        // Use Kling with frame-chaining for character consistency
+        if (consistencyMode === 'frame-chain' && process.env.FAL_KEY) {
+          console.log(`[${jobId}] Using Frame-Chain mode for character consistency`)
+          videos = await generateAIVideosWithKlingFrameChain(prompt, duration, dimensions, jobId, consistencySeed)
+        } else if (consistencyMode === 'seed' && process.env.FAL_KEY) {
+          console.log(`[${jobId}] Using Seed mode for consistency (seed: ${consistencySeed})`)
+          videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, consistencySeed)
+        } else if (process.env.FAL_KEY) {
+          // Default Kling generation (no consistency)
+          videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, null)
+        } else {
+          throw new Error('FAL_KEY not configured')
+        }
         
         if (videos.length === 0) {
-          throw new Error('No AI videos generated from Replicate')
+          throw new Error('No AI videos generated from Kling')
         }
-        } catch (replicateError) {
-        console.error(`[${jobId}] ⚠️ Replicate failed:`, replicateError.message)
+      } catch (klingError) {
+        console.error(`[${jobId}] ⚠️ Kling failed:`, klingError.message)
         
-        // Try Fal.ai as fallback
-        if (process.env.FAL_KEY) {
-          try {
-            console.log(`[${jobId}] Trying Fal.ai as fallback...`)
-            videos = await generateAIVideosWithFal(prompt, duration, dimensions, jobId)
-            
-            if (videos.length === 0) {
-              throw new Error('Fal.ai also failed')
-            }
-            } catch (falError) {
-            console.error(`[${jobId}] ⚠️ Fal.ai also failed:`, falError.message)
-            const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
-            videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
+        // Try Replicate MiniMax as fallback
+        try {
+          console.log(`[${jobId}] Trying Replicate MiniMax as fallback...`)
+          videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
+          
+          if (videos.length === 0) {
+            throw new Error('Replicate also failed')
           }
-        } else {
-          // No Fal.ai key, fall back to stock
+        } catch (replicateError) {
+          console.error(`[${jobId}] ⚠️ Replicate also failed:`, replicateError.message)
+          
+          // Final fallback to stock videos
           console.log(`[${jobId}] Falling back to stock videos`)
           const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
           videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
