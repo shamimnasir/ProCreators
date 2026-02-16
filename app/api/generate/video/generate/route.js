@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
 import { 
   generateConsistentVideoClips, 
-  isFalConfigured 
+  isFalConfigured,
+  generateKlingClip
 } from '@/lib/services'
 
 export const maxDuration = 300 // 5 minutes timeout for video generation
@@ -20,14 +22,31 @@ const videoGenerationSchema = z.object({
   consistencyMode: z.enum(['none', 'seed', 'frame-chain']).default('none')
 })
 
-// Mode to consistency mapping
+// Mode to consistency and quality mapping
 const MODE_CONFIG = {
-  budget: { consistencyMode: 'none', description: 'Fast generation, no character consistency' },
-  fast: { consistencyMode: 'seed', description: 'Good quality with seed-based consistency' },
-  pro: { consistencyMode: 'frame-chain', description: 'Best quality with frame-chain consistency' }
+  budget: { 
+    consistencyMode: 'none', 
+    name: 'Budget Mode',
+    description: 'Fast generation with Kling',
+    time: '30-60 seconds'
+  },
+  fast: { 
+    consistencyMode: 'seed', 
+    name: 'Fast Mode',
+    description: 'Good quality with seed-based consistency',
+    time: '1-2 minutes'
+  },
+  pro: { 
+    consistencyMode: 'frame-chain', 
+    name: 'Pro Mode',
+    description: 'Best quality with frame-chain consistency',
+    time: '2-5 minutes'
+  }
 }
 
 export async function POST(request) {
+  const jobId = randomUUID()
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
@@ -47,7 +66,7 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
-    const { script, mode, duration, language, platform, image, consistencyMode: requestedConsistency } = validation.data
+    const { script, mode, duration = 15, language, platform, image, consistencyMode: requestedConsistency } = validation.data
 
     // Platform-specific configurations
     const platformConfig = {
@@ -58,308 +77,115 @@ export async function POST(request) {
     }
     
     const targetPlatform = platformConfig[platform] || platformConfig.instagram
+    const modeConfig = MODE_CONFIG[mode] || MODE_CONFIG.budget
     
     // Check if Fal.ai (Kling) is configured
     if (!isFalConfigured()) {
       return NextResponse.json({
-        success: true,
-        status: 'pending',
-        message: 'Video generation requires FAL_KEY',
-        note: 'Please add FAL_KEY to your environment variables to enable AI video generation with Kling.',
+        success: false,
+        status: 'error',
+        error: 'Video generation service not configured',
+        message: 'FAL_KEY is required for AI video generation with Kling.',
         mode,
-        jobId: `placeholder_${Date.now()}`
-      })
+        jobId
+      }, { status: 503 })
     }
 
-    // Initialize Replicate client
-    const replicate = new Replicate({
-      auth: replicateKey,
-    })
+    console.log(`[${jobId}] Starting video generation - Mode: ${mode}, Duration: ${duration}s, Platform: ${platform}`)
 
-    // Determine which image to use
-    const imageToUse = image
-    const hasImage = !!imageToUse
+    // Determine consistency mode (use mode's default or explicit request)
+    const consistencyMode = requestedConsistency !== 'none' ? requestedConsistency : modeConfig.consistencyMode
     
-    const models = VIDEO_MODELS[mode] || VIDEO_MODELS.budget
+    // Cap duration based on platform
+    const effectiveDuration = Math.min(duration, targetPlatform.maxDuration)
     
-    // Try models in priority order
-    for (const model of models) {
-      // Skip if model doesn't support required input type
-      if (hasImage && model.type === 'text') {
-        continue
-      }
-      if (!hasImage && model.type === 'image') {
-        continue
-      }
-      
-      try {
-        const result = await generateWithModel(replicate, model.id, script, duration, imageToUse, targetPlatform)
+    try {
+      // Check if we have an input image (image-to-video mode)
+      if (image) {
+        console.log(`[${jobId}] Using image-to-video mode`)
+        
+        // Single clip generation with image
+        const clip = await generateKlingClip({
+          prompt: script.substring(0, 500),
+          aspectRatio: targetPlatform.aspectRatio,
+          duration: '5',
+          imageUrl: image,
+          jobId
+        })
         
         return NextResponse.json({
           success: true,
           status: 'completed',
-          message: `${getModeInfo(mode).name} - Video generated successfully`,
-          estimatedTime: getModeInfo(mode).time,
-          videoUrl: result,
-          jobId: `${mode}_${Date.now()}`,
-          provider: getModeInfo(mode).provider,
+          message: `${modeConfig.name} - Video generated successfully`,
+          estimatedTime: modeConfig.time,
+          videoUrl: clip.url,
+          jobId,
+          provider: 'Kling (Fal.ai)',
           mode,
-          language
+          language,
+          platform: targetPlatform.name,
+          clips: [clip]
         })
-      } catch (error) {
-        console.error(`[Video Generation] ${model.id} failed:`, error.message)
-        
-        // If it's an insufficient credit error and we're on the last model, return demo
-        if (error.message.includes('Insufficient credit') && model === models[models.length - 1]) {
-          return NextResponse.json({
-            success: true,
-            status: 'demo_mode',
-            message: `${getModeInfo(mode).name} - Demo Mode (Requires Replicate Credits)`,
-            estimatedTime: getModeInfo(mode).time,
-            videoUrl: 'https://replicate.delivery/pbxt/KswiwJ0g0C93PvMNcWlIQlAzDViCvLl7bCyHIoSQIHjHuEir/video.mp4',
-            jobId: `${mode}_${Date.now()}`,
-            provider: getModeInfo(mode).provider,
-            note: 'This is a demo video. To generate custom videos, please add credits to your Replicate account at replicate.com/account/billing',
-            mode,
-            language
-          })
-        }
-        
-        // Try next model in the list
-        continue
       }
+      
+      // Text-to-video mode with consistency
+      console.log(`[${jobId}] Using text-to-video mode with ${consistencyMode} consistency`)
+      
+      const result = await generateConsistentVideoClips({
+        script,
+        duration: effectiveDuration,
+        aspectRatio: targetPlatform.aspectRatio,
+        consistencyMode,
+        characterDescription: null, // Auto-extract from script
+        jobId,
+        onProgress: (progress) => {
+          console.log(`[${jobId}] ${progress.message}`)
+        }
+      })
+      
+      // If multiple clips, return the first one (or we could merge them)
+      const primaryVideo = result.clips[0]
+      
+      return NextResponse.json({
+        success: true,
+        status: 'completed',
+        message: `${modeConfig.name} - ${result.clips.length} clip(s) generated with ${consistencyMode} consistency`,
+        estimatedTime: modeConfig.time,
+        videoUrl: primaryVideo.url,
+        jobId,
+        provider: 'Kling (Fal.ai)',
+        mode,
+        language,
+        platform: targetPlatform.name,
+        consistencyMode,
+        characterDescription: result.characterDescription,
+        seed: result.seed,
+        clips: result.clips.map(c => ({
+          url: c.url,
+          model: c.model,
+          frameChained: c.frameChained,
+          duration: c.duration
+        })),
+        totalDuration: result.totalDuration
+      })
+      
+    } catch (generationError) {
+      console.error(`[${jobId}] Video generation failed:`, generationError.message)
+      
+      return NextResponse.json({
+        success: false,
+        status: 'failed',
+        error: generationError.message || 'Video generation failed',
+        jobId,
+        mode
+      }, { status: 500 })
     }
-    
-    // If all models failed
-    throw new Error('All video generation models failed. Please try again later.')
 
   } catch (error) {
-    console.error('Video generation error:', error)
+    console.error(`[${jobId}] Video generation error:`, error)
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate video' },
       { status: 500 }
     )
   }
-}
-
-async function generateWithModel(replicate, modelId, script, duration = 5, inputImage = null, platformConfig = null) {
-  const isTextModel = modelId.includes('t2v') || modelId.includes('text')
-  const isImageModel = modelId.includes('i2v') || modelId.includes('image')
-  
-  // Build input based on model type
-  let input = {}
-  
-  // Use platform-specific aspect ratio or default to 9:16
-  const aspectRatio = platformConfig?.aspectRatio || '9:16'
-  
-  // Create a concise visual prompt from the script
-  const visualPrompt = inputImage 
-    ? `Animate this image: ${script.substring(0, 300)}. Keep the visual style consistent with the reference image. ${aspectRatio} aspect ratio.`
-    : script.substring(0, 500)
-  
-  // Model-specific configurations
-  if (modelId.includes('wan-video')) {
-    // Wan models - support both text and image input
-    input = {
-      prompt: visualPrompt,
-      num_frames: Math.min(duration * 8, 80),
-    }
-    if (inputImage) {
-      input.image = inputImage
-      input.motion_bucket_id = 127
-      input.cond_aug = 0.02
-    }
-  } else if (modelId.includes('pixverse')) {
-    // PixVerse models - excellent for image-to-video
-    input = {
-      prompt: visualPrompt,
-      duration: duration,
-      aspect_ratio: aspectRatio,
-    }
-    if (inputImage) {
-      input.image = inputImage
-      input.motion_strength = 0.8
-      input.seed = Math.floor(Math.random() * 1000000)
-    }
-  } else if (modelId.includes('veo')) {
-    // Google Veo models
-    input = {
-      prompt: visualPrompt,
-      duration: duration,
-      aspect_ratio: aspectRatio,
-    }
-    if (inputImage) {
-      input.image = inputImage
-    }
-  } else if (modelId.includes('kling')) {
-    // Kling models
-    input = {
-      prompt: visualPrompt,
-      duration: `${duration}`,
-      aspect_ratio: aspectRatio,
-    }
-    if (inputImage) {
-      input.image = inputImage
-      input.creativity = 0.7
-    }
-  } else if (modelId.includes('hailuo') || modelId.includes('minimax')) {
-    // Minimax/Hailuo models
-    input = {
-      prompt: visualPrompt,
-    }
-    if (inputImage) {
-      input.first_frame_image = inputImage
-    }
-  } else if (modelId.includes('luma')) {
-    // Luma Ray models
-    input = {
-      prompt: visualPrompt,
-    }
-    if (inputImage) {
-      input.keyframes = {
-        frame0: {
-          type: 'image',
-          url: inputImage
-        }
-      }
-    }
-  } else if (modelId.includes('sora')) {
-    // OpenAI Sora
-    input = {
-      prompt: visualPrompt,
-      duration: duration,
-      aspect_ratio: aspectRatio,
-    }
-    if (inputImage) {
-      input.image = inputImage
-    }
-  } else if (modelId.includes('seedance')) {
-    // ByteDance Seedance
-    input = {
-      prompt: visualPrompt,
-      duration: `${duration}s`,
-      resolution: '1080p',
-    }
-    if (inputImage) {
-      input.image = inputImage
-    }
-  } else if (modelId.includes('stable-video')) {
-    // Stable Video Diffusion - image-to-video
-    if (!inputImage) {
-      throw new Error('This model requires an input image')
-    }
-    input = {
-      input_image: inputImage,
-      video_length: '25_frames_with_svd_xt',
-      sizing_strategy: 'maintain_aspect_ratio',
-      frames_per_second: 6,
-      motion_bucket_id: 127,
-      cond_aug: 0.02
-    }
-  } else {
-    // Generic fallback
-    input = {
-      prompt: visualPrompt,
-    }
-    if (inputImage) {
-      input.image = inputImage
-    }
-  }
-  
-  // Use predictions.create and wait for completion
-  let prediction = await replicate.predictions.create({
-    version: modelId.split(':')[1], // Extract version ID from model string  
-    input: input
-  })
-  
-  // Poll until prediction completes
-  while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && prediction.status !== 'canceled') {
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
-    prediction = await replicate.predictions.get(prediction.id)
-  }
-  
-  if (prediction.status !== 'succeeded') {
-    throw new Error('Prediction failed with status: ' + prediction.status)
-  }
-  
-  const output = prediction.output
-  
-  // Replicate returns a FileOutput object with url() method
-  // Handle different output formats
-  if (!output) {
-    throw new Error('No output received from model')
-  }
-  
-  // If output is a string URL
-  if (typeof output === 'string') {
-    return output
-  }
-  
-  // If output is an array
-  if (Array.isArray(output)) {
-    const firstOutput = output[0]
-    
-    // Check if it's a FileOutput object with url() method
-    if (firstOutput && typeof firstOutput.url === 'function') {
-      const videoUrl = firstOutput.url()
-      console.log('FileOutput url() method:', videoUrl)
-      return typeof videoUrl === 'string' ? videoUrl : videoUrl.toString()
-    }
-    
-    // Check if it's a FileOutput with toString()
-    if (firstOutput && typeof firstOutput.toString === 'function') {
-      const videoUrl = firstOutput.toString()
-      console.log('FileOutput toString():', videoUrl)
-      return videoUrl
-    }
-    
-    // If it's already a string
-    if (typeof firstOutput === 'string') {
-      return firstOutput
-    }
-    
-    // Fallback: return as-is
-    return firstOutput
-  }
-  
-  // If output has url() method (Replicate FileOutput)
-  if (output && typeof output.url === 'function') {
-    const videoUrl = output.url()
-    console.log('FileOutput url() method:', videoUrl)
-    // URL might be a URL object, convert to string
-    return typeof videoUrl === 'string' ? videoUrl : videoUrl.href
-  }
-  
-  // If output has url property
-  if (output && typeof output.url === 'string') {
-    return output.url
-  }
-  
-  // If output has video property
-  if (output && output.video) {
-    return output.video
-  }
-  
-  return output
-}
-
-function getModeInfo(mode) {
-  const modes = {
-    pro: {
-      name: 'Pro Edit / Quality Mode',
-      provider: 'Premium Models',
-      time: '2-3 minutes'
-    },
-    fast: {
-      name: 'Fast Social Mode',
-      provider: 'Optimized Models',
-      time: '1-2 minutes'
-    },
-    budget: {
-      name: 'Budget Mode',
-      provider: 'Cost-Effective Models',
-      time: '40-100 seconds'
-    }
-  }
-  return modes[mode] || modes.budget
 }
