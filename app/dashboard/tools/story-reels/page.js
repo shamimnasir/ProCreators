@@ -1614,8 +1614,9 @@ Product URL: ${scrapeData.product.url}`
         formData.append('voiceFile', voiceFile)
       }
 
-      // Use async endpoint for longer videos (> 45 seconds) with AI
-      const useAsync = duration > 45 && videoSource.startsWith('ai-')
+      // ALWAYS use async endpoint for AI videos (they take several minutes)
+      // Also use async for longer stock videos (> 60 seconds)
+      const useAsync = videoSource.startsWith('ai-') || duration > 60
       const endpoint = useAsync ? '/api/story-reels/compose-async' : '/api/story-reels/compose'
       
       console.log(`[Compose] Using ${useAsync ? 'async' : 'sync'} endpoint for ${duration}s ${videoSource} video`)
