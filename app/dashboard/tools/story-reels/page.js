@@ -1559,6 +1559,7 @@ Product URL: ${scrapeData.product.url}`
       formData.append('captionFontSize', captionFontSize)
       formData.append('captionPosition', captionPosition)
       formData.append('videoSource', videoSource) // Add video source for AI/Stock mode
+      formData.append('consistencyMode', consistencyMode) // Add character consistency mode
       // Send music from Freesound/AudioDB selection
       if (customMusic) {
         formData.append('musicTrack', 'custom')
