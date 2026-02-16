@@ -1826,7 +1826,12 @@ function AIVideoStudioPageContent() {
               </div>
               
               <div className="flex items-center justify-center gap-3 mb-2">
-                <CreditCostBadge toolId="ai-video-studio" className="bg-white/20 border-white/40 text-white" />
+                <CreditCostBadge 
+                  toolId="ai-video-studio" 
+                  duration={duration}
+                  consistencyMode={consistencyMode}
+                  className="bg-white/20 border-white/40 text-white" 
+                />
               </div>
               
               <Button
