@@ -248,7 +248,7 @@ export function CTASection({ onGetStarted }) {
             </Button>
           </div>
           <p className="mt-6 text-sm text-muted-foreground">
-            50 free credits • No credit card • Cancel anytime (but you won't want to)
+            500 free credits • No credit card • Cancel anytime (but you won't want to)
           </p>
         </div>
       </div>
