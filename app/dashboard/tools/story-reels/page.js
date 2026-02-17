@@ -2282,7 +2282,7 @@ Product URL: ${scrapeData.product.url}`
                   Scene Prompts for AI Video Generation
                 </Label>
                 <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                  {scenePrompts.length} clips × ~6s each
+                  {scenePrompts.length} clips × ~10s each
                 </Badge>
               </div>
               
