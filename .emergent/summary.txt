@@ -1,153 +1,181 @@
 <analysis>
 <original_problem_statement>
-The user's initial goal was to fix a series of critical bugs in the AI Video Studio and enhance its script generation capabilities.
-
-During this session, the user's requests evolved:
-1.  **Fix 0KB Video File Bug:** The user reported that a successfully generated video appeared in their library but was a 0KB file, making it unplayable.
-2.  **Fix Connection Issue / Timeout Errors:** After initial fixes, the user encountered persistent Connection Issue errors, which were later identified as frontend request timeouts during long-running AI video generation tasks.
-3.  **Fix Fal.ai Unauthorized Errors:** The root cause of many generation failures was discovered to be Unauthorized errors from the Fal.ai API, indicating an invalid or expired API key.
-4.  **Find a Reliable Alternative to Fal.ai:** Frustrated with the unreliability of Fal.ai, the user requested the agent to find and implement a more stable AI video generation service. The agent identified Replicate as a suitable alternative, which was already partially integrated.
-5.  **Fix Stuck UI Progress Bar:** While using the new Replicate integration, the user's UI got stuck on Generating clip 1/7... even though the backend process was continuing, indicating a UI or status polling issue.
-6.  **Address Poor Video Quality:** After a video was finally generated, the user reported that the character was not consistent, was distorted, and the video was shorter than expected. They requested information on the model being used and its cost.
+The user's initial goal was to fix poor AI video quality and inconsistent characters. This evolved into a series of major refactors and bug fixes:
+1.  **Improve Character Consistency:** The user requested a better AI model than the existing Replicate one. The agent researched and proposed using Fal.ai's Kling model with frame-chaining.
+2.  **Implement Kling Model:** The agent integrated Kling as the primary AI video generation service, centralizing the logic into  and updating all video generation API endpoints.
+3.  **Add Consistency UI:** A Character Consistency UI toggle (None, Seed, Frame Chain) was added to both the AI Video Studio and Story Reels pages.
+4.  **Analyze and Fix Profitability:** The user questioned the profitability of the credit system. The agent analyzed API costs vs. credit value, found it unprofitable, and, after user confirmation, implemented a new pricing model (200 credits base for a 30s video).
+5.  **Refactor for All Video Tools:** The user requested that Kling and consistency features be available on all video tools, leading to a major refactor to a centralized service.
+6.  **Improve Prompt Engineering:** Based on user-provided resources, the agent implemented an advanced prompt generation system based on Kling's best practices to improve output quality.
+7.  **Optimize API Costs:** The agent identified that the system was using 5-second clips when 10-second clips were available and more cost-effective. The system was updated to use 10-second clips, halving API calls.
+8.  **Fix Critical Generation Bugs:** The user reported a video that used stock footage, had incorrect ethnicity, and had the TTS read screenplay instructions. The agent diagnosed the root cause as an invalid  causing a fallback to stock videos. The agent also fixed the TTS issue by stripping screenplay formatting.
+9.  **Fix Recurring API Key Issue:** The user expressed major frustration with the  repeatedly becoming invalid. The agent identified the key was being corrupted, received the correct key from the user, and fixed it in the  file, verifying the fix with a test call.
+10. **Fix Dynamic Credit Display:** The user pointed out that the credit cost displayed on the UI was static and not updating based on video duration. The agent fixed the  component and its usage across the app to be fully dynamic.
 </original_problem_statement>
 **User's preferred language**: English
 
 **what currently exists?**
-The application has been significantly refactored to address multiple critical failures.
-1.  **Primary AI Provider is now Replicate:** The core video generation logic in both the Story Reels ( & ) and Quick AI Video Studio () has been modified to use **Replicate** as the primary service, with Fal.ai as a fallback.
-2.  **Asynchronous-First AI Generation:** A critical bug was fixed in the frontend () where short AI videos were using a synchronous API endpoint, causing timeouts. The logic has been changed to **always** use the asynchronous endpoint for any AI-based video generation, regardless of duration.
-3.  **0KB File Bug Mitigated:** A validation check has been added to the video composition routes. Before saving a video record to the database, the code now verifies that the generated MP4 file exists on disk and has a file size greater than zero. This prevents corrupted 0-byte entries from appearing in the user's library.
-4.  **Fragile Background Processing:** The async video generation relies on a fire-and-forget call within the API route's lifecycle. This has been proven to be unreliable, as the process hung silently and only resumed after a code change triggered a server hot-reload.
+The application's video generation capabilities have been completely overhauled.
+1.  **Centralized Kling Service:** All AI video generation is now routed through a centralized service in . This service uses Fal.ai's Kling model as the primary provider. It supports three consistency modes: None, Seed, and Frame Chain.
+2.  **Cost and Quality Optimized:** The service is optimized to generate 10-second clips, reducing API costs by 50% compared to the previous 5-second implementation.
+3.  **Advanced Prompt Engineering:** A new  function enhances user prompts to follow Kling's recommended structure (), aiming for higher-quality video output.
+4.  **Revamped Credit System:** The credit cost for AI video generation has been re-calculated and implemented to ensure profitability. The new base cost is 200 credits for a 30-second video, scaling with duration.
+5.  **Dynamic UI:** The Character Consistency mode selector is now correctly displayed on all relevant video creation pages (AI Video Studio and Story Reels). The credit cost displayed to the user is now fully dynamic and accurately reflects the cost based on video length and consistency mode.
+6.  **Bug Fixes:** The critical bug causing fallback to stock footage has been resolved by fixing the . The TTS system has been patched to strip screenplay formatting, preventing it from reading instructions aloud.
 
 **Last working item**:
-    - Last item agent was working: The user reported poor video quality (inconsistent character, distortion) from the newly integrated Replicate model and asked for details about the model and its cost. The agent had just initiated a web search to gather this information to answer the user's question.
+    - Last item agent was working: The agent just finished implementing the user's chosen credit system pricing (Option A: 200 credits base cost for a 30s AI video). This involved updating the frontend , the backend credit database , and the final credit deduction logic in the centralized .
     - Status: IN PROGRESS
-    - Agent Testing Done: N/A (Responding to user query)
-    - Which testing method agent to use? N/A
-    - User Testing Done: Y (User tested the full flow and provided feedback on the output.)
+    - Agent Testing Done: N
+    - Which testing method agent to use? both
+    - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Poor AI Video Quality (Inconsistent/Distorted Characters). (P0)
-  - Issue 2: Fragile Background Processing for Async Jobs. (P1)
-  - Issue 3: Incomplete Video Generation (28s instead of expected length). (P1)
+  - Issue 1: Verify and Test the New Credit System (P0)
+  - Issue 2: Fragile Background Processing for Async Jobs (P1)
+  - Issue 3: Full End-to-End Video Generation Test (P1)
+  - Issue 4: Recurring  Corruption (P2)
 
   Issues Detail:
   - Issue 1: 
-     - Description: The user's primary complaint is that the video generated by the Replicate model has poor quality, specifically lacking character consistency and showing distortions.
-     - Attempted fixes: None. This is a new issue based on the successful generation from Replicate.
+     - Description: The agent implemented a new, profitable credit system (200 credits base for 30s video). This change touched multiple files on the frontend and backend. It needs to be verified that the UI displays the correct cost and the backend deducts the correct amount.
+     - Attempted fixes: The implementation is complete.
      - Next debug checklist: 
-        1.  Complete the web search to identify the exact Replicate model being used in  (likely ).
-        2.  Find the model's documentation on Replicate's website to understand its parameters.
-        3.  Investigate techniques for improving consistency, such as using a consistent  parameter if supported, or more advanced methods like IP-Adapter.
-        4.  Present the model details, cost, and a plan to improve quality to the user.
-     - Why fix this issue and what will be achieved with the fix? This is the main blocker to user satisfaction. The core video generation feature is not usable if the output quality is poor.
-     - Status:  NOT STARTED
+        1. On the Story Reels and AI Video Studio pages, verify the  displays  credits for a 30s video.
+        2. Adjust the duration slider and confirm the credit cost scales correctly (e.g., 60s should show 400 credits).
+        3. Generate a short AI video and check the user's credit balance before and after to confirm the correct amount was deducted.
+        4. Check the server logs for any credit-related errors.
+     - Why fix this issue and what will be achieved with the fix? This ensures the business logic is correct and the application is profitable as requested by the user.
+     - Status:  TESTING PENDING
      - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? Backend (and visual verification of output)
+     - Should Test frontend/backend/both after fix? Both
      - Blocked on other issue: None.
 
   - Issue 2:
-     - Description: The async video generation process, which runs after the API responds, is not robust. It was observed to hang silently during the polling of the Replicate API result. The process only resumed after a server hot-reload. This indicates the fire-and-forget approach is not reliable and can be killed or suspended by the Node.js environment.
-     - Attempted fixes: The agent added more logging and error handling to the Replicate polling loop in , which helped diagnose the problem but did not fix the underlying architectural flaw.
+     - Description: The async video generation process is architecturally unsound, relying on a fire-and-forget approach within the Next.js API route lifecycle. This was previously proven to hang and fail silently. While not observed in this session, the underlying risk is still present and critical.
+     - Attempted fixes: None in this session. The previous agent added logging.
      - Next debug checklist:
-        1.  Propose and implement a persistent job queue system (e.g., BullMQ with Redis), replacing the mock in-memory system in .
+        1.  Propose and implement a persistent job queue system (e.g., BullMQ with Redis).
         2.  Refactor  to add a job to the queue instead of processing it in-process.
-        3.  Create a separate worker process to consume jobs from the queue, ensuring generation is decoupled from the HTTP request lifecycle.
-     - Why fix this issue and what will be achieved with this? This will make long-form video generation reliable, preventing jobs from being silently killed and ensuring progress is not lost.
+        3.  Create a separate worker process to consume jobs from the queue.
+     - Why fix this issue and what will be achieved with this? This will make long-form video generation reliable, preventing jobs from being silently killed. This is a critical stability fix.
      - Status:  NOT STARTED
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Backend
-     - Blocked on other issue: None. This is a critical stability fix.
+     - Blocked on other issue: None.
 
   - Issue 3:
-     - Description: The user reported the generated video was only 28 seconds long. This could be a side-effect of the fragile background process (Issue 2), where the job may have terminated prematurely after generating some clips but before completing the final video composition.
-     - Attempted fixes: None.
+     - Description: The entire video generation flow has been massively refactored (new AI model, centralized service, new prompt engineering, new clip duration). A full end-to-end test has not been performed since these changes. The user's last generated video had multiple critical flaws.
+     - Attempted fixes: The agent fixed the specific flaws (API key, TTS), but hasn't verified the whole flow.
      - Next debug checklist:
-        1. After fixing the background processing (Issue 2), run a multi-clip generation test.
-        2. Check the logs of the new worker process to ensure all clips are generated and the final FFmpeg merge command is executed successfully.
-        3. Verify the final video in the library has the expected length.
-     - Why fix this issue and what will be achieved with this? Ensures the video product is complete and matches the user's request.
+        1. Perform a full video generation test using a script with specific instructions (e.g., A Bangladeshi person walking in Dhaka).
+        2. Use the Frame Chain consistency mode.
+        3. Verify the final video: Is it AI-generated (not stock)? Is character consistency maintained? Is the ethnicity correct? Is the TTS clean? Is the video length correct?
+     - Why fix this issue and what will be achieved with this? To confirm that all the recent, major changes work together correctly and actually solve the user's original quality complaints.
      - Status: NOT STARTED
-     - Is recurring issue? N
+     - Is recurring issue? Y (the original quality issue)
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on other issue: None.
+
+  - Issue 4:
+     - Description: The user has repeatedly had issues with the  becoming corrupted or invalid. While the agent fixed the key in this session, the root cause of its repeated corruption is unknown.
+     - Attempted fixes: The agent updated the  file with the correct key.
+     - Next debug checklist:
+        1.  Add a startup check in the application that validates the  format or makes a simple test API call. If it fails, log a critical warning.
+        2.  Be vigilant for any agent actions that might modify the  file unnecessarily.
+     - Why fix this issue and what will be achieved with this? Prevents the most critical feature of the app from failing repeatedly and restores user trust.
+     - Status: RESOLVED (for now)
+     - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Backend
-     - Blocked on other issue: Issue 2: Fragile Background Processing for Async Jobs
+     - Blocked on other issue: None.
 
 **In progress Task List**:
-  - Task 1:  Respond to User About AI Model and Cost (P0)
- 
- Task Detail:
-  - Task 1: 
-     - Where to resume: The agent was about to present the findings of a web search. The next agent must find the model name in the codebase, look up its details and pricing on the Replicate website, and present a clear answer to the user.
-     - What will be achieved with this? Addresses the user's direct question and sets the stage for discussing quality improvements.
-     - Status:  IN PROGRESS
-     - Should Test frontend/backend/both after fix? N/A
-     - Blocked on something: None.
+- None. The last task (credit system update) is complete but pending testing.
 
 **Upcoming and Future Tasks**
-- **P1: Implement Character Consistency:** Based on the user's feedback, research and implement a method to maintain character consistency across generated video clips using the Replicate API (e.g., using seeds, IP-Adapter).
-- **P2: Full End-to-End Test of Quick AI Video flow:** The agent modified  to use Replicate, but this flow has not been tested by the user since the change.
-- **P3: Test  functionality:** This was implemented in a previous session but user verification is still pending.
+- **P0: Full End-to-End Test and Verification:** After the credit system is verified, conduct a full test of the video generation flow to ensure all recent changes work as expected and the quality issues are resolved.
+- **P1: Implement Robust Job Queue:** Replace the unreliable in-memory job system in  with a persistent queue like BullMQ to make async generation reliable.
+- **P2: Test  functionality:** This was implemented in a previous session but user verification is still pending.
 
 **Completed work in this session**
-- **Fixed 0KB Video Bug:** Added validation in  and  to ensure the video file is created successfully before saving to the database.
-- **Migrated from Fal.ai to Replicate:** Modified all video generation endpoints (, , ) to use Replicate as the primary AI video provider.
-- **Fixed Frontend Timeouts for AI Video:** Updated  to force all AI video generation requests to use the async API endpoint, preventing request timeouts.
-- **Diagnosed and Unstuck Hung Backend Process:** Identified that the background job had hung and that a server hot-reload resolved it, proving the fragility of the current background task implementation.
+- **Migrated to Kling AI:** Replaced Replicate with Fal.ai's Kling model as the primary AI video provider.
+- **Centralized Video Generation:** Refactored all video generation logic into a single, unified service in .
+- **Implemented Character Consistency:** Added backend logic and a frontend UI toggle for three levels of character consistency (None, Seed, Frame Chain).
+- **Fixed Critical API Key Bug:** Diagnosed and fixed a recurring  corruption issue, restoring the core AI video feature.
+- **Fixed TTS Bug:** Implemented a function to strip screenplay formatting from scripts before sending to Text-to-Speech.
+- **Improved Prompt Engineering:** Enhanced the prompt generation system based on official Kling documentation to improve video quality.
+- **Optimized API Costs:** Changed the video generation from 5-second to 10-second clips, halving API call costs.
+- **Revamped and Fixed Credit System:** Analyzed profitability, consulted the user, and implemented a new, profitable credit model (200 credits for 30s).
+- **Fixed Dynamic Credit UI:** Ensured the credit cost displayed on the UI is dynamic and accurately reflects the selected video duration.
 
 **Earlier issues found/mentioned but not fixed**
-- The async job system was identified as a mock implementation in the previous session and remains so, but its unreliability is now a proven, critical issue.
-- Older pending issues (timeout UX improvements for non-AI tasks, 404 on video downloads, Zod validation error) remain unaddressed.
+- The async job system () remains a mock, non-persistent implementation. Its unreliability is a critical architectural flaw that has not been addressed.
+
+**Known issue recurrence from previous fork**
+- **Issue:** The  becoming invalid or corrupted.
+- **Recurrence count:** High (user stated 5 times so far in this week).
+- **Status:** RESOLVED in this session, but the root cause of the recurrence is not definitively known, so it remains a high-risk item to monitor.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **API Provider Migration:** Switched the primary AI video generation service from Fal.ai to Replicate due to reliability issues. This involved changing API call structures and response handling.
-- **Forcing Asynchronous API Usage:** Identified that long-running tasks were incorrectly using a synchronous API, causing UI timeouts. The frontend logic was corrected to enforce the use of the async endpoint for specific tasks.
-- **File System Validation:** Implemented checks using  to verify file creation and integrity before committing to a database, preventing data-on-disk vs. database-record mismatches.
-- **Debugging Hung Node.js Processes:** Discovered that a fire-and-forget background task can hang silently within a standard Next.js API route. This points to a fundamental architectural issue with the current async implementation.
+- **Centralized Service Architecture:** Moving all AI video generation logic into a single, reusable service () to improve maintainability and ensure consistency across different API endpoints.
+- **Advanced Prompt Engineering:** Transforming simple user input into structured, detailed prompts optimized for a specific AI model (Kling) to dramatically improve output quality.
+- **Dynamic, Profitable Credit System:** Implementing a flexible credit calculation model that is tied to real API costs, scales with user inputs (duration), and ensures business profitability.
+- **Root Cause Analysis:** Tracing a user-facing bug (stock videos) back to a non-obvious technical issue (invalid API key) by analyzing server logs.
+- **Defensive Programming:** Adding logic to clean user-generated content () before passing it to a downstream service (TTS) to prevent errors.
+- **Recurring Issue Management:** Acknowledging and addressing user frustration over a recurring problem ( corruption) and taking steps to ensure a permanent fix.
 
 **key DB schema**
-  - **library**:  - The  was central to debugging the 0KB issue.
-  - **jobs**:  - This is still an in-memory object in , not a real DB collection.
+  - **users**:  - User credit balance is deducted from here.
+  - **toolCredits**: (in )  - In-code object defining the base cost of tools. Now updated for profitability.
 
 **All files of reference**
-- **Heavily Modified:**
-  - : Swapped Fal.ai for Replicate as the primary provider.
-  - : Added 0KB file validation and switched to Replicate.
-  - : Added 0KB file validation and switched to Replicate.
-  - : Changed logic to always use the async endpoint for AI video.
-- **Modified:**
-  - : Added more logging to the Replicate polling function.
+- **Core Logic:**
+  - : Now contains the heart of all AI video generation. It was created and heavily modified to centralize the Kling integration, add consistency modes, implement prompt engineering, and manage credit deduction.
+  - : Updated with the new profitable base cost for AI video tools.
+- **Frontend UI:**
+  - : Heavily modified to add the consistency UI, fix its position, update credit display logic, and change informational text.
+  - : Overhauled to support the new dynamic, per-second pricing model based on a profitable base cost.
+- **API Routes (Refactored):**
+  - : Updated to use the centralized service and to clean the script for TTS.
+  - : Also updated for the centralized service and TTS fix.
+  - : Refactored to use the centralized service.
+- **Environment:**
+  - : Updated with the correct, working .
 
 **key api endpoints**
-- : Now the primary endpoint for all AI video generation from the story-reels page.
-- : The frontend polls this endpoint to get the status of async jobs.
+- : Primary endpoint for generating videos from the Story Reels page. Now relies entirely on the centralized Kling service.
+- : Primary endpoint for the AI Video Studio. Also now uses the centralized Kling service.
 
 **Critical Info for New Agent**
-- **IMMEDIATE PRIORITY:** Your first task is to answer the user's question about the AI model and its cost. Find the model name in the code (e.g., in ), look up its details on Replicate's website, and report back to the user.
-- **MAIN USER COMPLAINT:** The most important issue to solve next is the **poor video quality** (inconsistent characters, distortion). This is a blocker for the user.
-- **CRITICAL RELIABILITY RISK:** The background job system is **not reliable**. It has been proven to hang silently. After addressing the user's immediate quality concerns, you MUST prioritize replacing the mock in-memory job system with a robust job queue (e.g., BullMQ with Redis).
-- **API KEYS:** The app now depends on  from the  file for its core functionality.
+- **IMMEDIATE PRIORITY:** Your first task is to **test the new credit system**. The implementation is done but unverified. Check that the UI shows the correct dynamic cost (base 200 for 30s) and that the backend deducts the right amount.
+- **CRITICAL TEST REQUIRED:** The entire video generation pipeline has been refactored. You MUST perform a full end-to-end test to ensure the fixes for AI quality, character consistency, and TTS have been successful and haven't introduced regressions. The user's last test failed spectacularly, so this verification is essential.
+- **CRITICAL RELIABILITY RISK:** The background job system is **still a mock and unreliable**. This is a ticking time bomb for any long video generations. After verifying the current fixes, you must prioritize implementing a robust job queue (e.g., BullMQ).
+- **API KEY VIGILANCE:** The  has been a major source of failure and user frustration. It is working now, but be extremely careful with any actions that could affect the  file. Do not trust that it will remain valid.
 
 **Last 10 User Messages and any pending HUMAN messages**
-- **Msg 253:** User reports the generated video has inconsistent/distorted characters, is too short, and asks for the model name and cost. **Status: IN PROGRESS. This is the highest priority issue.**
-- **Msg 178:** User reports the UI is stuck on the progress bar. **Status: ADDRESSED. The agent found a hung backend process and fixed the immediate symptom, but the root cause (fragile async) remains.**
-- **Msg 129:** User reports a Connection Issue timeout. **Status: ADDRESSED. The agent fixed this by forcing AI video generation to use the async API endpoint.**
-- **Msg 92:** User suggests using the existing Replicate integration. **Status: COMPLETED. The agent successfully migrated the app to use Replicate.**
-- **Msg 87:** User, frustrated with Fal.ai, asks for a more reliable API alternative. **Status: COMPLETED.**
-- **Msg 80:** User reports a Connection Issue error. **Status: ADDRESSED. This led to the discovery of Unauthorized errors from Fal.ai.**
-- **Msg 5:** User reports the initial 0KB file issue. **Status: ADDRESSED. The agent added validation to prevent this from creating bad DB entries.**
+- **Msg 477:** User confirms Go for Option A for the new credit pricing model. **Status: COMPLETED. The agent implemented this.**
+- **Msg 462:** User reports that the displayed credit cost (150) is wrong and asks for a full re-check of the credit system and profitability. **Status: ADDRESSED. This led to the agent's detailed analysis and proposing Options A/B.**
+- **Msg 433:** User points out the credit display on the Story Reels page should be dynamic, not static. **Status: COMPLETED. The agent fixed the  on that page.**
+- **Msg 414:** User expresses extreme frustration about the  failing repeatedly and asks for a permanent fix. **Status: ADDRESSED. The agent found and set the correct key, and verified it works.**
+- **Msg 389:** User provides a critical bug report with a screenshot showing TTS reading screenplay, video using stock footage, and incorrect ethnicity. **Status: ADDRESSED. The agent diagnosed the root cause (bad API key) and fixed both the key and the TTS issue.**
+- **Msg 360:** User asks if the clip duration is fixed and if the system is wasting generated footage, concerned about cost. **Status: COMPLETED. The agent optimized the system to use 10-second clips.**
+- **Msg 327:** User asks to improve the prompt generation system using provided links. **Status: COMPLETED. The agent implemented an advanced prompt engineering system.**
+- **Msg 278:** User reports the consistency settings are missing from the Quick Custom AI Video Tool. **Status: COMPLETED. The agent debugged a tricky UI issue and moved the component to the correct location.**
+- **Msg 221:** User reports the consistency UI is missing from the Story Reels page. **Status: COMPLETED. The agent added the UI to that page.**
+- **Msg 142:** User requests Kling be implemented for all video tools with support for unlimited length and consistency. **Status: COMPLETED. This triggered the major centralized service refactor.**
 
 **Project Health Check:**
 - **Broken**:
-    - **AI Video Quality:** The primary feature produces low-quality output (inconsistent characters), making it unusable for the user's purpose.
+    - None confirmed, but the core video generation feature is in a **fragile, untested state** after massive refactoring.
 - **Mocked**:
-    - **Asynchronous Job Processing:** The entire background task system is a non-persistent, unreliable mock that has been proven to fail under real-world conditions. This is a critical point of failure for any long-running task.
+    - **Asynchronous Job Processing:** The background task system () is a non-persistent, unreliable mock. This is a critical point of failure for videos longer than a minute or two.
 
 **3rd Party Integrations**
-- **Replicate** — uses . **This is now the primary provider for AI video generation.**
-- **Fal.ai** — uses . Now a fallback provider.
+- **Fal.ai (Kling)** — uses . **This is now the primary provider for AI video generation.**
+- **Replicate** — uses . Now a fallback provider.
 - Google Gemini — uses .
 - Pexels — uses .
 - Google Cloud Text-to-Speech — uses .
@@ -156,10 +184,11 @@ The application has been significantly refactored to address multiple critical f
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None, but the newly integrated primary feature (Replicate video generation) produces poor quality results.
+  - Known regressions: None known, but the risk is high due to the scale of recent changes.
+
+**Credentials to test flow:**
+- The  has been provided by the user and set in the  file. It was verified to be working at the end of the session.
 
 **What agent forgot to execute**
-- The agent did not address the fundamental architectural flaw of the mock job system, even after proving it was unreliable. It only applied a temporary fix (restarting the process via hot-reload). The next major task must be to implement a proper job queue.
-- The agent did not verify the final length of the generated video after the user reported it was too short (28s).
-
+- The agent did not perform a final, comprehensive end-to-end test of the AI video generation flow after completing all the refactoring, bug fixing, and new feature implementations. It fixed individual pieces but never verified the whole system works together, which is a major oversight and a high-risk situation for the next agent.
 </analysis>
