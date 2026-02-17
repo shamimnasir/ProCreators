@@ -86,8 +86,20 @@ const VIDEO_TOOLS_WITH_SCALING = [
   'talking-head'
 ]
 
-// Calculate dynamic cost based on number of AI clips
-// Each 10-second clip costs 10 credits
+/**
+ * Calculate dynamic cost based on video duration
+ * 
+ * PRICING STRATEGY:
+ * - Base cost is for 30 seconds of video
+ * - Cost scales linearly with duration
+ * - Frame-chain adds 15% premium
+ * 
+ * Example for ai-video-studio (base 80 credits for 30s):
+ * - 30s video = 80 credits
+ * - 60s video = 160 credits  
+ * - 90s video = 240 credits
+ * - 142s video = ~378 credits
+ */
 function calculateDynamicCost(toolId, duration = 30, consistencyMode = 'none') {
   const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
   
@@ -95,16 +107,15 @@ function calculateDynamicCost(toolId, duration = 30, consistencyMode = 'none') {
     return baseCost
   }
   
-  // Calculate based on number of clips (10 seconds per clip, 10 credits per clip)
-  const clipDuration = 10 // seconds
-  const creditsPerClip = 10
-  const numClips = Math.ceil(duration / clipDuration)
-  let cost = numClips * creditsPerClip
+  // Scale linearly with duration (base is 30 seconds)
+  const baseDuration = 30
+  const durationMultiplier = duration / baseDuration
+  let cost = Math.ceil(baseCost * durationMultiplier)
   
-  // Minimum cost is 20 credits
-  cost = Math.max(cost, 20)
+  // Minimum cost is base cost (for very short videos)
+  cost = Math.max(cost, Math.ceil(baseCost * 0.5))
   
-  // Frame-chain premium (15%)
+  // Frame-chain adds 15% premium (more API calls for frame extraction)
   if (consistencyMode === 'frame-chain') {
     cost = Math.ceil(cost * 1.15)
   }
@@ -119,7 +130,7 @@ export function CreditCostBadge({ toolId, duration, consistencyMode, className =
     ? calculateDynamicCost(toolId, duration, consistencyMode)
     : TOOL_COSTS[toolId] || TOOL_COSTS['default']
   
-  const numClips = duration ? Math.ceil(duration / 10) : 0
+  const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
   
   return (
     <TooltipProvider>
@@ -137,9 +148,9 @@ export function CreditCostBadge({ toolId, duration, consistencyMode, className =
           {isAIVideo ? (
             <div className="text-sm">
               <p className="font-medium">{cost} credits for {duration}s video</p>
-              <p className="text-xs text-muted-foreground">{numClips} clips × 10 credits each</p>
+              <p className="text-xs text-muted-foreground">Base: {baseCost} credits for 30s</p>
               {consistencyMode === 'frame-chain' && (
-                <p className="text-xs text-purple-400">+15% for Frame-Chain consistency</p>
+                <p className="text-xs text-purple-400">+15% for Frame-Chain</p>
               )}
             </div>
           ) : (
