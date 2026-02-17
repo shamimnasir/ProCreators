@@ -3175,20 +3175,21 @@ Product URL: ${scrapeData.product.url}`
           <div className="flex flex-col items-center gap-2">
             {(() => {
               const isAIMode = videoSource.startsWith('ai-')
+              
+              // Calculate dynamic credits based on video source and duration
+              let totalCredits
+              let toolId
+              
               if (isAIMode) {
-                // Calculate dynamic credits based on duration (base 200 for 30s)
-                const baseCost = 200
-                const baseDuration = 30
-                const durationMultiplier = duration / baseDuration
-                let totalCredits = Math.ceil(baseCost * durationMultiplier)
-                
-                // Minimum 50% of base
-                totalCredits = Math.max(totalCredits, Math.ceil(baseCost * 0.5))
-                
-                // Frame-chain premium
-                if (consistencyMode === 'frame-chain') {
-                  totalCredits = Math.ceil(totalCredits * 1.15)
+                // Map video source to tool ID for credit calculation
+                const aiToolMap = {
+                  'ai-essential': 'quick-reels-ai-essential',
+                  'ai-standard': 'quick-reels-ai-standard',
+                  'ai-professional': 'quick-reels-ai-professional',
+                  'ai-cinema': 'quick-reels-ai-cinema'
                 }
+                toolId = aiToolMap[videoSource] || 'story-reels'
+                totalCredits = calculateDynamicCost(toolId, duration, consistencyMode)
                 
                 return (
                   <div className="text-center">
@@ -3197,7 +3198,7 @@ Product URL: ${scrapeData.product.url}`
                       className="gap-1.5 px-4 py-2 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300"
                     >
                       <Coins className="h-4 w-4" />
-                      <span className="font-bold text-lg">{totalCredits}</span>
+                      <span className="font-bold text-lg">{formatCredits(totalCredits)}</span>
                       <span className="text-sm">credits</span>
                     </Badge>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -3207,16 +3208,23 @@ Product URL: ${scrapeData.product.url}`
                   </div>
                 )
               } else {
-                // Stock mode - fixed cost
+                // Stock mode - calculate dynamic cost based on duration
+                totalCredits = calculateDynamicCost('quick-reels-stock', duration, 'none')
+                
                 return (
-                  <Badge 
-                    variant="outline" 
-                    className="gap-1.5 px-4 py-2 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300"
-                  >
-                    <Coins className="h-4 w-4" />
-                    <span className="font-bold text-lg">25</span>
-                    <span className="text-sm">credits</span>
-                  </Badge>
+                  <div className="text-center">
+                    <Badge 
+                      variant="outline" 
+                      className="gap-1.5 px-4 py-2 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300"
+                    >
+                      <Coins className="h-4 w-4" />
+                      <span className="font-bold text-lg">{formatCredits(totalCredits)}</span>
+                      <span className="text-sm">credits</span>
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {duration}s stock video • Includes AI voice
+                    </p>
+                  </div>
                 )
               }
             })()}
