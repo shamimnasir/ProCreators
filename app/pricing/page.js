@@ -27,7 +27,7 @@ const pricingFAQs = [
   },
   {
     question: 'Is there a free trial?',
-    answer: 'Yes! Every new user gets 50 free credits to try all our tools. No credit card required.'
+    answer: 'Yes! Every new user gets 500 free credits to try all our tools. No credit card required. That\'s enough for 100+ text generations or 1-2 AI images!'
   },
   {
     question: 'How do subscriber discounts work?',
