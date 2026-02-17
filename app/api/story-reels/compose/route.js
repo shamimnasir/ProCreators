@@ -439,6 +439,46 @@ export async function POST(request) {
     // Step 2: Generate or use voice audio
     let audioPath = join(tempDir, 'voice.mp3')
     
+    // Clean script for TTS - remove screenplay formatting
+    const cleanScriptForTTS = (rawScript) => {
+      let cleaned = rawScript
+      
+      // Remove screenplay scene headings: INT./EXT., DAY/NIGHT, etc.
+      cleaned = cleaned.replace(/^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)[^\n]*$/gim, '')
+      
+      // Remove FADE IN/OUT, CUT TO, DISSOLVE TO, etc.
+      cleaned = cleaned.replace(/^(FADE IN:|FADE OUT:|FADE TO:|CUT TO:|DISSOLVE TO:|SMASH CUT:|MATCH CUT:|JUMP CUT:|INTERCUT:|CONTINUOUS:)[^\n]*$/gim, '')
+      
+      // Remove TITLE CARD lines
+      cleaned = cleaned.replace(/^TITLE CARD:[^\n]*$/gim, '')
+      
+      // Remove character names in all caps before dialogue
+      cleaned = cleaned.replace(/^[A-Z][A-Z\s\-']+(\s*\([^)]*\))?:\s*/gm, '')
+      
+      // Remove parenthetical directions like (softly), (V.O.), (O.S.)
+      cleaned = cleaned.replace(/\([^)]*\)/g, '')
+      
+      // Remove action/description blocks
+      cleaned = cleaned.replace(/^\[.*\]$/gm, '')
+      cleaned = cleaned.replace(/^Scene \d+:?.*$/gim, '')
+      
+      // Remove camera directions
+      cleaned = cleaned.replace(/^(CLOSE ON|ANGLE ON|POV|WIDE SHOT|MEDIUM SHOT|CLOSE-UP|TWO SHOT|INSERT|BACK TO)[:\s][^\n]*$/gim, '')
+      
+      // Remove time indicators
+      cleaned = cleaned.replace(/\s*--\s*(DAY|NIGHT|DAWN|DUSK|MORNING|EVENING|LATER|CONTINUOUS|SAME)[^\n]*/gi, '')
+      
+      // Clean up whitespace
+      cleaned = cleaned.replace(/\n{3,}/g, '\n\n')
+      cleaned = cleaned.split('\n').filter(line => line.trim().length > 0).join(' ')
+      cleaned = cleaned.replace(/\s{2,}/g, ' ').trim()
+      
+      return cleaned
+    }
+    
+    const ttsScript = cleanScriptForTTS(script)
+    console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
+    
     if (voiceOption === 'tts') {
       // Generate TTS with Google Cloud
       try {
