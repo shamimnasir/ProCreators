@@ -269,4 +269,4 @@ export function useCreditCost(toolId, duration = 30, consistencyMode = 'none') {
   return { cost, loading }
 }
 
-export { TOOL_COSTS, calculateDynamicCost, formatCredits }
+export { TOOL_COSTS, VIDEO_TOOLS_WITH_SCALING, STOCK_VIDEO_TOOLS_WITH_SCALING, calculateDynamicCost, formatCredits }
