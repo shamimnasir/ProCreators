@@ -124,23 +124,47 @@ const VIDEO_TOOLS_WITH_SCALING = [
   'quick-reels-ai-cinema'
 ]
 
+// Stock video tools that scale by duration (cheaper)
+const STOCK_VIDEO_TOOLS_WITH_SCALING = [
+  'quick-reels',
+  'quick-reels-stock',
+  'story-reels-stock',
+  'video-editor'
+]
+
 /**
  * Calculate dynamic cost based on video duration
  * 
  * PRICING:
- * - Base cost is for 30 seconds of video
- * - Cost scales linearly with duration
- * - Frame-chain adds 15% premium
+ * - AI Video: Base cost is 10,000 for 30 seconds, scales linearly
+ * - Stock Video: Base cost is 40 for 30 seconds, scales linearly (much cheaper)
+ * - Frame-chain adds 15% premium (AI only)
  * 
  * Example for ai-video-studio (base 10,000 credits for 30s):
  * - 15s video = 5,000 credits
  * - 30s video = 10,000 credits
  * - 60s video = 20,000 credits  
  * - 120s video = 40,000 credits
+ * 
+ * Example for stock video (base 40 credits for 30s):
+ * - 30s = 40 credits
+ * - 60s = 80 credits
+ * - 180s (3 min) = 240 credits
  */
 function calculateDynamicCost(toolId, duration = 30, consistencyMode = 'none') {
   const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
   
+  // Check if it's a stock video tool
+  if (STOCK_VIDEO_TOOLS_WITH_SCALING.includes(toolId)) {
+    const baseDuration = 30
+    const durationMultiplier = duration / baseDuration
+    let cost = Math.ceil(baseCost * durationMultiplier)
+    // Minimum cost is base cost
+    cost = Math.max(cost, baseCost)
+    return cost
+  }
+  
+  // Check if it's an AI video tool
   if (!VIDEO_TOOLS_WITH_SCALING.includes(toolId)) {
     return baseCost
   }
