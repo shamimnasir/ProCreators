@@ -153,7 +153,7 @@ export const pricingTiers = [
     name: 'Free',
     price: '$0',
     features: [
-      '50 free credits',
+      '500 free credits',
       'Access all 70+ tools',
       'Try before you buy',
       'No credit card needed'
@@ -166,10 +166,10 @@ export const pricingTiers = [
     price: '$19',
     period: '/mo',
     features: [
-      '400 credits/month',
+      '19,000 credits/month',
       'All 70+ AI tools',
       'No watermarks',
-      'Bangla Voice Studio',
+      '~60 AI images OR 1-2 AI videos',
       '5% discount on extra credits',
       'Email support'
     ],
@@ -181,9 +181,9 @@ export const pricingTiers = [
     price: '$49',
     period: '/mo',
     features: [
-      '1,000 credits/month',
+      '49,000 credits/month',
       'Everything in Creator',
-      'Auto-reel generator',
+      '~160 AI images OR 4-5 AI videos',
       'Batch generation',
       '10% discount on credits',
       'Priority support'
@@ -196,10 +196,10 @@ export const pricingTiers = [
     price: '$99',
     period: '/mo',
     features: [
-      '3,000 credits/month',
+      '99,000 credits/month',
       'Everything in Pro',
+      '~330 AI images OR 9-10 AI videos',
       'Team access (5 seats)',
-      'API access',
       '15% discount on credits',
       'Dedicated support'
     ],
