@@ -243,7 +243,7 @@ const DEFAULT_TEMPLATES = {
           title: 'Frequently Asked Questions',
           items: [
             { question: 'What is ProCreators?', answer: 'ProCreators is an AI-powered content creation platform that helps you create professional videos, images, ebooks, social media content, and more.' },
-            { question: 'How much does it cost?', answer: 'We offer a free plan with 50 credits. Paid plans start at $19/month for Creator, $49/month for Pro, and $99/month for Business.' },
+            { question: 'How much does it cost?', answer: 'We offer a free plan with 500 credits. Paid plans start at $19/month for Creator (19,000 credits), $49/month for Pro (49,000 credits), and $99/month for Business (99,000 credits).' },
             { question: 'What can I create?', answer: 'You can create AI videos, reels, thumbnails, ebooks, blog posts, social media content, educational materials, business documents, and 70+ other content types.' },
             { question: 'Do I need technical skills?', answer: 'No! ProCreators is designed for everyone. Our AI handles the complex work while you focus on your creative vision.' }
           ]
