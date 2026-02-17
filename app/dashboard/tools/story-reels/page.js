@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
-import { CreditCostBadge } from '@/components/CreditCostBadge'
+import { CreditCostBadge, calculateDynamicCost, formatCredits } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import { 
   Loader2, Video, Mic, Upload, Download, 
