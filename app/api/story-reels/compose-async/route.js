@@ -211,6 +211,51 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       progressMessage: 'Generating voiceover...'
     })
     
+    // Clean script for TTS - remove screenplay formatting
+    const cleanScriptForTTS = (rawScript) => {
+      let cleaned = rawScript
+      
+      // Remove screenplay scene headings: INT./EXT., DAY/NIGHT, etc.
+      cleaned = cleaned.replace(/^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)[^\n]*$/gim, '')
+      
+      // Remove FADE IN/OUT, CUT TO, DISSOLVE TO, etc.
+      cleaned = cleaned.replace(/^(FADE IN:|FADE OUT:|FADE TO:|CUT TO:|DISSOLVE TO:|SMASH CUT:|MATCH CUT:|JUMP CUT:|INTERCUT:|CONTINUOUS:)[^\n]*$/gim, '')
+      
+      // Remove TITLE CARD lines
+      cleaned = cleaned.replace(/^TITLE CARD:[^\n]*$/gim, '')
+      
+      // Remove character names in all caps before dialogue (e.g., "JOHN:")
+      cleaned = cleaned.replace(/^[A-Z][A-Z\s\-']+(\s*\([^)]*\))?:\s*/gm, '')
+      
+      // Remove parenthetical directions like (softly), (V.O.), (O.S.), (CONT'D)
+      cleaned = cleaned.replace(/\([^)]*\)/g, '')
+      
+      // Remove action/description blocks in brackets or with scene numbers
+      cleaned = cleaned.replace(/^\[.*\]$/gm, '')
+      cleaned = cleaned.replace(/^Scene \d+:?.*$/gim, '')
+      
+      // Remove camera directions
+      cleaned = cleaned.replace(/^(CLOSE ON|ANGLE ON|POV|WIDE SHOT|MEDIUM SHOT|CLOSE-UP|TWO SHOT|INSERT|BACK TO)[:\s][^\n]*$/gim, '')
+      
+      // Remove time indicators like "-- DAY", "-- NIGHT", "-- DAWN"
+      cleaned = cleaned.replace(/\s*--\s*(DAY|NIGHT|DAWN|DUSK|MORNING|EVENING|LATER|CONTINUOUS|SAME)[^\n]*/gi, '')
+      
+      // Clean up multiple newlines and whitespace
+      cleaned = cleaned.replace(/\n{3,}/g, '\n\n')
+      cleaned = cleaned.replace(/^\s+|\s+$/gm, '')
+      
+      // Remove empty lines
+      cleaned = cleaned.split('\n').filter(line => line.trim().length > 0).join(' ')
+      
+      // Clean up multiple spaces
+      cleaned = cleaned.replace(/\s{2,}/g, ' ').trim()
+      
+      return cleaned
+    }
+    
+    const ttsScript = cleanScriptForTTS(script)
+    console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
+    
     // Generate TTS audio
     let audioPath = join(tempDir, 'voice.mp3')
     
@@ -226,7 +271,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       }
       
       const [response] = await client.synthesizeSpeech({
-        input: { text: script },
+        input: { text: ttsScript }, // Use cleaned script
         voice: { languageCode, name: selectedVoice || undefined },
         audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0 }
       })
