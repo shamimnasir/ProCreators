@@ -3174,8 +3174,8 @@ Product URL: ${scrapeData.product.url}`
             {(() => {
               const isAIMode = videoSource.startsWith('ai-')
               if (isAIMode) {
-                // Calculate dynamic credits based on duration (base 70 for 30s)
-                const baseCost = 70
+                // Calculate dynamic credits based on duration (base 200 for 30s)
+                const baseCost = 200
                 const baseDuration = 30
                 const durationMultiplier = duration / baseDuration
                 let totalCredits = Math.ceil(baseCost * durationMultiplier)
@@ -3199,8 +3199,8 @@ Product URL: ${scrapeData.product.url}`
                       <span className="text-sm">credits</span>
                     </Badge>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {duration}s video (base: 70 credits for 30s)
-                      {consistencyMode === 'frame-chain' && ' +15%'}
+                      {duration}s AI video
+                      {consistencyMode === 'frame-chain' && ' (+15% frame-chain)'}
                     </p>
                   </div>
                 )
