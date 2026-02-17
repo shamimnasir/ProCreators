@@ -525,7 +525,7 @@ export async function POST(request) {
         }
         
         const request = {
-          input: { text: script },
+          input: { text: ttsScript }, // Use cleaned script
           voice: voiceConfig,
           audioConfig: {
             audioEncoding: 'MP3',
