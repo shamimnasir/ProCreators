@@ -2201,7 +2201,7 @@ Product URL: ${scrapeData.product.url}`
             const hasUserScript = script.trim().length > 50 // User has typed/pasted substantial content
             const requiredClips = Math.ceil(duration / 3)
             const isAIMode = videoSource && videoSource.startsWith('ai-')
-            const requiredAIClips = Math.ceil(duration / 6) // AI clips are ~6 seconds each
+            const requiredAIClips = Math.ceil(duration / 10) // AI clips are 10 seconds each (cost-optimized)
             
             return (
               <div className="space-y-3">
@@ -2263,7 +2263,7 @@ Product URL: ${scrapeData.product.url}`
                 {script.trim() && (
                   <p className="text-xs text-muted-foreground text-center">
                     {isAIMode ? (
-                      <>🤖 Based on {duration}s duration, AI will generate ~{requiredAIClips} video clips (6 sec each)</>
+                      <>🤖 Based on {duration}s duration, AI will generate ~{requiredAIClips} video clips (10 sec each) 💰</>
                     ) : (
                       <>📽️ Based on {duration}s duration, we'll find ~{requiredClips} video clips (3 sec each)</>
                     )}
