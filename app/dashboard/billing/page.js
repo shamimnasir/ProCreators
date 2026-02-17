@@ -509,32 +509,38 @@ function BillingPageContent() {
       <Card>
         <CardHeader>
           <CardTitle>What Can You Create?</CardTitle>
-          <CardDescription>Approximate credit costs per generation</CardDescription>
+          <CardDescription>Credit costs based on actual API usage (1 credit = $0.001)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="p-4 rounded-lg bg-muted/50">
               <h3 className="font-semibold mb-2">💬 Text Content</h3>
+              <p className="text-xs text-green-600 mb-2">Very affordable!</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>• Jokes, Quotes: 8 credits</li>
-                <li>• Stories, Letters: 10-15 credits</li>
-                <li>• Blog Posts: 20 credits</li>
+                <li>• Jokes, Fortune: 5 credits</li>
+                <li>• Emails, Letters: 8-10 credits</li>
+                <li>• Blog Posts: 15-20 credits</li>
+                <li>• Business Plans: 30 credits</li>
               </ul>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
-              <h3 className="font-semibold mb-2">📄 Documents</h3>
+              <h3 className="font-semibold mb-2">🖼️ Images & PDFs</h3>
+              <p className="text-xs text-yellow-600 mb-2">AI image = 300 credits</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>• Worksheets, Planners: 25 credits</li>
-                <li>• Ebooks, Storybooks: 35-40 credits</li>
-                <li>• Business Plans: 35 credits</li>
+                <li>• Text PDFs: 15-35 credits</li>
+                <li>• Single AI Image: 300 credits</li>
+                <li>• Storybook (10 imgs): 3,000</li>
+                <li>• Coloring Book (25 imgs): 7,500</li>
               </ul>
             </div>
             <div className="p-4 rounded-lg bg-muted/50">
-              <h3 className="font-semibold mb-2">🎬 Video & Media</h3>
+              <h3 className="font-semibold mb-2">🎬 Video</h3>
+              <p className="text-xs text-purple-600 mb-2">AI video = 10,000/30s</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>• Image Editing: 35 credits</li>
-                <li>• Quick Reels: 60-70 credits</li>
-                <li>• AI Video Studio: 80 credits</li>
+                <li>• Stock Video Reels: 40 credits</li>
+                <li>• AI Video (30s): 10,000 credits</li>
+                <li>• AI Video (60s): 20,000 credits</li>
+                <li>• AI Video (5min): 100,000 credits</li>
               </ul>
             </div>
           </div>
