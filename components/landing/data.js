@@ -169,7 +169,7 @@ export const pricingTiers = [
       '19,000 credits/month',
       'All 70+ AI tools',
       'No watermarks',
-      '~60 AI images OR 1-2 AI videos',
+      '~60 AI images OR 2 long-form AI videos',
       '5% discount on extra credits',
       'Email support'
     ],
@@ -183,7 +183,7 @@ export const pricingTiers = [
     features: [
       '49,000 credits/month',
       'Everything in Creator',
-      '~160 AI images OR 4-5 AI videos',
+      '~160 AI images OR 5 long-form AI videos',
       'Batch generation',
       '10% discount on credits',
       'Priority support'
@@ -198,7 +198,7 @@ export const pricingTiers = [
     features: [
       '99,000 credits/month',
       'Everything in Pro',
-      '~330 AI images OR 9-10 AI videos',
+      '~330 AI images OR 10 long-form AI videos',
       'Team access (5 seats)',
       '15% discount on credits',
       'Dedicated support'
