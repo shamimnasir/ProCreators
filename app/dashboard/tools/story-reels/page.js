@@ -3174,11 +3174,19 @@ Product URL: ${scrapeData.product.url}`
             {(() => {
               const isAIMode = videoSource.startsWith('ai-')
               if (isAIMode) {
-                // Calculate dynamic credits for AI mode
-                const numClips = Math.ceil(duration / 10) // 10 seconds per clip
-                const baseCreditsPerClip = 10 // Base cost per AI clip
-                const consistencyMultiplier = consistencyMode === 'frame-chain' ? 1.15 : 1
-                const totalCredits = Math.ceil(numClips * baseCreditsPerClip * consistencyMultiplier)
+                // Calculate dynamic credits based on duration (base 70 for 30s)
+                const baseCost = 70
+                const baseDuration = 30
+                const durationMultiplier = duration / baseDuration
+                let totalCredits = Math.ceil(baseCost * durationMultiplier)
+                
+                // Minimum 50% of base
+                totalCredits = Math.max(totalCredits, Math.ceil(baseCost * 0.5))
+                
+                // Frame-chain premium
+                if (consistencyMode === 'frame-chain') {
+                  totalCredits = Math.ceil(totalCredits * 1.15)
+                }
                 
                 return (
                   <div className="text-center">
@@ -3191,8 +3199,8 @@ Product URL: ${scrapeData.product.url}`
                       <span className="text-sm">credits</span>
                     </Badge>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {numClips} AI clips × {baseCreditsPerClip} credits
-                      {consistencyMode === 'frame-chain' && ' (+15% frame-chain)'}
+                      {duration}s video (base: 70 credits for 30s)
+                      {consistencyMode === 'frame-chain' && ' +15%'}
                     </p>
                   </div>
                 )
