@@ -66,7 +66,7 @@ const pricingTiers = [
       '19,000 credits/month',
       'All content tools',
       'No watermarks',
-      '~60 AI images OR 1-2 AI videos',
+      '~60 AI images OR 2 long-form AI videos',
       'Bangla Voice Studio access',
       '5% discount on extra credits',
       'Email support'
@@ -85,7 +85,7 @@ const pricingTiers = [
     features: [
       '49,000 credits/month',
       'Everything in Creator',
-      '~160 AI images OR 4-5 AI videos',
+      '~160 AI images OR 5 long-form AI videos',
       'Batch generation',
       '4K export quality',
       '10% discount on extra credits',
@@ -105,7 +105,7 @@ const pricingTiers = [
     features: [
       '99,000 credits/month',
       'Everything in Pro',
-      '~330 AI images OR 9-10 AI videos',
+      '~330 AI images OR 10 long-form AI videos',
       'Team access (5 seats)',
       'Brand kits & API access',
       '15% discount on extra credits',
