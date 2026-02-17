@@ -53,17 +53,18 @@ const TOOL_COSTS = {
   'carousels': 30,
   
   // Video Processing (High cost) - Base costs for 30s duration
+  // AI Video tools: 200 credits base for 30s (profitable at ~$0.049/credit)
   'video-editor': 60,
-  'ai-video-studio': 80,  // Base for 30s, scales with duration
-  'quick-reels': 70,
+  'ai-video-studio': 200,  // AI video: 200 credits for 30s
+  'quick-reels': 70,       // Stock video mode
   'auto-subtitles': 40,
-  'auto-reels': 80,
-  'auto-longform': 100,
-  'talking-head': 90,
-  'transformation-video': 75,
-  'script-to-ad': 85,
-  'story-reels': 70,
-  'reels': 60,
+  'auto-reels': 200,       // AI video: 200 credits for 30s
+  'auto-longform': 250,    // AI video: 250 credits for 30s (longer form)
+  'talking-head': 200,     // AI video: 200 credits for 30s
+  'transformation-video': 200, // AI video: 200 credits for 30s
+  'script-to-ad': 200,     // AI video: 200 credits for 30s
+  'story-reels': 200,      // AI video: 200 credits for 30s
+  'reels': 60,             // Stock video mode
   
   // Audio Processing (Medium cost)
   'audio-editor': 30,
