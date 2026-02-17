@@ -838,7 +838,8 @@ function AIVideoStudioPageContent() {
               </div>
             </div>
           </div>
-          <CreditCostBadge toolId="story-reels" />
+          {/* Credit badge - shows base cost, actual cost depends on duration selected below */}
+          <CreditCostBadge toolId={isAIMode ? "story-reels" : "quick-reels-stock"} />
         </div>
         
         {/* Full Story Reels Interface - Pass the mode */}
