@@ -2459,7 +2459,7 @@ Product URL: ${scrapeData.product.url}`
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl">📹</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">25 credits</Badge>
+                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">{formatCredits(calculateDynamicCost('quick-reels-stock', duration))} credits</Badge>
               </div>
               <h4 className="font-semibold">Stock Videos</h4>
               <p className="text-xs text-muted-foreground mt-1">
