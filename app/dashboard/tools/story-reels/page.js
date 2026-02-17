@@ -2659,7 +2659,9 @@ Product URL: ${scrapeData.product.url}`
                 </p>
               </div>
               <Badge variant="secondary" className={defaultVideoSource === 'stock' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}>
-                {defaultVideoSource === 'stock' ? '25 credits' : '70+ credits'}
+                {defaultVideoSource === 'stock' 
+                  ? `${formatCredits(calculateDynamicCost('quick-reels-stock', duration))} credits`
+                  : `${formatCredits(calculateDynamicCost('story-reels', duration, consistencyMode))} credits`}
               </Badge>
             </div>
             
