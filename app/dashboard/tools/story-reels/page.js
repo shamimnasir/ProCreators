@@ -2479,7 +2479,7 @@ Product URL: ${scrapeData.product.url}`
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl">🤖</span>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">50 credits</Badge>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">8K credits/30s</Badge>
               </div>
               <h4 className="font-semibold">AI Essential</h4>
               <p className="text-xs text-muted-foreground mt-1">
@@ -2499,7 +2499,7 @@ Product URL: ${scrapeData.product.url}`
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl">⭐</span>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">70 credits</Badge>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">10K credits/30s</Badge>
               </div>
               <h4 className="font-semibold">AI Standard</h4>
               <p className="text-xs text-muted-foreground mt-1">
@@ -2519,7 +2519,7 @@ Product URL: ${scrapeData.product.url}`
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl">🏆</span>
-                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">100 credits</Badge>
+                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">12K credits/30s</Badge>
               </div>
               <h4 className="font-semibold">AI Professional</h4>
               <p className="text-xs text-muted-foreground mt-1">
@@ -2539,7 +2539,7 @@ Product URL: ${scrapeData.product.url}`
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl">💎</span>
-                <Badge variant="secondary" className="bg-pink-100 text-pink-700 text-xs">150 credits</Badge>
+                <Badge variant="secondary" className="bg-pink-100 text-pink-700 text-xs">15K credits/30s</Badge>
               </div>
               <h4 className="font-semibold">AI Cinema Quality</h4>
               <p className="text-xs text-muted-foreground mt-1">
