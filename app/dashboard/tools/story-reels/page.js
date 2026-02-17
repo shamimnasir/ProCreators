@@ -3169,9 +3169,47 @@ Product URL: ${scrapeData.product.url}`
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Credit Cost Badge */}
-          <div className="flex justify-center">
-            <CreditCostBadge toolId="story-reels" />
+          {/* Dynamic Credit Cost Display */}
+          <div className="flex flex-col items-center gap-2">
+            {(() => {
+              const isAIMode = videoSource.startsWith('ai-')
+              if (isAIMode) {
+                // Calculate dynamic credits for AI mode
+                const numClips = Math.ceil(duration / 10) // 10 seconds per clip
+                const baseCreditsPerClip = 10 // Base cost per AI clip
+                const consistencyMultiplier = consistencyMode === 'frame-chain' ? 1.15 : 1
+                const totalCredits = Math.ceil(numClips * baseCreditsPerClip * consistencyMultiplier)
+                
+                return (
+                  <div className="text-center">
+                    <Badge 
+                      variant="outline" 
+                      className="gap-1.5 px-4 py-2 bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300"
+                    >
+                      <Coins className="h-4 w-4" />
+                      <span className="font-bold text-lg">{totalCredits}</span>
+                      <span className="text-sm">credits</span>
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {numClips} AI clips × {baseCreditsPerClip} credits
+                      {consistencyMode === 'frame-chain' && ' (+15% frame-chain)'}
+                    </p>
+                  </div>
+                )
+              } else {
+                // Stock mode - fixed cost
+                return (
+                  <Badge 
+                    variant="outline" 
+                    className="gap-1.5 px-4 py-2 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300"
+                  >
+                    <Coins className="h-4 w-4" />
+                    <span className="font-bold text-lg">25</span>
+                    <span className="text-sm">credits</span>
+                  </Badge>
+                )
+              }
+            })()}
           </div>
           
           {/* Preview Button (Recommended) */}
