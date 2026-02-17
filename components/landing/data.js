@@ -14,7 +14,7 @@ export const homepageFAQs = [
   },
   {
     question: 'How much does ProCreators cost?',
-    answer: 'ProCreators offers a free plan with 50 credits to try all tools. Paid plans start at $19/month for Creator (400 credits), $49/month for Pro (1000 credits), and $99/month for Business (3000 credits).'
+    answer: 'ProCreators offers a free plan with 500 credits to try all tools. Paid plans start at $19/month for Creator (19,000 credits), $49/month for Pro (49,000 credits), and $99/month for Business (99,000 credits). 1 credit = $0.001 value.'
   },
   {
     question: 'What types of content can I create with ProCreators?',
