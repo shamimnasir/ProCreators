@@ -106,11 +106,16 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     // Calculate clips needed for duration (5 sec per clip + buffer)
     const numClips = Math.min(Math.ceil(duration / 5) + 1, 40) // Max 40 clips for 3+ min
     
+    // Estimate total time: ~60 seconds per clip for AI generation + 60 seconds for processing
+    const estimatedTotalSeconds = numClips * 60 + 60
+    
     await updateJobStatus(jobId, { 
       status: 'generating_clips', 
       progress: 10, 
       progressMessage: `Generating ${numClips} AI video clips with Kling...`,
-      totalClips: numClips
+      totalClips: numClips,
+      estimatedSecondsRemaining: estimatedTotalSeconds,
+      estimatedTotalSeconds: estimatedTotalSeconds
     })
     
     // Get tier configuration
