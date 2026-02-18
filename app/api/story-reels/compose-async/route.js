@@ -726,11 +726,65 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         .run()
     })
     
-    // Merge with audio (or create silent video for no-audio mode)
+    // Merge with audio - MIX Kling's original audio with dialogue/voiceover
     const finalVideoPath = join(tempDir, 'final.mp4')
     
-    if (hasAudio) {
-      // Merge video with audio
+    // Check if the captioned video has audio (from Kling)
+    const hasKlingAudio = await new Promise((resolve) => {
+      ffmpeg.ffprobe(captionedPath, (err, metadata) => {
+        if (err) {
+          resolve(false)
+        } else {
+          const audioStreams = metadata.streams?.filter(s => s.codec_type === 'audio') || []
+          resolve(audioStreams.length > 0)
+        }
+      })
+    })
+    
+    console.log(`[${jobId}] Kling audio present: ${hasKlingAudio}, Has dialogue/voiceover: ${hasAudio}`)
+    
+    if (hasAudio && hasKlingAudio) {
+      // MIX Kling's original audio (ambient, effects) with dialogue/voiceover
+      // Kling audio at 70% volume, dialogue/voiceover at 100% volume
+      console.log(`[${jobId}] Mixing Kling audio with dialogue/voiceover...`)
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedPath)
+          .input(audioPath)
+          .complexFilter([
+            '[0:a]volume=0.7[kling]',  // Kling audio at 70% (background)
+            '[1:a]volume=1.0[voice]',   // Dialogue/voiceover at 100%
+            '[kling][voice]amix=inputs=2:duration=first:dropout_transition=2[aout]'
+          ])
+          .outputOptions([
+            '-c:v', 'copy',
+            '-map', '0:v:0',
+            '-map', '[aout]',
+            '-c:a', 'aac', '-b:a', '192k',
+            '-movflags', '+faststart',
+            '-shortest'
+          ])
+          .output(finalVideoPath)
+          .on('end', resolve)
+          .on('error', (err) => {
+            console.error(`[${jobId}] Audio mix failed: ${err.message}, falling back to dialogue only`)
+            // Fallback: just use dialogue audio
+            ffmpeg()
+              .input(captionedPath)
+              .input(audioPath)
+              .outputOptions([
+                '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k',
+                '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'
+              ])
+              .output(finalVideoPath)
+              .on('end', resolve)
+              .on('error', reject)
+              .run()
+          })
+          .run()
+      })
+    } else if (hasAudio) {
+      // Only dialogue/voiceover audio (no Kling audio)
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(captionedPath)
@@ -744,13 +798,27 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           .on('error', reject)
           .run()
       })
-    } else {
-      // No audio - just copy the captioned video
+    } else if (hasKlingAudio) {
+      // Only Kling's original audio (no dialogue)
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(captionedPath)
           .outputOptions([
-            '-c:v', 'copy', '-an', // No audio
+            '-c:v', 'copy', '-c:a', 'copy',
+            '-movflags', '+faststart'
+          ])
+          .output(finalVideoPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run()
+      })
+    } else {
+      // No audio at all
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedPath)
+          .outputOptions([
+            '-c:v', 'copy', '-an',
             '-movflags', '+faststart'
           ])
           .output(finalVideoPath)
