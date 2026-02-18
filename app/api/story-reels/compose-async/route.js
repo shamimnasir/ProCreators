@@ -256,7 +256,147 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     const ttsScript = cleanScriptForTTS(script)
     console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
     
-    // Function to extract dialogues from scene prompts
+    // Character voice mapping for Google Cloud TTS
+    // Maps character types to appropriate voices
+    const CHARACTER_VOICE_MAP = {
+      // Adult voices
+      'adult_male': {
+        voiceName: 'en-US-Studio-M', // Deep male studio voice
+        pitch: -2.0,
+        speakingRate: 1.0
+      },
+      'adult_female': {
+        voiceName: 'en-US-Studio-O', // Clear female studio voice
+        pitch: 0,
+        speakingRate: 1.0
+      },
+      // Older/elderly voices
+      'elderly_male': {
+        voiceName: 'en-US-Wavenet-B', // Mature male voice
+        pitch: -4.0,
+        speakingRate: 0.9
+      },
+      'elderly_female': {
+        voiceName: 'en-US-Wavenet-C', // Mature female voice
+        pitch: -2.0,
+        speakingRate: 0.9
+      },
+      // Young adult voices
+      'young_male': {
+        voiceName: 'en-US-Neural2-D', // Younger male voice
+        pitch: 2.0,
+        speakingRate: 1.05
+      },
+      'young_female': {
+        voiceName: 'en-US-Neural2-F', // Younger female voice
+        pitch: 2.0,
+        speakingRate: 1.05
+      },
+      // Child voices (using pitch adjustment for child-like sound)
+      'child_boy': {
+        voiceName: 'en-US-Neural2-D', // Male voice pitched up
+        pitch: 6.0,
+        speakingRate: 1.1
+      },
+      'child_girl': {
+        voiceName: 'en-US-Neural2-F', // Female voice pitched up
+        pitch: 6.0,
+        speakingRate: 1.1
+      },
+      // Baby/toddler voices (higher pitch, slower)
+      'baby_boy': {
+        voiceName: 'en-US-Neural2-D',
+        pitch: 10.0,
+        speakingRate: 0.85
+      },
+      'baby_girl': {
+        voiceName: 'en-US-Neural2-F',
+        pitch: 10.0,
+        speakingRate: 0.85
+      },
+      // Default neutral voice
+      'neutral': {
+        voiceName: 'en-US-Studio-O',
+        pitch: 0,
+        speakingRate: 1.0
+      }
+    }
+    
+    // Function to detect character type from prompt text
+    const detectCharacterType = (promptText) => {
+      const prompt = promptText.toLowerCase()
+      
+      // Baby detection (check first as it's most specific)
+      if (/baby\s*(boy|male)|infant\s*(boy|male)|toddler\s*(boy|male)/.test(prompt)) {
+        return 'baby_boy'
+      }
+      if (/baby\s*(girl|female)|infant\s*(girl|female)|toddler\s*(girl|female)|baby/.test(prompt)) {
+        return 'baby_girl'
+      }
+      
+      // Child/kid detection
+      if (/\b(boy|kid|child)\b.*\b(male|boy|son)\b|\b(little|young|small)\s+(boy|kid|son)\b|\b\d{1,2}[\s-]?year[\s-]?old\s+(boy|male\s+child)\b/.test(prompt)) {
+        return 'child_boy'
+      }
+      if (/\b(girl|kid|child)\b.*\b(female|girl|daughter)\b|\b(little|young|small)\s+(girl|daughter)\b|\b\d{1,2}[\s-]?year[\s-]?old\s+(girl|female\s+child)\b/.test(prompt)) {
+        return 'child_girl'
+      }
+      // Generic child detection
+      if (/\bchild\b|\bkid\b|\bchildren\b/.test(prompt)) {
+        // Default child to girl unless male indicators
+        if (/\b(he|him|his|boy|male|son)\b/.test(prompt)) return 'child_boy'
+        return 'child_girl'
+      }
+      
+      // Elderly detection
+      if (/\b(old|elderly|senior|aged|grandfather|grandpa|grandad)\s*(man|male|gentleman|guy)\b|\b(old|elderly)\s+(man|male)\b|\bgrandfather\b|\bgrandpa\b/.test(prompt)) {
+        return 'elderly_male'
+      }
+      if (/\b(old|elderly|senior|aged|grandmother|grandma|granny)\s*(woman|female|lady)\b|\b(old|elderly)\s+(woman|lady|female)\b|\bgrandmother\b|\bgrandma\b/.test(prompt)) {
+        return 'elderly_female'
+      }
+      
+      // Young adult detection
+      if (/\b(young|teen|teenage|adolescent)\s*(man|male|boy|guy)\b|\b(young|teen)\s+(man|guy|male)\b/.test(prompt)) {
+        return 'young_male'
+      }
+      if (/\b(young|teen|teenage|adolescent)\s*(woman|female|girl|lady)\b|\b(young|teen)\s+(woman|girl|lady|female)\b/.test(prompt)) {
+        return 'young_female'
+      }
+      
+      // Adult male detection
+      if (/\b(man|male|gentleman|businessman|father|dad|husband|guy|boy(?:friend)?|he|him)\b/.test(prompt)) {
+        // Check for age indicators
+        if (/\b(\d{2,}[\s-]?year[\s-]?old)\b/.test(prompt)) {
+          const ageMatch = prompt.match(/(\d{2,})[\s-]?year/)
+          if (ageMatch) {
+            const age = parseInt(ageMatch[1])
+            if (age >= 60) return 'elderly_male'
+            if (age <= 25) return 'young_male'
+          }
+        }
+        return 'adult_male'
+      }
+      
+      // Adult female detection
+      if (/\b(woman|female|lady|businesswoman|mother|mom|wife|girl(?:friend)?|she|her)\b/.test(prompt)) {
+        // Check for age indicators
+        if (/\b(\d{2,}[\s-]?year[\s-]?old)\b/.test(prompt)) {
+          const ageMatch = prompt.match(/(\d{2,})[\s-]?year/)
+          if (ageMatch) {
+            const age = parseInt(ageMatch[1])
+            if (age >= 60) return 'elderly_female'
+            if (age <= 25) return 'young_female'
+          }
+        }
+        return 'adult_female'
+      }
+      
+      // Default to neutral if no character type detected
+      return 'neutral'
+    }
+    
+    // Function to extract dialogues from scene prompts with character detection
     const extractDialoguesFromPrompts = (prompts) => {
       const dialogues = []
       if (!prompts || !Array.isArray(prompts)) return dialogues
@@ -269,11 +409,14 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           matches.forEach(match => {
             const dialogue = match.match(/saying\s+['"]([^'"]+)['"]/i)
             if (dialogue && dialogue[1]) {
+              // Detect character type from the full prompt
+              const characterType = detectCharacterType(prompt)
+              
               dialogues.push({
                 sceneIndex: index,
                 text: dialogue[1],
-                // Estimate timing: each scene is roughly equal duration
-                // Will be refined after video clips are generated
+                characterType: characterType,
+                fullPrompt: prompt // Store for logging
               })
             }
           })
@@ -282,8 +425,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       return dialogues
     }
     
-    // Function to generate character dialogue audio
-    const generateDialogueAudio = async (dialogues, totalDuration, numScenes, voiceConfig) => {
+    // Function to generate character dialogue audio with character-specific voices
+    const generateDialogueAudio = async (dialogues, totalDuration, numScenes, baseLanguageCode) => {
       if (!dialogues.length) return null
       
       const client = new textToSpeech.TextToSpeechClient({
@@ -295,17 +438,31 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       
       for (const dialogue of dialogues) {
         try {
-          // Use a character-appropriate voice (can be customized based on prompt analysis)
+          // Get character-specific voice configuration
+          const voiceConfig = CHARACTER_VOICE_MAP[dialogue.characterType] || CHARACTER_VOICE_MAP.neutral
+          
+          // Adjust voice name for non-English languages
+          let voiceName = voiceConfig.voiceName
+          if (baseLanguageCode && !baseLanguageCode.startsWith('en')) {
+            // For non-English, use a generic voice with the right language
+            const langPrefix = baseLanguageCode.split('-')[0]
+            // Try to find a matching voice or fall back
+            voiceName = undefined // Let Google TTS pick the best voice for the language
+          }
+          
+          console.log(`[${jobId}] Generating voice for "${dialogue.text}" - Character: ${dialogue.characterType}, Voice: ${voiceName || 'auto'}`)
+          
           const [response] = await client.synthesizeSpeech({
             input: { text: dialogue.text },
             voice: { 
-              languageCode: voiceConfig.languageCode || 'en-US', 
-              name: voiceConfig.voiceName || 'en-US-Studio-O' // Default to a clear studio voice
+              languageCode: baseLanguageCode || 'en-US', 
+              name: voiceName,
+              ssmlGender: dialogue.characterType.includes('male') || dialogue.characterType.includes('boy') ? 'MALE' : 'FEMALE'
             },
             audioConfig: { 
               audioEncoding: 'MP3', 
-              speakingRate: 1.0,
-              pitch: 0 // Can adjust based on character
+              speakingRate: voiceConfig.speakingRate || 1.0,
+              pitch: voiceConfig.pitch || 0
             }
           })
           
