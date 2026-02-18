@@ -3392,7 +3392,7 @@ Product URL: ${scrapeData.product.url}`
           )}
 
           {composing && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span>{progressMessage || 'Creating your video...'}</span>
                 <div className="flex items-center gap-3">
@@ -3409,6 +3409,18 @@ Product URL: ${scrapeData.product.url}`
                 </div>
               </div>
               <Progress value={progress} className="w-full" />
+              
+              {/* Stop Generation Button */}
+              <Button 
+                onClick={handleCancelGeneration}
+                variant="destructive"
+                size="sm"
+                className="w-full"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Stop Generation & Refund Credits
+              </Button>
+              
               {duration > 45 && videoSource.startsWith('ai-') && (
                 <p className="text-xs text-muted-foreground mt-2">
                   ⏱️ Generating {Math.ceil(duration / 10)} AI clips. This may take several minutes. You can leave this page - video will be saved to Library.
