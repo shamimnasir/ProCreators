@@ -2281,6 +2281,18 @@ Product URL: ${scrapeData.product.url}`
                   )}
                 </div>
                 
+                {/* Use Custom Prompts Button - AI Mode Only */}
+                {isAIMode && hasUserScript && (
+                  <Button 
+                    onClick={handleUseCustomPrompts}
+                    variant="outline"
+                    className="w-full border-2 border-dashed border-purple-400 hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950"
+                  >
+                    <Edit className="mr-2 h-4 w-4 text-purple-600" />
+                    Use My Text as Custom Prompts (Skip AI Generation)
+                  </Button>
+                )}
+                
                 {/* Show estimated clips needed */}
                 {script.trim() && (
                   <p className="text-xs text-muted-foreground text-center">
