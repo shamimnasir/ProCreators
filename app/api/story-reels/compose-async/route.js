@@ -361,9 +361,9 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       progressMessage: 'Adding captions and audio...'
     })
     
-    // Generate captions
+    // Generate captions - use the cleaned TTS script to remove screenplay formatting
     const captionsPath = join(tempDir, 'captions.ass')
-    const captionContent = generateASSCaptions(script, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
+    const captionContent = generateASSCaptions(ttsScript, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
     await writeFile(captionsPath, captionContent, 'utf8')
     
     // Add captions
