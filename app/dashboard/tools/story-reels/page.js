@@ -2859,32 +2859,35 @@ Product URL: ${scrapeData.product.url}`
               <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                 <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2 flex items-center gap-2">
                   <Video className="h-4 w-4" />
-                  AI Video with Character Dialogue - No Voiceover
+                  Character Dialogue Mode
                 </h4>
                 <p className="text-sm text-purple-800 dark:text-purple-200">
-                  Generate AI video where characters APPEAR to speak (lip movements) but without audio track.
+                  Generate AI video with characters speaking their dialogue lines.
                 </p>
                 
-                <div className="mt-3 p-3 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                  <p className="text-sm font-medium text-purple-900 dark:text-purple-100 mb-2">
-                    🎭 Character Dialogue Works Here!
+                <div className="mt-3 p-3 bg-green-100 dark:bg-green-900/50 rounded-lg border border-green-300 dark:border-green-700">
+                  <p className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                    🎤 Auto Character Voice Generation
                   </p>
-                  <p className="text-xs text-purple-700 dark:text-purple-300">
-                    When your script includes dialogue like <code className="bg-purple-200 dark:bg-purple-800 px-1 rounded">saying 'Hello!'</code>, 
-                    Kling AI will animate the character's lips and facial expressions as if speaking.
+                  <p className="text-xs text-green-700 dark:text-green-300">
+                    When your scene prompts include dialogue like <code className="bg-green-200 dark:bg-green-800 px-1 rounded">saying 'Welcome!'</code>, 
+                    we'll automatically generate character voices and sync them with the video.
                   </p>
                 </div>
                 
-                <p className="text-sm text-purple-800 dark:text-purple-200 mt-3 font-medium">Perfect for:</p>
-                <ul className="text-sm text-purple-800 dark:text-purple-200 mt-1 list-disc list-inside space-y-1">
-                  <li>Adding your own voiceover/dubbing later</li>
-                  <li>Using Kling's Lip Sync feature with custom audio</li>
-                  <li>Creating videos in any language (add audio post)</li>
-                  <li>Music video style content with speaking scenes</li>
-                </ul>
+                <div className="mt-3 p-3 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+                  <p className="text-sm font-medium text-purple-900 dark:text-purple-100 mb-2">
+                    🎭 How It Works
+                  </p>
+                  <ol className="text-xs text-purple-700 dark:text-purple-300 list-decimal list-inside space-y-1">
+                    <li>Kling AI creates lip movements for dialogue scenes</li>
+                    <li>Google TTS generates character voice for each dialogue</li>
+                    <li>Audio is synced to play when character speaks</li>
+                  </ol>
+                </div>
                 
                 <div className="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded text-xs text-yellow-800 dark:text-yellow-200">
-                  💡 <strong>Pro Tip:</strong> For character dialogue, use front-facing camera angles and short phrases (2-5 words) for best lip sync animation.
+                  💡 <strong>Best Practices:</strong> Use front-facing camera, short phrases (2-5 words), and include <code className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">saying '...'</code> in your scene prompts.
                 </div>
               </div>
             </TabsContent>
