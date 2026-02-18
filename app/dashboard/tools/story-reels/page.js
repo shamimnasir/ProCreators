@@ -972,7 +972,8 @@ Product URL: ${scrapeData.product.url}`
           niche: 'product-review',
           duration,
           language: ttsLanguage,
-          customTopic: productContext
+          customTopic: productContext,
+          videoSource // Pass video source for format optimization
         })
       })
 
