@@ -12,7 +12,7 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
-    const { duration, language, niche, customTopic, scriptFormat } = await request.json()
+    const { duration, language, niche, customTopic, scriptFormat, videoSource } = await request.json()
     
     // Support both short-form (10-60s) and long-form (up to 10 min / 600s) videos
     if (!duration || duration < 10 || duration > 600) {
@@ -25,9 +25,20 @@ export async function POST(request) {
     const languageText = language === 'bn' ? 'in Bengali language' : 'in English language'
     const languageName = language === 'bn' ? 'Bengali' : 'English'
     
-    // Determine script format: 'cinematic' (screenplay) or 'narration' (voiceover)
-    // Default to 'cinematic' for long-form (>60s), 'narration' for short-form
-    const format = scriptFormat || (duration > 60 ? 'cinematic' : 'narration')
+    // Determine script format based on video source and duration
+    // AI video: Use 'ai-visual' format (optimized for visual generation, no screenplay elements)
+    // Stock video: Use 'narration' for short, 'cinematic' for long
+    const isAIVideo = videoSource && videoSource.startsWith('ai-')
+    let format = scriptFormat
+    if (!format) {
+      if (isAIVideo) {
+        format = 'ai-visual' // New format optimized for AI video generation
+      } else if (duration > 60) {
+        format = 'cinematic'
+      } else {
+        format = 'narration'
+      }
+    }
 
     // Get niche-specific prompt template or use default
     let nichePrompt = ''
