@@ -256,14 +256,183 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     const ttsScript = cleanScriptForTTS(script)
     console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
     
+    // Function to extract dialogues from scene prompts
+    const extractDialoguesFromPrompts = (prompts) => {
+      const dialogues = []
+      if (!prompts || !Array.isArray(prompts)) return dialogues
+      
+      prompts.forEach((scene, index) => {
+        const prompt = scene.prompt || scene
+        // Match: saying 'dialogue' or saying "dialogue"
+        const matches = prompt.match(/saying\s+['"]([^'"]+)['"]/gi)
+        if (matches) {
+          matches.forEach(match => {
+            const dialogue = match.match(/saying\s+['"]([^'"]+)['"]/i)
+            if (dialogue && dialogue[1]) {
+              dialogues.push({
+                sceneIndex: index,
+                text: dialogue[1],
+                // Estimate timing: each scene is roughly equal duration
+                // Will be refined after video clips are generated
+              })
+            }
+          })
+        }
+      })
+      return dialogues
+    }
+    
+    // Function to generate character dialogue audio
+    const generateDialogueAudio = async (dialogues, totalDuration, numScenes, voiceConfig) => {
+      if (!dialogues.length) return null
+      
+      const client = new textToSpeech.TextToSpeechClient({
+        keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+      })
+      
+      const sceneDuration = totalDuration / numScenes
+      const dialogueAudios = []
+      
+      for (const dialogue of dialogues) {
+        try {
+          // Use a character-appropriate voice (can be customized based on prompt analysis)
+          const [response] = await client.synthesizeSpeech({
+            input: { text: dialogue.text },
+            voice: { 
+              languageCode: voiceConfig.languageCode || 'en-US', 
+              name: voiceConfig.voiceName || 'en-US-Studio-O' // Default to a clear studio voice
+            },
+            audioConfig: { 
+              audioEncoding: 'MP3', 
+              speakingRate: 1.0,
+              pitch: 0 // Can adjust based on character
+            }
+          })
+          
+          const dialogueFile = join(tempDir, `dialogue_${dialogue.sceneIndex}.mp3`)
+          await writeFile(dialogueFile, response.audioContent, 'binary')
+          
+          // Get dialogue audio duration
+          const dialogueDuration = await new Promise((resolve) => {
+            ffmpeg.ffprobe(dialogueFile, (err, metadata) => {
+              resolve(err ? 2 : metadata.format.duration)
+            })
+          })
+          
+          // Calculate start time (middle of the scene for natural feel)
+          const sceneStart = dialogue.sceneIndex * sceneDuration
+          const startTime = sceneStart + (sceneDuration - dialogueDuration) / 2
+          
+          dialogueAudios.push({
+            file: dialogueFile,
+            startTime: Math.max(0, startTime),
+            duration: dialogueDuration,
+            text: dialogue.text
+          })
+          
+          console.log(`[${jobId}] Generated dialogue audio: "${dialogue.text}" at ${startTime.toFixed(2)}s`)
+        } catch (err) {
+          console.error(`[${jobId}] Failed to generate dialogue: ${err.message}`)
+        }
+      }
+      
+      return dialogueAudios
+    }
+    
+    // Function to create combined dialogue audio track
+    const createDialogueTrack = async (dialogueAudios, totalDuration) => {
+      if (!dialogueAudios || !dialogueAudios.length) return null
+      
+      const outputPath = join(tempDir, 'dialogue_track.mp3')
+      
+      // Create a silent base track and overlay dialogues
+      return new Promise((resolve, reject) => {
+        let command = ffmpeg()
+          // Create silent base track
+          .input('anullsrc=r=44100:cl=stereo')
+          .inputFormat('lavfi')
+          .duration(totalDuration)
+        
+        // Add each dialogue audio
+        dialogueAudios.forEach(d => {
+          command = command.input(d.file)
+        })
+        
+        // Build filter complex for overlaying
+        let filterParts = ['[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[base]']
+        let mixInputs = '[base]'
+        
+        dialogueAudios.forEach((d, i) => {
+          const inputIndex = i + 1
+          const delayMs = Math.round(d.startTime * 1000)
+          filterParts.push(`[${inputIndex}:a]adelay=${delayMs}|${delayMs},aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[d${i}]`)
+          mixInputs += `[d${i}]`
+        })
+        
+        // Mix all audio streams
+        filterParts.push(`${mixInputs}amix=inputs=${dialogueAudios.length + 1}:duration=first[out]`)
+        
+        command
+          .complexFilter(filterParts.join(';'), 'out')
+          .audioCodec('libmp3lame')
+          .audioBitrate('192k')
+          .output(outputPath)
+          .on('end', () => resolve(outputPath))
+          .on('error', (err) => {
+            console.error(`[${jobId}] Dialogue track creation failed: ${err.message}`)
+            reject(err)
+          })
+          .run()
+      })
+    }
+    
     // Generate TTS audio (or skip if voiceOption is 'none')
     let audioPath = join(tempDir, 'voice.mp3')
     let hasAudio = true
+    let dialogueTrackPath = null
+    
+    // Parse scenePrompts if it's a string
+    let parsedScenePrompts = scenePrompts
+    if (typeof scenePrompts === 'string') {
+      try {
+        parsedScenePrompts = JSON.parse(scenePrompts)
+      } catch (e) {
+        parsedScenePrompts = []
+      }
+    }
     
     if (voiceOption === 'none') {
-      // No audio - create silent audio track matching video duration
-      hasAudio = false
-      console.log(`[${jobId}] No audio mode - will create silent video`)
+      // Check if we have character dialogues in prompts
+      const dialogues = extractDialoguesFromPrompts(parsedScenePrompts)
+      
+      if (dialogues.length > 0 && isAIMode) {
+        console.log(`[${jobId}] Found ${dialogues.length} character dialogues in prompts`)
+        
+        // Generate dialogue audio for character speech
+        const dialogueAudios = await generateDialogueAudio(
+          dialogues, 
+          duration, 
+          parsedScenePrompts.length || Math.ceil(duration / 10),
+          { languageCode: ttsLanguage === 'bn' ? 'bn-IN' : 'en-US' }
+        )
+        
+        if (dialogueAudios && dialogueAudios.length > 0) {
+          dialogueTrackPath = await createDialogueTrack(dialogueAudios, duration)
+          if (dialogueTrackPath) {
+            hasAudio = true
+            audioPath = dialogueTrackPath
+            console.log(`[${jobId}] Created character dialogue audio track`)
+          } else {
+            hasAudio = false
+          }
+        } else {
+          hasAudio = false
+        }
+      } else {
+        // No dialogues found - create truly silent video
+        hasAudio = false
+        console.log(`[${jobId}] No audio mode - will create silent video`)
+      }
     } else if (voiceOption === 'tts') {
       const client = new textToSpeech.TextToSpeechClient({
         keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
