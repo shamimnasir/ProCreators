@@ -1645,9 +1645,22 @@ Product URL: ${scrapeData.product.url}`
 
         // Check if response is OK before parsing JSON
         if (!response.ok) {
-          const text = await response.text()
-          console.error('Compose failed:', response.status, text.substring(0, 200))
-          throw new Error(`Server error: ${response.status}`)
+          // Try to parse error message from response
+          let errorMessage = `Server error: ${response.status}`
+          try {
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch (parseErr) {
+            // If JSON parse fails, try to read as text
+            try {
+              const text = await response.text()
+              console.error('Compose failed:', response.status, text.substring(0, 200))
+              if (text) errorMessage = text
+            } catch (e) {}
+          }
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
