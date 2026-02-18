@@ -708,7 +708,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     const captionContent = generateASSCaptions(ttsScript, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
     await writeFile(captionsPath, captionContent, 'utf8')
     
-    // Add captions
+    // Add captions (preserving Kling's original audio)
     const captionedPath = join(tempDir, 'captioned.mp4')
     const escapedCaptionsPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
     
@@ -717,7 +717,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         .input(concatVideoPath)
         .outputOptions([
           '-vf', `ass='${escapedCaptionsPath}':fontsdir=/app/fonts`,
-          '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', '-an'
+          '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
+          '-c:a', 'copy' // Keep Kling's original audio (environment sounds, footsteps, etc.)
         ])
         .output(captionedPath)
         .on('end', resolve)
