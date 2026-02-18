@@ -1861,6 +1861,56 @@ Product URL: ${scrapeData.product.url}`
     }
   }
 
+  // Cancel/Stop Video Generation
+  const handleCancelGeneration = async () => {
+    if (!currentJobId) {
+      toast({
+        title: "Error",
+        description: "No active job to cancel",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/story-reels/cancel-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId: currentJobId })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setComposing(false)
+        setProgress(0)
+        setProgressMessage('')
+        setCurrentJobId(null)
+        setEstimatedTimeRemaining(null)
+
+        toast({
+          title: "Generation Cancelled ✅",
+          description: data.refunded 
+            ? `Stopped! ${data.refundedAmount.toLocaleString()} credits refunded to your account.`
+            : "Generation stopped successfully."
+        })
+      } else {
+        toast({
+          title: "Cancel Failed",
+          description: data.error || "Could not cancel generation",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      console.error('Cancel error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to cancel generation",
+        variant: "destructive"
+      })
+    }
+  }
+
   // Download Captions
   const handleDownloadCaptions = async () => {
     if (!videoData?.captionsUrl) return
