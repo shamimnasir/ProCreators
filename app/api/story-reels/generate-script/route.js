@@ -220,14 +220,6 @@ DO include:
 
 Write ${languageText}. Create ${Math.ceil(duration / 10)} paragraph scenes (~10 seconds each).`
 
-The same woman walks alone down an empty street, saying 'I knew he wouldn't come', letting the rain wash over her, wide shot, melancholic atmosphere.
-
-She reaches a small café and stops at the door. Through the glass, a man at a table looks up and smiles, saying 'You came!', warm interior lighting, medium shot.
-
-The woman pushes open the door, a relieved smile spreading across her face, saying 'I almost didn't', cozy café interior, two-shot, romantic warm lighting."
-
-Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 60}-${Math.ceil(duration / 10) * 90} words of visual narrative with dialogue.`
-
     // Select system message based on format
     let finalSystemMessage
     if (nichePrompt) {
