@@ -3289,7 +3289,8 @@ Product URL: ${scrapeData.product.url}`
               composing || 
               !script.trim() || 
               (videoSource.startsWith('ai-') ? scenePrompts.length === 0 : stockVideos.length === 0) || 
-              (voiceOption === 'tts' && !selectedVoice)
+              (voiceOption === 'tts' && !selectedVoice) ||
+              (voiceOption === 'upload' && !voiceFile)
             }
             className="w-full"
             size="lg"
