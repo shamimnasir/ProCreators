@@ -1,0 +1,209 @@
+<analysis>
+<original_problem_statement>
+The user's initial request was a complete overhaul of the credit system to be dynamic and profitable (55% margin, 20% for AI video). Throughout the session, the scope expanded significantly with a focus on improving the AI video generation tool.
+
+The accumulated product requirements are:
+1.  **Credit System:** Implement the new dynamic and profitable credit system.
+2.  **Error Handling:** Fix a frontend JSON parsing error when a user has insufficient credits (402 error).
+3.  **Video Generation Bugs:**
+    *   Fix an issue where AI video generation was failing (due to an invalid API key) and silently falling back to stock footage.
+    *   Fix a bug where screenplay formatting instructions (e.g., V.O.) were included in generated captions and TTS audio.
+    *   Fix a mismatch where the UI indicated 3 clips would be generated, but the backend created 5 prompts.
+4.  **AI Video Scripting:**
+    *   Improve the script generation (auto mode) to produce prompts suitable for AI video (visual descriptions) rather than professional screenplay format.
+    *   Add support for dialogue within the script using a specific syntax (e.g., ).
+5.  **Audio Features (Major):**
+    *   Add an option to generate videos with no audio track.
+    *   Implement a feature to automatically generate character dialogue audio using Google TTS when dialogue is present in the script.
+    *   The dialogue generation should be character-aware, selecting appropriate voices (male, female, child) based on keywords in the prompt.
+    *   **Crucially**, preserve the original ambient audio from the AI-generated video (e.g., sound effects, footsteps) and **mix** the generated dialogue/voiceover on top of it, rather than replacing it.
+6.  **UI/UX Improvements:**
+    *   Add a progress timer with an estimated time of arrival (ETA) for video generation.
+    *   Remove a duplicate Character Consistency section from the UI.
+    *   Update UI text to clearly explain the new, complex audio and dialogue features.
+7.  **Quality Improvement:**
+    *   Improve the scene prompt generation to create more detailed, cinematic, and physically plausible scenes to enhance the final video quality.
+</original_problem_statement>
+
+**User's preferred language**: English
+
+**what currently exists?**
+The platform has a heavily enhanced AI video generation tool with a sophisticated, multi-layered feature set built upon the new dynamic credit system.
+- **Credit System**: A fully implemented (but backend-unverified) dynamic pricing system is live.
+- **Video Generation Core**: The tool can generate videos from AI (Kling via Fal.ai) or stock footage.
+- **Advanced Scripting**: The system can generate scripts in two modes: a 'screenplay' format for stock footage and a new 'ai-visual' format optimized for AI video, which includes support for character dialogue syntax.
+- **Advanced Audio Engine**:
+    - **Audio Mixing**: The system preserves the original ambient audio from AI-generated clips and mixes it with either a narrator's voiceover or character dialogues.
+    - **Character Dialogue Generation**: If a script contains dialogue and the No Audio mode is selected, the system automatically detects the dialogue, identifies the character type (man, woman, child), selects a matching Google TTS voice, generates the audio for each line, and mixes it into the final video at the correct time.
+- **UI/UX**: The video generation page includes a real-time progress bar with an ETA timer and updated descriptions explaining the new audio features.
+- **Prompt Engineering**: The system prompts for script and scene generation have been significantly enhanced to produce more cinematic and coherent content.
+
+**Last working item**:
+    - Last item agent was working: Improving the quality of AI-generated scenes by rewriting the system prompts for both the script generator () and the scene prompt generator (). The goal was to make the generated content more detailed, cinematic, and physically realistic.
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? Manual testing by user. The user needs to generate a video with the new prompts and visually assess the quality and coherence of the scenes.
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**:
+  - Issue 1: Cinematic Prompt Quality Verification (P0)
+  - Issue 2: End-to-End Credit System Verification (P1, CRITICAL)
+  - Issue 3: Fragile Background Processing for Async Jobs (P2, CRITICAL)
+
+  Issues Detail:
+  - Issue 1: 
+     - Description: The agent has updated the prompt engineering to improve scene quality. This is a qualitative change that requires user feedback to confirm if the results are satisfactory.
+     - Attempted fixes: The system messages in  and  were completely rewritten to be more descriptive and directive.
+     - Next debug checklist: Ask the user to generate a new AI video and evaluate whether the scenes are more cinematic, natural, and coherent.
+     - Why fix this issue and what will be achieved with the fix? This directly addresses the user's feedback for top-notch video quality and is the final step in the current feature enhancement cycle.
+     - Status:  USER VERIFICATION PENDING
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Frontend (User visual check)
+     - Blocked on other issue: None
+
+  - Issue 2: 
+     - Description: This is a critical issue carried over from the previous fork. The entire pricing and credit system was refactored, but the backend logic for **deducting** credits from a user's account has never been tested. The agent only verified the UI cost display and fixed an insufficient credit error message.
+     - Attempted fixes: None. The task was completely overlooked in this session.
+     - Next debug checklist: 
+        1. Log in as a user with a known credit balance.
+        2. Generate content from several different tools (e.g., a text-based tool, an image, a stock video, and an AI video).
+        3. After each generation, check the user's credit balance in the database (or on the billing page after a refresh) to confirm the correct amount was deducted.
+        4. Test dynamic costs (e.g., generate a 30s vs 60s video and check if the deduction scales correctly).
+     - Why fix this issue and what will be achieved with the fix? This is the core business logic. Failure to verify this means the application might not be charging users correctly, defeating the entire purpose of the pricing overhaul.
+     - Status:  NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Backend
+     - Blocked on other issue: None
+
+  - Issue 3:
+     - Description: The asynchronous video generation relies on an unreliable, non-persistent job queue (). This is a mock implementation that is prone to silent failures, especially for long-running video generation tasks. This is a known architectural flaw from a previous session.
+     - Attempted fixes: None in this session. The ETA feature was built on top of the existing flawed system.
+     - Next debug checklist:
+        1. Propose and implement a robust job queue system like BullMQ with Redis.
+        2. Refactor  to enqueue jobs.
+        3. Create a separate, persistent worker process to consume jobs from the queue.
+     - Why fix this issue and what will be achieved with this? To make video generation reliable, prevent data loss on server restarts or crashes, and build a scalable foundation for future features.
+     - Status:  NOT STARTED
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? Backend
+     - Blocked on other issue: None.
+
+**In progress Task List**:
+- None.
+
+**Upcoming and Future Tasks**
+- **P0: End-to-End Credit Deduction Testing:** Verify the backend correctly subtracts credits for all content generation types.
+- **P1: Implement a Robust Job Queue System:** Replace the mock job runner in  with a persistent queue (e.g., BullMQ) to ensure reliable async video generation.
+
+**Completed work in this session**
+- **Error Handling:** Fixed a frontend bug where 402 Insufficient Credit errors were displayed as a generic JSON parsing error. The fix involved parsing the API error message correctly in .
+- **API Key Management:** Resolved a recurring Unauthorized error by correcting a truncated  in the  file.
+- **Audio Engine Overhaul ():**
+    - Implemented audio mixing to preserve Kling's original ambient sound while overlaying generated voiceover/dialogue.
+    - Removed the  flag from  commands to stop stripping audio from video clips.
+    - Changed the final audio composition to use an  filter.
+- **Character Dialogue Feature ( & ):**
+    - Created logic to parse dialogue from prompts ().
+    - Implemented a  function to automatically select a Google TTS voice based on character descriptions (man, woman, boy, girl).
+    - Integrated this to generate and place dialogue audio correctly in the final video.
+- **Script & Prompt Enhancement ( & ):**
+    - Created a new 'ai-visual' script format optimized for AI video generation.
+    - Rewrote the system prompts for both script and scene generation to produce more cinematic, detailed, and coherent content.
+- **UI/UX Enhancements ():**
+    - Added a progress timer with an ETA for video generation by modifying  and the frontend polling logic.
+    - Removed a duplicate Character Consistency UI section.
+    - Added and updated UI text to explain the new dialogue and audio mixing features.
+- **Account Management:** Successfully updated the user's credit balance in the MongoDB database via the CLI to facilitate testing.
+
+**Earlier issues found/mentioned but not fixed**
+   - The primary issue is the **unreliable async job system ()**, which remains a mock implementation. This was identified in a previous fork and is still not addressed, posing a significant risk to the application's stability.
+
+**Known issue recurrence from previous fork**
+  - **Issue recurrence in previous fork:**  becoming invalid.
+  - **Recurrence count:** High. The key was found to be truncated in this session, which the user had to correct. The system for managing or reading this key appears to be fragile.
+  - **Status:** RESOLVED (for now), but remains a high-risk point of failure.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Prompt Engineering:** Extensive work was done to improve the quality of AI-generated content by rewriting system prompts for both script and scene generation.
+- **Audio Processing (ffmpeg):** Advanced  commands were used for audio mixing (), replacing a destructive workflow () with a non-destructive one.
+- **Chained AI Logic:** The system now chains multiple AI and processing steps: Script Generation (Gemini) → Scene Prompt Generation (Gemini) → Dialogue Extraction → Character-Aware TTS (Google) → Video Generation (Kling) → Audio Mixing (ffmpeg).
+- **Dynamic Frontend Updates:** The UI now uses polling to fetch job status, including a newly added ETA, to provide real-time feedback to the user during long processes.
+- **Character-Aware Systems:** Logic was introduced to parse natural language prompts for character attributes (gender, age) and map them to specific technical choices (TTS voices).
+
+**key DB schema**
+  - No database schema changes were made. The  collection schema (in , not a formal DB schema) was modified to include  and . The  field was updated for a specific user.
+
+**changes in tech stack**
+- No changes to the core tech stack. The session focused heavily on improving the implementation within the existing Next.js, MongoDB, and  stack.
+
+**All files of reference**
+- **Primary Logic:**
+  - : The heart of the video generation process. Contains logic for audio mixing, dialogue generation, and ETA updates.
+  - : The main frontend component. Contains logic for the ETA timer, error handling, and UI updates.
+- **AI Prompting:**
+  - : Defines how scripts are generated.
+  - : Defines how scripts are broken down into visual prompts for the AI video model.
+- **Job Management:**
+  - : The schema and update functions for the async job tracker.
+
+**Areas that need refactoring**:
+- The entire async job system in  and its usage in  is a temporary solution and needs to be replaced with a production-grade job queue (e.g., BullMQ with Redis) for reliability and scalability.
+
+**key api endpoints**
+- : Massively updated to handle audio mixing, character dialogue TTS, and ETA reporting.
+- : Heavily modified with a new  format and improved cinematic prompting.
+- : System prompt was completely rewritten for higher quality output.
+
+**Critical Info for New Agent**
+- **TOP PRIORITY IS NOT VIDEO FEATURES**: Your first task must be to address the **critical, outstanding risk** from the previous fork: **verifying backend credit deduction**. The entire business model is unverified. Do not start any new feature work until you have tested that generating content correctly subtracts credits from a user's account.
+- **Verify Cinematic Prompts**: After verifying credits, ask the user to test the latest video generation improvements and confirm if the scene quality is acceptable.
+- **Fragile API Key**: The  has been a recurring source of failure. If AI video generation fails, the first thing you should check is if the key is still valid and correctly configured in .
+- **Unreliable Job System**: Be aware that the entire asynchronous video generation process is built on a fragile, non-persistent job system. It is the next major architectural flaw that needs to be addressed after the credit system is verified.
+
+**documents created in this job**
+- None.
+
+**Last 10 User Messages and any pending HUMAN messages**
+- **Msg 362:** User requests a timer/ETA for generation and reports that the original video audio (ambience, sounds) is being removed, and there are lip-sync issues. **Status: ADDRESSED**. Agent implemented an ETA and fixed the audio mixing.
+- **Msg 341:** User asks how to handle different character voices (man, woman, child). **Status: ADDRESSED**. Agent implemented a character-aware voice selection system.
+- **Msg 308:** User approves using the existing Google Cloud TTS for character dialogue. **Status: ADDRESSED**. Agent implemented this.
+- **Msg 299:** User clarifies they want actual audible character dialogue, not just silent lip-sync. **Status: ADDRESSED**.
+- **Msg 286:** User asks if character dialogue in prompts will have audio. **Status: ADDRESSED**. This led to the dialogue generation feature.
+- **Msg 271:** User reports a duplicate UI section. **Status: COMPLETED**. The agent removed it.
+- **Msg 248:** User asks to update the script generator to support dialogue syntax. **Status: COMPLETED**.
+- **Msg 243:** User asks how to implement character dialogue. **Status: ADDRESSED**.
+- **Msg 174:** User reports three issues: clip count mismatch, poor script quality for AI video, and narrator instructions in the audio. **Status: ADDRESSED**. All three were fixed.
+- **Msg 161:** User provides the correct  and asks why it was changed by the system. **Status: ADDRESSED**. Agent corrected the key.
+
+**Project Health Check:**
+- **Broken**:
+    - **Backend Credit Deduction Logic:** This is completely untested and therefore must be considered broken until verified. It poses a critical business risk.
+- **Mocked**:
+    - **Asynchronous Job Processing ():** The system uses a non-persistent, mock job queue. It is not suitable for production and is a major reliability risk for the core video generation feature.
+
+**3rd Party Integrations**
+- **Fal.ai (Kling):** For AI video generation.
+- **Google Gemini:** For text/script/prompt generation.
+- **Google Cloud Text-to-Speech:** For all AI voice generation, including the new character-aware dialogue system.
+- **Pexels:** For stock footage.
+- **Stripe:** For payments and credit purchases.
+- **Replicate:** (Mentioned in previous summary, assumed still present as a fallback).
+
+**Testing status**
+  - Testing agent used after significant changes: NO
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: []
+  - Known regressions: None known, but the entire credit deduction backend is an unknown and could be considered a regression risk from the original (simpler) implementation.
+
+**Credentials to test flow:**
+- The  is critical and has been historically unstable. The correct key is now in .
+- User account has been credited with 100,000 credits to facilitate testing.
+
+**What agent forgot to execute**
+- The agent **completely failed to execute the highest priority task** from the previous handover: performing end-to-end testing of the backend credit deduction system. It got absorbed in implementing new user-requested features and overlooked this critical business logic verification, leaving the application in a risky state.
+</analysis>
+<SYS_PROMPT_SEPARATOR>
+
