@@ -2862,17 +2862,26 @@ Product URL: ${scrapeData.product.url}`
                   Character Dialogue Mode
                 </h4>
                 <p className="text-sm text-purple-800 dark:text-purple-200">
-                  Generate AI video with characters speaking their dialogue lines.
+                  Generate AI video with characters speaking their dialogue lines using character-appropriate voices.
                 </p>
                 
                 <div className="mt-3 p-3 bg-green-100 dark:bg-green-900/50 rounded-lg border border-green-300 dark:border-green-700">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100 mb-2">
-                    🎤 Auto Character Voice Generation
+                    🎤 Smart Character Voice Detection
                   </p>
-                  <p className="text-xs text-green-700 dark:text-green-300">
-                    When your scene prompts include dialogue like <code className="bg-green-200 dark:bg-green-800 px-1 rounded">saying 'Welcome!'</code>, 
-                    we'll automatically generate character voices and sync them with the video.
+                  <p className="text-xs text-green-700 dark:text-green-300 mb-2">
+                    We automatically detect character types from your prompts and generate matching voices:
                   </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-green-700 dark:text-green-300">
+                    <div>👨 Man/Male → Deep male voice</div>
+                    <div>👩 Woman/Female → Female voice</div>
+                    <div>👴 Old man/Grandpa → Elderly male</div>
+                    <div>👵 Old woman/Grandma → Elderly female</div>
+                    <div>👦 Boy/Kid (male) → Child male voice</div>
+                    <div>👧 Girl/Kid (female) → Child female voice</div>
+                    <div>👶 Baby boy → Baby male voice</div>
+                    <div>👶 Baby girl → Baby female voice</div>
+                  </div>
                 </div>
                 
                 <div className="mt-3 p-3 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
@@ -2881,13 +2890,16 @@ Product URL: ${scrapeData.product.url}`
                   </p>
                   <ol className="text-xs text-purple-700 dark:text-purple-300 list-decimal list-inside space-y-1">
                     <li>Kling AI creates lip movements for dialogue scenes</li>
-                    <li>Google TTS generates character voice for each dialogue</li>
+                    <li>System detects character type (man, woman, child, etc.)</li>
+                    <li>Google TTS generates appropriate voice for each character</li>
                     <li>Audio is synced to play when character speaks</li>
                   </ol>
                 </div>
                 
-                <div className="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded text-xs text-yellow-800 dark:text-yellow-200">
-                  💡 <strong>Best Practices:</strong> Use front-facing camera, short phrases (2-5 words), and include <code className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">saying '...'</code> in your scene prompts.
+                <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded text-xs text-blue-800 dark:text-blue-200">
+                  📝 <strong>Prompt Example:</strong><br/>
+                  <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded">A young woman in red dress, saying 'Hello there!', office, medium shot</code><br/>
+                  <code className="bg-blue-200 dark:bg-blue-800 px-1 rounded mt-1 inline-block">An elderly man with gray beard, saying 'Welcome home', living room, close-up</code>
                 </div>
               </div>
             </TabsContent>
