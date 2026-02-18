@@ -284,25 +284,28 @@ Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 60}-${M
     if (hasUserTopic) {
       // User provided a topic - use it as the basis for generation
       if (format === 'ai-visual') {
-        // AI Video format - pure visual descriptions
-        userPrompt = `Create a VISUAL NARRATIVE for AI video generation based on this story:
+        // AI Video format - visual descriptions with Kling dialogue syntax
+        userPrompt = `Create a VISUAL NARRATIVE for Kling AI video generation based on this story:
 
 STORY/TOPIC: "${customTopic}"
 
 Requirements:
 - Language: ${languageName}
 - Create ${Math.ceil(duration / 10)} visual scenes (each ~10 seconds of video)
-- PURE VISUAL descriptions only - NO screenplay format
-- NO "NARRATOR (V.O.):" or narrator instructions
-- NO dialogue formatting or character names followed by colons
-- Describe what we SEE: characters, settings, actions, emotions through visuals
-- Include character appearance details (clothing, expressions, movements)
-- Include setting details (location, lighting, atmosphere)
+- Use KLING AI format for visuals and dialogue
+- Include character dialogue using: saying '[short dialogue]' syntax
+- Keep dialogue SHORT (2-5 words per line)
+- Character should be front-facing when speaking
+- Include: character appearance, actions, settings, camera angles, lighting
 - Each paragraph = one scene
 
-CRITICAL: Write visual descriptions that an AI video model can render.
-Do NOT include any voiceover text or screenplay elements.
-Output ONLY visual scene descriptions.`
+DIALOGUE FORMAT (use this exact syntax):
+"[Character description], [action], saying '[dialogue]', [setting], [camera angle]"
+
+Example: "A young teacher in a blue dress, smiling warmly, saying 'Let's begin!', bright classroom, front-facing medium shot"
+
+CRITICAL: Follow the user's story and include meaningful dialogue moments.
+Output visual scene descriptions optimized for Kling AI video generation.`
       } else if (format === 'cinematic') {
         userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute video based on this story:
 
