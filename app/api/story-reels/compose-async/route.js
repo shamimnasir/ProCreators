@@ -661,7 +661,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             '-preset', 'fast',
             '-crf', '23',
             '-pix_fmt', 'yuv420p',
-            '-an'
+            '-c:a', 'aac', '-b:a', '128k' // Keep original audio from Kling
           ])
           .output(normalizedPath)
           .on('end', () => {
