@@ -776,6 +776,49 @@ export default function StoryReelsPage({
     setScenePrompts(prev => [...prev, newScene])
   }
 
+  // Use custom prompts directly - parse user's textarea content as scene prompts
+  // Each line or paragraph becomes a separate scene
+  const handleUseCustomPrompts = () => {
+    const userText = script.trim()
+    if (!userText) {
+      toast({
+        title: "Error",
+        description: "Please enter your scene prompts first (one per line or paragraph)",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Split by double newlines (paragraphs) or single newlines
+    let lines = userText.split(/\n{2,}/).map(line => line.trim()).filter(line => line.length > 0)
+    
+    // If only one block, try splitting by single newlines
+    if (lines.length === 1) {
+      lines = userText.split(/\n/).map(line => line.trim()).filter(line => line.length > 0)
+    }
+
+    // Calculate required clips based on duration
+    const requiredClips = Math.ceil(duration / 10)
+    
+    // Limit to required clips or user-provided lines
+    const promptLines = lines.slice(0, Math.max(requiredClips, lines.length))
+
+    // Create scene prompts from user's text
+    const customScenes = promptLines.map((line, index) => ({
+      sceneNumber: index + 1,
+      prompt: line,
+      mood: 'cinematic',
+      cameraStyle: 'medium shot',
+      fullPrompt: `${line}, cinematic lighting, professional quality, 4K resolution`
+    }))
+
+    setScenePrompts(customScenes)
+    toast({
+      title: "Custom Prompts Added! ✨",
+      description: `Created ${customScenes.length} scene prompts from your text. You can edit each one below.`
+    })
+  }
+
   // Search Stock Videos - Smart: calculates needed clips based on duration (3 sec per clip)
   const handleSearchVideos = async () => {
     if (keywords.length === 0) {
