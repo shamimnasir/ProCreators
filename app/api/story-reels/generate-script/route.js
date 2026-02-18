@@ -252,14 +252,36 @@ Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 50}-${M
     // Approximate word count based on duration and format
     const wordCount = format === 'cinematic' 
       ? Math.ceil(duration / 60) * 175 // Screenplay format has more structure
-      : Math.floor(duration * 2.5)      // Narration is spoken at ~2.5 words/sec
+      : format === 'ai-visual'
+        ? Math.ceil(duration / 10) * 60 // AI visual: ~60 words per 10-second scene
+        : Math.floor(duration * 2.5)    // Narration is spoken at ~2.5 words/sec
     
     // Check if user provided a topic/context (from script box or custom topic input)
     const hasUserTopic = customTopic && customTopic.trim().length > 0
     
     if (hasUserTopic) {
       // User provided a topic - use it as the basis for generation
-      if (format === 'cinematic') {
+      if (format === 'ai-visual') {
+        // AI Video format - pure visual descriptions
+        userPrompt = `Create a VISUAL NARRATIVE for AI video generation based on this story:
+
+STORY/TOPIC: "${customTopic}"
+
+Requirements:
+- Language: ${languageName}
+- Create ${Math.ceil(duration / 10)} visual scenes (each ~10 seconds of video)
+- PURE VISUAL descriptions only - NO screenplay format
+- NO "NARRATOR (V.O.):" or narrator instructions
+- NO dialogue formatting or character names followed by colons
+- Describe what we SEE: characters, settings, actions, emotions through visuals
+- Include character appearance details (clothing, expressions, movements)
+- Include setting details (location, lighting, atmosphere)
+- Each paragraph = one scene
+
+CRITICAL: Write visual descriptions that an AI video model can render.
+Do NOT include any voiceover text or screenplay elements.
+Output ONLY visual scene descriptions.`
+      } else if (format === 'cinematic') {
         userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute video based on this story:
 
 STORY/TOPIC: "${customTopic}"
@@ -295,7 +317,22 @@ Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.
       }
     } else {
       // No user topic - generate freely based on niche
-      if (format === 'cinematic') {
+      if (format === 'ai-visual') {
+        // AI Video format - generate visual narrative freely
+        userPrompt = `Create a VISUAL NARRATIVE for a ${duration}-second AI-generated ${nicheInstruction} video.
+
+Requirements:
+- Language: ${languageName}
+- Create ${Math.ceil(duration / 10)} visual scenes (each ~10 seconds of video)
+- PURE VISUAL descriptions only - NO screenplay format
+- NO narrator instructions or voiceover text
+- Describe what we SEE: characters, settings, actions, expressions
+- Include a consistent main character with specific appearance details
+- Build a visual story arc: setup → conflict → resolution
+- Each paragraph = one scene
+
+Output ONLY visual scene descriptions. No meta-information or formatting instructions.`
+      } else if (format === 'cinematic') {
         userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute ${nicheInstruction} video.
 
 Requirements:
