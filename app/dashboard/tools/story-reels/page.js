@@ -610,7 +610,7 @@ export default function StoryReelsPage({
       const userTopic = script.trim() || (showCustomTopicInput ? customTopic : undefined)
       
       // Determine the format to use
-      // 'auto' = let backend decide (cinematic for long-form, narration for short)
+      // 'auto' = let backend decide (ai-visual for AI video, cinematic for long-form, narration for short)
       const formatToSend = scriptFormat === 'auto' ? undefined : scriptFormat
       
       const response = await fetch('/api/story-reels/generate-script', {
@@ -621,7 +621,8 @@ export default function StoryReelsPage({
           language: ttsLanguage,
           niche,
           customTopic: userTopic,
-          scriptFormat: formatToSend
+          scriptFormat: formatToSend,
+          videoSource // Pass video source so backend can optimize for AI video
         })
       })
 
