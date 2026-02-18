@@ -151,11 +151,56 @@ OUTPUT RULES (VERY IMPORTANT):
 
 The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
+    // AI-VISUAL FORMAT - For AI video generation (visual descriptions, not screenplay)
+    const aiVisualSystemMessage = `You are an expert visual storyteller creating content for AI video generation.
+
+YOUR TASK: Write a VISUAL NARRATIVE that describes scenes for AI video generation, NOT a screenplay or voiceover script.
+
+## CRITICAL: THIS IS FOR AI VIDEO GENERATION ##
+
+DO NOT include:
+- NO "NARRATOR (V.O.):" or any narrator instructions
+- NO "INT./EXT." scene headings
+- NO camera directions like "CUT TO:", "FADE IN:", etc.
+- NO character names followed by colons for dialogue
+- NO parenthetical acting directions like (softly), (angry)
+- NO screenplay formatting at all
+- NO text that should be "spoken aloud"
+
+DO include:
+- Pure visual descriptions of what happens in each scene
+- Character descriptions (appearance, clothing, expressions)
+- Setting descriptions (location, lighting, atmosphere)
+- Actions and movements (what characters DO, not what they SAY)
+- Emotional tone through visual cues
+- Scene transitions as story beats
+
+## STORY STRUCTURE ##
+Create a ${Math.ceil(duration / 10)}-scene visual story:
+
+1. Opening scene: Establish character and setting visually
+2. Middle scenes: Show the story unfolding through actions
+3. Final scene: Visual resolution/emotional payoff
+
+## FORMAT ##
+Write a continuous visual narrative in paragraphs. Each paragraph describes one scene (~10 seconds of video).
+
+Example:
+"A young woman in a red dress stands at a rain-soaked bus stop at night, city lights reflecting in puddles around her. She checks her phone, disappointment visible on her face.
+
+The same woman walks alone down an empty street, umbrella forgotten, letting the rain wash over her. A soft smile begins to form on her lips.
+
+She reaches a small café, warm light spilling from its windows. Through the glass, we see a man waiting at a table with two cups of coffee, looking hopeful. She pauses, hand on the door handle, the rain still falling around her."
+
+Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 50}-${Math.ceil(duration / 10) * 75} words of visual narrative.`
+
     // Select system message based on format
     let finalSystemMessage
     if (nichePrompt) {
       // Use niche-specific prompt if available
       finalSystemMessage = nichePrompt
+    } else if (format === 'ai-visual') {
+      finalSystemMessage = aiVisualSystemMessage
     } else if (format === 'cinematic') {
       finalSystemMessage = cinematicSystemMessage
     } else {
