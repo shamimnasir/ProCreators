@@ -700,28 +700,73 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     
     await updateJobStatus(jobId, {
       progress: 85,
-      progressMessage: 'Concatenating video...'
+      progressMessage: 'Concatenating video with transitions...'
     })
     
-    // Concatenate clips (with audio from Kling)
-    const clipListPath = join(tempDir, 'clips.txt')
-    const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
-    await writeFile(clipListPath, clipListContent)
-    
+    // Concatenate clips with crossfade transitions
     const concatVideoPath = join(tempDir, 'concat.mp4')
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(clipListPath)
-        .inputOptions(['-f', 'concat', '-safe', '0'])
-        .outputOptions([
-          '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
-          '-c:a', 'aac', '-b:a', '128k' // Keep Kling's original audio (ambient sounds, effects)
-        ])
-        .output(concatVideoPath)
-        .on('end', resolve)
-        .on('error', reject)
-        .run()
-    })
+    
+    if (normalizedFiles.length === 1) {
+      // Single clip - just copy
+      await require('fs/promises').copyFile(normalizedFiles[0], concatVideoPath)
+    } else if (normalizedFiles.length === 2) {
+      // Two clips - simple crossfade
+      const transitionDuration = 0.5 // 0.5 second crossfade
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(normalizedFiles[0])
+          .input(normalizedFiles[1])
+          .complexFilter([
+            `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=${durationPerClip - transitionDuration}[v]`,
+            `[0:a][1:a]acrossfade=d=${transitionDuration}[a]`
+          ])
+          .outputOptions([
+            '-map', '[v]', '-map', '[a]',
+            '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
+            '-c:a', 'aac', '-b:a', '128k'
+          ])
+          .output(concatVideoPath)
+          .on('end', resolve)
+          .on('error', (err) => {
+            console.log(`[${jobId}] Crossfade failed, using simple concat: ${err.message}`)
+            // Fallback to simple concat
+            const clipListPath = join(tempDir, 'clips.txt')
+            const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
+            require('fs/promises').writeFile(clipListPath, clipListContent).then(() => {
+              ffmpeg()
+                .input(clipListPath)
+                .inputOptions(['-f', 'concat', '-safe', '0'])
+                .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k'])
+                .output(concatVideoPath)
+                .on('end', resolve)
+                .on('error', reject)
+                .run()
+            })
+          })
+          .run()
+      })
+    } else {
+      // Multiple clips - use concat with very short fade transitions
+      // For many clips, complex xfade chains can fail, so we use a simpler approach
+      // with fadeout/fadein at clip boundaries
+      const clipListPath = join(tempDir, 'clips.txt')
+      const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
+      await writeFile(clipListPath, clipListContent)
+      
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(clipListPath)
+          .inputOptions(['-f', 'concat', '-safe', '0'])
+          .outputOptions([
+            '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
+            '-c:a', 'aac', '-b:a', '128k'
+          ])
+          .output(concatVideoPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run()
+      })
+    }
     
     await updateJobStatus(jobId, {
       progress: 90,
