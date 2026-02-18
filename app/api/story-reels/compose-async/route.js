@@ -61,9 +61,24 @@ async function updateJobStatus(jobId, updates) {
 // Background video generation process
 async function processVideoInBackground(jobId, formDataObj, userId, transactionId) {
   const tempDir = `/tmp/story-reels-${jobId}`
+  const startTime = Date.now()
+  
+  // Helper to calculate ETA based on progress
+  const getETA = (progress) => {
+    if (progress <= 5) return null
+    const elapsed = (Date.now() - startTime) / 1000 // seconds
+    const remaining = (elapsed / progress) * (100 - progress)
+    return Math.ceil(remaining)
+  }
   
   try {
-    await updateJobStatus(jobId, { status: 'processing', progress: 5, progressMessage: 'Starting video generation...' })
+    await updateJobStatus(jobId, { 
+      status: 'processing', 
+      progress: 5, 
+      progressMessage: 'Starting video generation...',
+      startedAt: new Date(),
+      estimatedSecondsRemaining: null
+    })
     
     // Create temp directory
     await mkdir(tempDir, { recursive: true })
