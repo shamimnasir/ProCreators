@@ -2904,9 +2904,16 @@ Product URL: ${scrapeData.product.url}`
                 Upload Audio
               </TabsTrigger>
               {videoSource.startsWith('ai-') && (
-                <TabsTrigger value="none">
+                <TabsTrigger 
+                  value="none"
+                  className="relative data-[state=inactive]:bg-gradient-to-r data-[state=inactive]:from-purple-100 data-[state=inactive]:to-pink-100 data-[state=inactive]:dark:from-purple-900/50 data-[state=inactive]:dark:to-pink-900/50 data-[state=inactive]:border-2 data-[state=inactive]:border-purple-300 data-[state=inactive]:dark:border-purple-600 data-[state=inactive]:animate-pulse"
+                >
                   <MessageSquare className="h-4 w-4 mr-1" />
-                  Character Voice
+                  <span className="font-semibold">Character Voice</span>
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                  </span>
                 </TabsTrigger>
               )}
             </TabsList>
