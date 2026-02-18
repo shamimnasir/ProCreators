@@ -1542,6 +1542,8 @@ Product URL: ${scrapeData.product.url}`
             resolve(data)
           } else if (data.status === 'failed') {
             reject(new Error(data.error || 'Video generation failed'))
+          } else if (data.status === 'cancelled') {
+            reject(new Error('Video generation was cancelled'))
           } else {
             // Continue polling every 3 seconds
             setTimeout(poll, 3000)
