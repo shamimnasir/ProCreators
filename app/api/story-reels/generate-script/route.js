@@ -332,25 +332,25 @@ Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.
     } else {
       // No user topic - generate freely based on niche
       if (format === 'ai-visual') {
-        // AI Video format - generate visual narrative freely
-        userPrompt = `Create a VISUAL NARRATIVE for a ${duration}-second AI-generated ${nicheInstruction} video.
+        // AI Video format - Create NARRATION SCRIPT (not visual prompts)
+        userPrompt = `Create a compelling NARRATION SCRIPT for a ${duration}-second ${nicheInstruction} video.
 
 Requirements:
 - Language: ${languageName}
-- Create ${Math.ceil(duration / 10)} visual scenes (each ~10 seconds of video)
-- Use KLING AI format for visuals and dialogue
-- Include character dialogue using: saying '[short dialogue]' syntax
-- Keep dialogue SHORT (2-5 words per line)
-- Character should be front-facing when speaking
-- Include: character appearance, actions, settings, camera angles, lighting
-- Include a consistent main character with specific appearance details
-- Build a visual story arc: setup → conflict → resolution
-- Each paragraph = one scene
+- Approximately ${Math.floor(duration * 2.5)} words (2.5 words per second)
+- Write a STORY that will be SPOKEN ALOUD as narration
+- Strong opening hook in the first 5 seconds
+- Clear beginning, middle, and end
+- Emotional and engaging language
+- Include character dialogue with quotation marks when appropriate
+- Content type: ${nicheInstruction}
 
-DIALOGUE FORMAT (use this exact syntax):
-"[Character description], [action], saying '[dialogue]', [setting], [camera angle]"
+IMPORTANT: 
+- This text will be converted to speech and played over AI-generated visuals
+- Do NOT include camera directions, visual descriptions, or technical terms
+- Write ONLY what should be HEARD, not what should be SEEN
 
-Output visual scene descriptions optimized for Kling AI with natural dialogue moments.`
+Write the narration script now. Nothing else.`
       } else if (format === 'cinematic') {
         userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute ${nicheInstruction} video.
 
