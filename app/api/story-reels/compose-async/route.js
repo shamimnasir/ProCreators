@@ -563,14 +563,17 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       const dialogues = extractDialoguesFromPrompts(parsedScenePrompts)
       
       if (dialogues.length > 0 && isAIMode) {
-        console.log(`[${jobId}] Found ${dialogues.length} character dialogues in prompts`)
+        console.log(`[${jobId}] Found ${dialogues.length} character dialogues in prompts:`)
+        dialogues.forEach(d => {
+          console.log(`[${jobId}]   - Scene ${d.sceneIndex}: "${d.text}" (${d.characterType})`)
+        })
         
-        // Generate dialogue audio for character speech
+        // Generate dialogue audio for character speech with character-specific voices
         const dialogueAudios = await generateDialogueAudio(
           dialogues, 
           duration, 
           parsedScenePrompts.length || Math.ceil(duration / 10),
-          { languageCode: ttsLanguage === 'bn' ? 'bn-IN' : 'en-US' }
+          ttsLanguage === 'bn' ? 'bn-IN' : 'en-US' // Pass language code directly
         )
         
         if (dialogueAudios && dialogueAudios.length > 0) {
