@@ -2881,21 +2881,46 @@ Product URL: ${scrapeData.product.url}`
             Step 3: Voice Selection
           </CardTitle>
           <CardDescription>
-            Choose AI voice or use your own recording
+            Choose AI voice, use your own recording, or go silent for AI video
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={voiceOption} onValueChange={setVoiceOption} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className={`grid w-full ${videoSource.startsWith('ai-') ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <TabsTrigger value="tts">
                 <Wand2 className="h-4 w-4 mr-1" />
-                AI Voice Studio
+                AI Voice
               </TabsTrigger>
               <TabsTrigger value="upload">
                 <Mic className="h-4 w-4 mr-1" />
-                Use Original Recording
+                Upload Audio
               </TabsTrigger>
+              {videoSource.startsWith('ai-') && (
+                <TabsTrigger value="none">
+                  <Video className="h-4 w-4 mr-1" />
+                  No Audio
+                </TabsTrigger>
+              )}
             </TabsList>
+
+            {/* No Audio Tab - AI Video Only */}
+            <TabsContent value="none" className="space-y-4">
+              <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2 flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Pure Visual AI Video - No Voiceover
+                </h4>
+                <p className="text-sm text-purple-800 dark:text-purple-200">
+                  Generate a silent AI video with just visuals and captions. Perfect for:
+                </p>
+                <ul className="text-sm text-purple-800 dark:text-purple-200 mt-2 list-disc list-inside space-y-1">
+                  <li>Adding your own voiceover later</li>
+                  <li>Background/ambience videos</li>
+                  <li>Visual storytelling without narration</li>
+                  <li>Music video style content</li>
+                </ul>
+              </div>
+            </TabsContent>
 
             {/* AI Voice Studio Tab */}
             <TabsContent value="tts" className="space-y-4">
