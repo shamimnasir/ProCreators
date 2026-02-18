@@ -3333,12 +3333,23 @@ Product URL: ${scrapeData.product.url}`
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>{progressMessage || 'Creating your video...'}</span>
-                <span>{progress}%</span>
+                <div className="flex items-center gap-3">
+                  {estimatedTimeRemaining && estimatedTimeRemaining > 0 && (
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {estimatedTimeRemaining >= 60 
+                        ? `~${Math.ceil(estimatedTimeRemaining / 60)} min left`
+                        : `~${estimatedTimeRemaining}s left`
+                      }
+                    </span>
+                  )}
+                  <span className="font-medium">{progress}%</span>
+                </div>
               </div>
               <Progress value={progress} className="w-full" />
               {duration > 45 && videoSource.startsWith('ai-') && (
                 <p className="text-xs text-muted-foreground mt-2">
-                  ⏱️ Generating {Math.ceil(duration / 5)} AI clips. This may take several minutes. You can leave this page - video will be saved to Library.
+                  ⏱️ Generating {Math.ceil(duration / 10)} AI clips. This may take several minutes. You can leave this page - video will be saved to Library.
                 </p>
               )}
             </div>
