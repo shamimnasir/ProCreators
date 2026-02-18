@@ -12,9 +12,9 @@ export async function POST(request) {
       )
     }
 
-    // Calculate how many 5-8 second AI video clips we need
-    // AI video models typically generate 5-8 second clips
-    const clipDuration = 6 // Average clip duration in seconds
+    // Calculate how many 10 second AI video clips we need
+    // Kling AI generates 10-second clips for cost efficiency
+    const clipDuration = 10 // Each AI clip is 10 seconds
     const numClips = Math.ceil(duration / clipDuration)
     
     // Use AI to generate detailed visual scene prompts for AI video generation
