@@ -678,7 +678,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       progressMessage: 'Concatenating video...'
     })
     
-    // Concatenate clips
+    // Concatenate clips (with audio from Kling)
     const clipListPath = join(tempDir, 'clips.txt')
     const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
     await writeFile(clipListPath, clipListContent)
@@ -688,7 +688,10 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       ffmpeg()
         .input(clipListPath)
         .inputOptions(['-f', 'concat', '-safe', '0'])
-        .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p'])
+        .outputOptions([
+          '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
+          '-c:a', 'aac', '-b:a', '128k' // Keep Kling's original audio (ambient sounds, effects)
+        ])
         .output(concatVideoPath)
         .on('end', resolve)
         .on('error', reject)
