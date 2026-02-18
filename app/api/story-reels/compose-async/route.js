@@ -256,10 +256,15 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     const ttsScript = cleanScriptForTTS(script)
     console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
     
-    // Generate TTS audio
+    // Generate TTS audio (or skip if voiceOption is 'none')
     let audioPath = join(tempDir, 'voice.mp3')
+    let hasAudio = true
     
-    if (voiceOption === 'tts') {
+    if (voiceOption === 'none') {
+      // No audio - create silent audio track matching video duration
+      hasAudio = false
+      console.log(`[${jobId}] No audio mode - will create silent video`)
+    } else if (voiceOption === 'tts') {
       const client = new textToSpeech.TextToSpeechClient({
         keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
       })
@@ -281,12 +286,17 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       await writeFile(audioPath, voiceFile)
     }
     
-    // Get audio duration
-    const actualAudioDuration = await new Promise((resolve) => {
-      ffmpeg.ffprobe(audioPath, (err, metadata) => {
-        resolve(err ? duration : metadata.format.duration)
+    // Get audio duration (or use video duration for no-audio mode)
+    let actualAudioDuration
+    if (hasAudio) {
+      actualAudioDuration = await new Promise((resolve) => {
+        ffmpeg.ffprobe(audioPath, (err, metadata) => {
+          resolve(err ? duration : metadata.format.duration)
+        })
       })
-    })
+    } else {
+      actualAudioDuration = duration // Use requested duration for no-audio mode
+    }
     
     await updateJobStatus(jobId, {
       progress: 75,
