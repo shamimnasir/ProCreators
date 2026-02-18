@@ -17,61 +17,61 @@ export async function POST(request) {
     const clipDuration = 10 // Each AI clip is 10 seconds
     const numClips = Math.ceil(duration / clipDuration)
     
-    // Use AI to generate detailed visual scene prompts for AI video generation
-    const systemMessage = `You are an expert AI video director and prompt engineer. Your task is to analyze a script and create detailed visual scene prompts for AI video generation.
+    // Use AI to generate detailed visual scene prompts for Kling AI video generation
+    const systemMessage = `You are an expert Kling AI video director and prompt engineer. Your task is to analyze a script and create detailed visual scene prompts for AI video generation.
 
 CRITICAL REQUIREMENTS:
 1. Read the script (may be in any language) and understand the narrative flow
 2. Generate EXACTLY ${numClips} scene prompts for AI video generation
-3. Each scene should represent a 5-8 second video clip
+3. Each scene should represent a ~10 second video clip
 4. Prompts must be in ENGLISH regardless of script language
-5. Each prompt should be a detailed visual description (not the script text itself)
+5. Each prompt should be a detailed visual description optimized for Kling AI
 
 CONSISTENCY GUIDELINES (VERY IMPORTANT):
 - If the video needs a human character, use the SAME character description in ALL scenes
 - Define a "main character" with specific features: age, gender, clothing, hair style
-- Example: "30-year-old man with short dark hair, blue business suit" - use this EXACT description in every scene with a person
+- Example: "30-year-old man with short dark hair, blue business suit" - use this EXACT description in every scene
 - For abstract/conceptual videos, maintain consistent visual style (colors, mood, lighting)
-- Use the same visual style throughout: if scene 1 is "modern minimalist", ALL scenes should be "modern minimalist"
+- Characters speaking should be FRONT-FACING for best lip sync
+
+KLING AI DIALOGUE FORMAT:
+When a character speaks, use this EXACT syntax in the prompt:
+"[Character description], [action], saying '[short dialogue 2-5 words]', [setting], [camera angle]"
+
+EXAMPLES:
+✅ "30-year-old businessman in navy suit, standing confidently, saying 'Welcome aboard!', modern glass office, medium shot, front-facing"
+✅ "Same businessman leaning forward at desk, saying 'Let me explain', warm office lighting, close-up, front-facing camera"
+✅ "Young woman in red dress, smiling warmly, saying 'Thank you so much', cafe interior, medium shot"
 
 PROMPT WRITING GUIDELINES:
-- Describe the VISUAL scene, not the narration
-- Include: subject, action, setting, lighting, camera angle, mood
-- Be specific about visual elements (colors, textures, movements)
-- Use cinematic language (wide shot, close-up, tracking shot, etc.)
-- Avoid text/dialogue in the scene - AI video models can't generate text well
-- Keep each prompt under 200 characters for best results
-- ADD a consistent visual style tag to each prompt
-
-EXAMPLE TRANSFORMATIONS:
-Script: "Reduce risk more than you increase excitement. Guarantees and social proof beat hype."
-Scene Prompt: "30-year-old businessman in navy suit, confidently shaking hands in modern glass office, warm golden lighting, medium shot, professional corporate style"
-
-Script: "Make the next step obvious and easy. Confusion kills sales."
-Scene Prompt: "Same 30-year-old businessman in navy suit pointing at clean minimalist interface with glowing button, bright white office, close-up on hands, professional corporate style"
+- Describe the VISUAL scene with character, action, setting, lighting, camera angle
+- Include dialogue using "saying '...'" syntax when characters speak
+- Keep dialogue SHORT (2-5 words maximum for best lip sync)
+- Use cinematic language (wide shot, close-up, medium shot, front-facing)
+- Character should be front-facing when speaking
+- Keep each prompt under 250 characters
 
 OUTPUT FORMAT:
-Return a JSON array with:
-- "characterDescription": A consistent character description to use (if human needed)
+Return a JSON object with:
+- "characterDescription": A consistent character description to use
 - "visualStyle": The consistent visual style for all scenes
 - "scenes": Array of scene objects
 
-[
-  {
-    "characterDescription": "30-year-old professional man with short dark hair wearing navy blue suit",
-    "visualStyle": "modern corporate, warm lighting, professional",
-    "scenes": [
-      {
-        "sceneNumber": 1,
-        "prompt": "Detailed visual description including character description and visual style",
-        "mood": "confident/exciting/calm/dramatic/etc",
-        "cameraStyle": "wide shot/close-up/tracking/aerial/etc"
-      }
-    ]
-  }
-]`
+{
+  "characterDescription": "30-year-old professional man with short dark hair wearing navy blue suit",
+  "visualStyle": "modern corporate, warm lighting, professional",
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "prompt": "30-year-old man in navy suit, standing in modern office, saying 'Welcome to our company!', glass walls background, medium shot, front-facing, warm lighting",
+      "mood": "confident",
+      "cameraStyle": "medium shot",
+      "hasDialogue": true
+    }
+  ]
+}`
 
-    const userPrompt = `Analyze this script and create EXACTLY ${numClips} visual scene prompts for AI video generation.
+    const userPrompt = `Analyze this script and create EXACTLY ${numClips} visual scene prompts for Kling AI video generation.
 
 Script/Narration:
 """
