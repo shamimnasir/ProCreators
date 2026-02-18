@@ -154,10 +154,15 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           characterDescription: null, // Will be extracted from script
           jobId,
           onProgress: async (progress) => {
+            // Calculate ETA based on clip progress (each clip ~60 seconds)
+            const clipsRemaining = progress.totalClips - progress.clipIndex
+            const estimatedSecondsRemaining = clipsRemaining * 60 + 60 // 60s per clip + 60s processing
+            
             await updateJobStatus(jobId, {
               progress: 10 + Math.floor((progress.clipIndex / progress.totalClips) * 50),
               progressMessage: progress.message,
-              clipsGenerated: progress.clipIndex
+              clipsGenerated: progress.clipIndex,
+              estimatedSecondsRemaining
             })
           }
         })
