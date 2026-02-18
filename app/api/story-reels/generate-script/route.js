@@ -151,48 +151,70 @@ OUTPUT RULES (VERY IMPORTANT):
 
 The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
-    // AI-VISUAL FORMAT - For AI video generation (visual descriptions, not screenplay)
-    const aiVisualSystemMessage = `You are an expert visual storyteller creating content for AI video generation.
+    // AI-VISUAL FORMAT - For AI video generation (optimized for Kling AI)
+    const aiVisualSystemMessage = `You are an expert visual storyteller creating content for Kling AI video generation.
 
-YOUR TASK: Write a VISUAL NARRATIVE that describes scenes for AI video generation, NOT a screenplay or voiceover script.
+YOUR TASK: Write a VISUAL NARRATIVE that describes scenes for AI video generation. This is NOT a screenplay or voiceover script.
 
-## CRITICAL: THIS IS FOR AI VIDEO GENERATION ##
+## KLING AI VIDEO FORMAT ##
+
+Each scene should follow this structure:
+[Character description], [action/movement], [setting], [camera angle], [lighting/mood]
+
+## CHARACTER DIALOGUE IN KLING AI ##
+
+When characters need to speak, use this EXACT syntax:
+"[Character description], [action], saying '[dialogue text]', [setting], [camera angle]"
+
+DIALOGUE EXAMPLES:
+✅ "A young businesswoman in a navy blazer, standing confidently, saying 'Welcome to our team!', modern office background, medium shot, warm lighting"
+✅ "The same man leans forward, saying 'I've been waiting for this moment', coffee shop interior, close-up, soft natural light"
+✅ "A cheerful teacher in a colorful dress, gesturing enthusiastically, saying 'Let's learn something amazing today!', bright classroom, front-facing camera"
+
+## IMPORTANT RULES ##
 
 DO NOT include:
-- NO "NARRATOR (V.O.):" or any narrator instructions
-- NO "INT./EXT." scene headings
-- NO camera directions like "CUT TO:", "FADE IN:", etc.
-- NO character names followed by colons for dialogue
-- NO parenthetical acting directions like (softly), (angry)
-- NO screenplay formatting at all
-- NO text that should be "spoken aloud"
+- NO "NARRATOR (V.O.):" or narrator instructions
+- NO "INT./EXT." scene headings  
+- NO "CUT TO:", "FADE IN:" transitions
+- NO character names followed by colons (like "JOHN:")
+- NO parenthetical directions like (softly), (angry)
+- NO screenplay formatting
 
 DO include:
-- Pure visual descriptions of what happens in each scene
-- Character descriptions (appearance, clothing, expressions)
-- Setting descriptions (location, lighting, atmosphere)
-- Actions and movements (what characters DO, not what they SAY)
+- Visual descriptions of characters (appearance, clothing, expressions)
+- Character actions and movements
+- Setting details (location, lighting, atmosphere)
+- Dialogue using the "saying '...'" syntax when appropriate
+- Camera angles (close-up, medium shot, wide shot, front-facing)
 - Emotional tone through visual cues
-- Scene transitions as story beats
+
+## DIALOGUE TIPS FOR KLING AI ##
+- Keep dialogue SHORT (2-5 words work best for lip sync)
+- Character should be FRONT-FACING for best lip sync
+- Include emotion in the description, not the dialogue
+- One speaker per scene for clarity
 
 ## STORY STRUCTURE ##
 Create a ${Math.ceil(duration / 10)}-scene visual story:
 
 1. Opening scene: Establish character and setting visually
-2. Middle scenes: Show the story unfolding through actions
-3. Final scene: Visual resolution/emotional payoff
+2. Middle scenes: Story unfolds through actions AND dialogue
+3. Final scene: Visual/emotional resolution
 
 ## FORMAT ##
-Write a continuous visual narrative in paragraphs. Each paragraph describes one scene (~10 seconds of video).
+Write a continuous visual narrative in paragraphs. Each paragraph = one scene (~10 seconds).
 
-Example:
-"A young woman in a red dress stands at a rain-soaked bus stop at night, city lights reflecting in puddles around her. She checks her phone, disappointment visible on her face.
+EXAMPLE WITH DIALOGUE:
+"A young woman in a red dress stands at a rain-soaked bus stop at night, city lights reflecting in puddles. She checks her phone, disappointment visible on her face.
 
-The same woman walks alone down an empty street, umbrella forgotten, letting the rain wash over her. A soft smile begins to form on her lips.
+The same woman walks alone down an empty street, saying 'I knew he wouldn't come', letting the rain wash over her, wide shot, melancholic atmosphere.
 
-She reaches a small café, warm light spilling from its windows. Through the glass, we see a man waiting at a table with two cups of coffee, looking hopeful. She pauses, hand on the door handle, the rain still falling around her."
+She reaches a small café and stops at the door. Through the glass, a man at a table looks up and smiles, saying 'You came!', warm interior lighting, medium shot.
 
-Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 50}-${Math.ceil(duration / 10) * 75} words of visual narrative.`
+The woman pushes open the door, a relieved smile spreading across her face, saying 'I almost didn't', cozy café interior, two-shot, romantic warm lighting."
+
+Write ${languageText}. Create approximately ${Math.ceil(duration / 10) * 60}-${Math.ceil(duration / 10) * 90} words of visual narrative with dialogue.`
 
     // Select system message based on format
     let finalSystemMessage
