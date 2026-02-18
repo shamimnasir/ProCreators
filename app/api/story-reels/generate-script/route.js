@@ -349,14 +349,19 @@ Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.
 Requirements:
 - Language: ${languageName}
 - Create ${Math.ceil(duration / 10)} visual scenes (each ~10 seconds of video)
-- PURE VISUAL descriptions only - NO screenplay format
-- NO narrator instructions or voiceover text
-- Describe what we SEE: characters, settings, actions, expressions
+- Use KLING AI format for visuals and dialogue
+- Include character dialogue using: saying '[short dialogue]' syntax
+- Keep dialogue SHORT (2-5 words per line)
+- Character should be front-facing when speaking
+- Include: character appearance, actions, settings, camera angles, lighting
 - Include a consistent main character with specific appearance details
 - Build a visual story arc: setup → conflict → resolution
 - Each paragraph = one scene
 
-Output ONLY visual scene descriptions. No meta-information or formatting instructions.`
+DIALOGUE FORMAT (use this exact syntax):
+"[Character description], [action], saying '[dialogue]', [setting], [camera angle]"
+
+Output visual scene descriptions optimized for Kling AI with natural dialogue moments.`
       } else if (format === 'cinematic') {
         userPrompt = `Create a CINEMATIC SCREENPLAY for a ${Math.ceil(duration / 60)}-minute ${nicheInstruction} video.
 
