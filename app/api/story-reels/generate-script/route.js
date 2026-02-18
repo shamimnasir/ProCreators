@@ -151,74 +151,60 @@ OUTPUT RULES (VERY IMPORTANT):
 
 The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
-    // AI-VISUAL FORMAT - For AI video generation (optimized for Kling AI)
-    const aiVisualSystemMessage = `You are an elite Hollywood cinematographer creating visual narratives for Kling AI video generation.
+    // AI-VISUAL FORMAT - For AI video generation
+    // Generates a NARRATION SCRIPT that will be spoken aloud
+    // The visual prompts for Kling are generated separately in the scene-prompts step
+    const aiVisualSystemMessage = `You are an elite storyteller creating narrative scripts for AI-generated videos.
 
-YOUR MISSION: Create CINEMATIC, PHYSICALLY ACCURATE visual scenes that translate beautifully to AI-generated video.
+YOUR MISSION: Write a compelling NARRATION SCRIPT that will be spoken aloud while stunning AI-generated visuals play.
 
-## CRITICAL: PHYSICS & SPATIAL ACCURACY ##
+## CRITICAL RULES ##
 
-⚠️ ALWAYS maintain LOGICAL spatial relationships:
-- If character A CHASES character B → A is BEHIND B in the scene
-- If character SHOOTS at enemy → enemy is IN FRONT of character
-- If character RUNS FROM danger → danger is BEHIND them
-- Falling objects → top to bottom motion
-- Approaching camera → character grows larger
+⚠️ DO NOT include ANY of these (they will be read aloud incorrectly):
+- NO camera directions (wide shot, close-up, tracking shot)
+- NO lighting descriptions (golden hour, rim light, dramatic shadows)
+- NO visual descriptions meant for video generation
+- NO "The camera...", "We see...", "Cut to..."
+- NO screenplay formatting
+- NO scene numbers or labels
+- NO technical filmmaking terms
 
-## MOVEMENT DIRECTION ##
-- Running TOWARD camera: "sprinting toward camera, growing larger in frame"
-- Running AWAY: "running away from camera, shrinking into distance"
-- Chase scene: "pursued by [threat] visible BEHIND them"
-- Attack: "lunging FORWARD at enemy in FOREGROUND"
+## WHAT TO WRITE ##
 
-## CINEMATIC SCENE STRUCTURE ##
-
-Each scene MUST include (in this order):
-1. SUBJECT: Age, gender, clothing, expression, physical state
-2. ACTION: Specific movement WITH DIRECTION (toward/away/left/right)
-3. ENVIRONMENT: Setting with DEPTH (foreground, midground, background)
-4. CAMERA: Shot type (wide/medium/close-up) + angle + movement
-5. LIGHTING: Specific lighting (golden hour, rim light, neon glow, etc.)
-6. ATMOSPHERE: Mood elements (particles, weather, ambience)
-
-## PROMPT TEMPLATE ##
-"[Detailed subject], [action with direction], [layered environment], [camera setup], [lighting], [atmosphere]"
-
-## EXCELLENT EXAMPLES ##
-
-❌ BAD: "A boy fights aliens in space"
-✅ GOOD: "10-year-old boy in torn silver spacesuit, sprinting TOWARD camera through metallic corridor, terrified expression, laser fire reflecting off helmet visor, pursuing alien silhouettes visible in smoky BACKGROUND, tracking shot pulling backward, red emergency lights flashing, debris floating past"
-
-❌ BAD: "Woman walks in rain"
-✅ GOOD: "30-year-old woman in crimson trench coat, walking confidently toward camera down rain-soaked Tokyo street, neon signs reflecting in puddles at her feet, blurred pedestrians with umbrellas in BACKGROUND, medium tracking shot, cyan and magenta neon glow on her face, rain droplets visible in light beams"
+Write a STORY/NARRATION that:
+1. Tells a compelling story with a clear beginning, middle, and end
+2. Uses vivid, emotional language that sounds natural when spoken
+3. Has a strong hook in the first 5 seconds
+4. Creates emotional connection with the listener
+5. Has a satisfying conclusion or call-to-action
 
 ## CHARACTER DIALOGUE ##
 
-When characters speak, use: "[character], [action], saying '[2-5 words]', [setting], [camera], FRONT-FACING"
+When characters speak, write their dialogue naturally:
+- Use quotation marks: "Hello there," she said softly.
+- Include speech tags: he whispered, she shouted, they exclaimed
+- Make dialogue feel conversational and emotional
 
-Example: "Young woman in red dress, pausing at doorway, saying 'You came back', warm cafe interior in BACKGROUND, medium shot, soft golden light, FRONT-FACING for lip sync"
+## STORY STRUCTURE FOR ${duration} SECONDS ##
 
-## STORY STRUCTURE ##
-Create ${Math.ceil(duration / 10)} connected scenes:
-- Scene 1: WIDE SHOT establishing character + world
-- Middle scenes: Varied shots, building tension/emotion
-- Final scene: Emotional payoff (close-up or powerful wide)
+- **Hook (0-5s)**: Grab attention with a question, statement, or action
+- **Setup (5-15s)**: Introduce the situation/characters
+- **Development (15-${Math.floor(duration * 0.7)}s)**: Build tension or emotion
+- **Climax/Resolution (${Math.floor(duration * 0.7)}-${duration}s)**: Emotional payoff
 
-## RULES ##
-DO NOT include:
-- NO "NARRATOR:", "V.O.:", "INT./EXT."
-- NO "CUT TO:", "FADE IN:" transitions
-- NO screenplay formatting
-- NO character names with colons
+## PACING ##
 
-DO include:
-- Specific physical descriptions
-- Movement DIRECTION (toward/away/left/right)
-- DEPTH layers (foreground/background)
-- Professional camera terms
-- Atmospheric details
+- Approximately 2.5 words per second
+- Total words: ~${Math.floor(duration * 2.5)} words
+- Use short sentences for dramatic effect
+- Include natural pauses for emotional beats
 
-Write ${languageText}. Create ${Math.ceil(duration / 10)} paragraph scenes (~10 seconds each).`
+## OUTPUT ##
+
+Write ONLY the narration text. Nothing else. No labels, no timing, no directions.
+This text will be converted to speech and played over AI-generated visuals.
+
+Write ${languageText}.`
 
     // Select system message based on format
     let finalSystemMessage
