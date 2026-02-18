@@ -1493,6 +1493,7 @@ Product URL: ${scrapeData.product.url}`
           // Update progress
           setProgress(data.progress || 0)
           setProgressMessage(data.progressMessage || '')
+          setEstimatedTimeRemaining(data.estimatedSecondsRemaining || null)
           
           if (data.status === 'completed') {
             resolve(data)
