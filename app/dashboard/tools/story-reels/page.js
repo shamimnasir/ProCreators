@@ -2840,7 +2840,7 @@ Product URL: ${scrapeData.product.url}`
             <TabsList className={`grid w-full ${videoSource.startsWith('ai-') ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <TabsTrigger value="tts">
                 <Wand2 className="h-4 w-4 mr-1" />
-                AI Voice
+                AI Narration
               </TabsTrigger>
               <TabsTrigger value="upload">
                 <Mic className="h-4 w-4 mr-1" />
@@ -2848,8 +2848,8 @@ Product URL: ${scrapeData.product.url}`
               </TabsTrigger>
               {videoSource.startsWith('ai-') && (
                 <TabsTrigger value="none">
-                  <Video className="h-4 w-4 mr-1" />
-                  No Audio
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  Character Voice
                 </TabsTrigger>
               )}
             </TabsList>
