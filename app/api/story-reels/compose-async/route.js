@@ -393,21 +393,39 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         .run()
     })
     
-    // Merge with audio
+    // Merge with audio (or create silent video for no-audio mode)
     const finalVideoPath = join(tempDir, 'final.mp4')
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(captionedPath)
-        .input(audioPath)
-        .outputOptions([
-          '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k',
-          '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'
-        ])
-        .output(finalVideoPath)
-        .on('end', resolve)
-        .on('error', reject)
-        .run()
-    })
+    
+    if (hasAudio) {
+      // Merge video with audio
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedPath)
+          .input(audioPath)
+          .outputOptions([
+            '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k',
+            '-movflags', '+faststart', '-map', '0:v:0', '-map', '1:a:0', '-shortest'
+          ])
+          .output(finalVideoPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run()
+      })
+    } else {
+      // No audio - just copy the captioned video
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedPath)
+          .outputOptions([
+            '-c:v', 'copy', '-an', // No audio
+            '-movflags', '+faststart'
+          ])
+          .output(finalVideoPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run()
+      })
+    }
     
     await updateJobStatus(jobId, {
       progress: 95,
