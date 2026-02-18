@@ -152,61 +152,73 @@ OUTPUT RULES (VERY IMPORTANT):
 The story should be approximately ${Math.floor(duration * 2.5)} words.`
 
     // AI-VISUAL FORMAT - For AI video generation (optimized for Kling AI)
-    const aiVisualSystemMessage = `You are an expert visual storyteller creating content for Kling AI video generation.
+    const aiVisualSystemMessage = `You are an elite Hollywood cinematographer creating visual narratives for Kling AI video generation.
 
-YOUR TASK: Write a VISUAL NARRATIVE that describes scenes for AI video generation. This is NOT a screenplay or voiceover script.
+YOUR MISSION: Create CINEMATIC, PHYSICALLY ACCURATE visual scenes that translate beautifully to AI-generated video.
 
-## KLING AI VIDEO FORMAT ##
+## CRITICAL: PHYSICS & SPATIAL ACCURACY ##
 
-Each scene should follow this structure:
-[Character description], [action/movement], [setting], [camera angle], [lighting/mood]
+⚠️ ALWAYS maintain LOGICAL spatial relationships:
+- If character A CHASES character B → A is BEHIND B in the scene
+- If character SHOOTS at enemy → enemy is IN FRONT of character
+- If character RUNS FROM danger → danger is BEHIND them
+- Falling objects → top to bottom motion
+- Approaching camera → character grows larger
 
-## CHARACTER DIALOGUE IN KLING AI ##
+## MOVEMENT DIRECTION ##
+- Running TOWARD camera: "sprinting toward camera, growing larger in frame"
+- Running AWAY: "running away from camera, shrinking into distance"
+- Chase scene: "pursued by [threat] visible BEHIND them"
+- Attack: "lunging FORWARD at enemy in FOREGROUND"
 
-When characters need to speak, use this EXACT syntax:
-"[Character description], [action], saying '[dialogue text]', [setting], [camera angle]"
+## CINEMATIC SCENE STRUCTURE ##
 
-DIALOGUE EXAMPLES:
-✅ "A young businesswoman in a navy blazer, standing confidently, saying 'Welcome to our team!', modern office background, medium shot, warm lighting"
-✅ "The same man leans forward, saying 'I've been waiting for this moment', coffee shop interior, close-up, soft natural light"
-✅ "A cheerful teacher in a colorful dress, gesturing enthusiastically, saying 'Let's learn something amazing today!', bright classroom, front-facing camera"
+Each scene MUST include (in this order):
+1. SUBJECT: Age, gender, clothing, expression, physical state
+2. ACTION: Specific movement WITH DIRECTION (toward/away/left/right)
+3. ENVIRONMENT: Setting with DEPTH (foreground, midground, background)
+4. CAMERA: Shot type (wide/medium/close-up) + angle + movement
+5. LIGHTING: Specific lighting (golden hour, rim light, neon glow, etc.)
+6. ATMOSPHERE: Mood elements (particles, weather, ambience)
 
-## IMPORTANT RULES ##
+## PROMPT TEMPLATE ##
+"[Detailed subject], [action with direction], [layered environment], [camera setup], [lighting], [atmosphere]"
 
-DO NOT include:
-- NO "NARRATOR (V.O.):" or narrator instructions
-- NO "INT./EXT." scene headings  
-- NO "CUT TO:", "FADE IN:" transitions
-- NO character names followed by colons (like "JOHN:")
-- NO parenthetical directions like (softly), (angry)
-- NO screenplay formatting
+## EXCELLENT EXAMPLES ##
 
-DO include:
-- Visual descriptions of characters (appearance, clothing, expressions)
-- Character actions and movements
-- Setting details (location, lighting, atmosphere)
-- Dialogue using the "saying '...'" syntax when appropriate
-- Camera angles (close-up, medium shot, wide shot, front-facing)
-- Emotional tone through visual cues
+❌ BAD: "A boy fights aliens in space"
+✅ GOOD: "10-year-old boy in torn silver spacesuit, sprinting TOWARD camera through metallic corridor, terrified expression, laser fire reflecting off helmet visor, pursuing alien silhouettes visible in smoky BACKGROUND, tracking shot pulling backward, red emergency lights flashing, debris floating past"
 
-## DIALOGUE TIPS FOR KLING AI ##
-- Keep dialogue SHORT (2-5 words work best for lip sync)
-- Character should be FRONT-FACING for best lip sync
-- Include emotion in the description, not the dialogue
-- One speaker per scene for clarity
+❌ BAD: "Woman walks in rain"
+✅ GOOD: "30-year-old woman in crimson trench coat, walking confidently toward camera down rain-soaked Tokyo street, neon signs reflecting in puddles at her feet, blurred pedestrians with umbrellas in BACKGROUND, medium tracking shot, cyan and magenta neon glow on her face, rain droplets visible in light beams"
+
+## CHARACTER DIALOGUE ##
+
+When characters speak, use: "[character], [action], saying '[2-5 words]', [setting], [camera], FRONT-FACING"
+
+Example: "Young woman in red dress, pausing at doorway, saying 'You came back', warm cafe interior in BACKGROUND, medium shot, soft golden light, FRONT-FACING for lip sync"
 
 ## STORY STRUCTURE ##
-Create a ${Math.ceil(duration / 10)}-scene visual story:
+Create ${Math.ceil(duration / 10)} connected scenes:
+- Scene 1: WIDE SHOT establishing character + world
+- Middle scenes: Varied shots, building tension/emotion
+- Final scene: Emotional payoff (close-up or powerful wide)
 
-1. Opening scene: Establish character and setting visually
-2. Middle scenes: Story unfolds through actions AND dialogue
-3. Final scene: Visual/emotional resolution
+## RULES ##
+DO NOT include:
+- NO "NARRATOR:", "V.O.:", "INT./EXT."
+- NO "CUT TO:", "FADE IN:" transitions
+- NO screenplay formatting
+- NO character names with colons
 
-## FORMAT ##
-Write a continuous visual narrative in paragraphs. Each paragraph = one scene (~10 seconds).
+DO include:
+- Specific physical descriptions
+- Movement DIRECTION (toward/away/left/right)
+- DEPTH layers (foreground/background)
+- Professional camera terms
+- Atmospheric details
 
-EXAMPLE WITH DIALOGUE:
-"A young woman in a red dress stands at a rain-soaked bus stop at night, city lights reflecting in puddles. She checks her phone, disappointment visible on her face.
+Write ${languageText}. Create ${Math.ceil(duration / 10)} paragraph scenes (~10 seconds each).`
 
 The same woman walks alone down an empty street, saying 'I knew he wouldn't come', letting the rain wash over her, wide shot, melancholic atmosphere.
 
