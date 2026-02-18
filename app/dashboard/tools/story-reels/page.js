@@ -316,6 +316,7 @@ export default function StoryReelsPage({
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState('')
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(null) // ETA in seconds
   const [currentJobId, setCurrentJobId] = useState(null)
   // Initialize videoSource based on defaultVideoSource prop
   // If 'stock' mode is passed, use 'stock'. If 'ai' mode is passed, default to 'ai-standard'
