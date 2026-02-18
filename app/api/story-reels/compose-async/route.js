@@ -652,6 +652,108 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       actualAudioDuration = duration // Use requested duration for no-audio mode
     }
     
+    // Add background music if requested and we have voice/dialogue audio
+    if (musicTrack && musicTrack !== 'none' && hasAudio) {
+      const musicDir = '/app/public/music'
+      const musicMap = {
+        'upbeat': join(musicDir, 'upbeat.mp3'),
+        'calm': join(musicDir, 'calm.mp3'),
+        'epic': join(musicDir, 'epic.mp3'),
+        'emotional': join(musicDir, 'emotional.mp3')
+      }
+      
+      let musicPath = customMusicPath ? `/app/public${customMusicPath}` : musicMap[musicTrack]
+      
+      if (musicPath && existsSync(musicPath)) {
+        console.log(`[${jobId}] Adding background music: ${musicTrack}`)
+        
+        // Trim music to match audio duration
+        const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
+        
+        await new Promise((resolve) => {
+          ffmpeg(musicPath)
+            .setStartTime(0)
+            .duration(actualAudioDuration)
+            .outputOptions(['-acodec', 'libmp3lame', '-b:a', '128k', '-ar', '44100'])
+            .output(trimmedMusicPath)
+            .on('end', resolve)
+            .on('error', (err) => {
+              console.error(`[${jobId}] Music trim error:`, err.message)
+              resolve() // Continue without music on error
+            })
+            .run()
+        })
+        
+        // Mix music with voice
+        if (existsSync(trimmedMusicPath)) {
+          const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
+          
+          await new Promise((resolve) => {
+            ffmpeg()
+              .input(audioPath)
+              .input(trimmedMusicPath)
+              .complexFilter([
+                '[0:a]volume=1.0[voice]',
+                `[1:a]volume=0.20,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2[music]`,
+                '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
+              ])
+              .outputOptions(['-map', '[out]', '-ac', '2', '-ar', '44100', '-b:a', '128k'])
+              .output(mixedAudioPath)
+              .on('end', () => {
+                audioPath = mixedAudioPath // Use mixed audio
+                console.log(`[${jobId}] Successfully mixed background music with voice`)
+                resolve()
+              })
+              .on('error', (err) => {
+                console.error(`[${jobId}] Music mixing error:`, err.message)
+                resolve() // Continue without music on error
+              })
+              .run()
+          })
+        }
+      }
+    } else if (musicTrack && musicTrack !== 'none' && !hasAudio) {
+      // No voice but music requested - use music as background
+      const musicDir = '/app/public/music'
+      const musicMap = {
+        'upbeat': join(musicDir, 'upbeat.mp3'),
+        'calm': join(musicDir, 'calm.mp3'),
+        'epic': join(musicDir, 'epic.mp3'),
+        'emotional': join(musicDir, 'emotional.mp3')
+      }
+      
+      let musicPath = customMusicPath ? `/app/public${customMusicPath}` : musicMap[musicTrack]
+      
+      if (musicPath && existsSync(musicPath)) {
+        console.log(`[${jobId}] Using background music only (no voice): ${musicTrack}`)
+        
+        // Trim and use music as the audio track
+        const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
+        
+        await new Promise((resolve) => {
+          ffmpeg(musicPath)
+            .setStartTime(0)
+            .duration(actualAudioDuration)
+            .outputOptions([
+              '-acodec', 'libmp3lame', '-b:a', '128k', '-ar', '44100',
+              `-af`, `volume=0.8,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2`
+            ])
+            .output(trimmedMusicPath)
+            .on('end', () => {
+              audioPath = trimmedMusicPath
+              hasAudio = true
+              console.log(`[${jobId}] Using music-only audio track`)
+              resolve()
+            })
+            .on('error', (err) => {
+              console.error(`[${jobId}] Music-only error:`, err.message)
+              resolve()
+            })
+            .run()
+        })
+      }
+    }
+    
     await updateJobStatus(jobId, {
       progress: 75,
       progressMessage: 'Normalizing video clips...'
