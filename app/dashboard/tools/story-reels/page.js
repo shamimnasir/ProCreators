@@ -763,6 +763,67 @@ export default function StoryReelsPage({
     setSeedImagePreview(null)
   }
 
+  // Handle Multi-Scene Reference Image Upload
+  const handleSceneReferenceUpload = (event, sceneNumber) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file (JPG, PNG, WebP)",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    const preview = URL.createObjectURL(file)
+    
+    setSceneReferenceImages(prev => {
+      // Remove existing image for this scene if any
+      const filtered = prev.filter(img => img.sceneNumber !== sceneNumber)
+      return [...filtered, {
+        file,
+        preview,
+        sceneNumber,
+        label: `Scene ${sceneNumber}`
+      }].sort((a, b) => a.sceneNumber - b.sceneNumber)
+    })
+    
+    toast({
+      title: `Scene ${sceneNumber} Image Added ✨`,
+      description: "This image will be used as reference for this scene"
+    })
+  }
+  
+  // Remove Scene Reference Image
+  const removeSceneReferenceImage = (sceneNumber) => {
+    setSceneReferenceImages(prev => {
+      const toRemove = prev.find(img => img.sceneNumber === sceneNumber)
+      if (toRemove?.preview) {
+        URL.revokeObjectURL(toRemove.preview)
+      }
+      return prev.filter(img => img.sceneNumber !== sceneNumber)
+    })
+  }
+  
+  // Clear all scene reference images
+  const clearAllSceneReferences = () => {
+    sceneReferenceImages.forEach(img => {
+      if (img.preview) URL.revokeObjectURL(img.preview)
+    })
+    setSceneReferenceImages([])
+  }
+
   // Generate Scene Prompts (for AI mode) - converts script to visual prompts for AI video generation
   const handleGenerateScenePrompts = async () => {
     if (!script.trim()) {
