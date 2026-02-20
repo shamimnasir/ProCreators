@@ -331,9 +331,42 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       progressMessage: 'Generating voiceover...'
     })
     
-    // Clean script for TTS - remove screenplay formatting
+    // Clean script for TTS - remove screenplay formatting and technical terms
     const cleanScriptForTTS = (rawScript) => {
       let cleaned = rawScript
+      
+      // CRITICAL: Remove @image tags (like @image1, @image2, @image 3, etc.)
+      cleaned = cleaned.replace(/@image\s*\d*/gi, '')
+      
+      // Remove common video generation meta instructions
+      const metaPhrases = [
+        /\bcinematic\s+(video|shot|sequence|clip|footage)\s+of\b/gi,
+        /\bdynamic\s+\d+-second\s+(video|shot|clip)\b/gi,
+        /\bstart\s+with\s+a?\s*(wide|aerial|medium|close)?\s*shot\b/gi,
+        /\bin\s+(slow[- ]?motion|extreme)?\s*(close[- ]?up|wide\s+shot|medium\s+shot)\b/gi,
+        /\bshow\s+this\s+in\b/gi,
+        /\b(wide|aerial|medium|close|tracking|establishing)\s+shot\s+(of|showing|capturing)?\b/gi,
+        /\bcut\s+to\s+(a|the)?\b/gi,
+        /\bimmediately\s+transition\s+to\b/gi,
+        /\btransition\s+to\s+(celebration|scene)?\b/gi,
+        /\buse\s+dramatic\s+music\b/gi,
+        /\bquick\s+cuts\b/gi,
+        /\bhigh[- ]?energy\s+camera\s+movements?\b/gi,
+        /\bkeep\s+it\s+action[- ]?packed\b/gi,
+        /\bthen\s+(wide|zoom|cut)\s+shot\b/gi,
+        /\b(on|with)\s+the\s+net\s+rippling\b/gi,
+        /\barms?\s+outstretched\b/gi,
+      ]
+      
+      metaPhrases.forEach(pattern => {
+        cleaned = cleaned.replace(pattern, '')
+      })
+      
+      // Remove camera direction terms when they appear standalone
+      cleaned = cleaned.replace(/\b(wide shot|medium shot|close-?up|aerial shot|tracking shot|extreme close-?up|POV shot|establishing shot)\b/gi, '')
+      
+      // Remove technical video terms
+      cleaned = cleaned.replace(/\b(front[- ]?facing|for lip sync|4K resolution|professional quality|cinematic lighting)\b/gi, '')
       
       // Remove screenplay scene headings: INT./EXT., DAY/NIGHT, etc.
       cleaned = cleaned.replace(/^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)[^\n]*$/gim, '')
@@ -359,6 +392,13 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       
       // Remove time indicators like "-- DAY", "-- NIGHT", "-- DAWN"
       cleaned = cleaned.replace(/\s*--\s*(DAY|NIGHT|DAWN|DUSK|MORNING|EVENING|LATER|CONTINUOUS|SAME)[^\n]*/gi, '')
+      
+      // Clean up em-dashes commonly used in prompts
+      cleaned = cleaned.replace(/—/g, ', ')
+      
+      // Clean up multiple punctuation
+      cleaned = cleaned.replace(/[,;:]\s*[,;:]/g, ',')
+      cleaned = cleaned.replace(/\.\s*\./g, '.')
       
       // Clean up multiple newlines and whitespace
       cleaned = cleaned.replace(/\n{3,}/g, '\n\n')
