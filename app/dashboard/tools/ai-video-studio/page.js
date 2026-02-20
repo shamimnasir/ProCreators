@@ -215,6 +215,9 @@ function AIVideoStudioPageContent() {
   // NEW: Character Consistency Mode
   const [consistencyMode, setConsistencyMode] = useState('none') // 'none', 'seed', 'frame-chain'
   
+  // NEW: AI Video Model Selection
+  const [aiModel, setAiModel] = useState('kling') // 'kling' or 'minimax'
+  
   // Voice/TTS state (reused from Quick Reels Hub)
   const [ttsLanguage, setTtsLanguage] = useState('en')
   const [voiceOption, setVoiceOption] = useState('tts') // 'tts', 'upload', 'none'
