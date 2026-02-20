@@ -2160,6 +2160,54 @@ Product URL: ${scrapeData.product.url}`
             </p>
           </div>
 
+          {/* AI Model Selector - Show when in AI mode (defaultVideoSource is 'ai') */}
+          {defaultVideoSource === 'ai' && (
+            <div className="space-y-2 p-4 border-2 border-primary/20 rounded-lg bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-purple-950/20 dark:to-cyan-950/20">
+              <Label className="flex items-center gap-2 text-sm font-semibold">
+                ⚡ AI Video Model
+                <Badge variant="secondary" className="text-[10px] bg-gradient-to-r from-purple-500 to-cyan-500 text-white">Choose</Badge>
+              </Label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Select the AI model for video generation
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                    videoSource === 'ai-standard' || videoSource === 'ai-professional' || videoSource === 'ai-cinema'
+                      ? 'border-purple-500 bg-purple-100 dark:bg-purple-950/50'
+                      : 'border-muted hover:border-purple-300 bg-white dark:bg-gray-900'
+                  }`}
+                  onClick={() => setVideoSource('ai-standard')}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-lg">🎬</span>
+                    <Badge className="text-[9px] bg-purple-500">Premium</Badge>
+                  </div>
+                  <h4 className="font-semibold text-sm">Kling AI</h4>
+                  <p className="text-xs text-muted-foreground">Higher quality • ~60s/clip</p>
+                  <p className="text-xs text-purple-600 font-medium mt-1">10K credits/30s</p>
+                </div>
+                
+                <div
+                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                    videoSource === 'ai-minimax'
+                      ? 'border-cyan-500 bg-cyan-100 dark:bg-cyan-950/50'
+                      : 'border-muted hover:border-cyan-300 bg-white dark:bg-gray-900'
+                  }`}
+                  onClick={() => setVideoSource('ai-minimax')}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-lg">⚡</span>
+                    <Badge className="text-[9px] bg-cyan-500">Fast</Badge>
+                  </div>
+                  <h4 className="font-semibold text-sm">Minimax</h4>
+                  <p className="text-xs text-muted-foreground">Faster • Good quality</p>
+                  <p className="text-xs text-cyan-600 font-medium mt-1">7K credits/30s</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showCustomTopicInput && (
             <div className="space-y-2">
               <Label>
