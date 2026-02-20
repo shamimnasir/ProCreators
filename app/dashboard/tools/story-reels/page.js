@@ -2369,7 +2369,7 @@ Product URL: ${scrapeData.product.url}`
               
               {/* Scene Reference Grid */}
               {scenePrompts.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                <div className="grid grid-cols-3 gap-3 max-h-80 overflow-y-auto p-1">
                   {scenePrompts.map((scene, index) => {
                     const existingRef = sceneReferenceImages.find(img => img.sceneNumber === index + 1)
                     return (
@@ -2381,11 +2381,11 @@ Product URL: ${scrapeData.product.url}`
                       >
                         <div className="text-xs font-medium mb-1 text-center">Scene {index + 1}</div>
                         {existingRef ? (
-                          <div className="relative">
+                          <div className="relative aspect-video">
                             <img 
                               src={existingRef.preview} 
                               alt={`Scene ${index + 1} reference`}
-                              className="w-full h-16 object-cover rounded"
+                              className="w-full h-full object-cover rounded"
                             />
                             <Button
                               variant="destructive"
@@ -2397,19 +2397,19 @@ Product URL: ${scrapeData.product.url}`
                             </Button>
                           </div>
                         ) : (
-                          <label className="flex flex-col items-center justify-center h-16 border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                          <label className="flex flex-col items-center justify-center aspect-video border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                             <input
                               type="file"
                               accept="image/*"
                               className="hidden"
                               onChange={(e) => handleSceneReferenceUpload(e, index + 1)}
                             />
-                            <Plus className="h-4 w-4 text-gray-400" />
-                            <span className="text-[10px] text-gray-400">Add Image</span>
+                            <Plus className="h-5 w-5 text-gray-400" />
+                            <span className="text-[10px] text-gray-400 mt-1">Add Image</span>
                           </label>
                         )}
                         <p className="text-[9px] text-muted-foreground mt-1 line-clamp-2 text-center">
-                          {scene.prompt?.substring(0, 40)}...
+                          {scene.prompt?.substring(0, 30)}...
                         </p>
                       </div>
                     )
