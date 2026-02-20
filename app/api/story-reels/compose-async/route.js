@@ -90,8 +90,26 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       scenePrompts, voiceFile, captionFontSize, captionPosition,
       videoOrientation, customMusicPath, niche, videoSource,
       consistencyMode: userConsistencyMode, // User's selected consistency mode
-      seedImage, seedImageType // Seed image for character/scene consistency
+      seedImage, seedImageType, // Single seed image for character/scene consistency
+      sceneRefScenes // JSON string of scene numbers with references
     } = formDataObj
+    
+    // Parse scene reference images from form data
+    let sceneReferenceImages = {}
+    if (sceneRefScenes) {
+      try {
+        const sceneNumbers = JSON.parse(sceneRefScenes)
+        for (const sceneNum of sceneNumbers) {
+          const refImage = formDataObj[`sceneRefImage_${sceneNum}`]
+          if (refImage) {
+            sceneReferenceImages[sceneNum] = refImage
+          }
+        }
+        console.log(`[${jobId}] 🖼️ Found ${Object.keys(sceneReferenceImages).length} scene reference images for scenes: ${sceneNumbers.join(', ')}`)
+      } catch (e) {
+        console.error(`[${jobId}] Failed to parse scene references:`, e.message)
+      }
+    }
     
     // Determine video dimensions
     let dimensions = { width: 1080, height: 1920 }
