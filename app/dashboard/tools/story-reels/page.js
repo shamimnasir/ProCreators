@@ -2164,11 +2164,11 @@ Product URL: ${scrapeData.product.url}`
           {defaultVideoSource === 'ai' && (
             <div className="space-y-2 p-4 border-2 border-primary/20 rounded-lg bg-gradient-to-r from-purple-50 to-cyan-50 dark:from-purple-950/20 dark:to-cyan-950/20">
               <Label className="flex items-center gap-2 text-sm font-semibold">
-                ⚡ AI Video Model
+                ⚡ Video Quality
                 <Badge variant="secondary" className="text-[10px] bg-gradient-to-r from-purple-500 to-cyan-500 text-white">Choose</Badge>
               </Label>
               <p className="text-xs text-muted-foreground mb-3">
-                Select the AI model for video generation
+                Select video generation quality
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div
@@ -2183,8 +2183,8 @@ Product URL: ${scrapeData.product.url}`
                     <span className="text-lg">🎬</span>
                     <Badge className="text-[9px] bg-purple-500">Premium</Badge>
                   </div>
-                  <h4 className="font-semibold text-sm">Kling AI</h4>
-                  <p className="text-xs text-muted-foreground">Higher quality • ~60s/clip</p>
+                  <h4 className="font-semibold text-sm">Premium Quality</h4>
+                  <p className="text-xs text-muted-foreground">Best details & motion</p>
                   <p className="text-xs text-purple-600 font-medium mt-1">10K credits/30s</p>
                 </div>
                 
@@ -2200,8 +2200,8 @@ Product URL: ${scrapeData.product.url}`
                     <span className="text-lg">⚡</span>
                     <Badge className="text-[9px] bg-cyan-500">Fast</Badge>
                   </div>
-                  <h4 className="font-semibold text-sm">Minimax</h4>
-                  <p className="text-xs text-muted-foreground">Faster • Good quality</p>
+                  <h4 className="font-semibold text-sm">Fast Mode</h4>
+                  <p className="text-xs text-muted-foreground">Quick & budget-friendly</p>
                   <p className="text-xs text-cyan-600 font-medium mt-1">7K credits/30s</p>
                 </div>
               </div>
