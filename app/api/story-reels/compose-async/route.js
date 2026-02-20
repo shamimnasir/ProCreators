@@ -89,7 +89,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       captionStyle, musicTrack, resolution, stockVideos, videoOrder,
       scenePrompts, voiceFile, captionFontSize, captionPosition,
       videoOrientation, customMusicPath, niche, videoSource,
-      consistencyMode: userConsistencyMode // User's selected consistency mode
+      consistencyMode: userConsistencyMode, // User's selected consistency mode
+      seedImage, seedImageType // Seed image for character/scene consistency
     } = formDataObj
     
     // Determine video dimensions
