@@ -1664,6 +1664,13 @@ Product URL: ${scrapeData.product.url}`
       formData.append('captionPosition', captionPosition)
       formData.append('videoSource', videoSource) // Add video source for AI/Stock mode
       formData.append('consistencyMode', consistencyMode) // Add character consistency mode
+      
+      // Add seed image if provided (for AI video character/scene consistency)
+      if (seedImage && videoSource.startsWith('ai-')) {
+        formData.append('seedImage', seedImage)
+        formData.append('seedImageType', seedImageType)
+      }
+      
       // Send music from Freesound/AudioDB selection
       if (customMusic) {
         formData.append('musicTrack', 'custom')
