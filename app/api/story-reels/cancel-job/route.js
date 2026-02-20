@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
-import { refundCredits } from '@/lib/credits'
+import { refundCredits, partialRefundCredits } from '@/lib/credits'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,6 +43,18 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
+    // Calculate partial refund based on clips already generated
+    const clipsGenerated = job.clipsGenerated || 0
+    const totalClips = job.totalClips || 1
+    const originalCost = job.creditCost || 0
+    
+    // Calculate how much to charge for generated clips
+    // Charge proportionally: (clips generated / total clips) * original cost
+    const chargeForGenerated = Math.ceil((clipsGenerated / totalClips) * originalCost)
+    const refundAmount = Math.max(0, originalCost - chargeForGenerated)
+    
+    console.log(`[${jobId}] Cancel requested - Clips: ${clipsGenerated}/${totalClips}, Cost: ${originalCost}, Charge: ${chargeForGenerated}, Refund: ${refundAmount}`)
+    
     // Update job status to cancelled
     await jobsCollection.updateOne(
       { jobId },
@@ -50,19 +62,33 @@ export async function POST(request) {
         $set: { 
           status: 'cancelled',
           progress: 0,
-          progressMessage: 'Cancelled by user',
+          progressMessage: `Cancelled by user (${clipsGenerated} clips generated)`,
           cancelledAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          partialCharge: chargeForGenerated,
+          partialRefund: refundAmount
         }
       }
     )
     
-    // Refund credits if transaction exists
+    // Process refund if transaction exists
     let refundResult = null
     if (job.transactionId) {
       try {
-        refundResult = await refundCredits(job.transactionId, 'User cancelled video generation')
-        console.log(`[${jobId}] Credits refunded:`, refundResult)
+        if (clipsGenerated === 0) {
+          // No clips generated - full refund
+          refundResult = await refundCredits(job.transactionId, 'User cancelled before generation started')
+          console.log(`[${jobId}] Full refund:`, refundResult)
+        } else if (refundAmount > 0) {
+          // Partial refund - charge for generated clips, refund the rest
+          refundResult = await partialRefundCredits(job.transactionId, refundAmount, 
+            `User cancelled after ${clipsGenerated}/${totalClips} clips generated`)
+          console.log(`[${jobId}] Partial refund (${refundAmount} credits):`, refundResult)
+        } else {
+          // All clips generated - no refund
+          console.log(`[${jobId}] No refund - all clips were already generated`)
+          refundResult = { success: true, refundedAmount: 0, message: 'All clips already generated' }
+        }
       } catch (refundError) {
         console.error(`[${jobId}] Refund failed:`, refundError.message)
       }
@@ -72,9 +98,14 @@ export async function POST(request) {
     
     return NextResponse.json({
       success: true,
-      message: 'Video generation cancelled',
+      message: clipsGenerated > 0 
+        ? `Cancelled. Charged ${chargeForGenerated} credits for ${clipsGenerated} clips generated.`
+        : 'Video generation cancelled. Full refund processed.',
       refunded: refundResult?.success || false,
-      refundedAmount: refundResult?.refundedAmount || 0
+      refundedAmount: refundResult?.refundedAmount || refundAmount,
+      chargedAmount: chargeForGenerated,
+      clipsGenerated,
+      totalClips
     })
     
   } catch (error) {
