@@ -2256,6 +2256,83 @@ Product URL: ${scrapeData.product.url}`
             </div>
           )}
 
+          {/* Seed Image Upload - For AI video character/scene consistency */}
+          {defaultVideoSource === 'ai' && (
+            <div className="space-y-3 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
+              <Label className="flex items-center gap-2 text-sm font-semibold">
+                🖼️ Reference Image
+                <Badge variant="secondary" className="text-[10px] bg-indigo-500 text-white">Optional</Badge>
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Upload an image to guide the AI - maintain character or scene consistency
+              </p>
+              
+              {/* Image Type Selector */}
+              <div className="flex gap-2">
+                <Button
+                  variant={seedImageType === 'character' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSeedImageType('character')}
+                  className="flex-1 text-xs"
+                >
+                  👤 Character
+                </Button>
+                <Button
+                  variant={seedImageType === 'scene' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSeedImageType('scene')}
+                  className="flex-1 text-xs"
+                >
+                  🎬 Scene/Style
+                </Button>
+              </div>
+              
+              {/* Upload Area */}
+              {!seedImage ? (
+                <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleSeedImageUpload}
+                  />
+                  <ImageIcon className="h-8 w-8 text-indigo-500 mb-2" />
+                  <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                    Upload {seedImageType === 'character' ? 'Character' : 'Scene'} Image
+                  </span>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    JPG, PNG, WebP (max 10MB)
+                  </span>
+                </label>
+              ) : (
+                <div className="relative">
+                  <img 
+                    src={seedImagePreview} 
+                    alt="Seed reference" 
+                    className="w-full h-32 object-cover rounded-lg border-2 border-indigo-500"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6"
+                    onClick={removeSeedImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                    {seedImageType === 'character' ? '👤 Character' : '🎬 Scene'} Reference
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-xs text-indigo-600 dark:text-indigo-400">
+                💡 {seedImageType === 'character' 
+                  ? 'The AI will try to generate videos featuring a similar-looking character'
+                  : 'The AI will use this as visual inspiration for the video style'}
+              </p>
+            </div>
+          )}
+
           {showCustomTopicInput && (
             <div className="space-y-2">
               <Label>
