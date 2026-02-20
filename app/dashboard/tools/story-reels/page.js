@@ -2574,6 +2574,26 @@ Product URL: ${scrapeData.product.url}`
               {videoSource === 'ai-essential' && <span className="text-blue-600 text-xs font-medium">✓ Selected</span>}
             </div>
 
+            {/* AI Minimax - Fast & Affordable */}
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                videoSource === 'ai-minimax' 
+                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30' 
+                  : 'border-muted hover:border-cyan-300'
+              }`}
+              onClick={() => setVideoSource('ai-minimax')}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xl">⚡</span>
+                <Badge variant="secondary" className="bg-cyan-100 text-cyan-700 text-xs">7K credits/30s</Badge>
+              </div>
+              <h4 className="font-semibold">Minimax Fast</h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                Faster generation • Good quality • Budget-friendly
+              </p>
+              {videoSource === 'ai-minimax' && <span className="text-cyan-600 text-xs font-medium">✓ Selected</span>}
+            </div>
+
             {/* AI Standard */}
             <div
               className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
