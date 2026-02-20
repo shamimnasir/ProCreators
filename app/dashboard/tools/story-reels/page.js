@@ -2635,9 +2635,9 @@ Product URL: ${scrapeData.product.url}`
                 <span className="text-xl">⚡</span>
                 <Badge variant="secondary" className="bg-cyan-100 text-cyan-700 text-xs">7K credits/30s</Badge>
               </div>
-              <h4 className="font-semibold">Minimax Fast</h4>
+              <h4 className="font-semibold">Fast Mode</h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Faster generation • Good quality • Budget-friendly
+                Quick generation • Good quality • Budget-friendly
               </p>
               {videoSource === 'ai-minimax' && <span className="text-cyan-600 text-xs font-medium">✓ Selected</span>}
             </div>
