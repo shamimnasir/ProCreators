@@ -717,6 +717,49 @@ export default function StoryReelsPage({
     }
   }
 
+  // Handle Seed Image Upload
+  const handleSeedImageUpload = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file (JPG, PNG, WebP)",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    setSeedImage(file)
+    setSeedImagePreview(URL.createObjectURL(file))
+    
+    toast({
+      title: "Seed Image Added ✨",
+      description: `Your ${seedImageType === 'character' ? 'character' : 'scene'} reference image is ready`
+    })
+  }
+  
+  // Remove Seed Image
+  const removeSeedImage = () => {
+    if (seedImagePreview) {
+      URL.revokeObjectURL(seedImagePreview)
+    }
+    setSeedImage(null)
+    setSeedImagePreview(null)
+  }
+
   // Generate Scene Prompts (for AI mode) - converts script to visual prompts for AI video generation
   const handleGenerateScenePrompts = async () => {
     if (!script.trim()) {
