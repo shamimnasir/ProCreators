@@ -1449,6 +1449,13 @@ Product URL: ${scrapeData.product.url}`
       formData.append('videoOrientation', previewSettings.videoOrientation || 'portrait') // Add orientation
       formData.append('videoSource', videoSource) // Add video source for AI/Stock mode
       formData.append('consistencyMode', consistencyMode) // Add character consistency mode
+      
+      // Add seed image if provided (for AI video character/scene consistency)
+      if (seedImage && videoSource.startsWith('ai-')) {
+        formData.append('seedImage', seedImage)
+        formData.append('seedImageType', seedImageType)
+      }
+      
       // Send music properly from preview
       if (previewSettings.customMusicPath) {
         formData.append('musicTrack', 'custom')
