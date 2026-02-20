@@ -1735,6 +1735,16 @@ Product URL: ${scrapeData.product.url}`
         formData.append('seedImageType', seedImageType)
       }
       
+      // Add multi-scene reference images if provided
+      if (sceneReferenceImages.length > 0 && videoSource.startsWith('ai-')) {
+        // Send each scene reference image
+        sceneReferenceImages.forEach((ref, index) => {
+          formData.append(`sceneRefImage_${ref.sceneNumber}`, ref.file)
+        })
+        // Send the scene numbers that have references
+        formData.append('sceneRefScenes', JSON.stringify(sceneReferenceImages.map(r => r.sceneNumber)))
+      }
+      
       // Send music from Freesound/AudioDB selection
       if (customMusic) {
         formData.append('musicTrack', 'custom')
