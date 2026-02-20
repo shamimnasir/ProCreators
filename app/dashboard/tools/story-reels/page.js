@@ -2334,79 +2334,143 @@ Product URL: ${scrapeData.product.url}`
             </div>
           )}
 
-          {/* Seed Image Upload - For AI video character/scene consistency */}
+          {/* Multi-Scene Reference Images - For AI video consistency */}
           {defaultVideoSource === 'ai' && (
             <div className="space-y-3 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20">
-              <Label className="flex items-center gap-2 text-sm font-semibold">
-                🖼️ Reference Image
-                <Badge variant="secondary" className="text-[10px] bg-indigo-500 text-white">Optional</Badge>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2 text-sm font-semibold">
+                  🖼️ Scene Reference Images
+                  <Badge variant="secondary" className="text-[10px] bg-indigo-500 text-white">Optional</Badge>
+                </Label>
+                {sceneReferenceImages.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllSceneReferences}
+                    className="text-xs text-red-500 hover:text-red-700"
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Upload an image to guide the AI - maintain character or scene consistency
+                Upload reference images for specific scenes. Each image will guide that scene's video generation.
               </p>
               
-              {/* Image Type Selector */}
-              <div className="flex gap-2">
-                <Button
-                  variant={seedImageType === 'character' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSeedImageType('character')}
-                  className="flex-1 text-xs"
-                >
-                  👤 Character
-                </Button>
-                <Button
-                  variant={seedImageType === 'scene' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSeedImageType('scene')}
-                  className="flex-1 text-xs"
-                >
-                  🎬 Scene/Style
-                </Button>
-              </div>
-              
-              {/* Upload Area */}
-              {!seedImage ? (
-                <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleSeedImageUpload}
-                  />
-                  <ImageIcon className="h-8 w-8 text-indigo-500 mb-2" />
-                  <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                    Upload {seedImageType === 'character' ? 'Character' : 'Scene'} Image
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    JPG, PNG, WebP (max 10MB)
-                  </span>
-                </label>
+              {/* Scene Reference Grid */}
+              {scenePrompts.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                  {scenePrompts.map((scene, index) => {
+                    const existingRef = sceneReferenceImages.find(img => img.sceneNumber === index + 1)
+                    return (
+                      <div 
+                        key={index}
+                        className={`relative p-2 rounded-lg border-2 ${
+                          existingRef ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30' : 'border-dashed border-gray-300 dark:border-gray-700'
+                        }`}
+                      >
+                        <div className="text-xs font-medium mb-1 text-center">Scene {index + 1}</div>
+                        {existingRef ? (
+                          <div className="relative">
+                            <img 
+                              src={existingRef.preview} 
+                              alt={`Scene ${index + 1} reference`}
+                              className="w-full h-16 object-cover rounded"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-1 -right-1 h-5 w-5"
+                              onClick={() => removeSceneReferenceImage(index + 1)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center justify-center h-16 border border-dashed border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleSceneReferenceUpload(e, index + 1)}
+                            />
+                            <Plus className="h-4 w-4 text-gray-400" />
+                            <span className="text-[10px] text-gray-400">Add Image</span>
+                          </label>
+                        )}
+                        <p className="text-[9px] text-muted-foreground mt-1 line-clamp-2 text-center">
+                          {scene.prompt?.substring(0, 40)}...
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
               ) : (
-                <div className="relative">
-                  <img 
-                    src={seedImagePreview} 
-                    alt="Seed reference" 
-                    className="w-full h-32 object-cover rounded-lg border-2 border-indigo-500"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6"
-                    onClick={removeSeedImage}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                    {seedImageType === 'character' ? '👤 Character' : '🎬 Scene'} Reference
-                  </div>
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  <p>Generate scene prompts first to add reference images</p>
+                  <p className="text-xs mt-1">Or use the single reference image below</p>
                 </div>
               )}
               
-              <p className="text-xs text-indigo-600 dark:text-indigo-400">
-                💡 {seedImageType === 'character' 
-                  ? 'The AI will try to generate videos featuring a similar-looking character'
-                  : 'The AI will use this as visual inspiration for the video style'}
+              {/* Fallback: Single Reference Image (when no scene prompts yet) */}
+              {scenePrompts.length === 0 && (
+                <div className="space-y-2 pt-2 border-t">
+                  <Label className="text-xs font-medium">Single Reference (for first scene)</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={seedImageType === 'character' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSeedImageType('character')}
+                      className="flex-1 text-xs"
+                    >
+                      👤 Character
+                    </Button>
+                    <Button
+                      variant={seedImageType === 'scene' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSeedImageType('scene')}
+                      className="flex-1 text-xs"
+                    >
+                      🎬 Scene/Style
+                    </Button>
+                  </div>
+                  
+                  {!seedImage ? (
+                    <label className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg cursor-pointer hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleSeedImageUpload}
+                      />
+                      <ImageIcon className="h-6 w-6 text-indigo-500 mb-1" />
+                      <span className="text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                        Upload Reference Image
+                      </span>
+                    </label>
+                  ) : (
+                    <div className="relative">
+                      <img 
+                        src={seedImagePreview} 
+                        alt="Seed reference" 
+                        className="w-full h-20 object-cover rounded-lg border-2 border-indigo-500"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-5 w-5"
+                        onClick={removeSeedImage}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded">
+                💡 <strong>Pro Tip:</strong> Upload character images for consistent protagonist appearance, or scene images for style/location reference.
+                {sceneReferenceImages.length > 0 && ` (${sceneReferenceImages.length} scene(s) have references)`}
               </p>
             </div>
           )}
