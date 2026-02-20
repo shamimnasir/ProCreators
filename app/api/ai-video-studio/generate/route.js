@@ -1426,8 +1426,9 @@ export async function POST(request) {
         videos = await searchStockVideosByKeywords(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'ai') {
-      // Generate AI video clips using centralized Kling service with character consistency
-      console.log(`[${jobId}] 🎬 Generating AI clips with Kling (consistency: ${consistencyMode})...`)
+      // Generate AI video clips using centralized service with character consistency
+      const modelName = aiModel === 'minimax' ? 'Minimax' : 'Kling'
+      console.log(`[${jobId}] 🎬 Generating AI clips with ${modelName} (consistency: ${aiModel === 'minimax' ? 'none (unsupported)' : consistencyMode})...`)
       
       try {
         if (!isFalConfigured()) {
@@ -1442,14 +1443,15 @@ export async function POST(request) {
           aspectRatio = '1:1'
         }
         
-        // Use the centralized Kling service with consistency
+        // Use the centralized video service with model selection
         const result = await generateConsistentVideoClips({
           script: prompt,
           duration: parseInt(duration),
           aspectRatio,
-          consistencyMode,
+          consistencyMode: aiModel === 'minimax' ? 'none' : consistencyMode, // Minimax doesn't support consistency
           characterDescription: null, // Will be auto-extracted from script
           jobId,
+          videoModel: aiModel, // Pass the selected AI model (kling or minimax)
           onProgress: (progress) => {
             console.log(`[${jobId}] ${progress.message}`)
           }
@@ -1459,18 +1461,18 @@ export async function POST(request) {
           url: clip.url,
           keyword: `ai-scene-${i + 1}`,
           type: 'ai-generated',
-          model: clip.model || 'Kling',
+          model: aiModel === 'minimax' ? 'Minimax' : (clip.model || 'Kling'),
           frameChained: clip.frameChained,
           seed: result.seed
         }))
         
-        console.log(`[${jobId}] ✅ Generated ${videos.length} clips with ${consistencyMode} consistency`)
+        console.log(`[${jobId}] ✅ Generated ${videos.length} clips with ${modelName}`)
         
         if (videos.length === 0) {
-          throw new Error('No AI videos generated from Kling')
+          throw new Error(`No AI videos generated from ${modelName}`)
         }
-      } catch (klingError) {
-        console.error(`[${jobId}] ⚠️ Kling failed:`, klingError.message)
+      } catch (aiError) {
+        console.error(`[${jobId}] ⚠️ ${aiModel} failed:`, aiError.message)
         
         // Fallback to stock videos
         console.log(`[${jobId}] Falling back to stock videos`)
