@@ -306,6 +306,11 @@ export default function StoryReelsPage({
   const [recording, setRecording] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState(null)
   
+  // Seed Image for character/scene consistency
+  const [seedImage, setSeedImage] = useState(null) // File object
+  const [seedImagePreview, setSeedImagePreview] = useState(null) // Preview URL
+  const [seedImageType, setSeedImageType] = useState('character') // 'character' or 'scene'
+  
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [captionFontSize, setCaptionFontSize] = useState('medium')
