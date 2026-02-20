@@ -1574,6 +1574,64 @@ function AIVideoStudioPageContent() {
                 </div>
               )}
 
+              {/* AI Video Model Selection (only for AI videos) */}
+              {videoSource === 'ai' && (
+                <div className="space-y-3 pt-4 border-t">
+                  <Label className="flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
+                    AI Video Model
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Choose the AI model for video generation
+                  </p>
+                  <RadioGroup value={aiModel} onValueChange={setAiModel} className="space-y-2">
+                    <div 
+                      className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        aiModel === 'kling' ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30' : 'border-muted hover:border-purple-300'
+                      }`}
+                      onClick={() => setAiModel('kling')}
+                    >
+                      <RadioGroupItem value="kling" id="model-kling" className="mt-0.5" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="model-kling" className="font-medium cursor-pointer">Kling AI</Label>
+                          <Badge className="text-[10px] bg-purple-500">Premium</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Higher quality • Better details • Character consistency supported</p>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                          ⏱️ ~60s per clip • 10K credits/30s
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        aiModel === 'minimax' ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30' : 'border-muted hover:border-cyan-300'
+                      }`}
+                      onClick={() => setAiModel('minimax')}
+                    >
+                      <RadioGroupItem value="minimax" id="model-minimax" className="mt-0.5" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="model-minimax" className="font-medium cursor-pointer">Minimax Fast</Label>
+                          <Badge className="text-[10px] bg-cyan-500">⚡ Fast</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Faster generation • Good quality • Budget-friendly</p>
+                        <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
+                          ⏱️ ~45s per clip • 7K credits/30s
+                        </p>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                  
+                  {aiModel === 'minimax' && consistencyMode !== 'none' && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 p-2 bg-amber-50 dark:bg-amber-950/30 rounded">
+                      ⚠️ Note: Minimax doesn't support character consistency. Consistency mode will be disabled.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Video Info */}
               <div className="space-y-3 pt-4 border-t">
                 <div className={`p-4 rounded-lg border ${
