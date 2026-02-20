@@ -199,8 +199,40 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         }
       }
       
+      // Upload multi-scene reference images
+      let sceneReferenceUrls = {}
+      if (Object.keys(sceneReferenceImages).length > 0) {
+        console.log(`[${jobId}] 🖼️ Uploading ${Object.keys(sceneReferenceImages).length} scene reference images...`)
+        
+        const { fal } = await import('@fal-ai/client')
+        fal.config({ credentials: process.env.FAL_KEY })
+        
+        for (const [sceneNum, imageFile] of Object.entries(sceneReferenceImages)) {
+          try {
+            const refImagePath = join(tempDir, `scene-ref-${sceneNum}.jpg`)
+            
+            if (imageFile instanceof Buffer) {
+              await writeFile(refImagePath, imageFile)
+            } else if (imageFile.arrayBuffer) {
+              const buffer = Buffer.from(await imageFile.arrayBuffer())
+              await writeFile(refImagePath, buffer)
+            }
+            
+            if (existsSync(refImagePath)) {
+              const fileBuffer = await require('fs/promises').readFile(refImagePath)
+              const uploadResult = await fal.storage.upload(new Blob([fileBuffer], { type: 'image/jpeg' }))
+              sceneReferenceUrls[sceneNum] = uploadResult.url || uploadResult
+              console.log(`[${jobId}] ✅ Scene ${sceneNum} reference uploaded`)
+            }
+          } catch (refErr) {
+            console.error(`[${jobId}] ⚠️ Scene ${sceneNum} reference upload failed:`, refErr.message)
+          }
+        }
+      }
+      
       try {
-        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)${seedImageUrl ? ' with seed image' : ''}...`)
+        const hasSceneRefs = Object.keys(sceneReferenceUrls).length > 0
+        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)${seedImageUrl ? ' with seed image' : ''}${hasSceneRefs ? ` with ${Object.keys(sceneReferenceUrls).length} scene refs` : ''}...`)
         
         // Use the centralized video service with consistency
         const result = await generateConsistentVideoClips({
@@ -213,6 +245,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           videoModel, // Pass the video model
           seedImageUrl, // Pass the seed image URL for image-to-video
           seedImageType, // 'character' or 'scene'
+          sceneReferenceUrls, // Pass multi-scene reference URLs
           onProgress: async (progress) => {
             // Calculate ETA based on clip progress
             // Minimax is typically faster (~60s), Kling is ~60-120s per clip
