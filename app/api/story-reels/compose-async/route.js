@@ -142,21 +142,28 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         throw new Error('AI video service not configured')
       }
       
+      // Determine video model (kling or minimax) from videoSource
+      // ai-standard = kling standard, ai-pro = kling pro, ai-minimax = minimax
+      const videoModel = videoSource === 'ai-minimax' ? 'minimax' : 'kling'
+      
       try {
-        console.log(`[${jobId}] 🎬 Starting Kling video generation (${consistencyMode} consistency)...`)
+        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)...`)
         
-        // Use the centralized Kling service with consistency
+        // Use the centralized video service with consistency
         const result = await generateConsistentVideoClips({
           script,
           duration: parseInt(duration),
           aspectRatio,
-          consistencyMode,
+          consistencyMode: videoModel === 'minimax' ? 'none' : consistencyMode, // Minimax doesn't support consistency
           characterDescription: null, // Will be extracted from script
           jobId,
+          videoModel, // Pass the video model
           onProgress: async (progress) => {
-            // Calculate ETA based on clip progress (each clip ~60 seconds)
+            // Calculate ETA based on clip progress
+            // Minimax is typically faster (~60s), Kling is ~60-120s per clip
+            const timePerClip = videoModel === 'minimax' ? 45 : 60
             const clipsRemaining = progress.totalClips - progress.clipIndex
-            const estimatedSecondsRemaining = clipsRemaining * 60 + 60 // 60s per clip + 60s processing
+            const estimatedSecondsRemaining = clipsRemaining * timePerClip + 60 // + 60s processing
             
             await updateJobStatus(jobId, {
               progress: 10 + Math.floor((progress.clipIndex / progress.totalClips) * 50),
@@ -171,14 +178,14 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           url: clip.url,
           keyword: `ai-scene-${i + 1}`,
           type: 'ai-generated',
-          model: 'Kling',
+          model: videoModel === 'minimax' ? 'Minimax' : 'Kling',
           frameChained: clip.frameChained
         }))
         
-        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} clips with ${consistencyMode} consistency`)
+        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} clips with ${videoModel}`)
         
-      } catch (klingError) {
-        console.error(`[${jobId}] ⚠️ Kling generation failed:`, klingError.message)
+      } catch (genError) {
+        console.error(`[${jobId}] ⚠️ ${videoModel} generation failed:`, genError.message)
         
         // Fallback to stock videos
         console.log(`[${jobId}] Falling back to stock videos...`)
