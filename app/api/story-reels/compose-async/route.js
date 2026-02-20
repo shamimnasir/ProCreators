@@ -819,20 +819,20 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // Single clip - just copy
       await require('fs/promises').copyFile(normalizedFiles[0], concatVideoPath)
     } else if (normalizedFiles.length === 2) {
-      // Two clips - simple crossfade
+      // Two clips - simple video-only crossfade (AI videos are silent)
       const transitionDuration = 0.5 // 0.5 second crossfade
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(normalizedFiles[0])
           .input(normalizedFiles[1])
           .complexFilter([
-            `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=${durationPerClip - transitionDuration}[v]`,
-            `[0:a][1:a]acrossfade=d=${transitionDuration}[a]`
+            // Video crossfade only - AI videos don't have audio
+            `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=${durationPerClip - transitionDuration}[v]`
           ])
           .outputOptions([
-            '-map', '[v]', '-map', '[a]',
+            '-map', '[v]',
             '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
-            '-c:a', 'aac', '-b:a', '128k'
+            '-an' // No audio in concat (will add later)
           ])
           .output(concatVideoPath)
           .on('end', resolve)
@@ -845,7 +845,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
               ffmpeg()
                 .input(clipListPath)
                 .inputOptions(['-f', 'concat', '-safe', '0'])
-                .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k'])
+                .outputOptions(['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p', '-an'])
                 .output(concatVideoPath)
                 .on('end', resolve)
                 .on('error', reject)
@@ -855,9 +855,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           .run()
       })
     } else {
-      // Multiple clips - use concat with very short fade transitions
-      // For many clips, complex xfade chains can fail, so we use a simpler approach
-      // with fadeout/fadein at clip boundaries
+      // Multiple clips - use simple concat (AI videos are silent)
       const clipListPath = join(tempDir, 'clips.txt')
       const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
       await writeFile(clipListPath, clipListContent)
@@ -868,7 +866,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           .inputOptions(['-f', 'concat', '-safe', '0'])
           .outputOptions([
             '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
-            '-c:a', 'aac', '-b:a', '128k'
+            '-an' // No audio in concat (will add later)
           ])
           .output(concatVideoPath)
           .on('end', resolve)
