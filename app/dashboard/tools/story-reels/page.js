@@ -19,7 +19,7 @@ import {
   FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
   GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
   TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
-  Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard, Zap, Coins, MessageSquare, Clock} from 'lucide-react'
+  Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard, Zap, Coins, MessageSquare, Clock, Image as ImageIcon} from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 import {
