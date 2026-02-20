@@ -1579,10 +1579,10 @@ function AIVideoStudioPageContent() {
                 <div className="space-y-3 pt-4 border-t">
                   <Label className="flex items-center gap-2">
                     <Zap className="h-4 w-4" />
-                    AI Video Model
+                    Video Quality
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Choose the AI model for video generation
+                    Choose video generation quality
                   </p>
                   <RadioGroup value={aiModel} onValueChange={setAiModel} className="space-y-2">
                     <div 
@@ -1594,12 +1594,12 @@ function AIVideoStudioPageContent() {
                       <RadioGroupItem value="kling" id="model-kling" className="mt-0.5" />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="model-kling" className="font-medium cursor-pointer">Kling AI</Label>
+                          <Label htmlFor="model-kling" className="font-medium cursor-pointer">Premium Quality</Label>
                           <Badge className="text-[10px] bg-purple-500">Premium</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Higher quality • Better details • Character consistency supported</p>
+                        <p className="text-xs text-muted-foreground">Best details • Cinematic motion • Character consistency</p>
                         <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                          ⏱️ ~60s per clip • 10K credits/30s
+                          10K credits/30s
                         </p>
                       </div>
                     </div>
@@ -1613,12 +1613,12 @@ function AIVideoStudioPageContent() {
                       <RadioGroupItem value="minimax" id="model-minimax" className="mt-0.5" />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor="model-minimax" className="font-medium cursor-pointer">Minimax Fast</Label>
+                          <Label htmlFor="model-minimax" className="font-medium cursor-pointer">Fast Mode</Label>
                           <Badge className="text-[10px] bg-cyan-500">⚡ Fast</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Faster generation • Good quality • Budget-friendly</p>
+                        <p className="text-xs text-muted-foreground">Quick generation • Good quality • Budget-friendly</p>
                         <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
-                          ⏱️ ~45s per clip • 7K credits/30s
+                          7K credits/30s
                         </p>
                       </div>
                     </div>
@@ -1626,7 +1626,7 @@ function AIVideoStudioPageContent() {
                   
                   {aiModel === 'minimax' && consistencyMode !== 'none' && (
                     <p className="text-xs text-amber-600 dark:text-amber-400 p-2 bg-amber-50 dark:bg-amber-950/30 rounded">
-                      ⚠️ Note: Minimax doesn't support character consistency. Consistency mode will be disabled.
+                      ⚠️ Note: Fast Mode doesn't support character consistency. Consistency mode will be disabled.
                     </p>
                   )}
                 </div>
