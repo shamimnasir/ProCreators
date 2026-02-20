@@ -147,8 +147,42 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // ai-standard = kling standard, ai-pro = kling pro, ai-minimax = minimax
       const videoModel = videoSource === 'ai-minimax' ? 'minimax' : 'kling'
       
+      // Handle seed image upload if provided
+      let seedImageUrl = null
+      if (seedImage) {
+        try {
+          console.log(`[${jobId}] 🖼️ Processing seed image (${seedImageType})...`)
+          
+          // Save seed image to temp and upload to fal storage
+          const seedImagePath = join(tempDir, 'seed-image.jpg')
+          
+          // If seedImage is a File/Blob, write it to disk first
+          if (seedImage instanceof Buffer) {
+            await writeFile(seedImagePath, seedImage)
+          } else if (seedImage.arrayBuffer) {
+            const buffer = Buffer.from(await seedImage.arrayBuffer())
+            await writeFile(seedImagePath, buffer)
+          }
+          
+          // Upload to fal storage for use in image-to-video
+          if (existsSync(seedImagePath)) {
+            const { fal } = await import('@fal-ai/client')
+            fal.config({ credentials: process.env.FAL_KEY })
+            
+            const fileBuffer = await require('fs/promises').readFile(seedImagePath)
+            const uploadResult = await fal.storage.upload(new Blob([fileBuffer], { type: 'image/jpeg' }))
+            seedImageUrl = uploadResult.url || uploadResult
+            
+            console.log(`[${jobId}] ✅ Seed image uploaded: ${seedImageUrl}`)
+          }
+        } catch (seedError) {
+          console.error(`[${jobId}] ⚠️ Seed image upload failed:`, seedError.message)
+          // Continue without seed image
+        }
+      }
+      
       try {
-        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)...`)
+        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)${seedImageUrl ? ' with seed image' : ''}...`)
         
         // Use the centralized video service with consistency
         const result = await generateConsistentVideoClips({
@@ -159,6 +193,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           characterDescription: null, // Will be extracted from script
           jobId,
           videoModel, // Pass the video model
+          seedImageUrl, // Pass the seed image URL for image-to-video
+          seedImageType, // 'character' or 'scene'
           onProgress: async (progress) => {
             // Calculate ETA based on clip progress
             // Minimax is typically faster (~60s), Kling is ~60-120s per clip
