@@ -485,6 +485,9 @@ function AIVideoStudioPageContent() {
       // Character consistency mode (for AI videos)
       formData.append('consistencyMode', consistencyMode)
       
+      // AI Model selection (kling or minimax)
+      formData.append('aiModel', aiModel)
+      
       // Voice/TTS parameters
       formData.append('voiceOption', voiceOption)
       formData.append('ttsLanguage', ttsLanguage)
