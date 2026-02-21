@@ -248,6 +248,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           seedImageUrl, // Pass the seed image URL for image-to-video
           seedImageType, // 'character' or 'scene'
           sceneReferenceUrls, // Pass multi-scene reference URLs
+          useScenePrompts, // Whether to use AI-generated scene prompts or raw prompt
           onProgress: async (progress) => {
             // Calculate ETA based on clip progress
             // Minimax is typically faster (~60s), Kling is ~60-120s per clip
