@@ -586,25 +586,37 @@ export async function POST(request) {
       } else {
         throw new Error('Voice file is required for upload option')
       }
+    } else if (voiceOption === 'silent' || voiceOption === 'none') {
+      // Silent mode - no voice audio needed
+      console.log(`[${jobId}] Silent mode - skipping voice generation`)
     }
 
-    // Verify audio file exists
-    if (!existsSync(audioPath)) {
+    // Track if we have voice audio
+    const hasVoiceAudio = existsSync(audioPath)
+
+    // Verify audio file exists (only if not in silent mode)
+    if (!hasVoiceAudio && voiceOption !== 'silent' && voiceOption !== 'none') {
       throw new Error('Audio file was not created')
     }
 
     // Step 2b: Get actual audio duration BEFORE processing video clips
-    const actualAudioDuration = await new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(audioPath, (err, metadata) => {
-        if (err) {
-          console.error(`[${jobId}] Could not get audio duration, using target:`, err.message)
-          resolve(duration) // Fallback to target duration
-        } else {
-          const audioDuration = metadata.format.duration
-          resolve(audioDuration)
-        }
+    let actualAudioDuration
+    if (hasVoiceAudio) {
+      actualAudioDuration = await new Promise((resolve, reject) => {
+        ffmpeg.ffprobe(audioPath, (err, metadata) => {
+          if (err) {
+            console.error(`[${jobId}] Could not get audio duration, using target:`, err.message)
+            resolve(duration) // Fallback to target duration
+          } else {
+            const audioDuration = metadata.format.duration
+            resolve(audioDuration)
+          }
+        })
       })
-    })
+    } else {
+      // Silent mode - use requested duration
+      actualAudioDuration = duration
+    }
 
     // Step 3: Normalize each clip individually, then concatenate
     // Determine target dimensions based on video orientation
