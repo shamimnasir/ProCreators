@@ -1803,12 +1803,24 @@ export default function StoryReelsPage({
                 <Progress value={progress} className="h-3" />
                 
                 <div className="flex items-center justify-between text-sm">
-                  <span>{Math.round(progress)}% complete</span>
-                  {estimatedTimeRemaining && (
-                    <span className="text-muted-foreground">
-                      ~{Math.ceil(estimatedTimeRemaining / 60)} min remaining
+                  <span className="font-medium">{Math.round(progress)}% complete</span>
+                  {estimatedTimeRemaining && estimatedTimeRemaining > 0 && (
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {estimatedTimeRemaining >= 60 
+                        ? `~${Math.ceil(estimatedTimeRemaining / 60)} min remaining`
+                        : `~${Math.ceil(estimatedTimeRemaining)} sec remaining`
+                      }
                     </span>
                   )}
+                </div>
+                
+                {/* Engaging tips while waiting */}
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xs text-muted-foreground">
+                    💡 <span className="font-medium">Tip:</span> AI video generation takes ~2 min per scene. 
+                    Your {actualDuration}s video with {scenePrompts.length || Math.ceil(actualDuration/10)} scenes is being crafted!
+                  </p>
                 </div>
                 
                 {currentJobId && (
