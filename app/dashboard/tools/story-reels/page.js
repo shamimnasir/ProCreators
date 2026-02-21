@@ -211,6 +211,8 @@ export default function StoryReelsPage({
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [captionFontSize, setCaptionFontSize] = useState('medium')
   const [captionPosition, setCaptionPosition] = useState('bottom')
+  const [showCaptions, setShowCaptions] = useState(true) // New: option to disable captions
+  const [useScenePrompts, setUseScenePrompts] = useState(true) // New: option to skip scene prompt generation
   const [customMusic, setCustomMusic] = useState(null)
   const [showMusicPicker, setShowMusicPicker] = useState(false)
   const [resolution, setResolution] = useState('1080p')
