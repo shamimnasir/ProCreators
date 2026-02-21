@@ -1067,7 +1067,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       console.log(`[${jobId}] Mixing Kling audio with dialogue/voiceover...`)
       await new Promise((resolve, reject) => {
         ffmpeg()
-          .input(captionedPath)
+          .input(processedVideoPath)
           .input(audioPath)
           .complexFilter([
             '[0:a]volume=0.7[kling]',  // Kling audio at 70% (background)
@@ -1088,7 +1088,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             console.error(`[${jobId}] Audio mix failed: ${err.message}, falling back to dialogue only`)
             // Fallback: just use dialogue audio
             ffmpeg()
-              .input(captionedPath)
+              .input(processedVideoPath)
               .input(audioPath)
               .outputOptions([
                 '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k',
@@ -1105,7 +1105,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // Only dialogue/voiceover audio (no Kling audio)
       await new Promise((resolve, reject) => {
         ffmpeg()
-          .input(captionedPath)
+          .input(processedVideoPath)
           .input(audioPath)
           .outputOptions([
             '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k',
@@ -1120,7 +1120,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // Only Kling's original audio (no dialogue)
       await new Promise((resolve, reject) => {
         ffmpeg()
-          .input(captionedPath)
+          .input(processedVideoPath)
           .outputOptions([
             '-c:v', 'copy', '-c:a', 'copy',
             '-movflags', '+faststart'
@@ -1134,7 +1134,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // No audio at all
       await new Promise((resolve, reject) => {
         ffmpeg()
-          .input(captionedPath)
+          .input(processedVideoPath)
           .outputOptions([
             '-c:v', 'copy', '-an',
             '-movflags', '+faststart'
