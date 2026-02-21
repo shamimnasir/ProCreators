@@ -957,11 +957,13 @@ export default function StoryReelsPage({
       const formData = new FormData()
       formData.append('script', script)
       formData.append('duration', submitDuration)  // Use scene-based duration for accurate billing
-      formData.append('captionStyle', captionStyle)
+      formData.append('captionStyle', showCaptions ? captionStyle : 'none') // Disable captions if user opted out
       formData.append('captionFontSize', captionFontSize)
       formData.append('captionPosition', captionPosition)
+      formData.append('showCaptions', showCaptions.toString())
       formData.append('videoSource', videoSource)
       formData.append('consistencyMode', consistencyMode)
+      formData.append('useScenePrompts', useScenePrompts.toString()) // Whether to use scene prompts or raw prompt
       
       if (seedImage && videoSource.startsWith('ai-')) {
         formData.append('seedImage', seedImage)
