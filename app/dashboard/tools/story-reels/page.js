@@ -1780,7 +1780,10 @@ export default function StoryReelsPage({
               className="w-full h-14 text-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
             >
               <Play className="mr-2 h-6 w-6" />
-              Generate Video ({formatCredits(estimatedCredits)} credits)
+              {isAIMode && scenePrompts.length > 0 
+                ? `Generate ${scenePrompts.length} Scenes (${actualDuration}s) - ${formatCredits(estimatedCredits)} credits`
+                : `Generate Video (${formatCredits(estimatedCredits)} credits)`
+              }
             </Button>
           )}
 
