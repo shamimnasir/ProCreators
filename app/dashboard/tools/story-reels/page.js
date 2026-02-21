@@ -1130,7 +1130,10 @@ export default function StoryReelsPage({
           </h1>
           <Badge variant="outline" className="text-sm px-3 py-1">
             <Coins className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
-            {formatCredits(estimatedCredits)} credits
+            {isAIMode && scenePrompts.length > 0 
+              ? `${scenePrompts.length} scenes × 10s = ${formatCredits(estimatedCredits)} credits`
+              : `${formatCredits(estimatedCredits)} credits`
+            }
           </Badge>
         </div>
         <p className="text-muted-foreground">{pageSubtitle || 'AI generates video clips from your script • Premium quality'}</p>
