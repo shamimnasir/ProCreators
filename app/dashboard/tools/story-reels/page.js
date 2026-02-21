@@ -1102,7 +1102,8 @@ export default function StoryReelsPage({
   const hasScript = script.trim().length > 30
   const hasScenePrompts = scenePrompts.length > 0
   const hasStockVideos = stockVideos.length > 0
-  const hasVoice = voiceOption === 'tts' ? !!selectedVoice : !!voiceFile
+  // Fix: Include 'silent' option as valid voice selection
+  const hasVoice = voiceOption === 'silent' ? true : (voiceOption === 'tts' ? !!selectedVoice : !!voiceFile)
   const isReadyToGenerate = hasScript && (isAIMode ? hasScenePrompts : hasStockVideos) && hasVoice
 
   return (
