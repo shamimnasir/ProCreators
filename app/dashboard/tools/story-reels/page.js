@@ -228,7 +228,7 @@ export default function StoryReelsPage({
   const [videoSource, setVideoSource] = useState(getInitialVideoSource())
   
   // Character Consistency Mode
-  const [consistencyMode, setConsistencyMode] = useState('none')
+  const [consistencyMode, setConsistencyMode] = useState('seed-based') // Default to seed-based for better visual consistency
   
   // Preview state
   const [showPreview, setShowPreview] = useState(false)
