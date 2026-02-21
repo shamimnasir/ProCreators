@@ -1221,7 +1221,7 @@ export default function StoryReelsPage({
               <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                 <Label className="whitespace-nowrap">Duration:</Label>
                 <div className="flex gap-2 flex-wrap">
-                  {[15, 30, 45, 60].map(d => (
+                  {[10, 15, 30, 45, 60].map(d => (
                     <Button
                       key={d}
                       variant={duration === d ? 'default' : 'outline'}
