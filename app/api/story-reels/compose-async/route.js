@@ -1366,13 +1366,19 @@ export async function POST(request) {
     
     console.log(`[${jobId}] Credit tool ID: ${creditToolId}`)
     
-    // For longer videos, multiply credits
-    const durationMultiplier = Math.ceil(duration / 30) // Each 30s costs base rate
+    // Linear duration scaling (per-scene pricing)
+    // 30s = 100% of base, 20s = 67%, 10s = 33%
+    const durationMultiplier = duration / 30
     
     // Check and deduct credits
     const creditCheck = await checkCredits(userId, creditToolId)
     console.log(`[${jobId}] Credit check:`, JSON.stringify(creditCheck))
-    const totalCost = creditCheck.cost * durationMultiplier
+    
+    // Calculate cost with linear scaling (minimum 25% of base)
+    const totalCost = Math.max(
+      Math.ceil(creditCheck.cost * durationMultiplier),
+      Math.ceil(creditCheck.cost * 0.25) // Minimum 25%
+    )
     
     if (creditCheck.currentBalance < totalCost) {
       console.log(`[${jobId}] Insufficient credits: ${creditCheck.currentBalance} < ${totalCost}`)
@@ -1382,8 +1388,8 @@ export async function POST(request) {
       }, { status: 402 })
     }
     
-    console.log(`[${jobId}] Deducting credits...`)
-    const deductResult = await deductCredits(userId, creditToolId, { multiplier: durationMultiplier })
+    console.log(`[${jobId}] Deducting credits... (${totalCost} credits for ${duration}s)`)
+    const deductResult = await deductCredits(userId, creditToolId, { duration: duration, durationMultiplier: durationMultiplier })
     if (!deductResult.success) {
       console.log(`[${jobId}] Deduct failed:`, deductResult.error)
       return NextResponse.json({ success: false, error: deductResult.error }, { status: 402 })
