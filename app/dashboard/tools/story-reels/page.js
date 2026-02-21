@@ -1877,13 +1877,14 @@ export default function StoryReelsPage({
       {/* Music Picker Modal */}
       {showMusicPicker && (
         <MusicPicker
-          isOpen={showMusicPicker}
+          open={showMusicPicker}
           onClose={() => setShowMusicPicker(false)}
-          onSelect={(music) => {
+          onSelectMusic={(music) => {
             setCustomMusic(music)
             setShowMusicPicker(false)
             toast({ title: "Music Selected", description: music.name })
           }}
+          videoDuration={duration}
         />
       )}
     </div>
