@@ -1389,7 +1389,7 @@ export async function POST(request) {
     }
     
     console.log(`[${jobId}] Deducting credits... (${totalCost} credits for ${duration}s)`)
-    const deductResult = await deductCredits(userId, creditToolId, { duration: duration, durationMultiplier: durationMultiplier })
+    const deductResult = await deductCredits(userId, creditToolId, { duration: duration })
     if (!deductResult.success) {
       console.log(`[${jobId}] Deduct failed:`, deductResult.error)
       return NextResponse.json({ success: false, error: deductResult.error }, { status: 402 })
