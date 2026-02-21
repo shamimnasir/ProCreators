@@ -718,7 +718,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       }
     }
     
-    if (voiceOption === 'none') {
+    if (voiceOption === 'none' || voiceOption === 'silent') {
       // Check if we have character dialogues in prompts
       const dialogues = extractDialoguesFromPrompts(parsedScenePrompts)
       
