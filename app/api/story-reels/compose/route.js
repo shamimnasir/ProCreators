@@ -820,7 +820,8 @@ export async function POST(request) {
     await writeFile(captionsPath, captionContent, 'utf8')
 
     // Step 5: Add background music if requested
-    let finalAudioPath = audioPath
+    let finalAudioPath = hasVoiceAudio ? audioPath : null
+    let hasFinalAudio = hasVoiceAudio
     
     if (musicTrack !== 'none') {
       // Determine music path (custom Freesound download or built-in)
@@ -837,7 +838,8 @@ export async function POST(request) {
             .outputOptions([
               '-acodec', 'libmp3lame',
               '-b:a', '128k',
-              '-ar', '44100'
+              '-ar', '44100',
+              `-af`, `volume=0.8,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2`
             ])
             .output(trimmedMusicPath)
             .on('end', () => {
@@ -850,39 +852,49 @@ export async function POST(request) {
             .run()
         })
         
-        // Step 6b: Mix trimmed music with voice
+        // Step 6b: Mix trimmed music with voice (if we have voice) or use music only
         if (existsSync(trimmedMusicPath)) {
-          const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
-          
-          await new Promise((resolve, reject) => {
-            ffmpeg()
-              .input(audioPath)
-              .input(trimmedMusicPath)
-              .complexFilter([
-                '[0:a]volume=1.0[voice]',
-                `[1:a]volume=0.20,afade=t=out:st=${Math.max(actualAudioDuration - 2, 0)}:d=2[music]`,
-                '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
-              ])
-              .outputOptions([
-                '-map', '[out]',
-                '-ac', '2',
-                '-ar', '44100',
-                '-b:a', '128k'
-              ])
-              .output(mixedAudioPath)
-              .on('end', () => {
-                finalAudioPath = mixedAudioPath
-                resolve()
-              })
-              .on('error', (err) => {
-                console.error(`[${jobId}] Music mixing error:`, err.message)
-                resolve() // Continue without music on error
-              })
-              .run()
-          })
+          if (hasVoiceAudio) {
+            // Mix music with voice
+            const mixedAudioPath = join(tempDir, 'mixed-audio.mp3')
+            
+            await new Promise((resolve, reject) => {
+              ffmpeg()
+                .input(audioPath)
+                .input(trimmedMusicPath)
+                .complexFilter([
+                  '[0:a]volume=1.0[voice]',
+                  `[1:a]volume=0.25[music]`,
+                  '[voice][music]amix=inputs=2:duration=shortest:dropout_transition=2[out]'
+                ])
+                .outputOptions([
+                  '-map', '[out]',
+                  '-ac', '2',
+                  '-ar', '44100',
+                  '-b:a', '128k'
+                ])
+                .output(mixedAudioPath)
+                .on('end', () => {
+                  finalAudioPath = mixedAudioPath
+                  hasFinalAudio = true
+                  resolve()
+                })
+                .on('error', (err) => {
+                  console.error(`[${jobId}] Music mixing error:`, err.message)
+                  resolve() // Continue without music on error
+                })
+                .run()
+            })
+          } else {
+            // Silent mode with music - use music as the only audio track
+            console.log(`[${jobId}] Using music-only audio (no voice)`)
+            finalAudioPath = trimmedMusicPath
+            hasFinalAudio = true
+          }
         }
       } else {
-        }
+        console.log(`[${jobId}] Music path not found: ${musicPath}`)
+      }
     }
 
     // Step 7: Add captions to video directly (OPTIMIZED - removed redundant normalization step)
