@@ -4,6 +4,34 @@
 import { NextResponse } from 'next/server'
 import { fal } from '@fal-ai/client'
 
+// Validate FAL API key format
+const validateFalKeyFormat = (key) => {
+  if (!key) return { valid: false, error: 'Key is empty' }
+  
+  const parts = key.split(':')
+  if (parts.length !== 2) {
+    return { valid: false, error: 'Key should be in format KEY_ID:KEY_SECRET' }
+  }
+  
+  const [keyId, keySecret] = parts
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
+  if (!uuidPattern.test(keyId)) {
+    return { 
+      valid: false, 
+      error: `KEY_ID doesn't look like a valid UUID`,
+      keyIdPreview: keyId.substring(0, 20) + (keyId.length > 20 ? '...' : ''),
+      hint: 'FAL keys should start with a UUID like: 360556a7-58bf-49f4-8ac8-dcb26a52d50d:...'
+    }
+  }
+  
+  if (!/^[0-9a-f]{32}$/i.test(keySecret)) {
+    return { valid: false, error: 'KEY_SECRET should be a 32-character hex string' }
+  }
+  
+  return { valid: true, keyId, keySecretPreview: keySecret.substring(0, 8) + '...' }
+}
+
 export async function GET(request) {
   try {
     const falKey = process.env.FAL_KEY
@@ -16,20 +44,28 @@ export async function GET(request) {
       }, { status: 500 })
     }
     
+    // Validate key format first
+    const validation = validateFalKeyFormat(falKey)
+    if (!validation.valid) {
+      return NextResponse.json({
+        success: false,
+        error: 'FAL_KEY format is invalid',
+        details: validation,
+        hint: validation.hint || 'Check that your FAL_KEY is in the correct format: UUID:SECRET'
+      }, { status: 400 })
+    }
+    
     // Configure with fresh credentials
     fal.config({ credentials: falKey })
     
-    // Test by checking a simple endpoint
-    // Using storage endpoint which is lightweight
+    // Test by uploading a tiny blob to verify auth works
     const testResult = await Promise.race([
       fal.storage.upload(new Blob(['test'], { type: 'text/plain' }))
         .then(url => ({ authWorking: true, method: 'storage-upload', uploadUrl: url }))
         .catch(e => {
-          // If it's a 401/unauthorized, rethrow
           if (e.status === 401 || e.message?.includes('nauthorized')) {
             throw e
           }
-          // Other errors might mean rate limit etc, but auth worked
           return { authWorking: true, note: 'Auth OK but upload had other error', error: e.message }
         }),
       new Promise((_, reject) => 
@@ -40,8 +76,9 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       message: 'FAL.ai credentials are working',
-      keyPrefix: falKey.substring(0, 10) + '...',
-      keyLength: falKey.length,
+      keyFormat: 'valid',
+      keyId: validation.keyId,
+      keySecretPreview: validation.keySecretPreview,
       timestamp: new Date().toISOString(),
       testResult
     })
@@ -59,10 +96,9 @@ export async function GET(request) {
       error: error.message,
       isUnauthorized,
       keyConfigured: !!process.env.FAL_KEY,
-      keyPrefix: process.env.FAL_KEY ? process.env.FAL_KEY.substring(0, 10) + '...' : null,
       timestamp: new Date().toISOString(),
       hint: isUnauthorized 
-        ? 'The API key is configured but FAL.ai rejected it. The key may be invalid, expired, or have incorrect permissions.'
+        ? 'The API key format is correct but FAL.ai rejected it. The key may be invalid, expired, or revoked.'
         : 'Check the error message for details'
     }, { status: isUnauthorized ? 401 : 500 })
   }
