@@ -947,9 +947,14 @@ export default function StoryReelsPage({
         throw new Error('Session expired. Please log in again.')
       }
       
+      // Calculate actual duration based on scene count for per-scene pricing
+      const submitDuration = isAIMode && scenePrompts.length > 0 
+        ? scenePrompts.length * 10  // Each AI scene is 10 seconds
+        : duration
+      
       const formData = new FormData()
       formData.append('script', script)
-      formData.append('duration', duration)
+      formData.append('duration', submitDuration)  // Use scene-based duration for accurate billing
       formData.append('captionStyle', captionStyle)
       formData.append('captionFontSize', captionFontSize)
       formData.append('captionPosition', captionPosition)
