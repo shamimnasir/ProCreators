@@ -1093,9 +1093,15 @@ export default function StoryReelsPage({
     }
   }
 
-  // Calculate credits
+  // Calculate actual duration based on scene count (10s per scene)
+  // This ensures per-scene pricing - deleting a scene reduces the cost
+  const actualDuration = isAIMode && scenePrompts.length > 0 
+    ? scenePrompts.length * 10  // Each scene is 10 seconds
+    : duration  // Use selected duration for stock video mode or before scenes are generated
+
+  // Calculate credits based on actual duration (per-scene pricing)
   const estimatedCredits = isAIMode 
-    ? calculateDynamicCost('story-reels', duration, consistencyMode)
+    ? calculateDynamicCost('story-reels', actualDuration, consistencyMode)
     : calculateDynamicCost('quick-reels-stock', duration)
 
   // Determine completion status for steps
