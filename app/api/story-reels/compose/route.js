@@ -929,32 +929,56 @@ export async function POST(request) {
         .run()
     })
     
-    // Step 7b: Merge captioned video with audio
+    // Step 7b: Merge captioned video with audio (if we have audio) or just copy video
     const finalVideoPath = join(tempDir, 'final.mp4')
     
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(captionedVideoPath)
-        .input(finalAudioPath)
-        .outputOptions([
-          '-c:v', 'copy',  // Copy video stream (already encoded)
-          '-c:a', 'aac',
-          '-b:a', '128k',
-          '-movflags', '+faststart',
-          '-map', '0:v:0',
-          '-map', '1:a:0',
-          '-shortest'
-        ])
-        .output(finalVideoPath)
-        .on('end', () => {
-          resolve()
-        })
-        .on('error', (err) => {
-          console.error(`[${jobId}] FFmpeg merge error:`, err.message)
-          reject(err)
-        })
-        .run()
-    })
+    if (hasFinalAudio && finalAudioPath) {
+      // Merge video with audio
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedVideoPath)
+          .input(finalAudioPath)
+          .outputOptions([
+            '-c:v', 'copy',  // Copy video stream (already encoded)
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-movflags', '+faststart',
+            '-map', '0:v:0',
+            '-map', '1:a:0',
+            '-shortest'
+          ])
+          .output(finalVideoPath)
+          .on('end', () => {
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[${jobId}] FFmpeg merge error:`, err.message)
+            reject(err)
+          })
+          .run()
+      })
+    } else {
+      // No audio - just copy the captioned video (silent video)
+      console.log(`[${jobId}] No audio - creating silent video`)
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(captionedVideoPath)
+          .outputOptions([
+            '-c:v', 'copy',
+            '-an',  // Remove any audio streams
+            '-movflags', '+faststart'
+          ])
+          .output(finalVideoPath)
+          .on('end', () => {
+            resolve()
+          })
+          .on('error', (err) => {
+            console.error(`[${jobId}] FFmpeg copy error:`, err.message)
+            reject(err)
+          })
+          .run()
+      })
+    }
 
     // Step 8: Save video to public folder
     // Verify final video exists and has content
