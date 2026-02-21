@@ -1066,6 +1066,7 @@ export default function StoryReelsPage({
             setProgressMessage('Video ready!')
             setVideoData(result)
             setCurrentJobId(null)
+            refreshCredits() // Refresh credit balance after generation
             toast({ title: "Success!", description: "Your video is ready!" })
           }
         } else if (data.success) {
