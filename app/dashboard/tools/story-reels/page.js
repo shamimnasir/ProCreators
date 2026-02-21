@@ -244,7 +244,7 @@ export default function StoryReelsPage({
   const [showSceneEditor, setShowSceneEditor] = useState(false)
   
   const { toast } = useToast()
-  const { checkAndDeduct, refund, complete } = useCredits()
+  const { checkAndDeduct, refund, complete, refresh: refreshCredits } = useCredits()
   const audioFileRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
