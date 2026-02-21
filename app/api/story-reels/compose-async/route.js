@@ -1404,6 +1404,8 @@ export async function POST(request) {
       ttsLanguage: formData.get('ttsLanguage') || 'en',
       selectedVoice: formData.get('selectedVoice'),
       captionStyle: formData.get('captionStyle') || 'bold-outline',
+      showCaptions: formData.get('showCaptions') !== 'false', // Default true
+      useScenePrompts: formData.get('useScenePrompts') !== 'false', // Default true
       musicTrack: formData.get('musicTrack') || 'none',
       resolution: formData.get('resolution') || '1080p',
       stockVideos: JSON.parse(formData.get('stockVideos') || '[]'),
