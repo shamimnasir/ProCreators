@@ -91,7 +91,9 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       videoOrientation, customMusicPath, niche, videoSource,
       consistencyMode: userConsistencyMode, // User's selected consistency mode
       seedImage, seedImageType, // Single seed image for character/scene consistency
-      sceneRefScenes // JSON string of scene numbers with references
+      sceneRefScenes, // JSON string of scene numbers with references
+      showCaptions = true, // Whether to show captions on video
+      useScenePrompts = true // Whether to use AI-generated scene prompts or raw prompt
     } = formDataObj
     
     // Parse scene reference images from form data
