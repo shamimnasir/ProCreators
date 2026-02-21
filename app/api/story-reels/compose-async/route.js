@@ -1007,38 +1007,49 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     
     await updateJobStatus(jobId, {
       progress: 90,
-      progressMessage: 'Adding captions and audio...'
+      progressMessage: showCaptions ? 'Adding captions and audio...' : 'Adding audio...'
     })
     
-    // Generate captions - use the cleaned TTS script to remove screenplay formatting
-    const captionsPath = join(tempDir, 'captions.ass')
-    const captionContent = generateASSCaptions(ttsScript, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
-    await writeFile(captionsPath, captionContent, 'utf8')
+    // Determine input video for final processing
+    let processedVideoPath = concatVideoPath
     
-    // Add captions (preserving Kling's original audio)
-    const captionedPath = join(tempDir, 'captioned.mp4')
-    const escapedCaptionsPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
-    
-    await new Promise((resolve, reject) => {
-      ffmpeg()
-        .input(concatVideoPath)
-        .outputOptions([
-          '-vf', `ass='${escapedCaptionsPath}':fontsdir=/app/fonts`,
-          '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
-          '-c:a', 'copy' // Keep Kling's original audio (environment sounds, footsteps, etc.)
-        ])
-        .output(captionedPath)
-        .on('end', resolve)
-        .on('error', reject)
-        .run()
-    })
+    // Add captions only if showCaptions is true
+    if (showCaptions && captionStyle !== 'none') {
+      // Generate captions - use the cleaned TTS script to remove screenplay formatting
+      const captionsPath = join(tempDir, 'captions.ass')
+      const captionContent = generateASSCaptions(ttsScript, actualAudioDuration, captionStyle, targetHeight, targetWidth, captionFontSize, captionPosition)
+      await writeFile(captionsPath, captionContent, 'utf8')
+      
+      // Add captions (preserving Kling's original audio)
+      const captionedPath = join(tempDir, 'captioned.mp4')
+      const escapedCaptionsPath = captionsPath.replace(/\\/g, '/').replace(/:/g, '\\:')
+      
+      await new Promise((resolve, reject) => {
+        ffmpeg()
+          .input(concatVideoPath)
+          .outputOptions([
+            '-vf', `ass='${escapedCaptionsPath}':fontsdir=/app/fonts`,
+            '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-pix_fmt', 'yuv420p',
+            '-c:a', 'copy' // Keep Kling's original audio (environment sounds, footsteps, etc.)
+          ])
+          .output(captionedPath)
+          .on('end', resolve)
+          .on('error', reject)
+          .run()
+      })
+      
+      processedVideoPath = captionedPath
+      console.log(`[${jobId}] Captions added successfully`)
+    } else {
+      console.log(`[${jobId}] Skipping captions (showCaptions: ${showCaptions}, captionStyle: ${captionStyle})`)
+    }
     
     // Merge with audio - MIX Kling's original audio with dialogue/voiceover
     const finalVideoPath = join(tempDir, 'final.mp4')
     
-    // Check if the captioned video has audio (from Kling)
+    // Check if the processed video has audio (from Kling)
     const hasKlingAudio = await new Promise((resolve) => {
-      ffmpeg.ffprobe(captionedPath, (err, metadata) => {
+      ffmpeg.ffprobe(processedVideoPath, (err, metadata) => {
         if (err) {
           resolve(false)
         } else {
