@@ -1682,36 +1682,82 @@ export default function StoryReelsPage({
               <CollapsibleContent>
                 <Card className="mt-2">
                   <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Caption Style */}
-                    <div className="space-y-2">
-                      <Label>Caption Style</Label>
-                      <Select value={captionStyle} onValueChange={setCaptionStyle}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bold-outline">Bold with Outline</SelectItem>
-                          <SelectItem value="minimal">Minimal</SelectItem>
-                          <SelectItem value="shadow">Shadow</SelectItem>
-                          <SelectItem value="none">No Captions</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* Show Captions Toggle */}
+                    <div className="space-y-2 sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-base">Show Captions</Label>
+                          <p className="text-xs text-muted-foreground">Display text captions on the video</p>
+                        </div>
+                        <Button
+                          variant={showCaptions ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setShowCaptions(!showCaptions)}
+                        >
+                          {showCaptions ? <Type className="mr-2 h-4 w-4" /> : <X className="mr-2 h-4 w-4" />}
+                          {showCaptions ? 'On' : 'Off'}
+                        </Button>
+                      </div>
                     </div>
                     
-                    {/* Caption Position */}
-                    <div className="space-y-2">
-                      <Label>Caption Position</Label>
-                      <Select value={captionPosition} onValueChange={setCaptionPosition}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bottom">Bottom</SelectItem>
-                          <SelectItem value="center">Center</SelectItem>
-                          <SelectItem value="top">Top</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Caption Style (only if captions enabled) */}
+                    {showCaptions && (
+                      <div className="space-y-2">
+                        <Label>Caption Style</Label>
+                        <Select value={captionStyle} onValueChange={setCaptionStyle}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bold-outline">Bold with Outline</SelectItem>
+                            <SelectItem value="minimal">Minimal</SelectItem>
+                            <SelectItem value="shadow">Shadow</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {/* Caption Position (only if captions enabled) */}
+                    {showCaptions && (
+                      <div className="space-y-2">
+                        <Label>Caption Position</Label>
+                        <Select value={captionPosition} onValueChange={setCaptionPosition}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bottom">Bottom</SelectItem>
+                            <SelectItem value="center">Center</SelectItem>
+                            <SelectItem value="top">Top</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {/* Use Scene Prompts Toggle (AI mode only) */}
+                    {isAIMode && (
+                      <div className="space-y-2 sm:col-span-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-base">Use Scene Prompts</Label>
+                            <p className="text-xs text-muted-foreground">
+                              {useScenePrompts 
+                                ? 'AI generates unique visual prompts for each scene' 
+                                : 'Use your raw prompt for all scenes (more consistent but less varied)'
+                              }
+                            </p>
+                          </div>
+                          <Button
+                            variant={useScenePrompts ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setUseScenePrompts(!useScenePrompts)}
+                          >
+                            {useScenePrompts ? <Wand2 className="mr-2 h-4 w-4" /> : <FileText className="mr-2 h-4 w-4" />}
+                            {useScenePrompts ? 'AI Prompts' : 'Raw Prompt'}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Resolution */}
                     <div className="space-y-2">
