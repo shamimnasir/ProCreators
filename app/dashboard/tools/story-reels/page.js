@@ -1205,11 +1205,11 @@ export default function StoryReelsPage({
               {/* Script Textarea */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Your Script / Idea</Label>
+                  <Label>Your Topic / Idea / Raw Prompt</Label>
                   <span className="text-xs text-muted-foreground">{script.length} characters</span>
                 </div>
                 <Textarea
-                  placeholder="Describe what you want in your video... or click 'Generate Script' to let AI create one for you!"
+                  placeholder="Describe what you want in your video... You can generate an AI script or use your text directly as the scene prompt!"
                   value={script}
                   onChange={(e) => setScript(e.target.value)}
                   rows={6}
@@ -1242,18 +1242,47 @@ export default function StoryReelsPage({
                 </div>
               </div>
 
-              {/* Generate Script Button */}
-              <Button 
-                onClick={handleGenerateScript} 
-                disabled={scriptLoading}
-                className="w-full h-12 text-base bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-              >
-                {scriptLoading ? (
-                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...</>
-                ) : (
-                  <><Sparkles className="mr-2 h-5 w-5" /> Generate AI Script</>
-                )}
-              </Button>
+              {/* Generate Script OR Use as Scene Prompt Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Button 
+                  onClick={handleGenerateScript} 
+                  disabled={scriptLoading}
+                  className="h-12 text-base bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  {scriptLoading ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...</>
+                  ) : (
+                    <><Sparkles className="mr-2 h-5 w-5" /> Generate AI Script</>
+                  )}
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (script.trim().length < 20) {
+                      toast({ title: "Too Short", description: "Please enter at least 20 characters for your prompt", variant: "destructive" })
+                      return
+                    }
+                    // Calculate number of scenes based on duration
+                    const numScenes = Math.ceil(duration / 10)
+                    // Create scene prompts from the raw text
+                    const rawScenePrompts = Array(numScenes).fill(script.trim())
+                    setScenePrompts(rawScenePrompts)
+                    setUseScenePrompts(false) // Disable AI scene prompt generation
+                    setShowSceneEditor(true)
+                    toast({ 
+                      title: "Using Raw Prompt", 
+                      description: `Your prompt will be used for all ${numScenes} scene(s). Same prompt = more consistent characters!` 
+                    })
+                  }}
+                  disabled={scriptLoading || script.trim().length < 20}
+                  variant="outline"
+                  className="h-12 text-base border-2 hover:bg-accent"
+                >
+                  <FileText className="mr-2 h-5 w-5" /> Use as Scene Prompt
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                💡 <strong>Tip:</strong> "Use as Scene Prompt" gives better character consistency by using your exact text for all scenes
+              </p>
             </CardContent>
           </Card>
 
