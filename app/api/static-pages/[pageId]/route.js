@@ -232,7 +232,7 @@ const DEFAULT_TEMPLATES = {
           items: [
             { icon: '⚡', title: 'Lightning Fast', description: 'Generate content in seconds, not hours' },
             { icon: '🎨', title: 'Professional Quality', description: 'Studio-grade output every time' },
-            { icon: '💰', title: 'Cost Effective', description: 'Save thousands on content creation' }
+            { icon: '🎬', title: 'Full Creative Control', description: 'Customize every aspect of your content' }
           ]
         }
       },
