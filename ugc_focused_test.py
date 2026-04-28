@@ -10,7 +10,7 @@ import json
 import sys
 
 # Base URL from environment
-BASE_URL = "https://ai-avatar-ugc.preview.emergentagent.com"
+BASE_URL = "https://ugc-ads-gen-1.preview.emergentagent.com"
 
 def test_script_generator_platforms_structure():
     """Test 1: GET /api/ugc-studio/generate-script (public) → returns 200 with platforms as structured object"""

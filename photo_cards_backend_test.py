@@ -14,7 +14,7 @@ import os
 import time
 
 # Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ai-avatar-ugc.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ugc-ads-gen-1.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Test user credentials - using existing verified user or create new

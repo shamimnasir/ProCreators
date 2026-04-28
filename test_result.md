@@ -2173,7 +2173,7 @@ agent_communication:
       4. Create a coupon, then try to redeem it as user
       5. Validate error cases: invalid code, expired coupon, already used, etc.
       
-      Base URL: https://ai-avatar-ugc.preview.emergentagent.com" COMPLETED SUCCESSFULLY - 100% SUCCESS RATE:
+      Base URL: https://ugc-ads-gen-1.preview.emergentagent.com" COMPLETED SUCCESSFULLY - 100% SUCCESS RATE:
       
       **COMPREHENSIVE BACKEND TESTING RESULTS:**
       
@@ -2533,7 +2533,7 @@ agent_communication:
 
 ### Test credentials:
 - Admin email: admin@procreators.io or coupon_admin_test@test.com
-- Base URL: https://ai-avatar-ugc.preview.emergentagent.com
+- Base URL: https://ugc-ads-gen-1.preview.emergentagent.com
 
     - agent: "testing" 
       message: "✅ COUPON SYSTEM API TESTING COMPLETED SUCCESSFULLY - 100% SECURITY COMPLIANCE:
@@ -2753,7 +2753,7 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "UGC Ad Studio backend APIs are fully implemented. 7 API routes under /api/ugc-studio/. All require auth via requireAuth middleware. Test CRUD, validation, and auth protection. Video generation endpoints call fal.ai - test auth/validation but skip actual generation. Audio generation requires Google Cloud TTS credentials at GOOGLE_APPLICATION_CREDENTIALS. Focus on: avatars CRUD, script GET options, projects CRUD, and auth/validation on all endpoints. Base URL: https://ai-avatar-ugc.preview.emergentagent.com"
+    message: "UGC Ad Studio backend APIs are fully implemented. 7 API routes under /api/ugc-studio/. All require auth via requireAuth middleware. Test CRUD, validation, and auth protection. Video generation endpoints call fal.ai - test auth/validation but skip actual generation. Audio generation requires Google Cloud TTS credentials at GOOGLE_APPLICATION_CREDENTIALS. Focus on: avatars CRUD, script GET options, projects CRUD, and auth/validation on all endpoints. Base URL: https://ugc-ads-gen-1.preview.emergentagent.com"
   - agent: "testing"
     message: "✅ UGC AD STUDIO BACKEND API TESTING COMPLETED SUCCESSFULLY - 96.3% SUCCESS RATE (previous run). All endpoints properly secured & validated."
   - agent: "main"

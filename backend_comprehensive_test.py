@@ -13,7 +13,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 # Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ai-avatar-ugc.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ugc-ads-gen-1.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 
 class BackendTester:

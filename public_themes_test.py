@@ -10,7 +10,7 @@ import json
 import time
 
 # Base URLs
-BASE_URL = "https://ai-avatar-ugc.preview.emergentagent.com"
+BASE_URL = "https://ugc-ads-gen-1.preview.emergentagent.com"
 THEMES_API = f"{BASE_URL}/api/admin/video-themes"
 SCRIPT_API = f"{BASE_URL}/api/story-reels/generate-script"
 

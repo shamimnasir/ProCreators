@@ -18,7 +18,7 @@ import string
 from urllib.parse import urljoin
 
 # Base URL from environment
-BASE_URL = "https://ai-avatar-ugc.preview.emergentagent.com"
+BASE_URL = "https://ugc-ads-gen-1.preview.emergentagent.com"
 
 def generate_random_email():
     """Generate a random email for testing"""
@@ -562,7 +562,7 @@ def test_cors_tightening():
     
     # Test with trusted origin (deployment host)
     try:
-        trusted_origin = "https://ai-avatar-ugc.preview.emergentagent.com"
+        trusted_origin = "https://ugc-ads-gen-1.preview.emergentagent.com"
         trusted_headers = {
             'Origin': trusted_origin,
             'Content-Type': 'application/json'

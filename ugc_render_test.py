@@ -12,7 +12,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Base URL from environment
-BASE_URL = "https://ai-avatar-ugc.preview.emergentagent.com"
+BASE_URL = "https://ugc-ads-gen-1.preview.emergentagent.com"
 
 class UGCRenderTester:
     def __init__(self):
