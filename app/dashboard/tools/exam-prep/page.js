@@ -13,12 +13,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  GraduationCap, Download, Loader2, Clock,
-  ArrowLeft, ArrowRight, CheckCircle, XCircle, Edit3,
-  BookOpen, Brain, Target, Trophy, Search, Globe,
-  FileText, Timer, Play, RotateCcw, Eye, RefreshCw,
-  AlertCircle, BookMarked, Award, Zap, Wand2
+import {
+  GraduationCap,
+  Download,
+  Loader2,
+  Clock,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  XCircle,
+  Edit3,
+  BookOpen,
+  Brain,
+  Target,
+  Trophy,
+  Search,
+  Globe,
+  FileText,
+  Timer,
+  Play,
+  RotateCcw,
+  Eye,
+  RefreshCw,
+  AlertCircle,
+  BookMarked,
+  Award,
+  Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -150,7 +170,7 @@ const EXAM_CATEGORIES = [
 
 // Practice Modes
 const PRACTICE_MODES = [
-  { id: 'quick', name: 'Quick Practice', icon: Zap, questions: 10, time: null, description: '10 questions, no time limit' },
+  { id: 'quick', name: 'Quick Practice', icon: Play, questions: 10, time: null, description: '10 questions, no time limit' },
   { id: 'timed', name: 'Timed Practice', icon: Timer, questions: 20, time: 30, description: '20 questions in 30 minutes' },
   { id: 'mock-test', name: 'Full Mock Test', icon: Trophy, questions: 50, time: 60, description: '50 questions in 60 minutes' },
   { id: 'topic-wise', name: 'Topic Practice', icon: Target, questions: 15, time: null, description: 'Focus on specific topics' },

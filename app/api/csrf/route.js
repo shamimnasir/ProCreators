@@ -3,7 +3,8 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 
-const CSRF_SECRET = process.env.CSRF_SECRET || process.env.SALT || 'procreators-csrf-secret'
+// IMPORTANT: Must match lib/csrf-verify.js for consistent validation
+const CSRF_SECRET = process.env.CSRF_SECRET || process.env.SALT || 'procreators-csrf-secret-2026'
 
 export async function GET(request) {
   try {

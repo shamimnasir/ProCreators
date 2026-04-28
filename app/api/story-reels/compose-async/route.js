@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { writeFile, unlink, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
+import { writeFile, unlink, mkdir, readFile } from 'fs/promises'
+import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 import ffmpeg from 'fluent-ffmpeg'
@@ -21,31 +21,33 @@ ffmpeg.setFfprobePath('/usr/bin/ffprobe')
 export const maxDuration = 60 // Quick response - actual work happens in background
 export const dynamic = 'force-dynamic'
 
-// AI Video Generation Tiers - Now using Kling via Fal.ai as primary
+// AI Video Generation Tiers — repriced Feb 2026 for 30% margin on fal.ai costs
+// (essential=Pixverse $0.008/s, standard=Wan 2.2 $0.05/s, professional=Kling 2.5 $0.07/s,
+//  cinema=Seedance 2 Fast $0.2419/s — all per 30s base)
 const AI_VIDEO_TIERS = {
   essential: {
     name: 'Essential',
     description: 'Basic AI video, no consistency',
     consistencyMode: 'none',
-    creditCost: 50
+    creditCost: 20
   },
   standard: {
     name: 'Standard',
     description: 'Good quality with seed-based consistency',
     consistencyMode: 'seed',
-    creditCost: 70
+    creditCost: 110
   },
   professional: {
     name: 'Professional',
     description: 'High quality with frame-chain consistency',
     consistencyMode: 'frame-chain',
-    creditCost: 100
+    creditCost: 175
   },
   cinema: {
     name: 'Cinema',
-    description: 'Best quality with advanced frame-chain',
+    description: 'Best quality with advanced frame-chain (Seedance 2 Fast)',
     consistencyMode: 'frame-chain',
-    creditCost: 150
+    creditCost: 600
   }
 }
 
@@ -107,7 +109,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             sceneReferenceImages[sceneNum] = refImage
           }
         }
-        console.log(`[${jobId}] 🖼️ Found ${Object.keys(sceneReferenceImages).length} scene reference images for scenes: ${sceneNumbers.join(', ')}`)
       } catch (e) {
         console.error(`[${jobId}] Failed to parse scene references:`, e.message)
       }
@@ -144,7 +145,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     // Use user's selected consistency mode if provided, otherwise use tier default
     const consistencyMode = userConsistencyMode || tierConfig.consistencyMode || 'none'
     
-    console.log(`[${jobId}] Using consistency mode: ${consistencyMode} (user: ${userConsistencyMode}, tier default: ${tierConfig.consistencyMode})`)
     
     // Determine aspect ratio from orientation
     let aspectRatio = '9:16' // Portrait default
@@ -163,15 +163,15 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         throw new Error('AI video service not configured')
       }
       
-      // Determine video model (kling or minimax) from videoSource
-      // ai-standard = kling standard, ai-pro = kling pro, ai-minimax = minimax
-      const videoModel = videoSource === 'ai-minimax' ? 'minimax' : 'kling'
+      // Determine video model from videoSource
+      // ai-standard / ai-pro / default → seedance 2 fast (primary), Kling 3.0 fallback
+      // ai-wan / ai-ltx → legacy options, kept for backwards compat
+      const videoModel = videoSource === 'ai-wan' ? 'wan' : videoSource === 'ai-ltx' ? 'ltx' : 'seedance'
       
       // Handle seed image upload if provided
       let seedImageUrl = null
       if (seedImage) {
         try {
-          console.log(`[${jobId}] 🖼️ Processing seed image (${seedImageType})...`)
           
           // Save seed image to temp and upload to fal storage
           const seedImagePath = join(tempDir, 'seed-image.jpg')
@@ -193,7 +193,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             const uploadResult = await fal.storage.upload(new Blob([fileBuffer], { type: 'image/jpeg' }))
             seedImageUrl = uploadResult.url || uploadResult
             
-            console.log(`[${jobId}] ✅ Seed image uploaded: ${seedImageUrl}`)
           }
         } catch (seedError) {
           console.error(`[${jobId}] ⚠️ Seed image upload failed:`, seedError.message)
@@ -204,7 +203,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // Upload multi-scene reference images
       let sceneReferenceUrls = {}
       if (Object.keys(sceneReferenceImages).length > 0) {
-        console.log(`[${jobId}] 🖼️ Uploading ${Object.keys(sceneReferenceImages).length} scene reference images...`)
         
         const { fal } = await import('@fal-ai/client')
         fal.config({ credentials: process.env.FAL_KEY })
@@ -224,7 +222,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
               const fileBuffer = await require('fs/promises').readFile(refImagePath)
               const uploadResult = await fal.storage.upload(new Blob([fileBuffer], { type: 'image/jpeg' }))
               sceneReferenceUrls[sceneNum] = uploadResult.url || uploadResult
-              console.log(`[${jobId}] ✅ Scene ${sceneNum} reference uploaded`)
             }
           } catch (refErr) {
             console.error(`[${jobId}] ⚠️ Scene ${sceneNum} reference upload failed:`, refErr.message)
@@ -234,14 +231,13 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       
       try {
         const hasSceneRefs = Object.keys(sceneReferenceUrls).length > 0
-        console.log(`[${jobId}] 🎬 Starting ${videoModel.toUpperCase()} video generation (${consistencyMode} consistency)${seedImageUrl ? ' with seed image' : ''}${hasSceneRefs ? ` with ${Object.keys(sceneReferenceUrls).length} scene refs` : ''}...`)
         
         // Use the centralized video service with consistency
         const result = await generateConsistentVideoClips({
           script,
           duration: parseInt(duration),
           aspectRatio,
-          consistencyMode: videoModel === 'minimax' ? 'none' : consistencyMode, // Minimax doesn't support consistency
+          consistencyMode: (videoModel === 'wan' || videoModel === 'ltx') ? 'none' : consistencyMode, // Wan/LTX don't support consistency
           characterDescription: null, // Will be extracted from script
           jobId,
           videoModel, // Pass the video model
@@ -250,9 +246,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           sceneReferenceUrls, // Pass multi-scene reference URLs
           useScenePrompts, // Whether to use AI-generated scene prompts or raw prompt
           onProgress: async (progress) => {
-            // Calculate ETA based on clip progress
-            // Minimax is typically faster (~60s), Kling is ~60-120s per clip
-            const timePerClip = videoModel === 'minimax' ? 45 : 60
+            // Estimate time per clip based on model
+            const timePerClip = videoModel === 'ltx' ? 30 : videoModel === 'wan' ? 50 : 60
             const clipsRemaining = progress.totalClips - progress.clipIndex
             const estimatedSecondsRemaining = clipsRemaining * timePerClip + 60 // + 60s processing
             
@@ -269,25 +264,25 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           url: clip.url,
           keyword: `ai-scene-${i + 1}`,
           type: 'ai-generated',
-          model: videoModel === 'minimax' ? 'Minimax' : 'Kling',
+          model: videoModel === 'wan' ? 'Wan 2.2' : videoModel === 'ltx' ? 'LTX' : 'Kling',
           frameChained: clip.frameChained
         }))
         
-        console.log(`[${jobId}] ✅ Generated ${aiVideos.length} clips with ${videoModel}`)
         
       } catch (genError) {
         console.error(`[${jobId}] ⚠️ ${videoModel} generation failed:`, genError.message)
         
-        // Fallback to stock videos
-        console.log(`[${jobId}] Falling back to stock videos...`)
-        const keywords = extractKeywordsFromScript(script)
-        const stockResults = await getFallbackStockVideos(keywords, numClips, videoOrientation)
+        // DO NOT silently fall back to stock — inform the user clearly
+        const errorMessage = genError.message || 'Unknown error'
+        let userFriendlyMessage = `AI video generation failed: ${errorMessage}`
         
-        if (stockResults.length > 0) {
-          aiVideos = stockResults
-        } else {
-          throw new Error('AI generation failed and no stock videos available')
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+          userFriendlyMessage = 'AI video generation failed: Service authentication error. Please contact support.'
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+          userFriendlyMessage = 'AI video generation timed out. Please try again or use a shorter duration.'
         }
+        
+        throw new Error(userFriendlyMessage)
       }
       
       await updateJobStatus(jobId, {
@@ -299,6 +294,8 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     
     // Download and process video clips
     const videosToProcess = isAIMode && aiVideos.length > 0 ? aiVideos : stockVideos
+    // Track if we're using stock videos (need trimming) or AI videos (no trimming)
+    const isUsingStockVideos = !isAIMode || aiVideos.length === 0
     
     if (videosToProcess.length === 0) {
       throw new Error('No video clips generated')
@@ -307,23 +304,33 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
     
-    const videoFiles = []
+    // Store video info alongside paths for trimming decisions
+    const videoFilesInfo = []
     for (let i = 0; i < videosToProcess.length; i++) {
       const video = videosToProcess[i]
       const videoPath = join(tempDir, `clip-${i}.mp4`)
       
       try {
-        console.log(`[${jobId}] Downloading clip ${i + 1}...`)
         const response = await fetch(video.url)
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         
         const fileStream = require('fs').createWriteStream(videoPath)
         await pipeline(Readable.fromWeb(response.body), fileStream)
-        videoFiles.push(videoPath)
+        // Track video type for later trimming decision
+        const isStockVideo = isUsingStockVideos || video.type === 'stock' || video.source === 'pexels'
+        const isAIGenerated = video.type === 'ai-generated'
+        videoFilesInfo.push({
+          path: videoPath,
+          isStock: isStockVideo && !isAIGenerated,
+          type: video.type || 'unknown'
+        })
       } catch (error) {
         console.error(`[${jobId}] Download failed for clip ${i + 1}:`, error.message)
       }
     }
+    
+    // Extract just paths for backward compat
+    const videoFiles = videoFilesInfo.map(v => v.path)
     
     if (videoFiles.length === 0) {
       throw new Error('Failed to download any clips')
@@ -335,11 +342,38 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
     })
     
     // Clean script for TTS - remove screenplay formatting and technical terms
+    // ENHANCED: Now catches INLINE patterns (not just start of line)
     const cleanScriptForTTS = (rawScript) => {
       let cleaned = rawScript
       
       // CRITICAL: Remove @image tags (like @image1, @image2, @image 3, etc.)
       cleaned = cleaned.replace(/@image\s*\d*/gi, '')
+      cleaned = cleaned.replace(/@\w+/gi, '') // Remove any @mentions like @Linda, @product
+      
+      // Remove section headers - BOTH at start of line AND inline
+      // Start of line patterns
+      cleaned = cleaned.replace(/^(Opening|Intro|Outro|Introduction|Conclusion|Scene\s*\d*|Act\s*\d*|Part\s*\d*|Section\s*\d*)[:\s]*/gim, '')
+      // Inline patterns (e.g., "Opening: text" anywhere in the text)
+      cleaned = cleaned.replace(/\b(Opening|Intro|Outro|Introduction|Conclusion):\s*/gi, '')
+      cleaned = cleaned.replace(/\bScene\s*\d+[:\.\-]\s*/gi, '') // "Scene 1:", "Scene 2.", "Scene3-"
+      cleaned = cleaned.replace(/\bAct\s*\d+[:\.\-]\s*/gi, '')
+      cleaned = cleaned.replace(/\bPart\s*\d+[:\.\-]\s*/gi, '')
+      
+      // Remove voiceover/narrator indicators - BOTH at start AND inline
+      cleaned = cleaned.replace(/^(VO|V\.O\.|Voiceover|Voice\s*Over|Voice-Over|Narrator|NARRATOR|Narration)[:\s]*/gim, '')
+      cleaned = cleaned.replace(/\b(VO|V\.O\.)[:\s]+/gi, '') // Inline "VO:" 
+      cleaned = cleaned.replace(/\b(Voiceover|Voice\s*Over|Voice-Over|Narrator|Narration)[:\s]+/gi, '')
+      cleaned = cleaned.replace(/\(VO\)|\(V\.O\.\)|\(voiceover\)|\(narrator\)/gi, '')
+      
+      // Remove visual/video direction indicators
+      cleaned = cleaned.replace(/^(Visual|Video|On\s*Screen|On-Screen|Shot|Footage|Clip|B-Roll|B\s*Roll)[:\s]*/gim, '')
+      
+      // Remove text/title indicators  
+      cleaned = cleaned.replace(/^(Text|Title|Caption|Super|Lower\s*Third|Graphic|On\s*Screen\s*Text)[:\s]*[^\n]*/gim, '')
+      
+      // Remove SFX/Music cues
+      cleaned = cleaned.replace(/^(SFX|Sound|Music|Audio|BGM|Background\s*Music)[:\s]*[^\n]*/gim, '')
+      cleaned = cleaned.replace(/\[SFX[^\]]*\]|\[Music[^\]]*\]|\[Sound[^\]]*\]/gi, '')
       
       // Remove common video generation meta instructions
       const metaPhrases = [
@@ -359,6 +393,9 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         /\bthen\s+(wide|zoom|cut)\s+shot\b/gi,
         /\b(on|with)\s+the\s+net\s+rippling\b/gi,
         /\barms?\s+outstretched\b/gi,
+        /\bgenerate\s+a\s+video\b/gi,
+        /\bcreate\s+a\s+(cinematic\s+)?(video|clip)\b/gi,
+        /\bmake\s+a\s+video\b/gi,
       ]
       
       metaPhrases.forEach(pattern => {
@@ -380,15 +417,28 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       // Remove TITLE CARD lines
       cleaned = cleaned.replace(/^TITLE CARD:[^\n]*$/gim, '')
       
+      // Remove VO / Narrator / Speaker labels (common in AI-generated scripts)
+      cleaned = cleaned.replace(/^(VO|V\.O\.|NARRATOR|VOICEOVER|VOICE OVER|SPEAKER|HOST|ANCHOR|PRESENTER|NARRATION)\s*[:–—-]\s*/gim, '')
+      cleaned = cleaned.replace(/^\*\*(VO|Narrator|Voiceover|Voice Over|Speaker|Host)\*\*\s*[:–—-]?\s*/gim, '')
+      cleaned = cleaned.replace(/^\[(VO|Narrator|Voiceover|Voice|Speaker|Host|Music|SFX|Sound|Audio|Visual|Video|Scene|Cut|Transition)[^\]]*\]\s*/gim, '')
+      
       // Remove character names in all caps before dialogue (e.g., "JOHN:")
       cleaned = cleaned.replace(/^[A-Z][A-Z\s\-']+(\s*\([^)]*\))?:\s*/gm, '')
       
-      // Remove parenthetical directions like (softly), (V.O.), (O.S.), (CONT'D)
+      // Remove parenthetical directions like (softly), (V.O.), (O.S.), (CONT'D), (beat), (pause)
       cleaned = cleaned.replace(/\([^)]*\)/g, '')
       
       // Remove action/description blocks in brackets or with scene numbers
       cleaned = cleaned.replace(/^\[.*\]$/gm, '')
       cleaned = cleaned.replace(/^Scene \d+:?.*$/gim, '')
+      
+      // Remove markdown headers and bold/italic markers
+      cleaned = cleaned.replace(/^#{1,6}\s+/gm, '')
+      cleaned = cleaned.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+      cleaned = cleaned.replace(/_{1,3}([^_]+)_{1,3}/g, '$1')
+      
+      // Remove common script section labels
+      cleaned = cleaned.replace(/^(Hook|Opening|Introduction|Body|Conclusion|Closing|Outro|Intro|Section \d+|Part \d+|Act \d+)\s*[:–—-]\s*/gim, '')
       
       // Remove camera directions
       cleaned = cleaned.replace(/^(CLOSE ON|ANGLE ON|POV|WIDE SHOT|MEDIUM SHOT|CLOSE-UP|TWO SHOT|INSERT|BACK TO)[:\s][^\n]*$/gim, '')
@@ -416,8 +466,43 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       return cleaned
     }
     
+    // Convert plain text to SSML with natural pauses for more human-like delivery
+    const textToSSML = (text) => {
+      // Escape special XML characters
+      let ssml = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+      
+      // Add medium pause after periods (end of sentences)
+      ssml = ssml.replace(/\.\s+/g, '.<break time="600ms"/> ')
+      
+      // Add short pause after commas
+      ssml = ssml.replace(/,\s+/g, ',<break time="300ms"/> ')
+      
+      // Add medium pause after question marks
+      ssml = ssml.replace(/\?\s+/g, '?<break time="600ms"/> ')
+      
+      // Add medium pause after exclamation marks
+      ssml = ssml.replace(/!\s+/g, '!<break time="500ms"/> ')
+      
+      // Add pause after colons
+      ssml = ssml.replace(/:\s+/g, ':<break time="400ms"/> ')
+      
+      // Add pause after semicolons
+      ssml = ssml.replace(/;\s+/g, ';<break time="400ms"/> ')
+      
+      // Add emphasis to words in ALL CAPS (but not single letters)
+      ssml = ssml.replace(/\b([A-Z]{2,})\b/g, '<emphasis level="strong">$1</emphasis>')
+      
+      // Wrap in speak tags
+      return `<speak>${ssml}</speak>`
+    }
+    
     const ttsScript = cleanScriptForTTS(script)
-    console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
+    const ttsSSML = textToSSML(ttsScript)
     
     // Character voice mapping for Google Cloud TTS
     // Maps character types to appropriate voices
@@ -613,7 +698,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             voiceName = undefined // Let Google TTS pick the best voice for the language
           }
           
-          console.log(`[${jobId}] Generating voice for "${dialogue.text}" - Character: ${dialogue.characterType}, Voice: ${voiceName || 'auto'}`)
           
           const [response] = await client.synthesizeSpeech({
             input: { text: dialogue.text },
@@ -650,7 +734,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             text: dialogue.text
           })
           
-          console.log(`[${jobId}] Generated dialogue audio: "${dialogue.text}" at ${startTime.toFixed(2)}s`)
         } catch (err) {
           console.error(`[${jobId}] Failed to generate dialogue: ${err.message}`)
         }
@@ -726,9 +809,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       const dialogues = extractDialoguesFromPrompts(parsedScenePrompts)
       
       if (dialogues.length > 0 && isAIMode) {
-        console.log(`[${jobId}] Found ${dialogues.length} character dialogues in prompts:`)
         dialogues.forEach(d => {
-          console.log(`[${jobId}]   - Scene ${d.sceneIndex}: "${d.text}" (${d.characterType})`)
         })
         
         // Generate dialogue audio for character speech with character-specific voices
@@ -744,7 +825,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           if (dialogueTrackPath) {
             hasAudio = true
             audioPath = dialogueTrackPath
-            console.log(`[${jobId}] Created character dialogue audio track`)
           } else {
             hasAudio = false
           }
@@ -754,7 +834,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       } else {
         // No dialogues found - create truly silent video
         hasAudio = false
-        console.log(`[${jobId}] No audio mode - will create silent video`)
       }
     } else if (voiceOption === 'tts') {
       const client = new textToSpeech.TextToSpeechClient({
@@ -767,13 +846,114 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
         if (parts.length >= 2) languageCode = `${parts[0]}-${parts[1]}`
       }
       
-      const [response] = await client.synthesizeSpeech({
-        input: { text: ttsScript }, // Use cleaned script
-        voice: { languageCode, name: selectedVoice || undefined },
-        audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0 }
-      })
+      // Helper: Build TTS request with proper voice config
+      // Chirp3-HD and other newer voices may fail — use fallback
+      const FALLBACK_VOICES = {
+        'en': 'en-US-Neural2-C',
+        'bn': 'bn-IN-Standard-A',
+      }
       
-      await writeFile(audioPath, response.audioContent, 'binary')
+      const buildTTSRequest = (inputObj) => {
+        return {
+          input: inputObj,
+          voice: { languageCode, name: selectedVoice || undefined },
+          audioConfig: { 
+            audioEncoding: 'MP3', 
+            speakingRate: 0.95,
+            pitch: 0,
+            volumeGainDb: 0
+          }
+        }
+      }
+      
+      const synthesizeWithFallback = async (inputObj) => {
+        try {
+          const [response] = await client.synthesizeSpeech(buildTTSRequest(inputObj))
+          return response
+        } catch (primaryError) {
+          // If the selected voice fails (e.g., Chirp3-HD needs model param), use fallback
+          console.log(`[${jobId}] Primary voice "${selectedVoice}" failed: ${primaryError.message}. Trying fallback...`)
+          const langBase = languageCode.split('-')[0] || 'en'
+          const fallbackVoice = FALLBACK_VOICES[langBase] || FALLBACK_VOICES['en']
+          const fallbackLang = langBase === 'bn' ? 'bn-IN' : 'en-US'
+          
+          const [response] = await client.synthesizeSpeech({
+            input: inputObj,
+            voice: { languageCode: fallbackLang, name: fallbackVoice },
+            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: 0, volumeGainDb: 0 }
+          })
+          console.log(`[${jobId}] Fallback voice "${fallbackVoice}" succeeded`)
+          return response
+        }
+      }
+      
+      // Google TTS has a 5000 byte limit per request
+      // Split long scripts into chunks and concatenate audio
+      const MAX_BYTES = 4500 // Leave buffer for SSML tags
+      const ssmlBytes = Buffer.byteLength(ttsSSML, 'utf8')
+      
+      if (ssmlBytes <= 5000) {
+        // Short enough — single request
+        const response = await synthesizeWithFallback({ ssml: ttsSSML })
+        await writeFile(audioPath, response.audioContent, 'binary')
+      } else {
+        // Long script — split by sentences, chunk, and concatenate
+        console.log(`[${jobId}] Script is ${ssmlBytes} bytes, splitting into chunks...`)
+        
+        // Split the clean text (not SSML) into sentences
+        const sentences = ttsScript.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0)
+        const chunks = []
+        let currentChunk = ''
+        
+        for (const sentence of sentences) {
+          const testChunk = currentChunk ? `${currentChunk} ${sentence}` : sentence
+          const testSSML = textToSSML(testChunk)
+          
+          if (Buffer.byteLength(testSSML, 'utf8') > MAX_BYTES && currentChunk) {
+            chunks.push(currentChunk)
+            currentChunk = sentence
+          } else {
+            currentChunk = testChunk
+          }
+        }
+        if (currentChunk) chunks.push(currentChunk)
+        
+        console.log(`[${jobId}] Split into ${chunks.length} TTS chunks`)
+        
+        // Generate audio for each chunk
+        const chunkAudioPaths = []
+        for (let i = 0; i < chunks.length; i++) {
+          const chunkSSML = textToSSML(chunks[i])
+          const response = await synthesizeWithFallback({ ssml: chunkSSML })
+          
+          const chunkPath = join(tmpDir, `tts_chunk_${i}.mp3`)
+          await writeFile(chunkPath, response.audioContent, 'binary')
+          chunkAudioPaths.push(chunkPath)
+        }
+        
+        // Concatenate all chunks using ffmpeg
+        if (chunkAudioPaths.length === 1) {
+          const singleChunkData = readFileSync(chunkAudioPaths[0])
+          await writeFile(audioPath, singleChunkData)
+        } else {
+          const concatListPath = join(tmpDir, 'tts_concat.txt')
+          const concatContent = chunkAudioPaths.map(p => `file '${p}'`).join('\n')
+          await writeFile(concatListPath, concatContent)
+          
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input(concatListPath)
+              .inputOptions(['-f', 'concat', '-safe', '0'])
+              .outputOptions(['-c', 'copy'])
+              .output(audioPath)
+              .on('end', resolve)
+              .on('error', reject)
+              .run()
+          })
+        }
+        
+        console.log(`[${jobId}] TTS chunks concatenated successfully`)
+      }
     } else if (voiceFile) {
       await writeFile(audioPath, voiceFile)
     }
@@ -803,7 +983,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       let musicPath = customMusicPath ? `/app/public${customMusicPath}` : musicMap[musicTrack]
       
       if (musicPath && existsSync(musicPath)) {
-        console.log(`[${jobId}] Adding background music: ${musicTrack}`)
         
         // Trim music to match audio duration
         const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
@@ -839,7 +1018,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
               .output(mixedAudioPath)
               .on('end', () => {
                 audioPath = mixedAudioPath // Use mixed audio
-                console.log(`[${jobId}] Successfully mixed background music with voice`)
                 resolve()
               })
               .on('error', (err) => {
@@ -863,7 +1041,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       let musicPath = customMusicPath ? `/app/public${customMusicPath}` : musicMap[musicTrack]
       
       if (musicPath && existsSync(musicPath)) {
-        console.log(`[${jobId}] Using background music only (no voice): ${musicTrack}`)
         
         // Trim and use music as the audio track
         const trimmedMusicPath = join(tempDir, 'trimmed-music.mp3')
@@ -880,7 +1057,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
             .on('end', () => {
               audioPath = trimmedMusicPath
               hasAudio = true
-              console.log(`[${jobId}] Using music-only audio track`)
               resolve()
             })
             .on('error', (err) => {
@@ -910,16 +1086,28 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       targetHeight = resolution === '1080p' ? '1920' : '1280'
     }
     
-    // Normalize clips
+    // Normalize clips - Apply trimming to stock videos (skip first 3-5 seconds to avoid watermarks)
     const durationPerClip = actualAudioDuration / videoFiles.length
     const normalizedFiles = []
     
+    // Stock video trim offset - skip first 3 seconds to avoid intro/watermark
+    const STOCK_VIDEO_TRIM_OFFSET = 3
+    
     for (let i = 0; i < videoFiles.length; i++) {
       const normalizedPath = join(tempDir, `normalized-${i}.mp4`)
+      const videoInfo = videoFilesInfo[i]
+      const isStockClip = videoInfo?.isStock || false
       
       await new Promise((resolve, reject) => {
-        ffmpeg(videoFiles[i])
-          .outputOptions([
+        const cmd = ffmpeg(videoFiles[i])
+        
+        // For stock videos: skip first 3 seconds to avoid watermarks/intros
+        // For AI-generated videos: use from the start
+        if (isStockClip) {
+          cmd.inputOptions(['-ss', String(STOCK_VIDEO_TRIM_OFFSET)])
+        }
+        
+        cmd.outputOptions([
             '-vf', `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=increase,crop=${targetWidth}:${targetHeight},fps=30`,
             '-t', String(durationPerClip),
             '-c:v', 'libx264',
@@ -968,7 +1156,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
           .output(concatVideoPath)
           .on('end', resolve)
           .on('error', (err) => {
-            console.log(`[${jobId}] Crossfade failed, using simple concat: ${err.message}`)
             // Fallback to simple concat
             const clipListPath = join(tempDir, 'clips.txt')
             const clipListContent = normalizedFiles.map(f => `file '${f}'`).join('\n')
@@ -1040,9 +1227,7 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       })
       
       processedVideoPath = captionedPath
-      console.log(`[${jobId}] Captions added successfully`)
     } else {
-      console.log(`[${jobId}] Skipping captions (showCaptions: ${showCaptions}, captionStyle: ${captionStyle})`)
     }
     
     // Merge with audio - MIX Kling's original audio with dialogue/voiceover
@@ -1060,12 +1245,10 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       })
     })
     
-    console.log(`[${jobId}] Kling audio present: ${hasKlingAudio}, Has dialogue/voiceover: ${hasAudio}`)
     
     if (hasAudio && hasKlingAudio) {
       // MIX Kling's original audio (ambient, effects) with dialogue/voiceover
       // Kling audio at 70% volume, dialogue/voiceover at 100% volume
-      console.log(`[${jobId}] Mixing Kling audio with dialogue/voiceover...`)
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(processedVideoPath)
@@ -1162,7 +1345,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       throw new Error('Final video file is empty (0 bytes)')
     }
     
-    console.log(`[${jobId}] ✅ Final video size: ${(finalVideoStats.size / 1024 / 1024).toFixed(2)} MB`)
     
     // Save to public folder
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
@@ -1184,7 +1366,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       throw new Error(`Public video file size mismatch: expected ${videoBuffer.length}, got ${publicFileStats.size}`)
     }
     
-    console.log(`[${jobId}] ✅ Video saved to public folder: ${publicVideoPath}`)
     
     const videoUrl = `/story-reels/${jobId}.mp4`
     
@@ -1226,7 +1407,6 @@ async function processVideoInBackground(jobId, formDataObj, userId, transactionI
       completedAt: new Date()
     })
     
-    console.log(`[${jobId}] ✅ Video completed: ${videoUrl}`)
     
     // Cleanup temp files
     try {
@@ -1291,14 +1471,23 @@ function generateFallbackScenes(script, numScenes) {
   return scenes
 }
 
-// Caption generator (simplified)
+// Caption generator (improved sync with speech patterns)
 function generateASSCaptions(script, duration, style, height, width, fontSize, position) {
   const h = parseInt(height) || 1920
   const w = parseInt(width) || 1080
-  const words = script.trim().split(/\s+/).filter(w => w.length > 0)
+  
+  // Clean script and split into words
+  const cleanScript = script.trim().replace(/\s+/g, ' ')
+  const words = cleanScript.split(' ').filter(w => w.length > 0)
+  
+  if (words.length === 0) return ''
+  
   const wordsPerCaption = style === 'karaoke' ? 1 : 3
-  const totalChars = script.replace(/\s+/g, '').length
-  const charsPerSecond = totalChars / duration
+  
+  // Use word-based timing (more accurate than character-based for speech)
+  // Average speech rate: ~2.5 words per second for narration
+  // Calculate actual words-per-second from total
+  const wordsPerSecond = words.length / duration
   
   const baseFontSize = h >= 1920 ? 64 : h >= 1280 ? 48 : 40
   const fontSizeMultiplier = fontSize === 'small' ? 0.85 : fontSize === 'large' ? 1.3 : 1.0
@@ -1321,23 +1510,48 @@ Style: Default,Siyam Rupali,${finalFontSize},&H00FFFFFF,&H000000FF,&H00000000,&H
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `
   
+  const formatTime = (s) => {
+    const hrs = Math.floor(s / 3600)
+    const mins = Math.floor((s % 3600) / 60)
+    const secs = Math.floor(s % 60)
+    const cs = Math.floor((s % 1) * 100)
+    return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+  }
+  
+  // Check if a word ends a sentence (contains punctuation)
+  const endsWithPunctuation = (word) => /[.!?;:—]$/.test(word)
+  const endsWithComma = (word) => /[,]$/.test(word)
+  const isEllipsis = (word) => word.includes('...')
+  
   let currentTime = 0
+  // Add a small initial delay to sync with speech start
+  currentTime = 0.15
+  
   for (let i = 0; i < words.length; i += wordsPerCaption) {
-    const chunk = words.slice(i, i + wordsPerCaption).join(' ')
-    const chunkChars = chunk.replace(/\s+/g, '').length
-    const chunkDuration = (chunkChars / charsPerSecond) * 1.05
-    const startTime = currentTime
-    const endTime = Math.min(currentTime + chunkDuration, duration)
+    const chunkWords = words.slice(i, i + wordsPerCaption)
+    const chunk = chunkWords.join(' ')
     
-    const formatTime = (s) => {
-      const hrs = Math.floor(s / 3600)
-      const mins = Math.floor((s % 3600) / 60)
-      const secs = Math.floor(s % 60)
-      const cs = Math.floor((s % 1) * 100)
-      return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+    // Calculate duration for this chunk based on word count
+    let chunkDuration = chunkWords.length / wordsPerSecond
+    
+    // Add natural pauses for sentence endings
+    const lastWord = chunkWords[chunkWords.length - 1] || ''
+    if (endsWithPunctuation(lastWord)) {
+      chunkDuration += 0.25 // Natural sentence-end pause
+    } else if (endsWithComma(lastWord)) {
+      chunkDuration += 0.12 // Shorter comma pause
+    } else if (isEllipsis(lastWord)) {
+      chunkDuration += 0.35 // Longer dramatic pause
     }
     
-    ass += `Dialogue: 0,${formatTime(startTime)},${formatTime(endTime)},Default,,0,0,0,,${chunk}\n`
+    const startTime = currentTime
+    const endTime = Math.min(currentTime + chunkDuration, duration - 0.05)
+    
+    // Only add caption if it has meaningful duration
+    if (endTime > startTime + 0.1) {
+      ass += `Dialogue: 0,${formatTime(startTime)},${formatTime(endTime)},Default,,0,0,0,,${chunk}\n`
+    }
+    
     currentTime = endTime
   }
   
@@ -1348,26 +1562,21 @@ export async function POST(request) {
   const jobId = randomUUID()
   
   try {
-    console.log(`[${jobId}] Starting compose-async request`)
     
     // Get user ID
     const userId = await getUserIdFromRequest(request)
     if (!userId) {
-      console.log(`[${jobId}] No userId found`)
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
-    console.log(`[${jobId}] User: ${userId}`)
     
     // Parse form data
     const formData = await request.formData()
     const videoSource = formData.get('videoSource') || 'stock'
     const duration = parseInt(formData.get('duration')) || 30
     
-    console.log(`[${jobId}] Duration: ${duration}, VideoSource: ${videoSource}`)
     
     // Validate duration (max 10 minutes = 600 seconds for long-form videos)
     if (duration > 600) {
-      console.log(`[${jobId}] Duration ${duration} exceeds 600s limit`)
       return NextResponse.json({ success: false, error: 'Maximum duration is 10 minutes (600 seconds)' }, { status: 400 })
     }
     
@@ -1377,8 +1586,9 @@ export async function POST(request) {
     else if (videoSource === 'ai-standard') creditToolId = 'quick-reels-ai-standard'
     else if (videoSource === 'ai-professional') creditToolId = 'quick-reels-ai-professional'
     else if (videoSource === 'ai-cinema') creditToolId = 'quick-reels-ai-cinema'
+    else if (videoSource === 'ai-wan') creditToolId = 'quick-reels-ai-wan'
+    else if (videoSource === 'ai-ltx') creditToolId = 'quick-reels-ai-ltx'
     
-    console.log(`[${jobId}] Credit tool ID: ${creditToolId}`)
     
     // Linear duration scaling (per-scene pricing)
     // 30s = 100% of base, 20s = 67%, 10s = 33%
@@ -1386,7 +1596,6 @@ export async function POST(request) {
     
     // Check and deduct credits
     const creditCheck = await checkCredits(userId, creditToolId)
-    console.log(`[${jobId}] Credit check:`, JSON.stringify(creditCheck))
     
     // Calculate cost with linear scaling (minimum 25% of base)
     const totalCost = Math.max(
@@ -1395,20 +1604,16 @@ export async function POST(request) {
     )
     
     if (creditCheck.currentBalance < totalCost) {
-      console.log(`[${jobId}] Insufficient credits: ${creditCheck.currentBalance} < ${totalCost}`)
       return NextResponse.json({
         success: false,
         error: `Insufficient credits. ${duration}s video costs ${totalCost} credits, you have ${creditCheck.currentBalance}.`
       }, { status: 402 })
     }
     
-    console.log(`[${jobId}] Deducting credits... (${totalCost} credits for ${duration}s)`)
     const deductResult = await deductCredits(userId, creditToolId, { duration: duration })
     if (!deductResult.success) {
-      console.log(`[${jobId}] Deduct failed:`, deductResult.error)
       return NextResponse.json({ success: false, error: deductResult.error }, { status: 402 })
     }
-    console.log(`[${jobId}] Credits deducted successfully`)
     
     // Extract all form data
     const formDataObj = {

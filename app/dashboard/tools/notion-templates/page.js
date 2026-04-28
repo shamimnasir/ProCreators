@@ -10,12 +10,42 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Download, ArrowLeft, ArrowRight, CheckCircle,
-  FolderOpen, Save, Clock, Trash2, Edit3, FilePlus, BookMarked,
-  LayoutGrid, List, Calendar, Kanban, Target, Heart, Briefcase,
-  GraduationCap, Users, Palette, Eye, FileJson, FileText, Copy,
-  Plus, Settings, Database, Table, LayoutDashboard, Zap, Globe, Wand2} from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  FolderOpen,
+  Save,
+  Clock,
+  Trash2,
+  Edit3,
+  FilePlus,
+  BookMarked,
+  LayoutGrid,
+  List,
+  Calendar,
+  Kanban,
+  Target,
+  Heart,
+  Briefcase,
+  GraduationCap,
+  Users,
+  Palette,
+  Eye,
+  FileJson,
+  FileText,
+  Copy,
+  Plus,
+  Settings,
+  Database,
+  Table,
+  LayoutDashboard,
+  Play,
+  Globe,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
@@ -695,7 +725,7 @@ export default function NotionTemplateMakerPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Zap className="h-5 w-5" />
+                      <Play className="h-5 w-5" />
                       <span className="font-semibold">Full Content</span>
                       <Badge variant="secondary">AI Powered</Badge>
                     </div>
@@ -958,7 +988,7 @@ export default function NotionTemplateMakerPage() {
               {/* What's Inside Section */}
               <div className="border rounded-lg p-5 bg-gradient-to-br from-muted/30 to-muted/10">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" /> What&apos;s Inside?
+                  <Play className="h-5 w-5 text-yellow-500" /> What&apos;s Inside?
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {generatedTemplate.databases?.map((db, idx) => (

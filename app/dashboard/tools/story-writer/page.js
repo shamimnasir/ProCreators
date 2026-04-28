@@ -8,7 +8,15 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BookOpen, Loader2, Copy, Download, ChevronDown, Wand2, Zap } from 'lucide-react'
+import {
+  BookOpen,
+  Loader2,
+  Copy,
+  Download,
+  ChevronDown,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
@@ -342,7 +350,7 @@ export default function StoryWriterPage() {
       <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
         <CardHeader>
           <CardTitle className="text-amber-800 dark:text-amber-200 flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+            <Play className="h-5 w-5" />
             Storytelling Tips
           </CardTitle>
         </CardHeader>

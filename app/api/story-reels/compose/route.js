@@ -21,31 +21,33 @@ export const maxDuration = 300 // 5 minutes timeout
 export const dynamic = 'force-dynamic'
 export const maxBodySize = 100 * 1024 * 1024 // 100MB for video response
 
-// AI Video Generation Tiers - Now using Kling via Fal.ai
+// AI Video Generation Tiers — repriced Feb 2026 for 30% margin on fal.ai costs
+// (essential=Pixverse $0.008/s, standard=Wan 2.2 $0.05/s, professional=Kling 2.5 $0.07/s,
+//  cinema=Seedance 2 Fast $0.2419/s — all per 30s base)
 const AI_VIDEO_TIERS = {
   essential: {
     name: 'Essential',
     description: 'Basic AI video, no consistency',
     consistencyMode: 'none',
-    creditCost: 50
+    creditCost: 20
   },
   standard: {
     name: 'Standard',
     description: 'Good quality with seed-based consistency',
     consistencyMode: 'seed',
-    creditCost: 70
+    creditCost: 110
   },
   professional: {
     name: 'Professional',
     description: 'High quality with frame-chain consistency',
     consistencyMode: 'frame-chain',
-    creditCost: 100
+    creditCost: 175
   },
   cinema: {
     name: 'Cinema',
-    description: 'Best quality with advanced frame-chain',
+    description: 'Best quality with advanced frame-chain (Seedance 2 Fast)',
     consistencyMode: 'frame-chain',
-    creditCost: 150
+    creditCost: 600
   }
 }
 
@@ -61,7 +63,6 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
     aspectRatio = '1:1'
   }
   
-  console.log(`[${jobId}] Generating AI videos with Kling (${tierConfig.consistencyMode} consistency)`)
   
   if (!isFalConfigured()) {
     throw new Error('FAL_KEY not configured')
@@ -76,7 +77,6 @@ async function generateAIVideoClips(script, duration, dimensions, tier, jobId, p
       characterDescription: null,
       jobId,
       onProgress: (progress) => {
-        console.log(`[${jobId}] ${progress.message}`)
       }
     })
     
@@ -149,7 +149,6 @@ export async function POST(request) {
       creditToolId = 'quick-reels-ai-cinema'
     }
     
-    console.log(`[${jobId}] Video source: ${videoSource}, Credit tool: ${creditToolId}`)
     
     // Check and deduct credits based on video source
     const creditCheck = await checkCredits(userId, creditToolId)
@@ -221,23 +220,18 @@ export async function POST(request) {
     const isAIMode = videoSource && videoSource.startsWith('ai-')
     
     if (isAIMode) {
-      console.log(`[${jobId}] 🤖 AI Video Mode: ${videoSource}`)
-      console.log(`[${jobId}] 📝 Scene Prompts: ${scenePrompts.length} provided`)
       
       // Extract tier from video source (e.g., 'ai-essential' -> 'essential')
       const aiTier = videoSource.replace('ai-', '')
       
       // Validate scene prompts for AI mode
       if (scenePrompts.length === 0) {
-        console.log(`[${jobId}] ⚠️ No scene prompts provided, will generate from script`)
       }
       
       try {
         aiGeneratedVideos = await generateAIVideoClips(script, duration, dimensions, aiTier, jobId, scenePrompts)
-        console.log(`[${jobId}] ✅ Generated ${aiGeneratedVideos.length} AI video clips`)
         
         if (aiGeneratedVideos.length === 0) {
-          console.log(`[${jobId}] ⚠️ No AI videos generated, falling back to stock videos`)
         }
       } catch (aiError) {
         console.error(`[${jobId}] ❌ AI video generation failed:`, aiError.message)
@@ -257,7 +251,6 @@ export async function POST(request) {
     let videosToProcess = stockVideos
     if (isAIMode && aiGeneratedVideos.length > 0) {
       videosToProcess = aiGeneratedVideos
-      console.log(`[${jobId}] Using ${aiGeneratedVideos.length} AI-generated videos`)
     }
     
     // Determine total clips based on video order or just stock videos (backward compatibility)
@@ -265,7 +258,6 @@ export async function POST(request) {
     const MAX_CLIPS = 15
     let totalClips = videoOrder.length > 0 ? videoOrder.length : videosToProcess.length
     if (totalClips > MAX_CLIPS) {
-      console.log(`[${jobId}] ⚠️ Limiting clips from ${totalClips} to ${MAX_CLIPS} to avoid timeout`)
       totalClips = MAX_CLIPS
       // Also limit the arrays
       if (videoOrder.length > MAX_CLIPS) videoOrder.length = MAX_CLIPS
@@ -389,7 +381,6 @@ export async function POST(request) {
                 await writeFile(videoPath, videoBuffer)
                 } else {
                 // External stock video - download it
-                console.log(`[${jobId}] Downloading video from: ${video.url.substring(0, 100)}...`)
                 const response = await fetch(video.url, {
                   headers: {
                     'User-Agent': 'Mozilla/5.0 (compatible; VideoComposer/1.0)'
@@ -440,8 +431,67 @@ export async function POST(request) {
     let audioPath = join(tempDir, 'voice.mp3')
     
     // Clean script for TTS - remove screenplay formatting
+    // Clean script for TTS - remove screenplay formatting and technical terms
+    // ENHANCED: Now catches INLINE patterns (not just start of line)
     const cleanScriptForTTS = (rawScript) => {
       let cleaned = rawScript
+      
+      // CRITICAL: Remove @image tags (like @image1, @image2, @image 3, etc.)
+      cleaned = cleaned.replace(/@image\s*\d*/gi, '')
+      cleaned = cleaned.replace(/@\w+/gi, '') // Remove any @mentions like @Linda, @product
+      
+      // Remove section headers - BOTH at start of line AND inline
+      // Start of line patterns
+      cleaned = cleaned.replace(/^(Opening|Intro|Outro|Introduction|Conclusion|Scene\s*\d*|Act\s*\d*|Part\s*\d*|Section\s*\d*)[:\s]*/gim, '')
+      // Inline patterns (e.g., "Opening: text" anywhere in the text)
+      cleaned = cleaned.replace(/\b(Opening|Intro|Outro|Introduction|Conclusion):\s*/gi, '')
+      cleaned = cleaned.replace(/\bScene\s*\d+[:\.\-]\s*/gi, '') // "Scene 1:", "Scene 2.", "Scene3-"
+      cleaned = cleaned.replace(/\bAct\s*\d+[:\.\-]\s*/gi, '')
+      cleaned = cleaned.replace(/\bPart\s*\d+[:\.\-]\s*/gi, '')
+      
+      // Remove voiceover/narrator indicators - BOTH at start AND inline
+      cleaned = cleaned.replace(/^(VO|V\.O\.|Voiceover|Voice\s*Over|Voice-Over|Narrator|NARRATOR|Narration)[:\s]*/gim, '')
+      cleaned = cleaned.replace(/\b(VO|V\.O\.)[:\s]+/gi, '') // Inline "VO:" 
+      cleaned = cleaned.replace(/\b(Voiceover|Voice\s*Over|Voice-Over|Narrator|Narration)[:\s]+/gi, '')
+      cleaned = cleaned.replace(/\(VO\)|\(V\.O\.\)|\(voiceover\)|\(narrator\)/gi, '')
+      
+      // Remove visual/video direction indicators
+      cleaned = cleaned.replace(/^(Visual|Video|On\s*Screen|On-Screen|Shot|Footage|Clip|B-Roll|B\s*Roll)[:\s]*/gim, '')
+      
+      // Remove text/title indicators  
+      cleaned = cleaned.replace(/^(Text|Title|Caption|Super|Lower\s*Third|Graphic|On\s*Screen\s*Text)[:\s]*[^\n]*/gim, '')
+      
+      // Remove SFX/Music cues
+      cleaned = cleaned.replace(/^(SFX|Sound|Music|Audio|BGM|Background\s*Music)[:\s]*[^\n]*/gim, '')
+      cleaned = cleaned.replace(/\[SFX[^\]]*\]|\[Music[^\]]*\]|\[Sound[^\]]*\]/gi, '')
+      
+      // Remove common video generation meta instructions
+      const metaPhrases = [
+        /\bcinematic\s+(video|shot|sequence|clip|footage)\s+of\b/gi,
+        /\bdynamic\s+\d+-second\s+(video|shot|clip)\b/gi,
+        /\bstart\s+with\s+a?\s*(wide|aerial|medium|close)?\s*shot\b/gi,
+        /\bin\s+(slow[- ]?motion|extreme)?\s*(close[- ]?up|wide\s+shot|medium\s+shot)\b/gi,
+        /\bshow\s+this\s+in\b/gi,
+        /\b(wide|aerial|medium|close|tracking|establishing)\s+shot\s+(of|showing|capturing)?\b/gi,
+        /\bcut\s+to\s+(a|the)?\b/gi,
+        /\bimmediately\s+transition\s+to\b/gi,
+        /\btransition\s+to\s+(celebration|scene)?\b/gi,
+        /\buse\s+dramatic\s+music\b/gi,
+        /\bquick\s+cuts\b/gi,
+        /\bhigh[- ]?energy\s+camera\s+movements?\b/gi,
+        /\bkeep\s+it\s+action[- ]?packed\b/gi,
+        /\bthen\s+(wide|zoom|cut)\s+shot\b/gi,
+        /\bgenerate\s+a\s+video\b/gi,
+        /\bcreate\s+a\s+(cinematic\s+)?(video|clip)\b/gi,
+        /\bmake\s+a\s+video\b/gi,
+      ]
+      
+      metaPhrases.forEach(pattern => {
+        cleaned = cleaned.replace(pattern, '')
+      })
+      
+      // Remove camera direction terms when they appear standalone
+      cleaned = cleaned.replace(/\b(wide shot|medium shot|close-?up|aerial shot|tracking shot|extreme close-?up|POV shot|establishing shot)\b/gi, '')
       
       // Remove screenplay scene headings: INT./EXT., DAY/NIGHT, etc.
       cleaned = cleaned.replace(/^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)[^\n]*$/gim, '')
@@ -468,6 +518,13 @@ export async function POST(request) {
       // Remove time indicators
       cleaned = cleaned.replace(/\s*--\s*(DAY|NIGHT|DAWN|DUSK|MORNING|EVENING|LATER|CONTINUOUS|SAME)[^\n]*/gi, '')
       
+      // Clean up em-dashes commonly used in prompts
+      cleaned = cleaned.replace(/—/g, ', ')
+      
+      // Clean up multiple punctuation
+      cleaned = cleaned.replace(/[,;:]\s*[,;:]/g, ',')
+      cleaned = cleaned.replace(/\.\s*\./g, '.')
+      
       // Clean up whitespace
       cleaned = cleaned.replace(/\n{3,}/g, '\n\n')
       cleaned = cleaned.split('\n').filter(line => line.trim().length > 0).join(' ')
@@ -476,8 +533,40 @@ export async function POST(request) {
       return cleaned
     }
     
+    // Convert plain text to SSML with natural pauses for more human-like delivery
+    const textToSSML = (text) => {
+      // Escape special XML characters
+      let ssml = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+      
+      // Add medium pause after periods (end of sentences)
+      ssml = ssml.replace(/\.\s+/g, '.<break time="600ms"/> ')
+      
+      // Add short pause after commas
+      ssml = ssml.replace(/,\s+/g, ',<break time="300ms"/> ')
+      
+      // Add medium pause after question marks
+      ssml = ssml.replace(/\?\s+/g, '?<break time="600ms"/> ')
+      
+      // Add medium pause after exclamation marks
+      ssml = ssml.replace(/!\s+/g, '!<break time="500ms"/> ')
+      
+      // Add pause after colons
+      ssml = ssml.replace(/:\s+/g, ':<break time="400ms"/> ')
+      
+      // Add pause after semicolons
+      ssml = ssml.replace(/;\s+/g, ';<break time="400ms"/> ')
+      
+      // Wrap in speak tags
+      return `<speak>${ssml}</speak>`
+    }
+    
     const ttsScript = cleanScriptForTTS(script)
-    console.log(`[${jobId}] TTS Script (cleaned): ${ttsScript.substring(0, 200)}...`)
+    const ttsSSML = textToSSML(ttsScript)
     
     if (voiceOption === 'tts') {
       // Generate TTS with Google Cloud
@@ -525,11 +614,11 @@ export async function POST(request) {
         }
         
         const request = {
-          input: { text: ttsScript }, // Use cleaned script
+          input: { ssml: ttsSSML }, // Use SSML for natural pauses and emphasis
           voice: voiceConfig,
           audioConfig: {
             audioEncoding: 'MP3',
-            speakingRate: 1.0,
+            speakingRate: 0.95, // Slightly slower for more natural pacing
             pitch: 0.0,
             volumeGainDb: 0.0,
           },
@@ -588,7 +677,6 @@ export async function POST(request) {
       }
     } else if (voiceOption === 'silent' || voiceOption === 'none') {
       // Silent mode - no voice audio needed
-      console.log(`[${jobId}] Silent mode - skipping voice generation`)
     }
 
     // Track if we have voice audio
@@ -636,7 +724,6 @@ export async function POST(request) {
       targetHeight = resolution === '4k' ? '2160' : resolution === '2k' ? '1440' : resolution === '1080p' ? '1920' : '1280'
     }
     
-    console.log(`[${jobId}] 📐 Video orientation: ${videoOrientation}, Dimensions: ${targetWidth}x${targetHeight}`)
     
     // Calculate duration per clip based on ACTUAL AUDIO DURATION (not target duration)
     const durationPerClip = actualAudioDuration / videoFiles.length
@@ -887,13 +974,11 @@ export async function POST(request) {
             })
           } else {
             // Silent mode with music - use music as the only audio track
-            console.log(`[${jobId}] Using music-only audio (no voice)`)
             finalAudioPath = trimmedMusicPath
             hasFinalAudio = true
           }
         }
       } else {
-        console.log(`[${jobId}] Music path not found: ${musicPath}`)
       }
     }
 
@@ -959,7 +1044,6 @@ export async function POST(request) {
       })
     } else {
       // No audio - just copy the captioned video (silent video)
-      console.log(`[${jobId}] No audio - creating silent video`)
       await new Promise((resolve, reject) => {
         ffmpeg()
           .input(captionedVideoPath)
@@ -991,7 +1075,6 @@ export async function POST(request) {
       throw new Error('Final video file is empty (0 bytes)')
     }
     
-    console.log(`[${jobId}] ✅ Final video size: ${(finalVideoStats.size / 1024 / 1024).toFixed(2)} MB`)
     
     const videoBuffer = await require('fs/promises').readFile(finalVideoPath)
     
@@ -1016,7 +1099,6 @@ export async function POST(request) {
       throw new Error(`Public video file size mismatch: expected ${videoBuffer.length}, got ${publicFileStats.size}`)
     }
     
-    console.log(`[${jobId}] ✅ Video saved to public folder: ${publicVideoPath}`)
     
     // Generate public URL
     const videoUrl = `/story-reels/${jobId}.mp4`
@@ -1099,8 +1181,6 @@ export async function POST(request) {
       }
 
       const insertResult = await libraryCollection.insertOne(libraryDoc)
-      console.log(`[${jobId}] ✅ Video saved to library: ${libraryDoc.id}, userId: ${userId}, videoUrl: ${videoUrl}`)
-      console.log(`[${jobId}] MongoDB insertId: ${insertResult.insertedId}`)
     } catch (saveError) {
       console.error(`[${jobId}] ❌ Failed to auto-save to library:`, saveError)
       console.error(`[${jobId}] Save error details:`, saveError.message)

@@ -14,13 +14,39 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Copy, Loader2, Wand2, RefreshCw,
-  Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
-  Lightbulb, Info, Layers, Brain, Target, MessageSquare,
-  HelpCircle, Shield, Star, ChevronRight, Layout, Eye,
-  MousePointer, DollarSign, Download, CheckCircle2, XCircle,
-  ArrowRight, Quote, Rocket, Heart
+import {
+  FileText,
+  Copy,
+  Loader2,
+  Wand2,
+  RefreshCw,
+  Check,
+  ArrowLeft,
+  Play,
+  Users,
+  TrendingUp,
+  BarChart3,
+  Lightbulb,
+  Info,
+  Layers,
+  Brain,
+  Target,
+  MessageSquare,
+  HelpCircle,
+  Shield,
+  Star,
+  ChevronRight,
+  Layout,
+  Eye,
+  MousePointer,
+  DollarSign,
+  Download,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+  Quote,
+  Rocket,
+  Heart
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
@@ -786,7 +812,7 @@ export default function LandingPageCopyPage() {
                       <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2">
                           {activeSection === 'hero' && <><Target className="h-5 w-5 text-blue-500" /> Hero Section (Above the Fold)</>}
-                          {activeSection === 'problem' && <><Zap className="h-5 w-5 text-red-500" /> Problem Section</>}
+                          {activeSection === 'problem' && <><Play className="h-5 w-5 text-red-500" /> Problem Section</>}
                           {activeSection === 'solution' && <><Lightbulb className="h-5 w-5 text-green-500" /> Solution Section</>}
                           {activeSection === 'socialProof' && <><Star className="h-5 w-5 text-yellow-500" /> Social Proof Section</>}
                           {activeSection === 'faq' && <><HelpCircle className="h-5 w-5 text-purple-500" /> FAQ Section</>}

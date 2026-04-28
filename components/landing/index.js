@@ -1,6 +1,6 @@
 // Landing Page Components - Barrel Export
 export { Header, HeroSection } from './HeroSection'
-export { FeaturesSection, StatsSection, PricingSection, TestimonialsSection, CTASection } from './Sections'
+export { FeaturesSection, StatsSection, PricingSection, TestimonialsSection, CTASection, ComparisonSection } from './Sections'
 export { UseCasesSection, ToolsShowcase, PhilosophySection, PopularToolsSection, Footer } from './MoreSections'
 export { 
   homepageFAQs, 

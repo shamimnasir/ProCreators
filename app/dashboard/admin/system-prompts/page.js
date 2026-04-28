@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Settings, Save, RotateCcw, Video, Type } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 
 export default function SystemPromptsPage() {
@@ -30,6 +31,7 @@ export default function SystemPromptsPage() {
   const [activeTab, setActiveTab] = useState('viral-tools')
   
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     fetchTools()
@@ -102,7 +104,7 @@ export default function SystemPromptsPage() {
     try {
       const response = await fetch('/api/admin/system-prompts/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           tool: selectedTool,
           prompt: systemPrompt

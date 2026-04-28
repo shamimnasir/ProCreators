@@ -11,11 +11,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  BookOpen, Download, Loader2, DollarSign, Image,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, Save, Palette, ImagePlus,
-  FileText, Wand2, BookMarked, Baby, GraduationCap, Users, Upload
+import {
+  BookOpen,
+  Download,
+  Loader2,
+  DollarSign,
+  Image,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Save,
+  Palette,
+  ImagePlus,
+  FileText,
+  Wand2,
+  BookMarked,
+  Baby,
+  GraduationCap,
+  Users,
+  Upload
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'

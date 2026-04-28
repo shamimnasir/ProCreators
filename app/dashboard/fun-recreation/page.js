@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gamepad2 } from 'lucide-react'
+import { Gamepad2, Play } from 'lucide-react'
 import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolCard'
 
 const FUN_CATEGORIES = [
@@ -95,7 +95,7 @@ const FUN_CATEGORIES = [
         id: 'fortune-teller',
         name: 'Fortune Teller',
         description: 'Fun predictions and horoscopes',
-        icon: 'Zap',
+        icon: 'Play',
         href: '/dashboard/tools/fortune-teller',
         useCase: 'Entertainment',
       }

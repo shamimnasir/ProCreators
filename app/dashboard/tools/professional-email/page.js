@@ -12,12 +12,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Mail, Loader2, Target, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
-  Check, Send, Clock, AlertCircle, FileText,
-  ArrowLeft, Zap, User, Building, Calendar,
-  ThumbsUp, Bell, Heart, Users, XCircle, Wand2} from 'lucide-react'
+import {
+  Mail,
+  Loader2,
+  Target,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  MessageSquare,
+  Check,
+  Send,
+  Clock,
+  AlertCircle,
+  FileText,
+  ArrowLeft,
+  Play,
+  User,
+  Building,
+  Calendar,
+  ThumbsUp,
+  Bell,
+  Heart,
+  Users,
+  XCircle,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'
@@ -347,7 +367,7 @@ export default function ProfessionalEmailPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-500" />
+                    <Play className="h-5 w-5 text-yellow-500" />
                     Tone & Urgency
                   </CardTitle>
                 </CardHeader>
@@ -605,7 +625,7 @@ export default function ProfessionalEmailPage() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-base flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <Play className="h-5 w-5 text-yellow-500" />
                             Shorter Version
                           </CardTitle>
                           <Button 

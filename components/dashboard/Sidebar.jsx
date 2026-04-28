@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Logo } from '@/components/ui/Logo'
 import {
-  Sparkles,
+  Wand2,
   LayoutDashboard,
   MessageSquare,
   Quote,
@@ -19,7 +19,7 @@ import {
   CreditCard,
   Video,
   Film,
-  Zap,
+  Play,
   BookOpen,
   BookText,
   Presentation,
@@ -54,7 +54,8 @@ import {
   Scissors,
   Layers,
   Shield,
-  Settings2
+  Settings2,
+  Ticket
 } from 'lucide-react'
 
 // Admin emails that can access the admin panel
@@ -70,31 +71,28 @@ const navigation = [
     name: 'Video Studio',
     href: '/dashboard/tools/ai-video-studio',
     icon: Film,
-    children: [
-      { name: 'Mini Stories', href: '/dashboard/tools/quick-reels/mini-stories', icon: BookOpen },
-      { name: 'Motivational', href: '/dashboard/tools/quick-reels/motivational', icon: Zap },
-      { name: 'Facts & Explainers', href: '/dashboard/tools/quick-reels/facts-explainer', icon: GraduationCap },
-      { name: 'Comedy & Memes', href: '/dashboard/tools/quick-reels/comedy', icon: Sparkles },
-      { name: 'Kids Stories', href: '/dashboard/tools/quick-reels/kids-stories', icon: BookOpen },
-      { name: 'Kids Learning', href: '/dashboard/tools/quick-reels/kids-learning', icon: GraduationCap },
-      { name: 'Business Promos', href: '/dashboard/tools/quick-reels/business-promo', icon: CreditCard },
-      { name: 'Horror Stories', href: '/dashboard/tools/quick-reels/horror', icon: Video },
-      { name: 'Story Video Reels', href: '/dashboard/tools/story-reels', icon: Sparkles },
-      { name: 'Long Form', href: '/dashboard/tools/long-form', icon: VideoIcon },
-    ]
+    description: 'Create any type of video with AI or Stock footage'
+  },
+  {
+    name: 'UGC Ad Studio',
+    href: '/dashboard/tools/ugc-studio',
+    icon: Wand2,
+    badge: 'NEW',
+    description: 'Create AI-powered UGC ads with talking-head avatars'
   },
   {
     name: 'Viral Post Creation',
     href: '/dashboard/viral-posts',
-    icon: Sparkles,
+    icon: Wand2,
     children: [
+      { name: 'Social Media Posts', href: '/dashboard/tools/linkedin-posts', icon: MessageSquare },
       { name: 'Content Humanizer', href: '/dashboard/tools/content-humanizer', icon: Edit3 },
+      { name: 'Blog Creator', href: '/dashboard/tools/blog-creator', icon: FileText },
       { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
       { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
-      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
-      { name: 'Tutorials', href: '/dashboard/tools/tutorials', icon: GraduationCap },
       { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
       { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
+      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
     ]
   },
   {
@@ -177,7 +175,7 @@ const navigation = [
       { name: 'AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: User },
       { name: 'Story Writer', href: '/dashboard/tools/story-writer', icon: BookOpen },
       { name: 'Joke Generator', href: '/dashboard/tools/joke-generator', icon: Smile },
-      { name: 'Fortune Teller', href: '/dashboard/tools/fortune-teller', icon: Sparkles },
+      { name: 'Fortune Teller', href: '/dashboard/tools/fortune-teller', icon: Wand2 },
       { name: 'Love Letter Generator', href: '/dashboard/tools/love-letter', icon: Heart },
     ]
   },
@@ -190,12 +188,14 @@ const navigation = [
     children: [
       { name: 'Page Manager', href: '/dashboard/admin/page-manager', icon: FileText },
       { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
+      { name: 'Coupons & Promos', href: '/dashboard/admin/coupons', icon: Ticket },
       { name: 'Kill Switches', href: '/dashboard/admin/controls', icon: Shield },
       { name: 'Site Settings', href: '/dashboard/admin/site-settings', icon: Settings2 },
       { name: 'Cost Analytics', href: '/dashboard/admin/costs', icon: TrendingUp },
       { name: 'System Prompts (Viral)', href: '/dashboard/admin/system-prompts', icon: Type },
       { name: 'System Prompts (Quick Reels)', href: '/dashboard/admin/prompts', icon: Video },
       { name: 'System Prompts (AI Video)', href: '/dashboard/admin/ai-video-prompts', icon: Film },
+      { name: 'Video Themes', href: '/dashboard/admin/video-themes', icon: Palette },
     ]
   },
 ]
@@ -252,10 +252,10 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      "relative flex h-screen flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300",
+      "relative flex h-screen flex-col glass-sidebar text-sidebar-foreground transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
-      <div className="flex h-20 items-center justify-between border-b border-border px-4">
+      <div className="flex h-20 items-center justify-between border-b border-white/30 px-4">
         {!collapsed && (
           <Link href="/dashboard">
             <Logo variant="full" className="h-8 w-8" />

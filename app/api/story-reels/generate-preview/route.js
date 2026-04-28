@@ -82,7 +82,6 @@ export async function POST(request) {
     }
 
     // Step 1: Download stock videos and process images (using streams)
-    console.log(`[Preview ${jobId}] 📹 Processing ${stockVideos.length} clips...`)
     const videoFiles = []
     const { Readable } = require('stream')
     const { pipeline } = require('stream/promises')
@@ -163,7 +162,6 @@ export async function POST(request) {
               // VIRAL STYLE: Bold colored box
               filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
               
-              console.log(`[Preview ${jobId}] 📝 Adding text overlay to clip ${i + 1}: "${textOverlay.text}"`)
             }
             
             ffmpeg(imagePath)
@@ -200,7 +198,6 @@ export async function POST(request) {
             videoFiles.push(videoPath)
           } else {
             // External stock video - download it
-            console.log(`[Preview ${jobId}] Downloading video ${i}: ${video.url.substring(0, 100)}...`)
             const response = await fetch(video.url, {
               headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; VideoComposer/1.0)'
@@ -227,7 +224,6 @@ export async function POST(request) {
     }
 
     // Step 2: Generate or use audio
-    console.log(`[Preview ${jobId}] 🎵 Processing audio...`)
     const audioPath = join(tempDir, 'voice.mp3')
     
     if (voiceOption === 'upload' && voiceFile) {
@@ -324,7 +320,6 @@ export async function POST(request) {
     })
 
     // Step 4: Create PREVIEW video (720p, fast encoding)
-    console.log(`[Preview ${jobId}] 🎬 Creating preview video...`)
     
     const durationPerClip = actualAudioDuration / videoFiles.length
     const normalizedFiles = []

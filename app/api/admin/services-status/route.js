@@ -2,7 +2,11 @@
 import { NextResponse } from 'next/server'
 import { getServicesStatus } from '@/lib/services'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 export async function GET() {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   const services = getServicesStatus()
   
   // Add webhook secrets count

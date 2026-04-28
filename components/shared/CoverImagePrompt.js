@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Image, Sparkles } from 'lucide-react'
+import { Image, Wand2 } from 'lucide-react'
 
 // Cover image style presets
 const COVER_STYLES = [
@@ -57,7 +57,7 @@ export default function CoverImagePrompt({
       {coverImageStyle === 'custom' && (
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-yellow-500" />
+            <Wand2 className="h-4 w-4 text-yellow-500" />
             Describe Your Cover Image
           </Label>
           <Textarea

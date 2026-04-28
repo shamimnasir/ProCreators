@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 import { verifyCsrf } from '@/lib/csrf-verify'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const COLLECTION_NAME = 'unified_pages'
 const CUSTOM_PAGES_COLLECTION = 'custom_pages'
 
@@ -160,6 +161,9 @@ const DEFAULT_TEMPLATES = {
 
 // GET - List all pages or get specific page
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const pageId = searchParams.get('pageId')
@@ -266,6 +270,9 @@ export async function GET(request) {
 
 // POST - Create NEW custom page or initialize existing page
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)
@@ -367,6 +374,9 @@ export async function POST(request) {
 
 // PUT - Update page (both registry and custom pages)
 export async function PUT(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)
@@ -448,6 +458,9 @@ export async function PUT(request) {
 
 // DELETE - Reset page to default OR delete custom page permanently
 export async function DELETE(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)

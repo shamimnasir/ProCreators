@@ -5,108 +5,115 @@ import { Coins, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-// Credit costs per tool - matches backend /lib/credits.js
-// PRICING MODEL: Based on actual API costs + profit margins
-// - Text tools (Gemini): 55% margin
-// - Image tools (Nano Banana): 55% margin - $0.134/image = 300 credits
-// - Video tools (Kling): 20% margin - ~$2.80/10s clip = 10,000 credits for 30s
+// Credit costs per tool - mirrors backend /lib/credits.js
+// CREDIT SYSTEM v3 (Feb 2026 — Seedance 2 + Kling Pro repricing)
+// 1 credit = $0.02 | Video tools rebuilt at 30% margin from fal.ai pricing
 const TOOL_COSTS = {
-  // ============= TEXT GENERATION (Very Cheap - Gemini) =============
-  'joke-generator': 5,
-  'fortune-teller': 5,
-  'love-letter': 8,
-  'story-writer': 15,
-  'avatar-creator': 8,
-  'meme-generator': 8,
-  'ad-copy': 10,
-  'professional-email': 8,
-  'blog-creator': 20,
-  'linkedin-posts': 8,
-  'threads': 8,
-  'quotes': 5,
-  'news': 10,
-  'tutorials': 15,
-  'lists': 8,
-  'landing-page-copy': 15,
-  'email-campaigns': 12,
-  'marketing-strategy': 20,
-  'cover-letter': 10,
-  'resume-builder': 15,
-  'interview-prep': 12,
-  'salary-negotiator': 10,
-  'networking-message': 8,
-  'job-matcher': 10,
-  'essay-helper': 15,
-  'study-notes': 12,
-  'exam-prep': 15,
-  'lesson-planner': 15,
-  'grammar-checker': 5,
-  'citation-generator': 5,
-  'ai-humanizer': 10,
-  'content-humanizer': 10,
-  'youtube-creator': 15,
+  // ============= TEXT GENERATION (1-3 credits) =============
+  'joke-generator': 1,
+  'fortune-teller': 1,
+  'grammar-checker': 1,
+  'citation-generator': 1,
+  'love-letter': 2,
+  'story-writer': 3,
+  'avatar-creator': 2,
+  'meme-generator': 2,
+  'ad-copy': 2,
+  'professional-email': 2,
+  'blog-creator': 3,
+  'linkedin-posts': 2,
+  'threads': 2,
+  'quotes': 1,
+  'news': 2,
+  'tutorials': 3,
+  'lists': 2,
+  'landing-page-copy': 3,
+  'email-campaigns': 2,
+  'marketing-strategy': 3,
+  'cover-letter': 2,
+  'resume-builder': 3,
+  'interview-prep': 2,
+  'salary-negotiator': 2,
+  'networking-message': 2,
+  'job-matcher': 2,
+  'essay-helper': 3,
+  'study-notes': 2,
+  'exam-prep': 3,
+  'lesson-planner': 3,
+  'ai-humanizer': 2,
+  'content-humanizer': 2,
+  'youtube-creator': 3,
   
-  // ============= PDF (Text-only - Cheap) =============
-  'planner-maker': 20,
-  'worksheet-maker': 20,
-  'checklist-maker': 15,
-  'journal-maker': 20,
-  'quiz-maker': 18,
-  'learning-cards': 18,
-  'slides-maker': 25,
-  'notion-templates': 20,
-  'business-plan': 30,
-  'pitch-deck': 35,
-  'swot-analysis': 20,
-  'guide-maker': 25,
+  // ============= DIGITAL PRODUCTS — TEXT-ONLY (5-15 credits) =============
+  'checklist-maker': 5,
+  'worksheet-maker': 5,
+  'quiz-maker': 5,
+  'learning-cards': 5,
+  'flashcards': 5,
+  'swot-analysis': 5,
+  'planner-maker': 8,
+  'journal-maker': 8,
+  'notion-templates': 8,
+  'guide-maker': 10,
+  'slides-maker': 12,
+  'business-plan': 15,
+  'pitch-deck': 15,
   
-  // ============= PDF WITH IMAGES (Expensive - Nano Banana @ $0.134/image) =============
-  // 300 credits per image
-  'coloring-book': 7500,      // ~25 images
-  'storybook-maker': 3000,    // ~10 images
-  'activity-book': 4500,      // ~15 images
-  'recipe-book': 2000,        // ~6-7 images
-  'ebook-maker': 1500,        // ~5 images
+  // ============= DIGITAL PRODUCTS — WITH IMAGES (100-400 credits) =============
+  'ebook-maker': 100,
+  'recipe-book': 120,
+  'storybook-maker': 200,
+  'activity-book': 250,
+  'coloring-book': 400,
   
-  // ============= SINGLE IMAGE GENERATION ($0.134 = 300 credits) =============
-  'image-editor': 300,
-  'cover-image-creator': 300,
-  'podcast-cover-maker': 300,
-  'thumbnail-maker': 300,
-  'photo-cards': 300,
-  'carousels': 600,           // 2 images avg
+  // ============= SINGLE IMAGE (15 credits) =============
+  'image-editor': 15,
+  'cover-image-creator': 15,
+  'podcast-cover-maker': 15,
+  'thumbnail-maker': 15,
+  'photo-cards': 15,
+  'carousels': 50,              // 10 credits/slide × 5 base
   
-  // ============= VIDEO - STOCK (Pexels FREE + TTS) =============
-  'video-editor': 50,
-  'quick-reels': 40,          // Stock videos only
-  'quick-reels-stock': 40,
-  'auto-subtitles': 30,
-  'reels': 40,
+  // ============= VIDEO — STOCK (2-3 credits) =============
+  'quick-reels': 3,
+  'quick-reels-stock': 3,
+  'auto-subtitles': 2,
+  'reels': 3,
   
-  // ============= VIDEO - AI (Kling @ $2.80/10s clip) =============
-  // 20% margin: 10,000 credits for 30s (3 clips)
-  'ai-video-studio': 10000,
-  'story-reels': 10000,
-  'auto-reels': 10000,
-  'auto-longform': 15000,
-  'talking-head': 10000,
-  'transformation-video': 10000,
-  'script-to-ad': 10000,
+  // ============= VIDEO — AI (per 30s base, 30% margin) =============
+  // Default engine = Seedance 2.0 Fast (720p) @ $0.2419/sec
+  'ai-video-studio': 520,
+  'story-reels': 520,
+  'auto-reels': 520,
+  'auto-longform': 800,
+  'talking-head': 520,
+  'transformation-video': 520,
+  'script-to-ad': 520,
   
-  // AI Video Tiers
-  'quick-reels-ai-essential': 8000,
-  'quick-reels-ai-standard': 10000,
-  'quick-reels-ai-professional': 12000,
-  'quick-reels-ai-cinema': 15000,
+  // AI Video Model Tiers (per 30s, 30% margin)
+  'quick-reels-ai-essential': 20,     // Pixverse $0.008/s
+  'quick-reels-ai-standard': 110,     // Wan 2.2 $0.05/s
+  'quick-reels-ai-seedance': 520,     // Seedance 2.0 Fast (DEFAULT) $0.2419/s
+  'quick-reels-ai-professional': 150, // Kling 2.5 Pro $0.07/s
+  'quick-reels-ai-cinema': 430,       // Veo 3.1 $0.20/s
+  'quick-reels-ai-wan': 110,
+  'quick-reels-ai-ltx': 25,
   
-  // ============= AUDIO =============
-  'audio-editor': 25,
-  'noise-remover': 20,
-  'voice-enhancer': 25,
-  'voice-clone': 500,
+  // ============= UGC AD STUDIO (per generation, 30% margin) =============
+  'ugc-talking-head-standard': 125,   // Kling Avatar v2 Std $0.0562/s × 30s
+  'ugc-talking-head-pro': 250,        // Kling Avatar v2 Pro $0.115/s × 30s
+  'ugc-broll': 140,                   // Seedance 2 Fast 8s clip
+  'ugc-script': 3,
+  'ugc-avatar-generate': 15,
+  
+  // ============= AUDIO (2-25 credits) =============
+  'audio-editor': 2,
+  'noise-remover': 2,
+  'voice-enhancer': 2,
+  'voice-clone': 25,
   
   // Default
-  'default': 20
+  'default': 2
 }
 
 // Video tools that scale by duration (base = 30s)
@@ -121,35 +128,35 @@ const VIDEO_TOOLS_WITH_SCALING = [
   'quick-reels-ai-essential',
   'quick-reels-ai-standard',
   'quick-reels-ai-professional',
-  'quick-reels-ai-cinema'
+  'quick-reels-ai-cinema',
+  'quick-reels-ai-wan',
+  'quick-reels-ai-ltx'
 ]
 
 // Stock video tools that scale by duration (cheaper)
 const STOCK_VIDEO_TOOLS_WITH_SCALING = [
   'quick-reels',
   'quick-reels-stock',
-  'story-reels-stock',
-  'video-editor'
+  'story-reels-stock'
 ]
 
 /**
  * Calculate dynamic cost based on video duration
  * 
- * PRICING:
- * - AI Video: Base cost is 10,000 for 30 seconds, scales linearly
- * - Stock Video: Base cost is 40 for 30 seconds, scales linearly (much cheaper)
+ * SIMPLIFIED v2 PRICING:
+ * - AI Video: Base cost for 30 seconds, scales linearly
+ * - Stock Video: Base cost for 30 seconds, scales linearly
  * - Frame-chain adds 15% premium (AI only)
  * 
- * Example for ai-video-studio (base 10,000 credits for 30s):
- * - 15s video = 5,000 credits
- * - 30s video = 10,000 credits
- * - 60s video = 20,000 credits  
- * - 120s video = 40,000 credits
+ * Example for ai-video-studio (base 520 credits for 30s):
+ * - 15s video = 260 credits
+ * - 30s video = 520 credits
+ * - 60s video = 1,040 credits  
  * 
- * Example for stock video (base 40 credits for 30s):
- * - 30s = 40 credits
- * - 60s = 80 credits
- * - 180s (3 min) = 240 credits
+ * Example for stock video (base 3 credits for 30s):
+ * - 30s = 3 credits
+ * - 60s = 6 credits
+ * - 180s (3 min) = 18 credits
  */
 function calculateDynamicCost(toolId, duration = 30, consistencyMode = 'none') {
   const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
@@ -211,15 +218,15 @@ export function CreditCostBadge({ toolId, duration, consistencyMode, className =
   const baseCost = TOOL_COSTS[toolId] || TOOL_COSTS['default']
   const formattedCost = formatCredits(cost)
   
-  // Color coding based on cost
+  // Color coding based on cost (adjusted for simplified credits)
   let colorClass = 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-  if (cost >= 1000) {
+  if (cost >= 50) {
     colorClass = 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300'
   }
-  if (cost >= 5000) {
+  if (cost >= 100) {
     colorClass = 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300'
   }
-  if (cost >= 10000) {
+  if (cost >= 300) {
     colorClass = 'bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300'
   }
   
@@ -240,7 +247,7 @@ export function CreditCostBadge({ toolId, duration, consistencyMode, className =
             <div className="text-sm">
               <p className="font-medium">{cost.toLocaleString()} credits for {duration}s video</p>
               <p className="text-xs text-muted-foreground">Base: {baseCost.toLocaleString()} credits for 30s</p>
-              <p className="text-xs text-muted-foreground">≈ ${(cost * 0.001).toFixed(2)} value</p>
+              <p className="text-xs text-muted-foreground">≈ ${(cost * 0.02).toFixed(2)} value</p>
               {consistencyMode === 'frame-chain' && (
                 <p className="text-xs text-purple-400">+15% for Frame-Chain</p>
               )}
@@ -248,7 +255,7 @@ export function CreditCostBadge({ toolId, duration, consistencyMode, className =
           ) : (
             <div className="text-sm">
               <p>This costs {cost.toLocaleString()} credits</p>
-              <p className="text-xs text-muted-foreground">≈ ${(cost * 0.001).toFixed(2)} value</p>
+              <p className="text-xs text-muted-foreground">≈ ${(cost * 0.02).toFixed(2)} value</p>
             </div>
           )}
         </TooltipContent>

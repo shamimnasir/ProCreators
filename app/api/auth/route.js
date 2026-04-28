@@ -87,7 +87,10 @@ export async function POST(request) {
         }
         
         // Check if user exists
-        const existingUser = await db.collection('users').findOne({ email: sanitizedEmail })
+        const existingUser = await db.collection('users').findOne(
+          { email: sanitizedEmail },
+          { projection: { _id: 1 } }
+        )
         if (existingUser) {
           return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 400 })
         }
@@ -100,7 +103,7 @@ export async function POST(request) {
         // Create user with bcrypt hashed password
         const userId = uuidv4()
         const hashedPassword = await hashPassword(password)
-        const initialCredits = 50 // Free starter credits
+        const initialCredits = 25 // Free starter credits (simplified v2: 1 credit ≈ $0.02)
         const newUser = {
           _id: userId,
           email: sanitizedEmail,
@@ -279,6 +282,12 @@ export async function POST(request) {
             plan: user.plan
           },
           sessionToken
+        }, {
+          headers: {
+            // SECURITY: also set session as httpOnly cookie so admin/non-localStorage
+            // pages get auth automatically. Bearer token in body still supported.
+            'Set-Cookie': `session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`
+          }
         })
       }
       

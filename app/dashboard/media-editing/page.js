@@ -8,23 +8,6 @@ import { ToolCard, CategoryHeader, PageHero } from '@/components/dashboard/ToolC
 
 const MEDIA_CATEGORIES = [
   {
-    id: 'video',
-    name: 'Video Tools',
-    description: 'Video editing and enhancement',
-    icon: 'Film',
-    color: 'from-purple-500 to-purple-600',
-    tools: [
-      {
-        id: 'video-editor',
-        name: 'Video Editor',
-        description: 'Professional video editing with trimming, effects & transitions',
-        icon: 'Film',
-        href: '/dashboard/tools/video-editor',
-        useCase: 'Complete video editing'
-      }
-    ]
-  },
-  {
     id: 'images',
     name: 'Image Tools',
     description: 'Image editing and enhancement',

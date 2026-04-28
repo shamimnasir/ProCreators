@@ -1,195 +1,132 @@
-<analysis>
+<analysis>**original_problem_statement**: 
+The user's primary goal is to build a sophisticated AI Avatar and UGC Ads tool inspired by Arcads, along with an AI Video Studio. 
+PRODUCT REQUIREMENTS: 
+- **AI Avatar Creation & Script Generation**: Realistic avatars and raw UGC scripts.
+- **Natural Video Generation**: Queue-based async video generation using high-end models.
+- **Strict UI Guidelines**: Light mode only, glassmorphism design system, and no Sparkle or Zap (AI-looking) icons. 
+- **Recent Requirement**: Integrate **Seedance 2** models across all video tools as the primary generation engine, using Kling as the *only* fallback. Build the final rendering/stitching route for UGC Ads, and ensure the platform's homepage perfectly mirrors the live ProCreators site (animated glassmorphism components).
 
-**original_problem_statement**: The user initially requested a complete UI/UX overhaul for the Custom AI Video Studio tool to make it simpler and more intuitive for novice users, while retaining all existing functionality. During the session, two new bugs were reported and addressed: a non-functional Select Music button on the newly designed page, and a critical issue where credit deductions were not being reflected in the UI for the admin user. The user also requested verification of the credit deduction for regular users.
+**User's preferred language**: English (INSTRUCT next agent to respond in English only)
 
-The accumulated product requirements from previous sessions also remain relevant:
-1.  **Credit System & Refunds:**
-    *   Implement a **partial refund** for cancelled jobs.
-2.  **AI Video Generation & Quality:**
-    *   Fix a regression where the TTS engine narrates the user's raw prompt, including instructions and image tags.
-3.  **UI/UX Improvements:**
-    *   Fix a UI bug where the multi-scene image upload grid does not display correctly.
+**what currently exists?** 
+A comprehensive Next.js/MongoDB platform with a strictly Light Mode / Glassmorphism UI. The platform has a fully functional UGC Ad Studio that handles script generation (via Gemini), AI avatar generation, voice-over with multi-language/gender matching, async video generation (using Seedance 2 & Kling via fal.ai), and final video stitching (via ). The homepage features rich animated HTML/CSS UI mockups replacing static images.
 
-**User's preferred language**: English
-
-**what currently exists?**
-The Custom AI Video Studio page () has been completely redesigned with a clean, accordion-based UI to guide users through a step-by-step process. All previous features (AI model selection, custom prompts, reference images, background music) have been preserved within this new layout.
-
-Crucially, the credit system has been debugged and verified:
--   A bug was fixed where the UI did not refresh the user's credit balance after a video was generated. The  function is now called upon successful generation.
--   The backend credit deduction logic has been confirmed to be working correctly for both **admin** and **regular users**, closing a significant business logic gap that was pending for a long time.
-
-**Last working item**:
-    - Last item agent was working: Investigating, fixing, and verifying the credit deduction system. The agent discovered that backend deductions were working correctly, but the frontend UI was not refreshing the credit balance. The agent implemented a fix to refresh the balance after generation and verified the end-to-end flow for both admin and regular users.
+**Last working item**: 
+    - Last item agent was working: Formatting the Hero H1 typography to wrap strictly on 2 lines and replacing all em-dashes (—) with standard hyphens (-) across the homepage components.
     - Status: USER VERIFICATION PENDING
-    - Agent Testing Done: Y
-    - Which testing method agent to use? manual testing by curl
+    - Agent Testing Done: Y (Screenshot tool confirmed 2 lines and hyphen changes)
+    - Which testing method agent to use? Screenshot tool or manual UI check.
     - User Testing Done: N
 
-**All Pending/In progress Issue list**:
-  - Issue 1: Critical TTS Narration Bug (P0)
-  - Issue 2: Reference Image Grid UI Bug (P1)
-  - Issue 3: Partial Refund on Cancellation (P1)
-  - Issue 4: Fragile Background Processing (P2, CRITICAL)
-
+**All Pending/In progress Issue list**: 
+  Issue 1: Verify End-to-End UGC Pipeline with Aspect Ratios and Rendering (P1)
+  
   Issues Detail:
   - Issue 1: 
-     - Description: When using Auto mode with a custom prompt, the TTS narrates the user's raw input, including instructions like cinematic video of and image tags like @image1. This is a major regression.
-     - Attempted fixes: A previous fix was attempted by cleaning the script, but it was insufficient. No new work was done on this in the current session.
-     - Next debug checklist: 
-        1.  Verify the bug still exists with the new UI.
-        2.  Implement a more robust solution: use an AI call to convert the user's visual prompt into a clean, narrative script *before* sending it to the TTS service. This should be done in .
-     - Why fix this issue and what will be achieved with the fix? This is a core functionality regression. Fixing it will restore the usability of generating videos from custom user prompts.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? Backend
-     - Blocked on other issue: None
-
-  - Issue 2: 
-     - Description: The UI for uploading multiple reference images (image grid) was reported as showing a horizontal top view and not functioning correctly. This component is part of the redesigned  page, but it was not explicitly tested after the overhaul.
-     - Attempted fixes: None. The UI was completely rewritten, so the original bug may or may not persist. It needs re-evaluation.
-     - Next debug checklist:
-        1.  Test the multi-scene reference image upload feature on the new UI in .
-        2.  If the bug persists, examine the React component code and its associated CSS/layout properties to identify and fix the rendering issue.
-     - Why fix this issue and what will be achieved with the fix? The multi-scene reference image feature is a key differentiator, and this UI bug makes it unusable.
-     - Status: NOT STARTED
+     - Attempted fixes: Implemented the  route utilizing  to stitch video clips together. Plumbed  (16:9, 9:16, 1:1) through all UGC generator routes. Added an editable script UI.
+     - Next debug checklist: User needs to generate a fresh UGC script, edit it, generate clips, and trigger the final render to confirm the video stitching (with  for smooth motion) and aspect ratios work flawlessly in the UI.
+     - Why fix this issue and what will be achieved with the fix? Final validation of the entire core feature.
+     - Status: USER VERIFICATION PENDING
      - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? Frontend
-     - Blocked on other issue: None
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on other issue: No
 
-  - Issue 3:
-      - Description: When a user cancels a job, they should be refunded only for the clips that were not generated (partial refund), not a full refund.
-      - Attempted fixes: The  function in  and modifications to  were started in a previous session but not completed.
-      - Next debug checklist:
-          1. Complete the logic in the  route to calculate the partial refund amount based on generated clips.
-          2. Test the endpoint by starting a multi-clip job, cancelling it, and verifying the credit deduction in the database.
-      - Why fix this issue and what will be achieved with the fix? This provides a fairer credit model for users.
-      - Status: NOT STARTED
-      - Is recurring issue? N
-      - Should Test frontend/backend/both after fix? Backend
-      - Blocked on other issue: None
-
-  - Issue 4:
-     - Description: The asynchronous video generation relies on an unreliable, non-persistent mock job queue (). This is a known architectural flaw that can lead to silent failures and data loss.
-     - Attempted fixes: None.
-     - Next debug checklist:
-        1. Propose and implement a robust job queue system like BullMQ with Redis.
-        2. Refactor the async composition routes to use the new queue.
-     - Why fix this issue and what will be achieved with this? To make video generation reliable and scalable for production use.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? Backend
-     - Blocked on other issue: None
-
-**In progress Task List**:
-- None. The tasks from this session are complete.
+**In progress Task List**: 
+None. All current tasks and UI parity updates were completed.
 
 **Upcoming and Future Tasks**
-- **P0: Fix Critical TTS Narration Bug:** Prevent the TTS from reading raw prompt instructions.
-- **P1: Test and Fix Reference Image Grid UI:** Verify the multi-scene image upload component works correctly in the new UI.
-- **P1: Implement Partial Credit Refunds:** Complete the logic for partial refunds on job cancellation.
-- **P2: Implement a Robust Job Queue System:** Replace the mock job runner in  with a production-grade solution.
+    Upcoming Tasks:
+    - P1: Cheaper AI Model Integration (Phase 2): Integrate Groq with Llama 3 for text, and Leonardo.ai/Playground v2.5 for images.
+    Future Tasks:
+    - P2: Video Studio Enhancements (background music, advanced editing).
+    - P3: Gamification & Retention features (streaks, badges).
 
 **Completed work in this session**
-- **UI/UX Overhaul:**
-  - Completely redesigned the Custom AI Video Studio page () using a clean, collapsible accordion layout for a more intuitive user experience.
-- **Critical Bug Fixes:**
-  - **Credit UI Refresh:** Fixed a bug where the credit balance in the UI was not updating after video generation. Added a  call to update the display.
-  - **Music Picker Functionality:** Repaired the Select Music button on the new UI by correcting mismatched component props ( vs ,  vs ) and adding the required  prop.
-- **System Verification:**
-  - **End-to-End Credit Deduction Verified:** For the first time, tested and confirmed that the credit deduction system works correctly for both admin and regular (non-admin) users, resolving a long-standing, critical uncertainty.
+- Seedance 2 Model Integration: Swapped primary video generation to  across standard video tools ().
+- UGC Script Fixes: Replaced  subprocess with direct  for Gemini text generation. Added  to handle unescaped quotes in JSON output.
+- UGC Render Route: Created , installed  via apt-get, and implemented  for clip concatenation.
+- UGC Motion Fixes: Upgraded Kling Avatar fallback to 'pro' tier (48fps) for natural motion, applied  in ffmpeg to prevent stutter, and added a Motion Style toggle (Strict vs Natural).
+- UGC Enhancements: Added Editable Script step, auto-matched voice selections based on Avatar gender, and added multi-language voice support. Added Aspect Ratio logic tied to platforms (TikTok, IG, etc.).
+- Homepage Parity: Overhauled , , and . Added animated CSS mockups, scrolling tool ribbons, interactive feature grids, and synced Hero/Comparison copy to match the live site PDF.
 
 **Earlier issues found/mentioned but not fixed**
-   - **TTS Narration Bug:** A critical regression where the TTS reads raw user prompts remains unfixed.
-   - **Partial Refund Logic:** The feature to refund credits partially for cancelled jobs is still incomplete.
-   - **Mock Job Queue:** The application continues to rely on an unreliable, non-production-ready job system in .
+  - None actively ignored. 
 
 **Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork:** Preview server infrastructure instability.
-  - **Recurrence count:** High. The agent repeatedly encountered Preview Unavailable messages, which were determined to be external infrastructure issues, not code errors. The agent successfully used  on the local instance to bypass this and verify its changes.
-  - **Status:** RESOLVED (by working around it).
+  - Issue recurrence in previous fork: Gemini JSON output formatting and Python subprocess rate limits.
+  - Recurrence count: 3 (in this session)
+  - Status: RESOLVED (Fixed by bypassing litellm, using direct Node.js  SDK, increasing output token limits, and passing the output through ).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **UI/UX Redesign:** Wholesale replacement of a page's structure and layout using shadcn/ui components () for a wizard-like flow.
-- **Component Prop Debugging:** Identifying and fixing issues caused by passing incorrect prop names ( vs ) and missing required props to a React component.
--**State Management & UI Refresh:** Using a React Context () to provide a refresh function () and calling it from a page component to solve a stale data issue.
-- **Backend vs. Frontend Debugging:** Differentiating between a backend logic error and a frontend display error by directly querying the database () to verify the source of truth.
-- **Manual Script-based Testing:** Creating and executing a standalone Node.js script () to test a specific backend function (credit deduction) for a user type that is hard to simulate through the UI.
+- Next.js App Router, Tailwind CSS (Glassmorphism), MongoDB.
+- Asynchronous Job Processing via  and  (polling).
+- Video processing using  directly in Next.js API routes with  for framerate correction.
+-  SDK for reliable LLM JSON generation, paired with .
 
 **key DB schema**
-- No schema changes. The agent interacted with the  and  collections to verify credit logic.
+  - : 
+  - : 
 
 **changes in tech stack**
-- No changes to the tech stack.
+  - Added  and  to .
+  - Installed system-level  via bash.
+  - Replaced internal  Python scripts with standard Node  for text.
 
 **All files of reference**
-- : The file that received a complete rewrite for the UI/UX overhaul and subsequent bug fixes.
-- : The core credit logic file, which was reviewed and verified.
-- : The context providing the  function used to fix the UI bug.
-- : The component whose props were mismatched, causing a bug.
-- : A new test script created to validate the credit deduction for regular users.
+- : Contains all the fal.ai logic for Seedance 2.0 Fast and Kling Avatar v2 Pro.
+- : Handles  logic.
+- : The frontend interface handling the 4-step UGC workflow (Script -> Avatar/Audio -> Video -> Render).
+- : Updated to natively support .
 
-**Areas that need refactoring**:
-- ****: This remains the highest priority for refactoring. It's a mock system and a critical point of failure for the application's core functionality. It needs to be replaced with a robust queue like BullMQ.
-- ****: This API route remains a large monolith. As new features (like the prompt-to-narration step) are added, it should be broken down into smaller, more manageable modules.
+**Areas that need refactoring**: 
+- None immediately. The codebase underwent significant cleanup.
 
 **key api endpoints**
-- : The agent verified this endpoint correctly deducts credits. It is the target for the future fix of the TTS narration bug.
+-  (POST)
+-  (POST/GET)
+-  (POST)
 
 **Critical Info for New Agent**
-- **UI Has Changed:** The Custom AI Video Studio () page has been completely redesigned. Be aware of the new accordion-based structure when working on it.
-- **Credit System is Verified:** You can trust that the credit deduction logic on the backend works for all user types. UI display issues should be treated as separate from the core deduction mechanism.
-- **Top Priorities Remain:** The user's highest priority issues from the previous session are still pending and should be addressed next:
-    1.  **TTS Narration Bug (P0):** Fix the AI reading raw prompts.
-    2.  **Image Grid UI (P1):** Test and, if necessary, fix the multi-scene reference image uploader within the *new* UI.
-    3.  **Partial Refunds (P1):** Implement the partial refund logic for cancelled jobs.
-- **Infrastructure Flakiness:** Be prepared for the preview environment to be unresponsive. Use  to test your page rendering directly on the instance if the preview link fails.
+1. **Design Constraints**: The application is strictly **LIGHT MODE ONLY**. Never introduce  classes. Never use Sparkle or Zap icons.
+2. **Video Processing**: Ffmpeg is installed on the container. Always use  for video manipulation. If combining Kling (48fps) and Seedance (24/30fps), ensure  or  video filters are applied in the complex filter graph to avoid jitter.
+3. **LLM Generation**: Do NOT use the  python subprocess for text generation. Always use  which relies on the  SDK. Keep  wrapper intact for JSON extraction.
 
-**documents created in this job**
-- : A script to test credit deduction for non-admin users.
+**documents and test reports created in this job**
+  -  (Created to ensure deep testing agents can log in)
+  -  (Updated regularly)
 
-**Last 10 User Messages and any pending HUMAN messages**
-- **Msg 92:** Agent confirms credit deduction works for regular users. **Status: COMPLETED**.
-- **Msg 90:** Agent creates a test script for regular user credit deduction. **Status: COMPLETED**.
-- **Msg 72-84:** Agent identifies the root cause of the credit display issue (no UI refresh) and applies the fix. **Status: COMPLETED**.
-- **Msg 62:** Agent discovers via database check that credit deduction IS working; the problem is in the UI. **Status: IN PROGRESS**.
-- **Msg 54:** Agent begins investigating the credit deduction issue. **Status: IN PROGRESS**.
-- **Msg 53:** User reports credit was not deducted for an admin and asks to test for regular users. **Status: IN PROGRESS**.
-- **Msg 51:** Agent confirms the music picker fix is complete. **Status: COMPLETED**.
-- **Msg 47-48:** Agent identifies and fixes the prop mismatches for the MusicPicker component. **Status: COMPLETED**.
-- **Msg 41:** Agent starts debugging the broken Select Music button. **Status: IN PROGRESS**.
-- **Msg 40:** User reports that the Select music button is not working on the new UI. **Status: IN PROGRESS**.
+**Last 10 User Messages and any pending HUMAN messages** 
+ - **Msg 517**: User requested Hero H1 texts to be kept on two lines, and replace all long dashes (—) with short dashes (-) across the homepage. (COMPLETED)
+ - **Msg 502**: User uploaded a screenshot of the Comparison Section and Hero Text, requesting them to be updated. (COMPLETED)
+ - **Msg 461**: User asked to implement animated card stuff (highlighting top tools/benefits) all over the rest of the homepage. (COMPLETED)
+ - **Msg 434**: User noted that all homepage sections needed animation and glassmorphism styling, not just the hero. (COMPLETED)
+ - **Msg 421**: User requested Option A: to hard-sync the dev environment's homepage copy to match the live site production copy. (COMPLETED)
+ - **Msg 401**: User asked why the preview tab was showing an old homepage compared to their live site PDF. (COMPLETED - diagnosed and explained the git divergence).
+ - **Msg 316**: User requested Option B (editable scripts) and adding platform specific sizes (aspect ratios). (COMPLETED)
+ - **Msg 258**: User asked to fix P0 (robotic motion and jitter) by upgrading Kling to Pro tier and adding a Motion Style toggle, and asked for visual hook intros in the scripts. (COMPLETED)
+ - **Msg 256**: User complained that the generated characters looked robotic and jittered, asking if Seedance 2 could be used for talking heads instead. (COMPLETED - Agent explained Kling Pro is better for strict lip-sync and applied fixes).
+ - **Msg 211**: User noted videos were generated but not stitched together into a final clip. (COMPLETED - Built render route with ffmpeg).
 
 **Project Health Check:**
-- **Broken**:
-    - **TTS Narration for Custom Prompts:** Core feature produces incorrect audio.
-    - **Multi-Scene Image Upload UI:** Functionality is unknown after the UI redesign and must be re-tested.
-- **Mocked**:
-    - **Asynchronous Job Processing ():** The system uses a non-persistent, mock job queue unsuitable for production.
-- **Untested / Risky**:
-    - **Partial Refund Logic:** This is an incomplete feature that requires implementation and testing.
+- **Broken**: None
+- **Mocked**: None
 
 **3rd Party Integrations**
-- **Fal.ai:** Used for AI video generation (Kling, Minimax models) and file storage.
-- **Google Gemini:** Used for script and prompt generation.
-- **Google Cloud Text-to-Speech:** Used for all voice generation.
-- **Pexels:** For stock footage.
-- **Stripe:** For payments.
+- **fal.ai**: Requires User API Key (Provided in ). Models: Seedance 2, Kling Avatar v2 Pro.
+- **Google GenAI (Gemini)**: Requires User API Key (Provided in  via ).
+- **Stripe**: Existing.
 
 **Testing status**
-  - Testing agent used after significant changes: NO
-  - Troubleshoot agent used after agent stuck in loop: NO (Agent successfully used  and created a test script to debug)
+  - Testing agent used after significant changes: YES ( ran on Seedance 2, Render route, and Aspect Ratios).
+  - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions:
-    - The TTS narrating raw user prompts is a known, critical regression from a previous session.
+  - Known regressions: None
 
 **Credentials to test flow:**
-- A valid  is present in .
+- Maintained in .
 
 **What agent forgot to execute**
-- The agent did not address the pre-existing, high-priority issues from the start of the session (TTS narration bug, partial refund, image grid UI) because it prioritized the user's immediate request for a UI redesign. While the agent successfully completed the user's new requests, the original list of pending tasks remains untouched.
-
-</analysis>
+- None. All requested features, bugs, and UI parity tasks from the PDF were successfully implemented. User verification is the only pending step.</analysis>

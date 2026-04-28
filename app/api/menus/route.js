@@ -12,9 +12,10 @@ const DEFAULT_MENUS = {
     location: 'header',
     items: [
       { id: 'h1', label: 'Features', link: '/#features', type: 'anchor', order: 1 },
-      { id: 'h2', label: 'Pricing', link: '/pricing', type: 'page', order: 2 },
-      { id: 'h3', label: 'Blog', link: '/blog', type: 'page', order: 3 },
-      { id: 'h4', label: 'Roadmap', link: '/roadmap', type: 'page', order: 4 }
+      { id: 'h2', label: 'Tools', link: '/tools', type: 'page', order: 2 },
+      { id: 'h3', label: 'Pricing', link: '/pricing', type: 'page', order: 3 },
+      { id: 'h4', label: 'Roadmap', link: '/roadmap', type: 'page', order: 4 },
+      { id: 'h5', label: 'Blog', link: '/blog', type: 'page', order: 5 }
     ]
   },
   footer_product: {
@@ -23,7 +24,7 @@ const DEFAULT_MENUS = {
     location: 'footer',
     column: 1,
     items: [
-      { id: 'fp1', label: 'All Features', link: '/#features', type: 'anchor', order: 1 },
+      { id: 'fp1', label: 'All Tools', link: '/tools', type: 'page', order: 1 },
       { id: 'fp2', label: 'Pricing', link: '/pricing', type: 'page', order: 2 },
       { id: 'fp3', label: 'Dashboard', link: '/dashboard', type: 'page', order: 3 },
       { id: 'fp4', label: 'Roadmap', link: '/roadmap', type: 'page', order: 4 }
@@ -35,10 +36,10 @@ const DEFAULT_MENUS = {
     location: 'footer',
     column: 2,
     items: [
-      { id: 'fs1', label: 'Content Creators', link: '/solutions/creators', type: 'page', order: 1 },
-      { id: 'fs2', label: 'Marketing Teams', link: '/solutions/marketers', type: 'page', order: 2 },
-      { id: 'fs3', label: 'Agencies', link: '/solutions/agencies', type: 'page', order: 3 },
-      { id: 'fs4', label: 'Educators', link: '/solutions/educators', type: 'page', order: 4 }
+      { id: 'fs1', label: 'Content Creators', link: '/tools?category=video', type: 'page', order: 1 },
+      { id: 'fs2', label: 'Marketing Teams', link: '/tools?category=business', type: 'page', order: 2 },
+      { id: 'fs3', label: 'Agencies', link: '/tools?category=business', type: 'page', order: 3 },
+      { id: 'fs4', label: 'Educators', link: '/tools?category=education', type: 'page', order: 4 }
     ]
   },
   footer_resources: {
@@ -47,10 +48,9 @@ const DEFAULT_MENUS = {
     location: 'footer',
     column: 3,
     items: [
-      { id: 'fr1', label: 'Help Center', link: '/docs', type: 'page', order: 1 },
+      { id: 'fr1', label: 'Documentation', link: '/docs', type: 'page', order: 1 },
       { id: 'fr2', label: 'Blog', link: '/blog', type: 'page', order: 2 },
-      { id: 'fr3', label: 'Community', link: '/community', type: 'page', order: 3 },
-      { id: 'fr4', label: 'Status', link: '/status', type: 'page', order: 4 }
+      { id: 'fr3', label: 'FAQ', link: '/faq', type: 'page', order: 3 }
     ]
   },
   footer_company: {
@@ -61,7 +61,8 @@ const DEFAULT_MENUS = {
     items: [
       { id: 'fc1', label: 'About Us', link: '/about', type: 'page', order: 1 },
       { id: 'fc2', label: 'Careers', link: '/careers', type: 'page', order: 2 },
-      { id: 'fc3', label: 'Contact', link: '/contact', type: 'page', order: 3 }
+      { id: 'fc3', label: 'Contact', link: '/contact', type: 'page', order: 3 },
+      { id: 'fc4', label: 'Media Kit', link: '/media-kit', type: 'page', order: 4 }
     ]
   },
   footer_legal: {
@@ -71,7 +72,7 @@ const DEFAULT_MENUS = {
     items: [
       { id: 'fl1', label: 'Privacy Policy', link: '/privacy', type: 'page', order: 1 },
       { id: 'fl2', label: 'Terms of Service', link: '/terms', type: 'page', order: 2 },
-      { id: 'fl3', label: 'Security', link: '/security', type: 'page', order: 3 }
+      { id: 'fl3', label: 'Cookie Policy', link: '/cookies', type: 'page', order: 3 }
     ]
   }
 }

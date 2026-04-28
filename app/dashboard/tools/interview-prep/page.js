@@ -13,12 +13,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Mic, Loader2, CheckCircle, XCircle, AlertTriangle,
-  Play, Pause, SkipForward, RotateCcw, Target, TrendingUp, 
-  Lightbulb, Clock, Award, MessageSquare, ChevronRight, ChevronDown,
-  ThumbsUp, ThumbsDown, Copy, Check, HelpCircle, Briefcase,
-  Star, BookOpen, Volume2, Timer, ArrowRight, RefreshCw, Zap, Wand2} from 'lucide-react'
+import {
+  Mic,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Play,
+  Pause,
+  SkipForward,
+  RotateCcw,
+  Target,
+  TrendingUp,
+  Lightbulb,
+  Clock,
+  Award,
+  MessageSquare,
+  ChevronRight,
+  ChevronDown,
+  ThumbsUp,
+  ThumbsDown,
+  Copy,
+  Check,
+  HelpCircle,
+  Briefcase,
+  Star,
+  BookOpen,
+  Volume2,
+  Timer,
+  ArrowRight,
+  RefreshCw,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 
@@ -509,7 +535,7 @@ export default function InterviewPrepPage() {
           <p className="text-muted-foreground mt-1">Practice with AI-generated questions & get instant feedback</p>
         </div>
         <Badge className="bg-green-100 text-green-800">
-          <Zap className="h-3 w-3 mr-1" />STAR Method
+          <Play className="h-3 w-3 mr-1" />STAR Method
         </Badge>
       </div>
 

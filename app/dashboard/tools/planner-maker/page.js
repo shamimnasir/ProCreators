@@ -10,9 +10,16 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Download, ArrowLeft, 
-  CheckCircle, DollarSign, Palette, User, Image, Wand2
+import {
+  Loader2,
+  Download,
+  ArrowLeft,
+  CheckCircle,
+  DollarSign,
+  Palette,
+  User,
+  Image,
+  Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -259,23 +266,8 @@ export default function PlannerMakerPage() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-4">
-        {/* Left sidebar - Drafts */}
-        <div className="lg:col-span-1">
-          <AutoSaveDraftsManager
-            toolType="planner"
-            getCurrentData={getCurrentData}
-            loadDraftData={loadDraftData}
-            onStartNew={handleStartNew}
-            dependencies={[plannerType, colorScheme, coverStyle, paperSize, pageCount, customTitle, authorName, year, mode]}
-            autoSaveEnabled={true}
-            debounceMs={2000}
-            minStepForAutoSave={1}
-            currentStep={1}
-          />
-        </div>
-
-        {/* Main content */}
-        <div className="lg:col-span-3">
+        {/* Main content - Takes 3 columns on large screens */}
+        <div className="lg:col-span-3 order-1 lg:order-1">
           <Tabs value={mode} onValueChange={setMode}>
             <TabsList>
               <TabsTrigger value="easy">✨ Easy Mode</TabsTrigger>
@@ -526,6 +518,23 @@ export default function PlannerMakerPage() {
 
                   </div>
 
+                  {/* Selling Price Guide */}
+                  <Card className="border-dashed border-green-300 bg-green-50/50 dark:bg-green-950/20">
+                    <CardContent className="py-3">
+                      <div className="flex items-center gap-3">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                            Sell this planner for $10-$30
+                          </p>
+                          <p className="text-xs text-green-600/70 dark:text-green-400/70">
+                            Platforms: Etsy, Gumroad, Creative Market • Unlimited copies, 90%+ profit margin
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Download Result */}
                   {generatedPDF && (
                     <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
@@ -740,6 +749,21 @@ export default function PlannerMakerPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Right sidebar - Drafts (appears after main content on large screens) */}
+        <div className="lg:col-span-1 order-2 lg:order-2">
+          <AutoSaveDraftsManager
+            toolType="planner"
+            getCurrentData={getCurrentData}
+            loadDraftData={loadDraftData}
+            onStartNew={handleStartNew}
+            dependencies={[plannerType, colorScheme, coverStyle, paperSize, pageCount, customTitle, authorName, year, mode]}
+            autoSaveEnabled={true}
+            debounceMs={2000}
+            minStepForAutoSave={1}
+            currentStep={1}
+          />
         </div>
       </div>
     </div>

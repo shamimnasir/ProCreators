@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Logo } from '@/components/ui/Logo'
 import { useState } from 'react'
 import {
-  Sparkles,
+  Wand2,
   LayoutDashboard,
   MessageSquare,
   Quote,
@@ -19,7 +19,7 @@ import {
   CreditCard,
   Video,
   Film,
-  Zap,
+  Play,
   BookOpen,
   BookText,
   Presentation,
@@ -67,7 +67,7 @@ const navigation = [
   {
     name: 'Viral Post Creation',
     href: '/dashboard/viral-posts',
-    icon: Sparkles,
+    icon: Wand2,
     children: []
   },
   {

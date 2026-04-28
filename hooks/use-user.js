@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react'
 
-const DEMO_USER_ID = 'demo-user-001'
-
 /**
  * Hook to get the current user ID from session
- * Falls back to demo user if not authenticated
+ * Returns null if not authenticated - NO demo user fallback
  */
 export function useUserId() {
-  const [userId, setUserId] = useState(DEMO_USER_ID)
+  const [userId, setUserId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
 
@@ -29,12 +27,12 @@ export function useUserId() {
             return
           }
         }
-        // Fallback to demo user
-        setUserId(DEMO_USER_ID)
+        // No demo user fallback - return null
+        setUserId(null)
         setUser(null)
       } catch (error) {
         console.error('Error getting user:', error)
-        setUserId(DEMO_USER_ID)
+        setUserId(null)
         setUser(null)
       } finally {
         setLoading(false)
@@ -95,12 +93,10 @@ export function useSession() {
   return {
     session,
     user: session?.user || null,
-    userId: session?.user?.id || DEMO_USER_ID,
+    userId: session?.user?.id || null,
     loading,
     isAuthenticated: !!session,
     logout,
     refresh: checkSession
   }
 }
-
-export { DEMO_USER_ID }

@@ -9,9 +9,18 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { 
-  Play, Pause, Volume2, VolumeX, Edit2, Check, X, 
-  Download, Loader2, AlertCircle, Zap, Wand2
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Edit2,
+  Check,
+  X,
+  Download,
+  Loader2,
+  AlertCircle,
+  Wand2
 } from 'lucide-react'
 
 export default function PreviewModal({ 
@@ -266,7 +275,7 @@ export default function PreviewModal({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-purple-500" />
+            <Play className="w-5 h-5 text-purple-500" />
             Preview & Customize Your Video
           </DialogTitle>
           <DialogDescription>

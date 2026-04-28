@@ -1,17 +1,25 @@
 // Admin User Management API
+// SECURITY: All routes require admin authentication
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { addCredits } from '@/lib/credits'
 import { v4 as uuidv4 } from 'uuid'
+import { requireAdmin } from '@/lib/auth-middleware'
 
 // GET - List users or get specific user
 export async function GET(request) {
+  // SECURITY: Verify admin access
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) {
+    return auth.response
+  }
+  
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const email = searchParams.get('email')
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100) // Max 100
     const search = searchParams.get('search')
     const plan = searchParams.get('plan')
     const status = searchParams.get('status')
@@ -38,7 +46,8 @@ export async function GET(request) {
         success: true,
         user: {
           ...user,
-          password: undefined, // Don't expose password
+          password: undefined,
+          passwordHash: undefined, // SECURITY: Never expose password hash
           totalGenerations,
           failedGenerations
         }
@@ -48,18 +57,20 @@ export async function GET(request) {
     // List users with filters
     const query = {}
     
+    // SECURITY: Escape regex special characters to prevent ReDoS
     if (search) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').substring(0, 100)
       query.$or = [
-        { email: { $regex: search, $options: 'i' } },
-        { name: { $regex: search, $options: 'i' } }
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { name: { $regex: escapedSearch, $options: 'i' } }
       ]
     }
     
-    if (plan) {
+    if (plan && ['free', 'creator', 'pro', 'business'].includes(plan)) {
       query.plan = plan
     }
     
-    if (status) {
+    if (status && ['active', 'suspended', 'banned', 'pending_verification'].includes(status)) {
       query.accountStatus = status
     }
     
@@ -125,12 +136,24 @@ export async function GET(request) {
 
 // POST - User management actions
 export async function POST(request) {
+  // SECURITY: Verify admin access
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) {
+    return auth.response
+  }
+  
   try {
     const body = await request.json()
-    const { action, userId, adminId = 'admin', ...params } = body
+    const { action, userId, ...params } = body
+    const adminId = auth.userId // SECURITY: Use verified admin ID, not from request
     
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
+    if (!userId || typeof userId !== 'string') {
+      return NextResponse.json({ success: false, error: 'Valid userId required' }, { status: 400 })
+    }
+    
+    // SECURITY: Validate userId format to prevent injection
+    if (userId.length > 100 || /[<>'"${}]/.test(userId)) {
+      return NextResponse.json({ success: false, error: 'Invalid userId format' }, { status: 400 })
     }
     
     const { db } = await connectToDatabase()

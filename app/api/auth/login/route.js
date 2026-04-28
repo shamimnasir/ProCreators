@@ -16,9 +16,14 @@ export async function POST(request) {
       })
     })
     
+    // SECURITY: Pass through Set-Cookie so the session_token cookie reaches the browser
+    const headers = new Headers({ 'Content-Type': 'application/json' })
+    const setCookie = res.headers.get('set-cookie')
+    if (setCookie) headers.append('Set-Cookie', setCookie)
+
     return new NextResponse(res.body, {
       status: res.status,
-      headers: { 'Content-Type': 'application/json' }
+      headers
     })
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

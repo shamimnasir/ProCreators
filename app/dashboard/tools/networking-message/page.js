@@ -12,12 +12,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Users, Loader2, Target, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
-  Check, Mail, Send, Heart, UserPlus, Handshake,
-  Linkedin, Twitter, Building, GraduationCap, Calendar,
-  ArrowLeft, AlertCircle, ThumbsUp, Clock, Zap, Wand2} from 'lucide-react'
+import {
+  Users,
+  Loader2,
+  Target,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  MessageSquare,
+  Check,
+  Mail,
+  Send,
+  Heart,
+  UserPlus,
+  Handshake,
+  Linkedin,
+  Twitter,
+  Building,
+  GraduationCap,
+  Calendar,
+  ArrowLeft,
+  AlertCircle,
+  ThumbsUp,
+  Clock,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'
@@ -39,7 +60,7 @@ const CONNECTION_CONTEXTS = [
   { id: 'alumni', name: 'Same School', icon: GraduationCap, hint: 'Reference shared alma mater' },
   { id: 'company', name: 'Same Company', icon: Building, hint: 'Current or former colleagues' },
   { id: 'industry', name: 'Same Industry', icon: Target, hint: 'Shared professional interests' },
-  { id: 'cold', name: 'Cold Outreach', icon: Zap, hint: 'No prior connection - need strong hook' }
+  { id: 'cold', name: 'Cold Outreach', icon: Play, hint: 'No prior connection - need strong hook' }
 ]
 
 // Purpose Types
@@ -433,7 +454,7 @@ export default function NetworkingMessagePage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-500" />
+                    <Play className="h-5 w-5 text-yellow-500" />
                     Platform & Tone
                   </CardTitle>
                 </CardHeader>

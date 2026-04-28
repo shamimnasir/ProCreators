@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  ShoppingBag, 
-  TrendingUp, 
-  DollarSign, 
+import {
+  ShoppingBag,
+  TrendingUp,
+  DollarSign,
   ExternalLink,
-  Zap,
+  Play,
   ArrowRight,
   Star,
   FileText,
@@ -64,6 +64,7 @@ function ProductIcon({ iconName, className = "h-5 w-5" }) {
 
 export default function DigitalProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [showSellingGuide, setShowSellingGuide] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -94,7 +95,7 @@ export default function DigitalProductsPage() {
               <p className="text-xs text-white/70">Profit Margin</p>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <Zap className="h-5 w-5 mb-2" />
+              <Play className="h-5 w-5 mb-2" />
               <p className="text-2xl font-bold">AI-Powered</p>
               <p className="text-xs text-white/70">Fast Creation</p>
             </div>
@@ -127,13 +128,93 @@ export default function DigitalProductsPage() {
                 ))}
               </div>
             </div>
-            <Button variant="outline" size="sm" className="text-green-700 border-green-300">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-green-700 border-green-300"
+              onClick={() => setShowSellingGuide(!showSellingGuide)}
+            >
               <ExternalLink className="h-3 w-3 mr-1" />
-              Selling Guide
+              {showSellingGuide ? 'Hide Guide' : 'Selling Guide'}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Selling Guide - Expandable */}
+      {showSellingGuide && (
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            {
+              platform: 'Amazon KDP',
+              emoji: '📚',
+              color: 'from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30',
+              borderColor: 'border-orange-200 dark:border-orange-800/30',
+              bestFor: 'Ebooks, Coloring Books, Journals, Planners',
+              tips: [
+                'Use 6x9" for ebooks, 8.5x11" for coloring books',
+                'Add 5-7 keywords in your book description',
+                'Price ebooks $2.99-$9.99 for 70% royalty',
+                'Create a series — bundles sell 3x more',
+              ],
+              cta: 'Perfect for ebooks & printable products',
+            },
+            {
+              platform: 'Etsy',
+              emoji: '🛍️',
+              color: 'from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30',
+              borderColor: 'border-orange-200 dark:border-orange-800/30',
+              bestFor: 'Planners, Journals, Worksheets, Templates',
+              tips: [
+                'Use all 13 tags with long-tail keywords',
+                'Offer instant digital download (PDF)',
+                'Create mockup images showing the product in use',
+                'Bundle 3-5 products for higher average order value',
+              ],
+              cta: 'Best for printable digital downloads',
+            },
+            {
+              platform: 'Gumroad',
+              emoji: '💰',
+              color: 'from-pink-50 to-purple-50 dark:from-pink-950/30 dark:to-purple-950/30',
+              borderColor: 'border-pink-200 dark:border-pink-800/30',
+              bestFor: 'Ebooks, Courses, Templates, Any Digital File',
+              tips: [
+                'Offer a free lead magnet to build your audience',
+                'Use "pay what you want" for audience growth',
+                'Create a landing page with benefit-driven copy',
+                'Email your buyers — repeat customers = 60% of revenue',
+              ],
+              cta: 'Best for building direct audience',
+            },
+          ].map((guide) => (
+            <Card key={guide.platform} className={`bg-gradient-to-br ${guide.color} ${guide.borderColor}`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">{guide.emoji}</span>
+                  <CardTitle className="text-lg">{guide.platform}</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  <strong>Best for:</strong> {guide.bestFor}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {guide.tips.map((tip, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs">
+                      <span className="text-green-500 mt-0.5 shrink-0">✓</span>
+                      <span className="text-muted-foreground">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border/50 italic">
+                  {guide.cta}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Category Tabs */}
       <Tabs defaultValue="all" onValueChange={setSelectedCategory}>
@@ -269,11 +350,16 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
         <CardContent className="pt-0">
           {expanded && (
             <>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-green-50 dark:bg-green-950/30">
                 <DollarSign className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-green-600">
-                  Sell for: {tool.sellPrice}
-                </span>
+                <div>
+                  <span className="text-sm font-medium text-green-600">
+                    Market Price: {tool.sellPrice}
+                  </span>
+                  <p className="text-[10px] text-green-600/70">
+                    💡 How much you can sell this for
+                  </p>
+                </div>
               </div>
               
               <div className="flex flex-wrap gap-1 mb-3">
@@ -287,9 +373,6 @@ function ToolCard({ tool, categoryColor, expanded = false }) {
           )}
           
           <div className="flex items-center justify-between">
-            {!expanded && (
-              <span className="text-xs text-green-600 font-medium">{tool.sellPrice}</span>
-            )}
             <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1 ml-auto">
               Create Now <ArrowRight className="h-3 w-3" />
             </span>

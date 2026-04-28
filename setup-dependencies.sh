@@ -32,9 +32,15 @@ fi
 
 # Check if chromium is installed (required for PDF generation)
 if command -v chromium &> /dev/null; then
-    echo "✅ chromium available"
+    echo "✅ chromium available ($(chromium --version | head -n 1))"
 else
-    echo "⚠️  chromium not found - PDF generation may not work"
+    echo "📦 Installing chromium for PDF generation..."
+    apt-get update -qq && apt-get install -y -qq chromium chromium-common > /dev/null 2>&1
+    if command -v chromium &> /dev/null; then
+        echo "✅ chromium installed successfully"
+    else
+        echo "⚠️  chromium installation failed - PDF generation will use HTML fallback"
+    fi
 fi
 
 # Check if ffprobe is available (comes with ffmpeg)

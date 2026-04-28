@@ -4,6 +4,10 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { saveToLibraryDirect } from '@/lib/library-save-server'
+
+const TOOL_ID = 'lesson-planner'
 
 // Helper to run LLM
 async function runLLM(prompt, systemPrompt = 'You are an expert curriculum designer and experienced teacher.') {
@@ -335,12 +339,43 @@ function generateLessonPlanHTML(lessonPlan, config) {
 // PDF generation is handled inline using @/lib/html-pdf-generator
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
       return rateLimitCheck.response
     }
+
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
 
     const body = await request.json()
     const { action } = body
@@ -488,29 +523,31 @@ Make each section detailed with specific activities, time allocations, and pract
 
       const pdfUrl = `/generated/lesson-plans/${filename}`
 
-      // Save to library
+      // Save to library (direct database save)
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-        await fetch(`${baseUrl}/api/library/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'lesson-planner',
-            title: lessonPlan.title || 'Lesson Plan',
-            content: pdfUrl,
-            filePath: pdfUrl,
-            description: `${subject} - ${gradeLevel} - ${duration}`,
-            metadata: {
-              subject,
-              gradeLevel,
-              duration,
-              topic,
-              pdfUrl
-            }
-          })
+        await saveToLibraryDirect(userId, {
+          type: 'lesson-planner',
+          category: 'document',
+          title: lessonPlan.title || 'Lesson Plan',
+          content: pdfUrl,
+          filePath: pdfUrl,
+          description: `${subject} - ${gradeLevel} - ${duration}`,
+          metadata: {
+            subject,
+            gradeLevel,
+            duration,
+            topic,
+            pdfUrl
+          }
         })
-        } catch (e) {
-        }
+      } catch (e) {
+        console.error('Failed to save to library:', e)
+      }
+
+      // Complete transaction on success
+      if (transactionId) {
+        await completeTransaction(transactionId)
+      }
 
       return NextResponse.json({
         success: true,
@@ -519,12 +556,23 @@ Make each section detailed with specific activities, time allocations, and pract
       })
     }
 
+    // Refund if invalid action
+    if (transactionId) {
+      await refundCredits(userId, transactionId, 'Invalid action')
+    }
+
     return NextResponse.json(
       { success: false, error: 'Invalid action' },
       { status: 400 }
     )
   } catch (error) {
     console.error('Lesson plan generation error:', error)
+    
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
+    
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

@@ -1,17 +1,73 @@
 'use client'
 
 import Link from 'next/link'
-import { 
-  ArrowRight, Smartphone, PenTool, FileText, MessageSquare, ListOrdered,
-  Image, Sunset, Newspaper, Video, Film, Mic, Music, Scissors,
-  Sparkles, Volume2, Subtitles, Wand2, BookOpen, Briefcase, GraduationCap,
-  Heart, Star, Lightbulb, Smile, TrendingUp, Users, Target, Mail,
-  Palette, Layout, Layers, Camera, Share2, Globe, Zap, Award, Gift,
-  Coffee, Gamepad2, Dumbbell, Calendar, ClipboardList, Brain, Rocket,
-  FileCheck, PenLine, MessageCircle, Send, ShoppingBag, DollarSign,
-  Building2, Presentation, BarChart3, PieChart, LineChart, Megaphone,
-  Search, CheckSquare, BookMarked, FileQuestion, Calculator, Puzzle,
-  Baby, Palette as ColorPalette, StickyNote, Receipt
+import {
+  ArrowRight,
+  Smartphone,
+  PenTool,
+  FileText,
+  MessageSquare,
+  ListOrdered,
+  Image,
+  Sunset,
+  Newspaper,
+  Video,
+  Film,
+  Mic,
+  Music,
+  Scissors,
+  Wand2,
+  Volume2,
+  Subtitles,
+  BookOpen,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Star,
+  Lightbulb,
+  Smile,
+  TrendingUp,
+  Users,
+  Target,
+  Mail,
+  Palette,
+  Layout,
+  Layers,
+  Camera,
+  Share2,
+  Globe,
+  Play,
+  Award,
+  Gift,
+  Coffee,
+  Gamepad2,
+  Dumbbell,
+  Calendar,
+  ClipboardList,
+  Brain,
+  Rocket,
+  FileCheck,
+  PenLine,
+  MessageCircle,
+  Send,
+  ShoppingBag,
+  DollarSign,
+  Building2,
+  Presentation,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Megaphone,
+  Search,
+  CheckSquare,
+  BookMarked,
+  FileQuestion,
+  Calculator,
+  Puzzle,
+  Baby,
+  Palette as ColorPalette,
+  StickyNote,
+  Receipt
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -40,11 +96,11 @@ const ICON_MAP = {
   'Volume2': Volume2,
   
   // AI & Creative
-  'Sparkles': Sparkles,
+  'Wand2': Wand2,
   'Wand2': Wand2,
   'Brain': Brain,
   'Rocket': Rocket,
-  'Zap': Zap,
+  'Play': Play,
   
   // Business
   'Briefcase': Briefcase,
@@ -137,12 +193,10 @@ export function ToolCard({ tool, gradient = 'from-blue-500 to-purple-500', expan
   return (
     <Link href={tool.href} className="block">
       <div className={cn(
-        "group relative h-full rounded-2xl p-[1px] transition-all duration-300",
-        "bg-gradient-to-br from-border via-border to-border",
-        "hover:from-primary/40 hover:via-primary/20 hover:to-primary/40",
-        `hover:shadow-xl ${shadowClass}`
+        "group relative h-full transition-all duration-300 hover:-translate-y-1",
+        "glass-card hover:bg-white/80 hover:shadow-xl hover:shadow-blue-100/50"
       )}>
-        <div className="relative h-full rounded-2xl bg-card overflow-hidden">
+        <div className="relative h-full overflow-hidden rounded-[16px]">
           <div className="relative p-5">
             {/* Icon Row */}
             <div className="flex items-start justify-between mb-4">
@@ -199,11 +253,10 @@ export function FeaturedToolCard({ tool }) {
   return (
     <Link href={tool.href} className="block">
       <div className={cn(
-        "group relative h-full rounded-2xl p-[2px] transition-all duration-300",
-        `bg-gradient-to-br ${tool.gradient || 'from-purple-500 to-purple-600'}`,
-        "hover:shadow-2xl hover:shadow-purple-500/25 hover:scale-[1.02]"
+        "group relative h-full transition-all duration-300 hover:-translate-y-1",
+        "glass-card-elevated hover:bg-white/85 hover:shadow-2xl hover:shadow-purple-100/50"
       )}>
-        <div className="relative h-full rounded-2xl bg-card overflow-hidden">
+        <div className="relative h-full overflow-hidden rounded-[20px]">
           {/* Gradient accent line */}
           <div className={cn(
             "h-1 w-full",
@@ -239,7 +292,7 @@ export function FeaturedToolCard({ tool }) {
                 {tool.features.map((feature) => (
                   <span 
                     key={feature} 
-                    className="px-2 py-0.5 rounded-md text-[10px] bg-muted text-muted-foreground"
+                    className="px-2 py-0.5 rounded-md text-[10px] bg-white/50 text-muted-foreground backdrop-blur-sm"
                   >
                     {feature}
                   </span>
@@ -297,12 +350,13 @@ export function PageHero({
   return (
     <div className={cn(
       "relative overflow-hidden rounded-2xl p-8 text-white",
-      `bg-gradient-to-r ${gradient}`
+      `bg-gradient-to-r ${gradient}`,
+      "shadow-xl"
     )}>
-      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
       <div className="relative z-10">
         <div className="flex items-center gap-4 mb-6">
-          <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+          <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/30 shadow-lg">
             {icon}
           </div>
           <div>
@@ -314,7 +368,7 @@ export function PageHero({
         {stats.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {stats.map((stat, i) => (
-              <div key={i} className="bg-white/10 backdrop-blur rounded-xl p-3">
+              <div key={i} className="bg-white/15 backdrop-blur-md rounded-2xl p-3 border border-white/20">
                 <div className="text-lg md:text-xl font-bold">{stat.value}</div>
                 <div className="text-xs text-white/70">{stat.label}</div>
               </div>
@@ -324,8 +378,8 @@ export function PageHero({
       </div>
       
       {/* Decorations */}
-      <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
     </div>
   )
 }

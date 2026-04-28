@@ -1,5 +1,7 @@
 'use client'
 
+import { saveToLibrary } from '@/lib/secure-api'
+
 import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +9,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Progress } from '@/components/ui/progress'
-import { Loader2, Video, Globe, Upload, Download, CheckCircle, Image as ImageIconLucide, Wand2, Zap } from 'lucide-react'
+import {
+  Loader2,
+  Video,
+  Globe,
+  Upload,
+  Download,
+  CheckCircle,
+  Image as ImageIconLucide,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -156,26 +168,20 @@ export default function ReelsPage() {
         if (data.videoUrl) {
           // Auto-save to library
           try {
-            const saveResponse = await fetch('/api/library/save', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                videoUrl: data.videoUrl,
-                script: generatedScript,
-                type: 'video',
-                title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
-                description: generatedScript.substring(0, 150),
-                metadata: {
-                  mode,
-                  duration,
-                  language,
-                  provider: data.provider,
-                  hasObjectImage: !!objectImage
-                }
-              })
+            const saveData = await saveToLibrary({
+              content: data.videoUrl,
+              type: 'video',
+              title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
+              description: generatedScript.substring(0, 150),
+              metadata: {
+                mode,
+                duration,
+                language,
+                provider: data.provider,
+                hasObjectImage: !!objectImage,
+                script: generatedScript
+              }
             })
-            
-            const saveData = await saveResponse.json()
             
             toast({
               title: "Video Ready & Saved!",
@@ -263,25 +269,19 @@ export default function ReelsPage() {
     if (!videoData?.videoUrl) return
     
     try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          videoUrl: videoData.videoUrl,
-          script: generatedScript,
-          type: 'video',
-          title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
-          description: generatedScript.substring(0, 150),
-          metadata: {
-            mode,
-            duration,
-            language,
-            provider: videoData.provider
-          }
-        })
+      const data = await saveToLibrary({
+        content: videoData.videoUrl,
+        type: 'video',
+        title: `Viral Reel - ${topic.substring(0, 50) || 'Generated Video'}`,
+        description: generatedScript.substring(0, 150),
+        metadata: {
+          mode,
+          duration,
+          language,
+          provider: videoData.provider,
+          script: generatedScript
+        }
       })
-      
-      const data = await response.json()
       
       if (data.success) {
         toast({
@@ -471,7 +471,7 @@ export default function ReelsPage() {
                 <SelectContent>
                   <SelectItem value="pro">
                     <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
+                      <Play className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Pro Edit / Quality Mode</div>
                         <div className="text-xs text-muted-foreground">Premium Models - Highest Quality</div>
@@ -480,7 +480,7 @@ export default function ReelsPage() {
                   </SelectItem>
                   <SelectItem value="fast">
                     <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
+                      <Play className="h-4 w-4" />
                       <div>
                         <div className="font-semibold">Fast Social Mode</div>
                         <div className="text-xs text-muted-foreground">Optimized Models - Quick & High Quality</div>

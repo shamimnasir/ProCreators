@@ -12,11 +12,28 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  HelpCircle, Download, Loader2, DollarSign,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, BookOpen, Brain,
-  GraduationCap, Palette, FileText, Zap, Wand2, Star
+import {
+  HelpCircle,
+  Download,
+  Loader2,
+  DollarSign,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  BookOpen,
+  Brain,
+  GraduationCap,
+  Palette,
+  FileText,
+  Play,
+  Wand2,
+  Star
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -25,7 +42,7 @@ import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
 // Quiz Types
 const QUIZ_TYPES = [
   { id: 'academic', name: 'Academic Test', icon: GraduationCap, description: 'Educational assessments for students' },
-  { id: 'trivia', name: 'Trivia Quiz', icon: Zap, description: 'Fun knowledge quizzes' },
+  { id: 'trivia', name: 'Trivia Quiz', icon: Play, description: 'Fun knowledge quizzes' },
   { id: 'personality', name: 'Personality Quiz', icon: Brain, description: 'Self-discovery quizzes' },
   { id: 'assessment', name: 'Knowledge Assessment', icon: FileText, description: 'Professional skill evaluation' },
   { id: 'practice', name: 'Practice Exam', icon: BookOpen, description: 'Exam preparation material' },
@@ -447,7 +464,7 @@ export default function QuizMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   Step 1: Quiz Setup
                 </CardTitle>
                 <CardDescription>Configure your quiz type, topic, and settings</CardDescription>
@@ -505,7 +522,7 @@ export default function QuizMakerPage() {
                 {quizType === 'custom' && (
                   <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 space-y-3">
                     <Label className="text-purple-700 dark:text-purple-300 font-medium flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
+                      <Play className="h-4 w-4" />
                       Describe Your Quiz
                     </Label>
                     <Textarea

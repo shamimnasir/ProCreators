@@ -271,7 +271,7 @@ const DEFAULT_TEMPLATES = {
           items: [
             { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express) and PayPal. Enterprise customers can also pay via invoice.' },
             { question: 'Can I cancel my subscription anytime?', answer: 'Yes, you can cancel your subscription at any time from your dashboard. Your access continues until the end of your billing period.' },
-            { question: 'Do you offer refunds?', answer: 'We offer a 7-day money-back guarantee for new subscribers. Contact our support team if you are not satisfied with the service.' }
+            { question: 'Do you offer refunds?', answer: 'We offer a 7-day refund window for new subscribers. We refund your payment after deducting the cost of any credits you have already used for generations — so you only pay for what you actually create.' }
           ]
         }
       },

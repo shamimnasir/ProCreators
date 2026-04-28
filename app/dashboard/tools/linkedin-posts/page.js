@@ -13,12 +13,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
-import { 
-  Share2, Loader2, Target, TrendingUp, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
-  ThumbsUp, Eye, Zap, Flame, Award,
-  ChevronDown, ChevronUp, Check, Edit3, Hash,
-  Users, Briefcase, BookOpen, Heart, AlertTriangle, ExternalLink, Wand2} from 'lucide-react'
+import {
+  Share2,
+  Loader2,
+  Target,
+  TrendingUp,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  MessageSquare,
+  ThumbsUp,
+  Eye,
+  Play,
+  Flame,
+  Award,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Edit3,
+  Hash,
+  Users,
+  Briefcase,
+  BookOpen,
+  Heart,
+  AlertTriangle,
+  ExternalLink,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'
@@ -103,19 +125,37 @@ const PLATFORMS = [
 const POST_FORMATS = {
   linkedin: [
     { id: 'authority-builder', name: 'Authority Builder', icon: '🏆', desc: 'Share expertise with case studies', engagement: 'Very High' },
-    { id: 'contrarian-take', name: 'Contrarian Take', icon: '🔥', desc: 'Challenge conventional wisdom', engagement: 'Very High' },
-    { id: 'story-hook', name: 'Story Hook', icon: '📖', desc: 'Personal story with a lesson', engagement: 'High' },
+    { id: 'contrarian-take', name: 'Contrarian Take', icon: '🔥', desc: '[Common belief] is wrong. Here\'s why:', engagement: 'Very High' },
+    { id: 'earned-secret', name: 'Earned Secret', icon: '🔑', desc: 'I [result]. Here\'s the playbook:', engagement: 'Very High' },
+    { id: 'story-hook', name: 'Story Hook', icon: '📖', desc: '[Time] ago I was [struggle]. Today...', engagement: 'High' },
     { id: 'listicle', name: 'Listicle', icon: '📋', desc: 'Actionable tips in list format', engagement: 'High' },
     { id: 'before-after', name: 'Before/After', icon: '🔄', desc: 'Transformation stories', engagement: 'High' },
-    { id: 'hot-take', name: 'Hot Take', icon: '🌶️', desc: 'Bold opinion on trending topic', engagement: 'Very High' }
+    { id: 'pattern-interrupt', name: 'Pattern Interrupt', icon: '⚡', desc: 'Everyone says X. They\'re wrong.', engagement: 'Very High' },
+    { id: 'framework', name: 'Named Framework', icon: '🎯', desc: 'I use the [NAME] Framework...', engagement: 'High' },
+    { id: 'case-study', name: 'Case Study', icon: '📊', desc: '[Company] did X. Here\'s how:', engagement: 'High' }
   ],
   twitter: [
-    { id: 'thread-starter', name: 'Thread Starter', icon: '🧵', desc: 'Viral thread opening', engagement: 'Very High' },
-    { id: 'hot-take', name: 'Hot Take', icon: '🔥', desc: 'Controversial opinion', engagement: 'Very High' },
-    { id: 'tip-thread', name: 'Tip Thread', icon: '💡', desc: 'Value-packed tips', engagement: 'High' },
-    { id: 'story-thread', name: 'Story Thread', icon: '📖', desc: 'Engaging narrative', engagement: 'High' },
-    { id: 'breakdown', name: 'Breakdown', icon: '🔍', desc: 'Analyze trending topic', engagement: 'High' },
-    { id: 'engagement-bait', name: 'Ratio Bait', icon: '💬', desc: 'Drive replies & quotes', engagement: 'Very High' }
+    // Single Tweets
+    { id: 'contrarian-take', name: 'Contrarian Take', icon: '🔥', desc: '[Common belief] is wrong', engagement: 'Very High', category: 'Single' },
+    { id: 'earned-secret', name: 'Earned Secret', icon: '🔑', desc: 'I [result]. Here\'s the playbook:', engagement: 'Very High', category: 'Single' },
+    { id: 'story-hook', name: 'Story Hook', icon: '📖', desc: '[Time] ago I was [struggle]...', engagement: 'High', category: 'Single' },
+    { id: 'bold-statement', name: 'Bold Statement', icon: '💥', desc: 'Nobody talks about this, but...', engagement: 'Very High', category: 'Single' },
+    { id: 'question-hook', name: 'Question Hook', icon: '❓', desc: 'Want to know the real secret?', engagement: 'High', category: 'Single' },
+    { id: 'pattern-interrupt', name: 'Pattern Interrupt', icon: '⚡', desc: 'Everyone says X. They\'re wrong.', engagement: 'Very High', category: 'Single' },
+    { id: 'hot-take', name: 'Hot Take', icon: '🌶️', desc: 'Hot take: [Strong opinion]', engagement: 'Very High', category: 'Single' },
+    { id: 'relatable', name: 'Relatable Observation', icon: '😅', desc: 'When you [universal experience]...', engagement: 'High', category: 'Single' },
+    // Threads
+    { id: 'viral-thread', name: '7-Part Viral Thread', icon: '🧵', desc: 'Hook → Context → Core → CTA', engagement: 'Very High', category: 'Thread' },
+    { id: 'case-study', name: 'Case Study Breakdown', icon: '📊', desc: '[Company] achieved X. Here\'s how:', engagement: 'High', category: 'Thread' },
+    { id: 'curated-resources', name: 'Curated Resources', icon: '📚', desc: 'I spent X hours so you don\'t have to', engagement: 'Very High', category: 'Thread' },
+    { id: 'wish-i-knew', name: 'X Things I Wish I Knew', icon: '💭', desc: '[Number] things before [milestone]', engagement: 'High', category: 'Thread' },
+    { id: 'framework', name: 'Named Framework', icon: '🎯', desc: 'I use the [NAME] Framework...', engagement: 'High', category: 'Thread' },
+    // Engagement
+    { id: 'this-or-that', name: 'This or That', icon: '⚖️', desc: '[Option A] or [Option B]? Reply:', engagement: 'Very High', category: 'Engagement' },
+    { id: 'fill-blank', name: 'Fill-in-the-Blank', icon: '✍️', desc: 'The best advice was ____', engagement: 'High', category: 'Engagement' },
+    { id: 'incomplete-list', name: 'Incomplete List', icon: '📝', desc: 'Here are X ways... What would you add?', engagement: 'High', category: 'Engagement' },
+    { id: 'strategic-poll', name: 'Strategic Poll', icon: '📊', desc: 'Poll with "Explain your vote"', engagement: 'Very High', category: 'Engagement' },
+    { id: 'advice-request', name: 'Advice Request', icon: '🙋', desc: 'What\'s your experience with...?', engagement: 'High', category: 'Engagement' }
   ],
   facebook: [
     { id: 'story-post', name: 'Story Post', icon: '📖', desc: 'Emotional storytelling', engagement: 'Very High' },
@@ -162,14 +202,18 @@ const POST_FORMATS = {
 }
 
 const HOOK_STYLES = [
-  { id: 'shocking-stat', name: 'Shocking Statistic', example: '97% of people fail at this.' },
-  { id: 'bold-statement', name: 'Bold Statement', example: 'MOST PEOPLE ARE MISSING THIS.' },
-  { id: 'question', name: 'Provocative Question', example: 'Why are you still doing [X]?' },
-  { id: 'story-opener', name: 'Story Opener', example: 'I almost quit last month.' },
-  { id: 'contrarian', name: 'Contrarian', example: 'Unpopular opinion:' },
-  { id: 'command', name: 'Command/Urgency', example: 'STOP doing this immediately.' },
-  { id: 'curiosity-gap', name: 'Curiosity Gap', example: 'Nobody talks about this...' },
-  { id: 'result-first', name: 'Result First', example: '$500K in 6 months. Here\'s how:' }
+  { id: 'contrarian', name: 'Contrarian Take', example: '[Common belief] is wrong. Here\'s why:', template: '[Common belief] is wrong.\n\n[Contrarian position backed by experience/data].\n\nHere\'s why:' },
+  { id: 'earned-secret', name: 'Earned Secret', example: 'I [specific result]. Here\'s the playbook:', template: 'I [specific impressive result with numbers].\n\nHere\'s the [exact/specific] [system/playbook/framework] I used:' },
+  { id: 'story-opener', name: 'Story Hook', example: '[Time] ago, I was [struggle]. Today...', template: '[Time period] ago, I was [relatable struggle].\n\nToday, [impressive transformation].\n\nHere\'s [what changed/what I learned]:' },
+  { id: 'bold-statement', name: 'Bold Statement', example: 'Nobody talks about this, but [truth].', template: 'Nobody talks about this, but [surprising truth].' },
+  { id: 'question', name: 'Question Hook', example: 'Want to know the real secret to [X]?', template: 'Want to know the real secret to [desirable outcome]?\n\nIt\'s not [common assumption]. It\'s [surprising truth].' },
+  { id: 'pattern-interrupt', name: 'Pattern Interrupt', example: 'Everyone says [X]. They\'re wrong.', template: 'Everyone says [common advice].\n\nThey\'re wrong.\n\nHere\'s what actually works:' },
+  { id: 'value-promise', name: 'Specific Value Promise', example: 'Here are [N] [things] that [benefit]:', template: 'Here are [number] [specific things] that [specific benefit]:' },
+  { id: 'result-first', name: 'Result First', example: '$500K in 6 months. Here\'s how:', template: 'I [achieved specific result with numbers].\n\nHere\'s exactly how:' },
+  { id: 'hot-take', name: 'Hot Take', example: 'Hot take: [Strong opinion you can defend].', template: 'Hot take: [Strong opinion you can defend].' },
+  { id: 'relatable', name: 'Relatable Observation', example: 'When you [universal experience]...', template: 'When you [universal experience]...' },
+  { id: 'shocking-stat', name: 'Shocking Statistic', example: '97% of people fail at this.', template: '[Shocking statistic] of people [fail/miss/ignore] this.' },
+  { id: 'command', name: 'Command/Urgency', example: 'STOP doing this immediately.', template: 'STOP [doing common mistake] immediately.' }
 ]
 
 const TONES = [
@@ -288,6 +332,7 @@ export default function SocialMediaPostCreator() {
         // Auto-save to library
         try {
           const posts = data.data?.posts || []
+          console.log('Posts to save:', posts.length, 'posts')
           // Save the first (main) post variation
           if (posts.length > 0) {
             const mainPost = posts[0]
@@ -304,7 +349,14 @@ export default function SocialMediaPostCreator() {
               return text
             }).join('\n\n---\n\n')
             
-            await saveToLibrary({
+            console.log('Saving to library:', {
+              type: 'social-media-post',
+              category: 'text',
+              title: `${selectedPlatformData?.name || platform} ${posts.length > 1 ? 'Thread' : 'Post'}: ${topic.substring(0, 40)}`,
+              contentLength: fullThreadContent.length
+            })
+            
+            const saveResult = await saveToLibrary({
               type: 'social-media-post',
               category: 'text',
               title: `${selectedPlatformData?.name || platform} ${posts.length > 1 ? 'Thread' : 'Post'}: ${topic.substring(0, 40)}${topic.length > 40 ? '...' : ''}`,
@@ -321,7 +373,7 @@ export default function SocialMediaPostCreator() {
                 contentType: 'social-post'
               }
             })
-            console.log('Social media post auto-saved to library')
+            console.log('Library save result:', saveResult)
           }
         } catch (saveError) {
           console.error('Failed to auto-save to library:', saveError)
@@ -356,78 +408,9 @@ export default function SocialMediaPostCreator() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Auto-save Drafts Manager */}
-      <AutoSaveDraftsManager
-        toolType="social-media-posts"
-        getCurrentData={() => ({
-          platform,
-          topic,
-          postFormat,
-          hookStyle,
-          tone,
-          industry,
-          targetAudience,
-          keyPoints,
-          personalStory,
-          ctaType,
-          includeEmojis,
-          includeHashtags,
-          postLength,
-          specificNumbers,
-          subreddit,
-          themePageNiche,
-          instagramStyle,
-          generateImage,
-          logoUrl,
-          title: topic || 'Social Media Post'
-        })}
-        loadDraftData={(draft) => {
-          if (draft.platform) setPlatform(draft.platform)
-          if (draft.topic) setTopic(draft.topic)
-          if (draft.postFormat) setPostFormat(draft.postFormat)
-          if (draft.hookStyle) setHookStyle(draft.hookStyle)
-          if (draft.tone) setTone(draft.tone)
-          if (draft.industry) setIndustry(draft.industry)
-          if (draft.targetAudience) setTargetAudience(draft.targetAudience)
-          if (draft.keyPoints) setKeyPoints(draft.keyPoints)
-          if (draft.personalStory) setPersonalStory(draft.personalStory)
-          if (draft.ctaType) setCtaType(draft.ctaType)
-          if (draft.includeEmojis !== undefined) setIncludeEmojis(draft.includeEmojis)
-          if (draft.includeHashtags !== undefined) setIncludeHashtags(draft.includeHashtags)
-          if (draft.postLength) setPostLength(draft.postLength)
-          if (draft.specificNumbers) setSpecificNumbers(draft.specificNumbers)
-          if (draft.subreddit) setSubreddit(draft.subreddit)
-          if (draft.themePageNiche) setThemePageNiche(draft.themePageNiche)
-          if (draft.instagramStyle) setInstagramStyle(draft.instagramStyle)
-          if (draft.generateImage !== undefined) setGenerateImage(draft.generateImage)
-          if (draft.logoUrl) setLogoUrl(draft.logoUrl)
-        }}
-        onStartNew={() => {
-          setPlatform('linkedin')
-          setTopic('')
-          setPostFormat('authority-builder')
-          setHookStyle('bold-statement')
-          setTone('professional')
-          setIndustry('')
-          setTargetAudience('')
-          setKeyPoints('')
-          setPersonalStory('')
-          setCtaType('comment')
-          setIncludeEmojis(true)
-          setIncludeHashtags(true)
-          setPostLength('medium')
-          setSpecificNumbers('')
-          setSubreddit('')
-          setThemePageNiche('')
-          setInstagramStyle('motivational')
-          setGenerateImage(false)
-          setLogoUrl('')
-        }}
-        dependencies={[topic, platform, tone, industry, keyPoints]}
-        autoSaveEnabled={true}
-        debounceMs={3000}
-      />
+    <div className="flex gap-6">
+      {/* Main Content Area */}
+      <div className="flex-1 space-y-6">
       
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -626,22 +609,57 @@ export default function SocialMediaPostCreator() {
               <CardDescription>Select the viral format for {selectedPlatform?.name}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {platformFormats.map(format => (
-                  <Button
-                    key={format.id}
-                    variant={postFormat === format.id ? 'default' : 'outline'}
-                    className={`h-auto py-3 flex flex-col items-center text-center ${postFormat === format.id ? 'ring-2 ring-purple-500 bg-purple-600 hover:bg-purple-700' : ''}`}
-                    onClick={() => setPostFormat(format.id)}
-                  >
-                    <span className="text-2xl mb-1">{format.icon}</span>
-                    <span className="font-medium text-xs">{format.name}</span>
-                    {postFormat === format.id && (
-                      <Badge variant="secondary" className="mt-1 text-[10px]">{format.engagement}</Badge>
-                    )}
-                  </Button>
-                ))}
-              </div>
+              {/* Show categories for Twitter */}
+              {platform === 'twitter' ? (
+                <div className="space-y-4">
+                  {['Single', 'Thread', 'Engagement'].map(category => {
+                    const categoryFormats = platformFormats.filter(f => f.category === category)
+                    if (categoryFormats.length === 0) return null
+                    return (
+                      <div key={category}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {category === 'Single' ? '🐦 Single Tweet' : category === 'Thread' ? '🧵 Thread' : '💬 Engagement'}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {categoryFormats.map(format => (
+                            <Button
+                              key={format.id}
+                              variant={postFormat === format.id ? 'default' : 'outline'}
+                              className={`h-auto py-2 px-2 flex flex-col items-center text-center ${postFormat === format.id ? 'ring-2 ring-purple-500 bg-purple-600 hover:bg-purple-700' : ''}`}
+                              onClick={() => setPostFormat(format.id)}
+                            >
+                              <span className="text-lg mb-0.5">{format.icon}</span>
+                              <span className="font-medium text-[10px] leading-tight">{format.name}</span>
+                              {postFormat === format.id && (
+                                <Badge variant="secondary" className="mt-1 text-[8px] px-1">{format.engagement}</Badge>
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {platformFormats.map(format => (
+                    <Button
+                      key={format.id}
+                      variant={postFormat === format.id ? 'default' : 'outline'}
+                      className={`h-auto py-3 flex flex-col items-center text-center ${postFormat === format.id ? 'ring-2 ring-purple-500 bg-purple-600 hover:bg-purple-700' : ''}`}
+                      onClick={() => setPostFormat(format.id)}
+                    >
+                      <span className="text-2xl mb-1">{format.icon}</span>
+                      <span className="font-medium text-xs">{format.name}</span>
+                      {postFormat === format.id && (
+                        <Badge variant="secondary" className="mt-1 text-[10px]">{format.engagement}</Badge>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -664,14 +682,23 @@ export default function SocialMediaPostCreator() {
                         key={hook.id}
                         variant={hookStyle === hook.id ? 'default' : 'outline'}
                         size="sm"
-                        className={`h-auto py-2 flex flex-col items-start text-left ${hookStyle === hook.id ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                        className={`h-auto py-2 px-2 flex flex-col items-start text-left ${hookStyle === hook.id ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
                         onClick={() => setHookStyle(hook.id)}
                       >
-                        <span className="font-medium text-xs">{hook.name}</span>
-                        <span className="text-[10px] opacity-70 font-normal">{hook.example}</span>
+                        <span className="font-medium text-[10px]">{hook.name}</span>
+                        <span className="text-[9px] opacity-70 font-normal line-clamp-1">{hook.example}</span>
                       </Button>
                     ))}
                   </div>
+                  {/* Show template preview for selected hook */}
+                  {hookStyle && (
+                    <div className="mt-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-[10px] font-medium text-purple-700 mb-1">Template:</p>
+                      <p className="text-xs text-purple-900 whitespace-pre-line">
+                        {HOOK_STYLES.find(h => h.id === hookStyle)?.template || HOOK_STYLES.find(h => h.id === hookStyle)?.example}
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1026,7 +1053,7 @@ export default function SocialMediaPostCreator() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   Alternative Hooks
                 </CardTitle>
                 <CardDescription>Swap the opening line for different impact</CardDescription>
@@ -1086,6 +1113,84 @@ export default function SocialMediaPostCreator() {
           </Card>
         </div>
       )}
+      </div>
+      
+      {/* Right Sidebar - Drafts Manager */}
+      <div className="hidden lg:block w-64 flex-shrink-0">
+        <div className="sticky top-4">
+          <AutoSaveDraftsManager
+            toolType="social-media-posts"
+            getCurrentData={() => ({
+              platform,
+              topic,
+              postFormat,
+              hookStyle,
+              tone,
+              industry,
+              targetAudience,
+              keyPoints,
+              personalStory,
+              ctaType,
+              includeEmojis,
+              includeHashtags,
+              postLength,
+              specificNumbers,
+              subreddit,
+              themePageNiche,
+              instagramStyle,
+              generateImage,
+              logoUrl,
+              title: topic || 'Social Media Post'
+            })}
+            loadDraftData={(draft) => {
+              // Set all values from draft, using explicit checks to handle empty strings
+              setPlatform(draft.platform || 'linkedin')
+              setTopic(draft.topic !== undefined ? draft.topic : '')
+              setPostFormat(draft.postFormat || 'authority-builder')
+              setHookStyle(draft.hookStyle || 'bold-statement')
+              setTone(draft.tone || 'professional')
+              setIndustry(draft.industry !== undefined ? draft.industry : '')
+              setTargetAudience(draft.targetAudience !== undefined ? draft.targetAudience : '')
+              setKeyPoints(draft.keyPoints !== undefined ? draft.keyPoints : '')
+              setPersonalStory(draft.personalStory !== undefined ? draft.personalStory : '')
+              setCtaType(draft.ctaType || 'comment')
+              setIncludeEmojis(draft.includeEmojis !== undefined ? draft.includeEmojis : true)
+              setIncludeHashtags(draft.includeHashtags !== undefined ? draft.includeHashtags : true)
+              setPostLength(draft.postLength || 'medium')
+              setSpecificNumbers(draft.specificNumbers !== undefined ? draft.specificNumbers : '')
+              setSubreddit(draft.subreddit !== undefined ? draft.subreddit : '')
+              setThemePageNiche(draft.themePageNiche !== undefined ? draft.themePageNiche : '')
+              setInstagramStyle(draft.instagramStyle || 'motivational')
+              setGenerateImage(draft.generateImage !== undefined ? draft.generateImage : false)
+              setLogoUrl(draft.logoUrl !== undefined ? draft.logoUrl : '')
+            }}
+            onStartNew={() => {
+              setPlatform('linkedin')
+              setTopic('')
+              setPostFormat('authority-builder')
+              setHookStyle('bold-statement')
+              setTone('professional')
+              setIndustry('')
+              setTargetAudience('')
+              setKeyPoints('')
+              setPersonalStory('')
+              setCtaType('comment')
+              setIncludeEmojis(true)
+              setIncludeHashtags(true)
+              setPostLength('medium')
+              setSpecificNumbers('')
+              setSubreddit('')
+              setThemePageNiche('')
+              setInstagramStyle('motivational')
+              setGenerateImage(false)
+              setLogoUrl('')
+            }}
+            dependencies={[topic, platform, tone, industry, keyPoints]}
+            autoSaveEnabled={true}
+            debounceMs={3000}
+          />
+        </div>
+      </div>
     </div>
   )
 }

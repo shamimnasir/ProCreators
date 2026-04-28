@@ -10,14 +10,64 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  FileText, Eye, Edit, Loader2, Save, ArrowLeft, Plus, Trash2,
-  Globe, Home, Shield, Mail, Users, Cookie, ChevronUp, ChevronDown,
-  Search, Filter, RefreshCw, ExternalLink, CheckCircle, XCircle,
-  Map, CreditCard, BookOpen, FileQuestion, Video, BarChart, Building,
-  GraduationCap, Lock, Activity, Users2, Briefcase, Settings, Database,
-  Check, X, Wrench, Layout, Code, Menu, Link2, PlusCircle, Upload, Image,
-  Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, ImagePlus, Link as LinkIcon, Type
+import {
+  FileText,
+  Eye,
+  Edit,
+  Loader2,
+  Save,
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Globe,
+  Home,
+  Shield,
+  Mail,
+  Users,
+  Cookie,
+  ChevronUp,
+  ChevronDown,
+  Search,
+  Filter,
+  RefreshCw,
+  ExternalLink,
+  CheckCircle,
+  XCircle,
+  Map,
+  CreditCard,
+  BookOpen,
+  FileQuestion,
+  Video,
+  BarChart,
+  Building,
+  GraduationCap,
+  Lock,
+  Activity,
+  Users2,
+  Briefcase,
+  Settings,
+  Database,
+  Check,
+  X,
+  Wrench,
+  Layout,
+  Code,
+  Menu,
+  Link2,
+  PlusCircle,
+  Upload,
+  Image,
+  Bold,
+  Italic,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  ImagePlus,
+  Link as LinkIcon,
+  Type
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCsrf } from '@/hooks/use-csrf'
@@ -398,7 +448,10 @@ export default function UnifiedPageManager() {
   const initializeAllToolPages = async () => {
     setInitializing(true)
     try {
-      const res = await fetch('/api/admin/pages/initialize-all', { method: 'POST' })
+      const res = await fetch('/api/admin/pages/initialize-all', { 
+        method: 'POST',
+        headers: { ...getCsrfHeaders() }
+      })
       const data = await res.json()
       if (data.success) {
         toast({ 
@@ -444,7 +497,7 @@ export default function UnifiedPageManager() {
         // Initialize page if it doesn't exist
         res = await fetch('/api/admin/pages', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
           body: JSON.stringify({ toolId, toolName, action: 'initialize' })
         })
         data = await res.json()
@@ -467,7 +520,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/unified-pages', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify(selectedPage)
       })
       const data = await res.json()
@@ -492,7 +545,7 @@ export default function UnifiedPageManager() {
     try {
       const res = await fetch('/api/admin/pages', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           toolId: selectedTool.toolId,
           seo: selectedTool.seo,
@@ -518,7 +571,10 @@ export default function UnifiedPageManager() {
   const resetPage = async (pageId) => {
     if (!confirm('Reset this page to default? All customizations will be lost.')) return
     try {
-      const res = await fetch(`/api/admin/unified-pages?pageId=${pageId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/unified-pages?pageId=${pageId}`, { 
+        method: 'DELETE',
+        headers: { ...getCsrfHeaders() }
+      })
       const data = await res.json()
       if (data.success) {
         toast({ title: 'Reset!', description: 'Page reset to default' })

@@ -10,21 +10,20 @@ import { enforceRateLimit } from '@/lib/rate-limiter'
 import { logSecurityEvent, SECURITY_EVENTS } from '@/lib/security-logger'
 
 // Credit packages - NEVER accept amounts from frontend (server-side pricing only)
-// 1 credit = $0.001, so $10 = 10,000 credits
-// Packages offer slight discount for bulk purchases
+// SIMPLIFIED v2: 1 credit ≈ $0.02
 const CREDIT_PACKAGES = {
   starter: {
     id: 'starter',
     name: 'Starter Pack',
-    credits: 5000,        // $5 worth + 0% bonus
+    credits: 250,          // ~16 AI images or 125 text tools
     price: 5.00,
     popular: false,
-    description: '~16 AI images or 500+ text tools'
+    description: '~16 AI images or 125+ text tools'
   },
   creator: {
     id: 'creator',
     name: 'Creator Pack',
-    credits: 15000,       // $15 worth + ~7% bonus (was 14,000)
+    credits: 750,          // 7% bonus vs $14 at $0.02/credit
     price: 14.00,
     popular: true,
     description: '~50 AI images or 1 AI video'
@@ -32,7 +31,7 @@ const CREDIT_PACKAGES = {
   pro: {
     id: 'pro',
     name: 'Pro Pack',
-    credits: 50000,       // $50 worth + ~11% bonus (was 45,000)
+    credits: 2500,         // 11% bonus
     price: 45.00,
     popular: false,
     description: '~166 AI images or 5 AI videos'
@@ -40,7 +39,7 @@ const CREDIT_PACKAGES = {
   business: {
     id: 'business',
     name: 'Business Pack',
-    credits: 150000,      // $150 worth + ~15% bonus (was 130,000)
+    credits: 7500,         // 15% bonus
     price: 130.00,
     popular: false,
     description: '~500 AI images or 15 AI videos'
@@ -108,6 +107,16 @@ export async function POST(request) {
     const rateLimitCheck = await enforceRateLimit(request, 'stripe_checkout')
     if (rateLimitCheck.limited) {
       return rateLimitCheck.response
+    }
+    
+    // SECURITY: CSRF verification for state-changing operation
+    const { verifyCsrf } = await import('@/lib/csrf-verify')
+    const csrfCheck = verifyCsrf(request)
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: 'CSRF verification failed', code: 'CSRF_INVALID' },
+        { status: 403 }
+      )
     }
     
     // SECURITY: Require authentication

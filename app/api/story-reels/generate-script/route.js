@@ -3,6 +3,7 @@ import { generateText } from '@/lib/gemini-text'
 import { getNicheBySlug } from '@/config/quick-reels-niches'
 import { connectToDatabase } from '@/lib/mongodb'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { humanizeText } from '@/lib/hooks/useHumanize'
 
 export async function POST(request) {
   try {
@@ -41,23 +42,28 @@ export async function POST(request) {
     }
 
     // Get niche-specific prompt template or use default
+    // Priority: 1) video_themes collection, 2) custom_prompts collection, 3) config file defaults
     let nichePrompt = ''
     if (niche && niche !== 'story-reels') {
-      // First, check for custom admin-defined prompt
       try {
         const { db } = await connectToDatabase()
-        const promptsCollection = db.collection('custom_prompts')
-        const customPrompt = await promptsCollection.findOne({ nicheSlug: niche })
         
-        if (customPrompt && customPrompt.prompt) {
-          nichePrompt = customPrompt.prompt
+        // Priority 1: Check video_themes collection (unified theme system)
+        const videoTheme = await db.collection('video_themes').findOne({ id: niche, isActive: true })
+        if (videoTheme && videoTheme.promptTemplate) {
+          nichePrompt = videoTheme.promptTemplate
+        } else {
+          // Priority 2: Check custom_prompts collection (legacy admin overrides)
+          const customPrompt = await db.collection('custom_prompts').findOne({ nicheSlug: niche })
+          if (customPrompt && customPrompt.prompt) {
+            nichePrompt = customPrompt.prompt
           } else {
-          // Fall back to default prompt from config
-          const nicheConfig = getNicheBySlug(niche)
-          if (nicheConfig) {
-            nichePrompt = nicheConfig.promptTemplate
-            } else {
+            // Priority 3: Fall back to default prompt from config
+            const nicheConfig = getNicheBySlug(niche)
+            if (nicheConfig) {
+              nichePrompt = nicheConfig.promptTemplate
             }
+          }
         }
       } catch (dbError) {
         // Fall back to default prompt from config
@@ -141,6 +147,20 @@ CRITICAL INSTRUCTIONS:
 5. Use simple, conversational language perfect for narration
 6. Make it emotionally engaging and shareable
 
+**BANNED AI-SOUNDING WORDS - DO NOT USE:**
+- unlock, unleash, unveil, uncover, revolutionize, revolutionary
+- game-changer, game-changing, cutting-edge, groundbreaking
+- supercharge, turbocharge, skyrocket, seamless, seamlessly
+- harness, leverage, elevate, empower, transform, transformative
+- dive into, dive deep, deep dive, delve, journey (metaphorical)
+- robust, scalable, synergy, paradigm shift, disrupt, holistic
+- streamline, maximize potential, take it to the next level
+- innovative, innovation, world-class, state-of-the-art
+- next-generation, best-in-class, comprehensive, landscape
+- navigate (metaphorical), realm, foster, facilitate
+
+Use clear, simple, natural language instead. Write like a friend telling a story.
+
 OUTPUT RULES (VERY IMPORTANT):
 - Return ONLY the story narration text
 - NO titles, NO labels, NO headers
@@ -168,6 +188,20 @@ YOUR MISSION: Write a compelling NARRATION SCRIPT that will be spoken aloud whil
 - NO screenplay formatting
 - NO scene numbers or labels
 - NO technical filmmaking terms
+
+**BANNED AI-SOUNDING WORDS - DO NOT USE:**
+- unlock, unleash, unveil, uncover, revolutionize, revolutionary
+- game-changer, game-changing, cutting-edge, groundbreaking
+- supercharge, turbocharge, skyrocket, seamless, seamlessly
+- harness, leverage, elevate, empower, transform, transformative
+- dive into, dive deep, deep dive, delve, journey (metaphorical)
+- robust, scalable, synergy, paradigm shift, disrupt, holistic
+- streamline, maximize potential, take it to the next level
+- innovative, innovation, world-class, state-of-the-art
+- next-generation, best-in-class, comprehensive, landscape
+- navigate (metaphorical), realm, foster, facilitate
+
+Use clear, simple, conversational language. Write like a friend telling a story.
 
 ## WHAT TO WRITE ##
 
@@ -237,7 +271,10 @@ Write ${languageText}.`
       : `\n\n## CRITICAL REQUIREMENTS ##
 1. Write the entire script in English only
 2. DO NOT include any timing references like "seconds" or duration information
-3. Make it emotionally engaging and production-ready`
+3. Make it emotionally engaging and production-ready
+4. NEVER use labels like "VO:", "Narrator:", "Voiceover:", "Speaker:", "(beat)", "(pause)" or any stage directions
+5. NEVER use brackets, parentheses, or headers to label sections of the script
+6. Write ONLY the words that will be spoken out loud — nothing else`
     
     finalSystemMessage = finalSystemMessage + languageEnforcement
 
@@ -245,17 +282,20 @@ Write ${languageText}.`
     
     // Build niche-specific user prompt
     const nicheInstructions = {
-      'mini-stories': 'a compelling story with moral, emotional twist, or folklore element',
-      'motivational': 'motivational content focused on discipline, growth, success, or resilience',
-      'facts-explainer': 'educational facts or science explainer content',
-      'comedy': 'comedy or relatable humor content',
-      'kids-stories': 'a playful moral story for children',
-      'kids-learning': 'educational learning content (ABC, 123, colors, shapes)',
-      'business-promo': 'a promotional script',
-      'horror': 'an atmospheric horror micro-story',
-      'relationship': 'relationship advice or emotional guidance',
-      'documentary': 'a historical or factual documentary-style script',
-      'festival': 'festive celebration content',
+      'mini-stories': 'a compelling story with an unexpected twist ending',
+      'motivational': 'raw, hard-hitting motivational content',
+      'facts-explainer': 'mind-blowing facts or a fascinating explainer',
+      'comedy': 'relatable comedy or humor content',
+      'kids-stories': 'a magical bedtime story for children',
+      'kids-learning': 'fun educational learning content for kids',
+      'business-promo': 'a persuasive promotional script',
+      'horror': 'an atmospheric psychological horror story',
+      'relationship': 'emotional relationship wisdom content',
+      'documentary': 'a cinematic mini-documentary narration',
+      'festival': 'warm festive celebration content',
+      'product-review': 'an honest, engaging product review',
+      'transformation': 'a stunning before-and-after transformation narration',
+      'custom': 'a compelling, viral-worthy script',
       'generic': 'a compelling script'
     }
     
@@ -320,14 +360,15 @@ Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
 - Approximately ${wordCount} words
 - MUST be related to the user's topic above
-- Content Type: ${nicheInstruction}
-- Strong opening hook
-- Clear and focused messaging
-- Suitable for voiceover narration
+- Strong opening hook that grabs attention in the first 3 seconds
+- Suitable for voiceover narration on TikTok, YouTube Shorts, or Instagram Reels
 
-CRITICAL: Your content MUST be based on the user's topic above. Do not ignore it.
-Output ONLY the narration text. No meta-information, no timing references, no labels.
-Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
+CRITICAL RULES:
+- Your content MUST be based on the user's topic above. Do not ignore it.
+- Output ONLY the narration text that will be spoken aloud.
+- NEVER include labels like "(Hook)", "(Opening)", section headers, brackets, or parenthetical directions.
+- NEVER include meta-commentary about the script.
+- Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
       }
     } else {
       // No user topic - generate freely based on niche
@@ -370,12 +411,10 @@ Write in proper SCREENPLAY FORMAT that a video production team can use directly.
 Requirements:
 - Language: ${languageName} ONLY (DO NOT mix languages)
 - Approximately ${wordCount} words
-- Content Type: ${nicheInstruction}
-- Strong opening hook
-- Clear and focused messaging
-- Suitable for voiceover narration
+- Strong opening hook that grabs attention in 3 seconds
+- Suitable for voiceover narration on TikTok, YouTube Shorts, or Instagram Reels
 
-IMPORTANT: Output ONLY the narration text. No meta-information, no timing references, no labels.
+CRITICAL: Output ONLY the narration text. NEVER include labels, brackets, headers, or parenthetical directions.
 Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.`
       }
     }
@@ -407,6 +446,10 @@ Write ONLY ${language === 'bn' ? 'in Bengali (বাংলা)' : 'in English'}.
         .replace(/\n{3,}/g, '\n\n')
         .replace(/  +/g, ' ')
         .trim()
+      
+      // HUMANIZE: Remove AI-sounding words and replace with natural alternatives
+      // This makes the generated content sound more human-written
+      cleanedScript = humanizeText(cleanedScript, { removeFiller: true })
       
       return NextResponse.json({
         success: true,

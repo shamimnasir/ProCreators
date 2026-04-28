@@ -14,22 +14,23 @@ export async function GET(request) {
     
     const { db } = await connectToDatabase()
     
-    // Get user's generation count this month
+    // Get user's generation count this month using aggregation for better performance
     const startOfMonth = new Date()
     startOfMonth.setDate(1)
     startOfMonth.setHours(0, 0, 0, 0)
     
-    const generations = await db.collection('credit_transactions').countDocuments({
-      userId,
-      type: 'deduction',
-      createdAt: { $gte: startOfMonth }
-    })
+    const generationsData = await db.collection('credit_transactions').aggregate([
+      { $match: { userId, type: 'deduction', createdAt: { $gte: startOfMonth } } },
+      { $count: 'total' }
+    ]).toArray()
+    const generations = generationsData[0]?.total || 0
     
-    // Get user's content count (from library)
-    const content = await db.collection('library').countDocuments({
-      userId,
-      createdAt: { $gte: startOfMonth }
-    })
+    // Get user's content count (from library) using aggregation
+    const contentData = await db.collection('library').aggregate([
+      { $match: { userId, createdAt: { $gte: startOfMonth } } },
+      { $count: 'total' }
+    ]).toArray()
+    const content = contentData[0]?.total || 0
     
     // Get credits used this month
     const creditsData = await db.collection('credit_transactions').aggregate([

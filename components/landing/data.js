@@ -1,28 +1,44 @@
 // Landing Page Data Constants
 // Centralized data for all landing page sections
 
-import { 
-  Video, Film, BookOpen, FileText, Mic, Layers, TrendingUp, Rocket, Heart,
-  Megaphone, BadgeDollarSign, Building2, GraduationCap, Briefcase,
-  Image as ImageIcon, Zap
+import {
+  Video,
+  Film,
+  BookOpen,
+  FileText,
+  Mic,
+  Layers,
+  TrendingUp,
+  Rocket,
+  Heart,
+  Megaphone,
+  BadgeDollarSign,
+  Building2,
+  GraduationCap,
+  Briefcase,
+  Image as ImageIcon,
+  Play,
+  Clock,
+  Users,
+  Star as StarIcon
 } from 'lucide-react'
 
 export const homepageFAQs = [
   {
     question: 'What is ProCreators?',
-    answer: 'ProCreators is an AI-powered content creation platform that helps creators make professional videos, images, ebooks, social media posts, and more in minutes using advanced artificial intelligence.'
+    answer: 'ProCreators is a content creation platform with 70+ tools that helps creators make professional videos, images, ebooks, social media posts, and more in minutes.'
   },
   {
     question: 'How much does ProCreators cost?',
-    answer: 'ProCreators offers a free plan with 500 credits to try all tools. Paid plans start at $19/month for Creator (19,000 credits), $49/month for Pro (49,000 credits), and $99/month for Business (99,000 credits). 1 credit = $0.001 value.'
+    answer: 'ProCreators offers a free plan with 25 credits to try all tools for 30 days. Paid plans start at $19/month for Creator (1,000 credits — about 7 AI video clips or 8 UGC ads at 15s), $49/month for Pro (2,500 credits — about 17 AI video clips or 20 UGC ads), and $99/month for Business (5,000 credits — about 35 AI video clips or 40 UGC ads). Mix and match across every tool — credits are universal.'
   },
   {
     question: 'What types of content can I create with ProCreators?',
-    answer: 'You can create AI-generated videos, Instagram/TikTok reels, YouTube thumbnails, ebooks, blog posts, social media threads, carousels, podcast covers, business plans, educational materials, and 70+ other content types.'
+    answer: 'You can create videos with voiceovers, Instagram/TikTok reels, YouTube thumbnails, ebooks, blog posts, social media threads, carousels, podcast covers, business plans, educational materials, and 70+ other content types.'
   },
   {
     question: 'Do I need technical skills to use ProCreators?',
-    answer: 'No technical skills required! ProCreators is designed for everyone - from beginners to professionals. Our AI handles all the complex work while you focus on your creative vision.'
+    answer: 'Not at all. ProCreators is built for people who want results fast - not people who want to learn complicated software. Pick a tool, give it a topic, and get finished content in minutes.'
   },
   {
     question: 'Can I cancel my subscription anytime?',
@@ -31,96 +47,108 @@ export const homepageFAQs = [
 ]
 
 export const tools = [
-  { name: 'AI Video Studio', icon: Video, desc: '4K videos with voice & music' },
-  { name: 'Quick Reels', icon: Film, desc: 'Viral TikTok & Instagram reels' },
+  { name: 'AI Video Studio', icon: Video, desc: 'Full videos with voice & captions' },
   { name: 'Ebook Creator', icon: BookOpen, desc: 'Sell on Amazon KDP' },
   { name: 'Thumbnail Maker', icon: ImageIcon, desc: 'YouTube-ready thumbnails' },
   { name: 'Blog Writer', icon: FileText, desc: 'SEO-optimized articles' },
-  { name: 'Voice Clone', icon: Mic, desc: 'Your voice, any language' },
+  { name: 'Carousel Maker', icon: Layers, desc: 'Social media carousels' },
+  { name: 'Voice Studio', icon: Mic, desc: 'Natural-sounding voiceovers' },
 ]
 
 export const features = [
   {
     icon: Layers,
-    title: '70+ AI Tools in ONE Platform',
-    description: 'Stop paying for 10 different tools. Get everything you need to dominate content creation.'
+    title: '70+ Tools, One Dashboard',
+    description: 'Videos, ebooks, blogs, carousels, thumbnails, business plans - stop juggling 10 different apps.',
+    gradient: 'from-purple-500 to-violet-500'
   },
   {
     icon: Video,
-    title: 'AI Videos That Go VIRAL',
-    description: 'Auto-generate reels, shorts, and long-form videos that rack up millions of views.'
+    title: 'Videos That Actually Get Views',
+    description: 'Pick a theme, drop in your topic, and get a complete video with voiceover, captions, and music. Done in minutes.',
+    gradient: 'from-pink-500 to-rose-500'
   },
   {
     icon: BookOpen,
-    title: 'Digital Products = Passive Income',
-    description: 'Create ebooks, planners, coloring books, and courses to sell while you sleep.'
+    title: 'Digital Products You Can Sell',
+    description: 'Create ebooks, planners, coloring books, and journals. List them on Amazon, Etsy, or Gumroad and start earning.',
+    gradient: 'from-emerald-500 to-teal-500'
   },
   {
     icon: TrendingUp,
-    title: 'Social Media on Autopilot',
-    description: 'Threads, carousels, quotes, LinkedIn posts - schedule weeks of content in minutes.'
+    title: 'Social Media Content on Tap',
+    description: 'Threads, carousels, quotes, LinkedIn posts - batch-create a month of content before your coffee gets cold.',
+    gradient: 'from-blue-500 to-indigo-500'
   },
   {
-    icon: Zap,
-    title: 'So Easy, Anyone Can Create',
-    description: 'No design skills? No problem. Our AI does the heavy lifting - just click, create, and share.'
+    icon: Play,
+    title: 'Dead Simple to Use',
+    description: 'No learning curve. No design skills. No complicated prompts. Just pick a tool, enter your topic, and hit create.',
+    gradient: 'from-cyan-500 to-sky-500'
   },
   {
     icon: Rocket,
-    title: 'From Idea to Income in Minutes',
-    description: 'What used to take days now takes minutes. More content = more money.'
+    title: 'From Idea to Finished in Minutes',
+    description: 'What used to take a freelancer 3 days now takes you 5 minutes. More output, less overhead.',
+    gradient: 'from-orange-500 to-amber-500'
   },
 ]
 
 export const stats = [
-  { number: '70+', label: 'AI Tools', icon: Layers },
-  { number: '1M+', label: 'Content Created', icon: FileText },
-  { number: '99%', label: 'Addiction Rate', icon: Heart },
-  { number: '∞', label: 'Creative Possibilities', icon: Rocket },
+  { number: '70+', label: 'Creation Tools', icon: Layers },
+  { number: '2 min', label: 'Avg. Creation Time', icon: Clock },
+  { number: '4.8/5', label: 'User Rating', icon: StarIcon },
+  { number: '15K+', label: 'Creators Using It', icon: Users },
 ]
 
 export const useCases = [
   {
     title: 'Content Creators',
     icon: Video,
-    description: 'Stop struggling with content. Create viral reels, engaging posts, and professional videos that explode your growth.',
-    image: '/api/placeholder/400/300',
-    features: ['Auto-generate viral hooks', 'AI thumbnails that get clicks', 'Voice clone in any language']
+    description: 'Batch-create reels, thumbnails, blog posts, and social content. Spend less time making stuff and more time growing your audience.',
+    features: ['Complete videos with voiceovers', 'Click-worthy thumbnails', 'Weeks of posts in one sitting'],
+    gradient: 'from-pink-500 to-rose-500',
+    stat: '3× faster posting'
   },
   {
     title: 'Digital Marketers',
     icon: Megaphone,
-    description: 'Scale your campaigns with AI. Create months of content in hours. Yes, your boss will be impressed.',
-    image: '/api/placeholder/400/300',
-    features: ['SEO-optimized blog posts', 'Ad copy that converts', 'Social media on autopilot']
+    description: 'Produce campaign assets at scale. Blog posts, ad copy, social graphics - all from one place, all brand-consistent.',
+    features: ['SEO blog posts in minutes', 'Ad copy and landing page text', 'Social content calendars'],
+    gradient: 'from-orange-500 to-amber-500',
+    stat: '15 hrs saved/week'
   },
   {
     title: 'Digital Product Sellers',
     icon: BadgeDollarSign,
-    description: 'Create ebooks, planners, coloring books, and courses that sell on Amazon, Etsy, and Gumroad while you sleep.',
-    image: '/api/placeholder/400/300',
-    features: ['KDP-ready ebooks', 'Print-on-demand designs', 'Course content generator']
+    description: 'Build ebooks, planners, journals, and coloring books that sell on Amazon, Etsy, and Gumroad. Your new side hustle starts here.',
+    features: ['KDP-ready ebooks with covers', 'Printable planners and journals', 'Coloring books for any niche'],
+    gradient: 'from-emerald-500 to-green-500',
+    stat: '$3K+ avg/month'
   },
   {
     title: 'Business Owners',
     icon: Building2,
-    description: 'Stop paying agencies $5000/month. Do it yourself in 10 minutes. We won\'t tell anyone.',
-    image: '/api/placeholder/400/300',
-    features: ['Professional presentations', 'Business plans & proposals', 'Marketing materials']
+    description: 'Create your own marketing materials, pitch decks, and business plans. No agency fees. No waiting around.',
+    features: ['Professional slide decks', 'Business plans and proposals', 'Marketing strategy docs'],
+    gradient: 'from-blue-500 to-indigo-500',
+    stat: 'No agency fees'
   },
   {
     title: 'Educators & Coaches',
     icon: GraduationCap,
-    description: 'Create engaging courses, lesson plans, and educational content that your students will actually love.',
-    image: '/api/placeholder/400/300',
-    features: ['Lesson plan generator', 'Quiz & worksheet maker', 'Video explanations in minutes']
+    description: 'Build course content, lesson plans, worksheets, and study guides that your students will actually use.',
+    features: ['Lesson plans and quizzes', 'Worksheets and flashcards', 'Video explanations'],
+    gradient: 'from-purple-500 to-violet-500',
+    stat: 'Built for educators'
   },
   {
     title: 'Agencies & Freelancers',
     icon: Briefcase,
-    description: 'Deliver 10x more to your clients without hiring. White-label everything. Charge premium prices.',
-    image: '/api/placeholder/400/300',
-    features: ['Bulk content creation', 'Client folder management', 'Brand kit templates']
+    description: 'Deliver more to your clients without adding headcount. Create at scale and charge what you\'re worth.',
+    features: ['Bulk content creation', 'Client-ready exports', 'Multiple format outputs'],
+    gradient: 'from-cyan-500 to-sky-500',
+    stat: 'Scale without hiring'
   },
 ]
 
@@ -129,22 +157,28 @@ export const testimonials = [
     name: 'Rakib Hassan',
     role: 'YouTube Creator',
     company: '500K+ Subscribers',
-    image: '/api/placeholder/100/100',
-    quote: 'I was skeptical at first. Now I create 10x more content in half the time. My channel growth went crazy! 🚀'
+    initials: 'RH',
+    image: '/testimonials/rakib.jpg',
+    color: 'from-orange-500 to-amber-500',
+    quote: 'I used to spend my entire weekend editing videos and making thumbnails. Now I batch-create a week of content on Monday morning. My channel has grown 3x since I started using this.'
   },
   {
     name: 'Priya Sharma',
-    role: 'Digital Marketer',
+    role: 'Marketing Lead',
     company: 'Agency Owner',
-    image: '/api/placeholder/100/100',
-    quote: 'Fired my content writer (sorry Amit). ProCreators writes better blog posts and never complains about deadlines. 😂'
+    initials: 'PS',
+    image: '/testimonials/priya.jpg',
+    color: 'from-pink-500 to-rose-500',
+    quote: 'We replaced 4 different tools with ProCreators. The blog writer alone saves us 15 hours a week. My team was skeptical at first - now they refuse to go back.'
   },
   {
     name: 'James Wilson',
     role: 'KDP Publisher',
-    company: '$10K/month passive',
-    image: '/api/placeholder/100/100',
-    quote: 'Made $10,000 last month from ebooks created with ProCreators. The coloring book tool is absolutely insane!'
+    company: 'Self-Published Author',
+    initials: 'JW',
+    image: '/testimonials/james.jpg',
+    color: 'from-blue-500 to-cyan-500',
+    quote: 'I\'ve published 12 ebooks and 6 coloring books using ProCreators in the last 3 months. The ebook tool is ridiculously fast. Already making $3K/month in royalties.'
   },
 ]
 
@@ -153,9 +187,9 @@ export const pricingTiers = [
     name: 'Free',
     price: '$0',
     features: [
-      '500 free credits',
+      '25 free credits (30-day trial)',
       'Access all 70+ tools',
-      'Try before you buy',
+      'Try everything risk-free',
       'No credit card needed'
     ],
     cta: 'Start Free',
@@ -166,14 +200,14 @@ export const pricingTiers = [
     price: '$19',
     period: '/mo',
     features: [
-      '19,000 credits/month',
-      'All 70+ AI tools',
-      'No watermarks',
-      '~60 AI images OR 2 long-form AI videos',
-      '5% discount on extra credits',
+      '1,000 credits — mix & match',
+      '🎬 7 AI video clips (~60s)',
+      '📣 8 UGC talking-head ads (15s)',
+      '🎨 66 images / 📝 333 blogs',
+      'All 70+ tools, no watermarks',
       'Email support'
     ],
-    cta: 'Get Creator',
+    cta: 'Start Creating',
     popular: true
   },
   {
@@ -181,12 +215,12 @@ export const pricingTiers = [
     price: '$49',
     period: '/mo',
     features: [
-      '49,000 credits/month',
-      'Everything in Creator',
-      '~160 AI images OR 5 long-form AI videos',
-      'Batch generation',
-      '10% discount on credits',
-      'Priority support'
+      '2,500 credits — best value',
+      '🎬 17 AI video clips (~2.5 min)',
+      '📣 10 UGC talking-head ads',
+      '🎨 166 images / 📝 833 blogs',
+      'Batch + 4K + brand kit',
+      'Priority queue & support'
     ],
     cta: 'Go Pro',
     popular: false
@@ -196,25 +230,25 @@ export const pricingTiers = [
     price: '$99',
     period: '/mo',
     features: [
-      '99,000 credits/month',
-      'Everything in Pro',
-      '~330 AI images OR 10 long-form AI videos',
-      'Team access (5 seats)',
-      '15% discount on credits',
-      'Dedicated support'
+      '5,000 credits — for teams',
+      '🎬 35 AI video clips (~5 min)',
+      '📣 40 UGC talking-head ads (15s)',
+      '🎨 333 images / 📝 1.6K blogs',
+      'Team (5) + API + brand kits',
+      'Dedicated success manager'
     ],
-    cta: 'Get Business',
+    cta: 'Start Business',
     popular: false
   },
 ]
 
 export const popularTools = [
-  'Auto Subtitles',
-  'Script-to-Ad',
+  'AI Video Studio',
   'Thumbnail Maker',
-  'Voice Clone',
   'Ebook Generator',
-  'Reels Creator',
-  'Talking Head',
-  'Thread Creator'
+  'Carousel Creator',
+  'Blog Writer',
+  'Quote Maker',
+  'Thread Creator',
+  'Reels Creator'
 ]

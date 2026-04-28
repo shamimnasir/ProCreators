@@ -4,7 +4,16 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Save, FolderOpen, Trash2, FilePlus, Clock, CloudOff, Cloud, Loader2 } from 'lucide-react'
+import {
+  Save,
+  FolderOpen,
+  Trash2,
+  FilePlus,
+  Clock,
+  CloudOff,
+  Cloud,
+  Loader2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 /**
@@ -96,11 +105,20 @@ export default function AutoSaveDraftsManager({
         return { success: true, skipped: true }
       }
       
-      // Check for meaningful content
-      const hasContent = currentData.title || currentData.story || currentData.pages || 
-                        currentData.content || currentData.items || currentData.data ||
-                        currentData.chapters || currentData.cards || currentData.slides ||
-                        currentData.generatedNotes || currentData.topic
+      // Check for meaningful content - require at least one non-empty text field
+      const hasContent = (currentData.title && currentData.title !== 'Social Media Post' && currentData.title !== 'Untitled') ||
+                        (currentData.story && currentData.story.trim()) ||
+                        (currentData.pages && currentData.pages.length > 0) || 
+                        (currentData.content && currentData.content.trim()) ||
+                        (currentData.items && currentData.items.length > 0) ||
+                        (currentData.data && Object.keys(currentData.data).length > 0) ||
+                        (currentData.chapters && currentData.chapters.length > 0) ||
+                        (currentData.cards && currentData.cards.length > 0) ||
+                        (currentData.slides && currentData.slides.length > 0) ||
+                        (currentData.generatedNotes && currentData.generatedNotes.trim()) ||
+                        (currentData.topic && currentData.topic.trim()) ||
+                        (currentData.keyPoints && currentData.keyPoints.trim()) ||
+                        (currentData.personalStory && currentData.personalStory.trim())
       if (!hasContent) {
         return { success: false, error: 'No content to save' }
       }

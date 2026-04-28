@@ -1,5 +1,7 @@
 'use client'
 
+import { saveToLibrary } from '@/lib/secure-api'
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,18 +47,14 @@ export default function QuotesPage() {
       if (data.success) {
         setGeneratedQuote(data.content)
         
-        // Auto-save to library
+        // Auto-save to library using secure API
         try {
-          await fetch('/api/library/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: data.content,
-              type: 'text',
-              title: `Quote: ${topic.substring(0, 50)}`,
-              description: data.content.substring(0, 100),
-              metadata: { topic, language, contentType: 'quote' }
-            })
+          await saveToLibrary({
+            content: data.content,
+            type: 'text',
+            title: `Quote: ${topic.substring(0, 50)}`,
+            description: data.content.substring(0, 100),
+            metadata: { topic, language, contentType: 'quote' }
           })
           console.log('Quote auto-saved to library')
         } catch (saveError) {
@@ -76,25 +74,18 @@ export default function QuotesPage() {
     if (!generatedQuote) return
     
     try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: generatedQuote,
-          type: 'quote',
-          title: `Quote: ${topic.substring(0, 50)}`,
-          description: generatedQuote.substring(0, 100),
-          metadata: {
-            topic,
-            language
-          }
-        })
+      const data = await saveToLibrary({
+        content: generatedQuote,
+        type: 'quote',
+        title: `Quote: ${topic.substring(0, 50)}`,
+        description: generatedQuote.substring(0, 100),
+        metadata: {
+          topic,
+          language
+        }
       })
       
-      const data = await response.json()
-      
       if (data.success) {
-        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "Quote saved to library successfully!"

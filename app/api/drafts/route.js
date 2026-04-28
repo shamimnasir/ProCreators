@@ -1,28 +1,34 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
-import { getUserIdFromRequest } from '@/lib/get-user-id'
+import { requireAuth } from '@/lib/auth-middleware'
+import { verifyCsrf } from '@/lib/csrf-verify'
+import { buildUserQuery } from '@/lib/tenant-isolation'
 
-// GET - Fetch all drafts for the user (filtered by tool type)
+// GET - Fetch all drafts for the authenticated user (filtered by tool type)
 export async function GET(request) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
     const { searchParams } = new URL(request.url)
     const toolType = searchParams.get('toolType')
-    const queryUserId = searchParams.get('userId')
     
     const drafts = await getCollection('drafts')
     
-    // Get user ID from query params or request headers
-    const userId = queryUserId || await getUserIdFromRequest(request)
-    
-    const query = { userId }
-    if (toolType) {
-      query.toolType = toolType
+    // SECURITY: Use tenant isolation - only fetch user's own drafts
+    const query = buildUserQuery(auth.userId)
+    if (toolType && typeof toolType === 'string' && toolType.length < 100) {
+      query.toolType = toolType.replace(/[<>'"${}]/g, '') // Sanitize
     }
     
     const userDrafts = await drafts
       .find(query)
       .sort({ updatedAt: -1 })
+      .limit(100) // Prevent excessive data retrieval
       .toArray()
     
     return NextResponse.json({
@@ -41,30 +47,50 @@ export async function GET(request) {
 // POST - Save a new draft or update existing
 export async function POST(request) {
   try {
+    // SECURITY: CSRF verification
+    const csrfCheck = verifyCsrf(request)
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: 'CSRF verification failed', code: 'CSRF_INVALID' },
+        { status: 403 }
+      )
+    }
+    
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
     const data = await request.json()
     const drafts = await getCollection('drafts')
     
-    // Get user ID from body or request headers
-    const userId = data.userId || await getUserIdFromRequest(request)
+    // SECURITY: Use authenticated userId only
+    const userId = auth.userId
     const now = new Date().toISOString()
+    
+    // Sanitize data - remove any userId override attempts
+    const safeData = { ...data }
+    delete safeData.userId // Prevent userId override
     
     // Check if updating existing draft
     if (data.id) {
+      // SECURITY: Only update if draft belongs to user
       const result = await drafts.updateOne(
-        { id: data.id, userId },
+        { id: data.id, userId }, // Tenant isolation in query
         {
           $set: {
-            ...data,
-            userId,
+            ...safeData,
+            userId, // Set to authenticated user
             updatedAt: now
           }
         }
       )
       
       if (result.matchedCount === 0) {
-        // Draft doesn't exist, create new one
+        // Draft doesn't exist for this user, create new one
         const newDraft = {
-          ...data,
+          ...safeData,
           id: data.id,
           userId,
           createdAt: now,
@@ -83,7 +109,7 @@ export async function POST(request) {
     // Create new draft
     const newId = randomUUID()
     const newDraft = {
-      ...data,
+      ...safeData,
       id: newId,
       userId,
       createdAt: now,
@@ -109,9 +135,23 @@ export async function POST(request) {
 // DELETE - Remove a draft
 export async function DELETE(request) {
   try {
+    // SECURITY: CSRF verification
+    const csrfCheck = verifyCsrf(request)
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: 'CSRF verification failed', code: 'CSRF_INVALID' },
+        { status: 403 }
+      )
+    }
+    
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
     const { searchParams } = new URL(request.url)
     const draftId = searchParams.get('id')
-    const queryUserId = searchParams.get('userId')
     
     if (!draftId) {
       return NextResponse.json(
@@ -121,9 +161,9 @@ export async function DELETE(request) {
     }
     
     const drafts = await getCollection('drafts')
-    const userId = queryUserId || await getUserIdFromRequest(request)
     
-    await drafts.deleteOne({ id: draftId, userId })
+    // SECURITY: Tenant isolation - only delete user's own drafts
+    await drafts.deleteOne({ id: draftId, userId: auth.userId })
     
     return NextResponse.json({
       success: true,

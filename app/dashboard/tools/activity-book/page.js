@@ -12,12 +12,37 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Puzzle, Download, Loader2, DollarSign, Image,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, Save, AlertTriangle,
-  FileText, Grid3X3, Search, BookOpen, Gamepad2, Brain,
-  Baby, GraduationCap, Users, Target, Palette, Zap, Wand2} from 'lucide-react'
+import {
+  Puzzle,
+  Download,
+  Loader2,
+  DollarSign,
+  Image,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Save,
+  AlertTriangle,
+  FileText,
+  Grid3X3,
+  Search,
+  BookOpen,
+  Gamepad2,
+  Brain,
+  Baby,
+  GraduationCap,
+  Users,
+  Target,
+  Palette,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
@@ -476,7 +501,7 @@ export default function ActivityBookPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   Step 1: Activity Book Setup
                 </CardTitle>
                 <CardDescription>Configure your activity book type and theme</CardDescription>

@@ -1,12 +1,21 @@
 'use client'
 
+import { saveToLibrary } from '@/lib/secure-api'
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2, Download, Save, Globe, Link as LinkIcon, Wand2 } from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  Save,
+  Globe,
+  Link as LinkIcon,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
@@ -95,16 +104,12 @@ export default function NewsPage() {
         
         // Auto-save to library
         try {
-          await fetch('/api/library/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: data.content,
-              type: 'text',
-              title: `News: ${topic.substring(0, 50)}`,
-              description: data.content.substring(0, 100),
-              metadata: { topic, style, language, contextUrl, contentType: 'news' }
-            })
+          await saveToLibrary({
+            content: data.content,
+            type: 'text',
+            title: `News: ${topic.substring(0, 50)}`,
+            description: data.content.substring(0, 100),
+            metadata: { topic, style, language, contextUrl, contentType: 'news' }
           })
           console.log('News auto-saved to library')
         } catch (saveError) {
@@ -133,24 +138,18 @@ export default function NewsPage() {
     if (!generatedNews) return
     
     try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: generatedNews,
-          type: 'news',
-          title: `News: ${topic.substring(0, 50)}`,
-          description: generatedNews.substring(0, 100),
-          metadata: {
-            topic,
-            style,
-            language,
-            contextUrl
-          }
-        })
+      const data = await saveToLibrary({
+        content: generatedNews,
+        type: 'news',
+        title: `News: ${topic.substring(0, 50)}`,
+        description: generatedNews.substring(0, 100),
+        metadata: {
+          topic,
+          style,
+          language,
+          contextUrl
+        }
       })
-      
-      const data = await response.json()
       
       if (data.success) {
         toast({

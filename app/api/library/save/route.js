@@ -1,11 +1,12 @@
-// Library Save API - Secured with Zod validation and rate limiting
+// Library Save API - Secured with Zod validation, CSRF, and rate limiting
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
-import { optionalAuth } from '@/lib/auth-middleware'
+import { requireAuth } from '@/lib/auth-middleware'
 import { validateRequest, librarySaveSchema } from '@/lib/validation'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { sanitizeText, sanitizeUrl } from '@/lib/sanitize'
+import { verifyCsrf } from '@/lib/csrf-verify'
 
 export async function POST(request) {
   try {
@@ -15,8 +16,20 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
     
-    // Get user from auth (optional - can save as anonymous)
-    const auth = await optionalAuth(request)
+    // SECURITY: CSRF verification
+    const csrfCheck = verifyCsrf(request)
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: 'CSRF verification failed', code: 'CSRF_INVALID' },
+        { status: 403 }
+      )
+    }
+    
+    // SECURITY: Require authentication - no anonymous saves
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
     
     const body = await request.json()
     
@@ -85,8 +98,8 @@ export async function POST(request) {
       }
     }
 
-    // Get user ID (prefer authenticated, fallback to validated body)
-    const userId = auth?.userId || validatedBody.userId || 'anonymous'
+    // SECURITY: Use authenticated userId only - never from body (prevents IDOR)
+    const userId = auth.userId
 
     // Calculate expiration: 30 days from now
     const expiresAt = new Date()

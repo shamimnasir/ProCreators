@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Upload, Download, Subtitles, Globe, Play, Pause, Edit2, Save } from 'lucide-react'
+import {
+  Loader2,
+  Upload,
+  Download,
+  Subtitles,
+  Globe,
+  Play,
+  Pause,
+  Edit2,
+  Save
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

@@ -243,7 +243,7 @@ const DEFAULT_TEMPLATES = {
           title: 'Frequently Asked Questions',
           items: [
             { question: 'What is ProCreators?', answer: 'ProCreators is an AI-powered content creation platform that helps you create professional videos, images, ebooks, social media content, and more.' },
-            { question: 'How much does it cost?', answer: 'We offer a free plan with 500 credits. Paid plans start at $19/month for Creator (19,000 credits), $49/month for Pro (49,000 credits), and $99/month for Business (99,000 credits).' },
+            { question: 'How much does it cost?', answer: 'We offer a free plan with 25 credits for 30 days. Paid plans start at $19/month for Creator (1,000 credits), $49/month for Pro (2,500 credits), and $99/month for Business (5,000 credits).' },
             { question: 'What can I create?', answer: 'You can create AI videos, reels, thumbnails, ebooks, blog posts, social media content, educational materials, business documents, and 70+ other content types.' },
             { question: 'Do I need technical skills?', answer: 'No! ProCreators is designed for everyone. Our AI handles the complex work while you focus on your creative vision.' }
           ]
@@ -546,7 +546,7 @@ const DEFAULT_TEMPLATES = {
           items: [
             { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express) and PayPal. Enterprise customers can also pay via invoice.' },
             { question: 'Can I cancel my subscription anytime?', answer: 'Yes, you can cancel your subscription at any time from your dashboard. Your access continues until the end of your billing period.' },
-            { question: 'Do you offer refunds?', answer: 'We offer a 7-day money-back guarantee for new subscribers. Contact our support team if you are not satisfied with the service.' }
+            { question: 'Do you offer refunds?', answer: 'We offer a 7-day refund window for new subscribers. We refund your payment after deducting the cost of any credits you have already used for generations — so you only pay for what you actually create.' }
           ]
         }
       },

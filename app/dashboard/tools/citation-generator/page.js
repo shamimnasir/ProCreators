@@ -12,12 +12,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Download, Loader2, 
-  ArrowLeft, Plus, Trash2, CheckCircle, Copy,
-  BookOpen, Globe, Newspaper, Video, Mic,
-  GraduationCap, Link2, RefreshCw, FileDown,
-  BookMarked, Library, ExternalLink, Search, Wand2
+import {
+  FileText,
+  Download,
+  Loader2,
+  ArrowLeft,
+  Plus,
+  Trash2,
+  CheckCircle,
+  Copy,
+  BookOpen,
+  Globe,
+  Newspaper,
+  Video,
+  Mic,
+  GraduationCap,
+  Link2,
+  RefreshCw,
+  FileDown,
+  BookMarked,
+  Library,
+  ExternalLink,
+  Search,
+  Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'

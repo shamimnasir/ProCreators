@@ -85,13 +85,12 @@ export async function POST(request) {
         success: false,
         status: 'error',
         error: 'Video generation service not configured',
-        message: 'FAL_KEY is required for AI video generation with Kling.',
+        message: 'AI video generation service is not configured. Please contact support.',
         mode,
         jobId
       }, { status: 503 })
     }
 
-    console.log(`[${jobId}] Starting video generation - Mode: ${mode}, Duration: ${duration}s, Platform: ${platform}`)
 
     // Determine consistency mode (use mode's default or explicit request)
     const consistencyMode = requestedConsistency !== 'none' ? requestedConsistency : modeConfig.consistencyMode
@@ -102,7 +101,6 @@ export async function POST(request) {
     try {
       // Check if we have an input image (image-to-video mode)
       if (image) {
-        console.log(`[${jobId}] Using image-to-video mode`)
         
         // Single clip generation with image
         const clip = await generateKlingClip({
@@ -129,7 +127,6 @@ export async function POST(request) {
       }
       
       // Text-to-video mode with consistency
-      console.log(`[${jobId}] Using text-to-video mode with ${consistencyMode} consistency`)
       
       const result = await generateConsistentVideoClips({
         script,
@@ -139,7 +136,6 @@ export async function POST(request) {
         characterDescription: null, // Auto-extract from script
         jobId,
         onProgress: (progress) => {
-          console.log(`[${jobId}] ${progress.message}`)
         }
       })
       

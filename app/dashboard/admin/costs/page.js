@@ -5,11 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  DollarSign, TrendingUp, TrendingDown, AlertTriangle, 
-  RefreshCw, Zap, BarChart3, Target, CheckCircle
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  RefreshCw,
+  Play,
+  BarChart3,
+  Target,
+  CheckCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 
 export default function CostAnalyticsPage() {
   const [period, setPeriod] = useState('30d')
@@ -18,6 +26,7 @@ export default function CostAnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [adjusting, setAdjusting] = useState(false)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     fetchAnalytics()
@@ -55,7 +64,7 @@ export default function CostAnalyticsPage() {
     try {
       const res = await fetch('/api/admin/costs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({ action: 'auto-adjust', dryRun })
       })
       const data = await res.json()
@@ -257,7 +266,7 @@ export default function CostAnalyticsPage() {
         <CardContent>
           {recommendations.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Zap className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <Play className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No data yet. Cost tracking will populate as users generate content.</p>
             </div>
           ) : (

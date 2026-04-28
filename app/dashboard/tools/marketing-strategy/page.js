@@ -13,14 +13,41 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Target, Copy, Loader2, Wand2, RefreshCw,
-  Check, ArrowLeft, TrendingUp, Users, BarChart3,
-  Lightbulb, Building2, DollarSign, Calendar, Layers,
-  PieChart, ArrowUpRight, ArrowDownRight, Minus, Shield,
-  Zap, Globe, Megaphone, Heart, Brain, CheckCircle2,
-  AlertTriangle, FileText, Download, FileDown, Printer,
-  Upload, X, ImageIcon
+import {
+  Target,
+  Copy,
+  Loader2,
+  Wand2,
+  RefreshCw,
+  Check,
+  ArrowLeft,
+  TrendingUp,
+  Users,
+  BarChart3,
+  Lightbulb,
+  Building2,
+  DollarSign,
+  Calendar,
+  Layers,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Shield,
+  Play,
+  Globe,
+  Megaphone,
+  Heart,
+  Brain,
+  CheckCircle2,
+  AlertTriangle,
+  FileText,
+  Download,
+  FileDown,
+  Printer,
+  Upload,
+  X,
+  ImageIcon
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
@@ -1748,7 +1775,7 @@ export default function MarketingStrategyPage() {
                       <Card>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <Play className="h-5 w-5 text-yellow-500" />
                             Executive Summary
                           </CardTitle>
                         </CardHeader>
@@ -2078,7 +2105,7 @@ export default function MarketingStrategyPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-purple-500" />
+                          <Play className="h-5 w-5 text-purple-500" />
                           Full-Funnel Strategy
                         </CardTitle>
                         <CardDescription>Customer journey from awareness to advocacy</CardDescription>
@@ -2190,7 +2217,7 @@ export default function MarketingStrategyPage() {
                         <Card className="md:col-span-2">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                              <Zap className="h-5 w-5 text-orange-500" />
+                              <Play className="h-5 w-5 text-orange-500" />
                               Immediate Next Steps
                             </CardTitle>
                           </CardHeader>
@@ -2282,7 +2309,7 @@ export default function MarketingStrategyPage() {
                         <Card>
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                              <Zap className="h-5 w-5 text-orange-500" />
+                              <Play className="h-5 w-5 text-orange-500" />
                               Action Plan
                             </CardTitle>
                           </CardHeader>
@@ -2638,7 +2665,7 @@ export default function MarketingStrategyPage() {
                       <Card>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-purple-500" />
+                            <Play className="h-5 w-5 text-purple-500" />
                             Full Marketing Funnel
                           </CardTitle>
                         </CardHeader>

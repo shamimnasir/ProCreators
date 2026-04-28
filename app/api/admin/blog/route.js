@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 import { verifyCsrf } from '@/lib/csrf-verify'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const COLLECTION_NAME = 'blog_posts'
 
 // Helper to generate slug from title
@@ -16,6 +17,9 @@ function generateSlug(title) {
 
 // GET - List all posts or get single post
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('postId')
@@ -82,6 +86,9 @@ export async function GET(request) {
 
 // POST - Create new post
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)
@@ -157,6 +164,9 @@ export async function POST(request) {
 
 // PUT - Update post
 export async function PUT(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)
@@ -229,6 +239,9 @@ export async function PUT(request) {
 
 // DELETE - Delete post
 export async function DELETE(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)

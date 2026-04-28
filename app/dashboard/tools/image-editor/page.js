@@ -15,11 +15,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Wand2, Upload, Download, Image as ImageIcon, Palette,
-  Layers, Trash2, Copy, RefreshCw, Lightbulb, Plus, X, Camera,
-  Pencil, Combine, Zap, User, ShoppingBag, Film, Smile, Target,
-  ChevronRight, Check, Star, Heart, Loader2, ArrowUpRight, ArrowDownRight
+import {
+  Wand2,
+  Upload,
+  Download,
+  Image as ImageIcon,
+  Palette,
+  Layers,
+  Trash2,
+  Copy,
+  RefreshCw,
+  Lightbulb,
+  Plus,
+  X,
+  Camera,
+  Pencil,
+  Combine,
+  Play,
+  User,
+  ShoppingBag,
+  Film,
+  Smile,
+  Target,
+  ChevronRight,
+  Check,
+  Star,
+  Heart,
+  Loader2,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react'
 
 // ==================== UPSCALE SECTION COMPONENT ====================
@@ -863,7 +887,7 @@ export default function ImageEditorPage() {
                   selectedModel === 'nano-banana' ? 'bg-white text-purple-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Fast
               </button>
               <button
@@ -872,7 +896,7 @@ export default function ImageEditorPage() {
                   selectedModel === 'nano-banana-pro' ? 'bg-white text-purple-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Pro HD
               </button>
             </div>
@@ -916,7 +940,7 @@ export default function ImageEditorPage() {
                     value="upscale" 
                     className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 px-4"
                   >
-                    <Zap className="h-4 w-4 mr-2" />
+                    <Play className="h-4 w-4 mr-2" />
                     Upscale
                   </TabsTrigger>
                   <TabsTrigger 

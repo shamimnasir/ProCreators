@@ -9,6 +9,9 @@ import { generateCoverImage, getChecklistTheme } from '@/lib/cover-image-generat
 import { drawCoverPageWithImage, drawCoverPage } from '@/lib/pdf-design'
 import { getSizeById } from '@/lib/paper-sizes'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'checklist-maker'
 
 const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
 
@@ -81,6 +84,10 @@ IMPORTANT: Return ONLY valid JSON.`
     
     return JSON.parse(text)
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('AI checklist generation error:', error)
     // Fallback with sensible defaults based on type
     const defaultItems = {
@@ -106,7 +113,38 @@ IMPORTANT: Return ONLY valid JSON.`
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -428,6 +466,12 @@ export async function POST(request) {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     })
     
+    // Complete transaction on success
+
+    
+    if (transactionId) await completeTransaction(transactionId)
+
+    
     return NextResponse.json({
       success: true,
       title: content.title,
@@ -437,6 +481,10 @@ export async function POST(request) {
     })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Checklist generation error:', error)
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate checklist' },

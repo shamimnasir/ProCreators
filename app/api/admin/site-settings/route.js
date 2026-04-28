@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { verifyCsrf } from '@/lib/csrf-verify'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const DEFAULT_SETTINGS = {
   // Branding
   branding: {
@@ -90,6 +91,9 @@ const DEFAULT_SETTINGS = {
 
 // GET - Retrieve site settings
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const section = searchParams.get('section') // Optional: get specific section
@@ -130,6 +134,9 @@ export async function GET(request) {
 
 // POST - Update site settings
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     // Verify CSRF token for mutations
     const csrfResult = verifyCsrf(request)

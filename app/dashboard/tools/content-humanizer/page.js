@@ -13,12 +13,30 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, ArrowLeft, Copy, RefreshCw,
-  FileText, Upload, FileUp, File, X, Wand2,
-  Bot, User, Shield, Zap, Settings2,
-  CheckCircle, AlertTriangle, ArrowRight, Eye,
-  Shuffle, PenTool, Brain, Target
+import {
+  Loader2,
+  ArrowLeft,
+  Copy,
+  RefreshCw,
+  FileText,
+  Upload,
+  FileUp,
+  File,
+  X,
+  Wand2,
+  Bot,
+  User,
+  Shield,
+  Play,
+  Settings2,
+  CheckCircle,
+  AlertTriangle,
+  ArrowRight,
+  Eye,
+  Shuffle,
+  PenTool,
+  Brain,
+  Target
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -372,7 +390,7 @@ export default function ContentHumanizerPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="h-5 w-5" />
+                <Play className="h-5 w-5" />
                 Humanization Level
               </CardTitle>
             </CardHeader>

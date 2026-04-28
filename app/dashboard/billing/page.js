@@ -5,10 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { 
-  CreditCard, Calendar, TrendingUp, Coins, 
-  Loader2, Check, Zap, Crown, Building2, Star, RefreshCw,
-  ArrowRight, Clock, Infinity
+import {
+  CreditCard,
+  Calendar,
+  TrendingUp,
+  Coins,
+  Loader2,
+  Check,
+  Play,
+  Crown,
+  Building2,
+  Star,
+  RefreshCw,
+  ArrowRight,
+  Clock,
+  Infinity
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useSearchParams } from 'next/navigation'
@@ -247,7 +258,7 @@ function BillingPageContent() {
 
   const getPackageIcon = (id) => {
     switch (id) {
-      case 'starter': return <Zap className="h-6 w-6" />
+      case 'starter': return <Play className="h-6 w-6" />
       case 'creator': return <Star className="h-6 w-6" />
       case 'pro': return <Crown className="h-6 w-6" />
       case 'business': return <Building2 className="h-6 w-6" />
@@ -347,7 +358,7 @@ function BillingPageContent() {
                 {plan === 'business' ? <Building2 className="h-6 w-6" /> : 
                  plan === 'pro' ? <Crown className="h-6 w-6" /> : 
                  plan === 'creator' ? <Star className="h-6 w-6" /> : 
-                 <Zap className="h-6 w-6" />}
+                 <Play className="h-6 w-6" />}
               </div>
               <div>
                 <h3 className="text-xl font-bold capitalize">{plan} Plan</h3>
@@ -377,7 +388,7 @@ function BillingPageContent() {
       {/* Credit Packages */}
       <div>
         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Zap className="h-6 w-6 text-yellow-500" />
+          <Play className="h-6 w-6 text-yellow-500" />
           Buy Extra Credits
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

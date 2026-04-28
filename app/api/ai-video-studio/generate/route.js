@@ -516,7 +516,6 @@ async function compileVideoWithFFmpeg({
       // Use the LONGER of: requested duration or audio duration
       // This ensures minimum duration is always respected
       actualDuration = Math.max(duration, audioDuration)
-      console.log(`[${jobId}] Duration: requested=${duration}s, audio=${audioDuration}s, using=${actualDuration}s`)
       }
     
     // Step 3: Normalize and trim each clip
@@ -818,7 +817,22 @@ const AI_VIDEO_MODELS = {
     tier: 'standard'
   },
   
-  // TIER 3: Professional (~$0.07-0.08/s) - High quality
+  // TIER 3: Professional (~$0.05-0.08/s) - High quality
+  'seedance-pro': {
+    name: 'Seedance 1.5 Pro ★',
+    endpoint: 'fal-ai/bytedance/seedance/v1.5/pro/text-to-video',
+    i2vEndpoint: 'fal-ai/bytedance/seedance/v1.5/pro/image-to-video',
+    costPerSecond: 0.052,
+    description: 'Cinematic quality with native audio & character consistency',
+    maxDuration: 12,
+    tier: 'professional',
+    supportsAudio: true,
+    supportsI2V: true,
+    supportsEndFrame: true,
+    supportsCameraFixed: true,
+    resolution: '720p',
+    isDefault: true
+  },
   'professional-hd': {
     name: 'Professional HD',
     endpoint: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
@@ -935,7 +949,6 @@ function extractKeywordsFromScript(script, count = 5) {
   // Combine: visual keywords first, then frequent words
   const result = [...new Set([...foundVisualKeywords, ...sortedWords])].slice(0, count)
   
-  console.log(`[Keywords] Extracted from script: ${result.join(', ')}`)
   
   return result.length > 0 ? result : ['nature', 'people', 'lifestyle']
 }
@@ -1305,12 +1318,8 @@ export async function POST(request) {
     }
     
     // Get user ID and check credits
-    console.log('[AI-VIDEO-STUDIO] Checking authentication...')
-    console.log('[AI-VIDEO-STUDIO] Cookie header:', request.headers.get('cookie') ? 'present' : 'missing')
     const userId = await getUserIdFromRequest(request)
-    console.log('[AI-VIDEO-STUDIO] User ID result:', userId)
     if (!userId) {
-      console.log('[AI-VIDEO-STUDIO] Authentication failed - no userId found')
       return NextResponse.json({
         success: false,
         error: 'Authentication required. Please log in to use this tool.'
@@ -1359,13 +1368,12 @@ export async function POST(request) {
     const consistencyMode = formData.get('consistencyMode') || 'none' // 'none', 'seed', 'frame-chain'
     const consistencySeed = formData.get('consistencySeed') ? parseInt(formData.get('consistencySeed')) : Math.floor(Math.random() * 2147483647)
     
-    // NEW: AI Video Model selection
-    const aiModel = formData.get('aiModel') || 'kling' // 'kling' or 'minimax'
+    // NEW: AI Video Model selection - 'seedance' (Seedance 2 Fast - PRIMARY) or 'kling' (fallback only)
+    const aiModel = formData.get('aiModel') || 'seedance'
     
     // AUTO-GENERATE SCRIPT: If prompt looks like a command, generate actual content
     const commandPatterns = /^(create|make|generate|write|produce|build|craft|design)\s+(a|an|the)?\s*(video|content|script|story|reel)?\s*(about|on|for|regarding|of)/i
     if (commandPatterns.test(prompt.trim()) && voiceOption === 'tts') {
-      console.log(`[${jobId}] Detected command-style prompt, generating script...`)
       try {
         const scriptResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ai-video-studio/enhance-prompt`, {
           method: 'POST',
@@ -1380,7 +1388,6 @@ export async function POST(request) {
         })
         const scriptData = await scriptResponse.json()
         if (scriptData.success && scriptData.enhancedPrompt) {
-          console.log(`[${jobId}] Script generated successfully (${scriptData.enhancedPrompt.length} chars)`)
           prompt = scriptData.enhancedPrompt
         }
       } catch (scriptError) {
@@ -1428,7 +1435,6 @@ export async function POST(request) {
     } else if (videoSource === 'ai') {
       // Generate AI video clips using centralized service with character consistency
       const modelName = aiModel === 'minimax' ? 'Minimax' : 'Kling'
-      console.log(`[${jobId}] 🎬 Generating AI clips with ${modelName} (consistency: ${aiModel === 'minimax' ? 'none (unsupported)' : consistencyMode})...`)
       
       try {
         if (!isFalConfigured()) {
@@ -1453,7 +1459,6 @@ export async function POST(request) {
           jobId,
           videoModel: aiModel, // Pass the selected AI model (kling or minimax)
           onProgress: (progress) => {
-            console.log(`[${jobId}] ${progress.message}`)
           }
         })
         
@@ -1466,7 +1471,6 @@ export async function POST(request) {
           seed: result.seed
         }))
         
-        console.log(`[${jobId}] ✅ Generated ${videos.length} clips with ${modelName}`)
         
         if (videos.length === 0) {
           throw new Error(`No AI videos generated from ${modelName}`)
@@ -1475,13 +1479,11 @@ export async function POST(request) {
         console.error(`[${jobId}] ⚠️ ${aiModel} failed:`, aiError.message)
         
         // Fallback to stock videos
-        console.log(`[${jobId}] Falling back to stock videos`)
         const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
         videos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
       }
     } else if (videoSource === 'stock') {
       // Stock videos only mode - fast and reliable
-      console.log(`[${jobId}] Using stock videos only mode`)
       
       // Use AI-powered keyword extraction for better video matching
       const numClips = Math.ceil(duration / 3) // 3-second clips
@@ -1498,7 +1500,6 @@ export async function POST(request) {
         
         if (keywordData.success && keywordData.keywords) {
           keywords = keywordData.keywords
-          console.log(`[${jobId}] AI extracted keywords: ${keywords.join(', ')}`)
         }
       } catch (keywordError) {
         console.error(`[${jobId}] AI keyword extraction failed:`, keywordError.message)
@@ -1507,7 +1508,6 @@ export async function POST(request) {
       // Fallback to basic extraction if AI failed
       if (keywords.length === 0) {
         keywords = extractKeywordsFromScript(prompt, numClips)
-        console.log(`[${jobId}] Basic extracted keywords: ${keywords.join(', ')}`)
       }
       
       // Search videos using the extracted keywords via the proper API
@@ -1528,7 +1528,6 @@ export async function POST(request) {
             source: v.source || 'pexels',
             type: 'stock'
           }))
-          console.log(`[${jobId}] Found ${videos.length} stock videos via search API`)
         }
       } catch (searchError) {
         console.error(`[${jobId}] Video search API failed:`, searchError.message)
@@ -1540,7 +1539,6 @@ export async function POST(request) {
       }
     } else if (videoSource === 'hybrid') {
       // Mix AI and stock videos with smart keyword search
-      console.log(`[${jobId}] Using hybrid mode (AI + Stock)`)
       
       // Use AI-powered keyword extraction for better video matching
       const numClips = Math.ceil(duration / 3)
@@ -1556,7 +1554,6 @@ export async function POST(request) {
         
         if (keywordData.success && keywordData.keywords) {
           keywords = keywordData.keywords
-          console.log(`[${jobId}] AI extracted keywords: ${keywords.join(', ')}`)
         }
       } catch (keywordError) {
         console.error(`[${jobId}] AI keyword extraction failed:`, keywordError.message)
@@ -1570,7 +1567,6 @@ export async function POST(request) {
           videos.push(...aiVideos.map(v => ({ ...v, type: 'ai' })))
         }
       } catch (e) {
-        console.log(`[${jobId}] AI video generation skipped, using stock only`)
       }
       
       // Search and add stock videos based on keywords
@@ -1604,7 +1600,6 @@ export async function POST(request) {
       // AI only mode - use Kling as primary with Replicate fallback
       try {
         if (process.env.FAL_KEY) {
-          console.log(`[${jobId}] 🎬 Using Kling for AI-only mode`)
           videos = await generateAIVideosWithKling(prompt, duration, dimensions, jobId, null)
         } else {
           videos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
@@ -1704,7 +1699,6 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
     let aiVideos = []
     try {
       // Generate AI video clips using Replicate
-      console.log(`[${jobId}] 🎬 Generating AI clips with Replicate...`)
       aiVideos = await generateAIVideosWithReplicate(prompt, duration, dimensions, jobId)
       
       if (aiVideos.length > 0) {
@@ -1734,7 +1728,6 @@ async function generateWithShotstack({ jobId, mode, prompt, duration, format, te
           editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
         }
       } else {
-        console.log(`[${jobId}] No Fal.ai key, using stock videos as fallback`)
         const keywords = getKeywordsFromPromptAndTemplate(prompt, templateId)
         const stockVideos = await fetchStockVideos(keywords, Math.ceil(duration / 5))
         editJson = buildStockVideoEdit(templateId, prompt, duration, dimensions, stockVideos)
@@ -2071,7 +2064,6 @@ Add subtle camera movement, depth, and professional lighting effects.`
           timeout: 180000, // 3 min timeout
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] Model ${model.name} processing...`)
             }
           }
         })
@@ -2127,7 +2119,6 @@ async function generateAIVideosWithKling(prompt, duration, dimensions, jobId, se
   // Determine aspect ratio
   const aspectRatio = dimensions.height > dimensions.width ? '9:16' : '16:9'
   
-  console.log(`[${jobId}] 🎬 Generating ${numClips} clips with Kling v2.5 Turbo (seed: ${seed || 'random'})`)
   
   for (let i = 0; i < numClips; i++) {
     const scenePrompt = scenes[i] || scenes[scenes.length - 1]
@@ -2135,12 +2126,10 @@ async function generateAIVideosWithKling(prompt, duration, dimensions, jobId, se
     
     // Add delay between requests to avoid rate limits (except first)
     if (i > 0) {
-      console.log(`[${jobId}] Waiting 2s before next clip...`)
       await new Promise(r => setTimeout(r, 2000))
     }
     
     try {
-      console.log(`[${jobId}] Generating clip ${i + 1}/${numClips}: ${scenePrompt.substring(0, 50)}...`)
       
       const input = {
         prompt: cinematicPrompt,
@@ -2159,7 +2148,6 @@ async function generateAIVideosWithKling(prompt, duration, dimensions, jobId, se
         timeout: 300000, // 5 min timeout
         onQueueUpdate: (update) => {
           if (update.status === 'IN_PROGRESS') {
-            console.log(`[${jobId}] Clip ${i + 1} processing...`)
           }
         }
       })
@@ -2175,7 +2163,6 @@ async function generateAIVideosWithKling(prompt, duration, dimensions, jobId, se
           seed: seed,
           index: i
         })
-        console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully`)
       } else {
         console.error(`[${jobId}] ❌ Clip ${i + 1}: No video URL in response`)
       }
@@ -2208,7 +2195,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
     await mkdir(tempDir, { recursive: true })
   } catch (e) { /* ignore */ }
   
-  console.log(`[${jobId}] 🔗 Starting Frame-Chain generation with ${numClips} clips`)
   
   let lastFrameUrl = null
   
@@ -2218,7 +2204,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
     
     // Add delay between requests
     if (i > 0) {
-      console.log(`[${jobId}] Waiting 3s before next clip...`)
       await new Promise(r => setTimeout(r, 3000))
     }
     
@@ -2227,7 +2212,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
       
       if (i === 0 || !lastFrameUrl) {
         // First clip: Use text-to-video
-        console.log(`[${jobId}] Clip ${i + 1}/${numClips}: Text-to-Video (first clip)`)
         
         const input = {
           prompt: cinematicPrompt,
@@ -2245,7 +2229,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
           timeout: 300000,
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] Clip ${i + 1} text-to-video processing...`)
             }
           }
         })
@@ -2253,7 +2236,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
         videoUrl = extractVideoUrl(result.data)
       } else {
         // Subsequent clips: Use image-to-video with last frame
-        console.log(`[${jobId}] Clip ${i + 1}/${numClips}: Image-to-Video (using previous frame)`)
         
         const input = {
           prompt: cinematicPrompt,
@@ -2272,7 +2254,6 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
           timeout: 300000,
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] Clip ${i + 1} image-to-video processing...`)
             }
           }
         })
@@ -2290,12 +2271,10 @@ async function generateAIVideosWithKlingFrameChain(prompt, duration, dimensions,
           index: i,
           frameChained: i > 0
         })
-        console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully`)
         
         // Extract last frame for next clip
         try {
           lastFrameUrl = await extractLastFrameFromVideo(videoUrl, tempDir, jobId, i)
-          console.log(`[${jobId}] 📸 Extracted last frame for next clip`)
         } catch (frameError) {
           console.error(`[${jobId}] ⚠️ Could not extract last frame:`, frameError.message)
           lastFrameUrl = null // Will fall back to text-to-video for next clip
@@ -2366,15 +2345,12 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   
   // Check FAL key first
   if (!process.env.FAL_KEY) {
-    console.log(`[${jobId}] FAL_KEY not configured, falling back to stock videos`)
     throw new Error('FAL_AI_UNAVAILABLE')
   }
   
   // Quick ping test to check if FAL is responsive
   try {
-    console.log(`[${jobId}] Checking FAL.ai availability...`)
   } catch (pingError) {
-    console.log(`[${jobId}] FAL.ai not responding, falling back to stock`)
     throw new Error('FAL_AI_UNAVAILABLE')
   }
   
@@ -2464,7 +2440,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
     
     // Add delay between requests to avoid rate limits (except for first request)
     if (i > 0) {
-      console.log(`[${jobId}] Waiting 3s before next clip to avoid rate limits...`)
       await new Promise(r => setTimeout(r, 3000))
     }
     
@@ -2474,7 +2449,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
     
     while (!clipGenerated && retryCount < maxRetries) {
       try {
-        console.log(`[${jobId}] Generating clip ${i + 1}/${numClips} with ${selectedModel.name}...`)
         const result = await fal.subscribe(selectedModel.endpoint, {
           input: {
             prompt: cinematicPrompt,
@@ -2484,7 +2458,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
           logs: true,
           onQueueUpdate: (update) => {
             if (update.status === 'IN_PROGRESS') {
-              console.log(`[${jobId}] Model ${selectedModel.name} processing...`)
             }
           }
         })
@@ -2503,7 +2476,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
           })
           consecutiveFailures = 0 // Reset on success
           clipGenerated = true
-          console.log(`[${jobId}] ✅ Clip ${i + 1} generated successfully with ${selectedModel.name}`)
         } else {
           throw new Error('No video URL in response')
         }
@@ -2513,7 +2485,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
         
         // Check for rate limit / concurrent generation errors
         if (errorMsg.includes('concurrent') || errorMsg.includes('rate') || errorMsg.includes('limit') || errorMsg.includes('too many')) {
-          console.log(`[${jobId}] Rate limit hit, waiting 10s before retry...`)
           await new Promise(r => setTimeout(r, 10000))
           retryCount++
           continue
@@ -2533,7 +2504,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
     
     // If we exhausted retries without success, move to next clip
     if (!clipGenerated) {
-      console.log(`[${jobId}] Could not generate clip ${i + 1} after ${maxRetries} retries, skipping...`)
     }
   }
   
@@ -2541,7 +2511,6 @@ async function generateAIVideosWithFal(prompt, duration, dimensions, jobId) {
   if (videos.length > 0) {
     const modelUsed = [...new Set(videos.map(v => v.model))].join(', ')
     const totalCost = videos.reduce((sum, v) => sum + (v.cost || 0), 0)
-    console.log(`[${jobId}] Generated ${videos.length} videos using ${modelUsed}, estimated cost: $${totalCost.toFixed(4)}`)
   }
   
   return videos
@@ -2804,7 +2773,6 @@ async function generateAIImages(prompt, numScenes, dimensions, apiKey, jobId) {
             console.error(`[${jobId}] Image ${index + 1} failed`)
             break
           } else if (attempts % 5 === 0) {
-            console.log(`[${jobId}] Image ${index + 1} still processing...`)
           }
         }
       }

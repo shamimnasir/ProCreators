@@ -12,11 +12,29 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Palette, Download, Loader2, DollarSign, Image,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, Save, Pipette, ImagePlus,
-  FileText, AlertTriangle, Zap, Wand2} from 'lucide-react'
+import {
+  Palette,
+  Download,
+  Loader2,
+  DollarSign,
+  Image,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Save,
+  Pipette,
+  ImagePlus,
+  FileText,
+  AlertTriangle,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
@@ -460,7 +478,7 @@ export default function ColoringBookPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   Step 1: Choose Your Theme
                 </CardTitle>
                 <CardDescription>Select a preset theme or create your own custom niche</CardDescription>

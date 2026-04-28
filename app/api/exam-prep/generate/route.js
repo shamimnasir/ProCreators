@@ -4,6 +4,10 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { saveToLibraryDirect } from '@/lib/library-save-server'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'exam-prep'
 
 // Official exam website mappings for better search results
 const OFFICIAL_EXAM_SOURCES = {
@@ -228,6 +232,10 @@ async function scrapeUrl(url) {
     // Limit content
     return text.substring(0, 5000)
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error(`Scrape error for ${url}:`, error.message)
     return null
   }
@@ -380,6 +388,10 @@ Return ONLY valid JSON.`
     }
     return null
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Exam search error:', error)
     return null
   }
@@ -488,6 +500,10 @@ Always return valid JSON only.`
     const data = JSON.parse(jsonStr)
     return data.questions || []
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Question generation error:', error)
     throw new Error('Failed to generate questions')
   }
@@ -769,7 +785,38 @@ async function generatePDF(config) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -790,6 +837,12 @@ export async function POST(request) {
       // Use hybrid approach: web search + LLM
       const examInfo = await searchExamInfo(examName, examId)
       
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
+      
       return NextResponse.json({
         success: true,
         examInfo,
@@ -803,6 +856,12 @@ export async function POST(request) {
     // Generate practice questions
     if (action === 'generate-questions') {
       const questions = await generateQuestions(body)
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -825,29 +884,32 @@ export async function POST(request) {
       
       const pdfUrl = `/generated/exam-prep/${filename}`
       
-      // Save to library
+      // Save to library (direct database save)
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-        await fetch(`${baseUrl}/api/library/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'exam-prep',
-            title: `${body.examName || 'Exam'} Practice Test`,
-            content: pdfUrl,
-            filePath: pdfUrl,
-            description: `${body.questions?.length || 0} questions - ${body.difficulty || 'Mixed'} difficulty`,
-            metadata: {
-              examName: body.examName,
-              questionCount: body.questions?.length,
-              difficulty: body.difficulty,
-              subject: body.subject,
-              pdfUrl
-            }
-          })
+        await saveToLibraryDirect(userId, {
+          type: 'exam-prep',
+          category: 'document',
+          title: `${body.examName || 'Exam'} Practice Test`,
+          content: pdfUrl,
+          filePath: pdfUrl,
+          description: `${body.questions?.length || 0} questions - ${body.difficulty || 'Mixed'} difficulty`,
+          metadata: {
+            examName: body.examName,
+            questionCount: body.questions?.length,
+            difficulty: body.difficulty,
+            subject: body.subject,
+            pdfUrl
+          }
         })
-        } catch (e) {
-        }
+      } catch (e) {
+        console.error('Failed to save to library:', e)
+      }
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -859,6 +921,10 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Exam prep error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }

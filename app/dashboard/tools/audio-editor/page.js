@@ -13,10 +13,27 @@ import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Upload, Download, Play, Pause, Scissors, Volume2, Music,
-  RefreshCw, X, Plus, Clock, Zap, FileAudio, Layers, Wand2,
-  FastForward, Rewind, VolumeX, Waves, Merge, ArrowRight
+import {
+  Upload,
+  Download,
+  Play,
+  Pause,
+  Scissors,
+  Volume2,
+  Music,
+  RefreshCw,
+  X,
+  Plus,
+  Clock,
+  FileAudio,
+  Layers,
+  Wand2,
+  FastForward,
+  Rewind,
+  VolumeX,
+  Waves,
+  Merge,
+  ArrowRight
 } from 'lucide-react'
 
 // Format options
@@ -662,7 +679,7 @@ export default function AudioEditorPage() {
           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-green-800 dark:text-green-200">
-                <Zap className="h-4 w-4" /> Quick Tips
+                <Play className="h-4 w-4" /> Quick Tips
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs space-y-2 text-green-700 dark:text-green-300">

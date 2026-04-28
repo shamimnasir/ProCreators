@@ -9,11 +9,26 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Download, ArrowLeft, ArrowRight,
-  FileText, Palette, CheckCircle, Edit3, Plus, Trash2,
-  GraduationCap, ChevronDown, ChevronUp, BookOpen, Globe,
-  Pipette, Zap, Wand2} from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Palette,
+  CheckCircle,
+  Edit3,
+  Plus,
+  Trash2,
+  GraduationCap,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  Globe,
+  Pipette,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
@@ -352,7 +367,7 @@ export default function WorksheetMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   Step 1: What Would You Like to Teach?
                 </CardTitle>
                 <CardDescription>Select subject and topic for AI-generated questions</CardDescription>

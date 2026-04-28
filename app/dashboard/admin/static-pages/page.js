@@ -8,11 +8,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { 
-  FileText, Eye, Edit, Loader2, Save, ArrowLeft, Plus, Trash2,
-  Globe, Home, Shield, Mail, Users, Cookie, ChevronUp, ChevronDown
+import {
+  FileText,
+  Eye,
+  Edit,
+  Loader2,
+  Save,
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Globe,
+  Home,
+  Shield,
+  Mail,
+  Users,
+  Cookie,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import Link from 'next/link'
 
 const PAGE_ICONS = {
@@ -44,6 +59,7 @@ export default function StaticPagesManager() {
   const [saving, setSaving] = useState(false)
   const [expandedBlock, setExpandedBlock] = useState(null)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     fetchPages()
@@ -93,7 +109,7 @@ export default function StaticPagesManager() {
     try {
       const res = await fetch('/api/admin/static-pages', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify(selectedPage)
       })
       const data = await res.json()

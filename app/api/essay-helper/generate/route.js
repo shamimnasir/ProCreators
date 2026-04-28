@@ -4,6 +4,10 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { saveToLibraryDirect } from '@/lib/library-save-server'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'essay-helper'
 
 // Helper to run LLM
 async function runLLM(prompt, systemPrompt = 'You are an expert academic writing assistant.') {
@@ -577,7 +581,38 @@ async function generatePDF(config) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -589,6 +624,12 @@ export async function POST(request) {
     
     if (action === 'generate') {
       const content = await generateContent(body)
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -609,29 +650,32 @@ export async function POST(request) {
       
       const pdfUrl = `/generated/essay-helper/${filename}`
       
-      // Save to library
+      // Save to library (direct database save)
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-        await fetch(`${baseUrl}/api/library/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'essay-helper',
-            title: body.topic || body.content?.title || 'Essay',
-            content: pdfUrl,
-            filePath: pdfUrl,
-            description: `${body.essayType || 'Essay'} - ${body.writingMode || 'Generated'}`,
-            metadata: {
-              essayType: body.essayType,
-              writingMode: body.writingMode,
-              academicLevel: body.academicLevel,
-              citationStyle: body.citationStyle,
-              pdfUrl
-            }
-          })
+        await saveToLibraryDirect(userId, {
+          type: 'essay-helper',
+          category: 'document',
+          title: body.topic || body.content?.title || 'Essay',
+          content: pdfUrl,
+          filePath: pdfUrl,
+          description: `${body.essayType || 'Essay'} - ${body.writingMode || 'Generated'}`,
+          metadata: {
+            essayType: body.essayType,
+            writingMode: body.writingMode,
+            academicLevel: body.academicLevel,
+            citationStyle: body.citationStyle,
+            pdfUrl
+          }
         })
-        } catch (e) {
-        }
+      } catch (e) {
+        console.error('Failed to save to library:', e)
+      }
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -643,6 +687,10 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Essay helper error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }

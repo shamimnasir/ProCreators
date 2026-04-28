@@ -14,14 +14,40 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Loader2, Target, TrendingUp, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, Search,
-  DollarSign, Star, BarChart3, BookOpen, Zap,
-  ChevronDown, ChevronUp, Check, Edit3, Hash,
-  ShoppingCart, Award, List, FileCheck, Wand2,
-  Bot, User, Shield, AlertCircle, AlertTriangle,
-  PenTool, Brain, Eye, Settings2
+import {
+  FileText,
+  Loader2,
+  Target,
+  TrendingUp,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  Search,
+  DollarSign,
+  Star,
+  BarChart3,
+  BookOpen,
+  Play,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Edit3,
+  Hash,
+  ShoppingCart,
+  Award,
+  List,
+  FileCheck,
+  Wand2,
+  Bot,
+  User,
+  Shield,
+  AlertCircle,
+  AlertTriangle,
+  PenTool,
+  Brain,
+  Eye,
+  Settings2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'

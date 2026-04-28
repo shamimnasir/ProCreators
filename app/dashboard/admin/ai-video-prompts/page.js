@@ -9,7 +9,16 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Save, RotateCcw, Plus, Trash2, AlertCircle, Video, Zap } from 'lucide-react'
+import { useCsrf } from '@/hooks/use-csrf'
+import {
+  Save,
+  RotateCcw,
+  Plus,
+  Trash2,
+  AlertCircle,
+  Video,
+  Play
+} from 'lucide-react'
 import { AI_VIDEO_TEMPLATES } from '@/config/ai-video-templates'
 
 export default function AIVideoPromptsPage() {
@@ -19,6 +28,7 @@ export default function AIVideoPromptsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     loadTemplates()
@@ -91,7 +101,7 @@ export default function AIVideoPromptsPage() {
     try {
       const response = await fetch('/api/admin/ai-video-prompts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           templateId,
           data: editedTemplates[templateId]
@@ -139,7 +149,8 @@ export default function AIVideoPromptsPage() {
       // Delete from database
       try {
         await fetch(`/api/admin/ai-video-prompts?templateId=${templateId}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { ...getCsrfHeaders() }
         })
         toast({
           title: "Reset",
@@ -298,7 +309,7 @@ export default function AIVideoPromptsPage() {
                 {/* System Prompt */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
+                    <Play className="h-4 w-4" />
                     System Prompt (AI Instructions)
                   </Label>
                   <Textarea

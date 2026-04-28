@@ -1,8 +1,21 @@
 import { StaticPage } from '@/components/StaticPage'
+import { getPageSeo } from '@/lib/get-page-seo'
 
-export const metadata = {
-  title: 'Community | ProCreators',
-  description: 'Join the ProCreators community. Connect with fellow creators, share tips, and get support.',
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export async function generateMetadata() {
+  const seo = await getPageSeo('community')
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      images: seo.ogImage ? [seo.ogImage] : [],
+    },
+  }
 }
 
 export default function CommunityPage() {

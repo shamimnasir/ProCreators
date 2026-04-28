@@ -1,12 +1,42 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const AuthContext = createContext(undefined)
+
+// Helper to get CSRF token
+async function getCsrfToken() {
+  try {
+    // Check sessionStorage first
+    const cached = sessionStorage.getItem('csrf_token')
+    const expiry = sessionStorage.getItem('csrf_expires')
+    if (cached && expiry && parseInt(expiry) > Date.now() + 60000) {
+      return cached
+    }
+    
+    // Fetch new token
+    const res = await fetch('/api/csrf')
+    const data = await res.json()
+    if (data.success) {
+      sessionStorage.setItem('csrf_token', data.csrfToken)
+      sessionStorage.setItem('csrf_expires', data.expiresAt)
+      return data.csrfToken
+    }
+  } catch (e) {
+    console.error('Failed to get CSRF token:', e)
+  }
+  return null
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [csrfToken, setCsrfToken] = useState(null)
+
+  // Fetch CSRF token on mount
+  useEffect(() => {
+    getCsrfToken().then(setCsrfToken)
+  }, [])
 
   useEffect(() => {
     // Check for existing session
@@ -37,9 +67,16 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      // Get fresh CSRF token for login
+      const token = await getCsrfToken()
+      setCsrfToken(token)
+      
       const res = await fetch('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-csrf-token': token || ''
+        },
         body: JSON.stringify({ action: 'login', email, password })
       })
       const data = await res.json()
@@ -58,9 +95,16 @@ export function AuthProvider({ children }) {
 
   const signup = async (email, password, name) => {
     try {
+      // Get fresh CSRF token for signup
+      const token = await getCsrfToken()
+      setCsrfToken(token)
+      
       const res = await fetch('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-csrf-token': token || ''
+        },
         body: JSON.stringify({ action: 'signup', email, password, name })
       })
       const data = await res.json()
@@ -78,6 +122,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('sessionToken')
+    sessionStorage.removeItem('csrf_token')
+    sessionStorage.removeItem('csrf_expires')
   }
 
   const forgotPassword = async (email) => {
@@ -106,6 +152,33 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Secure fetch helper that includes auth and CSRF tokens
+  const secureFetch = useCallback(async (url, options = {}) => {
+    const sessionToken = localStorage.getItem('sessionToken')
+    let token = csrfToken
+    
+    // Get fresh CSRF token if needed
+    if (!token) {
+      token = await getCsrfToken()
+      setCsrfToken(token)
+    }
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+    
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`
+    }
+    
+    if (token) {
+      headers['x-csrf-token'] = token
+    }
+    
+    return fetch(url, { ...options, headers })
+  }, [csrfToken])
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -116,8 +189,10 @@ export function AuthProvider({ children }) {
       forgotPassword,
       resendVerification,
       isAuthenticated: !!user,
-      userId: user?.id || null, // SECURITY: Return null instead of demo user
-      sessionToken: typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null
+      userId: user?.id || null,
+      sessionToken: typeof window !== 'undefined' ? localStorage.getItem('sessionToken') : null,
+      csrfToken,
+      secureFetch // SECURITY: Use this for all state-changing requests
     }}>
       {children}
     </AuthContext.Provider>

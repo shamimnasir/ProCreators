@@ -3,11 +3,12 @@ import { getCollection } from '@/lib/mongodb'
 
 // Time estimates (in seconds) for different stages
 const TIME_ESTIMATES = {
-  CLIP_GENERATION: 120, // ~2 minutes per AI clip
-  AUDIO_PROCESSING: 30,  // Voice/TTS generation
-  MUSIC_PROCESSING: 15,  // Background music mixing
-  VIDEO_COMPOSITION: 45, // Final video assembly with captions
-  UPLOAD: 20,            // Upload to storage
+  CLIP_GENERATION: 60,  // ~1 minute per AI clip (Kling 2.5 turbo is faster)
+  AUDIO_PROCESSING: 15, // Voice/TTS generation
+  MUSIC_PROCESSING: 10, // Background music mixing
+  VIDEO_COMPOSITION: 30, // Final video assembly with captions
+  NORMALIZATION: 20,    // Per-clip normalization
+  UPLOAD: 10,           // Upload to storage
 }
 
 function calculateEstimatedTimeRemaining(job) {
@@ -19,34 +20,56 @@ function calculateEstimatedTimeRemaining(job) {
   const clipsGenerated = job.clipsGenerated || 0
   const progress = job.progress || 0
   
-  // Base time calculation
-  let remainingSeconds = 0
-  
-  if (job.status === 'pending' || job.status === 'processing') {
-    // Full estimation: all clips + processing
-    remainingSeconds = (totalClips * TIME_ESTIMATES.CLIP_GENERATION) +
-                       TIME_ESTIMATES.AUDIO_PROCESSING +
-                       TIME_ESTIMATES.MUSIC_PROCESSING +
-                       TIME_ESTIMATES.VIDEO_COMPOSITION +
-                       TIME_ESTIMATES.UPLOAD
-  } else if (job.status === 'generating_clips') {
-    // Remaining clips + post-processing
-    const remainingClips = totalClips - clipsGenerated
-    remainingSeconds = (remainingClips * TIME_ESTIMATES.CLIP_GENERATION) +
-                       TIME_ESTIMATES.MUSIC_PROCESSING +
-                       TIME_ESTIMATES.VIDEO_COMPOSITION +
-                       TIME_ESTIMATES.UPLOAD
-  } else if (job.status === 'composing') {
-    // Just composition and upload remaining
-    remainingSeconds = TIME_ESTIMATES.VIDEO_COMPOSITION + TIME_ESTIMATES.UPLOAD
-    // Adjust based on progress within composition
-    if (progress > 80) {
-      remainingSeconds = TIME_ESTIMATES.UPLOAD
+  // PROGRESS-BASED ESTIMATION: Use actual progress to estimate time
+  // This is more accurate than stage-based estimation
+  if (progress > 0 && job.startedAt) {
+    const startTime = new Date(job.startedAt).getTime()
+    const elapsed = (Date.now() - startTime) / 1000 // seconds elapsed
+    
+    // Calculate remaining time based on actual progress rate
+    // progress 0-100, so remainingProgress = (100 - progress)
+    const progressRate = progress / elapsed // progress per second
+    if (progressRate > 0) {
+      const remainingProgress = 100 - progress
+      const estimatedRemaining = remainingProgress / progressRate
+      
+      // Cap at reasonable maximum (15 minutes for processing stages, no cap for generation)
+      if (progress >= 60) {
+        // In post-generation phase - max 15 min
+        return Math.min(Math.ceil(estimatedRemaining), 900)
+      }
+      return Math.ceil(estimatedRemaining)
     }
   }
   
-  // Apply a small buffer for uncertainty
-  return Math.ceil(remainingSeconds * 1.1)
+  // FALLBACK: Stage-based estimation for when we don't have good progress data
+  let remainingSeconds = 0
+  
+  if (progress <= 10) {
+    // Early stage: all clips + processing
+    remainingSeconds = (totalClips * TIME_ESTIMATES.CLIP_GENERATION) +
+                       TIME_ESTIMATES.AUDIO_PROCESSING +
+                       TIME_ESTIMATES.VIDEO_COMPOSITION
+  } else if (progress <= 60) {
+    // Generating clips stage
+    const remainingClips = totalClips - clipsGenerated
+    remainingSeconds = (remainingClips * TIME_ESTIMATES.CLIP_GENERATION) +
+                       TIME_ESTIMATES.VIDEO_COMPOSITION
+  } else if (progress <= 75) {
+    // Downloading/normalizing clips
+    remainingSeconds = TIME_ESTIMATES.VIDEO_COMPOSITION + TIME_ESTIMATES.NORMALIZATION
+  } else if (progress <= 85) {
+    // Concatenating/transitions
+    remainingSeconds = 60 // About 1 minute for concatenation
+  } else if (progress <= 95) {
+    // Adding captions and audio
+    remainingSeconds = 30 // About 30 seconds
+  } else {
+    // Almost done - saving to library
+    remainingSeconds = 15
+  }
+  
+  return Math.ceil(remainingSeconds)
 }
 
 export async function GET(request) {

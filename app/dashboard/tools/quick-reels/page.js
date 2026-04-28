@@ -8,7 +8,7 @@ export default function QuickReelsRedirect() {
   const router = useRouter()
   
   useEffect(() => {
-    router.replace('/dashboard/tools/ai-video-studio?mode=quick')
+    router.replace('/dashboard/tools/ai-video-studio?mode=stock')
   }, [router])
   
   return (

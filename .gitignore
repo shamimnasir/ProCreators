@@ -3,6 +3,8 @@
 # IDE and editors
 .idea/
 .vscode/
+*.swp
+*.swo
 
 # Dependencies
 node_modules/
@@ -21,6 +23,7 @@ node_modules/
 
 # Next.js
 /.next/
+/.next/**
 /out/
 next-env.d.ts
 *.tsbuildinfo
@@ -30,19 +33,17 @@ next-env.d.ts
 dist/
 dist
 
-# Environment files (comprehensive coverage)
-*token.json*
-*credentials.json*
-
 # Logs and debug files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 dump.rdb
+*.log
 
 # System files
 .DS_Store
+Thumbs.db
 *.pem
 
 # Python
@@ -63,7 +64,7 @@ chainlit.md
 # Data and databases
 agenthub/agents/youtube/db
 
-# Archive files and large assets
+# Archive and binary
 **/*.zip
 **/*.tar.gz
 **/*.tar
@@ -74,332 +75,77 @@ agenthub/agents/youtube/db
 
 # Build caches
 .cache/
+.turbo/
+
+# ==================================================================
+# Environment & credentials (NEVER commit secrets)
+# ==================================================================
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!.env.sample
+*token.json*
+*credentials.json*
+credentials.json
+.credentials
+*.key
+
+# ==================================================================
+# User-generated content & runtime artefacts
+# These are produced at runtime and should NOT be in source control
+# ==================================================================
+public/uploads/
+public/story-reels/
+public/story-reels-preview/
+public/ai-video-studio/
+public/ai-video-uploads/
+public/transformation-videos/
+public/ugc-audio/
+public/ugc-renders/
+public/generated/
+public/music-cache/
+public/product-images-cache/
+public/product-videos-cache/
+public/voice-previews/
+public/library/
+public/presentations/
+public/coloring-books/
+public/ebooks/
+public/storybooks/
+public/recipe-books/
+public/activity-books/
+public/journals/
+public/planners/
+public/checklists/
+public/quizzes/
+public/worksheets/
+public/flashcards/
+public/notion-templates/
+public/guides/
+public/media-kit/
+public/testimonials/
+public/video-editor/output/
+public/music/
+public/og-image.png
+public/twitter-image.png
+
+# Keep static seed assets (override above)
+!public/uploads/.gitkeep
+!public/fonts/
 
 # Mobile development
-android-sdk/ node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
-node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
-node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-public/story-reels/cd222af9-03c7-4cf3-aad3-0a6edfa98148.mp4
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+android-sdk/
 node_modules/chromium/lib/chromium/chrome-linux/chrome
+node_modules/@next/swc-linux-arm64-gnu/next-swc.linux-arm64-gnu.node
+node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-musl.node
 -e 
-# Environment files
+# Environment and credential files
+.env
+.env.*
 *.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/d1bd5b58/00001472.sst
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/d1bd5b58/00001965.sst
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00001947.sst
-.next/dev/cache/turbopack/da605e0c/00002042.sst
-.next/dev/cache/turbopack/da605e0c/00002235.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00002273.sst
-.next/dev/cache/turbopack/da605e0c/00002274.sst
-.next/dev/cache/turbopack/da605e0c/00002447.sst
-.next/dev/cache/turbopack/da605e0c/00002444.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00002599.sst
-.next/dev/cache/turbopack/da605e0c/00002618.sst
-.next/dev/cache/turbopack/da605e0c/00002619.sst
-.next/dev/cache/turbopack/da605e0c/00002815.sst
-.next/dev/cache/turbopack/da605e0c/00002814.sst
-.next/dev/cache/turbopack/da605e0c/00002921.sst
-.next/dev/cache/turbopack/da605e0c/00002922.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00003129.sst
-.next/dev/cache/turbopack/da605e0c/00003130.sst
-.next/dev/cache/turbopack/da605e0c/00003248.sst
-.next/dev/cache/turbopack/da605e0c/00003519.sst
-.next/dev/cache/turbopack/da605e0c/00003620.sst
-.next/dev/cache/turbopack/da605e0c/00004222.sst
-.next/dev/cache/turbopack/da605e0c/00004420.sst
-.next/dev/cache/turbopack/da605e0c/00004567.sst
-.next/dev/cache/turbopack/da605e0c/00004688.sst
-.next/dev/cache/turbopack/da605e0c/00004968.sst
-.next/dev/cache/turbopack/da605e0c/00005124.sst
-.next/dev/cache/turbopack/da605e0c/00005438.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00005601.sst
-.next/dev/cache/turbopack/da605e0c/00005817.sst
-.next/dev/cache/turbopack/da605e0c/00006086.sst
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00004328.sst
-.next/dev/cache/turbopack/da605e0c/00000063.sst
-.next/dev/cache/turbopack/da605e0c/00000421.sst
-.next/dev/cache/turbopack/da605e0c/00000420.sst
-.next/dev/cache/turbopack/da605e0c/00000650.sst
-.next/dev/cache/turbopack/da605e0c/00000728.sst
-.next/dev/cache/turbopack/da605e0c/00000838.sst
-.next/dev/cache/turbopack/da605e0c/00001253.sst
-.next/dev/cache/turbopack/da605e0c/00001391.sst
-.next/dev/cache/turbopack/da605e0c/00001653.sst
-.next/dev/cache/turbopack/da605e0c/00002086.sst
-.next/dev/cache/turbopack/da605e0c/00002085.sst
-.next/dev/cache/turbopack/da605e0c/00002275.sst
-.next/dev/cache/turbopack/da605e0c/00002422.sst
-.next/dev/cache/turbopack/da605e0c/00002421.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00002586.sst
-.next/dev/cache/turbopack/da605e0c/00002587.sst
-.next/dev/cache/turbopack/da605e0c/00002841.sst
-.next/dev/cache/turbopack/da605e0c/00002842.sst
-.next/dev/cache/turbopack/da605e0c/00003086.sst
-.next/dev/cache/turbopack/da605e0c/00003090.sst
-.next/dev/cache/turbopack/da605e0c/00003455.sst
-.next/dev/cache/turbopack/da605e0c/00003456.sst
-.next/dev/cache/turbopack/da605e0c/00003547.sst
-.next/dev/cache/turbopack/da605e0c/00003546.sst
-.next/dev/cache/turbopack/da605e0c/00003545.sst
-.next/dev/cache/turbopack/da605e0c/00003703.sst
-.next/dev/cache/turbopack/da605e0c/00003704.sst
-.next/dev/cache/turbopack/da605e0c/00004011.sst
-.next/dev/cache/turbopack/da605e0c/00004263.sst
-.next/dev/cache/turbopack/da605e0c/00004457.sst
-.next/dev/cache/turbopack/da605e0c/00004456.sst
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00002399.sst
--e 
-# Environment files
-*.env
-*.env.*
-.next/dev/cache/turbopack/da605e0c/00003658.sst
-.next/dev/cache/turbopack/da605e0c/00003808.sst
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+credentials.json
+*.pem
+*.key
+.credentials

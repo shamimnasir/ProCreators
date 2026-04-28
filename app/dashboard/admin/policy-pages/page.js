@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import { FileText, Save, Loader2, Eye } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
@@ -18,6 +19,7 @@ export default function PolicyPagesEditor() {
   const [activeTab, setActiveTab] = useState('privacy')
   const [previewMode, setPreviewMode] = useState(false)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   useEffect(() => {
     fetchSettings()
@@ -42,7 +44,7 @@ export default function PolicyPagesEditor() {
     try {
       const res = await fetch('/api/admin/site-settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({ 
           section: 'pages', 
           data: {

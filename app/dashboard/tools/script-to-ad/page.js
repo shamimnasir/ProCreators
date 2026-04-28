@@ -6,7 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Video, Download, Globe, Play, FilmIcon, Wand2, Zap } from 'lucide-react'
+import {
+  Loader2,
+  Video,
+  Download,
+  Globe,
+  Play,
+  FilmIcon,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -306,7 +314,7 @@ For each script include:
             ) : (
               <div className="flex h-96 items-center justify-center rounded-lg border-2 border-dashed">
                 <div className="text-center">
-                  <Zap className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <Play className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">Fill in the details to generate scripts</p>
                 </div>
               </div>

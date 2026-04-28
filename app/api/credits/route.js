@@ -1,4 +1,5 @@
 // Credit Balance & Operations API
+// SECURITY: All operations require authentication
 import { NextResponse } from 'next/server'
 import { 
   getUserCredits, 
@@ -12,48 +13,31 @@ import {
 } from '@/lib/credits'
 import { checkRateLimit, startGeneration, endGeneration } from '@/lib/rateLimit'
 import { isFeatureEnabled } from '@/lib/featureControls'
+import { requireAuth } from '@/lib/auth-middleware'
+import { verifyCsrf } from '@/lib/csrf-verify'
+import { validateUserIdMatch } from '@/lib/tenant-isolation'
 
 // GET - Get user's credit balance and info
 export async function GET(request) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('toolId')
     
-    // SECURITY: Get userId from Authorization header (preferred) or fallback to query param
-    let userId = null
-    const authHeader = request.headers.get('authorization')
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1]
-      if (token) {
-        // Dynamically import to avoid circular dependencies
-        const { connectToDatabase } = await import('@/lib/mongodb')
-        const { db } = await connectToDatabase()
-        const session = await db.collection('sessions').findOne({
-          token,
-          expiresAt: { $gt: new Date() }
-        })
-        if (session) {
-          userId = session.userId
-        }
-      }
-    }
-    
-    // Fallback to query param for backward compatibility (will be deprecated)
-    if (!userId) {
-      userId = searchParams.get('userId')
-    }
-    
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
-    }
+    // SECURITY: Use authenticated userId only (tenant isolation)
+    const userId = auth.userId
     
     const creditInfo = await getUserCredits(userId)
     
     // If toolId provided, also get cost estimate
     let costEstimate = null
-    if (toolId) {
-      costEstimate = await getToolCreditCost(toolId)
+    if (toolId && typeof toolId === 'string' && toolId.length < 100) {
+      costEstimate = await getToolCreditCost(toolId.replace(/[<>'"${}]/g, ''))
     }
     
     return NextResponse.json({
@@ -64,40 +48,39 @@ export async function GET(request) {
     
   } catch (error) {
     console.error('Error getting credits:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Failed to get credits' }, { status: 500 })
   }
 }
 
 // POST - Operations: check, deduct, refund, complete
 export async function POST(request) {
   try {
-    const body = await request.json()
-    let { action, userId, toolId, transactionId, amount, reason, params } = body
-    
-    // SECURITY: For history action, prefer Authorization header over body userId
-    if (action === 'history') {
-      const authHeader = request.headers.get('authorization')
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1]
-        if (token) {
-          const { connectToDatabase } = await import('@/lib/mongodb')
-          const { db } = await connectToDatabase()
-          const session = await db.collection('sessions').findOne({
-            token,
-            expiresAt: { $gt: new Date() }
-          })
-          if (session) {
-            userId = session.userId
-          }
-        }
-      }
+    // SECURITY: CSRF verification for state-changing operations
+    const csrfCheck = verifyCsrf(request)
+    if (!csrfCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: 'CSRF verification failed', code: 'CSRF_INVALID' },
+        { status: 403 }
+      )
     }
+    
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) {
+      return auth.response
+    }
+    
+    const body = await request.json()
+    const { action, toolId, transactionId, amount, reason, params } = body
+    
+    // SECURITY: Always use authenticated userId (tenant isolation)
+    const userId = auth.userId
     
     switch (action) {
       case 'check': {
         // Check if user has enough credits
-        if (!userId || !toolId) {
-          return NextResponse.json({ success: false, error: 'userId and toolId required' }, { status: 400 })
+        if (!toolId) {
+          return NextResponse.json({ success: false, error: 'toolId required' }, { status: 400 })
         }
         
         const result = await checkCredits(userId, toolId, params)
@@ -106,8 +89,8 @@ export async function POST(request) {
       
       case 'deduct': {
         // Deduct credits before generation
-        if (!userId || !toolId) {
-          return NextResponse.json({ success: false, error: 'userId and toolId required' }, { status: 400 })
+        if (!toolId) {
+          return NextResponse.json({ success: false, error: 'toolId required' }, { status: 400 })
         }
         
         // Check rate limits first
@@ -199,7 +182,7 @@ export async function POST(request) {
 
 // Helper to determine feature type from tool ID
 function getFeatureType(toolId) {
-  const videoTools = ['video-editor', 'ai-video-studio', 'quick-reels', 'auto-subtitles', 'auto-reels', 'auto-longform', 'talking-head', 'transformation-video', 'script-to-ad']
+  const videoTools = ['ai-video-studio', 'quick-reels', 'auto-subtitles', 'auto-reels', 'auto-longform', 'talking-head', 'transformation-video', 'script-to-ad']
   const imageTools = ['image-editor', 'cover-image-creator', 'podcast-cover-maker', 'thumbnail-maker', 'photo-cards', 'carousels', 'avatar-creator']
   const audioTools = ['audio-editor', 'noise-remover', 'voice-enhancer', 'voice-clone']
   const pdfTools = ['planner-maker', 'worksheet-maker', 'coloring-book', 'journal-maker', 'ebook-maker', 'recipe-book', 'guide-maker', 'storybook-maker', 'activity-book', 'quiz-maker', 'learning-cards', 'slides-maker', 'notion-templates', 'business-plan', 'pitch-deck']

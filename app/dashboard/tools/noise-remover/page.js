@@ -10,10 +10,22 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Upload, Download, Play, Pause, Volume2, VolumeX, Wand2,
-  RefreshCw, X, FileAudio, Waves, Zap, CheckCircle,
-  FastForward, Rewind, ArrowRight
+import {
+  Upload,
+  Download,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Wand2,
+  RefreshCw,
+  X,
+  FileAudio,
+  Waves,
+  CheckCircle,
+  FastForward,
+  Rewind,
+  ArrowRight
 } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 
@@ -212,7 +224,7 @@ export default function NoiseRemoverPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
-              <Zap className="h-8 w-8" />
+              <Play className="h-8 w-8" />
             </div>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -450,7 +462,7 @@ export default function NoiseRemoverPage() {
           <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 dark:border-purple-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-purple-800 dark:text-purple-200">
-                <Zap className="h-4 w-4" /> Tips
+                <Play className="h-4 w-4" /> Tips
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs space-y-2 text-purple-700 dark:text-purple-300">

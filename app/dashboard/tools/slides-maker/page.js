@@ -1,5 +1,7 @@
 'use client'
 
+import { saveToLibrary } from '@/lib/secure-api'
+
 import { useState, useCallback, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,14 +14,38 @@ import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Presentation, Download, Loader2, 
-  ArrowLeft, ArrowRight, CheckCircle, Eye,
-  ChevronLeft, ChevronRight, Edit3, RefreshCw,
-  Palette, Users, Target, FileText, Layout,
-  Quote, BarChart3, Columns, ListChecks, Plus,
-  Trash2, Upload, Image as ImageIcon, Type,
-  AlignLeft, AlignCenter, AlignRight, Wand2, Zap} from 'lucide-react'
+import {
+  Presentation,
+  Download,
+  Loader2,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  RefreshCw,
+  Palette,
+  Users,
+  Target,
+  FileText,
+  Layout,
+  Quote,
+  BarChart3,
+  Columns,
+  ListChecks,
+  Plus,
+  Trash2,
+  Upload,
+  Image as ImageIcon,
+  Type,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
@@ -492,25 +518,21 @@ export default function SlidesMakerPage() {
         setCurrentSlideIndex(0)
         setStep(3)
         
-        // Save to library automatically
+        // Save to library automatically using secure API
         try {
-          await fetch('/api/library/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'slides-maker',
-              title: data.presentation.title || topic,
-              description: `${data.presentation.slides.length} slides about "${topic}"`,
-              content: JSON.stringify(data.presentation),
-              metadata: {
-                slideCount: data.presentation.slides.length,
-                presentationType,
-                theme,
-                language,
-                audience,
-                authorName
-              }
-            })
+          await saveToLibrary({
+            type: 'slides-maker',
+            title: data.presentation.title || topic,
+            description: `${data.presentation.slides.length} slides about "${topic}"`,
+            content: JSON.stringify(data.presentation),
+            metadata: {
+              slideCount: data.presentation.slides.length,
+              presentationType,
+              theme,
+              language,
+              audience,
+              authorName
+            }
           })
           console.log('Presentation saved to library')
         } catch (libError) {
@@ -660,27 +682,23 @@ export default function SlidesMakerPage() {
       if (data.success && data.downloadUrl) {
         setDownloadUrl(data.downloadUrl)
         
-        // Save updated presentation to library with PDF path
+        // Save updated presentation to library with PDF path using secure API
         try {
-          await fetch('/api/library/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'slides-maker',
-              title: presentation.title || topic,
-              description: `${presentation.slides.length} slides - PDF generated`,
-              content: JSON.stringify(presentation),
-              filePath: data.downloadUrl,
-              metadata: {
-                slideCount: presentation.slides.length,
-                presentationType,
-                theme,
-                language,
-                audience,
-                authorName,
-                pdfGenerated: true
-              }
-            })
+          await saveToLibrary({
+            type: 'slides-maker',
+            title: presentation.title || topic,
+            description: `${presentation.slides.length} slides - PDF generated`,
+            content: JSON.stringify(presentation),
+            filePath: data.downloadUrl,
+            metadata: {
+              slideCount: presentation.slides.length,
+              presentationType,
+              theme,
+              language,
+              audience,
+              authorName,
+              pdfGenerated: true
+            }
           })
           console.log('Presentation with PDF saved to library')
         } catch (libError) {
@@ -780,7 +798,7 @@ export default function SlidesMakerPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
+                  <Play className="h-5 w-5 text-yellow-500" />
                   What's your presentation about?
                 </CardTitle>
                 <CardDescription>
@@ -908,7 +926,7 @@ export default function SlidesMakerPage() {
             <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-blue-500" />
+                  <Play className="h-5 w-5 text-blue-500" />
                   AI-Powered Features
                 </CardTitle>
               </CardHeader>

@@ -8,7 +8,14 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { User, Loader2, Copy, Palette, Wand2, Zap } from 'lucide-react'
+import {
+  User,
+  Loader2,
+  Copy,
+  Palette,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
@@ -360,7 +367,7 @@ export default function AvatarCreatorPage() {
       <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
         <CardHeader>
           <CardTitle className="text-purple-800 dark:text-purple-200 flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+            <Play className="h-5 w-5" />
             Avatar Creation Tips
           </CardTitle>
         </CardHeader>

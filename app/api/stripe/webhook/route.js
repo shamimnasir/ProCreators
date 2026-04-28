@@ -26,12 +26,6 @@ export async function POST(request) {
       WEBHOOK_SECRET_SECONDARY
     ].filter(secret => secret && secret !== 'whsec_placeholder')
     
-    // Log incoming webhook for debugging
-    console.log('[Stripe Webhook] Received request')
-    console.log('[Stripe Webhook] Signature present:', !!sig)
-    console.log('[Stripe Webhook] Secrets configured:', webhookSecrets.length)
-    console.log('[Stripe Webhook] Body length:', rawBody?.length || 0)
-    
     let event
     
     // Verify webhook signature if any secret is configured
@@ -51,7 +45,6 @@ export async function POST(request) {
       for (const secret of webhookSecrets) {
         try {
           event = stripe.webhooks.constructEvent(rawBody, sig, secret)
-          console.log('[Stripe Webhook] Signature verified successfully for event:', event.type)
           verified = true
           break
         } catch (err) {
@@ -61,8 +54,7 @@ export async function POST(request) {
       }
       
       if (!verified) {
-        console.error('[Stripe Webhook] Signature verification failed with all secrets:', lastError?.message)
-        console.error('[Stripe Webhook] Signature used:', sig?.substring(0, 50) + '...')
+        console.error('[Stripe Webhook] Signature verification failed:', lastError?.message)
         return NextResponse.json(
           { error: `Webhook signature verification failed: ${lastError?.message}` },
           { status: 400 }
@@ -70,7 +62,6 @@ export async function POST(request) {
       }
     } else {
       // In dev mode without webhook secret, parse body directly
-      console.log('[Stripe Webhook] Running in dev mode without signature verification')
       event = JSON.parse(rawBody)
     }
     
@@ -325,7 +316,7 @@ export async function POST(request) {
       }
     }
     
-    console.log('[Stripe Webhook] Processing complete for event:', event.type)
+    // Event processed: event.type logged to webhook_logs collection
     return NextResponse.json({ received: true, eventType: event.type })
     
   } catch (error) {

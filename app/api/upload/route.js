@@ -4,13 +4,19 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { verifyCsrf } from '@/lib/csrf-verify'
+import { requireAuth } from '@/lib/auth-middleware'
 
 // Allowed file types
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_FOLDERS = new Set(['blog', 'pages', 'avatars', 'uploads'])
 
 export async function POST(request) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth(request)
+    if (!auth.authenticated) return auth.response
+
     // Verify CSRF token for uploads
     const csrfResult = verifyCsrf(request)
     if (!csrfResult.valid) {
@@ -23,8 +29,11 @@ export async function POST(request) {
 
     const formData = await request.formData()
     const file = formData.get('file')
-    const folder = formData.get('folder') || 'blog' // blog, pages, etc.
-    
+    let folder = formData.get('folder') || 'blog'
+
+    // SECURITY: Whitelist folder to prevent path traversal
+    if (!ALLOWED_FOLDERS.has(folder)) folder = 'blog'
+
     if (!file) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 })
     }
@@ -45,8 +54,12 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
-    // Get file extension
-    const ext = file.name.split('.').pop().toLowerCase()
+    // Get file extension (whitelist)
+    const ext = (file.name.split('.').pop() || '').toLowerCase()
+    const ALLOWED_EXT = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
+    if (!ALLOWED_EXT.has(ext)) {
+      return NextResponse.json({ success: false, error: 'Invalid file extension' }, { status: 400 })
+    }
     const filename = `${uuidv4()}.${ext}`
     
     // Create upload directory if it doesn't exist
@@ -71,7 +84,7 @@ export async function POST(request) {
     })
     
   } catch (error) {
-    console.error('Upload error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    console.error('Upload error:', error?.message)
+    return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })
   }
 }

@@ -11,11 +11,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { useCsrf } from '@/hooks/use-csrf'
-import { 
-  Settings, Palette, Home, Share2, FileText, BarChart3, 
-  Save, Loader2, ExternalLink, Globe, Image, Type,
-  Twitter, Facebook, Instagram, Linkedin, Youtube, MessageCircle,
-  Code, Search, RefreshCw
+import {
+  Settings,
+  Palette,
+  Home,
+  Share2,
+  FileText,
+  BarChart3,
+  Save,
+  Loader2,
+  ExternalLink,
+  Globe,
+  Image,
+  Type,
+  Twitter,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  MessageCircle,
+  Code,
+  Search,
+  RefreshCw
 } from 'lucide-react'
 
 export default function SiteSettingsPage() {

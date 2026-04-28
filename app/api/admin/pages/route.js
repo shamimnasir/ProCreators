@@ -3,10 +3,14 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { getDefaultPageTemplate, BLOCK_TYPES, BLOCK_TEMPLATES } from '@/lib/pageSchema'
 import { v4 as uuidv4 } from 'uuid'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const COLLECTION_NAME = 'tool_pages'
 
 // GET - List all tool pages or get specific page
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('toolId')
@@ -35,6 +39,9 @@ export async function GET(request) {
 
 // POST - Create new page or initialize from template
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const body = await request.json()
     const { toolId, toolName, action } = body
@@ -76,6 +83,9 @@ export async function POST(request) {
 
 // PUT - Update page
 export async function PUT(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const body = await request.json()
     const { toolId, seo, contentBlocks, isPublished } = body
@@ -115,6 +125,9 @@ export async function PUT(request) {
 
 // DELETE - Delete page
 export async function DELETE(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('toolId')

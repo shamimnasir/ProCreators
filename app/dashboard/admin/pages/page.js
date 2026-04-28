@@ -6,11 +6,21 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Settings, FileText, Search, RefreshCw, Check, X, 
-  Edit, Eye, Loader2, Database, ChevronRight
+import {
+  Settings,
+  FileText,
+  Search,
+  RefreshCw,
+  Check,
+  X,
+  Edit,
+  Eye,
+  Loader2,
+  Database,
+  ChevronRight
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import Link from 'next/link'
 
 export default function AdminPagesPage() {
@@ -20,6 +30,7 @@ export default function AdminPagesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   const fetchTools = async () => {
     setLoading(true)
@@ -43,7 +54,10 @@ export default function AdminPagesPage() {
   const initializeAllPages = async () => {
     setInitializing(true)
     try {
-      const res = await fetch('/api/admin/pages/initialize-all', { method: 'POST' })
+      const res = await fetch('/api/admin/pages/initialize-all', { 
+        method: 'POST',
+        headers: { ...getCsrfHeaders() }
+      })
       const data = await res.json()
       if (data.success) {
         toast({ 

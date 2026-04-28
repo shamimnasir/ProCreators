@@ -12,12 +12,30 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  CheckCircle, AlertCircle, AlertTriangle, Info,
-  Loader2, ArrowLeft, Copy, RefreshCw,
-  FileText, Upload, FileUp, File, X, Wand2,
-  BookOpen, Lightbulb, Target, BarChart3,
-  Type, AlignLeft, Zap, Eye, PenTool
+import {
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  Loader2,
+  ArrowLeft,
+  Copy,
+  RefreshCw,
+  FileText,
+  Upload,
+  FileUp,
+  File,
+  X,
+  Wand2,
+  BookOpen,
+  Lightbulb,
+  Target,
+  BarChart3,
+  Type,
+  AlignLeft,
+  Play,
+  Eye,
+  PenTool
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'

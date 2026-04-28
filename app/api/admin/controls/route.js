@@ -1,5 +1,6 @@
 // Admin Feature Controls API (Kill Switches)
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/auth-middleware'
 import {
   getFeatureControls,
   updateFeatureControls,
@@ -11,6 +12,9 @@ import {
 
 // GET - Get current feature controls
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const includeAuditLog = searchParams.get('auditLog') === 'true'
@@ -34,6 +38,9 @@ export async function GET(request) {
 
 // POST - Update controls
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const body = await request.json()
     const { action, adminId = 'system', ...params } = body

@@ -7,6 +7,9 @@ import path from 'path'
 import { drawCoverPageWithImage, PDF_COLOR_SCHEMES } from '@/lib/pdf-design'
 import { generateCoverImage } from '@/lib/cover-image-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'how-to-guide'
 
 // Color schemes for how-to guides
 const GUIDE_COLOR_SCHEMES = {
@@ -98,7 +101,38 @@ function wrapText(text, font, fontSize, maxWidth) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -639,6 +673,10 @@ export async function POST(request) {
     await fs.writeFile(filePath, pdfBytes)
     
     const pageCount = pdfDoc.getPageCount()
+    // Complete transaction on success
+
+    if (transactionId) await completeTransaction(transactionId)
+
     return NextResponse.json({
       success: true,
       title: sanitizeText(title) || 'How-To Guide',
@@ -647,6 +685,10 @@ export async function POST(request) {
     })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Error generating guide:', error)
     return NextResponse.json({
       success: false,

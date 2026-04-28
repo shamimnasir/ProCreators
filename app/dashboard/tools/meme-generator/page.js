@@ -9,7 +9,18 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Smile, Download, Loader2, Image, Type, Upload, Wand2, Copy, RefreshCw, Zap } from 'lucide-react'
+import {
+  Smile,
+  Download,
+  Loader2,
+  Image,
+  Type,
+  Upload,
+  Wand2,
+  Copy,
+  RefreshCw,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
@@ -147,7 +158,7 @@ export default function MemeGeneratorPage() {
           </p>
         </div>
         <Badge className="bg-yellow-100 text-yellow-800">
-          <Zap className="h-3 w-3 mr-1" />
+          <Play className="h-3 w-3 mr-1" />
           Fun & Viral
         </Badge>
       </div>

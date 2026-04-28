@@ -13,7 +13,6 @@ export async function POST(request) {
 
     // Calculate how many clips we need (3 seconds per clip)
     const requiredClips = maxClips || Math.ceil((duration || 30) / 3)
-    console.log(`[Video Search] Need ${requiredClips} clips for ${duration || 30}s video, ${keywords.length} keywords provided`)
 
     // Check for API keys - Pexels is preferred for videos
     const pexelsKey = process.env.PEXELS_API_KEY
@@ -198,7 +197,6 @@ export async function POST(request) {
     // Calculate how many videos per keyword to fetch
     // E.g., 10 clips needed with 5 keywords = 2 videos per keyword
     const videosPerKeyword = Math.max(1, Math.ceil(requiredClips / keywords.length))
-    console.log(`[Video Search] Fetching up to ${videosPerKeyword} videos per keyword`)
 
     // Search all keywords IN PARALLEL (much faster!)
     const startTime = Date.now()
@@ -213,7 +211,6 @@ export async function POST(request) {
     videos = videos.slice(0, requiredClips)
     
     const endTime = Date.now()
-    console.log(`[Video Search] Found ${videos.length}/${requiredClips} videos in ${endTime - startTime}ms`)
     if (videos.length === 0) {
       // Try generic fallback if no videos found
       const fallbackKeywords = ['nature', 'people', 'lifestyle', 'city', 'abstract']

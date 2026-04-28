@@ -6,6 +6,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'resume-builder'
 
 // Resume Builder input schema
 const resumeBuilderSchema = z.object({
@@ -127,7 +130,38 @@ async function fetchLinkedInData(url) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -385,6 +419,12 @@ IMPORTANT REMINDERS:
       resumeData.references = []
     }
 
+    // Complete transaction on success
+
+
+    if (transactionId) await completeTransaction(transactionId)
+
+
     return NextResponse.json({
       success: true,
       resumeData,
@@ -398,6 +438,10 @@ IMPORTANT REMINDERS:
     })
 
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Resume generation error:', error)
     return NextResponse.json({ 
       success: false, 

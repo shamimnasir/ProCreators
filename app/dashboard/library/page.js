@@ -6,9 +6,18 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  FileText, Image as ImageIcon, Video, Trash2, Download, 
-  Library as LibraryIcon, Grid, LayoutGrid, Play, Filter, X 
+import {
+  FileText,
+  Image as ImageIcon,
+  Video,
+  Trash2,
+  Download,
+  Library as LibraryIcon,
+  Grid,
+  LayoutGrid,
+  Play,
+  Filter,
+  X
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
@@ -16,6 +25,7 @@ import { QUICK_REELS_NICHES } from '@/config/quick-reels-niches'
 // Tool types for filtering
 const TOOL_TYPES = [
   { value: 'all', label: 'All Tools', icon: '🎯' },
+  { value: 'ugc-studio', label: 'UGC Ad Studio', icon: '🎬' },
   { value: 'ai-video-studio', label: 'AI Video Studio', icon: '🎬' },
   { value: 'story-reel', label: 'Quick Video Reels', icon: '📹' },
   { value: 'script-to-ad', label: 'Script to Ad', icon: '📱' },
@@ -44,6 +54,7 @@ export default function LibraryPage() {
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'feed'
   const [playingVideo, setPlayingVideo] = useState(null)
   const [userId, setUserId] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -52,10 +63,12 @@ export default function LibraryPage() {
   }, [])
 
   useEffect(() => {
-    if (userId) {
+    if (userId && isAuthenticated) {
       fetchLibrary()
+    } else if (!loading && !isAuthenticated) {
+      setLoading(false)
     }
-  }, [selectedTool, userId])
+  }, [selectedTool, userId, isAuthenticated])
 
   const initUser = async () => {
     try {
@@ -67,14 +80,17 @@ export default function LibraryPage() {
         const data = await res.json()
         if (data.success && data.user) {
           setUserId(data.user.id)
+          setIsAuthenticated(true)
           return
         }
       }
-      // SECURITY: Redirect to login instead of demo user fallback
-      window.location.href = '/login?redirect=/dashboard/library'
+      // User not authenticated - show empty library
+      setIsAuthenticated(false)
+      setLoading(false)
     } catch (error) {
       console.error('Error getting user:', error)
-      window.location.href = '/login?redirect=/dashboard/library'
+      setIsAuthenticated(false)
+      setLoading(false)
     }
   }
 
@@ -98,10 +114,13 @@ export default function LibraryPage() {
   const fetchLibrary = async () => {
     setLoading(true)
     try {
+      const token = localStorage.getItem('sessionToken') || ''
       let url = selectedTool === 'all' 
         ? `/api/library/list?userId=${userId}` 
         : `/api/library/list?tool=${selectedTool}&userId=${userId}`
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       const data = await response.json()
       if (data.success) {
         setItems(data.items || [])
@@ -119,9 +138,13 @@ export default function LibraryPage() {
 
   const handleDelete = async (id) => {
     try {
+      const token = localStorage.getItem('sessionToken') || ''
       const response = await fetch('/api/library/delete', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ id, userId })
       })
       
@@ -145,16 +168,25 @@ export default function LibraryPage() {
     }
   }
 
+  // Helper to trigger download via the /api/download endpoint (forces Content-Disposition: attachment)
+  const downloadViaApi = (filePath, fileName) => {
+    // Strip leading slash for the API parameter
+    const cleanPath = filePath.replace(/^\/+/, '')
+    const downloadUrl = `/api/download?file=${encodeURIComponent(cleanPath)}`
+    const a = document.createElement('a')
+    a.href = downloadUrl
+    a.download = fileName
+    a.style.display = 'none'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
   const handleDownload = (item) => {
-    // For videos
+    // For videos - use the dedicated download API endpoint
     if (item.category === 'video' && item.videoUrl) {
-      const a = document.createElement('a')
-      a.href = item.videoUrl
-      a.download = `${item.type}-${Date.now()}.mp4`
-      a.target = '_blank'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      const fileName = `${item.type || 'video'}-${Date.now()}.mp4`
+      downloadViaApi(item.videoUrl, fileName)
       toast({ title: "Downloading", description: "Video download started" })
       return
     }
@@ -164,6 +196,7 @@ export default function LibraryPage() {
       const a = document.createElement('a')
       a.href = item.content
       a.download = `${item.title || item.type}-${Date.now()}.pdf`
+      a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -185,39 +218,24 @@ export default function LibraryPage() {
     
     // For documents (PDFs - ebooks, journals, planners, worksheets, checklists)
     if (item.filePath && item.filePath.endsWith('.pdf')) {
-      const a = document.createElement('a')
-      a.href = item.filePath
-      a.download = `${item.title || item.type}-${Date.now()}.pdf`
-      a.target = '_blank'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      const fileName = `${item.title || item.type}-${Date.now()}.pdf`
+      downloadViaApi(item.filePath, fileName)
       toast({ title: "Downloading", description: "PDF download started" })
       return
     }
     
-    // For images
+    // For images - use the download API to force attachment
     if (item.category === 'image' && item.filePath) {
-      const a = document.createElement('a')
-      a.href = item.filePath
-      a.download = `${item.type}-${Date.now()}.jpg`
-      a.target = '_blank'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      toast({ title: "Downloaded", description: "Image downloaded successfully" })
+      const fileName = `${item.type || 'image'}-${Date.now()}.jpg`
+      downloadViaApi(item.filePath, fileName)
+      toast({ title: "Downloaded", description: "Image download started" })
       return
     }
     
     // For any other file with filePath
     if (item.filePath) {
-      const a = document.createElement('a')
-      a.href = item.filePath
-      a.download = `${item.title || item.type}-${Date.now()}`
-      a.target = '_blank'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      const fileName = `${item.title || item.type}-${Date.now()}`
+      downloadViaApi(item.filePath, fileName)
       toast({ title: "Downloading", description: "Download started" })
       return
     }
@@ -229,6 +247,7 @@ export default function LibraryPage() {
       const a = document.createElement('a')
       a.href = url
       a.download = `${item.type}-${Date.now()}.txt`
+      a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

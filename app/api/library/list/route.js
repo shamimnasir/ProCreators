@@ -1,22 +1,30 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
-import { getUserIdFromRequest } from '@/lib/get-user-id'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const toolFilter = searchParams.get('tool') // Optional tool filter
     const category = searchParams.get('category') // Optional category filter
-    const limit = parseInt(searchParams.get('limit')) || 100
-    const queryUserId = searchParams.get('userId') // Optional userId from query
+    const limit = Math.min(parseInt(searchParams.get('limit')) || 100, 500) // Max 500
     
-    // Get user ID from query params or request headers
-    const userId = queryUserId || await getUserIdFromRequest(request)
+    // SECURITY: Get userId from authenticated session only - NOT from query params
+    // This prevents IDOR attacks where users could access others' libraries
+    const userId = await getAuthenticatedUserId(request)
+    
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required',
+        code: 'AUTH_REQUIRED'
+      }, { status: 401 })
+    }
     
     const libraryCollection = await getCollection('library')
     const now = new Date()
     
-    // Build query
+    // Build query - userId is now guaranteed to be from authenticated session
     const query = { 
       userId,
       $or: [
@@ -25,13 +33,13 @@ export async function GET(request) {
       ]
     }
     
-    // Add tool filter if specified
-    if (toolFilter) {
-      query.type = toolFilter
+    // Add tool filter if specified (validate input)
+    if (toolFilter && typeof toolFilter === 'string' && toolFilter.length < 100) {
+      query.type = toolFilter.replace(/[<>'"${}]/g, '') // Sanitize
     }
     
-    // Add category filter if specified
-    if (category) {
+    // Add category filter if specified (whitelist valid values)
+    if (category && ['video', 'image', 'text', 'document'].includes(category)) {
       query.category = category
     }
     

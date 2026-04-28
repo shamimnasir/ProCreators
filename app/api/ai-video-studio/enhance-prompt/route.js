@@ -27,7 +27,6 @@ export async function POST(request) {
     const isExplainer = /explain|what\s*is|why|how\s*does|understand/i.test(prompt)
     const isMotivational = /motivat|inspir|success|discipline|growth|mindset|achieve/i.test(prompt)
     
-    console.log('[enhance-prompt] Content type detection:', { isTopList, isCommandPrompt, isTutorial, isExplainer, isMotivational })
     
     // Build the appropriate system prompt based on content type
     let systemPrompt = ''
@@ -174,7 +173,6 @@ Write the enhanced script now:`
     
     // Generate script using Gemini
     try {
-      console.log('[enhance-prompt] Generating script with AI...')
       const result = await generateText(prompt, systemPrompt)
       
       if (result.success && result.content) {
@@ -193,7 +191,6 @@ Write the enhanced script now:`
           .replace(/  +/g, ' ')
           .trim()
         
-        console.log('[enhance-prompt] Script generated successfully, length:', enhancedPrompt.length)
       } else {
         console.error('[enhance-prompt] AI generation failed:', result.error)
         enhancedPrompt = enhancePromptBasic(prompt, useCase, format)

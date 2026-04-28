@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const COLLECTION_NAME = 'static_pages'
 
 // List of available static pages
@@ -10,6 +11,9 @@ const STATIC_PAGE_IDS = ['about', 'privacy', 'terms', 'contact', 'careers', 'coo
 
 // GET - List all static pages
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const pageId = searchParams.get('pageId')
@@ -51,6 +55,9 @@ export async function GET(request) {
 
 // PUT - Update static page
 export async function PUT(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const body = await request.json()
     const { pageId, title, metaTitle, metaDescription, contentBlocks, isPublished } = body

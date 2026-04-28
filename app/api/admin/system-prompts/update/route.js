@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { tool, prompt } = await request.json()
 

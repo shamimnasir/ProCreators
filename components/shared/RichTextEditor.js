@@ -4,10 +4,18 @@ import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { 
-  ChevronDown, List, Quote,
-  Heading1, Heading2, Heading3, ListOrdered, 
-  Lightbulb, AlertTriangle, Info, MessageSquare
+import {
+  ChevronDown,
+  List,
+  Quote,
+  Heading1,
+  Heading2,
+  Heading3,
+  ListOrdered,
+  Lightbulb,
+  AlertTriangle,
+  Info,
+  MessageSquare
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'

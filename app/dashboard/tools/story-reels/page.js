@@ -15,13 +15,51 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge, calculateDynamicCost, formatCredits } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Video, Mic, Upload, Download, 
-  FileText, Film, Music, Type, Play, Edit, X, Check, Eye,
-  GripVertical, Trash2, Plus, ImagePlus, Search, BookOpen,
-  TrendingUp, Lightbulb, Smile, Star, GraduationCap, Briefcase,
-  Skull, Heart, PartyPopper, ShoppingBag, RefreshCw, Wand2, Clapperboard, Zap, Coins, MessageSquare, Clock, Image as ImageIcon,
-  ChevronDown, ChevronRight, Settings2, Sparkles, Square, StopCircle, Volume2, VolumeX
+import {
+  Loader2,
+  Video,
+  Mic,
+  Upload,
+  Download,
+  FileText,
+  Film,
+  Music,
+  Type,
+  Play,
+  Edit,
+  X,
+  Check,
+  Eye,
+  GripVertical,
+  Trash2,
+  Plus,
+  ImagePlus,
+  Search,
+  BookOpen,
+  TrendingUp,
+  Lightbulb,
+  Smile,
+  Star,
+  GraduationCap,
+  Briefcase,
+  Skull,
+  Heart,
+  PartyPopper,
+  ShoppingBag,
+  RefreshCw,
+  Wand2,
+  Clapperboard,
+  Coins,
+  MessageSquare,
+  Clock,
+  Image as ImageIcon,
+  ChevronDown,
+  ChevronRight,
+  Settings2,
+  Square,
+  StopCircle,
+  Volume2,
+  VolumeX
 } from 'lucide-react'
 import PreviewModal from './PreviewModal'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
@@ -164,6 +202,26 @@ export default function StoryReelsPage({
   pageTitle = null,
   pageSubtitle = null
 }) {
+  // Determine if we're in Stock mode (passed from parent) - skip template selection
+  const isStockMode = defaultVideoSource === 'stock'
+  
+  // Template/Niche selection - skip for stock mode
+  const [selectedTemplate, setSelectedTemplate] = useState(isStockMode ? 'stock' : null)
+  const hasExternalTheme = niche && niche !== 'story-reels' // Theme was selected from Video Studio
+  const [showTemplates, setShowTemplates] = useState(!isStockMode && !hasExternalTheme) // Hide templates when theme already selected
+  
+  // Template definitions - only for AI mode
+  const TEMPLATES = [
+    { id: 'custom', name: 'Custom Video', icon: '🎬', description: 'Full creative control', color: 'from-purple-500 to-pink-500' },
+    { id: 'mini-stories', name: 'Mini Stories', icon: '📖', description: 'Short narrative videos', color: 'from-blue-500 to-cyan-500' },
+    { id: 'motivational', name: 'Motivational', icon: '⚡', description: 'Inspiring content', color: 'from-amber-500 to-orange-500' },
+    { id: 'facts-explainer', name: 'Facts & Explainers', icon: '🎓', description: 'Educational content', color: 'from-green-500 to-emerald-500' },
+    { id: 'business-promo', name: 'Business Promo', icon: '💼', description: 'Product & service ads', color: 'from-slate-600 to-slate-800' },
+    { id: 'comedy', name: 'Comedy & Memes', icon: '😂', description: 'Funny viral content', color: 'from-pink-500 to-rose-500' },
+    { id: 'kids-stories', name: 'Kids Stories', icon: '🧸', description: 'Children\'s content', color: 'from-violet-500 to-purple-500' },
+    { id: 'horror', name: 'Horror Stories', icon: '👻', description: 'Scary narratives', color: 'from-gray-800 to-black' },
+  ]
+  
   // Script state
   const [script, setScript] = useState('')
   const [scriptLoading, setScriptLoading] = useState(false)
@@ -207,6 +265,11 @@ export default function StoryReelsPage({
   // Multi-Scene Reference Images
   const [sceneReferenceImages, setSceneReferenceImages] = useState([])
   
+  // Visual References (@mentions) - Multiple images that can be referenced in prompts
+  const [visualReferences, setVisualReferences] = useState([]) // [{id, file, preview, tag, name}]
+  const [showReferenceUploader, setShowReferenceUploader] = useState(false)
+  const referenceInputRef = useRef(null)
+  
   // Composition state
   const [captionStyle, setCaptionStyle] = useState('bold-outline')
   const [captionFontSize, setCaptionFontSize] = useState('medium')
@@ -216,11 +279,16 @@ export default function StoryReelsPage({
   const [customMusic, setCustomMusic] = useState(null)
   const [showMusicPicker, setShowMusicPicker] = useState(false)
   const [resolution, setResolution] = useState('1080p')
+  const [videoOrientation, setVideoOrientation] = useState('portrait') // portrait (9:16), landscape (16:9), square (1:1)
   const [composing, setComposing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressMessage, setProgressMessage] = useState('')
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(null)
   const [currentJobId, setCurrentJobId] = useState(null)
+  
+  // Audio preview state
+  const [previewingVoice, setPreviewingVoice] = useState(null)
+  const [audioPreviewRef] = useState(() => typeof Audio !== 'undefined' ? new Audio() : null)
   
   const getInitialVideoSource = () => {
     if (defaultVideoSource === 'stock') return 'stock'
@@ -290,20 +358,21 @@ export default function StoryReelsPage({
       captionPosition, resolution, keywords, stockVideos, nicheName])
 
   const loadDraftData = useCallback((data) => {
-    if (data.script) setScript(data.script)
-    if (data.duration) setDuration(data.duration)
-    if (data.customTopic) setCustomTopic(data.customTopic)
-    if (data.scriptFormat) setScriptFormat(data.scriptFormat)
-    if (data.scenePrompts) setScenePrompts(data.scenePrompts)
-    if (data.videoSource) setVideoSource(data.videoSource)
-    if (data.ttsLanguage) setTtsLanguage(data.ttsLanguage)
-    if (data.languageVariant) setLanguageVariant(data.languageVariant)
-    if (data.selectedVoice) setSelectedVoice(data.selectedVoice)
-    if (data.captionStyle) setCaptionStyle(data.captionStyle)
-    if (data.captionFontSize) setCaptionFontSize(data.captionFontSize)
-    if (data.captionPosition) setCaptionPosition(data.captionPosition)
-    if (data.resolution) setResolution(data.resolution)
-    if (data.keywords) setKeywords(data.keywords)
+    // Use explicit undefined checks to handle empty strings properly
+    setScript(data.script !== undefined ? data.script : '')
+    setDuration(data.duration || 30)
+    setCustomTopic(data.customTopic !== undefined ? data.customTopic : '')
+    setScriptFormat(data.scriptFormat || 'auto')
+    setScenePrompts(data.scenePrompts || [])
+    setVideoSource(data.videoSource || 'stock')
+    setTtsLanguage(data.ttsLanguage || 'en-US')
+    setLanguageVariant(data.languageVariant || '')
+    setSelectedVoice(data.selectedVoice || '')
+    setCaptionStyle(data.captionStyle || 'centered')
+    setCaptionFontSize(data.captionFontSize || 'medium')
+    setCaptionPosition(data.captionPosition || 'center')
+    setResolution(data.resolution || '1080p')
+    setKeywords(data.keywords || [])
     if (data.stockVideos) {
       const restoredVideos = data.stockVideos.map(v => ({
         ...v,
@@ -593,6 +662,97 @@ export default function StoryReelsPage({
 
   const removeScenePrompt = (index) => {
     setScenePrompts(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Visual Reference Functions (@mentions)
+  const handleAddVisualReference = (e) => {
+    const files = Array.from(e.target.files)
+    if (visualReferences.length + files.length > 5) {
+      toast({ title: "Limit Reached", description: "Maximum 5 visual references allowed", variant: "destructive" })
+      return
+    }
+    
+    files.forEach((file, idx) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const newRef = {
+          id: `ref_${Date.now()}_${idx}`,
+          file: file,
+          preview: event.target.result,
+          tag: `@image${visualReferences.length + idx + 1}`,
+          name: file.name.split('.')[0].substring(0, 10)
+        }
+        setVisualReferences(prev => [...prev, newRef])
+      }
+      reader.readAsDataURL(file)
+    })
+    
+    // Reset input
+    if (referenceInputRef.current) {
+      referenceInputRef.current.value = ''
+    }
+  }
+  
+  const updateReferenceName = (id, newName) => {
+    setVisualReferences(prev => prev.map(ref => 
+      ref.id === id ? { ...ref, name: newName, tag: `@${newName.replace(/\s+/g, '')}` } : ref
+    ))
+  }
+  
+  const removeVisualReference = (id) => {
+    setVisualReferences(prev => prev.filter(ref => ref.id !== id))
+  }
+  
+  const insertReferenceTag = (tag) => {
+    setScript(prev => prev + ` ${tag} `)
+  }
+
+  // Voice Preview Function
+  const handleVoicePreview = async (voice) => {
+    try {
+      // Stop any currently playing audio
+      if (audioPreviewRef) {
+        audioPreviewRef.pause()
+        audioPreviewRef.src = ''
+      }
+      
+      setPreviewingVoice(voice.name)
+      
+      const response = await fetch('/api/story-reels/preview-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          voiceName: voice.name, 
+          languageCode: voice.languageCodes?.[0] || `${ttsLanguage}-US`
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success && data.audioUrl) {
+        audioPreviewRef.src = data.audioUrl
+        audioPreviewRef.play()
+        audioPreviewRef.onended = () => setPreviewingVoice(null)
+        audioPreviewRef.onerror = () => {
+          setPreviewingVoice(null)
+          toast({ title: "Error", description: "Failed to play audio", variant: "destructive" })
+        }
+      } else {
+        throw new Error(data.error || 'Failed to generate preview')
+      }
+    } catch (error) {
+      console.error('Voice preview error:', error)
+      toast({ title: "Error", description: error.message, variant: "destructive" })
+      setPreviewingVoice(null)
+    }
+  }
+  
+  const stopVoicePreview = () => {
+    if (audioPreviewRef) {
+      audioPreviewRef.pause()
+      audioPreviewRef.src = ''
+    }
+    setPreviewingVoice(null)
   }
 
   const addScenePrompt = () => {
@@ -984,6 +1144,18 @@ export default function StoryReelsPage({
         formData.append('musicTrack', 'none')
       }
       formData.append('resolution', resolution)
+      formData.append('videoOrientation', videoOrientation) // portrait, landscape, square
+      
+      // Add visual references (multi-image with @mentions)
+      if (visualReferences.length > 0) {
+        visualReferences.forEach((ref, idx) => {
+          formData.append(`visualRef_${idx}`, ref.file)
+          formData.append(`visualRefTag_${idx}`, ref.tag)
+          formData.append(`visualRefName_${idx}`, ref.name)
+        })
+        formData.append('visualReferencesCount', visualReferences.length.toString())
+        formData.append('visualReferenceTags', JSON.stringify(visualReferences.map(r => ({ tag: r.tag, name: r.name }))))
+      }
       
       const urlVideos = stockVideos.filter(v => !v.isCustom)
       const customVideos = stockVideos.filter(v => v.isCustom)
@@ -1008,84 +1180,55 @@ export default function StoryReelsPage({
         formData.append('voiceFile', voiceFile)
       }
 
-      const useAsync = videoSource.startsWith('ai-') || duration > 60
-      const endpoint = useAsync ? '/api/story-reels/compose-async' : '/api/story-reels/compose'
+      // Always use async mode for reliable processing
+      // Stock video processing can take 60+ seconds even for short videos (downloads, concat, audio, captions)
+      // AI video always needs async due to generation time
+      const useAsync = true // Force async mode for all video generation
+      const endpoint = '/api/story-reels/compose-async'
 
-      if (!useAsync) {
-        const progressInterval = setInterval(() => {
-          setProgress(prev => Math.min(prev + 5, 90))
-        }, 2000)
+      // Note: The sync endpoint (/api/story-reels/compose) is kept for backward compatibility
+      // but we use async for better UX with progress polling
+      
+      // Async mode - all video generation uses this
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${sessionToken}` }
+      })
+
+      if (!response.ok) {
+        let errorMessage = `Server error: ${response.status}`
+        try {
+          const errorData = await response.json()
+          if (errorData.error) errorMessage = errorData.error
+        } catch (e) {}
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      
+      if (data.jobId) {
+        setCurrentJobId(data.jobId)
+        toast({ title: "Video Generation Started!", description: "This may take a few minutes..." })
         
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-          headers: { 'Authorization': `Bearer ${sessionToken}` }
-        })
-
-        clearInterval(progressInterval)
-
-        if (!response.ok) {
-          let errorMessage = `Server error: ${response.status}`
-          try {
-            const errorData = await response.json()
-            if (errorData.error) errorMessage = errorData.error
-          } catch (e) {}
-          throw new Error(errorMessage)
-        }
-
-        const data = await response.json()
-        if (data.success) {
+        const result = await pollJobStatus(data.jobId)
+        
+        if (result.success) {
           setProgress(100)
           setProgressMessage('Video ready!')
-          setVideoData(data)
+          setVideoData(result)
+          setCurrentJobId(null)
           refreshCredits() // Refresh credit balance after generation
           toast({ title: "Success!", description: "Your video is ready!" })
-        } else {
-          throw new Error(data.error)
         }
+      } else if (data.success) {
+        setProgress(100)
+        setVideoData(data)
+        refreshCredits() // Refresh credit balance after generation
+        toast({ title: "Success!", description: "Your video is ready!" })
       } else {
-        // Async mode
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-          headers: { 'Authorization': `Bearer ${sessionToken}` }
-        })
-
-        if (!response.ok) {
-          let errorMessage = `Server error: ${response.status}`
-          try {
-            const errorData = await response.json()
-            if (errorData.error) errorMessage = errorData.error
-          } catch (e) {}
-          throw new Error(errorMessage)
-        }
-
-        const data = await response.json()
-        
-        if (data.jobId) {
-          setCurrentJobId(data.jobId)
-          toast({ title: "Video Generation Started!", description: "This may take a few minutes..." })
-          
-          const result = await pollJobStatus(data.jobId)
-          
-          if (result.success) {
-            setProgress(100)
-            setProgressMessage('Video ready!')
-            setVideoData(result)
-            setCurrentJobId(null)
-            refreshCredits() // Refresh credit balance after generation
-            toast({ title: "Success!", description: "Your video is ready!" })
-          }
-        } else if (data.success) {
-          setProgress(100)
-          setVideoData(data)
-          refreshCredits() // Refresh credit balance after generation
-          toast({ title: "Success!", description: "Your video is ready!" })
-        } else {
-          throw new Error(data.error || 'Unknown error')
-        }
+        throw new Error(data.error || 'Unknown error')
       }
     } catch (error) {
       const isTimeoutError = error.message?.includes('520') || error.message?.includes('504') || error.message?.includes('timeout')
@@ -1108,9 +1251,19 @@ export default function StoryReelsPage({
     ? scenePrompts.length * 10  // Each scene is 10 seconds
     : duration  // Use selected duration for stock video mode or before scenes are generated
 
-  // Calculate credits based on actual duration (per-scene pricing)
+  // Calculate credits based on actual duration and selected model (per-scene pricing)
+  const creditToolIdMap = {
+    'ai-standard': 'quick-reels-ai-standard',
+    'ai-professional': 'quick-reels-ai-professional',
+    'ai-cinema': 'quick-reels-ai-cinema',
+    'ai-wan': 'quick-reels-ai-wan',
+    'ai-ltx': 'quick-reels-ai-ltx',
+    'ai-essential': 'quick-reels-ai-essential',
+  }
+  const aiCreditToolId = creditToolIdMap[videoSource] || 'quick-reels-ai-standard'
+  
   const estimatedCredits = isAIMode 
-    ? calculateDynamicCost('story-reels', actualDuration, consistencyMode)
+    ? calculateDynamicCost(aiCreditToolId, actualDuration, consistencyMode)
     : calculateDynamicCost('quick-reels-stock', duration)
 
   // Determine completion status for steps
@@ -1124,13 +1277,13 @@ export default function StoryReelsPage({
   return (
     <div className="container mx-auto py-6 max-w-5xl">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+            <div className={`p-2 rounded-xl bg-gradient-to-br ${isStockMode ? 'from-green-500 to-emerald-500' : 'from-purple-500 to-pink-500'} text-white`}>
               <Video className="h-6 w-6" />
             </div>
-            {pageTitle || 'Custom AI Video'}
+            {isStockMode ? 'Stock Video Studio' : (pageTitle || 'AI Video Studio')}
           </h1>
           <Badge variant="outline" className="text-sm px-3 py-1">
             <Coins className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
@@ -1140,8 +1293,74 @@ export default function StoryReelsPage({
             }
           </Badge>
         </div>
-        <p className="text-muted-foreground">{pageSubtitle || 'AI generates video clips from your script • Premium quality'}</p>
+        <p className="text-muted-foreground">
+          {isStockMode 
+            ? 'HD Stock footage from Pexels • Fast & affordable • Full creative control'
+            : pageSubtitle || 'Create any type of video with AI • Upload references, describe your vision, generate'
+          }
+        </p>
       </div>
+
+      {/* Template Selector - Only show for AI mode */}
+      {showTemplates && !selectedTemplate && !isStockMode && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Choose a Template or Start Custom</h2>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                setSelectedTemplate('custom')
+                setShowTemplates(false)
+              }}
+            >
+              Skip to Custom →
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {TEMPLATES.map((template) => (
+              <button
+                key={template.id}
+                onClick={() => {
+                  setSelectedTemplate(template.id)
+                  setShowTemplates(false)
+                  // Set niche-specific defaults
+                  if (template.id !== 'custom') {
+                    toast({ 
+                      title: `${template.name} Selected`, 
+                      description: 'Template applied! Customize your video below.' 
+                    })
+                  }
+                }}
+                className={`p-4 rounded-xl border-2 text-left transition-all hover:scale-[1.02] hover:shadow-lg bg-gradient-to-br ${template.color} text-white`}
+              >
+                <div className="text-2xl mb-2">{template.icon}</div>
+                <div className="font-semibold">{template.name}</div>
+                <div className="text-xs opacity-80">{template.description}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Template Badge - only for AI mode */}
+      {selectedTemplate && !isStockMode && (
+        <div className="flex items-center gap-2 mb-4">
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            {TEMPLATES.find(t => t.id === selectedTemplate)?.icon} {TEMPLATES.find(t => t.id === selectedTemplate)?.name}
+          </Badge>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => {
+              setSelectedTemplate(null)
+              setShowTemplates(true)
+            }}
+          >
+            Change Template
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main Content */}
@@ -1202,6 +1421,108 @@ export default function StoryReelsPage({
                 </div>
               )}
 
+              {/* Visual References Section (@mentions) - AI mode only */}
+              {!isStockMode && (
+              <div className="space-y-3 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ImagePlus className="h-5 w-5 text-purple-500" />
+                    <div>
+                      <Label className="text-base font-semibold">Visual References</Label>
+                      <p className="text-xs text-muted-foreground">Add images and reference them in your prompt with @tags</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {visualReferences.length}/5
+                  </Badge>
+                </div>
+                
+                {/* Reference Images Grid */}
+                {visualReferences.length > 0 && (
+                  <div className="flex flex-wrap gap-3">
+                    {visualReferences.map((ref) => (
+                      <div key={ref.id} className="relative group">
+                        <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-purple-500/50 bg-background">
+                          <img 
+                            src={ref.preview} 
+                            alt={ref.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        {/* Tag Badge */}
+                        <div 
+                          className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full cursor-pointer hover:bg-purple-700 whitespace-nowrap"
+                          onClick={() => insertReferenceTag(ref.tag)}
+                          title="Click to insert into prompt"
+                        >
+                          {ref.tag}
+                        </div>
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => removeVisualReference(ref.id)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {/* Edit Name */}
+                        <input
+                          type="text"
+                          value={ref.name}
+                          onChange={(e) => updateReferenceName(ref.id, e.target.value)}
+                          className="absolute top-1 left-1 right-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity text-center"
+                          placeholder="Name"
+                          maxLength={10}
+                        />
+                      </div>
+                    ))}
+                    
+                    {/* Add More Button */}
+                    {visualReferences.length < 5 && (
+                      <label className="w-20 h-20 rounded-lg border-2 border-dashed border-purple-500/50 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-500/10 transition-colors">
+                        <Plus className="h-6 w-6 text-purple-500" />
+                        <span className="text-xs text-purple-500">Add</span>
+                        <input
+                          ref={referenceInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleAddVisualReference}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+                
+                {/* Empty State - Upload Button */}
+                {visualReferences.length === 0 && (
+                  <label className="flex items-center justify-center gap-3 p-4 border-2 border-dashed border-purple-500/30 rounded-lg cursor-pointer hover:bg-purple-500/5 transition-colors">
+                    <ImagePlus className="h-8 w-8 text-purple-500" />
+                    <div className="text-center">
+                      <p className="font-medium text-purple-600">Upload Reference Images</p>
+                      <p className="text-xs text-muted-foreground">People, products, or scenes to include in your video</p>
+                    </div>
+                    <input
+                      ref={referenceInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleAddVisualReference}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+                
+                {/* Usage Hint */}
+                {visualReferences.length > 0 && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Lightbulb className="h-3 w-3" />
+                    Click on any @tag to insert it into your prompt. Example: "{visualReferences[0]?.tag} is walking in the park"
+                  </p>
+                )}
+              </div>
+              )}
+
               {/* Script Textarea */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -1209,7 +1530,10 @@ export default function StoryReelsPage({
                   <span className="text-xs text-muted-foreground">{script.length} characters</span>
                 </div>
                 <Textarea
-                  placeholder="Describe what you want in your video... You can generate an AI script or use your text directly as the scene prompt!"
+                  placeholder={visualReferences.length > 0 
+                    ? `Use @tags to reference your images! Example: "${visualReferences[0]?.tag} is holding a product and walking through a busy street..."`
+                    : "Describe what you want in your video... You can generate an AI script or use your text directly as the scene prompt!"
+                  }
                   value={script}
                   onChange={(e) => setScript(e.target.value)}
                   rows={6}
@@ -1252,7 +1576,7 @@ export default function StoryReelsPage({
                   {scriptLoading ? (
                     <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating...</>
                   ) : (
-                    <><Sparkles className="mr-2 h-5 w-5" /> Generate AI Script</>
+                    <><Wand2 className="mr-2 h-5 w-5" /> Generate AI Script</>
                   )}
                 </Button>
                 <Button 
@@ -1310,7 +1634,7 @@ export default function StoryReelsPage({
               <CardContent className="pt-6 space-y-4">
                 {/* AI Mode: Video Quality Selection */}
                 {defaultVideoSource === 'ai' && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <div
                       className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         videoSource === 'ai-standard' || videoSource === 'ai-professional'
@@ -1321,26 +1645,45 @@ export default function StoryReelsPage({
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-2xl">🎬</span>
-                        <Badge className="bg-purple-500 text-white">Premium</Badge>
+                        <Badge className="bg-purple-500 text-white text-[10px]">Premium</Badge>
                       </div>
-                      <h4 className="font-semibold">Premium Quality</h4>
-                      <p className="text-xs text-muted-foreground mt-1">Best details & motion</p>
+                      <h4 className="font-semibold text-sm">Kling v2.5</h4>
+                      <p className="text-xs text-muted-foreground mt-1">Best quality & motion</p>
+                      <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mt-1.5">~2,600 credits / 30s</p>
                     </div>
                     
                     <div
                       className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        videoSource === 'ai-minimax'
+                        videoSource === 'ai-wan'
                           ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 shadow-md'
                           : 'border-muted hover:border-cyan-300'
                       }`}
-                      onClick={() => setVideoSource('ai-minimax')}
+                      onClick={() => setVideoSource('ai-wan')}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xl">🌊</span>
+                        <Badge className="bg-cyan-500 text-white text-[10px]">Balanced</Badge>
+                      </div>
+                      <h4 className="font-semibold text-sm">Wan 2.2</h4>
+                      <p className="text-xs text-muted-foreground mt-1">Great quality, affordable</p>
+                      <p className="text-xs font-medium text-cyan-600 dark:text-cyan-400 mt-1.5">~1,900 credits / 30s</p>
+                    </div>
+                    
+                    <div
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        videoSource === 'ai-ltx'
+                          ? 'border-green-500 bg-green-50 dark:bg-green-950/30 shadow-md'
+                          : 'border-muted hover:border-green-300'
+                      }`}
+                      onClick={() => setVideoSource('ai-ltx')}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-2xl">⚡</span>
-                        <Badge className="bg-cyan-500 text-white">Fast</Badge>
+                        <Badge className="bg-green-500 text-white text-[10px]">Fast</Badge>
                       </div>
-                      <h4 className="font-semibold">Fast Mode</h4>
-                      <p className="text-xs text-muted-foreground mt-1">Quick & budget-friendly</p>
+                      <h4 className="font-semibold text-sm">LTX Video</h4>
+                      <p className="text-xs text-muted-foreground mt-1">Fastest & budget</p>
+                      <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1.5">~400 credits / 30s</p>
                     </div>
                   </div>
                 )}
@@ -1356,7 +1699,7 @@ export default function StoryReelsPage({
                       {generatingPrompts ? (
                         <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Creating Scenes...</>
                       ) : (
-                        <><Zap className="mr-2 h-5 w-5" /> Generate {Math.ceil(duration / 10)} Video Scenes</>
+                        <><Play className="mr-2 h-5 w-5" /> Generate {Math.ceil(duration / 10)} Video Scenes</>
                       )}
                     </Button>
 
@@ -1623,7 +1966,7 @@ export default function StoryReelsPage({
                         {voicesByVariant[languageVariant].map((voice) => (
                           <div
                             key={voice.name}
-                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all relative group ${
                               selectedVoice === voice.name 
                                 ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
                                 : 'border-muted hover:border-green-300'
@@ -1639,6 +1982,30 @@ export default function StoryReelsPage({
                                 <div className="text-xs text-muted-foreground">{getVoiceType(voice.name)}</div>
                               </div>
                             </div>
+                            {/* Voice Preview Button - Always visible */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (previewingVoice === voice.name) {
+                                  stopVoicePreview()
+                                } else {
+                                  handleVoicePreview(voice)
+                                }
+                              }}
+                              className={`absolute top-1.5 right-1.5 p-2 rounded-full transition-all shadow-sm border ${
+                                previewingVoice === voice.name 
+                                  ? 'bg-red-500 text-white border-red-600 animate-pulse' 
+                                  : 'bg-primary text-primary-foreground border-primary/80 hover:bg-primary/90'
+                              }`}
+                              title={previewingVoice === voice.name ? "Stop preview" : "Preview voice"}
+                            >
+                              {previewingVoice === voice.name ? (
+                                <Square className="h-3.5 w-3.5" />
+                              ) : (
+                                <Volume2 className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -1802,6 +2169,21 @@ export default function StoryReelsPage({
                       </Select>
                     </div>
                     
+                    {/* Video Orientation / Format */}
+                    <div className="space-y-2">
+                      <Label>Video Format</Label>
+                      <Select value={videoOrientation} onValueChange={setVideoOrientation}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="portrait">📱 Portrait (9:16) - TikTok/Reels</SelectItem>
+                          <SelectItem value="landscape">🖥️ Landscape (16:9) - YouTube</SelectItem>
+                          <SelectItem value="square">⬛ Square (1:1) - Instagram</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
                     {/* Background Music */}
                     <div className="space-y-2">
                       <Label>Background Music</Label>
@@ -1897,8 +2279,10 @@ export default function StoryReelsPage({
                 {/* Engaging tips while waiting */}
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
                   <p className="text-xs text-muted-foreground">
-                    💡 <span className="font-medium">Tip:</span> AI video generation takes ~2 min per scene. 
-                    Your {actualDuration}s video with {scenePrompts.length || Math.ceil(actualDuration/10)} scenes is being crafted!
+                    💡 <span className="font-medium">Tip:</span> {isAIMode 
+                      ? `AI video generation takes ~2 min per scene. Your ${actualDuration}s video with ${scenePrompts.length || Math.ceil(actualDuration/10)} scenes is being crafted!`
+                      : `Your ${actualDuration}s stock video is being assembled with voiceover, music, and captions!`
+                    }
                   </p>
                 </div>
                 

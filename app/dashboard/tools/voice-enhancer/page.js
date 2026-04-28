@@ -10,10 +10,25 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Upload, Download, Play, Pause, Volume2, Mic,
-  RefreshCw, X, FileAudio, Waves, Zap,
-  FastForward, Rewind, Radio, Podcast, Speech, Music2, Video, Wand2
+import {
+  Upload,
+  Download,
+  Play,
+  Pause,
+  Volume2,
+  Mic,
+  RefreshCw,
+  X,
+  FileAudio,
+  Waves,
+  FastForward,
+  Rewind,
+  Radio,
+  Podcast,
+  Speech,
+  Music2,
+  Video,
+  Wand2
 } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 
@@ -264,7 +279,7 @@ export default function VoiceEnhancerPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Zap className="h-5 w-5" /> Voice Enhancement
+                <Play className="h-5 w-5" /> Voice Enhancement
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -471,7 +486,7 @@ export default function VoiceEnhancerPage() {
           <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 dark:border-orange-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-orange-800 dark:text-orange-200">
-                <Zap className="h-4 w-4" /> Pro Tips
+                <Play className="h-4 w-4" /> Pro Tips
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs space-y-2 text-orange-700 dark:text-orange-300">

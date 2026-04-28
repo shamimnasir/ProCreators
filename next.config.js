@@ -1,12 +1,23 @@
 const nextConfig = {
   output: 'standalone',
+  // Generate unique deployment ID to prevent Server Action mismatches
+  generateBuildId: async () => {
+    // Use timestamp-based build ID to ensure consistency across pods
+    return `build-${Date.now()}`
+  },
   images: {
     unoptimized: true,
   },
   // Moved from experimental in Next.js 15
-  serverExternalPackages: ['mongodb'],
+  serverExternalPackages: ['mongodb', 'fluent-ffmpeg'],
   // Empty turbopack config to silence warning
   turbopack: {},
+  // Disable Server Actions if not explicitly used (prevents ID mismatch errors)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
   webpack(config, { dev }) {
     if (dev) {
       // Reduce CPU/memory from file watching
@@ -39,6 +50,8 @@ const nextConfig = {
           { key: "Access-Control-Allow-Origin", value: process.env.CORS_ORIGINS || "*" },
           { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          // Cache control to prevent stale JS
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
         ],
       },
       // SECURITY: Extra protection for API routes

@@ -8,7 +8,14 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Heart, Loader2, Copy, Download, Wand2, Zap } from 'lucide-react'
+import {
+  Heart,
+  Loader2,
+  Copy,
+  Download,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
@@ -310,7 +317,7 @@ export default function LoveLetterPage() {
       <Card className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30">
         <CardHeader>
           <CardTitle className="text-pink-800 dark:text-pink-200 flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+            <Play className="h-5 w-5" />
             Tips for the Perfect Love Letter
           </CardTitle>
         </CardHeader>

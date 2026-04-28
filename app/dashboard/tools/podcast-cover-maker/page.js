@@ -11,10 +11,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Wand2, Upload, Download, ImageIcon, RefreshCw,
-  Zap, Target, X, Copy, Headphones, Mic, Radio, Music,
-  Layers, Play, Volume2
+import {
+  Wand2,
+  Upload,
+  Download,
+  ImageIcon,
+  RefreshCw,
+  Play,
+  Target,
+  X,
+  Copy,
+  Headphones,
+  Mic,
+  Radio,
+  Music,
+  Layers,
+  Volume2
 } from 'lucide-react'
 // Platform specifications
 const PLATFORM_SPECS = [
@@ -378,7 +390,7 @@ DESIGN REQUIREMENTS:
                   selectedModel === 'nano-banana' ? 'bg-white text-teal-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Fast
               </button>
               <button
@@ -387,7 +399,7 @@ DESIGN REQUIREMENTS:
                   selectedModel === 'nano-banana-pro' ? 'bg-white text-teal-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Pro HD
               </button>
             </div>

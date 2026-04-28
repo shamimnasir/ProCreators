@@ -13,12 +13,29 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Presentation, Copy, Loader2, Wand2,
-  Check, ArrowLeft, TrendingUp, Users, BarChart3,
-  Lightbulb, Target, DollarSign, Layers, Rocket,
-  CheckCircle2, ChevronRight, Download, Eye, 
-  Building2, MessageSquare, Award, Play
+import {
+  Presentation,
+  Copy,
+  Loader2,
+  Wand2,
+  Check,
+  ArrowLeft,
+  TrendingUp,
+  Users,
+  BarChart3,
+  Lightbulb,
+  Target,
+  DollarSign,
+  Layers,
+  Rocket,
+  CheckCircle2,
+  ChevronRight,
+  Download,
+  Eye,
+  Building2,
+  MessageSquare,
+  Award,
+  Play
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'

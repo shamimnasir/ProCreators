@@ -14,12 +14,36 @@ import { Switch } from '@/components/ui/switch'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Mail, Copy, Loader2, Wand2, RefreshCw,
-  Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
-  Lightbulb, Target, Send, Clock, Calendar, Layers,
-  MousePointer, Eye, CheckCircle2, ChevronRight, Download,
-  FileText, Heart, Bell, Gift, Megaphone, UserPlus, ShoppingCart
+import {
+  Mail,
+  Copy,
+  Loader2,
+  Wand2,
+  RefreshCw,
+  Check,
+  ArrowLeft,
+  Play,
+  Users,
+  TrendingUp,
+  BarChart3,
+  Lightbulb,
+  Target,
+  Send,
+  Clock,
+  Calendar,
+  Layers,
+  MousePointer,
+  Eye,
+  CheckCircle2,
+  ChevronRight,
+  Download,
+  FileText,
+  Heart,
+  Bell,
+  Gift,
+  Megaphone,
+  UserPlus,
+  ShoppingCart
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
@@ -264,25 +288,26 @@ export default function EmailCampaignPage() {
   }), [campaignType, campaignGoal, industry, brandName, brandDescription, brandVoice, targetAudience, audiencePainPoints, audienceDesires, mainOffer, keyBenefits, uniqueValue, callToAction, productName, price, deadline, socialProof, tone, emailCount, result])
 
   const loadDraftData = useCallback((data) => {
-    if (data.campaignType) setCampaignType(data.campaignType)
-    if (data.campaignGoal) setCampaignGoal(data.campaignGoal)
-    if (data.industry) setIndustry(data.industry)
-    if (data.brandName) setBrandName(data.brandName)
-    if (data.brandDescription) setBrandDescription(data.brandDescription)
-    if (data.brandVoice) setBrandVoice(data.brandVoice)
-    if (data.targetAudience) setTargetAudience(data.targetAudience)
-    if (data.audiencePainPoints) setAudiencePainPoints(data.audiencePainPoints)
-    if (data.audienceDesires) setAudienceDesires(data.audienceDesires)
-    if (data.mainOffer) setMainOffer(data.mainOffer)
-    if (data.keyBenefits) setKeyBenefits(data.keyBenefits)
-    if (data.uniqueValue) setUniqueValue(data.uniqueValue)
-    if (data.callToAction) setCallToAction(data.callToAction)
-    if (data.productName) setProductName(data.productName)
-    if (data.price) setPrice(data.price)
-    if (data.deadline) setDeadline(data.deadline)
-    if (data.socialProof) setSocialProof(data.socialProof)
-    if (data.tone) setTone(data.tone)
-    if (data.emailCount) setEmailCount(data.emailCount)
+    // Use explicit undefined checks to handle empty strings properly
+    setCampaignType(data.campaignType || 'newsletter')
+    setCampaignGoal(data.campaignGoal !== undefined ? data.campaignGoal : '')
+    setIndustry(data.industry || 'ecommerce')
+    setBrandName(data.brandName !== undefined ? data.brandName : '')
+    setBrandDescription(data.brandDescription !== undefined ? data.brandDescription : '')
+    setBrandVoice(data.brandVoice !== undefined ? data.brandVoice : '')
+    setTargetAudience(data.targetAudience !== undefined ? data.targetAudience : '')
+    setAudiencePainPoints(data.audiencePainPoints !== undefined ? data.audiencePainPoints : '')
+    setAudienceDesires(data.audienceDesires !== undefined ? data.audienceDesires : '')
+    setMainOffer(data.mainOffer !== undefined ? data.mainOffer : '')
+    setKeyBenefits(data.keyBenefits !== undefined ? data.keyBenefits : '')
+    setUniqueValue(data.uniqueValue !== undefined ? data.uniqueValue : '')
+    setCallToAction(data.callToAction !== undefined ? data.callToAction : '')
+    setProductName(data.productName !== undefined ? data.productName : '')
+    setPrice(data.price !== undefined ? data.price : '')
+    setDeadline(data.deadline !== undefined ? data.deadline : '')
+    setSocialProof(data.socialProof !== undefined ? data.socialProof : '')
+    setTone(data.tone || 'friendly')
+    setEmailCount(data.emailCount || 3)
     if (data.result) {
       setResult(data.result)
       setActiveTab('results')
@@ -641,7 +666,7 @@ export default function EmailCampaignPage() {
                     <Card>
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-yellow-500" />
+                          <Play className="h-5 w-5 text-yellow-500" />
                           Additional Details
                         </CardTitle>
                       </CardHeader>
@@ -1083,7 +1108,7 @@ export default function EmailCampaignPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-pink-600">
-                          <Zap className="h-5 w-5" />
+                          <Play className="h-5 w-5" />
                           A/B Test Ideas
                         </CardTitle>
                       </CardHeader>

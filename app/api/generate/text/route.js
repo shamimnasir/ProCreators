@@ -6,6 +6,10 @@ import { generateWithTracking, estimateTokens } from '@/lib/ai-tracking'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { humanizeText, cleanMarkdown } from '@/lib/hooks/useHumanize'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const DEFAULT_TOOL_ID = 'story-writer'
 
 // Text generation input schema
 const textGenerationSchema = z.object({
@@ -18,6 +22,9 @@ const textGenerationSchema = z.object({
 })
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
@@ -25,11 +32,42 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+
     const body = await request.json()
+    const toolId = body.type || DEFAULT_TOOL_ID
+    
+    const creditCheck = await checkCredits(userId, toolId)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, toolId)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
     
     // SECURITY: Validate input with Zod schema
     const validation = validateRequest(textGenerationSchema, body)
     if (!validation.success) {
+      // Refund for validation failure
+      if (transactionId) await refundCredits(userId, transactionId, 'Validation failed')
       return NextResponse.json({
         success: false,
         error: 'Validation failed',
@@ -37,7 +75,7 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
-    const { prompt, type, systemMessage, userId, transactionId, creditsCharged } = validation.data
+    const { prompt, type, systemMessage, creditsCharged } = validation.data
 
     // Get system prompt for the tool type
     let finalSystemMessage = systemMessage
@@ -72,11 +110,16 @@ export async function POST(request) {
     )
     
     if (!result.success) {
+      // Refund on generation failure
+      if (transactionId) await refundCredits(userId, transactionId, result.error)
       return NextResponse.json(
         { success: false, error: result.error },
         { status: 500 }
       )
     }
+    
+    // Complete transaction on success
+    if (transactionId) await completeTransaction(transactionId)
     
     // Track API cost if we have tracking info
     if (userId && transactionId && creditsCharged) {
@@ -96,18 +139,11 @@ export async function POST(request) {
       }
     }
     
-    // Clean up formatting: Replace asterisks with dashes, remove emojis
+    // Clean up formatting: Remove markdown and clean asterisks
     let cleanedContent = result.content
     
-    // Replace ** bold markers ** with nothing (just keep the text)
-    cleanedContent = cleanedContent.replace(/\*\*([^*]+)\*\*/g, '$1')
-    
-    // Replace single asterisks used as bullets with dashes
-    cleanedContent = cleanedContent.replace(/^[\s]*\*[\s]+/gm, '- ')
-    cleanedContent = cleanedContent.replace(/\n[\s]*\*[\s]+/g, '\n- ')
-    
-    // Remove any remaining asterisks
-    cleanedContent = cleanedContent.replace(/\*/g, '')
+    // Use shared cleanMarkdown function
+    cleanedContent = cleanMarkdown(cleanedContent)
     
     // Remove common emojis (basic cleanup)
     cleanedContent = cleanedContent.replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
@@ -117,6 +153,10 @@ export async function POST(request) {
     cleanedContent = cleanedContent.replace(/[\u{2600}-\u{26FF}]/gu, '')   // Misc symbols
     cleanedContent = cleanedContent.replace(/[\u{2700}-\u{27BF}]/gu, '')   // Dingbats
     
+    // HUMANIZE: Remove AI-sounding words and replace with natural alternatives
+    // This makes the generated content sound more human-written
+    cleanedContent = humanizeText(cleanedContent, { removeFiller: true })
+    
     return NextResponse.json({
       success: true,
       content: cleanedContent,
@@ -124,6 +164,10 @@ export async function POST(request) {
     })
   } catch (error) {
     console.error('Text generation error:', error)
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to generate text' },
       { status: 500 }

@@ -14,11 +14,35 @@ import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Wand2, Upload, Download, ImageIcon, Type, RefreshCw,
-  Camera, Zap, Target, Eye, Palette, Layout, X, Check, Copy,
-  Youtube, Instagram, Facebook, Twitter, Linkedin, MonitorPlay,
-  Plus, Trash2, Move, Bold, AlignLeft, AlignCenter, AlignRight
+import {
+  Wand2,
+  Upload,
+  Download,
+  ImageIcon,
+  Type,
+  RefreshCw,
+  Camera,
+  Play,
+  Target,
+  Eye,
+  Palette,
+  Layout,
+  X,
+  Check,
+  Copy,
+  Youtube,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  MonitorPlay,
+  Plus,
+  Trash2,
+  Move,
+  Bold,
+  AlignLeft,
+  AlignCenter,
+  AlignRight
 } from 'lucide-react'
 
 // Bengali-friendly fonts available in most systems
@@ -798,7 +822,7 @@ export default function ThumbnailMakerPage() {
                   selectedModel === 'nano-banana' ? 'bg-white text-red-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Fast
               </button>
               <button
@@ -807,7 +831,7 @@ export default function ThumbnailMakerPage() {
                   selectedModel === 'nano-banana-pro' ? 'bg-white text-red-600' : 'hover:bg-white/10'
                 }`}
               >
-                <Zap className="h-4 w-4 inline mr-1" />
+                <Play className="h-4 w-4 inline mr-1" />
                 Pro HD
               </button>
             </div>

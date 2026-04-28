@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server'
 import { SYSTEM_PROMPTS } from '@/lib/system-prompts'
 import { getCollection } from '@/lib/mongodb'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const tool = searchParams.get('tool')

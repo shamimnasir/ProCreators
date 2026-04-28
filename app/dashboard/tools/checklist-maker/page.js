@@ -6,7 +6,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Download, ArrowLeft, ArrowRight, CheckCircle, DollarSign, Plus, Trash2, Save, FolderOpen, FilePlus, Clock, Edit3, Wand2, Zap } from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  DollarSign,
+  Plus,
+  Trash2,
+  Save,
+  FolderOpen,
+  FilePlus,
+  Clock,
+  Edit3,
+  Wand2,
+  Play
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
@@ -809,7 +825,7 @@ export default function ChecklistMakerPage() {
           <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-200">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-amber-800 dark:text-amber-200">
-                <Zap className="h-4 w-4" />
+                <Play className="h-4 w-4" />
                 Pro Tips
               </CardTitle>
             </CardHeader>

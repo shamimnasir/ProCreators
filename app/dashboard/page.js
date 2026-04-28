@@ -10,7 +10,7 @@ import {
   FileText,
   Image as ImageIcon,
   Video,
-  Zap,
+  Gauge,
   ArrowRight,
   Calendar,
   Target,
@@ -23,10 +23,18 @@ import {
   PenTool,
   Star,
   Crown,
-  Layers
+  Layers,
+  Ticket,
+  Gift,
+  Check,
+  X
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useToast } from '@/hooks/use-toast'
+
+import { OnboardingWizard } from '@/components/shared/OnboardingWizard'
 
 // Quick action cards with vibrant colors
 const quickActions = [
@@ -70,7 +78,7 @@ const quickActions = [
 
 // Popular tools
 const popularTools = [
-  { name: 'Quick Reels', href: '/dashboard/tools/quick-reels', icon: Zap, color: 'bg-amber-100 dark:bg-amber-900/30' },
+  { name: 'Quick Reels', href: '/dashboard/tools/quick-reels', icon: Gauge, color: 'bg-amber-100 dark:bg-amber-900/30' },
   { name: 'Thumbnails', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon, color: 'bg-blue-100 dark:bg-blue-900/30' },
   { name: 'Blog Writer', href: '/dashboard/tools/blog-creator', icon: FileText, color: 'bg-green-100 dark:bg-green-900/30' },
   { name: 'Ad Copy', href: '/dashboard/tools/ad-copy', icon: Target, color: 'bg-red-100 dark:bg-red-900/30' },
@@ -114,6 +122,19 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [userName, setUserName] = useState('')
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  // Coupon redemption state
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponResult, setCouponResult] = useState(null) // { success, message } or { error }
+  const { toast } = useToast()
+  // Initialize greeting as null to avoid hydration mismatch - will be set client-side
+  const [greeting, setGreeting] = useState({ text: 'Hello', emoji: '👋' })
+
+  // Set greeting on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setGreeting(getGreeting())
+  }, [])
 
   useEffect(() => {
     const getUserAndFetchStats = async () => {
@@ -147,6 +168,13 @@ export default function DashboardPage() {
         if (data.success) {
           setStats(data.stats)
           setRecentActivity(data.recentActivity || [])
+          
+          // Show onboarding for new users (0 creations and not previously dismissed)
+          const totalItems = (data.stats?.totalContent || 0) + (data.stats?.videoContent || 0) + (data.stats?.imageContent || 0)
+          const onboardingDone = localStorage.getItem('onboarding_complete')
+          if (totalItems === 0 && !onboardingDone) {
+            setShowOnboarding(true)
+          }
         } else {
           setError(data.error || 'Failed to fetch stats')
         }
@@ -161,19 +189,53 @@ export default function DashboardPage() {
     getUserAndFetchStats()
   }, [])
 
-  const greeting = getGreeting()
   const totalCreations = (stats?.totalContent || 0) + (stats?.videoContent || 0)
   const weeklyGoal = 10
   const progressPercent = Math.min((totalCreations / weeklyGoal) * 100, 100)
 
+  const handleRedeemCoupon = async () => {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    setCouponResult(null)
+    try {
+      const token = localStorage.getItem('sessionToken')
+      const res = await fetch('/api/coupons/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setCouponResult({ success: true, message: data.message })
+        setCouponCode('')
+        toast({ title: 'Coupon Redeemed!', description: data.message })
+      } else {
+        setCouponResult({ success: false, message: data.error })
+      }
+    } catch (err) {
+      setCouponResult({ success: false, message: 'Failed to redeem coupon' })
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6 pb-8">
+      {/* Onboarding Wizard for new users */}
+      {showOnboarding && (
+        <OnboardingWizard onComplete={() => setShowOnboarding(false)} />
+      )}
+      
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 md:p-8 text-white"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-6 md:p-8 text-white shadow-xl"
       >
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-sm" />
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -204,10 +266,10 @@ export default function DashboardPage() {
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { name: 'Total Creations', value: stats?.totalContent || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30', trend: '+12%' },
-          { name: 'Videos Made', value: stats?.videoContent || 0, icon: Video, color: 'text-pink-600', bg: 'bg-pink-100 dark:bg-pink-900/30', trend: '+8%' },
-          { name: 'Images Created', value: stats?.imageContent || 0, icon: ImageIcon, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30', trend: '+15%' },
-          { name: 'AI Generations', value: stats?.aiGenerations || 0, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', trend: '+20%' },
+          { name: 'Total Creations', value: stats?.totalContent || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100', trend: '+12%' },
+          { name: 'Videos Made', value: stats?.videoContent || 0, icon: Video, color: 'text-pink-600', bg: 'bg-pink-100', trend: '+8%' },
+          { name: 'Images Created', value: stats?.imageContent || 0, icon: ImageIcon, color: 'text-purple-600', bg: 'bg-purple-100', trend: '+15%' },
+          { name: 'AI Generations', value: stats?.aiGenerations || 0, icon: Gauge, color: 'text-amber-600', bg: 'bg-amber-100', trend: '+20%' },
         ].map((stat, index) => (
           <motion.div
             key={stat.name}
@@ -215,14 +277,14 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
           >
-            <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
+            <Card className="relative overflow-hidden glass-card hover:shadow-xl transition-all duration-300">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div className={`p-2.5 rounded-xl ${stat.bg}`}>
                     <stat.icon className={`h-5 w-5 ${stat.color}`} />
                   </div>
                   {stat.value > 0 && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <Badge variant="secondary" className="bg-green-100 text-green-700">
                       <TrendingUp className="h-3 w-3 mr-1" />
                       {stat.trend}
                     </Badge>
@@ -249,7 +311,7 @@ export default function DashboardPage() {
           {/* Quick Actions */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-5 w-5 text-purple-500" />
+              <Gauge className="h-5 w-5 text-purple-500" />
               <h2 className="text-lg font-semibold">Quick Actions</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
@@ -261,7 +323,7 @@ export default function DashboardPage() {
                   transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
                 >
                   <Link href={action.href}>
-                    <Card className={`group cursor-pointer transition-all hover:shadow-xl border-0 ${action.bgLight}`}>
+                    <Card className={`group cursor-pointer transition-all duration-300 glass-card hover:bg-white/80 hover:shadow-xl hover:-translate-y-1 border-0`}>
                       <CardContent className="p-5">
                         <div className="flex items-start justify-between mb-3">
                           <div className={`p-3 rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-lg`}>
@@ -285,7 +347,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <Card>
+          <Card className="glass-card">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -317,9 +379,9 @@ export default function DashboardPage() {
                         className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors"
                       >
                         <div className={`p-2 rounded-lg ${
-                          item.category === 'video' ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30' : 
-                          item.category === 'image' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 
-                          'bg-blue-100 text-blue-600 dark:bg-blue-900/30'
+                          item.category === 'video' ? 'bg-pink-100 text-pink-600' : 
+                          item.category === 'image' ? 'bg-purple-100 text-purple-600' : 
+                          'bg-blue-100 text-blue-600'
                         }`}>
                           <Icon className="h-4 w-4" />
                         </div>
@@ -352,7 +414,7 @@ export default function DashboardPage() {
         {/* Right Column - Progress & Popular */}
         <div className="space-y-6">
           {/* Weekly Progress */}
-          <Card className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border-violet-200/50 dark:border-violet-800/30">
+          <Card className="glass-card bg-gradient-to-br from-violet-50/80 to-purple-50/80 border-violet-200/50">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Target className="h-5 w-5 text-violet-600" />
@@ -395,8 +457,47 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* Redeem Coupon */}
+          <Card className="glass-card bg-gradient-to-br from-emerald-50/80 to-teal-50/80 border-emerald-200/50">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 rounded-xl bg-emerald-100">
+                  <Ticket className="h-5 w-5 text-emerald-600" />
+                </div>
+                <h3 className="font-semibold">Have a Coupon?</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Enter your promo code to claim credits or discounts
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter code..."
+                  value={couponCode}
+                  onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null) }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRedeemCoupon()}
+                  className="font-mono tracking-wider glass-input"
+                  disabled={couponLoading}
+                />
+                <Button
+                  size="sm"
+                  onClick={handleRedeemCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+                >
+                  {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gift className="h-4 w-4" />}
+                </Button>
+              </div>
+              {couponResult && (
+                <div className={`mt-2 flex items-center gap-1.5 text-xs ${couponResult.success ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {couponResult.success ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                  {couponResult.message}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Popular Tools */}
-          <Card>
+          <Card className="glass-card">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-amber-500" />
@@ -419,7 +520,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Pro Upgrade */}
-          <Card className="bg-gradient-to-br from-violet-600 to-purple-700 text-white border-0">
+          <Card className="bg-gradient-to-br from-violet-600 to-purple-700 text-white border-0 shadow-xl shadow-purple-200/50 backdrop-blur-sm">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Crown className="h-5 w-5 text-yellow-300" />

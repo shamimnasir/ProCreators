@@ -12,11 +12,30 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  DollarSign, Loader2, Target, TrendingUp, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
-  Mail, Phone, Shield, Award, ChevronDown, ChevronUp,
-  Briefcase, Users, AlertCircle, Check, Zap, Heart, Wand2} from 'lucide-react'
+import {
+  DollarSign,
+  Loader2,
+  Target,
+  TrendingUp,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  MessageSquare,
+  Mail,
+  Phone,
+  Shield,
+  Award,
+  ChevronDown,
+  ChevronUp,
+  Briefcase,
+  Users,
+  AlertCircle,
+  Check,
+  Play,
+  Heart,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 
@@ -635,7 +654,7 @@ export default function SalaryNegotiatorPage() {
                 <Shield className="h-4 w-4" />Objections
               </TabsTrigger>
               <TabsTrigger value="tactics" className="flex items-center gap-1">
-                <Zap className="h-4 w-4" />Tactics
+                <Play className="h-4 w-4" />Tactics
               </TabsTrigger>
             </TabsList>
 

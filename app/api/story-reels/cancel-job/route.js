@@ -53,7 +53,6 @@ export async function POST(request) {
     const chargeForGenerated = Math.ceil((clipsGenerated / totalClips) * originalCost)
     const refundAmount = Math.max(0, originalCost - chargeForGenerated)
     
-    console.log(`[${jobId}] Cancel requested - Clips: ${clipsGenerated}/${totalClips}, Cost: ${originalCost}, Charge: ${chargeForGenerated}, Refund: ${refundAmount}`)
     
     // Update job status to cancelled
     await jobsCollection.updateOne(
@@ -78,15 +77,12 @@ export async function POST(request) {
         if (clipsGenerated === 0) {
           // No clips generated - full refund
           refundResult = await refundCredits(job.transactionId, 'User cancelled before generation started')
-          console.log(`[${jobId}] Full refund:`, refundResult)
         } else if (refundAmount > 0) {
           // Partial refund - charge for generated clips, refund the rest
           refundResult = await partialRefundCredits(job.transactionId, refundAmount, 
             `User cancelled after ${clipsGenerated}/${totalClips} clips generated`)
-          console.log(`[${jobId}] Partial refund (${refundAmount} credits):`, refundResult)
         } else {
           // All clips generated - no refund
-          console.log(`[${jobId}] No refund - all clips were already generated`)
           refundResult = { success: true, refundedAmount: 0, message: 'All clips already generated' }
         }
       } catch (refundError) {
@@ -94,7 +90,6 @@ export async function POST(request) {
       }
     }
     
-    console.log(`[${jobId}] Job cancelled by user`)
     
     return NextResponse.json({
       success: true,

@@ -10,13 +10,44 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Download, BookOpen, ArrowLeft, ArrowRight,
-  FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
-  RefreshCw, Eye, Save, List, BookMarked, ChevronDown, ChevronUp,
-  Type, Image, Layout, FolderOpen, Clock, FilePlus,
-  Heading1, Heading2, Heading3, Quote, ListOrdered, 
-  Lightbulb, AlertTriangle, Info, MessageSquare, Zap, Wand2} from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  BookOpen,
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Palette,
+  CheckCircle,
+  User,
+  Edit3,
+  Plus,
+  Trash2,
+  RefreshCw,
+  Eye,
+  Save,
+  List,
+  BookMarked,
+  ChevronDown,
+  ChevronUp,
+  Type,
+  Image,
+  Layout,
+  FolderOpen,
+  Clock,
+  FilePlus,
+  Heading1,
+  Heading2,
+  Heading3,
+  Quote,
+  ListOrdered,
+  Lightbulb,
+  AlertTriangle,
+  Info,
+  MessageSquare,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
@@ -1128,7 +1159,7 @@ export default function EbookMakerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
+              <Play className="h-5 w-5 text-yellow-500" />
               Step 1: What is Your Ebook About?
             </CardTitle>
             <CardDescription>Enter your topic and AI will create a detailed outline</CardDescription>

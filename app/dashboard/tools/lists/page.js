@@ -1,5 +1,7 @@
 'use client'
 
+import { saveToLibrary } from '@/lib/secure-api'
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -55,18 +57,14 @@ export default function ListsPage() {
       if (data.success) {
         setGeneratedList(data.content)
         
-        // Auto-save to library
+        // Auto-save to library using secure API
         try {
-          await fetch('/api/library/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              content: data.content,
-              type: 'text',
-              title: `List: ${topic.substring(0, 50)}`,
-              description: data.content.substring(0, 100),
-              metadata: { topic, listType, language, contentType: 'list' }
-            })
+          await saveToLibrary({
+            content: data.content,
+            type: 'text',
+            title: `List: ${topic.substring(0, 50)}`,
+            description: data.content.substring(0, 100),
+            metadata: { topic, listType, language, contentType: 'list' }
           })
           console.log('List auto-saved to library')
         } catch (saveError) {
@@ -95,26 +93,19 @@ export default function ListsPage() {
     if (!generatedList) return
     
     try {
-      const response = await fetch('/api/library/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: generatedList,
-          type: 'list',
-          title: `List: ${topic.substring(0, 50)}`,
-          description: generatedList.substring(0, 100),
-          metadata: {
-            topic,
-            listType,
-            language
-          }
-        })
+      const data = await saveToLibrary({
+        content: generatedList,
+        type: 'list',
+        title: `List: ${topic.substring(0, 50)}`,
+        description: generatedList.substring(0, 100),
+        metadata: {
+          topic,
+          listType,
+          language
+        }
       })
       
-      const data = await response.json()
-      
       if (data.success) {
-        await complete(creditResult.transactionId)
         toast({
           title: "Saved",
           description: "List saved to library successfully!"
@@ -239,7 +230,24 @@ export default function ListsPage() {
             {generatedList ? (
               <>
                 <div className="rounded-lg border bg-muted/50 p-4 max-h-96 overflow-y-auto">
-                  <p className="whitespace-pre-wrap text-sm">{generatedList}</p>
+                  <div className="text-sm space-y-2">
+                    {generatedList.split('\n').map((line, index) => {
+                      // Style hooks and section headers differently
+                      if (line.includes('🔥') || line.includes('📋') || line.includes('✅')) {
+                        return <p key={index} className="font-bold text-primary mt-4">{line}</p>
+                      }
+                      if (line.startsWith('---')) {
+                        return <hr key={index} className="my-2 border-border" />
+                      }
+                      if (line.match(/^\d+\./)) {
+                        return <p key={index} className="font-semibold mt-3">{line}</p>
+                      }
+                      if (line.trim() === '') {
+                        return <br key={index} />
+                      }
+                      return <p key={index}>{line}</p>
+                    })}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Button variant="outline" className="w-full" onClick={handleDownload}>

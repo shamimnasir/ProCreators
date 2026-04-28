@@ -10,13 +10,34 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  ArrowLeft, Save, Eye, Plus, Trash2, GripVertical, 
-  ChevronUp, ChevronDown, Loader2, Settings, FileText,
-  Image, Type, List, HelpCircle, Play, Quote, DollarSign,
-  BarChart, Minus, Code, Layout, Columns, Star
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Plus,
+  Trash2,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  Loader2,
+  Settings,
+  FileText,
+  Image,
+  Type,
+  List,
+  HelpCircle,
+  Play,
+  Quote,
+  DollarSign,
+  BarChart,
+  Minus,
+  Code,
+  Layout,
+  Columns,
+  Star
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -68,6 +89,7 @@ export default function EditPagePage({ params }) {
   const [blockTypes, setBlockTypes] = useState([])
   const [expandedBlock, setExpandedBlock] = useState(null)
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
   const router = useRouter()
 
   useEffect(() => {
@@ -86,7 +108,7 @@ export default function EditPagePage({ params }) {
         // Initialize page if it doesn't exist
         const initRes = await fetch('/api/admin/pages', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
           body: JSON.stringify({ toolId, toolName: toolId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), action: 'initialize' })
         })
         const initData = await initRes.json()
@@ -118,7 +140,7 @@ export default function EditPagePage({ params }) {
     try {
       const res = await fetch('/api/admin/pages', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({
           toolId,
           seo: page.seo,

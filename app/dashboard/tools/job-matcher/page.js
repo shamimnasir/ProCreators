@@ -13,11 +13,30 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Target, Loader2, CheckCircle, XCircle, AlertTriangle,
-  FileText, Briefcase, TrendingUp, Lightbulb, RefreshCw, Upload,
-  ChevronRight, Award, Zap, Shield, ArrowUp, ArrowDown, Minus,
-  Copy, Check, FileUp, X, ExternalLink
+import {
+  Target,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  FileText,
+  Briefcase,
+  TrendingUp,
+  Lightbulb,
+  RefreshCw,
+  Upload,
+  ChevronRight,
+  Award,
+  Play,
+  Shield,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  Copy,
+  Check,
+  FileUp,
+  X,
+  ExternalLink
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -320,7 +339,7 @@ function AnalysisResults({ data }) {
                 {data.competitiveAnalysis.standoutOpportunities?.length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-purple-700 mb-2 flex items-center gap-1">
-                      <Zap className="h-4 w-4" /> Stand Out Opportunities
+                      <Play className="h-4 w-4" /> Stand Out Opportunities
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {data.competitiveAnalysis.standoutOpportunities.map((point, i) => (
@@ -559,7 +578,7 @@ export default function JobMatcherPage() {
           <p className="text-muted-foreground mt-1">Match your resume to job requirements & optimize for ATS</p>
         </div>
         <Badge className="bg-blue-100 text-blue-800">
-          <Zap className="h-3 w-3 mr-1" />Smart Match
+          <Play className="h-3 w-3 mr-1" />Smart Match
         </Badge>
       </div>
 

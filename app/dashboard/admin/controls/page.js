@@ -8,11 +8,23 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-  AlertTriangle, Power, Shield, Zap, Video, Image, Music, 
-  FileText, Type, Loader2, RefreshCw, History, AlertCircle
+import {
+  AlertTriangle,
+  Power,
+  Shield,
+  Play,
+  Video,
+  Image,
+  Music,
+  FileText,
+  Type,
+  Loader2,
+  RefreshCw,
+  History,
+  AlertCircle
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCsrf } from '@/hooks/use-csrf'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +53,7 @@ export default function AdminControlsPage() {
   const [emergencyReason, setEmergencyReason] = useState('')
   const [maintenanceMessage, setMaintenanceMessage] = useState('')
   const { toast } = useToast()
+  const { getCsrfHeaders } = useCsrf()
 
   const fetchControls = async () => {
     setLoading(true)
@@ -68,7 +81,7 @@ export default function AdminControlsPage() {
     try {
       const res = await fetch('/api/admin/controls', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getCsrfHeaders() },
         body: JSON.stringify({ action, adminId: 'admin', ...params })
       })
       const data = await res.json()
@@ -193,7 +206,7 @@ export default function AdminControlsPage() {
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="w-full" disabled={saving}>
-                    <Zap className="h-4 w-4 mr-2" />
+                    <Play className="h-4 w-4 mr-2" />
                     ACTIVATE EMERGENCY KILL
                   </Button>
                 </AlertDialogTrigger>

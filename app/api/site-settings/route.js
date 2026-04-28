@@ -30,6 +30,10 @@ const DEFAULT_SETTINGS = {
     defaultDescription: 'Create viral content, ebooks, videos, and more with AI. 70+ tools for creators, marketers, and businesses.',
     defaultKeywords: 'AI content creation, video generator, ebook maker, social media tools',
     ogImage: '/og-image.png'
+  },
+  analytics: {
+    customHeadScripts: '',
+    customBodyScripts: ''
   }
 }
 
@@ -48,7 +52,13 @@ export async function GET(request) {
       branding: { ...DEFAULT_SETTINGS.branding, ...(settings?.branding || {}) },
       social: { ...DEFAULT_SETTINGS.social, ...(settings?.social || {}) },
       footer: { ...DEFAULT_SETTINGS.footer, ...(settings?.footer || {}) },
-      seo: { ...DEFAULT_SETTINGS.seo, ...(settings?.seo || {}) }
+      seo: { ...DEFAULT_SETTINGS.seo, ...(settings?.seo || {}) },
+      analytics: {
+        // Only expose custom scripts and GA ID, not other tracking IDs for security
+        googleAnalyticsId: settings?.analytics?.googleAnalyticsId || '',
+        customHeadScripts: settings?.analytics?.customHeadScripts || '',
+        customBodyScripts: settings?.analytics?.customBodyScripts || ''
+      }
     }
     
     // Return specific section if requested

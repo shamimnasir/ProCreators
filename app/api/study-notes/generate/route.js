@@ -6,6 +6,10 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { saveToLibraryDirect } from '@/lib/library-save-server'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'study-notes'
 
 // Check if text contains Bangla characters
 function containsBangla(text) {
@@ -45,6 +49,10 @@ async function extractTextFromPDF(buffer) {
     const data = await pdfParse(buffer)
     return data.text || ''
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('PDF extraction error:', error)
     return ''
   }
@@ -1122,7 +1130,38 @@ async function generatePDF(notes, config) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -1352,6 +1391,12 @@ Remember: ONLY use information from the source content. Do not add external info
           }
         }
         
+        // Complete transaction on success
+
+        
+        if (transactionId) await completeTransaction(transactionId)
+
+        
         return NextResponse.json({ success: true, notes })
       }
     }
@@ -1386,27 +1431,42 @@ Remember: ONLY use information from the source content. Do not add external info
       
       const pdfUrl = `/generated/study-notes/${filename}`
       
-      // Save to library
+      // Save to library (direct database save)
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-        await fetch(`${baseUrl}/api/library/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            toolId: 'study-notes',
-            title: notes.title || topic || 'Study Notes',
-            data: { notes, topic, noteStyle, pdfUrl, authorName, instituteName },
-            thumbnailUrl: null
-          })
+        await saveToLibraryDirect(userId, {
+          type: 'study-notes',
+          category: 'document',
+          title: notes.title || topic || 'Study Notes',
+          content: pdfUrl,
+          filePath: pdfUrl,
+          description: `${noteStyle} style study notes`,
+          metadata: {
+            topic,
+            noteStyle,
+            pdfUrl,
+            authorName,
+            instituteName
+          }
         })
       } catch (e) {
-        }
+        console.error('Failed to save to library:', e)
+      }
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({ success: true, pdfUrl, filename })
     }
     
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Study notes generation error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }

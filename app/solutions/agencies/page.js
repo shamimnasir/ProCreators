@@ -1,8 +1,21 @@
 import { StaticPage } from '@/components/StaticPage'
+import { getPageSeo } from '@/lib/get-page-seo'
 
-export const metadata = {
-  title: 'For Agencies | ProCreators',
-  description: 'White-label AI content creation for agencies. Scale your client work without scaling your team.',
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export async function generateMetadata() {
+  const seo = await getPageSeo('solutions-agencies')
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      images: seo.ogImage ? [seo.ogImage] : [],
+    },
+  }
 }
 
 export default function AgenciesPage() {

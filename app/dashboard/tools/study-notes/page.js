@@ -12,12 +12,36 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Download, Loader2, Clock,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  BookOpen, Brain, Target, Lightbulb, Upload,
-  PenTool, Copy, Eye, RefreshCw, Palette, GraduationCap,
-  FileUp, X, ListOrdered, AlignLeft, Hash, Zap, Wand2} from 'lucide-react'
+import {
+  FileText,
+  Download,
+  Loader2,
+  Clock,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  BookOpen,
+  Brain,
+  Target,
+  Lightbulb,
+  Upload,
+  PenTool,
+  Copy,
+  Eye,
+  RefreshCw,
+  Palette,
+  GraduationCap,
+  FileUp,
+  X,
+  ListOrdered,
+  AlignLeft,
+  Hash,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import AutoSaveDraftsManager from '@/components/shared/AutoSaveDraftsManager'
@@ -426,7 +450,7 @@ export default function StudyNotesPage() {
               <Tabs value={inputMode} onValueChange={setInputMode}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="topic" className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
+                    <Play className="h-4 w-4" />
                     Generate from Topic
                   </TabsTrigger>
                   <TabsTrigger value="upload" className="flex items-center gap-2">

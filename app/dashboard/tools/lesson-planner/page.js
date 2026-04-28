@@ -12,12 +12,32 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Download, Loader2, Clock,
-  ArrowLeft, ArrowRight, Plus, Trash2, Edit3, CheckCircle,
-  ChevronDown, ChevronUp, RefreshCw, BookOpen, Brain,
-  GraduationCap, Target, Users, Lightbulb, ClipboardList,
-  PenTool, PlayCircle, CheckSquare, Palette, Wand2
+import {
+  FileText,
+  Download,
+  Loader2,
+  Clock,
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  BookOpen,
+  Brain,
+  GraduationCap,
+  Target,
+  Users,
+  Lightbulb,
+  ClipboardList,
+  PenTool,
+  PlayCircle,
+  CheckSquare,
+  Palette,
+  Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -842,7 +862,7 @@ export default function LessonPlannerPage() {
                 { key: 'assessment', label: 'Assessment', icon: Target },
                 { key: 'differentiation', label: 'Differentiation', icon: Users },
                 { key: 'accommodations', label: 'Accommodations', icon: Users },
-                { key: 'extensions', label: 'Extensions', icon: Sparkles },
+                { key: 'extensions', label: 'Extensions', icon: Wand2 },
                 { key: 'homework', label: 'Homework/Follow-up', icon: FileText },
                 { key: 'reflection', label: 'Teacher Reflection Notes', icon: Brain }
               ].filter(section => lessonPlan[section.key]).map((section) => (

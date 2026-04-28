@@ -13,11 +13,29 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Target, Copy, Loader2, Wand2, RefreshCw,
-  Check, ArrowLeft, Zap, Users, TrendingUp, BarChart3,
-  Lightbulb, Info, Layers, Brain, Megaphone, Heart,
-  Clock, DollarSign, Eye, MousePointer, Share2, Play
+import {
+  Target,
+  Copy,
+  Loader2,
+  Wand2,
+  RefreshCw,
+  Check,
+  ArrowLeft,
+  Play,
+  Users,
+  TrendingUp,
+  BarChart3,
+  Lightbulb,
+  Info,
+  Layers,
+  Brain,
+  Megaphone,
+  Heart,
+  Clock,
+  DollarSign,
+  Eye,
+  MousePointer,
+  Share2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
@@ -254,19 +272,20 @@ export default function AdCopyPage() {
   }), [productName, productDescription, targetAudience, uniqueSellingPoints, painPoints, benefits, socialProof, offer, framework, platform, goal, tone, variationCount, result])
 
   const loadDraftData = useCallback((data) => {
-    if (data.productName) setProductName(data.productName)
-    if (data.productDescription) setProductDescription(data.productDescription)
-    if (data.targetAudience) setTargetAudience(data.targetAudience)
-    if (data.uniqueSellingPoints) setUniqueSellingPoints(data.uniqueSellingPoints)
-    if (data.painPoints) setPainPoints(data.painPoints)
-    if (data.benefits) setBenefits(data.benefits)
-    if (data.socialProof) setSocialProof(data.socialProof)
-    if (data.offer) setOffer(data.offer)
-    if (data.framework) setFramework(data.framework)
-    if (data.platform) setPlatform(data.platform)
-    if (data.goal) setGoal(data.goal)
-    if (data.tone) setTone(data.tone)
-    if (data.variationCount) setVariationCount(data.variationCount)
+    // Use explicit undefined checks to handle empty strings properly
+    setProductName(data.productName !== undefined ? data.productName : '')
+    setProductDescription(data.productDescription !== undefined ? data.productDescription : '')
+    setTargetAudience(data.targetAudience !== undefined ? data.targetAudience : '')
+    setUniqueSellingPoints(data.uniqueSellingPoints !== undefined ? data.uniqueSellingPoints : '')
+    setPainPoints(data.painPoints !== undefined ? data.painPoints : '')
+    setBenefits(data.benefits !== undefined ? data.benefits : '')
+    setSocialProof(data.socialProof !== undefined ? data.socialProof : '')
+    setOffer(data.offer !== undefined ? data.offer : '')
+    setFramework(data.framework || 'aida')
+    setPlatform(data.platform || 'facebook')
+    setGoal(data.goal || 'sales')
+    setTone(data.tone || 'casual')
+    setVariationCount(data.variationCount || '3')
     if (data.result) {
       setResult(data.result)
       setActiveTab('results')
@@ -736,7 +755,7 @@ export default function AdCopyPage() {
                       <Card>
                         <CardHeader>
                           <CardTitle className="text-base flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-yellow-500" />
+                            <Play className="h-5 w-5 text-yellow-500" />
                             Hook Alternatives (A/B Test These!)
                           </CardTitle>
                           <CardDescription>Test different hooks to find your winner</CardDescription>

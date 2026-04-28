@@ -7,33 +7,31 @@ import { enforceRateLimit } from '@/lib/rate-limiter'
 import { checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 import { cookies } from 'next/headers'
 import { connectToDatabase } from '@/lib/mongodb'
+import { cleanMarkdown } from '@/lib/hooks/useHumanize'
 
-// Get user ID from session
+// Get user ID from session - returns null if not authenticated
 async function getUserIdFromSession(request) {
   try {
     // Check Authorization header first (primary method)
     const authHeader = request.headers.get('Authorization')
-    console.log('Auth header:', authHeader ? 'Present' : 'Missing')
     
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7)
-      console.log('Token from header (first 20 chars):', token.substring(0, 20))
-      const { db } = await connectToDatabase()
-      const session = await db.collection('sessions').findOne({ 
-        token,
-        expiresAt: { $gt: new Date() }
-      })
-      console.log('Session found:', session ? 'Yes' : 'No')
-      if (session?.userId) {
-        console.log('User ID from session:', session.userId)
-        return session.userId
+      if (token && token !== 'null' && token !== 'undefined') {
+        const { db } = await connectToDatabase()
+        const session = await db.collection('sessions').findOne({ 
+          token,
+          expiresAt: { $gt: new Date() }
+        })
+        if (session?.userId) {
+          return session.userId
+        }
       }
     }
     
     // Fallback to cookies
     const cookieStore = await cookies()
     const sessionToken = cookieStore.get('session_token')?.value
-    console.log('Cookie session_token:', sessionToken ? 'Present' : 'Missing')
     
     if (sessionToken) {
       const { db } = await connectToDatabase()
@@ -41,9 +39,12 @@ async function getUserIdFromSession(request) {
         token: sessionToken,
         expiresAt: { $gt: new Date() }
       })
-      return session?.userId || null
+      if (session?.userId) {
+        return session.userId
+      }
     }
     
+    // Return null if not authenticated - no demo user fallback
     return null
   } catch (error) {
     console.error('Error getting user from session:', error)
@@ -592,12 +593,18 @@ Return ONLY JSON - no markdown.`
 
     // Handle hashtags based on platform and user preference
     if (postsData.posts) {
-      postsData.posts = postsData.posts.map(post => ({
-        ...post,
-        hashtags: (includeHashtags && platform !== 'reddit' && platform !== 'quora' && platform !== 'blog') 
-          ? (post.hashtags || []) 
-          : []
-      }))
+      postsData.posts = postsData.posts.map(post => {
+        // Use shared cleanMarkdown function to remove asterisks and markdown
+        let cleanContent = cleanMarkdown(post.content || '')
+        
+        return {
+          ...post,
+          content: cleanContent,
+          hashtags: (includeHashtags && platform !== 'reddit' && platform !== 'quora' && platform !== 'blog') 
+            ? (post.hashtags || []) 
+            : []
+        }
+      })
     }
 
     // Complete the credit transaction on success

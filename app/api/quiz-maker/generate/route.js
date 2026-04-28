@@ -11,6 +11,9 @@ import { generateQuizHTML } from '@/lib/quiz-html-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'quiz-maker'
 
 // Quiz Maker input schema
 const quizMakerSchema = z.object({
@@ -424,6 +427,10 @@ IMPORTANT: Return ONLY valid JSON. Questions should be accurate, engaging, and e
     
     return JSON.parse(text)
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('AI quiz generation error:', error)
     // Return fallback structure
     return {
@@ -530,7 +537,38 @@ function wrapText(text, font, fontSize, maxWidth, useUnicode = false) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -582,6 +620,12 @@ export async function POST(request) {
         difficulty
       )
       
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
+      
       return NextResponse.json({
         success: true,
         quiz: content
@@ -625,7 +669,6 @@ export async function POST(request) {
       
       // Use HTML-to-PDF for complex scripts (better text rendering)
       if (needsHtmlPdf) {
-        console.log('Using HTML-to-PDF for proper text rendering')
         
         try {
           const finalTitle = customTitle || content.title || 'Quiz'
@@ -689,6 +732,12 @@ export async function POST(request) {
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           })
+          
+          // Complete transaction on success
+
+          
+          if (transactionId) await completeTransaction(transactionId)
+
           
           return NextResponse.json({
             success: true,
@@ -1429,6 +1478,12 @@ export async function POST(request) {
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       })
       
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
+      
       return NextResponse.json({
         success: true,
         title: finalTitle,
@@ -1442,6 +1497,10 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Quiz generation error:', error)
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate quiz' },

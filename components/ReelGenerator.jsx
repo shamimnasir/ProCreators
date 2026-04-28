@@ -12,9 +12,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
-import { 
-  Loader2, Sparkles, Video, Mic, Upload, Download, 
-  FileText, Film, Music, Type, Play, Edit, X, Check, Eye 
+import {
+  Loader2,
+  Wand2,
+  Video,
+  Mic,
+  Upload,
+  Download,
+  FileText,
+  Film,
+  Music,
+  Type,
+  Play,
+  Edit,
+  X,
+  Check,
+  Eye
 } from 'lucide-react'
 import PreviewModal from '@/app/dashboard/tools/story-reels/PreviewModal'
 import MusicPicker from '@/app/dashboard/tools/story-reels/MusicPicker'
@@ -666,7 +679,7 @@ export default function ReelGenerator({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Wand2 className="mr-2 h-4 w-4" />
                     Generate AI Script
                   </>
                 )}

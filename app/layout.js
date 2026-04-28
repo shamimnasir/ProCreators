@@ -3,11 +3,18 @@ import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from 'next-themes'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { CustomScripts } from '@/components/CustomScripts'
 
 const inter = Inter({ subsets: ['latin'] })
 
+// Default metadata - will be overridden by page-level generateMetadata
+// Using procreators.io as the canonical base URL for all OG/meta purposes
 export const metadata = {
-  title: 'ProCreators - AI-Powered Content Creation Platform',
+  metadataBase: new URL('https://procreators.io'),
+  title: {
+    default: 'ProCreators - AI-Powered Content Creation Platform',
+    template: '%s | ProCreators'
+  },
   description: 'Create viral content, ebooks, videos, and more with AI',
   icons: {
     icon: '/favicon.svg',
@@ -44,7 +51,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider 
           attribute="class" 
           defaultTheme="light"
-          forcedTheme={undefined}
+          forcedTheme="light"
           enableSystem={false}
           storageKey="pubtools-theme"
           disableTransitionOnChange
@@ -52,6 +59,7 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             {children}
             <Toaster />
+            <CustomScripts />
           </AuthProvider>
         </ThemeProvider>
       </body>

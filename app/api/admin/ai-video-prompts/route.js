@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
 import { AI_VIDEO_TEMPLATES } from '@/config/ai-video-templates'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 // GET - Fetch all custom AI Video Studio prompts
 export async function GET(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { db } = await connectToDatabase()
     const promptsCollection = db.collection('ai_video_prompts')
@@ -41,6 +45,9 @@ export async function GET(request) {
 
 // POST - Save/Update custom prompt
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { templateId, data } = await request.json()
     
@@ -94,6 +101,9 @@ export async function POST(request) {
 
 // DELETE - Remove custom prompt (revert to default)
 export async function DELETE(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { searchParams } = new URL(request.url)
     const templateId = searchParams.get('templateId')

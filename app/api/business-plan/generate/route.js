@@ -4,6 +4,9 @@ import path from 'path'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'business-plan'
 
 // Business Plan input schema
 const businessPlanSchema = z.object({
@@ -134,6 +137,9 @@ async function callLLM(prompt, systemPrompt) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
@@ -141,11 +147,41 @@ export async function POST(request) {
       return rateLimitCheck.response
     }
 
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     const body = await request.json()
     
     // SECURITY: Validate input with Zod schema
     const validation = validateRequest(businessPlanSchema, body)
     if (!validation.success) {
+      // Refund for validation failure
+      if (transactionId) await refundCredits(userId, transactionId, 'Validation failed')
       return NextResponse.json({
         success: false,
         error: 'Validation failed',
@@ -856,6 +892,9 @@ Generate a complete Pitch Deck in this JSON format:
       }
     }
 
+    // Complete transaction on success
+    if (transactionId) await completeTransaction(transactionId)
+
     return NextResponse.json({
       success: true,
       data: result,
@@ -871,6 +910,10 @@ Generate a complete Pitch Deck in this JSON format:
 
   } catch (error) {
     console.error('Business Plan Generator Error:', error)
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate business plan' },
       { status: 500 }

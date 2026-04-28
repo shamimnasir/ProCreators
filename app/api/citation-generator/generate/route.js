@@ -4,6 +4,10 @@ import path from 'path'
 import fs from 'fs/promises'
 import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { saveToLibraryDirect } from '@/lib/library-save-server'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'citation-generator'
 
 // Helper to run LLM
 async function runLLM(prompt, systemPrompt = 'You are an expert citation formatter.') {
@@ -322,7 +326,38 @@ async function generatePDF(bibliography, citationStyle) {
 }
 
 export async function POST(request) {
+  let transactionId = null
+  let userId = null
+  
   try {
+    // SECURITY: Get user ID and check credits
+    userId = await getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required. Please log in to use this tool.'
+      }, { status: 401 })
+    }
+    
+    const creditCheck = await checkCredits(userId, TOOL_ID)
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. This tool costs ${creditCheck.cost} credits, but you have ${creditCheck.currentBalance}.`,
+        creditInfo: creditCheck
+      }, { status: 402 })
+    }
+    
+    // Deduct credits before generation
+    const deductResult = await deductCredits(userId, TOOL_ID)
+    if (!deductResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits. Please try again.'
+      }, { status: 500 })
+    }
+    transactionId = deductResult.transactionId
+
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
     if (rateLimitCheck.limited) {
@@ -336,6 +371,12 @@ export async function POST(request) {
       const { sourceType, sourceData, citationStyle } = body
       const citation = await formatCitation(sourceType, sourceData, citationStyle)
       
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
+      
       return NextResponse.json({
         success: true,
         citation
@@ -346,6 +387,12 @@ export async function POST(request) {
       const { citations, citationStyle } = body
       const bibliography = await generateBibliography(citations, citationStyle)
       
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
+      
       return NextResponse.json({
         success: true,
         bibliography
@@ -355,6 +402,12 @@ export async function POST(request) {
     if (action === 'reformat-all') {
       const { citations, citationStyle } = body
       const reformatted = await reformatAllCitations(citations, citationStyle)
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -389,24 +442,28 @@ export async function POST(request) {
           'vancouver': 'Vancouver'
         }[citationStyle] || citationStyle
         
-        await fetch(`${baseUrl}/api/library/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'citation-generator',
-            title: `Bibliography (${styleName})`,
-            content: pdfUrl,
-            filePath: pdfUrl,
-            description: `${citationCount} citations in ${styleName} format`,
-            metadata: {
-              citationStyle,
-              citationCount,
-              pdfUrl
-            }
-          })
+        await saveToLibraryDirect(userId, {
+          type: 'citation-generator',
+          category: 'document',
+          title: `Bibliography (${styleName})`,
+          content: pdfUrl,
+          filePath: pdfUrl,
+          description: `${citationCount} citations in ${styleName} format`,
+          metadata: {
+            citationStyle,
+            citationCount,
+            pdfUrl
+          }
         })
         } catch (e) {
+          console.error('Failed to save to library:', e)
         }
+      
+      // Complete transaction on success
+
+      
+      if (transactionId) await completeTransaction(transactionId)
+
       
       return NextResponse.json({
         success: true,
@@ -418,6 +475,10 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
     
   } catch (error) {
+    // Refund credits on error
+    if (transactionId && userId) {
+      await refundCredits(userId, transactionId, error.message)
+    }
     console.error('Citation generator error:', error)
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }

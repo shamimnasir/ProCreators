@@ -14,12 +14,35 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Youtube, Loader2, Target, TrendingUp, 
-  Copy, RefreshCw, CheckCircle, Lightbulb, MessageSquare,
-  Play, Clock, FileText, Zap, ChevronDown, ChevronUp,
-  Check, Edit3, Hash, Eye, ThumbsUp, AlertCircle,
-  Video, Mic, PenTool, BookOpen, ArrowLeft, Timer, Wand2} from 'lucide-react'
+import {
+  Youtube,
+  Loader2,
+  Target,
+  TrendingUp,
+  Copy,
+  RefreshCw,
+  CheckCircle,
+  Lightbulb,
+  MessageSquare,
+  Play,
+  Clock,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Edit3,
+  Hash,
+  Eye,
+  ThumbsUp,
+  AlertCircle,
+  Video,
+  Mic,
+  PenTool,
+  BookOpen,
+  ArrowLeft,
+  Timer,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import Link from 'next/link'
@@ -558,7 +581,7 @@ export default function YouTubeCreatorPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-yellow-500" />
+                    <Play className="h-5 w-5 text-yellow-500" />
                     Hook Type
                   </CardTitle>
                   <CardDescription>Choose your opening hook strategy</CardDescription>
@@ -779,7 +802,7 @@ export default function YouTubeCreatorPage() {
                   >
                     {tab === 'script' && <FileText className="h-4 w-4 mr-1" />}
                     {tab === 'titles' && <PenTool className="h-4 w-4 mr-1" />}
-                    {tab === 'hooks' && <Zap className="h-4 w-4 mr-1" />}
+                    {tab === 'hooks' && <Play className="h-4 w-4 mr-1" />}
                     {tab === 'description' && <MessageSquare className="h-4 w-4 mr-1" />}
                     {tab === 'tags' && <Hash className="h-4 w-4 mr-1" />}
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -862,7 +885,7 @@ export default function YouTubeCreatorPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-yellow-500" />
+                      <Play className="h-5 w-5 text-yellow-500" />
                       Opening Hook Variations
                     </CardTitle>
                     <CardDescription>First 15 seconds - grab attention immediately</CardDescription>

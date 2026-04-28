@@ -1,7 +1,7 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { Zap } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
 
@@ -16,7 +16,7 @@ export default function AutoReelsPage() {
         <CreditCostBadge toolId="auto-reels" />
       </div>
       <Card className="p-12 text-center">
-        <Zap className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+        <Play className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <p className="text-lg font-semibold mb-2">Auto Reels Tool</p>
         <p className="text-sm text-muted-foreground">Automation feature ready for implementation</p>
       </Card>

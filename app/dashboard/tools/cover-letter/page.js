@@ -12,11 +12,32 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Mail, Download, Loader2, Briefcase, 
-  CheckCircle, Copy, RefreshCw, User, Building2,
-  FileText, Target, Award, Lightbulb, ChevronDown, ChevronUp,
-  Phone, MapPin, Linkedin, Edit3, Check, X, AlertCircle, Zap, Wand2} from 'lucide-react'
+import {
+  Mail,
+  Download,
+  Loader2,
+  Briefcase,
+  CheckCircle,
+  Copy,
+  RefreshCw,
+  User,
+  Building2,
+  FileText,
+  Target,
+  Award,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  Phone,
+  MapPin,
+  Linkedin,
+  Edit3,
+  Check,
+  X,
+  AlertCircle,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
 import html2canvas from 'html2canvas'
@@ -409,7 +430,7 @@ export default function CoverLetterPage() {
           <p className="text-muted-foreground mt-1">Create personalized, compelling cover letters</p>
         </div>
         <Badge className="bg-purple-100 text-purple-800">
-          <Zap className="h-3 w-3 mr-1" />ATS-Optimized
+          <Play className="h-3 w-3 mr-1" />ATS-Optimized
         </Badge>
       </div>
 

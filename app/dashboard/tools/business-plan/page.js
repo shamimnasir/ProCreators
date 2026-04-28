@@ -14,12 +14,35 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Copy, Loader2, Wand2, RefreshCw,
-  Check, ArrowLeft, TrendingUp, Users, BarChart3, Building2,
-  Lightbulb, Target, DollarSign, Layers, PieChart, Briefcase,
-  CheckCircle2, ChevronRight, Download, Eye, Globe, Rocket,
-  ClipboardList, Settings, Shield, Award, LineChart
+import {
+  FileText,
+  Copy,
+  Loader2,
+  Wand2,
+  RefreshCw,
+  Check,
+  ArrowLeft,
+  TrendingUp,
+  Users,
+  BarChart3,
+  Building2,
+  Lightbulb,
+  Target,
+  DollarSign,
+  Layers,
+  PieChart,
+  Briefcase,
+  CheckCircle2,
+  ChevronRight,
+  Download,
+  Eye,
+  Globe,
+  Rocket,
+  ClipboardList,
+  Settings,
+  Shield,
+  Award,
+  LineChart
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'

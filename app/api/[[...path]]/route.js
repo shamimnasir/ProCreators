@@ -15,18 +15,34 @@ async function connectToMongo() {
   return db
 }
 
-// Helper function to handle CORS
-function handleCORS(response) {
-  response.headers.set('Access-Control-Allow-Origin', process.env.CORS_ORIGINS || '*')
+// Helper function to handle CORS — same-origin only (proxy.js handles cross-origin block)
+function handleCORS(response, request) {
+  // Echo back the same-origin's Origin header so credentialed requests work,
+  // but never set a wildcard or untrusted Origin.
+  try {
+    const origin = request?.headers?.get('origin')
+    if (origin) {
+      const host = request.headers.get('host')
+      const allowedHosts = new Set([host])
+      if (process.env.NEXT_PUBLIC_BASE_URL) {
+        try { allowedHosts.add(new URL(process.env.NEXT_PUBLIC_BASE_URL).host) } catch (_) {}
+      }
+      const originHost = new URL(origin).host
+      if (allowedHosts.has(originHost) || originHost.endsWith('.emergentagent.com')) {
+        response.headers.set('Access-Control-Allow-Origin', origin)
+        response.headers.set('Vary', 'Origin')
+      }
+    }
+  } catch (_) { /* no-op */ }
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token')
   response.headers.set('Access-Control-Allow-Credentials', 'true')
   return response
 }
 
 // OPTIONS handler for CORS
-export async function OPTIONS() {
-  return handleCORS(new NextResponse(null, { status: 200 }))
+export async function OPTIONS(request) {
+  return handleCORS(new NextResponse(null, { status: 200 }), request)
 }
 
 // Route handler function
@@ -40,11 +56,11 @@ async function handleRoute(request, { params }) {
 
     // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
     if (route === '/root' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
+      return handleCORS(NextResponse.json({ message: "Hello World" }), request)
     }
     // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
     if (route === '/' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
+      return handleCORS(NextResponse.json({ message: "Hello World" }), request)
     }
 
     // Status endpoints - POST /api/status
@@ -55,7 +71,7 @@ async function handleRoute(request, { params }) {
         return handleCORS(NextResponse.json(
           { error: "client_name is required" }, 
           { status: 400 }
-        ))
+        ), request)
       }
 
       const statusObj = {
@@ -65,7 +81,7 @@ async function handleRoute(request, { params }) {
       }
 
       await db.collection('status_checks').insertOne(statusObj)
-      return handleCORS(NextResponse.json(statusObj))
+      return handleCORS(NextResponse.json(statusObj), request)
     }
 
     // Status endpoints - GET /api/status
@@ -78,21 +94,23 @@ async function handleRoute(request, { params }) {
       // Remove MongoDB's _id field from response
       const cleanedStatusChecks = statusChecks.map(({ _id, ...rest }) => rest)
       
-      return handleCORS(NextResponse.json(cleanedStatusChecks))
+      return handleCORS(NextResponse.json(cleanedStatusChecks), request)
     }
 
     // Route not found
     return handleCORS(NextResponse.json(
       { error: `Route ${route} not found` }, 
       { status: 404 }
-    ))
+    ), request)
 
   } catch (error) {
-    console.error('API Error:', error)
+    // SECURITY: Don't leak stack traces or internal details in production
+    console.error('API Error:', error?.message)
+    const isDev = process.env.NODE_ENV !== 'production'
     return handleCORS(NextResponse.json(
-      { error: "Internal server error" }, 
+      { error: "Internal server error", ...(isDev ? { detail: error?.message } : {}) },
       { status: 500 }
-    ))
+    ), request)
   }
 }
 

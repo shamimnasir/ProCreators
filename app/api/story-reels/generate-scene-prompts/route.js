@@ -206,7 +206,6 @@ Return ONLY valid JSON with exactly ${numClips} scenes.`
 
     // If still not enough prompts, generate fallback prompts
     if (scenePrompts.length < numClips) {
-      console.log(`[Scene Prompts] Only got ${scenePrompts.length} prompts, generating fallbacks for remaining ${numClips - scenePrompts.length}`)
       
       // Generate contextual fallback prompts based on the script
       const fallbackPrompts = generateFallbackPrompts(script, numClips - scenePrompts.length)

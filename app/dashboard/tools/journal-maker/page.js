@@ -9,10 +9,27 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Loader2, Download, BookOpen, ArrowLeft, ArrowRight,
-  FileText, Palette, CheckCircle, User, Edit3, Plus, Trash2,
-  RefreshCw, Heart, ChevronDown, ChevronUp, Image, Zap, Wand2} from 'lucide-react'
+import {
+  Loader2,
+  Download,
+  BookOpen,
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Palette,
+  CheckCircle,
+  User,
+  Edit3,
+  Plus,
+  Trash2,
+  RefreshCw,
+  Heart,
+  ChevronDown,
+  ChevronUp,
+  Image,
+  Play,
+  Wand2
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
@@ -413,7 +430,7 @@ export default function JournalMakerPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
+              <Play className="h-5 w-5 text-yellow-500" />
               Step 1: Choose Your Journal Type
             </CardTitle>
             <CardDescription>Select a journal style and AI will create the perfect prompts</CardDescription>

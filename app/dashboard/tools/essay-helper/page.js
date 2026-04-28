@@ -13,13 +13,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  FileText, Download, Loader2, 
-  ArrowLeft, ArrowRight, CheckCircle, Copy,
-  BookOpen, Brain, Target, Lightbulb, PenTool,
-  ListOrdered, AlignLeft, RefreshCw, Eye,
-  Wand2, FileEdit, Quote, Layers, GraduationCap,
-  Upload, FileUp, X, File
+import {
+  FileText,
+  Download,
+  Loader2,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Copy,
+  BookOpen,
+  Brain,
+  Target,
+  Lightbulb,
+  PenTool,
+  ListOrdered,
+  AlignLeft,
+  RefreshCw,
+  Eye,
+  Wand2,
+  FileEdit,
+  Quote,
+  Layers,
+  GraduationCap,
+  Upload,
+  FileUp,
+  X,
+  File
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'

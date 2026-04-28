@@ -1,124 +1,65 @@
-'use client'
+// Homepage - Server Component with Dynamic Metadata
+import { getPageSeo } from '@/lib/get-page-seo'
+import { headers } from 'next/headers'
+import HomeClient from './HomeClient'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import { HomepageSchema } from '@/components/SchemaMarkup'
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-// Import modular landing page components
-import {
-  Header,
-  HeroSection,
-  FeaturesSection,
-  StatsSection,
-  UseCasesSection,
-  ToolsShowcase,
-  PhilosophySection,
-  TestimonialsSection,
-  PricingSection,
-  CTASection,
-  PopularToolsSection,
-  Footer,
-  homepageFAQs,
-  testimonials,
-  pricingTiers
-} from '@/components/landing'
-
-export default function Home() {
-  const router = useRouter()
-  const { setTheme } = useTheme()
-  const [billingCycle, setBillingCycle] = useState('monthly')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userName, setUserName] = useState('')
-
-  // Check if user is logged in
-  useEffect(() => {
-    const checkAuth = async () => {
-      const sessionToken = localStorage.getItem('sessionToken')
-      if (sessionToken) {
-        try {
-          const res = await fetch('/api/auth/session', {
-            headers: { 'Authorization': `Bearer ${sessionToken}` }
-          })
-          const data = await res.json()
-          if (data.success && data.user) {
-            setIsLoggedIn(true)
-            setUserName(data.user.name || data.user.email?.split('@')[0] || 'User')
-          }
-        } catch (error) {
-          // Silent fail for auth check
+// Generate metadata from database
+export async function generateMetadata() {
+  const seo = await getPageSeo('homepage')
+  
+  // Detect the actual host from the incoming request so OG URLs always match the domain
+  // This ensures procreators.io gets procreators.io URLs, not preview URLs
+  const headersList = await headers()
+  const host = headersList.get('x-forwarded-host') || headersList.get('host') || ''
+  const protocol = headersList.get('x-forwarded-proto') || 'https'
+  const detectedBase = host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_BASE_URL || 'https://procreators.io')
+  
+  console.log('[Homepage] generateMetadata called, title:', seo.title, 'baseUrl:', detectedBase)
+  
+  // Use static OG image for maximum compatibility with Twitter/X, Facebook, LinkedIn, etc.
+  const ogImageUrl = seo.ogImage || `${detectedBase}/og-image.png`
+  
+  return {
+    metadataBase: new URL(detectedBase),
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      type: 'website',
+      siteName: 'ProCreators',
+      url: detectedBase,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          type: 'image/png',
+          alt: 'ProCreators - AI Content Creation Platform | 70+ Tools',
         }
-      }
-    }
-    checkAuth()
-  }, [])
-
-  // Set dark mode for homepage
-  useEffect(() => {
-    setTheme('dark')
-  }, [setTheme])
-
-  // Navigation handlers
-  const handleGetStarted = () => router.push('/register')
-  const handleExplore = () => router.push('/dashboard')
-  const handleSelectPlan = (planName) => {
-    router.push(planName === 'Free' ? '/register' : '/pricing')
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@procreators',
+      creator: '@procreators',
+      title: seo.title,
+      description: seo.description,
+      images: [ogImageUrl],
+    },
+    ...(seo.canonical && { alternates: { canonical: seo.canonical } }),
+    icons: {
+      icon: '/favicon.svg',
+    },
   }
+}
 
-  return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Schema.org structured data for SEO */}
-      <HomepageSchema faqs={homepageFAQs} />
-      
-      {/* Header */}
-      <Header 
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
-
-      {/* Hero Section */}
-      <HeroSection 
-        onGetStarted={handleGetStarted}
-        onExplore={handleExplore}
-      />
-
-      {/* Features Section */}
-      <FeaturesSection />
-
-      {/* Stats Section */}
-      <StatsSection />
-
-      {/* Use Cases Section */}
-      <UseCasesSection />
-
-      {/* Tools Showcase */}
-      <ToolsShowcase />
-
-      {/* Philosophy Section */}
-      <PhilosophySection />
-
-      {/* Testimonials Section */}
-      <TestimonialsSection testimonials={testimonials} />
-
-      {/* Pricing Section */}
-      <PricingSection 
-        billingCycle={billingCycle}
-        setBillingCycle={setBillingCycle}
-        pricingTiers={pricingTiers}
-        onSelectPlan={handleSelectPlan}
-      />
-
-      {/* CTA Section */}
-      <CTASection onGetStarted={handleGetStarted} />
-
-      {/* Popular Tools Section */}
-      <PopularToolsSection />
-
-      {/* Footer */}
-      <Footer />
-    </div>
-  )
+// Server component that renders the client homepage
+export default function HomePage() {
+  return <HomeClient />
 }

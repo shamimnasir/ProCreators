@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { spawn } from 'child_process'
 import { generateText } from '@/lib/gemini-text'
 import { generateImage } from '@/lib/gemini-image'
 import { enforceRateLimit } from '@/lib/rate-limiter'
@@ -13,8 +14,20 @@ const carouselGenerationSchema = z.object({
   slideCount: z.number().int().min(2).max(20).default(5),
   width: z.number().int().min(100).max(4000).default(1080),
   height: z.number().int().min(100).max(4000).default(1080),
-  platform: z.enum(['instagram-square', 'instagram-portrait', 'linkedin', 'facebook', 'twitter']).default('instagram-square'),
+  platform: z.enum(['instagram-square', 'instagram-portrait', 'linkedin', 'facebook', 'twitter', 'linkedin-square']).default('instagram-square'),
   generationMode: z.enum(['auto', 'manual']).default('auto'),
+  backgroundStyle: z.enum([
+    // Gradients
+    'gradient', 'warm', 'ocean', 'aurora',
+    // Clean & Minimal
+    'minimal', 'dark', 'professional',
+    // Stock Photo Styles
+    'office', 'coffee', 'nature', 'city',
+    // AI Artistic
+    'abstract', 'geometric', '3d', 'watercolor',
+    // Industry Themes
+    'tech', 'finance', 'health', 'education'
+  ]).default('gradient'),
   manualSlides: z.array(z.object({
     slideNumber: z.number().int().optional(),
     text: z.string().max(500)
@@ -44,7 +57,73 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
-    const { prompt, language, slideCount, width, height, platform, generationMode, manualSlides, logo, logoSize, logoPosition } = validation.data
+    const { prompt, language, slideCount, width, height, platform, generationMode, manualSlides, logo, logoSize, logoPosition, backgroundStyle } = validation.data
+    
+    // Credit check and deduction
+    const userId = await getUserIdFromRequest(request)
+    
+    if (!userId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication required to generate carousel'
+      }, { status: 401 })
+    }
+    
+    const creditCost = slideCount * 10 // 10 credits per slide for image generation
+    
+    // Direct credit check using carousel toolId
+    const creditCheck = await checkCredits(userId, 'carousels', { slideCount })
+    
+    if (!creditCheck.hasEnough) {
+      return NextResponse.json({
+        success: false,
+        error: `Insufficient credits. Need ${creditCheck.cost} credits, you have ${creditCheck.currentBalance}.`
+      }, { status: 402 })
+    }
+    
+    // Deduct credits upfront
+    const creditResult = await deductCredits(userId, 'carousels', { slideCount })
+    
+    if (!creditResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to process credits'
+      }, { status: 500 })
+    }
+    
+    // Background style descriptions for image generation
+    const backgroundStyles = {
+      // Gradients
+      gradient: 'vibrant colorful gradient background with modern purple, pink, and blue tones, smooth color transitions',
+      warm: 'warm inviting background with rich orange, yellow, and golden sunset tones, glowing warmth',
+      ocean: 'calming ocean-inspired gradient with turquoise blue to emerald green tones, tropical feel',
+      aurora: 'stunning aurora borealis inspired background with green, purple, and pink flowing colors',
+      
+      // Clean & Minimal
+      minimal: 'clean minimalist white or soft cream background with subtle shadows and elegant simplicity',
+      dark: 'bold dark mode background with deep charcoal black, subtle highlights, and modern elegance',
+      professional: 'sophisticated corporate background with slate gray and navy blue professional tones',
+      
+      // Stock Photo Styles
+      office: 'blurred modern office interior background with natural lighting, desk setup, plants, professional workspace aesthetic',
+      coffee: 'cozy coffee shop atmosphere background with warm wooden textures, ambient lighting, cafe vibes',
+      nature: 'beautiful natural outdoor scenery background with lush greenery, mountains, or serene landscape',
+      city: 'stunning city skyline at dusk or night background with urban lights and modern architecture',
+      
+      // AI Artistic Styles
+      abstract: 'vibrant abstract art background with bold brushstrokes, splashes of color, artistic expression',
+      geometric: 'modern geometric pattern background with clean shapes, triangles, hexagons, low-poly style',
+      '3d': 'sleek 3D rendered background with floating shapes, glass spheres, metallic elements, futuristic',
+      watercolor: 'soft watercolor art background with gentle color washes, artistic paint texture, dreamy aesthetic',
+      
+      // Industry Themes
+      tech: 'futuristic technology background with circuit patterns, data visualization, blue neon accents, digital',
+      finance: 'professional finance theme background with growth charts, green tones, success and prosperity',
+      health: 'fresh health and wellness background with clean greens, natural elements, vitality and energy',
+      education: 'inspiring education theme background with books, warm lighting, knowledge and learning atmosphere'
+    }
+    
+    const selectedBackgroundStyle = backgroundStyles[backgroundStyle] || backgroundStyles.gradient
     
     // Additional validation based on mode
     if (generationMode === 'auto' && !prompt) {
@@ -131,11 +210,8 @@ Keep text concise and impactful. Images should be text-free visuals that support
       }
     }
 
-    // Step 2: Generate images for each slide
-    const slides = []
-    for (let i = 0; i < carouselSequence.length; i++) {
-      const slide = carouselSequence[i]
-      
+    // Step 2: Generate images for each slide IN PARALLEL
+    const slidePromises = carouselSequence.map(async (slide, i) => {
       // Determine aspect ratio description
       const aspectRatio = width / height
       let aspectDesc = 'square'
@@ -146,7 +222,18 @@ Keep text concise and impactful. Images should be text-free visuals that support
       
       // Use Gemini 3 Pro Image Preview - best for Bengali text rendering
       // Include the exact text to be displayed with size optimization
-      const textOverlayPrompt = `Create a professional ${platform.includes('instagram') ? 'Instagram' : platform.includes('facebook') ? 'Facebook' : 'LinkedIn'} carousel image in ${aspectDesc} ${width}x${height} format. Background: ${slide.imagePrompt}. TEXT TO DISPLAY (render EXACTLY as written): "${slide.text}". Use large, bold typography optimized for ${aspectDesc} format. Make the text clearly readable with high contrast. Modern social media design.`
+      const textOverlayPrompt = `Create a stunning ${platform.includes('instagram') ? 'Instagram' : platform.includes('facebook') ? 'Facebook' : 'LinkedIn'} carousel image in ${aspectDesc} ${width}x${height} format. 
+
+BACKGROUND STYLE: ${selectedBackgroundStyle}
+VISUAL THEME: ${slide.imagePrompt}
+
+TEXT TO DISPLAY (render EXACTLY as written, large and bold): "${slide.text}"
+
+Design requirements:
+- Use large, bold typography optimized for ${aspectDesc} format
+- Text must be clearly readable with high contrast against the background
+- Modern, eye-catching social media design
+- Professional quality suitable for viral content`
       
       // Generate image - will use Gemini 3 Pro if Google API key available, otherwise DALL-E 3
       const imageResult = await generateImage(
@@ -211,24 +298,27 @@ Keep text concise and impactful. Images should be text-free visuals that support
           }
         }
         
-        slides.push({
+        return {
           slideNumber: slide.slideNumber || (i + 1),
           text: slide.text,
           imageUrl: finalImageUrl,
           imagePrompt: slide.imagePrompt
-        })
+        }
       } else {
         console.error(`Failed to generate image for slide ${i + 1}:`, imageResult.error)
         // Use placeholder if image generation fails
-        slides.push({
+        return {
           slideNumber: slide.slideNumber || (i + 1),
           text: slide.text,
           imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgZmlsbD0iIzMzMzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+SW1hZ2UgR2VuZXJhdGlvbiBGYWlsZWQ8L3RleHQ+PC9zdmc+',
           imagePrompt: slide.imagePrompt,
           error: imageResult.error
-        })
+        }
       }
-    }
+    })
+    
+    // Wait for all images to generate in parallel
+    const slides = await Promise.all(slidePromises)
 
     return NextResponse.json({
       success: true,

@@ -13,11 +13,23 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { CreditCostBadge } from '@/components/CreditCostBadge'
 import { useCredits } from '@/components/CreditBalance'
-import { 
-  Copy, Loader2, Wand2,
-  Check, ArrowLeft, TrendingUp, Shield, Target,
-  Lightbulb, AlertTriangle, CheckCircle2, ChevronRight, 
-  Download, Building2, Zap, BarChart3
+import {
+  Copy,
+  Loader2,
+  Wand2,
+  Check,
+  ArrowLeft,
+  TrendingUp,
+  Shield,
+  Target,
+  Lightbulb,
+  AlertTriangle,
+  CheckCircle2,
+  ChevronRight,
+  Download,
+  Building2,
+  Play,
+  BarChart3
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { saveToLibrary } from '@/lib/library-utils'
@@ -567,7 +579,7 @@ export default function SwotAnalysisPage() {
                     <Card className="bg-blue-50 border-blue-200">
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-3">
-                          <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
+                          <Play className="h-5 w-5 text-blue-600 mt-0.5" />
                           <div>
                             <p className="font-semibold text-blue-800 mb-1">Executive Summary</p>
                             <p className="text-blue-700">{result.data.executiveSummary}</p>
@@ -781,7 +793,7 @@ export default function SwotAnalysisPage() {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-yellow-600" />
+                          <Play className="h-5 w-5 text-yellow-600" />
                           Priority Actions
                         </CardTitle>
                       </CardHeader>

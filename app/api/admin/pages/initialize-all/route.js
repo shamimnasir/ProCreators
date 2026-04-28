@@ -3,21 +3,21 @@ import { connectToDatabase } from '@/lib/mongodb'
 import { getDefaultPageTemplate } from '@/lib/pageSchema'
 import { v4 as uuidv4 } from 'uuid'
 
+import { requireAdmin } from '@/lib/auth-middleware'
 const COLLECTION_NAME = 'tool_pages'
 
-// Complete list of ALL tools in the system
+// Complete list of ALL ACTIVE tools in the system
+// These match the actual tool directories in /app/dashboard/tools/
 const ALL_TOOLS = [
   // ============ VIDEO TOOLS ============
   { id: 'ai-video-studio', name: 'AI Video Studio', category: 'Video' },
   { id: 'quick-reels', name: 'Quick Video Studio', category: 'Video' },
-  { id: 'video-editor', name: 'AI Video Editor', category: 'Video' },
   { id: 'auto-subtitles', name: 'Auto Subtitles', category: 'Video' },
   { id: 'auto-reels', name: 'Auto Reels', category: 'Video' },
   { id: 'auto-longform', name: 'Auto Longform', category: 'Video' },
   { id: 'reels', name: 'Reels Creator', category: 'Video' },
   { id: 'story-reels', name: 'Story Reels', category: 'Video' },
-  { id: 'talking-head', name: 'Talking Head Video', category: 'Video' },
-  { id: 'transformation-video', name: 'Transformation Video', category: 'Video' },
+  { id: 'long-form', name: 'Long Form Video', category: 'Video' },
   { id: 'script-to-ad', name: 'Script to Ad', category: 'Video' },
   { id: 'thumbnail-maker', name: 'Thumbnail Maker', category: 'Video' },
   
@@ -27,12 +27,13 @@ const ALL_TOOLS = [
   { id: 'podcast-cover-maker', name: 'Podcast Cover Maker', category: 'Image' },
   { id: 'photo-cards', name: 'Photo Cards', category: 'Image' },
   { id: 'carousels', name: 'Carousel Creator', category: 'Image' },
+  { id: 'meme-generator', name: 'AI Meme Generator', category: 'Image' },
+  { id: 'avatar-creator', name: 'AI Avatar Creator', category: 'Image' },
   
   // ============ AUDIO TOOLS ============
   { id: 'audio-editor', name: 'Audio Editor', category: 'Audio' },
   { id: 'noise-remover', name: 'Noise Remover', category: 'Audio' },
   { id: 'voice-enhancer', name: 'Voice Enhancer', category: 'Audio' },
-  { id: 'voice-clone', name: 'Voice Clone', category: 'Audio' },
   
   // ============ DIGITAL PRODUCTS ============
   { id: 'planner-maker', name: 'Digital Planner Maker', category: 'Digital Products' },
@@ -41,8 +42,6 @@ const ALL_TOOLS = [
   { id: 'journal-maker', name: 'Journal & Diary Maker', category: 'Digital Products' },
   { id: 'checklist-maker', name: 'Checklist Maker', category: 'Digital Products' },
   { id: 'ebook-maker', name: 'Ebook Creator', category: 'Digital Products' },
-  { id: 'recipe-book', name: 'Recipe Book Maker', category: 'Digital Products' },
-  { id: 'guide-maker', name: 'How-To Guide Creator', category: 'Digital Products' },
   { id: 'notion-templates', name: 'Notion Template Maker', category: 'Digital Products' },
   { id: 'slides-maker', name: 'Presentation Templates', category: 'Digital Products' },
   { id: 'learning-cards', name: 'Flashcard Pack Creator', category: 'Digital Products' },
@@ -51,12 +50,10 @@ const ALL_TOOLS = [
   { id: 'activity-book', name: 'Activity Book Creator', category: 'Digital Products' },
   
   // ============ FUN & RECREATION ============
-  { id: 'meme-generator', name: 'AI Meme Generator', category: 'Fun' },
   { id: 'joke-generator', name: 'Joke Generator', category: 'Fun' },
   { id: 'fortune-teller', name: 'AI Fortune Teller', category: 'Fun' },
   { id: 'love-letter', name: 'Love Letter Generator', category: 'Fun' },
   { id: 'story-writer', name: 'AI Story Writer', category: 'Fun' },
-  { id: 'avatar-creator', name: 'AI Avatar Creator', category: 'Fun' },
   { id: 'quotes', name: 'Quote Generator', category: 'Fun' },
   
   // ============ BUSINESS & MARKETING ============
@@ -65,7 +62,6 @@ const ALL_TOOLS = [
   { id: 'pitch-deck', name: 'Pitch Deck Creator', category: 'Business' },
   { id: 'swot-analysis', name: 'SWOT Analysis', category: 'Business' },
   { id: 'marketing-strategy', name: 'Marketing Strategy', category: 'Business' },
-  { id: 'landing-page-copy', name: 'Landing Page Copy', category: 'Business' },
   { id: 'email-campaigns', name: 'Email Campaigns', category: 'Business' },
   
   // ============ CONTENT CREATION ============
@@ -73,8 +69,6 @@ const ALL_TOOLS = [
   { id: 'youtube-creator', name: 'YouTube Content Creator', category: 'Content' },
   { id: 'professional-email', name: 'Professional Email Writer', category: 'Content' },
   { id: 'linkedin-posts', name: 'LinkedIn Post Creator', category: 'Content' },
-  { id: 'threads', name: 'Threads Creator', category: 'Content' },
-  { id: 'long-form', name: 'Long Form Content', category: 'Content' },
   { id: 'lists', name: 'List Creator', category: 'Content' },
   { id: 'news', name: 'News Writer', category: 'Content' },
   { id: 'ai-humanizer', name: 'AI Humanizer', category: 'Content' },
@@ -99,6 +93,9 @@ const ALL_TOOLS = [
 
 // POST - Initialize all tool pages
 export async function POST(request) {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
@@ -141,6 +138,9 @@ export async function POST(request) {
 
 // GET - Get status of all tool pages
 export async function GET() {
+  const auth = await requireAdmin(request)
+  if (!auth.authenticated) return auth.response
+
   try {
     const { db } = await connectToDatabase()
     const collection = db.collection(COLLECTION_NAME)
