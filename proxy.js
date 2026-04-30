@@ -103,34 +103,64 @@ export async function proxy(request) {
   }
 
   // ============= 3. Same-origin CORS =============
-  // Block cross-origin API calls (browsers send Origin header on cross-origin fetch)
+  // Block cross-origin API calls (browsers send Origin header on cross-origin fetch).
+  // Allowlist is built from:
+  //  - request host (same-origin)
+  //  - process.env.NEXT_PUBLIC_BASE_URL (configured preview)
+  //  - process.env.CORS_ORIGINS (comma-separated, or "*" to allow ALL origins)
+  //  - *.emergentagent.com, *.emergent.host, *.emergent.sh (platform domains)
+  //  - localhost (dev)
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
 
     if (origin) {
-      try {
-        const originHost = new URL(origin).host
-        // Allow:
-        //  - same host
-        //  - the production NEXT_PUBLIC_BASE_URL host (configured)
-        //  - localhost (for dev)
-        const allowedHosts = new Set([host])
-        if (process.env.NEXT_PUBLIC_BASE_URL) {
-          try { allowedHosts.add(new URL(process.env.NEXT_PUBLIC_BASE_URL).host) } catch (_) {}
-        }
-        if (originHost.endsWith('.emergentagent.com')) allowedHosts.add(originHost)
-        if (originHost === 'localhost:3000' || originHost.startsWith('localhost:')) allowedHosts.add(originHost)
+      // Env-driven wildcard escape hatch: CORS_ORIGINS="*" allows any origin.
+      const corsEnv = (process.env.CORS_ORIGINS || '').trim()
+      if (corsEnv === '*') {
+        // permissive mode — skip the CORS block
+      } else {
+        try {
+          const originHost = new URL(origin).host
+          const allowedHosts = new Set([host])
 
-        if (!allowedHosts.has(originHost)) {
-          const res = NextResponse.json(
-            { success: false, error: 'Cross-origin request blocked', code: 'CORS_BLOCKED' },
-            { status: 403 }
-          )
-          return applySecurityHeaders(res)
+          if (process.env.NEXT_PUBLIC_BASE_URL) {
+            try { allowedHosts.add(new URL(process.env.NEXT_PUBLIC_BASE_URL).host) } catch (_) {}
+          }
+
+          // Comma-separated explicit origins from env
+          if (corsEnv) {
+            for (const raw of corsEnv.split(',')) {
+              const v = raw.trim()
+              if (!v) continue
+              try { allowedHosts.add(new URL(v).host) } catch (_) { allowedHosts.add(v) }
+            }
+          }
+
+          // Platform subdomains
+          if (
+            originHost.endsWith('.emergentagent.com') ||
+            originHost.endsWith('.emergent.host') ||
+            originHost.endsWith('.emergent.sh')
+          ) {
+            allowedHosts.add(originHost)
+          }
+
+          // Localhost dev
+          if (originHost === 'localhost:3000' || originHost.startsWith('localhost:') || originHost.startsWith('127.0.0.1')) {
+            allowedHosts.add(originHost)
+          }
+
+          if (!allowedHosts.has(originHost)) {
+            const res = NextResponse.json(
+              { success: false, error: 'Cross-origin request blocked', code: 'CORS_BLOCKED' },
+              { status: 403 }
+            )
+            return applySecurityHeaders(res)
+          }
+        } catch (_) {
+          // bad Origin header — let it through, browser will also block
         }
-      } catch (_) {
-        // bad Origin header — let it through, browser will also block
       }
     }
   }
