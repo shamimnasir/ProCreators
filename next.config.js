@@ -46,10 +46,9 @@ const nextConfig = {
           // Frame options for embedding
           { key: "X-Frame-Options", value: "ALLOWALL" },
           { key: "Content-Security-Policy", value: "frame-ancestors *;" },
-          // CORS headers
-          { key: "Access-Control-Allow-Origin", value: process.env.CORS_ORIGINS || "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          // NOTE: CORS headers intentionally handled in /app/proxy.js middleware,
+          // which echoes the specific Origin and sets Allow-Credentials=true
+          // so that session cookies work across custom domains.
           // Cache control to prevent stale JS
           { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
         ],

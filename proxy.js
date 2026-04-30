@@ -72,6 +72,21 @@ function applySecurityHeaders(response) {
   return response
 }
 
+// Attach CORS headers that are compatible with credentialed (cookie-bearing) requests.
+// Echoes the specific Origin (NOT '*') and sets Allow-Credentials=true.
+function applyCorsHeaders(response, origin) {
+  if (!origin) return response
+  response.headers.set('Access-Control-Allow-Origin', origin)
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-csrf-token, X-Requested-With')
+  response.headers.set('Access-Control-Max-Age', '86400')
+  // Make caches key responses on Origin
+  const existingVary = response.headers.get('Vary')
+  response.headers.set('Vary', existingVary ? `${existingVary}, Origin` : 'Origin')
+  return response
+}
+
 export async function proxy(request) {
   const { pathname } = request.nextUrl
   const method = request.method
@@ -102,23 +117,28 @@ export async function proxy(request) {
     if (limited) return applySecurityHeaders(limited)
   }
 
-  // ============= 3. Same-origin CORS =============
-  // Block cross-origin API calls (browsers send Origin header on cross-origin fetch).
+  // ============= 3. CORS — credential-safe, origin-echoing =============
+  // Block cross-origin API calls from unknown origins, but for ALLOWED origins,
+  // echo back the specific Origin and set Allow-Credentials=true so cookies work.
   // Allowlist is built from:
   //  - request host (same-origin)
   //  - process.env.NEXT_PUBLIC_BASE_URL (configured preview)
   //  - process.env.CORS_ORIGINS (comma-separated, or "*" to allow ALL origins)
   //  - *.emergentagent.com, *.emergent.host, *.emergent.sh (platform domains)
+  //  - procreators.io, www.procreators.io (production custom domain)
   //  - localhost (dev)
+  let allowedOrigin = null
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
 
     if (origin) {
-      // Env-driven wildcard escape hatch: CORS_ORIGINS="*" allows any origin.
       const corsEnv = (process.env.CORS_ORIGINS || '').trim()
+      let isAllowed = false
+
       if (corsEnv === '*') {
-        // permissive mode — skip the CORS block
+        // permissive mode
+        isAllowed = true
       } else {
         try {
           const originHost = new URL(origin).host
@@ -128,7 +148,6 @@ export async function proxy(request) {
             try { allowedHosts.add(new URL(process.env.NEXT_PUBLIC_BASE_URL).host) } catch (_) {}
           }
 
-          // Comma-separated explicit origins from env
           if (corsEnv) {
             for (const raw of corsEnv.split(',')) {
               const v = raw.trim()
@@ -137,7 +156,6 @@ export async function proxy(request) {
             }
           }
 
-          // Platform subdomains
           if (
             originHost.endsWith('.emergentagent.com') ||
             originHost.endsWith('.emergent.host') ||
@@ -146,28 +164,46 @@ export async function proxy(request) {
             allowedHosts.add(originHost)
           }
 
-          // Localhost dev
+          const TRUSTED_DOMAINS = ['procreators.io', 'www.procreators.io']
+          if (TRUSTED_DOMAINS.includes(originHost)) {
+            allowedHosts.add(originHost)
+          }
+
           if (originHost === 'localhost:3000' || originHost.startsWith('localhost:') || originHost.startsWith('127.0.0.1')) {
             allowedHosts.add(originHost)
           }
 
-          if (!allowedHosts.has(originHost)) {
-            const res = NextResponse.json(
-              { success: false, error: 'Cross-origin request blocked', code: 'CORS_BLOCKED' },
-              { status: 403 }
-            )
-            return applySecurityHeaders(res)
-          }
+          isAllowed = allowedHosts.has(originHost)
         } catch (_) {
-          // bad Origin header — let it through, browser will also block
+          isAllowed = false
         }
+      }
+
+      if (!isAllowed) {
+        const res = NextResponse.json(
+          { success: false, error: 'Cross-origin request blocked', code: 'CORS_BLOCKED' },
+          { status: 403 }
+        )
+        return applySecurityHeaders(res)
+      }
+
+      allowedOrigin = origin
+
+      // Handle CORS preflight immediately with proper headers
+      if (method === 'OPTIONS') {
+        const preflight = new NextResponse(null, { status: 204 })
+        applySecurityHeaders(preflight)
+        applyCorsHeaders(preflight, allowedOrigin)
+        return preflight
       }
     }
   }
 
-  // ============= 4. Security headers on every response =============
+  // ============= 4. Security + CORS headers on every response =============
   const response = NextResponse.next()
-  return applySecurityHeaders(response)
+  applySecurityHeaders(response)
+  if (allowedOrigin) applyCorsHeaders(response, allowedOrigin)
+  return response
 }
 
 // Run on all /api routes
