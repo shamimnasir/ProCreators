@@ -71,6 +71,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCsrf } from '@/hooks/use-csrf'
+import { htmlToMarkdown } from '@/lib/html-to-markdown'
 import Link from 'next/link'
 
 // Icon mapping
@@ -161,13 +162,17 @@ export default function UnifiedPageManager() {
     formData.append('folder', 'blog')
     
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        headers: getCsrfHeaders()
+      })
       const data = await res.json()
       if (data.success) {
         insertAtCursor(`\n![Image](${data.url})\n`, '', '')
         toast({ title: 'Image uploaded!', description: 'Image inserted into content' })
       } else {
-        throw new Error(data.error)
+        throw new Error(data.error || 'Upload failed')
       }
     } catch (err) {
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })
@@ -1347,12 +1352,37 @@ export default function UnifiedPageManager() {
                           ref={contentEditorRef}
                           value={selectedPost.content || ''}
                           onChange={(e) => setSelectedPost(p => ({ ...p, content: e.target.value }))}
+                          onPaste={(e) => {
+                            // Smart paste: if clipboard has HTML (from Docs/Word/web),
+                            // convert to clean Markdown so headings, lists, tables,
+                            // bold/italic, and links survive.
+                            const html = e.clipboardData?.getData('text/html')
+                            if (!html) return // let default plain-text paste happen
+                            const md = htmlToMarkdown(html)
+                            if (!md) return
+                            e.preventDefault()
+                            const textarea = e.target
+                            const start = textarea.selectionStart
+                            const end = textarea.selectionEnd
+                            const current = selectedPost.content || ''
+                            const newContent = current.substring(0, start) + md + current.substring(end)
+                            setSelectedPost(p => ({ ...p, content: newContent }))
+                            setTimeout(() => {
+                              textarea.focus()
+                              const pos = start + md.length
+                              textarea.setSelectionRange(pos, pos)
+                            }, 0)
+                            toast({ title: 'Formatted paste', description: 'Converted to Markdown (headings, lists, tables preserved)' })
+                          }}
                           rows={15}
                           placeholder="Write your blog post content here...
 
-Select text and click formatting buttons above, or type:
-• Markdown: ## Heading, **bold**, *italic*
-• HTML: <h2>Heading</h2>, <b>bold</b>"
+📋 Paste from Google Docs / Word / web — headings, lists, tables, bold/italic and links are auto-converted to Markdown.
+
+You can also type Markdown directly:
+• ## Heading, **bold**, *italic*
+• Tables: | Col1 | Col2 |
+           | --- | --- |"
                           className="font-mono text-sm rounded-t-none border-t-0 focus:ring-0"
                         />
                       </div>
@@ -1409,14 +1439,15 @@ Select text and click formatting buttons above, or type:
                                     toast({ title: 'Uploading...', description: 'Please wait' })
                                     const res = await fetch('/api/upload', {
                                       method: 'POST',
-                                      body: formData
+                                      body: formData,
+                                      headers: getCsrfHeaders()
                                     })
                                     const data = await res.json()
                                     if (data.success) {
                                       setSelectedPost(p => ({ ...p, coverImage: data.url }))
                                       toast({ title: 'Uploaded!', description: 'Image uploaded successfully' })
                                     } else {
-                                      throw new Error(data.error)
+                                      throw new Error(data.error || 'Upload failed')
                                     }
                                   } catch (err) {
                                     toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })

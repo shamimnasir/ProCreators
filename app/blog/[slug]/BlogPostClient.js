@@ -18,6 +18,7 @@ import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/landing/MoreSections'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 
 export default function BlogPostClient() {
   const params = useParams()
@@ -165,6 +166,7 @@ export default function BlogPostClient() {
           <div className="prose prose-lg dark:prose-invert max-w-none">
             {post.content ? (
               <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
                   h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
@@ -196,7 +198,24 @@ export default function BlogPostClient() {
                   strong: ({ children }) => <strong className="font-bold">{children}</strong>,
                   b: ({ children }) => <strong className="font-bold">{children}</strong>,
                   em: ({ children }) => <em className="italic">{children}</em>,
-                  i: ({ children }) => <em className="italic">{children}</em>
+                  i: ({ children }) => <em className="italic">{children}</em>,
+                  // GFM tables
+                  table: ({ children }) => (
+                    <div className="my-6 overflow-x-auto rounded-lg border">
+                      <table className="w-full text-sm border-collapse">{children}</table>
+                    </div>
+                  ),
+                  thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
+                  tbody: ({ children }) => <tbody>{children}</tbody>,
+                  tr: ({ children }) => <tr className="border-b last:border-b-0 hover:bg-muted/40">{children}</tr>,
+                  th: ({ children }) => (
+                    <th className="px-4 py-2 text-left font-semibold border-r last:border-r-0">{children}</th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="px-4 py-2 align-top border-r last:border-r-0">{children}</td>
+                  ),
+                  hr: () => <hr className="my-8 border-t" />,
+                  del: ({ children }) => <del className="line-through opacity-70">{children}</del>,
                 }}
               >
                 {post.content}
