@@ -3428,3 +3428,39 @@ agent_communication:
       - `validTools` array already contained the 5 new toolIds so no 404s.
       
       **Sprint 2 status: DONE.** All 5 endpoints work end-to-end (auth → CSRF → credits → generation → completion / refund on failure) with a live LLM key. Public landing pages and dashboard pages exist and render correctly."
+
+    - agent: "main"
+      message: "✅ SPRINT 3 COMPLETE (Feb 2026):
+      
+      **5 upgrades shipped:**
+      1. Coloring Book: 6 new themed presets (K-Pop, Dinosaur, Insect, Mermaid, Fairycore, Anime) + backend fallback examples.
+      2. Journal Maker: 3 therapeutic modes (ADHD Focus, CBT Thought Journal, Postpartum Wellness) with clinical scaffolding, wellness disclaimers, and mode-aware AI prompts in both generate and generate-structure routes.
+      3. Blog / Listing Writer: split 'Amazon Listing' into two dedicated modes — Amazon (200-char title + 7 bullets + backend keywords) and NEW Etsy (140-char title + 13 tags + materials + personalization + section suggestion). Frontend has both tiles, dedicated headers/copy, and passes a `listingPlatform` flag.
+      4. Planner Maker: hyperlinked TOC page. Uses new `/lib/pdf-links.js` helper (addInternalLink / addExternalLink via pdf-lib low-level GoTo annotation). TOC lists the first 20 pages with clickable rows.
+      5. Ebook Creator: EPUB 3 export (new `/api/ebook-maker/generate-epub` + `/lib/epub-builder.js` using JSZip) + Series Generator (new `/api/ebook-maker/generate-series` — one seed → 3-7 book series with shared brand, buyer avatar, cover concept, and chapter outlines).
+      
+      **Backend verification (deep_testing_backend_nextjs):**
+      - EPUB Export: 5/5 tests PASS. Real EPUB (6453 bytes, valid ZIP magic, application/epub+zip Content-Type).
+      - Series Generator: 4/4 tests PASS. 5-book series with seriesBrand + full chapter outlines.
+      - Etsy Listing: 200 with 134-char title, 13 tags all ≤20 chars, 6 materials, personalization, sectionSuggestion.
+      - Amazon Listing regression: 200 with 156-char title, 7 bullets ≤400 chars each, 237-char backend keywords. No regression.
+      
+      **Also fixed a critical pre-existing infrastructure bug:**
+      - `/app/scripts/llm_call.py` was using deprecated `gemini-2.0-flash` (404 upstream). Updated to `gemini-3.5-flash` which is the current Emergent proxy default. This unblocks blog-creator, activity-book, and other tools that share this Python LLM script.
+      
+      **New credit-tier entries in `/lib/credits.js`:** `ebook-maker-epub` = 20 credits (repackaging, no LLM), `ebook-series` = 50 credits (single LLM call).
+      
+      **Files created:**
+      - `/app/lib/pdf-links.js`
+      - `/app/lib/epub-builder.js`
+      - `/app/app/api/ebook-maker/generate-epub/route.js`
+      - `/app/app/api/ebook-maker/generate-series/route.js`
+      
+      **Frontend changes:**
+      - Ebook Creator page: Series planner panel on step 1 (generates 3-7 book plan, click a book to prefill topic + chapter count) + EPUB download button next to PDF on step 5.
+      - Blog / Content Writer: Etsy Listing article-type tile + dynamic header/copy for Etsy vs Amazon.
+      - Planner Maker: TOC page auto-inserted between cover and content with clickable rows.
+      - Coloring Book: 6 new theme tiles.
+      - Journal Maker: 3 new therapeutic-mode tiles.
+      
+      **Public tool registry:** added `etsy-listing` to `[toolId]/page.js` TOOL_METADATA + validTools so `/tools/etsy-listing` is a live SEO landing page."
