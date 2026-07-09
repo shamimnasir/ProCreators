@@ -230,3 +230,6 @@ credentials.json
 
 # Testing memory (contains admin credentials — do not deploy)
 memory/test_credentials.md
+.next/dev/cache/turbopack/da605e0c/00002967.sst
+.next/dev/cache/turbopack/da605e0c/00002968.sst
+.next/dev/cache/turbopack/da605e0c/00002966.sst

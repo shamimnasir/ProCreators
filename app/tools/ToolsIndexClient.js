@@ -52,8 +52,6 @@ const HIDDEN_FROM_PUBLIC = new Set([
  'linkedin-posts',
  'youtube-creator',
  'ai-humanizer',
- 'slides-maker',
- 'quiz-maker',
 ])
 
 // -----------------------------------------------------------
@@ -77,6 +75,21 @@ const TOOLS_BY_CATEGORY = {
  { id: 'spreadsheet-template', name: 'Spreadsheet Template Builder', description: 'Google Sheets / Excel templates: budget trackers, freelancer invoices, Airbnb dashboards, meal-prep planners. Includes formulas, sample data, dashboards, and CSV download.', badge: 'NEW' },
  { id: 'wedding-suite', name: 'Wedding Printable Suite', description: 'Complete 8-piece wedding stationery: save-the-date, invitation, RSVP, details, program, menu, table cards, thank you. $25\u2013$65 per Etsy sale at 95% margins.', badge: 'NEW' },
  { id: 'puzzle-book', name: 'Themed Puzzle Book Generator', description: 'Themed word-search puzzle books (K-pop, dinosaurs, cats, holidays). Auto-generated printable grids, difficulty tiers, kids-to-seniors audiences. KDP research: themed puzzles outsell generic 4:1.', badge: 'NEW' },
+ { id: 'checklist-maker', name: 'Checklist & Tracker Maker', description: 'Printable checklists, habit trackers, chore charts, and daily to-do sheets. Perfect for Etsy productivity bundles and KDP low-content books.' },
+ ]
+ },
+ 'For Kids & Educators': {
+ icon: GraduationCap,
+ color: 'bg-amber-500',
+ slug: 'for-kids-educators',
+ description: 'High-margin KDP niches for the kids and education market — plus Teachers-Pay-Teachers-style Etsy digital printables.',
+ tools: [
+ { id: 'storybook-maker', name: "Children's Storybook Creator", description: 'Illustrated childrens picture books with character consistency, page-by-page AI art, and KDP paperback trim sizes (8×10, 8.5×8.5). One of the biggest KDP niches — sells $8–$18 per book.' },
+ { id: 'activity-book', name: 'Kids Activity Book Creator', description: 'Mazes, dot-to-dot, tracing, matching, counting, and coloring activities in one printable bundle. 20 to 80 pages. Age-graded content. Perfect for KDP and Etsy homeschool stores.' },
+ { id: 'learning-cards', name: 'Flashcard Pack Creator', description: 'Printable flashcards (alphabet, sight words, multiplication, sciences, languages). Front-and-back layouts, KDP-ready trim sizes. Teachers-Pay-Teachers and Etsy top seller category.' },
+ { id: 'quiz-maker', name: 'Quiz & Test Creator', description: 'Auto-generated quizzes and tests by subject, grade level, and difficulty. Multiple-choice, true/false, and short-answer. Bundle 10 quizzes into a sellable digital pack.' },
+ { id: 'slides-maker', name: 'Presentation Templates', description: 'Editable presentation deck templates for teachers, coaches, and consultants. Sell as Google Slides / PowerPoint bundles on Etsy ($8–$25 each).' },
+ { id: 'worksheet-maker', name: 'Worksheet Generator', description: 'Printable worksheets for any subject or grade level. Teacher-friendly fields (subject, grade, instructions). Multi-page bundles auto-generated for KDP and Etsy.' },
  ]
  },
  'Design Your Covers': {
