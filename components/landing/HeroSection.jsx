@@ -114,7 +114,7 @@ export function HeroSection({ onGetStarted, onExplore }) {
  </h1>
 
  <p className="text-lg md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
- ProCreators builds your complete Amazon KDP or Etsy product with{' '}
+ ProCreators builds your complete Amazon KDP or Etsy product or your own Digital Assets with{' '}
  <span className="text-foreground font-semibold">ebook, cover, interior pages, and listing copy</span>{' '}done in one session. No designer. No writer. No excuses.
  </p>
 
