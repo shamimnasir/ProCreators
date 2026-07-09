@@ -40,11 +40,6 @@ const HIDDEN_FROM_PUBLIC = new Set([
  'exam-prep',
  'lesson-planner',
  'citation-generator',
- 'resume-builder',
- 'cover-letter',
- 'interview-prep',
- 'job-matcher',
- 'salary-negotiator',
  'auto-subtitles',
  'auto-reels',
  'story-reels',
@@ -110,6 +105,19 @@ const TOOLS_BY_CATEGORY = {
  { id: 'quick-reels', name: 'Quick Video Studio', description: 'Short, viral videos to promote your published products. Vertical format for Reels, TikTok, and Shorts.' },
  { id: 'reels', name: 'Reels Creator', description: 'Social reels showcasing your new listings. Auto-captioned. Music-ready.' },
  { id: 'thumbnail-maker', name: 'Thumbnail Maker', description: 'Attention-grabbing thumbnails for YouTube promos, blog headers, and social posts.' },
+ ]
+ },
+ 'Career & Job Search': {
+ icon: Briefcase,
+ color: 'bg-emerald-500',
+ slug: 'career',
+ description: 'AI-powered career suite. Perfect for job seekers AND for creating sellable career-templates on Etsy.',
+ tools: [
+ { id: 'resume-builder', name: 'Resume Builder', description: 'Build ATS-friendly resumes with multiple templates (Modern, Classic, Creative). One-click PDF export. Bonus: bundle 5+ template variants and sell them as Canva-ready resume packs on Etsy ($5–$25 each).' },
+ { id: 'cover-letter', name: 'Cover Letter Writer', description: 'AI-drafted cover letters with 5+ tone options (Professional, Enthusiastic, Confident, Conversational, Formal). PDF-ready. Bundle with resume templates for a complete Etsy career pack.' },
+ { id: 'interview-prep', name: 'Interview Prep Coach', description: 'Job-title and company-specific interview questions with difficulty tiers. Paste the job description for hyper-targeted practice. Great for sellable interview-prep guides on Gumroad.' },
+ { id: 'job-matcher', name: 'ATS Job Matcher', description: 'Paste a job description and your resume, get a keyword-match score. See missing keywords to add. Beat the ATS filter every time.' },
+ { id: 'salary-negotiator', name: 'Salary Negotiator', description: '5 negotiation scenarios: initial offer, counter offer, raise request, promotion, competing offers. AI-written scripts and email templates for each.' },
  ]
  },
 }
@@ -252,7 +260,7 @@ export default function ToolsIndexClient() {
 
  {filteredCategories.length === 0 && (
  <div className="text-center py-12">
- <p className="text-muted-foreground">No tools found matching "{searchQuery}"</p>
+ <p className="text-muted-foreground">No tools found matching &ldquo;{searchQuery}&rdquo;</p>
  <Button
  variant="link"
  onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
