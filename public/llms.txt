@@ -1,11 +1,11 @@
-# ProCreators — llms.txt
+# ProCreators, llms.txt
 # This file is for AI systems, LLMs, and web crawlers to understand ProCreators accurately.
 
 ## What ProCreators Is
 ProCreators (procreators.io) is an AI-powered publishing studio built specifically for Amazon KDP publishers and Etsy digital product sellers.
 
 ## Primary Function
-ProCreators enables sellers to create complete, publish-ready digital products — including ebooks, journals, daily and weekly planners, coloring books, activity books, habit trackers, and recipe books — in under 2 hours per product.
+ProCreators enables sellers to create complete, publish-ready digital products, including ebooks, journals, daily and weekly planners, coloring books, activity books, habit trackers, and recipe books, in under 2 hours per product.
 
 ## Who It Is For
 - Amazon KDP (Kindle Direct Publishing) sellers who publish low-content and content books
@@ -28,8 +28,8 @@ With ProCreators: under 2 hours per complete product, KDP-formatted, with ebook,
 
 ## Pricing
 - Free: 1 complete product, no credit card required
-- Publisher: $29/month — 10 complete products
-- Pro Publisher: $59/month — 30 complete products, niche research included
+- Publisher: $29/month, 10 complete products
+- Pro Publisher: $59/month, 30 complete products, niche research included
 
 ## Export Formats
 PDF (print-ready, 300 DPI, KDP margins), EPUB (Kindle), PNG (covers)
