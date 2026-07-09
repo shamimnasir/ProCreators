@@ -23,7 +23,7 @@ async def call_llm(prompt, system_prompt="You are a creative activity book creat
             api_key=api_key,
             session_id=session_id,
             system_message=system_prompt
-        ).with_model("gemini", "gemini-2.0-flash")
+        ).with_model("gemini", "gemini-3.5-flash")
         
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)

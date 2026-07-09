@@ -137,7 +137,7 @@ backend:
 
   - task: "Sprint 3: Etsy Listing mode (blog-creator)"
     implemented: true
-    working: false
+    working: true
     file: "/app/app/api/blog-creator/generate/route.js"
     stuck_count: 0
     priority: "high"
@@ -149,6 +149,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "❌ SPRINT 3 IMPLEMENTATION CORRECT BUT BLOCKED BY PRE-EXISTING LLM INFRASTRUCTURE ISSUE: The Etsy listing mode implementation is correctly structured with proper Zod schema validation, platform detection logic (lines 162-163), and complete Etsy-specific output schema (lines 274-304) including title (max 140 chars), 13 tags (max 20 chars each), materials (up to 13), description, personalization, sectionSuggestion. However, the endpoint returns empty fields because the underlying Python LLM script (/app/scripts/llm_call.py line 26) uses deprecated model 'gemini-2.0-flash' which returns 404 error: 'This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model.' This is NOT a Sprint 3 bug - it's a pre-existing infrastructure issue affecting ALL blog-creator endpoints. The Sprint 3 code changes are correct and will work once the LLM model is updated to 'gemini-flash-latest'. RECOMMENDATION: Main agent should update /app/scripts/llm_call.py line 26 from 'gemini-2.0-flash' to 'gemini-flash-latest' to fix this infrastructure issue."
+        - working: true
+          agent: "testing"
+          comment: "✅ SPRINT 3 ETSY/AMAZON LISTING MODE FULLY FUNCTIONAL - 100% SUCCESS RATE: After fixing Python LLM script model from 'gemini-2.0-flash' → 'gemini-3.5-flash' (/app/scripts/llm_call.py line 26), both Etsy and Amazon listing modes are now working perfectly. SCENARIO A - ETSY LISTING (✅ PASS): POST /api/blog-creator/generate with articleType='etsy-listing' returns 200 with complete Etsy-specific schema: title (134 chars, ≤140 ✓), tags array (13 items, all ≤20 chars, max 18 ✓), materials array (6 items, 0-13 valid ✓), description (1960 chars, non-empty ✓), personalization field (present ✓), sectionSuggestion field (present ✓). SCENARIO B - AMAZON LISTING REGRESSION CHECK (✅ PASS): POST /api/blog-creator/generate with articleType='amazon-listing' returns 200 with classic Amazon schema maintained: title (156 chars, ≤200 ✓), bullets array (7 items, all ≤400 chars, max 192 ✓), backendKeywords string (237 chars, ≤250 ✓), description (1856 chars, non-empty ✓). NO REGRESSION DETECTED - Amazon listing correctly returns bullets+backendKeywords structure, NOT Etsy tags/materials schema. Both listing types generate high-quality, platform-specific content with proper field validation. The LLM model fix has resolved the infrastructure issue and Sprint 3 Etsy listing mode is PRODUCTION READY."
 
   - task: "Sprint 2: AI Prompt Pack Generate API"
     implemented: true
