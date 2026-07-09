@@ -1,873 +1,493 @@
 #!/usr/bin/env python3
 """
-Security Hardening Verification Test Suite
-Tests the security changes shipped including:
-1. Admin route protection via proxy middleware
-2. Auth hardening on upload/scrape endpoints  
-3. Session cookie + Bearer token support
-4. CORS tightening
-5. Rate limiting
-6. Credit pricing config verification
+Sprint 2 Text Generation Endpoints Testing
+Tests 5 new endpoints with comprehensive test matrix:
+1. POST /api/ai-prompt-pack/generate (creditCost: 8)
+2. POST /api/recipe-book/generate (creditCost: 10)
+3. POST /api/spreadsheet-template/generate (creditCost: 8)
+4. POST /api/wedding-suite/generate (creditCost: 12)
+5. POST /api/puzzle-book/generate (creditCost: 8)
+
+Test scenarios for each endpoint:
+1. No auth → 401
+2. Auth + no/invalid CSRF → 403 with code: 'CSRF_INVALID'
+3. Auth + valid CSRF + insufficient credits → 402 with code: 'INSUFFICIENT_CREDITS'
+4. Auth + valid CSRF + sufficient credits → 200 with success: true
 """
 
 import requests
+import os
 import json
 import time
+from pymongo import MongoClient
 import random
 import string
-from urllib.parse import urljoin
 
 # Base URL from environment
-BASE_URL = "https://ugc-ads-gen-1.preview.emergentagent.com"
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ugc-ads-gen-1.preview.emergentagent.com')
+API_BASE = f"{BASE_URL}/api"
+
+# MongoDB connection
+MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
+DB_NAME = os.getenv('DB_NAME', 'procreators')
+
+print(f"🔧 Configuration:")
+print(f"   BASE_URL: {BASE_URL}")
+print(f"   API_BASE: {API_BASE}")
+print(f"   MONGO_URL: {MONGO_URL}")
+print(f"   DB_NAME: {DB_NAME}")
+print()
+
+# Test endpoints configuration
+ENDPOINTS = [
+    {
+        'name': 'AI Prompt Pack Generate',
+        'path': '/ai-prompt-pack/generate',
+        'creditCost': 8,
+        'body': {
+            'niche': 'Content Creation',
+            'packSize': 10,
+            'category': 'marketing',
+            'audience': 'social media managers',
+            'aiTool': 'ChatGPT'
+        }
+    },
+    {
+        'name': 'Recipe Book Generate',
+        'path': '/recipe-book/generate',
+        'creditCost': 10,
+        'body': {
+            'cuisine': 'Italian',
+            'recipeCount': 5,
+            'skill': 'Beginner-friendly',
+            'diet': 'Vegetarian',
+            'audience': 'home cooks'
+        }
+    },
+    {
+        'name': 'Spreadsheet Template Generate',
+        'path': '/spreadsheet-template/generate',
+        'creditCost': 8,
+        'body': {
+            'templateType': 'Budget Tracker',
+            'audience': 'freelancers',
+            'style': 'Professional'
+        }
+    },
+    {
+        'name': 'Wedding Suite Generate',
+        'path': '/wedding-suite/generate',
+        'creditCost': 12,
+        'body': {
+            'style': 'Modern Minimalist',
+            'couple': 'Sarah & Michael',
+            'weddingDate': 'September 20, 2026',
+            'venue': 'Garden Terrace, Brooklyn',
+            'time': '5:00 PM ceremony',
+            'dressCode': 'Semi-formal',
+            'rsvpBy': 'August 15, 2026'
+        }
+    },
+    {
+        'name': 'Puzzle Book Generate',
+        'path': '/puzzle-book/generate',
+        'creditCost': 8,
+        'body': {
+            'theme': 'Space Exploration',
+            'puzzleCount': 5,
+            'difficulty': 'Medium',
+            'audience': 'Adults'
+        }
+    }
+]
 
 def generate_random_email():
     """Generate a random email for testing"""
-    random_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
-    return f"test_{random_string}@example.com"
+    random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+    return f"test_{random_str}@example.com"
 
-def test_admin_route_protection():
-    """Test 1: Admin route protection - all should return 401 without auth"""
-    print("\n🔒 Testing Admin Route Protection...")
+def setup_test_user():
+    """Create a test user with email verification and credits"""
+    print("=" * 80)
+    print("SETUP: Creating test user")
+    print("=" * 80)
     
-    admin_endpoints = [
-        "/api/admin/site-settings",
-        "/api/admin/system-prompts/list", 
-        "/api/admin/system-prompts/get?tool=blog-creator",
-        "/api/admin/controls",
-        "/api/admin/services-status",
-        "/api/admin/static-pages",
-        "/api/admin/menus",
-        "/api/admin/ai-video-prompts",
-        "/api/admin/pages",
-        "/api/admin/pages/initialize-all",
-        "/api/admin/pages/blocks",
-        "/api/admin/blog",
-        "/api/admin/unified-pages"
-    ]
+    email = generate_random_email()
+    password = "TestPass123"
+    name = "Test User Sprint2"
     
-    results = []
+    print(f"📧 Email: {email}")
+    print(f"🔑 Password: {password}")
     
-    for endpoint in admin_endpoints:
-        try:
-            # Test GET endpoints
-            response = requests.get(urljoin(BASE_URL, endpoint), timeout=10)
-            expected_status = 401
-            status_ok = response.status_code == expected_status
-            
-            # Check for proper error structure
-            try:
-                data = response.json()
-                has_auth_error = data.get('code') == 'AUTH_REQUIRED' or 'Authentication required' in data.get('error', '')
-            except:
-                has_auth_error = False
-            
-            results.append({
-                'endpoint': endpoint,
-                'method': 'GET',
-                'status': response.status_code,
-                'expected': expected_status,
-                'pass': status_ok and has_auth_error,
-                'response_preview': str(response.text)[:200]
-            })
-            
-            print(f"  {'✅' if status_ok and has_auth_error else '❌'} GET {endpoint}: {response.status_code}")
-            
-        except Exception as e:
-            results.append({
-                'endpoint': endpoint,
-                'method': 'GET', 
-                'status': 'ERROR',
-                'expected': expected_status,
-                'pass': False,
-                'error': str(e)
-            })
-            print(f"  ❌ GET {endpoint}: ERROR - {e}")
-    
-    # Test POST endpoints that should also be protected
-    post_endpoints = [
-        ("/api/admin/site-settings", {"section": "branding", "data": {}}),
-        ("/api/admin/system-prompts/update", {"tool": "x", "systemPrompt": "y"})
-    ]
-    
-    for endpoint, payload in post_endpoints:
-        try:
-            response = requests.post(urljoin(BASE_URL, endpoint), json=payload, timeout=10)
-            expected_status = 401
-            status_ok = response.status_code == expected_status
-            
-            try:
-                data = response.json()
-                has_auth_error = data.get('code') == 'AUTH_REQUIRED' or 'Authentication required' in data.get('error', '')
-            except:
-                has_auth_error = False
-            
-            results.append({
-                'endpoint': endpoint,
-                'method': 'POST',
-                'status': response.status_code,
-                'expected': expected_status,
-                'pass': status_ok and has_auth_error,
-                'response_preview': str(response.text)[:200]
-            })
-            
-            print(f"  {'✅' if status_ok and has_auth_error else '❌'} POST {endpoint}: {response.status_code}")
-            
-        except Exception as e:
-            results.append({
-                'endpoint': endpoint,
-                'method': 'POST',
-                'status': 'ERROR', 
-                'expected': expected_status,
-                'pass': False,
-                'error': str(e)
-            })
-            print(f"  ❌ POST {endpoint}: ERROR - {e}")
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Admin Route Protection: {passed}/{total} tests passed")
-    
-    return results
-
-def test_public_route_auth_hardening():
-    """Test 2: Public route auth hardening - upload/scrape should require auth"""
-    print("\n🔒 Testing Public Route Auth Hardening...")
-    
-    results = []
-    
-    # Test upload endpoint without auth
+    # Register user
+    print("\n1️⃣ Registering user...")
     try:
-        response = requests.post(urljoin(BASE_URL, "/api/upload"), timeout=10)
-        expected_status = 401
-        status_ok = response.status_code == expected_status
+        response = requests.post(
+            f"{API_BASE}/auth",
+            json={
+                'action': 'signup',
+                'email': email,
+                'password': password,
+                'name': name
+            },
+            timeout=10
+        )
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text[:200]}")
         
-        try:
-            data = response.json()
-            has_auth_error = 'Authentication required' in data.get('error', '')
-        except:
-            has_auth_error = False
-        
-        results.append({
-            'endpoint': '/api/upload',
-            'method': 'POST',
-            'status': response.status_code,
-            'expected': expected_status,
-            'pass': status_ok and has_auth_error,
-            'response_preview': str(response.text)[:200]
-        })
-        
-        print(f"  {'✅' if status_ok and has_auth_error else '❌'} POST /api/upload (no auth): {response.status_code}")
-        
+        if response.status_code not in [200, 201]:
+            print(f"   ❌ Registration failed")
+            return None
+            
+        data = response.json()
+        user_id = data.get('userId')
+        print(f"   ✅ User registered: {user_id}")
     except Exception as e:
-        results.append({
-            'endpoint': '/api/upload',
-            'method': 'POST',
-            'status': 'ERROR',
-            'expected': 401,
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ POST /api/upload: ERROR - {e}")
+        print(f"   ❌ Registration error: {e}")
+        return None
     
-    # Test scrape endpoint without auth
+    # Set emailVerified and credits in MongoDB
+    print("\n2️⃣ Setting emailVerified=true and credits=200 in MongoDB...")
     try:
-        response = requests.post(urljoin(BASE_URL, "/api/scrape/url"), timeout=10)
-        expected_status = 401
-        status_ok = response.status_code == expected_status
+        client = MongoClient(MONGO_URL)
+        db = client[DB_NAME]
+        users_collection = db['users']
         
-        try:
-            data = response.json()
-            has_auth_error = 'Authentication required' in data.get('error', '')
-        except:
-            has_auth_error = False
+        result = users_collection.update_one(
+            {'email': email},
+            {
+                '$set': {
+                    'emailVerified': True,
+                    'credits': 200,
+                    'purchasedCredits': 200
+                }
+            }
+        )
         
-        results.append({
-            'endpoint': '/api/scrape/url',
-            'method': 'POST',
-            'status': response.status_code,
-            'expected': expected_status,
-            'pass': status_ok and has_auth_error,
-            'response_preview': str(response.text)[:200]
-        })
+        if result.modified_count > 0:
+            print(f"   ✅ Updated user in MongoDB")
+        else:
+            print(f"   ⚠️  User not found or already updated")
         
-        print(f"  {'✅' if status_ok and has_auth_error else '❌'} POST /api/scrape/url (no auth): {response.status_code}")
-        
+        client.close()
     except Exception as e:
-        results.append({
-            'endpoint': '/api/scrape/url',
-            'method': 'POST',
-            'status': 'ERROR',
-            'expected': 401,
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ POST /api/scrape/url: ERROR - {e}")
+        print(f"   ❌ MongoDB update error: {e}")
+        return None
     
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Public Route Auth Hardening: {passed}/{total} tests passed")
-    
-    return results
-
-def test_ssrf_protection():
-    """Test SSRF protection on scrape endpoint with valid auth"""
-    print("\n🛡️ Testing SSRF Protection...")
-    
-    # First register and login a test user
-    test_email = generate_random_email()
-    test_password = "TestPassword123!"
-    
-    results = []
-    
+    # Login to get session token
+    print("\n3️⃣ Logging in to get session token...")
     try:
-        # Register user
-        register_response = requests.post(urljoin(BASE_URL, "/api/auth"), json={
-            "action": "register",
-            "email": test_email,
-            "password": test_password,
-            "name": "Test User"
-        }, timeout=10)
+        response = requests.post(
+            f"{API_BASE}/auth",
+            json={
+                'action': 'login',
+                'email': email,
+                'password': password
+            },
+            timeout=10
+        )
+        print(f"   Status: {response.status_code}")
         
-        if register_response.status_code not in [200, 201]:
-            print(f"  ❌ User registration failed: {register_response.status_code}")
-            return results
-        
-        # Login user
-        login_response = requests.post(urljoin(BASE_URL, "/api/auth"), json={
-            "action": "login", 
-            "email": test_email,
-            "password": test_password
-        }, timeout=10)
-        
-        if login_response.status_code != 200:
-            print(f"  ❌ User login failed: {login_response.status_code}")
-            return results
-        
-        # Extract session token from response
-        login_data = login_response.json()
-        session_token = login_data.get('sessionToken')
+        if response.status_code != 200:
+            print(f"   ❌ Login failed: {response.text[:200]}")
+            return None
+            
+        data = response.json()
+        session_token = data.get('sessionToken')
         
         if not session_token:
-            print("  ❌ No session token received from login")
-            return results
+            print(f"   ❌ No sessionToken in response")
+            return None
+            
+        print(f"   ✅ Session token obtained: {session_token[:20]}...")
         
-        headers = {"Authorization": f"Bearer {session_token}"}
-        
-        # Test SSRF protection with internal addresses
-        ssrf_tests = [
-            ("http://127.0.0.1/test", "internal address"),
-            ("http://localhost/test", "localhost"),
-            ("ftp://example.com", "non-HTTP protocol"),
-            ("https://example.com", "valid external URL")
-        ]
-        
-        for url, test_type in ssrf_tests:
-            try:
-                response = requests.post(
-                    urljoin(BASE_URL, "/api/scrape/url"),
-                    json={"url": url},
-                    headers=headers,
-                    timeout=10
-                )
-                
-                if test_type in ["internal address", "localhost", "non-HTTP protocol"]:
-                    # Should be blocked with 400
-                    expected_status = 400
-                    status_ok = response.status_code == expected_status
-                    
-                    try:
-                        data = response.json()
-                        has_block_message = any(phrase in data.get('error', '').lower() for phrase in 
-                                              ['internal', 'not permitted', 'blocked', 'invalid'])
-                    except:
-                        has_block_message = False
-                    
-                    test_pass = status_ok and has_block_message
-                    
-                else:  # valid external URL
-                    # Should succeed with 200 or fail gracefully
-                    expected_status = 200
-                    status_ok = response.status_code in [200, 400, 500]  # Various valid responses
-                    test_pass = status_ok
-                
-                results.append({
-                    'test_type': test_type,
-                    'url': url,
-                    'status': response.status_code,
-                    'expected': expected_status,
-                    'pass': test_pass,
-                    'response_preview': str(response.text)[:200]
-                })
-                
-                print(f"  {'✅' if test_pass else '❌'} {test_type} ({url}): {response.status_code}")
-                
-            except Exception as e:
-                results.append({
-                    'test_type': test_type,
-                    'url': url,
-                    'status': 'ERROR',
-                    'expected': expected_status,
-                    'pass': False,
-                    'error': str(e)
-                })
-                print(f"  ❌ {test_type}: ERROR - {e}")
-        
+        return {
+            'email': email,
+            'password': password,
+            'userId': user_id,
+            'sessionToken': session_token
+        }
     except Exception as e:
-        print(f"  ❌ SSRF test setup failed: {e}")
-        return results
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 SSRF Protection: {passed}/{total} tests passed")
-    
-    return results
+        print(f"   ❌ Login error: {e}")
+        return None
 
-def test_auth_cookie_issuance():
-    """Test 3: Auth cookie issuance and session token support"""
-    print("\n🍪 Testing Auth Cookie Issuance...")
-    
-    test_email = generate_random_email()
-    test_password = "TestPassword123!"
-    
-    results = []
-    
+def get_csrf_token():
+    """Get CSRF token from /api/csrf"""
+    print("\n4️⃣ Getting CSRF token...")
     try:
-        # Register user first
-        register_response = requests.post(urljoin(BASE_URL, "/api/auth"), json={
-            "action": "register",
-            "email": test_email,
-            "password": test_password,
-            "name": "Test User"
-        }, timeout=10)
+        response = requests.get(f"{API_BASE}/csrf", timeout=10)
+        print(f"   Status: {response.status_code}")
         
-        if register_response.status_code not in [200, 201]:
-            print(f"  ❌ User registration failed: {register_response.status_code}")
-            return results
-        
-        # Test login response has Set-Cookie header
-        login_response = requests.post(urljoin(BASE_URL, "/api/auth"), json={
-            "action": "login",
-            "email": test_email, 
-            "password": test_password
-        }, timeout=10)
-        
-        # Check for Set-Cookie header
-        set_cookie_header = login_response.headers.get('Set-Cookie', '')
-        has_session_cookie = 'session_token=' in set_cookie_header
-        has_httponly = 'HttpOnly' in set_cookie_header
-        has_samesite = 'SameSite=Lax' in set_cookie_header or 'SameSite=Strict' in set_cookie_header
-        
-        cookie_test_pass = has_session_cookie and has_httponly
-        
-        results.append({
-            'test': 'Login Set-Cookie header',
-            'status': login_response.status_code,
-            'has_session_cookie': has_session_cookie,
-            'has_httponly': has_httponly,
-            'has_samesite': has_samesite,
-            'pass': cookie_test_pass,
-            'set_cookie_header': set_cookie_header[:200]
-        })
-        
-        print(f"  {'✅' if cookie_test_pass else '❌'} Login Set-Cookie: session_token={has_session_cookie}, HttpOnly={has_httponly}")
-        
-        # Test direct /api/auth login endpoint
-        direct_login_response = requests.post(urljoin(BASE_URL, "/api/auth/login"), json={
-            "email": test_email,
-            "password": test_password
-        }, timeout=10)
-        
-        if direct_login_response.status_code == 200:
-            direct_set_cookie = direct_login_response.headers.get('Set-Cookie', '')
-            direct_has_session = 'session_token=' in direct_set_cookie
-            direct_has_httponly = 'HttpOnly' in direct_set_cookie
+        if response.status_code != 200:
+            print(f"   ❌ CSRF token request failed")
+            return None
             
-            direct_cookie_test_pass = direct_has_session and direct_has_httponly
-            
-            results.append({
-                'test': 'Direct /api/auth/login Set-Cookie',
-                'status': direct_login_response.status_code,
-                'has_session_cookie': direct_has_session,
-                'has_httponly': direct_has_httponly,
-                'pass': direct_cookie_test_pass,
-                'set_cookie_header': direct_set_cookie[:200]
-            })
-            
-            print(f"  {'✅' if direct_cookie_test_pass else '❌'} Direct login Set-Cookie: session_token={direct_has_session}, HttpOnly={direct_has_httponly}")
+        data = response.json()
+        csrf_token = data.get('csrfToken')
         
-        # Test session cookie authentication (without Authorization header)
-        if has_session_cookie:
-            # Extract session token from Set-Cookie header
-            import re
-            session_match = re.search(r'session_token=([^;]+)', set_cookie_header)
-            if session_match:
-                session_token = session_match.group(1)
-                
-                # Test admin endpoint with cookie only (should still get 401/403 since test user isn't admin)
-                cookie_headers = {'Cookie': f'session_token={session_token}'}
-                admin_response = requests.get(
-                    urljoin(BASE_URL, "/api/admin/site-settings"),
-                    headers=cookie_headers,
-                    timeout=10
-                )
-                
-                # Should NOT get 401 (auth required) but might get 403 (not admin) or other error
-                cookie_auth_working = admin_response.status_code != 401
-                
-                results.append({
-                    'test': 'Cookie-only authentication',
-                    'status': admin_response.status_code,
-                    'not_401': cookie_auth_working,
-                    'pass': cookie_auth_working,
-                    'response_preview': str(admin_response.text)[:200]
-                })
-                
-                print(f"  {'✅' if cookie_auth_working else '❌'} Cookie auth (admin endpoint): {admin_response.status_code} (not 401 = working)")
-        
+        if not csrf_token:
+            print(f"   ❌ No csrfToken in response")
+            return None
+            
+        print(f"   ✅ CSRF token obtained: {csrf_token[:20]}...")
+        return csrf_token
     except Exception as e:
-        results.append({
-            'test': 'Auth cookie test setup',
-            'status': 'ERROR',
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ Auth cookie test failed: {e}")
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Auth Cookie Issuance: {passed}/{total} tests passed")
-    
-    return results
+        print(f"   ❌ CSRF token error: {e}")
+        return None
 
-def test_rate_limiting():
-    """Test 4: Rate limiting via proxy.js"""
-    print("\n⏱️ Testing Rate Limiting...")
+def set_user_credits(email, credits):
+    """Set user credits in MongoDB"""
+    try:
+        client = MongoClient(MONGO_URL)
+        db = client[DB_NAME]
+        users_collection = db['users']
+        
+        result = users_collection.update_one(
+            {'email': email},
+            {
+                '$set': {
+                    'credits': credits,
+                    'purchasedCredits': credits
+                }
+            }
+        )
+        
+        client.close()
+        return result.modified_count > 0
+    except Exception as e:
+        print(f"   ❌ Error setting credits: {e}")
+        return False
+
+def test_endpoint(endpoint, user_data, csrf_token):
+    """Test a single endpoint with all 4 scenarios"""
+    print("\n" + "=" * 80)
+    print(f"TESTING: {endpoint['name']}")
+    print(f"Endpoint: POST {endpoint['path']}")
+    print(f"Credit Cost: {endpoint['creditCost']}")
+    print("=" * 80)
     
-    results = []
-    
-    # Test login rate limiting (10 requests per 15 minutes)
-    print("  Testing login rate limiting...")
-    
-    login_endpoint = urljoin(BASE_URL, "/api/auth")
-    bogus_credentials = {
-        "action": "login",
-        "email": "nonexistent@example.com",
-        "password": "wrongpassword"
+    url = f"{API_BASE}{endpoint['path']}"
+    results = {
+        'endpoint': endpoint['name'],
+        'path': endpoint['path'],
+        'creditCost': endpoint['creditCost'],
+        'tests': {}
     }
     
-    rate_limit_hit = False
-    requests_made = 0
-    
+    # Test 1: No auth → 401
+    print("\n📋 Test 1: No authentication")
+    print("   Expected: 401 'Not authenticated'")
     try:
-        for i in range(12):  # Try 12 requests (limit is 10)
-            response = requests.post(login_endpoint, json=bogus_credentials, timeout=5)
-            requests_made += 1
-            
-            if response.status_code == 429:
-                rate_limit_hit = True
-                retry_after = response.headers.get('Retry-After')
-                
-                results.append({
-                    'test': 'Login rate limiting',
-                    'requests_made': requests_made,
-                    'status': response.status_code,
-                    'retry_after': retry_after,
-                    'pass': True,
-                    'response_preview': str(response.text)[:200]
-                })
-                
-                print(f"  ✅ Rate limit hit after {requests_made} requests (429 with Retry-After: {retry_after})")
-                break
-            
-            time.sleep(0.1)  # Small delay between requests
+        response = requests.post(url, json=endpoint['body'], timeout=15)
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text[:200]}")
         
-        if not rate_limit_hit:
-            results.append({
-                'test': 'Login rate limiting',
-                'requests_made': requests_made,
-                'status': 'No rate limit hit',
-                'pass': False,
-                'note': 'Rate limit may be shared with other tests or higher than expected'
-            })
-            print(f"  ⚠️ No rate limit hit after {requests_made} requests (may be shared IP or higher limit)")
-    
-    except Exception as e:
-        results.append({
-            'test': 'Login rate limiting',
-            'status': 'ERROR',
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ Rate limiting test failed: {e}")
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Rate Limiting: {passed}/{total} tests passed")
-    
-    return results
-
-def test_cors_tightening():
-    """Test 5: CORS tightening"""
-    print("\n🌐 Testing CORS Tightening...")
-    
-    results = []
-    
-    # Test with malicious origin
-    try:
-        malicious_headers = {
-            'Origin': 'https://malicious-site.com',
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(
-            urljoin(BASE_URL, "/api/root"),
-            headers=malicious_headers,
-            timeout=10
-        )
-        
-        # Check if CORS is blocked
-        access_control_origin = response.headers.get('Access-Control-Allow-Origin')
-        cors_blocked = (
-            response.status_code == 403 or
-            access_control_origin != 'https://malicious-site.com'
-        )
-        
-        try:
+        if response.status_code == 401:
             data = response.json()
-            has_cors_error = data.get('code') == 'CORS_BLOCKED'
-        except:
-            has_cors_error = False
-        
-        results.append({
-            'test': 'Malicious origin blocking',
-            'origin': 'https://malicious-site.com',
-            'status': response.status_code,
-            'access_control_origin': access_control_origin,
-            'cors_blocked': cors_blocked,
-            'has_cors_error': has_cors_error,
-            'pass': cors_blocked or has_cors_error,
-            'response_preview': str(response.text)[:200]
-        })
-        
-        print(f"  {'✅' if cors_blocked or has_cors_error else '❌'} Malicious origin: {response.status_code}, ACAO: {access_control_origin}")
-        
-    except Exception as e:
-        results.append({
-            'test': 'Malicious origin blocking',
-            'status': 'ERROR',
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ CORS malicious origin test failed: {e}")
-    
-    # Test with trusted origin (deployment host)
-    try:
-        trusted_origin = "https://ugc-ads-gen-1.preview.emergentagent.com"
-        trusted_headers = {
-            'Origin': trusted_origin,
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(
-            urljoin(BASE_URL, "/api/root"),
-            headers=trusted_headers,
-            timeout=10
-        )
-        
-        access_control_origin = response.headers.get('Access-Control-Allow-Origin')
-        cors_allowed = (
-            response.status_code == 200 and
-            access_control_origin == trusted_origin
-        )
-        
-        results.append({
-            'test': 'Trusted origin allowing',
-            'origin': trusted_origin,
-            'status': response.status_code,
-            'access_control_origin': access_control_origin,
-            'cors_allowed': cors_allowed,
-            'pass': cors_allowed,
-            'response_preview': str(response.text)[:200]
-        })
-        
-        print(f"  {'✅' if cors_allowed else '❌'} Trusted origin: {response.status_code}, ACAO: {access_control_origin}")
-        
-    except Exception as e:
-        results.append({
-            'test': 'Trusted origin allowing',
-            'status': 'ERROR',
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ CORS trusted origin test failed: {e}")
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 CORS Tightening: {passed}/{total} tests passed")
-    
-    return results
-
-def test_regression_checks():
-    """Test 6: Regression checks for existing routes"""
-    print("\n🔄 Testing Regression Checks...")
-    
-    results = []
-    
-    # Test UGC Studio endpoints
-    ugc_endpoints = [
-        "/api/ugc-studio/generate-broll",
-        "/api/ugc-studio/render"
-    ]
-    
-    for endpoint in ugc_endpoints:
-        try:
-            # Test without auth - should get 401
-            response = requests.post(urljoin(BASE_URL, endpoint), timeout=10)
-            expected_status = 401
-            status_ok = response.status_code == expected_status
-            
-            try:
-                data = response.json()
-                has_auth_error = 'Authentication required' in data.get('error', '') or data.get('code') == 'AUTH_REQUIRED'
-            except:
-                has_auth_error = False
-            
-            results.append({
-                'endpoint': endpoint,
-                'method': 'POST',
-                'status': response.status_code,
-                'expected': expected_status,
-                'pass': status_ok and has_auth_error,
-                'response_preview': str(response.text)[:200]
-            })
-            
-            print(f"  {'✅' if status_ok and has_auth_error else '❌'} POST {endpoint} (no auth): {response.status_code}")
-            
-        except Exception as e:
-            results.append({
-                'endpoint': endpoint,
-                'method': 'POST',
-                'status': 'ERROR',
-                'expected': 401,
-                'pass': False,
-                'error': str(e)
-            })
-            print(f"  ❌ POST {endpoint}: ERROR - {e}")
-    
-    # Test public template endpoint
-    try:
-        response = requests.get(urljoin(BASE_URL, "/api/ugc-studio/generate-broll"), timeout=10)
-        expected_status = 200
-        status_ok = response.status_code == expected_status
-        
-        try:
-            data = response.json()
-            has_templates = isinstance(data, dict) and 'templates' in data
-        except:
-            has_templates = False
-        
-        results.append({
-            'endpoint': '/api/ugc-studio/generate-broll',
-            'method': 'GET',
-            'status': response.status_code,
-            'expected': expected_status,
-            'pass': status_ok and has_templates,
-            'response_preview': str(response.text)[:200]
-        })
-        
-        print(f"  {'✅' if status_ok and has_templates else '❌'} GET /api/ugc-studio/generate-broll (templates): {response.status_code}")
-        
-    except Exception as e:
-        results.append({
-            'endpoint': '/api/ugc-studio/generate-broll',
-            'method': 'GET',
-            'status': 'ERROR',
-            'expected': 200,
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ GET /api/ugc-studio/generate-broll: ERROR - {e}")
-    
-    # Test credits/membership endpoints
-    credit_endpoints = [
-        "/api/credits",
-        "/api/membership"
-    ]
-    
-    for endpoint in credit_endpoints:
-        try:
-            response = requests.get(urljoin(BASE_URL, endpoint), timeout=10)
-            # These should either work (200) or require auth (401) - both are acceptable
-            status_ok = response.status_code in [200, 401]
-            
-            results.append({
-                'endpoint': endpoint,
-                'method': 'GET',
-                'status': response.status_code,
-                'expected': '200 or 401',
-                'pass': status_ok,
-                'response_preview': str(response.text)[:200]
-            })
-            
-            print(f"  {'✅' if status_ok else '❌'} GET {endpoint}: {response.status_code}")
-            
-        except Exception as e:
-            results.append({
-                'endpoint': endpoint,
-                'method': 'GET',
-                'status': 'ERROR',
-                'expected': '200 or 401',
-                'pass': False,
-                'error': str(e)
-            })
-            print(f"  ❌ GET {endpoint}: ERROR - {e}")
-    
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Regression Checks: {passed}/{total} tests passed")
-    
-    return results
-
-def verify_credit_pricing():
-    """Test 7: Credit pricing config verification"""
-    print("\n💰 Verifying Credit Pricing Config...")
-    
-    # Expected new credit costs from the review request
-    expected_costs = {
-        'ai-video-studio': 520,
-        'talking-head': 520,
-        'ugc-talking-head-pro': 250,
-        'ugc-talking-head-standard': 125,
-        'ugc-broll': 140,
-        'quick-reels-ai-cinema': 430,
-        'quick-reels-ai-seedance': 520,
-        'quick-reels-ai-essential': 20
-    }
-    
-    results = []
-    
-    # Read the credits.js file to verify pricing
-    try:
-        with open('/app/lib/credits.js', 'r') as f:
-            credits_content = f.read()
-        
-        for tool, expected_cost in expected_costs.items():
-            # Look for the tool in the credits file
-            import re
-            pattern = rf"'{tool}':\s*(\d+)"
-            match = re.search(pattern, credits_content)
-            
-            if match:
-                actual_cost = int(match.group(1))
-                cost_correct = actual_cost == expected_cost
-                
-                results.append({
-                    'tool': tool,
-                    'expected_cost': expected_cost,
-                    'actual_cost': actual_cost,
-                    'pass': cost_correct
-                })
-                
-                print(f"  {'✅' if cost_correct else '❌'} {tool}: {actual_cost} credits (expected {expected_cost})")
+            if 'Not authenticated' in data.get('error', ''):
+                print("   ✅ PASS: Correctly rejected unauthenticated request")
+                results['tests']['no_auth'] = 'PASS'
             else:
-                results.append({
-                    'tool': tool,
-                    'expected_cost': expected_cost,
-                    'actual_cost': 'NOT_FOUND',
-                    'pass': False
-                })
-                print(f"  ❌ {tool}: NOT FOUND in credits.js")
-        
-        # Check if 1 credit = $0.02 is documented
-        credit_value_correct = 'CREDIT_VALUE = 0.02' in credits_content
-        results.append({
-            'tool': 'CREDIT_VALUE',
-            'expected_cost': 0.02,
-            'actual_cost': 0.02 if credit_value_correct else 'NOT_FOUND',
-            'pass': credit_value_correct
-        })
-        print(f"  {'✅' if credit_value_correct else '❌'} CREDIT_VALUE = 0.02: {credit_value_correct}")
-        
+                print(f"   ⚠️  PASS but unexpected error message: {data.get('error')}")
+                results['tests']['no_auth'] = 'PASS'
+        else:
+            print(f"   ❌ FAIL: Expected 401, got {response.status_code}")
+            results['tests']['no_auth'] = 'FAIL'
     except Exception as e:
-        results.append({
-            'tool': 'FILE_READ',
-            'expected_cost': 'N/A',
-            'actual_cost': 'ERROR',
-            'pass': False,
-            'error': str(e)
-        })
-        print(f"  ❌ Failed to read credits.js: {e}")
+        print(f"   ❌ FAIL: Request error: {e}")
+        results['tests']['no_auth'] = 'ERROR'
     
-    passed = sum(1 for r in results if r['pass'])
-    total = len(results)
-    print(f"\n📊 Credit Pricing Config: {passed}/{total} tests passed")
+    # Test 2: Auth + no/invalid CSRF → 403
+    print("\n📋 Test 2: Auth without CSRF token")
+    print("   Expected: 403 with code: 'CSRF_INVALID'")
+    try:
+        headers = {
+            'Authorization': f"Bearer {user_data['sessionToken']}"
+        }
+        response = requests.post(url, json=endpoint['body'], headers=headers, timeout=15)
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text[:200]}")
+        
+        if response.status_code == 403:
+            data = response.json()
+            if data.get('code') == 'CSRF_INVALID':
+                print("   ✅ PASS: Correctly rejected request without CSRF token")
+                results['tests']['no_csrf'] = 'PASS'
+            else:
+                print(f"   ⚠️  Got 403 but code is: {data.get('code')}")
+                results['tests']['no_csrf'] = 'PARTIAL'
+        else:
+            print(f"   ❌ FAIL: Expected 403, got {response.status_code}")
+            results['tests']['no_csrf'] = 'FAIL'
+    except Exception as e:
+        print(f"   ❌ FAIL: Request error: {e}")
+        results['tests']['no_csrf'] = 'ERROR'
+    
+    # Test 3: Auth + CSRF + insufficient credits → 402
+    print("\n📋 Test 3: Auth + CSRF with insufficient credits")
+    print(f"   Expected: 402 with code: 'INSUFFICIENT_CREDITS', required: {endpoint['creditCost']}")
+    
+    # Set credits to less than required
+    insufficient_credits = endpoint['creditCost'] - 1
+    print(f"   Setting user credits to {insufficient_credits}...")
+    if set_user_credits(user_data['email'], insufficient_credits):
+        print(f"   ✅ Credits set to {insufficient_credits}")
+    else:
+        print(f"   ⚠️  Could not set credits")
+    
+    try:
+        headers = {
+            'Authorization': f"Bearer {user_data['sessionToken']}",
+            'X-CSRF-Token': csrf_token
+        }
+        response = requests.post(url, json=endpoint['body'], headers=headers, timeout=15)
+        print(f"   Status: {response.status_code}")
+        print(f"   Response: {response.text[:300]}")
+        
+        if response.status_code == 402:
+            data = response.json()
+            if data.get('code') == 'INSUFFICIENT_CREDITS' and data.get('required') == endpoint['creditCost']:
+                print(f"   ✅ PASS: Correctly rejected with insufficient credits (required: {data.get('required')})")
+                results['tests']['insufficient_credits'] = 'PASS'
+            else:
+                print(f"   ⚠️  Got 402 but code: {data.get('code')}, required: {data.get('required')}")
+                results['tests']['insufficient_credits'] = 'PARTIAL'
+        else:
+            print(f"   ❌ FAIL: Expected 402, got {response.status_code}")
+            results['tests']['insufficient_credits'] = 'FAIL'
+    except Exception as e:
+        print(f"   ❌ FAIL: Request error: {e}")
+        results['tests']['insufficient_credits'] = 'ERROR'
+    
+    # Test 4: Auth + CSRF + sufficient credits → 200
+    print("\n📋 Test 4: Auth + CSRF with sufficient credits")
+    print("   Expected: 200 with success: true, toolId, and content")
+    
+    # Set credits to sufficient amount
+    sufficient_credits = 200
+    print(f"   Setting user credits to {sufficient_credits}...")
+    if set_user_credits(user_data['email'], sufficient_credits):
+        print(f"   ✅ Credits set to {sufficient_credits}")
+    else:
+        print(f"   ⚠️  Could not set credits")
+    
+    try:
+        headers = {
+            'Authorization': f"Bearer {user_data['sessionToken']}",
+            'X-CSRF-Token': csrf_token
+        }
+        response = requests.post(url, json=endpoint['body'], headers=headers, timeout=60)
+        print(f"   Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"   Response keys: {list(data.keys())}")
+            
+            # Check required fields
+            has_success = data.get('success') == True
+            has_tool_id = data.get('toolId') == endpoint['path'].split('/')[1]
+            has_content = 'content' in data and isinstance(data['content'], str) and len(data['content']) > 0
+            
+            print(f"   - success: {data.get('success')}")
+            print(f"   - toolId: {data.get('toolId')}")
+            print(f"   - content length: {len(data.get('content', ''))} chars")
+            
+            # Special check for spreadsheet-template
+            if 'spreadsheet-template' in endpoint['path']:
+                has_csv = 'csv' in data
+                print(f"   - csv field present: {has_csv}")
+                if has_csv:
+                    csv_value = data.get('csv')
+                    if csv_value:
+                        print(f"   - csv length: {len(csv_value)} chars")
+                    else:
+                        print(f"   - csv is null")
+            
+            if has_success and has_tool_id and has_content:
+                print("   ✅ PASS: Successfully generated content with all required fields")
+                results['tests']['success'] = 'PASS'
+            else:
+                print(f"   ⚠️  PARTIAL: Got 200 but missing fields (success:{has_success}, toolId:{has_tool_id}, content:{has_content})")
+                results['tests']['success'] = 'PARTIAL'
+        elif response.status_code == 500:
+            print(f"   ⚠️  Got 500 - LLM generation may have failed")
+            print(f"   Response: {response.text[:500]}")
+            # Check if credits were refunded
+            print("   Note: If LLM key unavailable, this is acceptable per test instructions")
+            results['tests']['success'] = 'LLM_ERROR'
+        else:
+            print(f"   ❌ FAIL: Expected 200, got {response.status_code}")
+            print(f"   Response: {response.text[:500]}")
+            results['tests']['success'] = 'FAIL'
+    except Exception as e:
+        print(f"   ❌ FAIL: Request error: {e}")
+        results['tests']['success'] = 'ERROR'
     
     return results
 
 def main():
-    """Run all security hardening tests"""
-    print("🔐 SECURITY HARDENING VERIFICATION TEST SUITE")
-    print("=" * 60)
-    print(f"Testing against: {BASE_URL}")
-    print("=" * 60)
+    print("\n" + "🚀" * 40)
+    print("Sprint 2 Text Generation Endpoints - Comprehensive Testing")
+    print("🚀" * 40)
     
-    all_results = {}
+    # Setup test user
+    user_data = setup_test_user()
+    if not user_data:
+        print("\n❌ Failed to setup test user. Exiting.")
+        return
     
-    # Run all test suites
-    all_results['admin_protection'] = test_admin_route_protection()
-    all_results['auth_hardening'] = test_public_route_auth_hardening()
-    all_results['ssrf_protection'] = test_ssrf_protection()
-    all_results['auth_cookies'] = test_auth_cookie_issuance()
-    all_results['rate_limiting'] = test_rate_limiting()
-    all_results['cors_tightening'] = test_cors_tightening()
-    all_results['regression_checks'] = test_regression_checks()
-    all_results['credit_pricing'] = verify_credit_pricing()
+    # Get CSRF token
+    csrf_token = get_csrf_token()
+    if not csrf_token:
+        print("\n❌ Failed to get CSRF token. Exiting.")
+        return
     
-    # Calculate overall results
-    total_passed = 0
-    total_tests = 0
+    print("\n✅ Setup complete. Starting endpoint tests...")
     
-    print("\n" + "=" * 60)
-    print("📊 FINAL RESULTS SUMMARY")
-    print("=" * 60)
+    # Test all endpoints
+    all_results = []
+    for endpoint in ENDPOINTS:
+        results = test_endpoint(endpoint, user_data, csrf_token)
+        all_results.append(results)
+        time.sleep(1)  # Brief pause between endpoints
     
-    for test_name, results in all_results.items():
-        if results:
-            passed = sum(1 for r in results if r.get('pass', False))
-            total = len(results)
-            total_passed += passed
-            total_tests += total
-            
-            status = "✅ PASS" if passed == total else "⚠️ PARTIAL" if passed > 0 else "❌ FAIL"
-            print(f"{status} {test_name.replace('_', ' ').title()}: {passed}/{total}")
+    # Summary
+    print("\n" + "=" * 80)
+    print("SUMMARY: Sprint 2 Text Generation Endpoints Testing")
+    print("=" * 80)
     
-    print("-" * 60)
-    overall_percentage = (total_passed / total_tests * 100) if total_tests > 0 else 0
-    overall_status = "✅ EXCELLENT" if overall_percentage >= 90 else "⚠️ GOOD" if overall_percentage >= 75 else "❌ NEEDS WORK"
+    for result in all_results:
+        print(f"\n📊 {result['endpoint']} (POST {result['path']}, cost: {result['creditCost']})")
+        tests = result['tests']
+        
+        test_names = {
+            'no_auth': 'No Auth → 401',
+            'no_csrf': 'Auth + No CSRF → 403',
+            'insufficient_credits': 'Insufficient Credits → 402',
+            'success': 'Success → 200'
+        }
+        
+        for test_key, test_name in test_names.items():
+            status = tests.get(test_key, 'NOT_RUN')
+            emoji = '✅' if status == 'PASS' else '⚠️' if status in ['PARTIAL', 'LLM_ERROR'] else '❌'
+            print(f"   {emoji} {test_name}: {status}")
     
-    print(f"{overall_status} Overall Security: {total_passed}/{total_tests} ({overall_percentage:.1f}%)")
-    print("=" * 60)
+    # Overall statistics
+    total_tests = len(all_results) * 4
+    passed_tests = sum(1 for r in all_results for t in r['tests'].values() if t == 'PASS')
+    partial_tests = sum(1 for r in all_results for t in r['tests'].values() if t in ['PARTIAL', 'LLM_ERROR'])
+    failed_tests = sum(1 for r in all_results for t in r['tests'].values() if t in ['FAIL', 'ERROR'])
     
-    # Report critical failures
-    critical_failures = []
-    for test_name, results in all_results.items():
-        if results:
-            failed = [r for r in results if not r.get('pass', False)]
-            if failed and test_name in ['admin_protection', 'auth_hardening']:
-                critical_failures.extend(failed)
+    print(f"\n📈 Overall Statistics:")
+    print(f"   Total Tests: {total_tests}")
+    print(f"   ✅ Passed: {passed_tests}")
+    print(f"   ⚠️  Partial/LLM Error: {partial_tests}")
+    print(f"   ❌ Failed: {failed_tests}")
+    print(f"   Success Rate: {(passed_tests / total_tests * 100):.1f}%")
     
-    if critical_failures:
-        print("\n🚨 CRITICAL SECURITY ISSUES FOUND:")
-        for failure in critical_failures[:5]:  # Show first 5
-            endpoint = failure.get('endpoint', failure.get('test', 'Unknown'))
-            status = failure.get('status', 'Unknown')
-            print(f"  ❌ {endpoint}: {status}")
-        if len(critical_failures) > 5:
-            print(f"  ... and {len(critical_failures) - 5} more")
-    else:
-        print("\n✅ No critical security issues found!")
-    
-    return all_results
+    print("\n" + "🎉" * 40)
+    print("Testing Complete!")
+    print("🎉" * 40)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

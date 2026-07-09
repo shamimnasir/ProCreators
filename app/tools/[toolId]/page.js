@@ -50,6 +50,11 @@ const TOOL_METADATA = {
   'quiz-maker': { name: 'Quiz & Test Creator', description: 'Generate quizzes and tests with AI assistance', category: 'Digital Products' },
   'storybook-maker': { name: "Children's Storybook", description: 'Create illustrated children\'s stories with AI', category: 'Digital Products' },
   'activity-book': { name: 'Activity Book Creator', description: 'Design engaging activity books for all ages', category: 'Digital Products' },
+  'ai-prompt-pack': { name: 'AI Prompt Pack Generator', description: 'Create sellable AI prompt packs for Etsy, Gumroad, and Notion buyers in minutes', category: 'Digital Products' },
+  'spreadsheet-template': { name: 'Spreadsheet Template Creator', description: 'Design ready-to-sell Google Sheets and Excel templates with formulas and dashboards', category: 'Digital Products' },
+  'wedding-suite': { name: 'Wedding Stationery Suite', description: 'Generate a complete 8-piece printable wedding invitation and stationery suite', category: 'Digital Products' },
+  'puzzle-book': { name: 'Puzzle Book Creator', description: 'Create themed word-search puzzle books ready for Amazon KDP publishing', category: 'Digital Products' },
+  'recipe-book': { name: 'Recipe Book Creator', description: 'Write complete themed recipe books ready to sell on Amazon KDP and Etsy', category: 'Digital Products' },
   
   // Fun & Recreation
   'joke-generator': { name: 'Joke Generator', description: 'Generate hilarious jokes with AI-powered humor', category: 'Fun' },
