@@ -225,3 +225,5 @@ credentials.json
 .next/dev/cache/turbopack/da605e0c/00002787.sst
 .next/dev/cache/turbopack/da605e0c/00002790.sst
 .next/dev/cache/turbopack/da605e0c/00002788.sst
+.next/standalone/node_modules/chromium/lib/chromium/chrome-linux/chrome
+.next/standalone/backup.zip
