@@ -202,7 +202,9 @@ export default async function ToolLandingPage({ params }) {
     'essay-helper', 'study-notes', 'exam-prep', 'lesson-planner',
     'citation-generator', 'grammar-checker',
     'resume-builder', 'cover-letter', 'interview-prep', 'job-matcher',
-    'salary-negotiator', 'networking-message'
+    'salary-negotiator', 'networking-message',
+    // Sprint 2: new publisher tools
+    'ai-prompt-pack', 'recipe-book', 'spreadsheet-template', 'wedding-suite', 'puzzle-book'
   ]
   
   if (!validTools.includes(toolId)) {

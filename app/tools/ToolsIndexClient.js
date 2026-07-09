@@ -72,6 +72,11 @@ const TOOLS_BY_CATEGORY = {
  { id: 'coloring-book', name: 'Coloring Book', description: 'Black-and-white AI line-art. 5 KDP-accepted paper sizes: 8.5×11 (gold standard), 8×10, 8.5×8.5 (mandalas), 7×10, 8.25×8.25. 10 to 120 pages. Print-ready 300 DPI with correct bleed.' },
  { id: 'journal-maker', name: 'Journal Maker', description: '8 journal types (Gratitude, Mindfulness, Self-Discovery, Dream, Fitness, Bullet, Reading, Travel). Unique prompts per page. KDP trims 6×9 and 5.5×8.5. 4 design themes: Floral, Elegant, Minimalist, Boho.' },
  { id: 'notion-templates', name: 'Notion Templates', description: 'Sell-ready Notion templates for Work (Product, Marketing, HR, CRM), School (Study Planner, Class Notes, Research), and Life (Health, Habits, Meal Plans). Includes setup instructions and onboarding copy for buyers.' },
+ { id: 'ai-prompt-pack', name: 'AI Prompt Pack Generator', description: 'Sellable prompt packs of 25\u2013200 prompts organized by category (marketing, sales, writing, coding). Each prompt has a use case, ready-to-copy body, and example output. Sells for $9\u2013$99 on Etsy and Gumroad.', badge: 'NEW' },
+ { id: 'recipe-book', name: 'Recipe Book Generator', description: 'Complete cookbook (10\u201350 recipes) with prep/cook time, ingredients, steps, nutrition, and one-week meal plan. Any cuisine or diet. KDP paperback-ready.', badge: 'NEW' },
+ { id: 'spreadsheet-template', name: 'Spreadsheet Template Builder', description: 'Google Sheets / Excel templates: budget trackers, freelancer invoices, Airbnb dashboards, meal-prep planners. Includes formulas, sample data, dashboards, and CSV download.', badge: 'NEW' },
+ { id: 'wedding-suite', name: 'Wedding Printable Suite', description: 'Complete 8-piece wedding stationery: save-the-date, invitation, RSVP, details, program, menu, table cards, thank you. $25\u2013$65 per Etsy sale at 95% margins.', badge: 'NEW' },
+ { id: 'puzzle-book', name: 'Themed Puzzle Book Generator', description: 'Themed word-search puzzle books (K-pop, dinosaurs, cats, holidays). Auto-generated printable grids, difficulty tiers, kids-to-seniors audiences. KDP research: themed puzzles outsell generic 4:1.', badge: 'NEW' },
  ]
  },
  'Design Your Covers': {
@@ -238,9 +243,14 @@ export default function ToolsIndexClient() {
  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
  {data.tools.map(tool => (
  <Link key={tool.id} href={`/tools/${tool.id}`} aria-label={`Open ${tool.name}`}>
- <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
+ <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group relative">
+ {tool.badge && (
+ <span className="absolute top-3 right-3 z-10 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+ {tool.badge}
+ </span>
+ )}
  <CardHeader className="pb-2">
- <CardTitle className="text-lg group-hover:text-primary transition-colors">
+ <CardTitle className="text-lg group-hover:text-primary transition-colors pr-14">
  {tool.name}
  </CardTitle>
  </CardHeader>
