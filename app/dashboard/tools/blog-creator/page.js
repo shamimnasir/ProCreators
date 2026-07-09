@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -54,6 +55,7 @@ import { saveToLibrary } from '@/lib/library-utils'
 
 // Article types
 const ARTICLE_TYPES = [
+  { id: 'amazon-listing', name: 'Amazon Listing', icon: '🛒', desc: 'KDP / Etsy listing copy', bestFor: 'Amazon KDP & Etsy sellers', color: 'from-orange-500 to-amber-600' },
   { id: 'seo-article', name: 'SEO Article', icon: '🔍', desc: 'Keyword-optimized content', bestFor: 'Organic traffic', color: 'from-blue-500 to-blue-700' },
   { id: 'affiliate-best', name: 'Best X for Y', icon: '🏆', desc: 'Best [product] for [audience]', bestFor: 'Affiliate commissions', color: 'from-green-500 to-emerald-700' },
   { id: 'product-review', name: 'Product Review', icon: '⭐', desc: 'In-depth single product review', bestFor: 'Affiliate, Trust', color: 'from-yellow-500 to-orange-600' },
@@ -114,6 +116,10 @@ const INDUSTRIES = [
 ]
 
 export default function BlogCreatorPage() {
+  const searchParams = useSearchParams()
+  const initialType = searchParams?.get('type')
+  const validInitialType = ['amazon-listing','seo-article','affiliate-best','product-review','comparison','how-to-guide','listicle','ultimate-guide','buyers-guide'].includes(initialType) ? initialType : 'seo-article'
+
   const [generating, setGenerating] = useState(false)
   const [humanizing, setHumanizing] = useState(false)
   const [checkingGrammar, setCheckingGrammar] = useState(false)
@@ -125,7 +131,14 @@ export default function BlogCreatorPage() {
   const { checkAndDeduct, refund, complete } = useCredits()
   
   // Form state
-  const [articleType, setArticleType] = useState('seo-article')
+  const [articleType, setArticleType] = useState(validInitialType)
+  // If the URL param changes (client-side nav), sync it once
+  useEffect(() => {
+    if (validInitialType !== 'seo-article') setArticleType(validInitialType)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialType])
+
+  const isAmazonListing = articleType === 'amazon-listing'
   const [topic, setTopic] = useState('')
   const [targetKeyword, setTargetKeyword] = useState('')
   const [secondaryKeywords, setSecondaryKeywords] = useState('')
@@ -323,10 +336,18 @@ export default function BlogCreatorPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileText className="h-8 w-8 text-emerald-600" />
-            Blog Post Creator
+            {isAmazonListing ? (
+              <ShoppingCart className="h-8 w-8 text-orange-600" />
+            ) : (
+              <FileText className="h-8 w-8 text-emerald-600" />
+            )}
+            {isAmazonListing ? 'Amazon Listing Writer' : 'Content Writer'}
           </h1>
-          <p className="text-muted-foreground mt-1">SEO articles, affiliate content & product reviews with AI humanization</p>
+          <p className="text-muted-foreground mt-1">
+            {isAmazonListing
+              ? 'KDP & Etsy listing copy: title, 7 bullets, description, and backend keywords, Amazon A9 optimized'
+              : 'SEO articles, affiliate content, product reviews, and Amazon listings with AI humanization'}
+          </p>
         </div>
         <div className="flex gap-2">
           <Badge className="bg-emerald-100 text-emerald-800">

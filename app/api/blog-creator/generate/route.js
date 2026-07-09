@@ -10,7 +10,7 @@ import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction,
 
 // Blog generation input schema
 const blogCreatorSchema = z.object({
-  articleType: z.enum(['seo-article', 'affiliate-best', 'product-review', 'comparison', 'how-to-guide', 'listicle', 'ultimate-guide', 'buyers-guide']).default('seo-article'),
+  articleType: z.enum(['seo-article', 'affiliate-best', 'product-review', 'comparison', 'how-to-guide', 'listicle', 'ultimate-guide', 'buyers-guide', 'amazon-listing']).default('seo-article'),
   topic: z.string().min(1, 'Topic is required').max(500, 'Topic too long'),
   targetKeyword: z.string().max(200).optional(),
   secondaryKeywords: z.string().max(500).optional(),
@@ -199,7 +199,8 @@ export async function POST(request) {
       'how-to-guide': 'Step-by-step tutorial with numbered steps, tips, and common mistakes to avoid.',
       'listicle': 'Top X / X Ways / X Tips format with numbered items and brief descriptions.',
       'ultimate-guide': 'Comprehensive pillar content covering all aspects of the topic in depth.',
-      'buyers-guide': "What to look for when buying X - criteria, features to consider, price ranges, recommendations."
+      'buyers-guide': "What to look for when buying X - criteria, features to consider, price ranges, recommendations.",
+      'amazon-listing': "Amazon KDP / Etsy product listing copy. Optimize for Amazon A9 / Etsy search algorithm with keyword-front-loaded title, 7 benefit-driven bullet points, an HTML-safe long description with power words, and 250-char backend keyword field."
     }
 
     const systemPrompt = `You are an expert SEO content writer and affiliate marketing specialist who creates high-ranking, high-converting blog content.
@@ -263,7 +264,38 @@ ${isAffiliateType ? `
 ` : ''}
 
 ## OUTPUT FORMAT:
-Return a JSON object:
+${articleType === 'amazon-listing' ? `Return a JSON object with this Amazon-listing structure:
+{
+  "title": "Amazon listing title (max 200 chars), keyword-front-loaded, benefit-driven",
+  "metaTitle": "Same as title for consistency",
+  "metaDescription": "One-sentence hook for social sharing (150-155 chars)",
+  "slug": "url-friendly-slug-for-tracking",
+  "bullets": [
+    "Bullet 1: benefit-driven (max 400 chars, start with a capitalized benefit phrase)",
+    "Bullet 2",
+    "Bullet 3",
+    "Bullet 4",
+    "Bullet 5",
+    "Bullet 6",
+    "Bullet 7"
+  ],
+  "description": "Long product description formatted for Amazon (HTML-safe line breaks with \\n\\n). Include benefits, features, use cases, gift/audience hooks, and a closing call-to-action.",
+  "backendKeywords": "250-character comma-separated backend keywords with no repeats, no duplicated words from the title, no punctuation other than commas",
+  "content": "Markdown preview of the entire listing (title as H1, bullets as list, description below, backend keywords in code block) for user preview",
+  "wordCount": approximate word count number,
+  "readingTime": "1 min",
+  "outline": [
+    {"type": "h2", "text": "Title"},
+    {"type": "h2", "text": "Bullet Points"},
+    {"type": "h2", "text": "Description"},
+    {"type": "h2", "text": "Backend Keywords"}
+  ],
+  "tips": [
+    "One Amazon SEO / A9 tip",
+    "One conversion-boosting tip",
+    "One category-specific tip (KDP / Etsy)"
+  ]
+}` : `Return a JSON object:
 {
   "title": "SEO-optimized article title (50-60 chars)",
   "metaTitle": "Meta title for SEO (50-60 chars)",
@@ -281,7 +313,7 @@ Return a JSON object:
     "Content improvement tip 2",
     "Conversion tip 3"
   ]
-}
+}`}
 
 IMPORTANT:
 - Return ONLY valid JSON
@@ -291,7 +323,25 @@ IMPORTANT:
 - For affiliate content, include product recommendations naturally
 - Be ${tone} in tone and ${writingStyle} in style`
 
-    const userPrompt = `Write a complete ${articleType} blog post:
+    const userPrompt = articleType === 'amazon-listing'
+      ? `Write a complete Amazon KDP / Etsy product listing for the following product.
+
+Product / Topic: ${topic}
+${targetKeyword ? `Primary keyword to rank for: ${targetKeyword}` : ''}
+${secondaryKeywords ? `Secondary keywords (weave into bullets and description): ${secondaryKeywords}` : ''}
+${targetAudience ? `Target buyer: ${targetAudience}` : ''}
+${priceRange ? `Price range: ${priceRange}` : ''}
+${keyPoints ? `Key features / selling points to include: ${keyPoints}` : ''}
+
+Deliver:
+1. TITLE (max 200 characters) — front-load the primary keyword, then benefit + variant/size/qty
+2. 7 BULLET POINTS — each starts with a CAPITALIZED benefit phrase (e.g. "PERFECT GIFT FOR MOMS —"), then the supporting detail. Max 400 chars each. Cover: main benefit, feature detail, use case, size/format, quality/materials, gift/audience hook, satisfaction/guarantee.
+3. DESCRIPTION — 4-6 short paragraphs separated by "\\n\\n". Open with the hero benefit, expand into features, use-case scenarios, gift/audience appeal, and close with a soft call-to-action. HTML-safe.
+4. BACKEND KEYWORDS — a single string, 250 characters max, comma-separated, no punctuation other than commas, no repeated words, no words already in the title.
+5. Also emit "content" as a markdown preview that shows the full listing in order.
+
+Return ONLY valid JSON matching the Amazon-listing output schema. Tone: ${tone}. Style: ${writingStyle}.`
+      : `Write a complete ${articleType} blog post:
 
 ${context}
 

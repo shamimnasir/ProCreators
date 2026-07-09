@@ -97,7 +97,7 @@ const TOOLS_BY_CATEGORY = {
  slug: 'content',
  description: 'Amazon-ready listing copy that ranks. Blog posts and content that reads human.',
  tools: [
- { id: 'blog-creator', name: 'Amazon Listing Writer', description: 'Title, 7 bullet points, description, and backend keywords, all Amazon algorithm optimized. Built-in AI Humanizer so your listing passes AI detection. One-click SEO meta description. Copy-paste ready for KDP and Etsy dashboards.' },
+ { id: 'amazon-listing', name: 'Amazon Listing Writer', description: 'Title, 7 bullet points, description, and backend keywords, all Amazon algorithm optimized. Built-in AI Humanizer so your listing passes AI detection. One-click SEO meta description. Copy-paste ready for KDP and Etsy dashboards.' },
  ]
  },
  'Create Your Videos': {

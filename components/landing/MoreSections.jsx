@@ -55,7 +55,7 @@ const toolCards = [
  },
  {
   name: 'Amazon Listing Writer',
-  href: '/tools/blog-creator',
+  href: '/tools/amazon-listing',
   badge: 'Saves 3 Hours',
   desc: 'Title, 7 bullet points, description, and backend keywords, all Amazon algorithm optimized.',
   highlights: [
