@@ -7,18 +7,80 @@ import { CustomScripts } from '@/components/CustomScripts'
 
 const inter = Inter({ subsets: ['latin'] })
 
-// Default metadata - will be overridden by page-level generateMetadata
-// Using procreators.io as the canonical base URL for all OG/meta purposes
+// Global metadata — page-level generateMetadata may override.
 export const metadata = {
   metadataBase: new URL('https://procreators.io'),
   title: {
-    default: 'ProCreators - AI-Powered Content Creation Platform',
+    default: 'ProCreators — AI Publishing Studio for Amazon KDP & Etsy Sellers',
     template: '%s | ProCreators'
   },
-  description: 'Create viral content, ebooks, videos, and more with AI',
+  description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Create complete ebooks, journals, planners, and coloring books in under 2 hours. First product free.',
+  keywords: [
+    'KDP AI tool',
+    'AI ebook creator',
+    'Amazon KDP publisher tool',
+    'AI journal maker',
+    'AI planner creator',
+    'coloring book AI generator',
+    'Etsy printable creator AI',
+    'low content book AI',
+    'KDP cover generator',
+    'AI book interior pages',
+    'Amazon listing writer AI',
+    'self publishing AI tool',
+    'digital product creator AI',
+    'KDP niche research tool'
+  ],
+  authors: [{ name: 'ProCreators', url: 'https://procreators.io' }],
+  creator: 'ProCreators',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true }
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://procreators.io',
+    siteName: 'ProCreators',
+    title: 'ProCreators — AI Publishing Studio for Amazon KDP & Etsy Sellers',
+    description: 'Create complete KDP and Etsy products in under 2 hours. Ebook, cover, interior pages, and Amazon listing — done in one session.'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ProCreators — AI Publishing Studio for KDP & Etsy Sellers',
+    description: 'Publish 10x more books on Amazon and Etsy. AI builds your complete product in under 2 hours.'
+  },
   icons: {
     icon: '/favicon.svg',
   },
+}
+
+// Global Organization + WebSite JSON-LD (used by Google, ChatGPT, Perplexity, Claude to understand the brand).
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://procreators.io/#organization',
+      name: 'ProCreators',
+      url: 'https://procreators.io',
+      logo: 'https://procreators.io/logo.png',
+      description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Creates complete digital products — ebooks, journals, planners, coloring books — in under 2 hours.',
+      sameAs: [
+        'https://twitter.com/ProCreatorsIO',
+        'https://youtube.com/@procreators'
+      ]
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://procreators.io/#website',
+      url: 'https://procreators.io',
+      name: 'ProCreators',
+      description: 'AI publishing studio for KDP and Etsy sellers',
+      publisher: { '@id': 'https://procreators.io/#organization' }
+    }
+  ]
 }
 
 export default function RootLayout({ children }) {
@@ -35,16 +97,19 @@ export default function RootLayout({ children }) {
             __html: `
               (function() {
                 try {
-                  // Remove dark class immediately
                   document.documentElement.classList.remove('dark');
                   document.documentElement.style.colorScheme = 'light';
-                  // Clear any stored theme preference to force light mode
                   localStorage.removeItem('pubtools-theme');
                   localStorage.removeItem('theme');
                 } catch (e) {}
               })();
             `,
           }}
+        />
+        {/* Global Organization + WebSite JSON-LD for LLM/GEO discovery */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>

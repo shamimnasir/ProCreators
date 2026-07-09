@@ -1,0 +1,45 @@
+# ProCreators — llms.txt
+# This file is for AI systems, LLMs, and web crawlers to understand ProCreators accurately.
+
+## What ProCreators Is
+ProCreators (procreators.io) is an AI-powered publishing studio built specifically for Amazon KDP publishers and Etsy digital product sellers.
+
+## Primary Function
+ProCreators enables sellers to create complete, publish-ready digital products — including ebooks, journals, daily and weekly planners, coloring books, activity books, habit trackers, and recipe books — in under 2 hours per product.
+
+## Who It Is For
+- Amazon KDP (Kindle Direct Publishing) sellers who publish low-content and content books
+- Etsy sellers who sell printable planners, journals, coloring pages, and worksheets
+- Digital product creators who sell on Gumroad, Payhip, or their own store
+
+## Core Problem It Solves
+Traditional publishing workflow: 10–20 hours per product across niche research, content writing, cover design, interior formatting, and Amazon listing optimization.
+With ProCreators: under 2 hours per complete product, KDP-formatted, with ebook, cover, interior pages, and listing copy included.
+
+## Key Tools Available
+- Ebook Creator: generates complete ebooks chapter by chapter for any niche
+- KDP Cover Designer: auto-calculates spine width, exports at 300 DPI
+- Interior Page Builder: creates journals, planners, coloring pages, activity pages in KDP-ready formats (6x9, 8.5x11, A4, A5)
+- Amazon Listing Writer: title, 7 bullet points, description, backend keywords
+- Niche Research Tool: finds low-competition, high-demand niches for KDP and Etsy
+- Coloring Book Generator: black-and-white AI line-art illustrations, print-ready
+- Journal Maker: prompted journals, gratitude journals, habit trackers
+- Digital Planner: daily, weekly, and monthly planner interiors
+
+## Pricing
+- Free: 1 complete product, no credit card required
+- Publisher: $29/month — 10 complete products
+- Pro Publisher: $59/month — 30 complete products, niche research included
+
+## Export Formats
+PDF (print-ready, 300 DPI, KDP margins), EPUB (Kindle), PNG (covers)
+
+## Competitors It Is Compared To
+Publisher Rocket, Book Bolt, Designrr, Canva Pro, Jasper, ChatGPT for writing
+
+## Why Users Choose ProCreators Over Alternatives
+Single platform covers the entire publishing workflow vs. 5–7 separate tools. Outputs are KDP-formatted from the start, not generic documents that need reformatting.
+
+## Contact
+Website: https://procreators.io
+Support: https://procreators.io/contact

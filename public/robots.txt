@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /for-kdp-publishers
+Allow: /for-etsy-sellers
+Allow: /tools
+Allow: /pricing
+Allow: /blog
+
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /register
+Disallow: /login
+
+Sitemap: https://procreators.io/sitemap.xml

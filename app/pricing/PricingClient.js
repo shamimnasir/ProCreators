@@ -19,97 +19,95 @@ import { useToast } from '@/hooks/use-toast'
 import { PricingSchema } from '@/components/SchemaMarkup'
 import { PublicLayout } from '@/components/shared/PublicLayout'
 
-// Pricing FAQs for schema
+// Pricing FAQs for schema (KDP/Etsy publisher-focused)
 const pricingFAQs = [
   {
-    question: 'What are credits and how do they work?',
-    answer: 'Credits are the currency used to generate content on ProCreators. Each tool costs a certain number of credits based on complexity. Monthly subscription credits reset each billing cycle, while purchased credits never expire.'
+    question: 'Can I cancel my ProCreators plan anytime?',
+    answer: 'Yes. No contracts, no cancellation fees. Cancel from your account settings in under 30 seconds. Your published products on Amazon and Etsy are unaffected.'
+  },
+  {
+    question: 'What happens to my published products if I cancel?',
+    answer: 'Nothing. Your exported files stay on your device. Your Amazon and Etsy listings keep earning royalties. Cancelling ProCreators does not affect any published products.'
+  },
+  {
+    question: 'Is there a money-back guarantee?',
+    answer: 'Yes. If you are not satisfied within the first 7 days of a paid plan, contact support for a full refund after deducting the cost of credits you have already used. No questions asked.'
   },
   {
     question: 'Can I upgrade or downgrade my plan?',
-    answer: 'Yes! You can upgrade your plan at any time and the new credits will be added immediately. When downgrading, the change takes effect at the start of your next billing cycle.'
+    answer: 'Yes. Upgrade any time and new credits are added instantly. Downgrades take effect at the start of your next billing cycle.'
   },
   {
-    question: 'What happens to unused credits?',
-    answer: 'Monthly subscription credits reset at the start of each billing cycle. However, any credits you purchase separately never expire and roll over indefinitely.'
+    question: 'Do I own the products I create?',
+    answer: 'Yes. 100%. Every word, every design, every page. Upload it to Amazon KDP, sell it on Etsy, bundle it, sell the rights — we have no claim on any of it.'
   },
-  {
-    question: 'Is there a free trial?',
-    answer: 'Yes! Every new user gets 25 free credits to try all our tools for 30 days. No credit card required. That\'s enough for 25 text generations or 1-2 AI images!'
-  },
-  {
-    question: 'How do subscriber discounts work?',
-    answer: 'Subscribers get discounts when purchasing extra credits: Creator plan gets 5% off, Pro plan gets 10% off, and Business plan gets 15% off all credit purchases.'
-  }
 ]
 
 const pricingTiers = [
   {
     id: 'free',
-    name: 'Free',
+    name: 'Try It Free',
     price: 0,
     priceYearly: 0,
     monthlyCredits: 25,
     icon: Play,
     color: 'from-gray-500 to-gray-600',
+    description: 'One complete product, on us',
     features: [
-      '25 starter credits (30-day trial)',
-      'All text generation tools',
-      'Watermarked exports',
-      'Standard support',
-      'Community access'
+      '1 complete ebook, planner, or coloring book',
+      '1 KDP cover design (front, spine, back)',
+      '1 Amazon listing (title, bullets, keywords)',
+      'KDP-formatted PDF export',
+      'No credit card required',
     ],
     cta: 'Current Plan',
     popular: false
   },
   {
     id: 'creator',
-    name: 'Creator',
+    name: 'Publisher',
     price: 19,
     priceYearly: 190,
     monthlyCredits: 1000,
     icon: Star,
     color: 'from-purple-500 to-pink-500',
+    description: 'For publishers releasing 5–10 products per month',
     features: [
-      '1,000 credits/month — mix & match',
-      '🎬 7 cinematic AI video clips (~60s)',
-      '📣 8 UGC talking-head ads (15s)',
-      '🎨 66 AI images / 🖼️ 66 thumbnails',
-      '📝 333 blog posts / ✉️ 500 emails',
-      'All 70+ creation tools unlocked',
+      '~10 complete products per month',
+      'Unlimited cover designs',
+      '100+ interior pages per month',
+      'Amazon listing writer (10 listings)',
+      'KDP-ready export (PDF, EPUB)',
       'No watermarks on any export',
-      'Bangla Voice Studio access',
       'Purchased credits never expire',
       '5% off all extra credit packs',
-      'Email support · 7-day refund on unused credits'
+      'Email support · 7-day refund guarantee'
     ],
-    cta: 'Start Creator',
+    cta: 'Start Publishing — $19/mo',
     popular: true
   },
   {
     id: 'pro',
-    name: 'Pro',
+    name: 'Pro Publisher',
     price: 49,
     priceYearly: 490,
     monthlyCredits: 2500,
     icon: Crown,
     color: 'from-orange-500 to-red-500',
+    description: 'For serious publishers releasing 20+ products monthly',
     features: [
-      '2,500 credits/month — best value',
-      '🎬 17 cinematic AI video clips (~2.5 min)',
-      '📣 20 UGC talking-head ads (15s)',
-      '🎨 166 AI images / 🖼️ 166 thumbnails',
-      '📝 833 blog posts / ✉️ 1,250 emails',
-      'Everything in Creator',
-      '4K export quality',
-      'Batch generation (parallel jobs)',
+      '~25 complete products per month',
+      'Unlimited covers and interior pages',
+      'Niche research tool included',
+      'Unlimited Amazon listing optimisation',
+      'Bulk export',
+      'Everything in Publisher',
+      '4K cover export quality',
       'Priority generation queue',
       'Brand kit (save 1 brand identity)',
-      'Early access to new tools',
-      '10% off extra credits',
       'Priority support'
     ],
-    cta: 'Go Pro',
+    cta: 'Go Pro — $49/mo',
     popular: false
   },
   {
@@ -120,13 +118,10 @@ const pricingTiers = [
     monthlyCredits: 5000,
     icon: Building2,
     color: 'from-green-500 to-teal-500',
+    description: 'For agencies and multi-brand Etsy shops',
     features: [
-      '5,000 credits/month — for teams',
-      '🎬 35 cinematic AI video clips (~5 min)',
-      '📣 40 UGC talking-head ads (15s)',
-      '🎨 333 AI images / 🖼️ 333 thumbnails',
-      '📝 1,666 blog posts / ✉️ 2,500 emails',
-      'Everything in Pro',
+      '~50 complete products per month',
+      'Everything in Pro Publisher',
       'Team access (5 seats)',
       'Multi-brand kits (up to 5 brands)',
       'API access for automation',
@@ -269,18 +264,18 @@ export default function PricingClient() {
         <PricingSchema faqs={pricingFAQs} />
 
         {/* Hero */}
-        <section className="container pt-16 pb-8">
+        <section aria-label="ProCreators pricing — plans for KDP and Etsy publishers" className="container pt-16 pb-8">
           <div className="mx-auto max-w-7xl text-center">
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Simple, Transparent Pricing</h1>
-            <p className="mb-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Every plan unlocks all 70+ tools. Credits work across cinematic AI video, UGC ads, images, blogs and more — mix any way you want.
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Every Plan Pays for Itself With Your First Published Book</h1>
+            <p className="mb-6 text-lg text-muted-foreground max-w-3xl mx-auto">
+              A planner on Amazon earns $2–$8 per sale. A coloring book earns $3–$12. Our $29/month plan pays for itself after 4–6 sales. After that, every product you publish is profit.
             </p>
 
             {/* Trust strip */}
             <div className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> 7-day money-back on unused credits</span>
+              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> 7-day money-back guarantee</span>
               <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> Cancel anytime</span>
-              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> Purchased credits never expire</span>
+              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> You own every product you create</span>
               <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-green-500" /> No credit card for free plan</span>
             </div>
 
@@ -386,9 +381,9 @@ export default function PricingClient() {
         <section className="container py-12">
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-3">Your Credits Unlock 70+ Tools</h2>
+              <h2 className="text-3xl font-bold mb-3">Your Credits Unlock the Complete Publishing Toolkit</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Credits are universal — use them anywhere. Here's what the same monthly allowance creates across our most popular tools.
+                Credits are universal — mix and match across ebooks, covers, journals, planners, coloring books, and Amazon listings. Here's what your monthly allowance produces on our most-used tools.
               </p>
             </div>
 
@@ -534,11 +529,11 @@ export default function PricingClient() {
         </section>
 
         {/* Value Comparison */}
-        <section className="container py-16">
+        <section aria-label="Return on investment calculator for ProCreators publishing plans" className="container py-16">
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-3">How ProCreators Compares</h2>
-              <p className="text-muted-foreground">One platform vs. paying for everything separately.</p>
+              <h2 className="text-3xl font-bold mb-3">How Fast Does ProCreators Pay for Itself?</h2>
+              <p className="text-muted-foreground">Even conservative sales pay off Publisher and Pro Publisher plans within the first month.</p>
             </div>
 
             <Card className="overflow-hidden">
@@ -546,38 +541,37 @@ export default function PricingClient() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left p-4 font-semibold">What you need</th>
-                      <th className="text-center p-4 font-semibold text-muted-foreground">Separate Tools</th>
-                      <th className="text-center p-4 font-semibold text-purple-400">ProCreators</th>
+                      <th className="text-left p-4 font-semibold">Products / Month</th>
+                      <th className="text-center p-4 font-semibold text-muted-foreground">Monthly Sales Each</th>
+                      <th className="text-center p-4 font-semibold text-muted-foreground">Avg Royalty</th>
+                      <th className="text-center p-4 font-semibold text-muted-foreground">Monthly Royalties</th>
+                      <th className="text-center p-4 font-semibold text-muted-foreground">Plan Cost</th>
+                      <th className="text-center p-4 font-semibold text-emerald-500">Net Gain</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[
-                      { need: 'AI Video Creation', separate: '$15-48/mo (Runway, Pika)', ours: '✓ Included' },
-                      { need: 'Blog / Article Writing', separate: '$49/mo (Jasper, Copy.ai)', ours: '✓ Included' },
-                      { need: 'Social Media Graphics', separate: '$15/mo (Canva Pro)', ours: '✓ Included' },
-                      { need: 'Ebook / Digital Products', separate: '$20-50/mo (Designrr)', ours: '✓ Included' },
-                      { need: 'Thumbnail Maker', separate: '$10-20/mo', ours: '✓ Included' },
-                      { need: 'AI Image Generation', separate: '$20/mo (Midjourney)', ours: '✓ Included' },
+                      { p: '5 products',  s: '20 sales', r: '$4.00', mo: '$400',   plan: '$29', net: '+$371' },
+                      { p: '10 products', s: '20 sales', r: '$4.00', mo: '$800',   plan: '$29', net: '+$771' },
+                      { p: '20 products', s: '20 sales', r: '$4.00', mo: '$1,600', plan: '$59', net: '+$1,541' },
+                      { p: '30 products', s: '20 sales', r: '$4.00', mo: '$2,400', plan: '$59', net: '+$2,341' },
                     ].map((row, i) => (
                       <tr key={i} className="border-b border-border last:border-0">
-                        <td className="p-4 font-medium text-foreground">{row.need}</td>
-                        <td className="p-4 text-center text-muted-foreground">{row.separate}</td>
-                        <td className="p-4 text-center text-green-500 font-medium">{row.ours}</td>
+                        <td className="p-4 font-medium text-foreground">{row.p}</td>
+                        <td className="p-4 text-center text-muted-foreground">{row.s}</td>
+                        <td className="p-4 text-center text-muted-foreground">{row.r}</td>
+                        <td className="p-4 text-center text-foreground font-medium">{row.mo}</td>
+                        <td className="p-4 text-center text-muted-foreground">{row.plan}</td>
+                        <td className="p-4 text-center text-emerald-500 font-bold">{row.net}</td>
                       </tr>
                     ))}
-                    <tr className="bg-muted/30 font-bold">
-                      <td className="p-4 text-foreground">Total Monthly Cost</td>
-                      <td className="p-4 text-center text-red-400">$129-201/mo</td>
-                      <td className="p-4 text-center text-green-500">From $19/mo</td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
             </Card>
 
-            <p className="text-center text-xs text-muted-foreground mt-4">
-              Prices based on publicly available pricing of listed tools as of 2025. ProCreators pricing reflects the Creator plan.
+            <p className="text-center text-xs text-muted-foreground mt-4 max-w-3xl mx-auto">
+              Estimates based on industry averages for low-content books on Amazon KDP. Actual results vary based on niche selection, cover quality, and listing optimisation. ProCreators does not guarantee any specific revenue outcome.
             </p>
           </div>
         </section>
@@ -598,34 +592,17 @@ export default function PricingClient() {
         </section>
 
         {/* FAQ */}
-        <section className="container pb-16">
+        <section aria-label="Frequently asked questions about ProCreators pricing" className="container pb-16">
           <div className="mx-auto max-w-3xl">
             <h2 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
-            <div className="space-y-4">
-              {[
-                {
-                  q: 'Do monthly credits roll over?',
-                  a: 'No, monthly subscription credits reset each billing cycle. However, any credits you purchase separately will never expire and roll over indefinitely.'
-                },
-                {
-                  q: 'Can I upgrade or downgrade anytime?',
-                  a: 'Yes! You can change your plan anytime. When upgrading, you get immediate access to your new credits. When downgrading, your current credits remain until the billing cycle ends.'
-                },
-                {
-                  q: 'What happens if I run out of credits?',
-                  a: 'You can always buy additional credit packs. Subscribers enjoy 5-15% discounts on credit purchases depending on their plan level.'
-                },
-                {
-                  q: 'Is there a money-back guarantee?',
-                  a: 'Yes. If you\'re not happy within the first 7 days, we\'ll refund your payment after deducting the cost of any credits you\'ve already used for generations. So you only pay for what you actually create.'
-                },
-              ].map((faq, i) => (
+            <dl className="space-y-4">
+              {pricingFAQs.map((faq, i) => (
                 <div key={i} className="p-4 rounded-lg border">
-                  <h3 className="font-semibold mb-2">{faq.q}</h3>
-                  <p className="text-sm text-muted-foreground">{faq.a}</p>
+                  <dt><h3 className="font-semibold mb-2">{faq.question}</h3></dt>
+                  <dd className="text-sm text-muted-foreground">{faq.answer}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
         </section>
       </div>
