@@ -11,7 +11,7 @@ const kdpPageJsonLd = {
  '@context': 'https://schema.org',
  '@type': 'WebPage',
  name: 'AI Tool for Amazon KDP Publishers',
- description: 'ProCreators is an AI publishing studio for Amazon KDP sellers that creates complete books, covers, and listings in under 2 hours.',
+ description: 'ProCreators is an AI publishing studio for Amazon KDP sellers that creates complete books, covers, and listings in under 30 minutes.',
  url: 'https://procreators.io/for-kdp-publishers',
  mainEntity: {
  '@type': 'SoftwareApplication',

@@ -14,7 +14,7 @@ export const metadata = {
  default: 'ProCreators. AI Publishing Studio for Amazon KDP & Etsy Sellers',
  template: '%s | ProCreators'
  },
- description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Create complete ebooks, journals, planners, and coloring books in under 2 hours. First product free.',
+ description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Create complete ebooks, journals, planners, and coloring books in under 30 minutes. First product free.',
  keywords: [
  'KDP AI tool',
  'AI ebook creator',
@@ -44,12 +44,12 @@ export const metadata = {
  url: 'https://procreators.io',
  siteName: 'ProCreators',
  title: 'ProCreators. AI Publishing Studio for Amazon KDP & Etsy Sellers',
- description: 'Create complete KDP and Etsy products in under 2 hours. Ebook, cover, interior pages, and Amazon listing, done in one session.'
+ description: 'Create complete KDP and Etsy products in under 30 minutes. Ebook, cover, interior pages, and Amazon listing, done in one session.'
  },
  twitter: {
  card: 'summary_large_image',
  title: 'ProCreators. AI Publishing Studio for KDP & Etsy Sellers',
- description: 'Publish 10x more books on Amazon and Etsy. AI builds your complete product in under 2 hours.'
+ description: 'Publish 10x more books on Amazon and Etsy. AI builds your complete product in under 30 minutes.'
  },
  icons: {
  icon: '/favicon.svg',
@@ -66,7 +66,7 @@ const organizationJsonLd = {
  name: 'ProCreators',
  url: 'https://procreators.io',
  logo: 'https://procreators.io/logo.png',
- description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Creates complete digital products, ebooks, journals, planners, coloring books, in under 2 hours.',
+ description: 'AI-powered publishing studio for Amazon KDP and Etsy sellers. Creates complete digital products, ebooks, journals, planners, coloring books, in under 30 minutes.',
  sameAs: [
  'https://twitter.com/ProCreatorsIO',
  'https://youtube.com/@procreators'

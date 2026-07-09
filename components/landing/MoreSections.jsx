@@ -145,7 +145,7 @@ const comparisonRows = [
  { task: 'Cover design', without: '$30–$100 Fiverr or 4+ hrs Canva', with: '15 minutes, KDP-ready' },
  { task: 'Interior pages', without: 'Manual Canva formatting', with: 'Auto-generated' },
  { task: 'Amazon listing', without: 'Keyword guessing, 5 rewrites', with: 'One click, SEO-optimised' },
- { task: 'Total per product', without: '10–20 hours', with: 'Under 2 hours', bold: true },
+ { task: 'Total per product', without: '10–20 hours', with: 'Under 30 minutes', bold: true },
  { task: 'Tools needed', without: '5–7 separate subscriptions', with: 'ProCreators only' },
 ]
 

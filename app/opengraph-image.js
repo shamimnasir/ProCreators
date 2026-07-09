@@ -97,7 +97,7 @@ export default async function Image() {
               letterSpacing: -1.5,
             }}
           >
-            Publish complete digital products in under 2 hours.
+            Publish complete digital products in under 30 minutes.
           </div>
           <div style={{ fontSize: 26, color: '#334155', maxWidth: 900, lineHeight: 1.35 }}>
             Ebooks &middot; Planners &middot; Journals &middot; Coloring Books &middot; Etsy Listings — all in one studio.

@@ -110,12 +110,12 @@ export function HeroSection({ onGetStarted, onExplore }) {
 
  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
  <span className="text-foreground block">Stop Spending 15 Hours on One Digital Product.</span>
- <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent block">Publish in 2 Hours or Less.</span>
+ <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent block">Publish in 30 Minutes or Less.</span>
  </h1>
 
  <p className="text-lg md:text-2xl text-muted-foreground max-w-4xl leading-relaxed">
  ProCreators builds your complete Amazon KDP or Etsy product or your own Digital Assets with{' '}
- <span className="text-foreground font-semibold">ebook, cover, interior pages, and listing copy</span>{' '}done in one session. No designer. No writer. No excuses.
+ <span className="text-foreground font-semibold">ebook, cover, interior pages, and listing copy</span>{' '}done in a single 30-minute session. No designer. No writer. No excuses.
  </p>
 
  <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">

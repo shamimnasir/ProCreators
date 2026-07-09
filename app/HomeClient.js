@@ -29,7 +29,7 @@ const faqJsonLd = {
  name: 'What is ProCreators?',
  acceptedAnswer: {
  '@type': 'Answer',
- text: 'ProCreators is an AI publishing studio built specifically for Amazon KDP and Etsy sellers. It generates complete digital products, ebooks, journals, planners, coloring books, and activity books, including writing, cover design, interior pages, and Amazon listing copy, in under 2 hours.',
+ text: 'ProCreators is an AI publishing studio built specifically for Amazon KDP and Etsy sellers. It generates complete digital products, ebooks, journals, planners, coloring books, and activity books, including writing, cover design, interior pages, and Amazon listing copy, in under 30 minutes.',
  },
  },
  {
@@ -37,7 +37,7 @@ const faqJsonLd = {
  name: 'How long does it take to publish a book with ProCreators?',
  acceptedAnswer: {
  '@type': 'Answer',
- text: 'Most users complete a full product, writing, cover, interior pages, and Amazon listing, in under 2 hours. The traditional process without ProCreators typically takes 10 to 20 hours per book.',
+ text: 'Most users complete a full product, writing, cover, interior pages, and Amazon listing, in under 30 minutes. The traditional process without ProCreators typically takes 10 to 20 hours per book.',
  },
  },
  {
@@ -81,7 +81,7 @@ const softwareAppJsonLd = {
  name: 'ProCreators',
  applicationCategory: 'BusinessApplication',
  operatingSystem: 'Web',
- description: 'AI publishing studio for Amazon KDP and Etsy sellers. Generates complete digital products including ebooks, journals, planners, and coloring books in under 2 hours.',
+ description: 'AI publishing studio for Amazon KDP and Etsy sellers. Generates complete digital products including ebooks, journals, planners, and coloring books in under 30 minutes.',
  offers: [
  { '@type': 'Offer', name: 'Free Trial', price: '0', priceCurrency: 'USD', description: 'One complete product free. No credit card required.' },
  { '@type': 'Offer', name: 'Publisher Plan', price: '29', priceCurrency: 'USD', billingIncrement: 'P1M', description: '10 complete products per month, unlimited covers, KDP export.' },

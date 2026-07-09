@@ -11,7 +11,7 @@ const etsyPageJsonLd = {
  '@context': 'https://schema.org',
  '@type': 'WebPage',
  name: 'AI Tool for Etsy Printable Sellers',
- description: 'ProCreators helps Etsy sellers create complete printable products, planners, journals, coloring pages, worksheets, in under 2 hours.',
+ description: 'ProCreators helps Etsy sellers create complete printable products, planners, journals, coloring pages, worksheets, in under 30 minutes.',
  url: 'https://procreators.io/for-etsy-sellers',
 }
 
@@ -104,7 +104,7 @@ export default function EtsySellersClient() {
  <section aria-label="ProCreators Etsy production features" className="container px-6 pb-20">
  <div className="mx-auto max-w-4xl text-center mb-10 space-y-3">
  <h2 className="text-3xl md:text-4xl font-bold">ProCreators Is Your <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Etsy Production System</span></h2>
- <p className="text-muted-foreground text-lg">Generate complete, Etsy-ready printable products, planners, journals, coloring pages, worksheets, and more, in under 2 hours. You focus on your shop. We handle the production.</p>
+ <p className="text-muted-foreground text-lg">Generate complete, Etsy-ready printable products, planners, journals, coloring pages, worksheets, and more, in under 30 minutes. You focus on your shop. We handle the production.</p>
  </div>
  <dl className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
  {features.map((f, i) => (
