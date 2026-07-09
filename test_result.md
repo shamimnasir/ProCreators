@@ -105,6 +105,51 @@
 user_problem_statement: "Integrate AI Humanizer and Grammar Checker functionality into the Blog Post Creator tool."
 
 backend:
+  - task: "Sprint 3: Ebook EPUB Export API"
+    implemented: true
+    working: true
+    file: "/app/app/api/ebook-maker/generate-epub/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW Sprint 3: POST endpoint. Reuses shared credit + CSRF plumbing. Repackages an existing ebook payload (cover, introduction, chapters, conclusion) into a valid EPUB 3 archive via /lib/epub-builder.js (JSZip-based, no LLM call). Costs 20 credits. Returns application/epub+zip stream with Content-Disposition attachment. Test: 401 no auth, 402 insufficient credits, 400 missing cover.title/chapters, 200 with a valid EPUB buffer for a normal payload."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE TESTING COMPLETED - 100% SUCCESS RATE: All 5 test scenarios passed perfectly. Test Results: ✅ Test 1 (No Auth → 401): PASS - Correctly rejects unauthenticated requests with 'Not authenticated'. ✅ Test 2 (Missing cover.title → 400): PASS - Correctly returns 400 with error 'cover.title and at least one chapter are required'. ✅ Test 3 (Empty chapters → 400): PASS - Correctly returns 400 when chapters array is empty. ✅ Test 4 (Insufficient Credits → 402): PASS - Correctly returns 402 with code='INSUFFICIENT_CREDITS', required=20, balance=0. ✅ Test 5 (Valid EPUB Generation → 200): PASS - Returns 200 with Content-Type: application/epub+zip, Content-Length: 6453 bytes, ZIP magic bytes (PK\\x03\\x04) verified, Content-Disposition: attachment with filename 'The_Ultimate_Guide_to_Testing.epub'. EPUB Structure Verified: Valid EPUB 3 archive with mimetype, META-INF/container.xml, OEBPS/content.opf, navigation, chapters, and CSS. Credit system working correctly (20 credits deducted). CSRF protection active. The EPUB export endpoint is FULLY FUNCTIONAL and PRODUCTION READY."
+
+  - task: "Sprint 3: Ebook Series Generator API"
+    implemented: true
+    working: true
+    file: "/app/app/api/ebook-maker/generate-series/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "NEW Sprint 3: POST endpoint. Takes { seedTopic, audience, tone, genre, seriesSize (3-7) } and asks Gemini (gemini-flash-latest via GOOGLE_API_KEY) for a JSON payload with a seriesBrand + an array of books each with title/subtitle/hook/chapters. Costs 50 credits. Test: 401 no auth, 402 insufficient credits, 400 missing seedTopic, 200 with success:true + books array of length in [3..7]."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE TESTING COMPLETED - 100% SUCCESS RATE: All 4 test scenarios passed perfectly. Test Results: ✅ Test 1 (No Auth → 401): PASS - Correctly rejects unauthenticated requests with 'Not authenticated'. ✅ Test 2 (Missing seedTopic → 400): PASS - Correctly returns 400 with error 'seedTopic is required'. ✅ Test 3 (Insufficient Credits → 402): PASS - Correctly returns 402 with code='INSUFFICIENT_CREDITS', required=50, balance=0. ✅ Test 4 (Valid Series Generation → 200): PASS - Returns 200 with success=true, books array length=5 (matching requested seriesSize), seriesBrand present with seriesName='Python from Scratch'. Series Structure Verified: Each book contains position, title, subtitle, hook, and chapters array (6-8 chapter outlines). seriesBrand contains seriesName, buyerAvatar, brandPromise, and coverConcept. Gemini integration working correctly with gemini-flash-latest model via GOOGLE_API_KEY. Credit system working correctly (50 credits deducted). CSRF protection active. The series generator endpoint is FULLY FUNCTIONAL and PRODUCTION READY."
+
+  - task: "Sprint 3: Etsy Listing mode (blog-creator)"
+    implemented: true
+    working: false
+    file: "/app/app/api/blog-creator/generate/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "UPDATED Sprint 3: Zod schema now accepts articleType 'etsy-listing' plus a new optional listingPlatform ('amazon' | 'etsy'). When articleType='etsy-listing' or listingPlatform='etsy', the system prompt switches to an Etsy-specific output schema (13 tags, materials array, personalization field, section suggestion, structured description) with a shorter 140-char title cap. Test: 400 on missing topic, 200 with response.data containing tags (13 items, each <=20 chars), materials, description, personalization, sectionSuggestion when calling with articleType='etsy-listing'. Verify articleType='amazon-listing' still returns the classic bullets+backendKeywords structure."
+        - working: false
+          agent: "testing"
+          comment: "❌ SPRINT 3 IMPLEMENTATION CORRECT BUT BLOCKED BY PRE-EXISTING LLM INFRASTRUCTURE ISSUE: The Etsy listing mode implementation is correctly structured with proper Zod schema validation, platform detection logic (lines 162-163), and complete Etsy-specific output schema (lines 274-304) including title (max 140 chars), 13 tags (max 20 chars each), materials (up to 13), description, personalization, sectionSuggestion. However, the endpoint returns empty fields because the underlying Python LLM script (/app/scripts/llm_call.py line 26) uses deprecated model 'gemini-2.0-flash' which returns 404 error: 'This model models/gemini-2.0-flash is no longer available. Please update your code to use a newer model.' This is NOT a Sprint 3 bug - it's a pre-existing infrastructure issue affecting ALL blog-creator endpoints. The Sprint 3 code changes are correct and will work once the LLM model is updated to 'gemini-flash-latest'. RECOMMENDATION: Main agent should update /app/scripts/llm_call.py line 26 from 'gemini-2.0-flash' to 'gemini-flash-latest' to fix this infrastructure issue."
+
   - task: "Sprint 2: AI Prompt Pack Generate API"
     implemented: true
     working: true
@@ -2976,11 +3021,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Sprint 2: AI Prompt Pack Generate API"
-    - "Sprint 2: Recipe Book Generate API"
-    - "Sprint 2: Spreadsheet Template Generate API"
-    - "Sprint 2: Wedding Suite Generate API"
-    - "Sprint 2: Puzzle Book Generate API"
+    - "Sprint 3: Ebook EPUB Export API"
+    - "Sprint 3: Ebook Series Generator API"
+    - "Sprint 3: Etsy Listing mode (blog-creator generate API)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"

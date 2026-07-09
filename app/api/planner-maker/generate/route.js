@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { addInternalLink } from '@/lib/pdf-links'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { 
-import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
-
-const TOOL_ID = 'planner-maker'
   PDF_COLOR_SCHEMES, 
   COVER_STYLES, 
   drawCoverPage,
@@ -16,9 +14,12 @@ const TOOL_ID = 'planner-maker'
   drawCornerDecorations,
   getCurrentYear
 } from '@/lib/pdf-design'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
 import { generateCoverImage, getPlannerTheme } from '@/lib/cover-image-generator'
 import { getSizeById } from '@/lib/paper-sizes'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+
+const TOOL_ID = 'planner-maker'
 
 // Use Google Generative AI with the proper Google API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
@@ -612,6 +613,14 @@ export async function POST(request) {
       })
     }
 
+    // ============================================================
+    // Sprint 3 — Hyperlinked PDF: reserve a Table of Contents page
+    // immediately after the cover, then track each content page as
+    // it's created so we can back-fill clickable TOC entries.
+    // ============================================================
+    const tocPage = pdfDoc.addPage([size.width, size.height])
+    const tocEntries = [] // { label, targetPage }
+
     // Generate content pages based on planner type
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 
                     'July', 'August', 'September', 'October', 'November', 'December']
@@ -621,19 +630,86 @@ export async function POST(request) {
       const page = pdfDoc.addPage([size.width, size.height])
       const quote = content.quotes[i % content.quotes.length]
 
+      let label
       switch (plannerType) {
         case 'daily':
           drawDailyPage(page, fonts, colors, i + 1, quote)
+          label = `Day ${i + 1}`
           break
         case 'weekly':
           drawWeeklyPage(page, fonts, colors, i + 1, quote)
+          label = `Week ${i + 1}`
           break
         case 'habit':
           drawHabitPage(page, fonts, colors, months[i % 12])
+          label = `Habit Tracker — ${months[i % 12]}`
           break
         default:
           drawDailyPage(page, fonts, colors, i + 1, quote)
+          label = `Page ${i + 1}`
       }
+      // Only show the first ~20 entries in the TOC to keep it printable/scannable
+      if (tocEntries.length < 20) {
+        tocEntries.push({ label, targetPage: page })
+      }
+    }
+
+    // ============================================================
+    // Sprint 3 — Now that all content pages have refs, back-fill the
+    // Table of Contents page with clickable entries pointing to each page.
+    // ============================================================
+    {
+      tocPage.drawRectangle({ x: 0, y: 0, width: size.width, height: size.height, color: colors.background })
+      tocPage.drawText('Table of Contents', {
+        x: margin,
+        y: size.height - 72,
+        size: 24,
+        font: boldFont,
+        color: colors.primary,
+      })
+      tocPage.drawText('Tap any row to jump to that page.', {
+        x: margin,
+        y: size.height - 96,
+        size: 10,
+        font: italicFont,
+        color: colors.secondary,
+      })
+
+      const rowHeight = 20
+      const startY = size.height - 130
+      const linkColor = colors.primary
+      tocEntries.forEach((entry, idx) => {
+        const y = startY - idx * rowHeight
+        if (y < margin + 40) return // safety: bail if we run out of vertical space
+        // Row label (indexed like "01. Day 1")
+        const label = `${String(idx + 1).padStart(2, '0')}.  ${entry.label}`
+        tocPage.drawText(label, {
+          x: margin,
+          y,
+          size: 12,
+          font: fonts.regular,
+          color: linkColor,
+        })
+        // Dot leader + arrow marker
+        tocPage.drawText('→', {
+          x: size.width - margin - 20,
+          y,
+          size: 12,
+          font: boldFont,
+          color: linkColor,
+        })
+        // Add clickable hotspot spanning the whole row
+        try {
+          addInternalLink(
+            pdfDoc,
+            tocPage,
+            [margin - 4, y - 4, size.width - margin + 4, y + 14],
+            entry.targetPage,
+          )
+        } catch (err) {
+          console.warn('[Planner PDF] TOC link failed for entry', idx, err?.message)
+        }
+      })
     }
 
     // Tips page at the end

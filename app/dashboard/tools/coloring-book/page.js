@@ -96,6 +96,13 @@ const COLORING_THEMES = [
   { id: 'patterns', name: 'Abstract Patterns', icon: '🎨', examples: 'Doodles, swirls, geometric' },
   { id: 'characters', name: 'Cute Characters', icon: '🧸', examples: 'Kawaii, chibi, cartoon animals' },
   { id: 'vehicles', name: 'Vehicles', icon: '🚗', examples: 'Cars, planes, trains' },
+  // Sprint 3 additions — trending Etsy / KDP niches
+  { id: 'kpop', name: 'K-Pop & Idols', icon: '🎤', examples: 'K-pop idols, stage outfits, microphones, chibi idols' },
+  { id: 'dinosaur', name: 'Dinosaurs', icon: '🦖', examples: 'T-Rex, Triceratops, Stegosaurus, prehistoric scenes' },
+  { id: 'insect', name: 'Insects & Bugs', icon: '🦋', examples: 'Butterflies, beetles, dragonflies, ladybugs' },
+  { id: 'mermaid', name: 'Mermaids & Underwater', icon: '🧜‍♀️', examples: 'Mermaids, sea castles, mystical underwater scenes' },
+  { id: 'fairycore', name: 'Fairycore & Cottagecore', icon: '🍄', examples: 'Fairies, mushrooms, cottages, whimsical forests' },
+  { id: 'anime', name: 'Anime & Manga', icon: '🌸', examples: 'Anime characters, manga panels, kawaii scenes' },
   { id: 'custom', name: 'Custom Theme', icon: '✏️', examples: 'Create your own niche!' },
 ]
 

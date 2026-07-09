@@ -55,7 +55,8 @@ import { saveToLibrary } from '@/lib/library-utils'
 
 // Article types
 const ARTICLE_TYPES = [
-  { id: 'amazon-listing', name: 'Amazon Listing', icon: '🛒', desc: 'KDP / Etsy listing copy', bestFor: 'Amazon KDP & Etsy sellers', color: 'from-orange-500 to-amber-600' },
+  { id: 'amazon-listing', name: 'Amazon Listing', icon: '🛒', desc: 'Amazon-style KDP listing copy', bestFor: 'Amazon KDP sellers', color: 'from-orange-500 to-amber-600' },
+  { id: 'etsy-listing', name: 'Etsy Listing', icon: '🧺', desc: '13-tag Etsy listing copy', bestFor: 'Etsy digital + physical shops', color: 'from-orange-600 to-rose-500' },
   { id: 'seo-article', name: 'SEO Article', icon: '🔍', desc: 'Keyword-optimized content', bestFor: 'Organic traffic', color: 'from-blue-500 to-blue-700' },
   { id: 'affiliate-best', name: 'Best X for Y', icon: '🏆', desc: 'Best [product] for [audience]', bestFor: 'Affiliate commissions', color: 'from-green-500 to-emerald-700' },
   { id: 'product-review', name: 'Product Review', icon: '⭐', desc: 'In-depth single product review', bestFor: 'Affiliate, Trust', color: 'from-yellow-500 to-orange-600' },
@@ -118,7 +119,7 @@ const INDUSTRIES = [
 export default function BlogCreatorPage() {
   const searchParams = useSearchParams()
   const initialType = searchParams?.get('type')
-  const validInitialType = ['amazon-listing','seo-article','affiliate-best','product-review','comparison','how-to-guide','listicle','ultimate-guide','buyers-guide'].includes(initialType) ? initialType : 'seo-article'
+  const validInitialType = ['amazon-listing','etsy-listing','seo-article','affiliate-best','product-review','comparison','how-to-guide','listicle','ultimate-guide','buyers-guide'].includes(initialType) ? initialType : 'seo-article'
 
   const [generating, setGenerating] = useState(false)
   const [humanizing, setHumanizing] = useState(false)
@@ -139,6 +140,8 @@ export default function BlogCreatorPage() {
   }, [initialType])
 
   const isAmazonListing = articleType === 'amazon-listing'
+  const isEtsyListing = articleType === 'etsy-listing'
+  const isListing = isAmazonListing || isEtsyListing
   const [topic, setTopic] = useState('')
   const [targetKeyword, setTargetKeyword] = useState('')
   const [secondaryKeywords, setSecondaryKeywords] = useState('')
@@ -195,6 +198,7 @@ export default function BlogCreatorPage() {
         body: JSON.stringify({
           articleType, topic, targetKeyword: targetKeyword || topic, secondaryKeywords,
           industry, targetAudience, writingStyle, wordCount, tone,
+          listingPlatform: isEtsyListing ? 'etsy' : (isAmazonListing ? 'amazon' : undefined),
           products, affiliateNetwork, priceRange, includeProsCons, includeRatings, includePricing,
           includeFAQ, includeTOC, includeMetaTags, internalLinks, keyPoints,
           humanizationLevel, enabledTechniques
@@ -336,17 +340,19 @@ export default function BlogCreatorPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            {isAmazonListing ? (
-              <ShoppingCart className="h-8 w-8 text-orange-600" />
+            {isListing ? (
+              <ShoppingCart className={`h-8 w-8 ${isEtsyListing ? 'text-rose-600' : 'text-orange-600'}`} />
             ) : (
               <FileText className="h-8 w-8 text-emerald-600" />
             )}
-            {isAmazonListing ? 'Amazon Listing Writer' : 'Content Writer'}
+            {isEtsyListing ? 'Etsy Listing Writer' : (isAmazonListing ? 'Amazon Listing Writer' : 'Content Writer')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {isAmazonListing
-              ? 'KDP & Etsy listing copy: title, 7 bullets, description, and backend keywords, Amazon A9 optimized'
-              : 'SEO articles, affiliate content, product reviews, and Amazon listings with AI humanization'}
+            {isEtsyListing
+              ? '13-tag Etsy listing copy: keyword-rich title, 13 tags, materials, structured description, and personalization field — optimized for Etsy search'
+              : isAmazonListing
+              ? 'Amazon-style KDP listing copy: title, 7 bullets, description, and backend keywords — Amazon A9 optimized'
+              : 'SEO articles, affiliate content, product reviews, and Amazon / Etsy listings with AI humanization'}
           </p>
         </div>
         <div className="flex gap-2">

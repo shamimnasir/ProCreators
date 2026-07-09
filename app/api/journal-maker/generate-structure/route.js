@@ -37,6 +37,15 @@ export async function POST(request) {
       )
     }
     
+    // Sprint 3 — therapeutic modes get extra clinical scaffolding
+    const THERAPEUTIC_MODES = {
+      'adhd': 'Executive-function scaffolding for adults with ADHD. Use short chunked prompts (never long paragraphs). Include Distraction Log, Dopamine Deposits (small wins), Time-Blocked Focus Sprints, medication check-in, and non-judgmental language.',
+      'cbt': 'Standard CBT thought-record structure (Beck / Padesky). Include the classic 5–7 column thought record on every daily page, a reference page listing 10 core cognitive distortions with brief examples, and a Behavioral Activation tracker. Include a plain-English wellness disclaimer that this is not a substitute for therapy.',
+      'postpartum': 'Compassionate postpartum mental-wellness journal for new mothers. Include gentle daily mood, sleep, feeding and body-recovery prompts, a weekly Edinburgh Postnatal Depression Scale (EPDS)-style self check-in, and a "When to Reach Out" page listing warning signs. Warm, non-judgmental language that affirms asking for help is a strength.'
+    }
+    const isTherapeutic = !!THERAPEUTIC_MODES[journalType]
+    const modeGuidance = THERAPEUTIC_MODES[journalType] || ''
+    
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     
     const prompt = `You are an expert journal designer. Create a comprehensive journal template structure for:
@@ -45,7 +54,7 @@ Journal Type: ${journalType}
 Purpose: ${purpose || 'Personal growth and reflection'}
 Duration: ${duration || '90 days'}
 Target Audience: ${targetAudience || 'Adults seeking self-improvement'}
-
+${isTherapeutic ? `\nCLINICAL MODE CONTEXT (strictly follow): ${modeGuidance}\nInclude a plain-English wellness disclaimer as a "disclaimer" field. Do NOT diagnose, prescribe, or use clinical jargon without plain-English explanation.\n` : ''}
 Generate a detailed journal structure with:
 1. An inspiring journal title
 2. A motivating subtitle
@@ -58,7 +67,7 @@ Format your response as JSON:
 {
   "title": "...",
   "subtitle": "...",
-  "introduction": "Welcome message explaining how to use this journal...",
+  "introduction": "Welcome message explaining how to use this journal...",${isTherapeutic ? '\n  "disclaimer": "Plain-English self-help disclaimer",' : ''}
   "sections": [
     {
       "name": "Section Name",

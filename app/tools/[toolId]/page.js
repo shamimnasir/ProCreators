@@ -73,6 +73,7 @@ const TOOL_METADATA = {
   
   // Content Creation
   'blog-creator': { name: 'Blog Post Writer', description: 'Write SEO-optimized blog posts with AI', category: 'Content' },
+  'etsy-listing': { name: 'Etsy Listing Writer', description: 'Generate 13-tag Etsy listings with keyword-rich titles, materials, and structured descriptions that rank in Etsy search', category: 'Business' },
   'youtube-creator': { name: 'YouTube Content Creator', description: 'Create YouTube content with AI tools', category: 'Content' },
   'professional-email': { name: 'Professional Email Writer', description: 'Write professional emails with AI assistance', category: 'Content' },
   'linkedin-posts': { name: 'LinkedIn Post Creator', description: 'Create engaging LinkedIn posts with AI', category: 'Content' },
@@ -209,7 +210,9 @@ export default async function ToolLandingPage({ params }) {
     'resume-builder', 'cover-letter', 'interview-prep', 'job-matcher',
     'salary-negotiator', 'networking-message',
     // Sprint 2: new publisher tools
-    'ai-prompt-pack', 'recipe-book', 'spreadsheet-template', 'wedding-suite', 'puzzle-book'
+    'ai-prompt-pack', 'recipe-book', 'spreadsheet-template', 'wedding-suite', 'puzzle-book',
+    // Sprint 3: Etsy Listing mode gets its own public landing
+    'etsy-listing'
   ]
   
   if (!validTools.includes(toolId)) {

@@ -10,7 +10,9 @@ import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction,
 
 // Blog generation input schema
 const blogCreatorSchema = z.object({
-  articleType: z.enum(['seo-article', 'affiliate-best', 'product-review', 'comparison', 'how-to-guide', 'listicle', 'ultimate-guide', 'buyers-guide', 'amazon-listing']).default('seo-article'),
+  articleType: z.enum(['seo-article', 'affiliate-best', 'product-review', 'comparison', 'how-to-guide', 'listicle', 'ultimate-guide', 'buyers-guide', 'amazon-listing', 'etsy-listing']).default('seo-article'),
+  // Sprint 3 — allow explicit listing platform override for the unified listing generator
+  listingPlatform: z.enum(['amazon', 'etsy']).optional(),
   topic: z.string().min(1, 'Topic is required').max(500, 'Topic too long'),
   targetKeyword: z.string().max(200).optional(),
   secondaryKeywords: z.string().max(500).optional(),
@@ -150,10 +152,15 @@ export async function POST(request) {
       keyPoints,
       competitorUrls,
       humanizationLevel,
-      enabledTechniques
+      enabledTechniques,
+      listingPlatform
     } = validation.data
 
     const isAffiliateType = ['affiliate-best', 'product-review', 'comparison', 'buyers-guide'].includes(articleType)
+    // Sprint 3 — normalize the listing platform. Prefer explicit `listingPlatform` param;
+    // fall back to the articleType ('etsy-listing' -> 'etsy', 'amazon-listing' -> 'amazon').
+    const isListing = articleType === 'amazon-listing' || articleType === 'etsy-listing'
+    const platform = listingPlatform || (articleType === 'etsy-listing' ? 'etsy' : 'amazon')
 
     let context = `## Article Type: ${articleType}\n`
     context += `## Topic: ${topic}\n`
@@ -264,7 +271,38 @@ ${isAffiliateType ? `
 ` : ''}
 
 ## OUTPUT FORMAT:
-${articleType === 'amazon-listing' ? `Return a JSON object with this Amazon-listing structure:
+${isListing && platform === 'etsy' ? `Return a JSON object with this ETSY-listing structure (optimized for Etsy search + shopper conversion):
+{
+  "title": "Etsy listing title (max 140 chars) — front-load 2-3 buyer keywords, then product type + occasion / audience hook. Etsy titles carry major search weight.",
+  "metaTitle": "Same as title",
+  "metaDescription": "One-sentence hook for social sharing (150-155 chars)",
+  "slug": "url-friendly-slug",
+  "tags": [
+    "13 Etsy tags — each MAX 20 characters, lowercase, multi-word tags encouraged (e.g. 'boho wall art'), no repeats, no punctuation. Order: highest-intent buyer keywords first."
+  ],
+  "materials": [
+    "Up to 13 materials — comma-safe single tokens or short phrases (e.g. 'PDF download', 'digital file', 'canva template')"
+  ],
+  "description": "Etsy long description formatted with clear section breaks: 1) HERO opening line (why they need it today), 2) WHAT'S INCLUDED (bulleted with • characters), 3) HOW TO USE / DELIVERY (digital download instructions or physical shipping notes), 4) PERSONALIZATION options if any, 5) POLICIES snippet, 6) CTA to favorite / message the shop. Use \\n\\n between sections. No HTML.",
+  "personalization": "Copy for the personalization field (or 'Not applicable' if none)",
+  "sectionSuggestion": "Suggested shop section this listing belongs in (e.g. 'Printable Planners')",
+  "backendKeywords": "Not applicable on Etsy — return empty string.",
+  "content": "Markdown preview of the entire listing (title as H1, tags as inline pills, materials list, then description)",
+  "wordCount": approximate word count number,
+  "readingTime": "1 min",
+  "outline": [
+    {"type": "h2", "text": "Title"},
+    {"type": "h2", "text": "Tags (13)"},
+    {"type": "h2", "text": "Materials"},
+    {"type": "h2", "text": "Description"},
+    {"type": "h2", "text": "Personalization"}
+  ],
+  "tips": [
+    "One Etsy SEO tip (title + tag alignment)",
+    "One conversion-boosting tip (first-photo hook, first line of description)",
+    "One digital-product / shipping tip"
+  ]
+}` : isListing ? `Return a JSON object with this AMAZON-listing structure:
 {
   "title": "Amazon listing title (max 200 chars), keyword-front-loaded, benefit-driven",
   "metaTitle": "Same as title for consistency",
@@ -323,7 +361,27 @@ IMPORTANT:
 - For affiliate content, include product recommendations naturally
 - Be ${tone} in tone and ${writingStyle} in style`
 
-    const userPrompt = articleType === 'amazon-listing'
+    const userPrompt = isListing && platform === 'etsy'
+      ? `Write a complete Etsy product listing for the following product.
+
+Product / Topic: ${topic}
+${targetKeyword ? `Primary buyer keyword: ${targetKeyword}` : ''}
+${secondaryKeywords ? `Secondary keywords (weave into tags and description): ${secondaryKeywords}` : ''}
+${targetAudience ? `Target buyer: ${targetAudience}` : ''}
+${priceRange ? `Price range: ${priceRange}` : ''}
+${keyPoints ? `Key features / selling points to include: ${keyPoints}` : ''}
+
+Deliver:
+1. TITLE (max 140 characters) — front-load 2-3 buyer keywords, then product type + occasion / audience.
+2. 13 TAGS — each max 20 characters, lowercase, multi-word phrases preferred (e.g. "boho wall art"), no repeats, no punctuation. Rank by buyer intent.
+3. UP TO 13 MATERIALS — short tokens/phrases the shopper searches for (e.g. "PDF download", "Canva template").
+4. DESCRIPTION — structured sections separated by "\\n\\n": Hero opening → What's Included (• bullets) → How To Use / Delivery → Personalization → Policies snippet → CTA.
+5. PERSONALIZATION field copy (or "Not applicable").
+6. SECTION suggestion (shop section this listing belongs in).
+7. Also emit "content" as a markdown preview.
+
+Return ONLY valid JSON matching the Etsy-listing output schema. Tone: ${tone}. Style: ${writingStyle}.`
+      : isListing
       ? `Write a complete Amazon KDP / Etsy product listing for the following product.
 
 Product / Topic: ${topic}

@@ -72,6 +72,7 @@
         "jsonrepair": "^3.14.0",
         "jsonwebtoken": "^9.0.3",
         "jspdf": "^4.0.0",
+        "jszip": "^3.10.1",
         "lucide-react": "^0.516.0",
         "mailgun.js": "^12.7.0",
         "mongodb": "^6.6.0",
