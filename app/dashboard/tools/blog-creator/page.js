@@ -1,5 +1,9 @@
 'use client'
 
+// Force dynamic rendering — this dashboard page uses useSearchParams and is
+// behind auth, so it can never be safely prerendered at build time.
+export const dynamic = 'force-dynamic'
+
 import { useState, useCallback, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -116,7 +120,15 @@ const INDUSTRIES = [
   'Marketing', 'Education', 'Entertainment', 'Sports', 'Automotive', 'Other'
 ]
 
-function BlogCreatorPageContent() {
+export default function BlogCreatorPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+      <BlogCreatorInner />
+    </Suspense>
+  )
+}
+
+function BlogCreatorInner() {
   const searchParams = useSearchParams()
   const initialType = searchParams?.get('type')
   const validInitialType = ['amazon-listing','etsy-listing','seo-article','affiliate-best','product-review','comparison','how-to-guide','listicle','ultimate-guide','buyers-guide'].includes(initialType) ? initialType : 'seo-article'
@@ -1002,18 +1014,5 @@ function BlogCreatorPageContent() {
         </div>
       )}
     </div>
-  )
-}
-
-// Wrap in Suspense for useSearchParams
-export default function BlogCreatorPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    }>
-      <BlogCreatorPageContent />
-    </Suspense>
   )
 }

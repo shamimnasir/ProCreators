@@ -14,7 +14,7 @@ export function FeaturesSection({ onGetStarted }) {
  <section id="features" aria-label="The problems KDP and Etsy sellers face without ProCreators" className="py-20 md:py-28">
  <div className="container px-6">
  <div className="mx-auto max-w-3xl text-center mb-14 space-y-4">
- <h2 className="text-3xl md:text-5xl font-bold tracking-tight">You’re Doing in 15 Hours What Should Take 2</h2>
+ <h2 className="text-3xl md:text-5xl font-bold tracking-tight">You’re Doing in 15 Hours What Should Take 30 Minutes</h2>
  </div>
  <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
  {painPoints.map((p, i) => {

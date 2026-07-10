@@ -55,7 +55,12 @@ import {
   Layers,
   Shield,
   Settings2,
-  Ticket
+  Ticket,
+  BookMarked,
+  Puzzle,
+  Layout,
+  Baby,
+  FileQuestion
 } from 'lucide-react'
 
 // Admin emails that can access the admin panel
@@ -68,115 +73,76 @@ const ADMIN_EMAILS = [
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
-    name: 'Video Studio',
-    href: '/dashboard/tools/ai-video-studio',
-    icon: Film,
-    description: 'Create any type of video with AI or Stock footage'
-  },
-  {
-    name: 'UGC Ad Studio',
-    href: '/dashboard/tools/ugc-studio',
-    icon: Wand2,
-    badge: 'NEW',
-    description: 'Create AI-powered UGC ads with talking-head avatars'
-  },
-  {
-    name: 'Viral Post Creation',
-    href: '/dashboard/viral-posts',
-    icon: Wand2,
-    children: [
-      { name: 'Social Media Posts', href: '/dashboard/tools/linkedin-posts', icon: MessageSquare },
-      { name: 'Content Humanizer', href: '/dashboard/tools/content-humanizer', icon: Edit3 },
-      { name: 'Blog Creator', href: '/dashboard/tools/blog-creator', icon: FileText },
-      { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
-      { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
-      { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
-      { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
-      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
-    ]
-  },
-  {
+    // === CORE FOCUS: Digital Publishing (KDP & Etsy) ===
+    // Kept at the top and auto-expanded by default so publishers see it first.
     name: 'Digital Products',
     href: '/dashboard/digital-products',
     icon: ShoppingBag,
+    badge: 'CORE',
+    highlight: true,
+    description: 'For Amazon KDP and Etsy sellers',
     children: [
-      { name: 'Planner Maker', href: '/dashboard/tools/planner-maker', icon: Calendar },
-      { name: 'Worksheet Generator', href: '/dashboard/tools/worksheet-maker', icon: FileText },
-      { name: 'Coloring Book Creator', href: '/dashboard/tools/coloring-book', icon: Palette },
-      { name: 'Journal Maker', href: '/dashboard/tools/journal-maker', icon: BookText },
-      { name: 'Checklist Maker', href: '/dashboard/tools/checklist-maker', icon: List },
       { name: 'Ebook Creator', href: '/dashboard/tools/ebook-maker', icon: BookOpen },
+      { name: 'Planner Maker', href: '/dashboard/tools/planner-maker', icon: Calendar },
+      { name: 'Journal Maker', href: '/dashboard/tools/journal-maker', icon: BookText },
+      { name: 'Coloring Book Creator', href: '/dashboard/tools/coloring-book', icon: Palette },
+      { name: 'Worksheet Generator', href: '/dashboard/tools/worksheet-maker', icon: FileText },
+      { name: 'Checklist Maker', href: '/dashboard/tools/checklist-maker', icon: List },
+      { name: 'Recipe Book', href: '/dashboard/tools/recipe-book', icon: BookMarked },
+      { name: 'Puzzle Book', href: '/dashboard/tools/puzzle-book', icon: Puzzle },
+      { name: 'AI Prompt Pack', href: '/dashboard/tools/ai-prompt-pack', icon: Wand2 },
+      { name: 'Spreadsheet Template', href: '/dashboard/tools/spreadsheet-template', icon: Layout },
+      { name: 'Wedding Suite', href: '/dashboard/tools/wedding-suite', icon: Heart },
       { name: 'Notion Templates', href: '/dashboard/tools/notion-templates', icon: Presentation },
-      { name: 'Social Templates', href: '/dashboard/tools/social-templates', icon: ImageIcon },
-      { name: 'Storybook Maker', href: '/dashboard/tools/storybook-maker', icon: BookOpen },
-      { name: 'Learning Cards', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
-      { name: 'Slides Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
+      { name: "Children's Storybook", href: '/dashboard/tools/storybook-maker', icon: Baby },
+      { name: 'Activity Book', href: '/dashboard/tools/activity-book', icon: FileQuestion },
+      { name: 'Flashcards / Learning Cards', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
+      { name: 'Quiz & Test Creator', href: '/dashboard/tools/quiz-maker', icon: Lightbulb },
+      { name: 'Presentation Templates', href: '/dashboard/tools/slides-maker', icon: Presentation },
+      { name: 'Amazon Listing Writer', href: '/dashboard/tools/blog-creator?type=amazon-listing', icon: ShoppingBag },
+      { name: 'Etsy Listing Writer', href: '/dashboard/tools/blog-creator?type=etsy-listing', icon: ShoppingBag },
+      { name: 'KDP Cover Designer', href: '/dashboard/tools/cover-image-creator', icon: ImageIcon },
     ]
   },
   {
-    name: 'Media Editor',
-    href: '/dashboard/media-editing',
-    icon: Edit3,
+    // === MARKETING TOOLS ===
+    // Everything else (video, UGC, viral posts, media edit, business, career, students, fun)
+    // is grouped here so the sidebar stays focused on the KDP/Etsy publishing core.
+    name: 'Marketing Tools',
+    icon: Target,
+    description: 'Promote your published products',
     children: [
-      { name: 'Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
+      { name: 'Video Studio', href: '/dashboard/tools/ai-video-studio', icon: Film },
+      { name: 'UGC Ad Studio', href: '/dashboard/tools/ugc-studio', icon: Wand2 },
+      { name: 'Quick Reels', href: '/dashboard/tools/quick-reels', icon: Play },
+      { name: 'Reels Creator', href: '/dashboard/tools/reels', icon: Video },
+      { name: 'Blog / SEO Writer', href: '/dashboard/tools/blog-creator', icon: FileText },
+      { name: 'Content Humanizer', href: '/dashboard/tools/content-humanizer', icon: Edit3 },
+      { name: 'Social Media Posts', href: '/dashboard/tools/linkedin-posts', icon: MessageSquare },
+      { name: 'Carousels', href: '/dashboard/tools/carousels', icon: ImageIcon },
+      { name: 'Quotes', href: '/dashboard/tools/quotes', icon: Quote },
+      { name: 'Photo Cards', href: '/dashboard/tools/photo-cards', icon: CreditCard },
+      { name: 'Lists', href: '/dashboard/tools/lists', icon: List },
+      { name: 'News Generator', href: '/dashboard/tools/news', icon: Newspaper },
       { name: 'Thumbnail Maker', href: '/dashboard/tools/thumbnail-maker', icon: ImageIcon },
       { name: 'Cover Image Creator', href: '/dashboard/tools/cover-image-creator', icon: ImageIcon },
       { name: 'Podcast Cover Maker', href: '/dashboard/tools/podcast-cover-maker', icon: Mic },
+      { name: 'Image Studio', href: '/dashboard/tools/image-editor', icon: Camera },
       { name: 'Audio Editor', href: '/dashboard/tools/audio-editor', icon: Music },
-      { name: 'Noise Remover', href: '/dashboard/tools/noise-remover', icon: Volume2 },
       { name: 'Voice Enhancer', href: '/dashboard/tools/voice-enhancer', icon: Mic },
-      { name: 'Auto Subtitles', href: '/dashboard/tools/auto-subtitles', icon: MessageSquare },
-    ]
-  },
-  {
-    name: 'Students & Teachers',
-    href: '/dashboard/students-teachers',
-    icon: GraduationCap,
-    children: [
-      { name: 'Presentation Maker', href: '/dashboard/tools/slides-maker', icon: Presentation },
-      { name: 'Quiz Generator', href: '/dashboard/tools/quiz-maker', icon: Lightbulb },
-      { name: 'Flashcard Creator', href: '/dashboard/tools/learning-cards', icon: FlipVertical },
-      { name: 'Study Notes Generator', href: '/dashboard/tools/study-notes', icon: FileText },
-      { name: 'Research Summarizer', href: '/dashboard/tools/research-summarizer', icon: BookOpen },
-      { name: 'Essay Helper', href: '/dashboard/tools/essay-helper', icon: Edit3 },
-    ]
-  },
-  {
-    name: 'Jobs & Career',
-    href: '/dashboard/jobs-career',
-    icon: Briefcase,
-    children: [
-      { name: 'Resume Builder', href: '/dashboard/tools/resume-builder', icon: FileText },
-      { name: 'Cover Letter Generator', href: '/dashboard/tools/cover-letter', icon: MessageSquare },
-      { name: 'LinkedIn Post Writer', href: '/dashboard/tools/linkedin-posts', icon: Users },
-      { name: 'Interview Prep Coach', href: '/dashboard/tools/interview-prep', icon: Mic },
-      { name: 'Professional Email Writer', href: '/dashboard/tools/email-writer', icon: MessageSquare },
-    ]
-  },
-  {
-    name: 'Business & Marketing',
-    href: '/dashboard/business-ai',
-    icon: TrendingUp,
-    children: [
+      { name: 'Noise Remover', href: '/dashboard/tools/noise-remover', icon: Volume2 },
       { name: 'Ad Copy Generator', href: '/dashboard/tools/ad-copy', icon: Target },
-      { name: 'Social Media Calendar', href: '/dashboard/tools/social-calendar', icon: Calendar },
-      { name: 'Email Campaign Writer', href: '/dashboard/tools/email-campaigns', icon: MessageSquare },
-      { name: 'Review Responder', href: '/dashboard/tools/review-responder', icon: Star },
-      { name: 'Business Plan Generator', href: '/dashboard/tools/business-plan', icon: FileText },
+      { name: 'Email Campaigns', href: '/dashboard/tools/email-campaigns', icon: MessageSquare },
+      { name: 'Business Plan', href: '/dashboard/tools/business-plan', icon: FileText },
       { name: 'Marketing Strategy', href: '/dashboard/tools/marketing-strategy', icon: Target },
-    ]
-  },
-  {
-    name: 'Fun & Recreation',
-    href: '/dashboard/fun-recreation',
-    icon: GamepadIcon,
-    children: [
+      { name: 'Resume Builder', href: '/dashboard/tools/resume-builder', icon: FileText },
+      { name: 'Cover Letter', href: '/dashboard/tools/cover-letter', icon: MessageSquare },
+      { name: 'Interview Prep', href: '/dashboard/tools/interview-prep', icon: Mic },
+      { name: 'Study Notes', href: '/dashboard/tools/study-notes', icon: FileText },
+      { name: 'Essay Helper', href: '/dashboard/tools/essay-helper', icon: Edit3 },
       { name: 'Meme Generator', href: '/dashboard/tools/meme-generator', icon: Smile },
       { name: 'AI Avatar Creator', href: '/dashboard/tools/avatar-creator', icon: User },
       { name: 'Story Writer', href: '/dashboard/tools/story-writer', icon: BookOpen },
-      { name: 'Joke Generator', href: '/dashboard/tools/joke-generator', icon: Smile },
-      { name: 'Fortune Teller', href: '/dashboard/tools/fortune-teller', icon: Wand2 },
-      { name: 'Love Letter Generator', href: '/dashboard/tools/love-letter', icon: Heart },
     ]
   },
   { name: 'Library', href: '/dashboard/library', icon: Library },
@@ -203,7 +169,8 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const [expandedSections, setExpandedSections] = useState({})
+  // Auto-expand the "Digital Products" section by default so publishers land on it.
+  const [expandedSections, setExpandedSections] = useState({ 'Digital Products': true })
   const [isAdmin, setIsAdmin] = useState(false)
   const [userEmail, setUserEmail] = useState('')
 
@@ -285,21 +252,30 @@ export function Sidebar() {
                   {/* Section with children - can also have an href for the section itself */}
                   {item.href ? (
                     // Section has both href and children - split functionality
-                    <div className="flex items-center gap-1">
+                    <div className={cn(
+                      "flex items-center gap-1",
+                      item.highlight && "rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 ring-1 ring-orange-200/70"
+                    )}>
                       <Link href={item.href} className="flex-1">
                         <Button
                           variant={pathname === item.href ? "secondary" : "ghost"}
                           className={cn(
                             "w-full justify-start",
-                            collapsed && "justify-center px-2"
+                            collapsed && "justify-center px-2",
+                            item.highlight && "font-semibold text-orange-800 hover:bg-orange-100/60"
                           )}
                         >
-                          <item.icon className={cn("h-4 w-4", !collapsed && "mr-2")} />
+                          <item.icon className={cn("h-4 w-4", !collapsed && "mr-2", item.highlight && "text-orange-600")} />
                           {!collapsed && (
                             <>
                               <span className="truncate">{item.name}</span>
                               {item.badge && (
-                                <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">
+                                <span className={cn(
+                                  "ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                  item.highlight
+                                    ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+                                    : "bg-primary text-primary-foreground"
+                                )}>
                                   {item.badge}
                                 </span>
                               )}
