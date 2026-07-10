@@ -268,7 +268,7 @@ export default function PricingClient() {
  <div className="mx-auto max-w-7xl text-center">
  <h1 className="mb-4 text-4xl font-bold md:text-5xl">Every Plan Pays for Itself With Your First Published Book</h1>
  <p className="mb-6 text-lg text-muted-foreground max-w-3xl mx-auto">
- A planner on Amazon earns $2–$8 per sale. A coloring book earns $3–$12. Our $29/month plan pays for itself after 4–6 sales. After that, every product you publish is profit.
+ A planner on Amazon earns $2–$8 per sale. A coloring book earns $3–$12. Our $19/month plan pays for itself after 4–6 sales. After that, every product you publish is profit.
  </p>
 
  {/* Trust strip */}
@@ -551,10 +551,10 @@ export default function PricingClient() {
  </thead>
  <tbody>
  {[
- { p: '5 products', s: '20 sales', r: '$4.00', mo: '$400', plan: '$29', net: '+$371' },
- { p: '10 products', s: '20 sales', r: '$4.00', mo: '$800', plan: '$29', net: '+$771' },
- { p: '20 products', s: '20 sales', r: '$4.00', mo: '$1,600', plan: '$59', net: '+$1,541' },
- { p: '30 products', s: '20 sales', r: '$4.00', mo: '$2,400', plan: '$59', net: '+$2,341' },
+ { p: '5 products', s: '20 sales', r: '$4.00', mo: '$400', plan: '$19', net: '+$381' },
+ { p: '10 products', s: '20 sales', r: '$4.00', mo: '$800', plan: '$19', net: '+$781' },
+ { p: '20 products', s: '20 sales', r: '$4.00', mo: '$1,600', plan: '$49', net: '+$1,551' },
+ { p: '30 products', s: '20 sales', r: '$4.00', mo: '$2,400', plan: '$99', net: '+$2,301' },
  ].map((row, i) => (
  <tr key={i} className="border-b border-border last:border-0">
  <td className="p-4 font-medium text-foreground">{row.p}</td>
