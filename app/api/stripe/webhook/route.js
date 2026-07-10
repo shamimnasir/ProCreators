@@ -6,8 +6,6 @@ import { refillMembershipCredits, changeSubscription, MEMBERSHIP_PLANS, addPurch
 import { v4 as uuidv4 } from 'uuid'
 import { getStripe } from '@/lib/services'
 
-const stripe = getStripe()
-
 export async function POST(request) {
   let rawBody
   
@@ -44,7 +42,7 @@ export async function POST(request) {
       
       for (const secret of webhookSecrets) {
         try {
-          event = stripe.webhooks.constructEvent(rawBody, sig, secret)
+          event = getStripe().webhooks.constructEvent(rawBody, sig, secret)
           verified = true
           break
         } catch (err) {

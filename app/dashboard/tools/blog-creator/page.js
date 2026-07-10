@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -116,7 +116,7 @@ const INDUSTRIES = [
   'Marketing', 'Education', 'Entertainment', 'Sports', 'Automotive', 'Other'
 ]
 
-export default function BlogCreatorPage() {
+function BlogCreatorPageContent() {
   const searchParams = useSearchParams()
   const initialType = searchParams?.get('type')
   const validInitialType = ['amazon-listing','etsy-listing','seo-article','affiliate-best','product-review','comparison','how-to-guide','listicle','ultimate-guide','buyers-guide'].includes(initialType) ? initialType : 'seo-article'
@@ -1002,5 +1002,18 @@ export default function BlogCreatorPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// Wrap in Suspense for useSearchParams
+export default function BlogCreatorPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <BlogCreatorPageContent />
+    </Suspense>
   )
 }
