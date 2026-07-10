@@ -56,6 +56,11 @@ export const metadata = {
  },
 }
 
+export const viewport = {
+ width: 'device-width',
+ initialScale: 1,
+}
+
 // Global Organization + WebSite JSON-LD (used by Google, ChatGPT, Perplexity, Claude to understand the brand).
 const organizationJsonLd = {
  '@context': 'https://schema.org',
