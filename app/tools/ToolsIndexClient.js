@@ -175,7 +175,7 @@ export default function ToolsIndexClient() {
  <div className="mb-8 max-w-2xl mx-auto glass-badge rounded-full px-5 py-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
  <span className="text-muted-foreground">Not sure where to start?</span>
  <Link href="/tools/ebook-maker" className="font-semibold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1">
- Build your first ebook free in 10 minutes <ArrowRight className="w-3.5 h-3.5" />
+ Build your first ebook free in 30 minutes <ArrowRight className="w-3.5 h-3.5" />
  </Link>
  </div>
 

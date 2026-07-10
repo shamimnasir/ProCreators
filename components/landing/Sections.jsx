@@ -202,7 +202,7 @@ export function CTASection({ onGetStarted }) {
  <div className="absolute -top-24 -left-16 w-72 h-72 bg-orange-200/40 rounded-full blur-3xl" />
  <div className="absolute -bottom-24 -right-16 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl" />
  <div className="relative">
- <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Your Next Published Book Is 2 Hours Away.</h2>
+ <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Your Next Published Book Is 30 Minutes Away.</h2>
  <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">Create one complete product free. No credit card. No tutorials to watch. Just open the Ebook Creator and start.</p>
  <div className="flex justify-center mt-8">
  <Button size="lg" onClick={onGetStarted} aria-label="Build my first book free, no credit card" className="text-lg px-8 py-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-xl glow-orange rounded-2xl">

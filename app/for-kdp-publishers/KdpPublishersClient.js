@@ -11,7 +11,7 @@ const kdpPageJsonLd = {
  '@context': 'https://schema.org',
  '@type': 'WebPage',
  name: 'AI Tool for Amazon KDP Publishers',
- description: 'ProCreators is an AI publishing studio for Amazon KDP sellers that creates complete books, covers, and listings in under 2 hours.',
+ description: 'ProCreators is an AI publishing studio for Amazon KDP sellers that creates complete books, covers, and listings in under 30 minutes.',
  url: 'https://procreators.io/for-kdp-publishers',
  mainEntity: {
  '@type': 'SoftwareApplication',
@@ -108,7 +108,7 @@ export default function KdpPublishersClient() {
  {/* SOLUTION */}
  <section aria-label="ProCreators features for KDP publishers" className="container px-6 pb-20">
  <div className="text-center mb-12 space-y-3">
- <h2 className="text-3xl md:text-4xl font-bold">ProCreators Is That System. <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Under 2 Hours Per Product.</span></h2>
+ <h2 className="text-3xl md:text-4xl font-bold">ProCreators Is That System. <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">Under 30 Minutes Per Product.</span></h2>
  </div>
  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
  {features.map((f, i) => {
@@ -152,7 +152,7 @@ export default function KdpPublishersClient() {
  {/* FINAL CTA */}
  <section aria-label="Call to action, create your first KDP product free" className="container px-6 pb-24">
  <div className="mx-auto max-w-4xl glass-card-elevated rounded-3xl p-10 md:p-14 text-center space-y-6">
- <h2 className="text-3xl md:text-4xl font-bold">Your next KDP product is 2 hours away.</h2>
+ <h2 className="text-3xl md:text-4xl font-bold">Your next KDP product is 30 minutes away.</h2>
  <p className="text-lg text-muted-foreground">Start with one free product. No credit card.</p>
  <div className="flex justify-center">
  <Button size="lg" onClick={cta} aria-label="Create your first KDP product free" className="text-lg px-8 py-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-xl glow-orange rounded-2xl">
