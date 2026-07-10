@@ -195,7 +195,7 @@ export default function PricingClient() {
  description: "Please log in to subscribe to a plan",
  variant: "destructive"
  })
- router.push('/auth/login?redirect=/pricing')
+ router.push('/login?redirect=/pricing')
  return
  }
 
