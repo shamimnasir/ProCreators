@@ -124,7 +124,6 @@ export async function proxy(request) {
   //  - request host (same-origin)
   //  - process.env.NEXT_PUBLIC_BASE_URL (configured preview)
   //  - process.env.CORS_ORIGINS (comma-separated, or "*" to allow ALL origins)
-  //  - *.emergentagent.com, *.emergent.host, *.emergent.sh (platform domains)
   //  - procreators.io, www.procreators.io (production custom domain)
   //  - localhost (dev)
   let allowedOrigin = null
@@ -154,14 +153,6 @@ export async function proxy(request) {
               if (!v) continue
               try { allowedHosts.add(new URL(v).host) } catch (_) { allowedHosts.add(v) }
             }
-          }
-
-          if (
-            originHost.endsWith('.emergentagent.com') ||
-            originHost.endsWith('.emergent.host') ||
-            originHost.endsWith('.emergent.sh')
-          ) {
-            allowedHosts.add(originHost)
           }
 
           const TRUSTED_DOMAINS = ['procreators.io', 'www.procreators.io']
