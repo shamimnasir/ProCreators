@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import textToSpeech from '@google-cloud/text-to-speech'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const language = searchParams.get('language') || 'bn' // Default to Bengali
