@@ -10,6 +10,7 @@ const stripe = getStripe()
 
 export async function POST(request) {
   let rawBody
+  let claimedEventId = null
   
   try {
     // Get raw body as text for signature verification
@@ -61,11 +62,31 @@ export async function POST(request) {
         )
       }
     } else {
-      // In dev mode without webhook secret, parse body directly
+      // SECURITY: never accept unsigned events in production. Without a signing secret anyone
+      // could POST a forged checkout.session.completed and grant themselves credits.
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Stripe Webhook] No signing secret configured (STRIPE_WEBHOOK_SECRET); rejecting event')
+        return NextResponse.json({ error: 'Webhook signing secret not configured' }, { status: 503 })
+      }
+      // Local development only: parse body directly
       event = JSON.parse(rawBody)
     }
     
     const { db } = await connectToDatabase()
+
+    // Idempotency: claim this event id atomically so duplicate or concurrent deliveries
+    // (Stripe retries, or the same event reaching both configured endpoints) are processed once.
+    if (event.id) {
+      try {
+        await db.collection('stripe_events_processed').insertOne({ _id: event.id, type: event.type, claimedAt: new Date() })
+        claimedEventId = event.id
+      } catch (err) {
+        if (err?.code === 11000) {
+          return NextResponse.json({ received: true, status: 'duplicate_event' })
+        }
+        throw err
+      }
+    }
     
     // Log all webhook events
     await db.collection('webhook_logs').insertOne({
@@ -322,6 +343,15 @@ export async function POST(request) {
   } catch (error) {
     console.error('[Stripe Webhook] Handler error:', error.message)
     console.error('[Stripe Webhook] Stack:', error.stack)
+    // Release the claim so Stripe's retry can process this event
+    if (claimedEventId) {
+      try {
+        const { db } = await connectToDatabase()
+        await db.collection('stripe_events_processed').deleteOne({ _id: claimedEventId })
+      } catch (releaseErr) {
+        console.error('[Stripe Webhook] Failed to release event claim:', releaseErr.message)
+      }
+    }
     return NextResponse.json(
       { error: 'Webhook handler failed', message: error.message },
       { status: 500 }

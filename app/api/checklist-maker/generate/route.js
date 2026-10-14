@@ -13,7 +13,7 @@ import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction,
 
 const TOOL_ID = 'checklist-maker'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
 // Checklist/Tracker types
 const CHECKLIST_TYPES = {

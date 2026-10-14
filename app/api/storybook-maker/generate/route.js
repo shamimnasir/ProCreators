@@ -8,6 +8,7 @@ import path from 'path'
 import { spawn } from 'child_process'
 import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { generateText } from '@/lib/gemini-text'
 import { z } from 'zod'
 import { validateRequest } from '@/lib/validation'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
@@ -322,71 +323,28 @@ Return as a JSON object with this EXACT structure:
 
 Return ONLY valid JSON, no markdown or extra text.`
 
-      const scriptPath = path.join(process.cwd(), 'lib', 'gemini-text.py')
-      
-      const inputData = JSON.stringify({
-        prompt: prompt,
-        systemMessage: 'You are a professional children\'s book author who creates engaging, age-appropriate stories with vivid imagery perfect for illustration. Always return valid JSON.'
-      })
-      
-      const pythonProcess = spawn('/root/.venv/bin/python3', [scriptPath], {
-        env: { ...process.env }
-      })
-      
-      pythonProcess.stdin.write(inputData)
-      pythonProcess.stdin.end()
-      
-      let stdout = ''
-      let stderr = ''
-      
-      pythonProcess.stdout.on('data', (data) => {
-        stdout += data.toString()
-      })
-      
-      pythonProcess.stderr.on('data', (data) => {
-        stderr += data.toString()
-      })
-      
-      pythonProcess.on('close', (code) => {
-        if (code !== 0) {
-          console.error('Story generation error:', stderr)
-          resolve({ success: false, error: stderr })
-          return
-        }
-        
-        try {
-          const result = JSON.parse(stdout)
-          if (result.success && result.content) {
-            // Parse the story content
-            let storyData
-            try {
-              // Clean up the response - remove markdown if present
-              let content = result.content
-              content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-              storyData = JSON.parse(content)
-            } catch (parseErr) {
-              console.error('Failed to parse story JSON:', parseErr)
-              resolve({ success: false, error: 'Failed to parse story content' })
-              return
-            }
-            resolve({ success: true, story: storyData })
-          } else {
-            resolve({ success: false, error: result.error || 'Generation failed' })
+      const timeout = new Promise((r) =>
+        setTimeout(() => r({ success: false, error: 'Story generation timed out' }), 60000))
+      Promise.race([generateText(
+        prompt,
+        'You are a professional children\'s book author who creates engaging, age-appropriate stories with vivid imagery perfect for illustration. Always return valid JSON.'
+      ), timeout]).then((result) => {
+        if (result.success && result.content) {
+          let storyData
+          try {
+            // Clean up the response - remove markdown if present
+            const content = result.content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+            storyData = JSON.parse(content)
+          } catch (parseErr) {
+            console.error('Failed to parse story JSON:', parseErr)
+            resolve({ success: false, error: 'Failed to parse story content' })
+            return
           }
-        } catch (error) {
-          resolve({ success: false, error: 'Failed to parse response' })
+          resolve({ success: true, story: storyData })
+        } else {
+          resolve({ success: false, error: result.error || 'Generation failed' })
         }
-      })
-      
-      pythonProcess.on('error', (error) => {
-        resolve({ success: false, error: error.message })
-      })
-      
-      // Timeout after 60 seconds
-      setTimeout(() => {
-        pythonProcess.kill()
-        resolve({ success: false, error: 'Story generation timed out' })
-      }, 60000)
+      }).catch((error) => resolve({ success: false, error: error.message }))
       
     } catch (error) {
       resolve({ success: false, error: error.message })

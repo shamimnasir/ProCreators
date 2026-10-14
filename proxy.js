@@ -25,6 +25,11 @@ const RATE_LIMITS = {
 }
 
 function getClientIp(request) {
+  // Only trust CF-Connecting-IP when told we're behind Cloudflare (see lib/rate-limiter.js)
+  if (process.env.BEHIND_CLOUDFLARE === 'true') {
+    const cf = request.headers.get('cf-connecting-ip')?.trim()
+    if (cf) return cf
+  }
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||

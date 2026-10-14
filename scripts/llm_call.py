@@ -3,34 +3,15 @@ import sys
 import json
 import os
 import asyncio
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gemini_client import generate
 
 async def call_llm(prompt, system_prompt="You are a creative activity book creator. Generate engaging, age-appropriate content."):
     try:
-        import uuid
-        api_key = os.getenv('EMERGENT_LLM_KEY')
-        
-        if not api_key:
-            return {
-                "success": False,
-                "content": None,
-                "error": "EMERGENT_LLM_KEY not found in environment"
-            }
-        
-        session_id = str(uuid.uuid4())
-        
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message=system_prompt
-        ).with_model("gemini", "gemini-2.0-flash")
-        
-        user_message = UserMessage(text=prompt)
-        response = await chat.send_message(user_message)
-        
+        content = await asyncio.to_thread(generate, prompt, system_prompt)
         return {
             "success": True,
-            "content": response,
+            "content": content,
             "error": None
         }
     except Exception as e:
