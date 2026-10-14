@@ -6,9 +6,6 @@ import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { 
-import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
-
-const TOOL_ID = 'planner-maker'
   PDF_COLOR_SCHEMES, 
   COVER_STYLES, 
   drawCoverPage,
@@ -19,6 +16,9 @@ const TOOL_ID = 'planner-maker'
 import { generateCoverImage, getPlannerTheme } from '@/lib/cover-image-generator'
 import { getSizeById } from '@/lib/paper-sizes'
 import { enforceRateLimit } from '@/lib/rate-limiter'
+import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+
+const TOOL_ID = 'planner-maker'
 
 // Use Google Generative AI with the proper Google API key
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
