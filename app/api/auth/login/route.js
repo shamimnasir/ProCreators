@@ -8,7 +8,13 @@ export async function POST(request) {
     // Forward to main auth API
     const res = await fetch(new URL('/api/auth', request.url), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        // Preserve the caller's IP so the downstream rate limiter does not see the server itself
+        ...(request.headers.get('x-forwarded-for') && { 'x-forwarded-for': request.headers.get('x-forwarded-for') }),
+        ...(request.headers.get('x-real-ip') && { 'x-real-ip': request.headers.get('x-real-ip') }),
+        ...(request.headers.get('cf-connecting-ip') && { 'cf-connecting-ip': request.headers.get('cf-connecting-ip') }),
+      },
       body: JSON.stringify({
         action: 'login',
         email: body.email,

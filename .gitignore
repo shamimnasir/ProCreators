@@ -215,3 +215,6 @@ credentials.json
 .credentials
 .next/dev/cache/turbopack/da605e0c/00000344.sst
 .next/dev/cache/turbopack/da605e0c/00000676.sst
+
+# Keep the committed template (must come after the .env.* rules above)
+!.env.example

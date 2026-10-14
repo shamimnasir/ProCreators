@@ -10,7 +10,7 @@ import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction,
 
 const TOOL_ID = 'worksheet-maker'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
 // Worksheet types
 const WORKSHEET_TYPES = {

@@ -10,7 +10,7 @@ import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction,
 
 const TOOL_ID = 'journal-maker'
 
-const genAI = new GoogleGenerativeAI(process.env.EMERGENT_LLM_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
 // Journal types with configurations
 const JOURNAL_TYPES = {
