@@ -1952,7 +1952,7 @@ export async function POST(request) {
       if (transactionId) await completeTransaction(transactionId)
       return result
     } else if (action === 'generate-pdf') {
-      const result = await generateActivityPDF(body)
+      const result = await generateActivityPDF(body, userId)
       if (transactionId) await completeTransaction(transactionId)
       return result
     } else {
@@ -2084,7 +2084,7 @@ function getActivityTitle(activityId, theme, pageNum) {
 }
 
 // Generate PDF
-async function generateActivityPDF(body) {
+async function generateActivityPDF(body, userId = null) {
   const {
     pages,
     title,
@@ -2584,7 +2584,7 @@ async function generateActivityPDF(body) {
   
   await libraryCollection.insertOne({
     id: documentId,
-    userId: 'default-user',
+    userId: userId || 'default-user',
     type: 'activity-book',
     category: 'document',
     title: cleanTitle,

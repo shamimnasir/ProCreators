@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getUserIdFromRequest } from '@/lib/credits'
 import { PDFDocument, rgb } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
@@ -905,7 +906,7 @@ export async function POST(request) {
       
       await libraryCollection.insertOne({
         id: documentId,
-        oduserId: 'default-user',
+        userId: (await getUserIdFromRequest(request)) || 'default-user',
         type: 'document',
         category: 'presentation',
         title: presentation.title || 'Untitled Presentation',

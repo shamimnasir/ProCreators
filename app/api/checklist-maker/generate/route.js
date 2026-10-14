@@ -454,7 +454,7 @@ export async function POST(request) {
     
     await libraryCollection.insertOne({
       id: documentId,
-      userId: 'default-user',
+      userId,
       type: 'checklist',
       category: 'document',
       title: content.title,

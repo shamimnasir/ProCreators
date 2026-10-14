@@ -10,7 +10,7 @@ export const maxDuration = 120
 export const dynamic = 'force-dynamic'
 
 // Helper to save image to library
-async function saveToLibrary(imageUrl, prompt, action, style = null) {
+async function saveToLibrary(imageUrl, prompt, action, style = null, userId = null) {
   try {
     // Extract base64 data
     const base64Data = imageUrl.split('base64,')[1]
@@ -44,7 +44,7 @@ async function saveToLibrary(imageUrl, prompt, action, style = null) {
     
     const document = {
       id: imageId,
-      userId: 'default-user',
+      userId: userId || 'default-user',
       content: '',
       filePath: publicPath,
       fileSize: buffer.length,
@@ -277,7 +277,7 @@ export async function POST(request) {
     let libraryInfo = null
     const promptText = body.prompt || body.editPrompt || body.fusionPrompt || ''
     try {
-      libraryInfo = await saveToLibrary(result.imageUrl, promptText, action, body.style)
+      libraryInfo = await saveToLibrary(result.imageUrl, promptText, action, body.style, await getUserIdFromRequest(request))
     } catch (saveError) {
       console.error('[Image Editor] Auto-save failed:', saveError)
     }

@@ -714,7 +714,7 @@ export async function POST(request) {
           
           await libraryCollection.insertOne({
             id: documentId,
-            userId: 'default-user',
+            userId,
             type: 'quiz',
             category: 'document',
             title: finalTitle,
@@ -1460,7 +1460,7 @@ export async function POST(request) {
       
       await libraryCollection.insertOne({
         id: documentId,
-        userId: 'default-user',
+        userId,
         type: 'quiz',
         category: 'document',
         title: finalTitle,
