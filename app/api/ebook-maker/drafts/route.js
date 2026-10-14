@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 
 // GET - Fetch all drafts for the user
 export async function GET(request) {
   try {
+    // SECURITY: drafts belong to the authenticated user only
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const drafts = await getCollection('ebook_drafts')
     
-    // For now, use a default user ID (can be updated when auth is added)
-    const userId = 'default-user'
     
     const userDrafts = await drafts
       .find({ userId })
@@ -31,10 +35,14 @@ export async function GET(request) {
 // POST - Save a new draft or update existing
 export async function POST(request) {
   try {
+    // SECURITY: drafts belong to the authenticated user only
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const data = await request.json()
     const drafts = await getCollection('ebook_drafts')
     
-    const userId = 'default-user'
     const now = new Date().toISOString()
     
     // Check if updating existing draft
@@ -98,6 +106,11 @@ export async function POST(request) {
 // DELETE - Remove a draft
 export async function DELETE(request) {
   try {
+    // SECURITY: drafts belong to the authenticated user only
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const { searchParams } = new URL(request.url)
     const draftId = searchParams.get('id')
     
@@ -109,7 +122,6 @@ export async function DELETE(request) {
     }
     
     const drafts = await getCollection('ebook_drafts')
-    const userId = 'default-user'
     
     await drafts.deleteOne({ id: draftId, userId })
     

@@ -319,6 +319,7 @@ async function compileVideoWithFFmpeg({
   captionStyle,  // Caption styling option
   musicTrack,    // Background music option
   narrationMode, // 'full' or 'dialogue-only' (default: dialogue-only)
+  userId,        // Owner of the generated library item
 }) {
   const tempDir = `/tmp/ai-video-studio-${jobId}`
   
@@ -705,7 +706,7 @@ async function compileVideoWithFFmpeg({
       
       const libraryDoc = {
         id: randomUUID(),
-        userId: 'default-user',
+        userId: userId || 'default-user',
         content: prompt || '',
         videoUrl,
         filePath: videoUrl,
@@ -1634,7 +1635,8 @@ export async function POST(request) {
       voiceFile,
       captionStyle,
       musicTrack,
-      narrationMode
+      narrationMode,
+      userId
     })
     
     // Complete the credit transaction on success

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getUserIdFromRequest } from '@/lib/credits'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import * as fontkit from '@pdf-lib/fontkit'
 import { getCollection } from '@/lib/mongodb'
@@ -1108,7 +1109,7 @@ export async function POST(request) {
     
     await libraryCollection.insertOne({
       id: documentId,
-      userId: 'default-user',
+      userId: (await getUserIdFromRequest(request)) || 'default-user',
       type: 'document',
       category: 'document',
       title: sanitizeText(cover.title),

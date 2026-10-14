@@ -575,7 +575,7 @@ export async function POST(request) {
     
     await libraryCollection.insertOne({
       id: documentId,
-      userId: 'default-user',
+      userId: (await getUserIdFromRequest(request)) || 'default-user',
       type: 'coloring-book',
       category: 'document',
       title: bookTitle,

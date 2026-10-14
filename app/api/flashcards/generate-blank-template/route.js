@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getUserIdFromRequest } from '@/lib/credits'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fs from 'fs/promises'
 import path from 'path'
@@ -334,7 +335,7 @@ export async function POST(request) {
       
       await libraryCollection.insertOne({
         id: documentId,
-        userId: 'default-user',
+        userId: (await getUserIdFromRequest(request)) || 'default-user',
         type: 'blank-flashcards',
         category: 'document',
         title: title || 'Blank Flashcard Templates',
