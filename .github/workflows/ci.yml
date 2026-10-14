@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      # --ignore-scripts skips package postinstall hooks; the build does not need them.
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      # Call next directly: `yarn build` runs setup-dependencies.sh (apt-get) as a prebuild step.
+      # Placeholder values only. Some routes construct SDK clients at import time
+      # (e.g. app/api/contact/route.js), so the build needs these set. Not real credentials.
+      - name: Build
+        run: npx next build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          RESEND_API_KEY: re_placeholder
+          STRIPE_API_KEY: sk_test_placeholder
+          MAILGUN_API_KEY: placeholder
+          MAILGUN_DOMAIN: example.com
+          GOOGLE_API_KEY: placeholder
+          MONGO_URL: mongodb://localhost:27017
+          DB_NAME: ci
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      # Informational for now: the repo has known high-severity advisories, so report
+      # them without failing the check. Drop the `|| true` to make this blocking.
+      - run: yarn audit --level high --groups dependencies || true
