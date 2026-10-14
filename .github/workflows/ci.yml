@@ -47,12 +47,12 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Informational for now: the repo currently has known high-severity advisories.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: yarn
-      - run: yarn audit --level high --groups dependencies
+      # Informational for now: the repo has known high-severity advisories, so report
+      # them without failing the check. Drop the `|| true` to make this blocking.
+      - run: yarn audit --level high --groups dependencies || true
