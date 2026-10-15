@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import textToSpeech from '@google-cloud/text-to-speech'
 import { v4 as uuidv4 } from 'uuid'
 import { writeFile, mkdir, stat } from 'fs/promises'
@@ -47,6 +48,11 @@ async function generateTTS(client, voiceName, languageCode, sampleText) {
 }
 
 export async function POST(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     const { voiceName, languageCode } = await request.json()
     
@@ -145,6 +151,11 @@ export async function POST(request) {
 
 // GET method to check if preview exists
 export async function GET(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const voiceName = searchParams.get('voiceName')
   const languageCode = searchParams.get('languageCode')

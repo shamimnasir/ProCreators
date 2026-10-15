@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
@@ -65,6 +66,11 @@ async function runLLM(prompt, systemPrompt = 'You are an expert job matching ana
 }
 
 export async function POST(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     const body = await request.json()
     const { 

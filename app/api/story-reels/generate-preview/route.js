@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { writeFile, unlink, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
@@ -15,6 +16,11 @@ export const maxDuration = 120 // 2 minutes timeout for preview
 export const dynamic = 'force-dynamic'
 
 export async function POST(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   const jobId = randomUUID()
   const tempDir = `/tmp/story-reels-preview-${jobId}`
   

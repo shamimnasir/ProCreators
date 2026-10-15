@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 
@@ -21,6 +22,11 @@ function sanitizeText(text) {
 }
 
 export async function POST(request) {
+  // SECURITY: this route calls a paid AI/media API; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     // SECURITY: Rate limiting for content generation
     const rateLimitCheck = await enforceRateLimit(request, 'content_generate')
