@@ -8,12 +8,22 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --ignore-scripts
 COPY . .
+# NEXT_PUBLIC_* values are inlined into the bundle by `next build`, so they are build args, not
+# runtime env. They are public by design (base URL, Stripe publishable key, Supabase anon key).
+ARG NEXT_PUBLIC_BASE_URL=http://localhost:3000
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+ARG NEXT_PUBLIC_SUPABASE_URL=
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=
 # Placeholder values only: some routes construct SDK clients at import time, so `next build`
 # needs them set. Real values are supplied at runtime and are NOT baked into the image.
 ENV NODE_OPTIONS=--max-old-space-size=4096 \
     RESEND_API_KEY=re_placeholder STRIPE_API_KEY=sk_test_placeholder \
     MAILGUN_API_KEY=placeholder MAILGUN_DOMAIN=example.com GOOGLE_API_KEY=placeholder \
-    MONGO_URL=mongodb://localhost:27017 DB_NAME=build NEXT_PUBLIC_BASE_URL=http://localhost:3000
+    MONGO_URL=mongodb://localhost:27017 DB_NAME=build \
+    NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL \
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY \
+    NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 # Skip `yarn build`: its prebuild hook runs apt-get via setup-dependencies.sh.
 RUN npx next build
 
