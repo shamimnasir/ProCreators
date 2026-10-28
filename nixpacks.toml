@@ -1,0 +1,9 @@
+# Nixpacks build config for Railway.
+# The repo's setup-dependencies.sh uses `apt-get`, which doesn't run under
+# Nixpacks' Nix-based build — these packages must be declared here instead so
+# ffmpeg (video pipeline) and chromium (Puppeteer PDF generation) exist at runtime.
+[phases.setup]
+nixPkgs = ["ffmpeg", "chromium", "nodejs_20"]
+
+[start]
+cmd = "yarn start"

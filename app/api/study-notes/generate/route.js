@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 import { saveToLibraryDirect } from '@/lib/library-save-server'
 import { getUserIdFromRequest, checkCredits, deductCredits, completeTransaction, refundCredits } from '@/lib/credits'
+import { getChromePath } from '@/lib/html-pdf-generator'
 
 const TOOL_ID = 'study-notes'
 
@@ -1725,7 +1726,7 @@ async function generatePDFWithHTML(notes, config) {
   const puppeteer = (await import('puppeteer-core')).default
   
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium',
+    executablePath: getChromePath(),
     headless: true,
     args: [
       '--no-sandbox',
