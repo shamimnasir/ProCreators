@@ -1,0 +1,97 @@
+services:
+  - name: procreators
+    type: web
+    runtime: node
+    plan: free
+    buildCommand: yarn install && yarn build
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # --- Core ---
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: NEXT_PUBLIC_BASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CSRF_SECRET
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      # --- AI / LLM ---
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: EMERGENT_LLM_KEY
+        sync: false
+      - key: FAL_KEY
+        sync: false
+      - key: REPLICATE_API_TOKEN
+        sync: false
+      # --- Cloudflare R2 ---
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
+      # --- Stripe ---
+      - key: STRIPE_API_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET_2
+        sync: false
+      # --- Email ---
+      - key: MAILGUN_API_KEY
+        sync: false
+      - key: MAILGUN_DOMAIN
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      # --- Media / content APIs ---
+      - key: PEXELS_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: FREESOUND_API_KEY
+        sync: false
+      - key: PIXABAY_API_KEY
+        sync: false
+      - key: SHOTSTACK_API_KEY
+        sync: false
+      - key: SHOTSTACK_OWNER_ID
+        sync: false
+      - key: SHOTSTACK_ENV
+        sync: false
+      # --- AnyChat widget ---
+      - key: ANYCHAT_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_ANYCHAT_WIDGET_ID
+        sync: false
+      # --- Chromium (Puppeteer PDF generation) ---
+      # Leave unset initially — lib/html-pdf-generator.js falls back to the
+      # `chromium` npm package's downloaded binary. Only set this if that
+      # fallback fails on Render's environment (check deploy logs first).
+      - key: CHROME_EXECUTABLE_PATH
+        sync: false
+      # GOOGLE_APPLICATION_CREDENTIALS points to a JSON key file, not a
+      # plain string — upload it as a Render "Secret File" instead
+      # (Render Dashboard -> Environment -> Secret Files), then set this
+      # var to whatever mount path Render gives it.
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false

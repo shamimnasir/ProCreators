@@ -1,8 +1,33 @@
 # Deploying ProCreators
 
-The app needs a full Node server (ffmpeg, Chromium, spawned Python, local file writes), so run it as a
-container on a Docker-capable host. Cloudflare Workers/Pages is not a fit. Use Cloudflare for DNS, CDN
-and R2 only.
+The app needs a full Node server (ffmpeg, Chromium, spawned Python, local file writes), so it runs as a
+container. Plain Cloudflare Workers/Pages is not a fit, but Cloudflare Containers is: `cloudflare/` holds
+a small Worker that runs this repo's Dockerfile and forwards every request to it.
+
+## Cloudflare Containers
+
+Needs the Workers Paid plan and a running Docker engine (Docker Desktop, or `colima start --vm-type vz
+--vz-rosetta` on Apple Silicon; the image is built for linux/amd64).
+
+```bash
+cd cloudflare
+npm install
+npx wrangler login
+npx wrangler secret put MONGO_URL      # repeat for each secret in .env.example
+npx wrangler deploy
+```
+
+- Every Worker var and secret is passed to the container as an environment variable
+  (`cloudflare/src/index.js`). `NODE_ENV` and `BEHIND_CLOUDFLARE=true` are set in `wrangler.jsonc`; the
+  container is only reachable through the Worker, so trusting `CF-Connecting-IP` is safe there.
+- One instance (`max_instances: 1`, every request goes to the instance named `main`), because rate limits
+  and generated files live in the process.
+- **The container disk is not persistent.** Generated documents and uploads written under `public/<dir>`
+  are lost when the container sleeps (after 1 hour idle) or is redeployed, until they are stored in R2.
+- `NEXT_PUBLIC_*` values are inlined at build time, so they are Docker build args set in `image_vars` in
+  `wrangler.jsonc`, not secrets. Change them and redeploy to rebuild the image.
+
+## Other Docker hosts
 
 ## Build and run
 

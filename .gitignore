@@ -218,3 +218,7 @@ credentials.json
 
 # Keep the committed template (must come after the .env.* rules above)
 !.env.example
+
+# Testing memory (contains admin credentials — do not deploy)
+memory/test_credentials.md
+.next/standalone/
