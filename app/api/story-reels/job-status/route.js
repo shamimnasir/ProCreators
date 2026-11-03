@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { getCollection } from '@/lib/mongodb'
 
 // Time estimates (in seconds) for different stages
@@ -74,6 +75,11 @@ function calculateEstimatedTimeRemaining(job) {
 
 export async function GET(request) {
   try {
+    // SECURITY: a job's status (including its video URL) is visible to its owner only
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const { searchParams } = new URL(request.url)
     const jobId = searchParams.get('jobId')
     
@@ -82,7 +88,7 @@ export async function GET(request) {
     }
     
     const jobsCollection = await getCollection('video_jobs')
-    const job = await jobsCollection.findOne({ jobId })
+    const job = await jobsCollection.findOne({ jobId, userId })
     
     if (!job) {
       return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 })

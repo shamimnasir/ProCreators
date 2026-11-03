@@ -1,15 +1,15 @@
 // User Profile API
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { connectToDatabase } from '@/lib/mongodb'
 
 // GET - Get user stats
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    
+    // SECURITY: stats for the signed-in user only (was any ?userId=, unauthenticated)
+    const userId = await getAuthenticatedUserId(request)
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
     }
     
     const { db } = await connectToDatabase()

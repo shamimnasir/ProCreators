@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { v4 as uuidv4 } from 'uuid'
 import { getCollection } from '@/lib/mongodb'
 
 // GET - Fetch all drafts
-export async function GET() {
+export async function GET(request) {
   try {
+    // SECURITY: drafts are private to their owner (this route used to need no login at all)
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const draftsCollection = await getCollection('drafts')
     
     const drafts = await draftsCollection
-      .find({ tool: 'flashcard-maker' })
+      .find({ tool: 'flashcard-maker', userId })
       .sort({ updatedAt: -1 })
       .toArray()
     
@@ -25,24 +31,30 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Failed to fetch drafts:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Request failed' }, { status: 500 })
   }
 }
 
 // POST - Save draft
 export async function POST(request) {
   try {
+    // SECURITY: drafts are private to their owner (this route used to need no login at all)
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const body = await request.json()
     const { id, title, subtitle, step, data } = body
     
     const draftsCollection = await getCollection('drafts')
-    const draftId = id || uuidv4()
+    const draftId = typeof id === 'string' && id ? id : uuidv4()
     
     await draftsCollection.updateOne(
-      { id: draftId, tool: 'flashcard-maker' },
+      { id: draftId, tool: 'flashcard-maker', userId },
       {
         $set: {
           id: draftId,
+          userId,
           tool: 'flashcard-maker',
           title,
           subtitle,
@@ -60,13 +72,18 @@ export async function POST(request) {
     return NextResponse.json({ success: true, id: draftId })
   } catch (error) {
     console.error('Failed to save draft:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Request failed' }, { status: 500 })
   }
 }
 
 // DELETE - Delete draft
 export async function DELETE(request) {
   try {
+    // SECURITY: drafts are private to their owner (this route used to need no login at all)
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     
@@ -75,11 +92,11 @@ export async function DELETE(request) {
     }
     
     const draftsCollection = await getCollection('drafts')
-    await draftsCollection.deleteOne({ id, tool: 'flashcard-maker' })
+    await draftsCollection.deleteOne({ id, tool: 'flashcard-maker', userId })
     
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Failed to delete draft:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Request failed' }, { status: 500 })
   }
 }

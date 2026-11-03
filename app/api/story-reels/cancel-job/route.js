@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { getCollection } from '@/lib/mongodb'
 import { refundCredits, partialRefundCredits } from '@/lib/credits'
 
@@ -6,16 +7,22 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request) {
   try {
+    // SECURITY: only the job's owner can cancel it (this used to need no login, and
+    // {"jobId": {"$ne": null}} cancelled and refunded someone else's job)
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
     const { jobId } = await request.json()
     
-    if (!jobId) {
+    if (typeof jobId !== 'string' || !jobId) {
       return NextResponse.json({ success: false, error: 'Job ID required' }, { status: 400 })
     }
     
     const jobsCollection = await getCollection('video_jobs')
     
     // Find the job
-    const job = await jobsCollection.findOne({ jobId })
+    const job = await jobsCollection.findOne({ jobId, userId })
     
     if (!job) {
       return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 })
@@ -54,9 +61,10 @@ export async function POST(request) {
     const refundAmount = Math.max(0, originalCost - chargeForGenerated)
     
     
-    // Update job status to cancelled
-    await jobsCollection.updateOne(
-      { jobId },
+    // Update job status to cancelled. Conditional on the job still being active, so parallel
+    // cancel requests can't each pass the checks above and refund twice.
+    const cancelResult = await jobsCollection.updateOne(
+      { jobId, userId, status: { $nin: ['completed', 'cancelled', 'failed'] } },
       { 
         $set: { 
           status: 'cancelled',
@@ -69,6 +77,10 @@ export async function POST(request) {
         }
       }
     )
+    
+    if (cancelResult.modifiedCount !== 1) {
+      return NextResponse.json({ success: false, error: 'Job is no longer active' }, { status: 409 })
+    }
     
     // Process refund if transaction exists
     let refundResult = null

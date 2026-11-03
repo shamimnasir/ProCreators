@@ -14,16 +14,11 @@ export async function GET(request) {
     
     let userId = auth?.userId
     
-    // Fallback to query param if not authenticated via header
-    if (!userId) {
-      const { searchParams } = new URL(request.url)
-      userId = searchParams.get('userId')
-    }
-    
+    // SECURITY: no ?userId= fallback (it exposed any user's email and balance)
     if (!userId) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Authentication required or userId param needed',
+        error: 'Authentication required',
         code: 'AUTH_REQUIRED'
       }, { status: 401 })
     }
