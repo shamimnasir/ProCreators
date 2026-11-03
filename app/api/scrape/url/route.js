@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 import { requireAuth } from '@/lib/auth-middleware'
 
 // Internal allow-list — block fetches to private/internal addresses (SSRF guard)
@@ -66,7 +67,7 @@ export async function POST(request) {
     const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s
     let response
     try {
-      response = await fetch(url, {
+      response = await safeFetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         },

@@ -13,7 +13,7 @@ import {
   getCurrentYear
 } from '@/lib/pdf-design'
 import { generateCoverImage, getWorksheetTheme } from '@/lib/cover-image-generator'
-import { generatePDFFromHTML } from '@/lib/html-pdf-generator'
+import { generatePDFFromHTML, safeHexColor } from '@/lib/html-pdf-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Check if text contains non-Latin characters (Bengali, Hindi, Arabic, Chinese, etc.)
@@ -111,8 +111,9 @@ function wrapText(text, font, fontSize, maxWidth) {
 // Generate HTML for Puppeteer (multi-language support)
 function generateWorksheetHTML(data) {
   const { cover, sections, bonusQuestions, includeAnswerKey, settings } = data
-  const primaryColor = settings?.customPrimaryColor || '#1e40af'
-  const secondaryColor = settings?.customSecondaryColor || '#3b82f6'
+  // SECURITY: inserted into HTML/CSS; accept only hex colours
+  const primaryColor = safeHexColor(settings?.customPrimaryColor, '#1e40af')
+  const secondaryColor = safeHexColor(settings?.customSecondaryColor, '#3b82f6')
   
   // Generate questions HTML
   let questionNum = 1
@@ -458,8 +459,8 @@ export async function POST(request) {
     const colorScheme = settings?.colorScheme || 'ocean-blue'
     const coverStyle = settings?.coverStyle || 'modern'
     const subject = settings?.subject || 'general'
-    const customPrimaryColor = settings?.customPrimaryColor || '#1e40af'
-    const customSecondaryColor = settings?.customSecondaryColor || '#3b82f6'
+    const customPrimaryColor = safeHexColor(settings?.customPrimaryColor, '#1e40af')
+    const customSecondaryColor = safeHexColor(settings?.customSecondaryColor, '#3b82f6')
     
     // Determine if we need Puppeteer (for non-Latin scripts)
     const requiresUnicode = worksheetRequiresUnicode(cover, sections, bonusQuestions)

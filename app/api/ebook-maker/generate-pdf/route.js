@@ -15,7 +15,7 @@ import {
   generateCustomColors
 } from '@/lib/pdf-design'
 import { generateCoverImage, getEbookTheme } from '@/lib/cover-image-generator'
-import { generatePDFFromHTML, generateEbookHTML } from '@/lib/html-pdf-generator'
+import { generatePDFFromHTML, generateEbookHTML, safeHexColor } from '@/lib/html-pdf-generator'
 import { enforceRateLimit } from '@/lib/rate-limiter'
 
 // Helper to sanitize text - PRESERVES Unicode characters (Bengali, Hindi, Chinese, etc.)
@@ -499,7 +499,8 @@ export async function POST(request) {
     }
     
     const colorScheme = settings?.colorScheme || 'ocean-blue'
-    const customColor = settings?.customColor || null
+    // SECURITY: accept only a hex colour (it reaches HTML/CSS)
+    const customColor = safeHexColor(settings?.customColor, null)
     const coverStyle = settings?.coverStyle || 'elegant'
     const genre = settings?.genre || 'non-fiction'
     
@@ -519,7 +520,7 @@ export async function POST(request) {
           conclusion,
           settings: {
             ...settings,
-            customColor: customColor || (colorScheme === 'custom' ? settings?.customColor : 
+            customColor: customColor || (colorScheme === 'custom' ? null : 
               PDF_COLOR_SCHEMES[colorScheme]?.coverGradient?.[0] || '#3b82f6')
           }
         })

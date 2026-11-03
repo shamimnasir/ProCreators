@@ -804,14 +804,10 @@ export async function POST(request) {
             // Join with newline character for ffmpeg
             const wrappedText = lines.join('\\n')
             
-            // Escape special characters for ffmpeg
-            const text = wrappedText
-              .replace(/\\/g, '\\\\')
-              .replace(/'/g, "'\\''")
-              .replace(/:/g, "\\:")
-              .replace(/\[/g, "\\[")
-              .replace(/\]/g, "\\]")
-              .replace(/\\\\n/g, '\n') // Restore newlines after escaping
+            // SECURITY: write the overlay text to a server-named file rather than escaping it into
+            // the filtergraph (escaping mistakes let a quote or comma inject extra filters)
+            const textPath = join(tempDir, `overlay-${i}.txt`)
+            require('fs').writeFileSync(textPath, wrappedText.split('\\n').join('\n'))
             
             // Calculate Y position based on user selection
             let yPosition
@@ -834,7 +830,7 @@ export async function POST(request) {
             const config = colorConfig[color] || colorConfig.yellow
             
             // VIRAL STYLE: Bold colored box with high-contrast text + LINE WRAPPING
-            videoFilter += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=18:line_spacing=8`
+            videoFilter += `,drawtext=textfile='${textPath}':expansion=none:fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=18:line_spacing=8`
           }
           
           cmd.outputOptions([

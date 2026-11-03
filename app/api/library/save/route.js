@@ -1,5 +1,7 @@
 // Library Save API - Secured with Zod validation, CSRF, and rate limiting
 import { NextResponse } from 'next/server'
+import { GENERATED_DIRS } from '@/lib/generated-dirs'
+import { resolvePublicPath } from '@/lib/public-path'
 import { getCollection } from '@/lib/mongodb'
 import { randomUUID } from 'crypto'
 import { requireAuth } from '@/lib/auth-middleware'
@@ -63,6 +65,12 @@ export async function POST(request) {
       validatedBody = body
     }
     
+    // SECURITY: a stored filePath is later unlinked by library/delete and cleanup, so it must
+    // point inside the generated-content directories
+    if (validatedBody.filePath && !resolvePublicPath(validatedBody.filePath, { allowedDirs: GENERATED_DIRS })) {
+      return NextResponse.json({ success: false, error: 'Invalid file path' }, { status: 400 })
+    }
+
     // Check required content (at least one content source must be provided)
     if (!validatedBody.content && !validatedBody.videoUrl && !validatedBody.filePath) {
       return NextResponse.json(
