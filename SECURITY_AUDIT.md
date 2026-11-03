@@ -71,7 +71,7 @@ const userId = queryUserId || await getUserIdFromRequest(request)
 **Severity:** HIGH  
 **Location:** `/app/.env`  
 **Issue:** Production API keys exposed in environment file:
-- Stripe Live API Key: `sk_live_518mMZx...`
+- Stripe Live API Key: `sk_live_<redacted>`
 - Replicate API Token
 - ElevenLabs API Key
 - FAL API Key

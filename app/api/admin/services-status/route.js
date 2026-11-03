@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServicesStatus } from '@/lib/services'
 
 import { requireAdmin } from '@/lib/auth-middleware'
-export async function GET() {
+export async function GET(request) {
   const auth = await requireAdmin(request)
   if (!auth.authenticated) return auth.response
 

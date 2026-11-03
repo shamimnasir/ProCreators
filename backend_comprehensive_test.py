@@ -61,9 +61,9 @@ class BackendTester:
         try:
             # Try with known test users first
             test_users = [
-                ("shourjois@gmail.com", "password123"),  # From previous tests
+                # (hardcoded credentials removed; set TEST_EMAIL/TEST_PASSWORD to test an existing account)
                 ("test@example.com", "TestPassword123!"),
-                ("admin@procreators.io", "AdminPassword123!")
+                # (hardcoded credentials removed; set TEST_EMAIL/TEST_PASSWORD to test an existing account)
             ]
             
             for test_email, test_password in test_users:

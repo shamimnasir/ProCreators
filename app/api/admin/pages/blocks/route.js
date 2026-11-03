@@ -3,7 +3,7 @@ import { BLOCK_TYPES, BLOCK_TEMPLATES } from '@/lib/pageSchema'
 
 import { requireAdmin } from '@/lib/auth-middleware'
 // GET - Get available block types and templates
-export async function GET() {
+export async function GET(request) {
   const auth = await requireAdmin(request)
   if (!auth.authenticated) return auth.response
 
