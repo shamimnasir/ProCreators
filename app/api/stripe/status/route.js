@@ -1,11 +1,20 @@
-// Stripe Payment Status API - Check and process payment status
+// Stripe Payment Status API - report the status of the caller's own checkout session.
+//
+// SECURITY: this route used to add credits itself (no auth, check-then-set on creditsAdded), so
+// parallel calls could credit one payment many times and race the webhook. Credits are now granted
+// only by the signed, idempotent webhook; this route just reports progress to the billing page.
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
-import { addCredits } from '@/lib/credits'
 import { getStripe, isStripeConfigured } from '@/lib/services'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 
 export async function GET(request) {
   try {
+    const userId = await getAuthenticatedUserId(request)
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('session_id')
     
@@ -23,93 +32,34 @@ export async function GET(request) {
       )
     }
     
-    const stripe = getStripe()
     const { db } = await connectToDatabase()
-    
-    // Get session from Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
-    
-    // Get our transaction record
-    const transaction = await db.collection('payment_transactions').findOne({
-      sessionId
-    })
-    
+    const transaction = await db.collection('payment_transactions').findOne({ sessionId, userId })
     if (!transaction) {
       return NextResponse.json(
         { success: false, error: 'Transaction not found' },
         { status: 404 }
       )
     }
-    
-    // If already processed, return current status
-    if (transaction.paymentStatus === 'paid' && transaction.creditsAdded) {
-      return NextResponse.json({
-        success: true,
-        status: session.status,
-        paymentStatus: session.payment_status,
-        credits: transaction.credits,
-        alreadyProcessed: true
-      })
-    }
-    
-    // Process successful payment
-    if (session.payment_status === 'paid' && !transaction.creditsAdded) {
-      const userId = session.metadata.userId
-      const credits = parseInt(session.metadata.credits)
-      
-      // Add credits to user (atomic operation)
-      const creditResult = await addCredits(
-        userId,
-        credits,
-        `Credit purchase: ${transaction.packageName}`,
-        'stripe'
-      )
-      
-      // Update transaction record
-      await db.collection('payment_transactions').updateOne(
-        { sessionId },
-        {
-          $set: {
-            status: 'completed',
-            paymentStatus: 'paid',
-            creditsAdded: true,
-            completedAt: new Date(),
-            updatedAt: new Date()
-          }
-        }
-      )
-      
-      return NextResponse.json({
-        success: true,
-        status: session.status,
-        paymentStatus: session.payment_status,
-        credits,
-        newBalance: creditResult.success ? 'updated' : 'error'
-      })
-    }
-    
-    // Update status for non-paid sessions
-    await db.collection('payment_transactions').updateOne(
-      { sessionId },
-      {
-        $set: {
-          status: session.status,
-          paymentStatus: session.payment_status,
-          updatedAt: new Date()
-        }
-      }
-    )
-    
+
+    const session = await getStripe().checkout.sessions.retrieve(sessionId)
+
+    // Report "paid" only once the webhook has actually added the credits; until then the billing
+    // page keeps polling.
+    const paymentStatus = session.payment_status === 'paid' && !transaction.creditsAdded
+      ? 'processing'
+      : session.payment_status
+
     return NextResponse.json({
       success: true,
       status: session.status,
-      paymentStatus: session.payment_status
+      paymentStatus,
+      credits: transaction.credits,
+      alreadyProcessed: !!transaction.creditsAdded
     })
-    
   } catch (error) {
     console.error('Payment status error:', error)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Could not check payment status' },
       { status: 500 }
     )
   }

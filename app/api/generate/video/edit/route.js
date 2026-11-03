@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 import { writeFile, readFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { exec } from 'child_process'
@@ -9,6 +11,11 @@ import { enforceRateLimit } from '@/lib/rate-limiter'
 const execAsync = promisify(exec)
 
 export async function POST(request) {
+  // SECURITY: fetches a user-supplied URL server-side; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   let inputPath = null
   let outputPath = null
   
@@ -29,7 +36,7 @@ export async function POST(request) {
     }
 
     // Download the video
-    const videoResponse = await fetch(videoUrl)
+    const videoResponse = await safeFetch(videoUrl)
     if (!videoResponse.ok) {
       throw new Error(`Failed to download video: ${videoResponse.status}`)
     }

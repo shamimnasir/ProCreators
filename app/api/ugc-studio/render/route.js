@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { resolvePublicPath } from '@/lib/public-path'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 import { requireAuth } from '@/lib/auth-middleware'
 import { connectToDatabase } from '@/lib/mongodb'
 import { v4 as uuidv4 } from 'uuid'
@@ -34,7 +36,8 @@ const ASPECT_DIMENSIONS = {
 async function downloadClip(url, destPath, baseUrl) {
   // Local path under /public — read directly
   if (url.startsWith('/')) {
-    const localPath = join(process.cwd(), 'public', url)
+    const localPath = resolvePublicPath(url)
+    if (!localPath) throw new Error('Invalid clip path')
     if (existsSync(localPath)) {
       const buf = await readFile(localPath)
       await writeFile(destPath, buf)
@@ -45,7 +48,7 @@ async function downloadClip(url, destPath, baseUrl) {
       url = `${baseUrl}${url}`
     }
   }
-  const res = await fetch(url)
+  const res = await safeFetch(url)
   if (!res.ok) throw new Error(`Failed to download ${url}: HTTP ${res.status}`)
   const stream = createWriteStream(destPath)
   await pipeline(Readable.fromWeb(res.body), stream)

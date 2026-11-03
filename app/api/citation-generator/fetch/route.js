@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 
 // Fetch metadata from URL
 export async function POST(request) {
+  // SECURITY: fetches a user-supplied URL server-side; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     const { url } = await request.json()
     
@@ -10,7 +17,7 @@ export async function POST(request) {
     }
 
     // Fetch the page
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml'

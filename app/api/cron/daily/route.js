@@ -1,24 +1,17 @@
 // Cron Job API - Daily Tasks
 // Run via external cron service (e.g., cron-job.org, Vercel Cron, etc.)
-// Endpoint: GET /api/cron/daily?secret=YOUR_CRON_SECRET
+// Endpoint: GET /api/cron/daily with header "Authorization: Bearer $CRON_SECRET" (or ?secret=, legacy)
 
 import { NextResponse } from 'next/server'
+import { isAuthorizedCron } from '@/lib/cron-auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import { autoAdjustPricing } from '@/lib/cost-tracking'
 import { refillMembershipCredits, MEMBERSHIP_PLANS } from '@/lib/membership'
 import { v4 as uuidv4 } from 'uuid'
 
-// Verify cron secret to prevent unauthorized access
-function verifyCronSecret(request) {
-  const { searchParams } = new URL(request.url)
-  const secret = searchParams.get('secret')
-  const expectedSecret = process.env.CRON_SECRET || 'default-cron-secret-change-me'
-  return secret === expectedSecret
-}
-
 export async function GET(request) {
   // Verify authorization
-  if (!verifyCronSecret(request)) {
+  if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -137,7 +137,7 @@ export async function POST(request) {
 }
 
 // GET - Get status of all tool pages
-export async function GET() {
+export async function GET(request) {
   const auth = await requireAdmin(request)
   if (!auth.authenticated) return auth.response
 

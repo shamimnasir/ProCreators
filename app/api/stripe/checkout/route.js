@@ -58,11 +58,7 @@ export async function GET(request) {
     const auth = await optionalAuth(request)
     let userId = auth?.userId
     
-    // Fallback to query param
-    if (!userId) {
-      const { searchParams } = new URL(request.url)
-      userId = searchParams.get('userId')
-    }
+    // SECURITY: no ?userId= fallback (it exposed another user's plan)
     
     let discount = 0
     let userPlan = 'free'

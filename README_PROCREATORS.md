@@ -78,7 +78,7 @@ The application is ready to run with placeholders. To enable full functionality,
 
 ```bash
 # Emergent LLM Key (Already configured for Gemini text & image)
-EMERGENT_LLM_KEY=sk-emergent-0D153B9080b88A8E71
+EMERGENT_LLM_KEY=<removed: never commit keys>
 
 # Supabase Configuration (REQUIRED for auth & database)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co

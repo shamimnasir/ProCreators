@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
+import { runMedia, safeExt, seconds, MediaInputError } from '@/lib/media-exec'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 
-const execAsync = promisify(exec)
 
 // Ensure tmp directory exists
 const ensureTmpDir = async () => {
@@ -20,9 +19,7 @@ const ensureTmpDir = async () => {
 // Get audio duration using ffprobe
 const getAudioDuration = async (filePath) => {
   try {
-    const { stdout } = await execAsync(
-      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`
-    )
+    const { stdout } = await runMedia('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', filePath])
     return parseFloat(stdout.trim())
   } catch (error) {
     console.error('FFprobe error:', error)
@@ -33,9 +30,7 @@ const getAudioDuration = async (filePath) => {
 // Get audio info using ffprobe
 const getAudioInfo = async (filePath) => {
   try {
-    const { stdout } = await execAsync(
-      `ffprobe -v error -show_entries stream=codec_name,sample_rate,channels,bit_rate -show_entries format=duration,size -of json "${filePath}"`
-    )
+    const { stdout } = await runMedia('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,sample_rate,channels,bit_rate', '-show_entries', 'format=duration,size', '-of', 'json', filePath])
     return JSON.parse(stdout)
   } catch (error) {
     console.error('FFprobe error:', error)
@@ -44,6 +39,11 @@ const getAudioInfo = async (filePath) => {
 }
 
 export async function POST(request) {
+  // SECURITY: CPU-heavy media processing; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   const tmpDir = await ensureTmpDir()
   const tempFiles = []
   
@@ -59,7 +59,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const inputPath = join(tmpDir, `${randomUUID()}.${audioFile.name.split('.').pop()}`)
+      const inputPath = join(tmpDir, `${randomUUID()}.${safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')}`)
       tempFiles.push(inputPath)
       await writeFile(inputPath, buffer)
       
@@ -77,15 +77,18 @@ export async function POST(request) {
     } else if (action === 'trim') {
       // Trim audio
       const audioFile = formData.get('audio')
-      const startTime = parseFloat(formData.get('startTime') || '0')
-      const endTime = parseFloat(formData.get('endTime') || '0')
+      const startTime = seconds(formData.get('startTime') || '0', 'startTime')
+      const endTime = seconds(formData.get('endTime') || '0', 'endTime')
+      if (endTime <= startTime) {
+        return NextResponse.json({ success: false, error: 'Invalid trim range' }, { status: 400 })
+      }
       
       if (!audioFile) {
         return NextResponse.json({ success: false, error: 'No audio file provided' }, { status: 400 })
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       tempFiles.push(inputPath, outputPath)
@@ -93,9 +96,7 @@ export async function POST(request) {
       await writeFile(inputPath, buffer)
       
       const duration = endTime - startTime
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -ss ${startTime} -t ${duration} -acodec copy "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 50 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-ss', startTime, '-t', duration, '-acodec', 'copy', outputPath], { maxBuffer: 50 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -120,7 +121,7 @@ export async function POST(request) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         const buffer = Buffer.from(await file.arrayBuffer())
-        const ext = file.name.split('.').pop() || 'mp3'
+        const ext = safeExt(file.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
         const path = join(tmpDir, `${randomUUID()}.${ext}`)
         inputPaths.push(path)
         tempFiles.push(path)
@@ -136,9 +137,7 @@ export async function POST(request) {
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(outputPath)
       
-      const ffmpegCmd = `ffmpeg -y -f concat -safe 0 -i "${concatFile}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concatFile, '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -156,36 +155,34 @@ export async function POST(request) {
       const audioFile = formData.get('audio')
       const outputFormat = formData.get('format') || 'mp3'
       const bitrate = formData.get('bitrate') || '192k'
+      if (!['mp3', 'wav', 'ogg', 'aac', 'flac'].includes(outputFormat)) {
+        return NextResponse.json({ success: false, error: 'Unsupported format' }, { status: 400 })
+      }
+      if (!/^\d{2,3}k$/.test(bitrate)) {
+        return NextResponse.json({ success: false, error: 'Invalid bitrate' }, { status: 400 })
+      }
       
       if (!audioFile) {
         return NextResponse.json({ success: false, error: 'No audio file provided' }, { status: 400 })
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const inputExt = audioFile.name.split('.').pop() || 'mp3'
+      const inputExt = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${inputExt}`)
       const outputPath = join(tmpDir, `${randomUUID()}.${outputFormat}`)
       tempFiles.push(inputPath, outputPath)
       
       await writeFile(inputPath, buffer)
       
-      let ffmpegCmd = `ffmpeg -y -i "${inputPath}"`
+      const codecArgs = {
+        mp3: ['-acodec', 'libmp3lame', '-b:a', bitrate],
+        wav: ['-acodec', 'pcm_s16le'],
+        ogg: ['-acodec', 'libvorbis', '-b:a', bitrate],
+        aac: ['-acodec', 'aac', '-b:a', bitrate],
+        flac: ['-acodec', 'flac'],
+      }[outputFormat]
       
-      if (outputFormat === 'mp3') {
-        ffmpegCmd += ` -acodec libmp3lame -b:a ${bitrate}`
-      } else if (outputFormat === 'wav') {
-        ffmpegCmd += ` -acodec pcm_s16le`
-      } else if (outputFormat === 'ogg') {
-        ffmpegCmd += ` -acodec libvorbis -b:a ${bitrate}`
-      } else if (outputFormat === 'aac') {
-        ffmpegCmd += ` -acodec aac -b:a ${bitrate}`
-      } else if (outputFormat === 'flac') {
-        ffmpegCmd += ` -acodec flac`
-      }
-      
-      ffmpegCmd += ` "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, ...codecArgs, outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -217,7 +214,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(inputPath, outputPath)
@@ -232,9 +229,7 @@ export async function POST(request) {
       }
       
       const filter = noiseLevels[noiseLevel] || noiseLevels.medium
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-af', filter, '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -257,7 +252,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(inputPath, outputPath)
@@ -274,9 +269,7 @@ export async function POST(request) {
       }
       
       const filter = presets[preset] || presets.podcast
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-af', filter, '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -300,7 +293,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(inputPath, outputPath)
@@ -312,9 +305,7 @@ export async function POST(request) {
         filter += ',loudnorm=I=-16:TP=-1.5:LRA=11'
       }
       
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-af', filter, '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -338,7 +329,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(inputPath, outputPath)
@@ -360,9 +351,7 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'No fade duration specified' }, { status: 400 })
       }
       
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filters.join(',')}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-af', filters.join(','), '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -385,7 +374,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await audioFile.arrayBuffer())
-      const ext = audioFile.name.split('.').pop() || 'mp3'
+      const ext = safeExt(audioFile.name, ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'opus', 'webm'], 'mp3')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp3`)
       tempFiles.push(inputPath, outputPath)
@@ -407,9 +396,7 @@ export async function POST(request) {
         filter = `asetrate=44100*${speed},aresample=44100`
       }
       
-      const ffmpegCmd = `ffmpeg -y -i "${inputPath}" -af "${filter}" -acodec libmp3lame -b:a 192k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-i', inputPath, '-af', filter, '-acodec', 'libmp3lame', '-b:a', '192k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Audio = outputBuffer.toString('base64')
@@ -427,9 +414,13 @@ export async function POST(request) {
     }
     
   } catch (error) {
+    if (error instanceof MediaInputError || error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+    }
     console.error('[Audio Editor] Error:', error)
+    // Don't return ffmpeg/internal error text to the client
     return NextResponse.json(
-      { success: false, error: error.message || 'Audio processing failed' },
+      { success: false, error: 'Audio processing failed' },
       { status: 500 }
     )
   } finally {

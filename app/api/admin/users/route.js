@@ -182,6 +182,8 @@ export async function POST(request) {
             }
           }
         )
+        // End the user's existing sessions right away
+        await db.collection('sessions').deleteMany({ userId })
         return NextResponse.json({ success: true, message: 'User banned' })
       }
       
@@ -202,6 +204,8 @@ export async function POST(request) {
             }
           }
         )
+        // End the user's existing sessions right away
+        await db.collection('sessions').deleteMany({ userId })
         return NextResponse.json({ success: true, message: 'User suspended', until: suspendUntil })
       }
       

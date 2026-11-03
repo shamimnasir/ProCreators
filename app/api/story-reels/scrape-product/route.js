@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -9,6 +11,11 @@ import { join } from 'path'
 import { randomBytes } from 'crypto'
 
 export async function POST(request) {
+  // SECURITY: fetches a user-supplied URL server-side; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   try {
     const { url } = await request.json()
     
@@ -31,7 +38,7 @@ export async function POST(request) {
     }
 
     // Fetch the webpage content with full browser headers
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -449,7 +456,7 @@ async function downloadAndCacheImages(imageUrls) {
       const filename = `${imageId}.${ext}`
       const filepath = join(cacheDir, filename)
       
-      const response = await fetch(imageUrl, {
+      const response = await safeFetch(imageUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
@@ -518,7 +525,7 @@ async function downloadAndCacheVideos(videoUrls) {
       const filename = `${videoId}.${ext}`
       const filepath = join(cacheDir, filename)
       
-      const response = await fetch(videoUrl, {
+      const response = await safeFetch(videoUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'video/mp4,video/webm,video/*,*/*;q=0.8',

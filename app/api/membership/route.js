@@ -1,33 +1,13 @@
 // Membership API - Get user membership status and credits breakdown
 import { NextResponse } from 'next/server'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { MEMBERSHIP_PLANS } from '@/lib/membership'
 import { connectToDatabase } from '@/lib/mongodb'
 
 export async function GET(request) {
   try {
-    let userId = null
-    
-    // SECURITY: Primary method - get userId from Authorization header
-    const authHeader = request.headers.get('authorization')
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1]
-      if (token) {
-        const { db } = await connectToDatabase()
-        const session = await db.collection('sessions').findOne({
-          token,
-          expiresAt: { $gt: new Date() }
-        })
-        if (session) {
-          userId = session.userId
-        }
-      }
-    }
-    
-    // Fallback to query param for backward compatibility (will be deprecated)
-    if (!userId) {
-      const { searchParams } = new URL(request.url)
-      userId = searchParams.get('userId')
-    }
+    // SECURITY: session only (cookie or Bearer); no ?userId= fallback
+    const userId = await getAuthenticatedUserId(request)
     
     if (!userId) {
       return NextResponse.json({
@@ -61,7 +41,9 @@ export async function GET(request) {
     let purchasedCredits = user.purchasedCredits || 0
     
     // If user has 'credits' but no membershipCredits/purchasedCredits, migrate the value
-    if (membershipCredits === 0 && purchasedCredits === 0 && user.credits > 0) {
+    // SECURITY: one-time upgrade for legacy accounts that never had the split fields. It used to
+    // run whenever both balances hit 0, turning any later legacy `credits` into spendable credits.
+    if (user.membershipCredits === undefined && user.purchasedCredits === undefined && user.credits > 0) {
       purchasedCredits = user.credits // Legacy credits become purchased credits
       
       // Also update the user record to migrate the data structure

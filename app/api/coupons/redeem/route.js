@@ -98,6 +98,42 @@ export async function POST(request) {
       }
     }
 
+    if (!['credits', 'discount_percent', 'discount_fixed'].includes(coupon.type)) {
+      return NextResponse.json({ success: false, error: 'Unknown coupon type' }, { status: 400 })
+    }
+
+    // SECURITY: reserve this redemption atomically BEFORE granting anything. The checks above read
+    // a snapshot, so parallel requests could all pass them and each add the coupon's credits.
+    // The limits are re-checked inside the database as part of the same update.
+    const limits = []
+    if (coupon.maxUses) {
+      limits.push({ $lt: [{ $ifNull: ['$usedCount', 0] }, coupon.maxUses] })
+    }
+    if (coupon.perUserLimit) {
+      limits.push({
+        $lt: [
+          { $size: { $filter: { input: { $ifNull: ['$usedBy', []] }, cond: { $eq: ['$$this.userId', userId] } } } },
+          coupon.perUserLimit
+        ]
+      })
+    }
+    const reservation = await db.collection('coupons').updateOne(
+      { _id: coupon._id, isActive: true, ...(limits.length ? { $expr: { $and: limits } } : {}) },
+      {
+        $inc: { usedCount: 1 },
+        $push: {
+          usedBy: {
+            userId,
+            email: user.email,
+            redeemedAt: new Date(),
+          }
+        }
+      }
+    )
+    if (reservation.modifiedCount !== 1) {
+      return NextResponse.json({ success: false, error: 'This coupon is no longer available to you' }, { status: 400 })
+    }
+
     // Apply the coupon based on type
     let result = {}
     switch (coupon.type) {
@@ -163,20 +199,7 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'Unknown coupon type' }, { status: 400 })
     }
 
-    // Record usage
-    await db.collection('coupons').updateOne(
-      { _id: coupon._id },
-      {
-        $inc: { usedCount: 1 },
-        $push: {
-          usedBy: {
-            userId,
-            email: user.email,
-            redeemedAt: new Date(),
-          }
-        }
-      }
-    )
+    // (usage was recorded by the atomic reservation above)
 
     // Record in coupon redemption log
     await db.collection('coupon_redemptions').insertOne({
