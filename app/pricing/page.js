@@ -6,19 +6,19 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function generateMetadata() {
-  const seo = await getPageSeo('pricing')
-  return {
-    title: seo.title,
-    description: seo.description,
-    keywords: seo.keywords,
-    openGraph: {
-      title: seo.title,
-      description: seo.description,
-      images: seo.ogImage ? [seo.ogImage] : [],
-    },
-  }
+ const seo = await getPageSeo('pricing')
+ return {
+ title: seo.title,
+ description: seo.description,
+ keywords: seo.keywords,
+ openGraph: {
+ title: seo.title,
+ description: seo.description,
+ images: seo.ogImage ? [seo.ogImage] : [],
+ },
+ }
 }
 
 export default function PricingPage() {
-  return <PricingClient />
+ return <PricingClient />
 }

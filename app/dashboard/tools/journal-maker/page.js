@@ -49,6 +49,10 @@ const JOURNAL_TYPES = [
   { id: 'bullet', name: 'Bullet Journal', icon: '📝', description: 'Organized task tracking' },
   { id: 'reading', name: 'Reading Journal', icon: '📚', description: 'Book notes & reviews' },
   { id: 'travel', name: 'Travel Journal', icon: '✈️', description: 'Document adventures' },
+  // Sprint 3 — therapeutic modes
+  { id: 'adhd', name: 'ADHD Focus Journal', icon: '🧠', description: 'Executive-function scaffolding' },
+  { id: 'cbt', name: 'CBT Thought Journal', icon: '💭', description: 'Cognitive-behavioral reframing' },
+  { id: 'postpartum', name: 'Postpartum Journal', icon: '🤱', description: 'New-mom mental wellness' },
 ]
 
 const COLOR_SCHEMES = [

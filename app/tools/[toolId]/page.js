@@ -50,6 +50,11 @@ const TOOL_METADATA = {
   'quiz-maker': { name: 'Quiz & Test Creator', description: 'Generate quizzes and tests with AI assistance', category: 'Digital Products' },
   'storybook-maker': { name: "Children's Storybook", description: 'Create illustrated children\'s stories with AI', category: 'Digital Products' },
   'activity-book': { name: 'Activity Book Creator', description: 'Design engaging activity books for all ages', category: 'Digital Products' },
+  'ai-prompt-pack': { name: 'AI Prompt Pack Generator', description: 'Create sellable AI prompt packs for Etsy, Gumroad, and Notion buyers in minutes', category: 'Digital Products' },
+  'spreadsheet-template': { name: 'Spreadsheet Template Creator', description: 'Design ready-to-sell Google Sheets and Excel templates with formulas and dashboards', category: 'Digital Products' },
+  'wedding-suite': { name: 'Wedding Stationery Suite', description: 'Generate a complete 8-piece printable wedding invitation and stationery suite', category: 'Digital Products' },
+  'puzzle-book': { name: 'Puzzle Book Creator', description: 'Create themed word-search puzzle books ready for Amazon KDP publishing', category: 'Digital Products' },
+  'recipe-book': { name: 'Recipe Book Creator', description: 'Write complete themed recipe books ready to sell on Amazon KDP and Etsy', category: 'Digital Products' },
   
   // Fun & Recreation
   'joke-generator': { name: 'Joke Generator', description: 'Generate hilarious jokes with AI-powered humor', category: 'Fun' },
@@ -68,6 +73,7 @@ const TOOL_METADATA = {
   
   // Content Creation
   'blog-creator': { name: 'Blog Post Writer', description: 'Write SEO-optimized blog posts with AI', category: 'Content' },
+  'etsy-listing': { name: 'Etsy Listing Writer', description: 'Generate 13-tag Etsy listings with keyword-rich titles, materials, and structured descriptions that rank in Etsy search', category: 'Business' },
   'youtube-creator': { name: 'YouTube Content Creator', description: 'Create YouTube content with AI tools', category: 'Content' },
   'professional-email': { name: 'Professional Email Writer', description: 'Write professional emails with AI assistance', category: 'Content' },
   'linkedin-posts': { name: 'LinkedIn Post Creator', description: 'Create engaging LinkedIn posts with AI', category: 'Content' },
@@ -202,7 +208,11 @@ export default async function ToolLandingPage({ params }) {
     'essay-helper', 'study-notes', 'exam-prep', 'lesson-planner',
     'citation-generator', 'grammar-checker',
     'resume-builder', 'cover-letter', 'interview-prep', 'job-matcher',
-    'salary-negotiator', 'networking-message'
+    'salary-negotiator', 'networking-message',
+    // Sprint 2: new publisher tools
+    'ai-prompt-pack', 'recipe-book', 'spreadsheet-template', 'wedding-suite', 'puzzle-book',
+    // Sprint 3: Etsy Listing mode gets its own public landing
+    'etsy-listing'
   ]
   
   if (!validTools.includes(toolId)) {

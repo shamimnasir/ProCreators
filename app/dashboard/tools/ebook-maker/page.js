@@ -46,7 +46,8 @@ import {
   Info,
   MessageSquare,
   Play,
-  Wand2
+  Wand2,
+  Sparkles
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -364,6 +365,15 @@ export default function EbookMakerPage() {
   const [genre, setGenre] = useState('self-help')
   const [targetAudience, setTargetAudience] = useState('')
   const [chapterCount, setChapterCount] = useState(5)
+
+  // Sprint 3 — Series Generator state
+  const [showSeriesPanel, setShowSeriesPanel] = useState(false)
+  const [seriesSeed, setSeriesSeed] = useState('')
+  const [seriesSize, setSeriesSize] = useState(5)
+  const [seriesResult, setSeriesResult] = useState(null)
+  const [seriesLoading, setSeriesLoading] = useState(false)
+  // Sprint 3 — EPUB export state
+  const [epubLoading, setEpubLoading] = useState(false)
 
   // Step 2: Outline (editable)
   const [outline, setOutline] = useState(null)
@@ -930,6 +940,86 @@ export default function EbookMakerPage() {
     }
   }
 
+  // Sprint 3: Download the same book as an EPUB (for Kindle / Apple Books / Kobo)
+  const downloadEpub = async () => {
+    if (!cover.title || chapters.length === 0) {
+      toast({ title: 'Missing Content', description: 'Please generate the ebook first.', variant: 'destructive' })
+      return
+    }
+    setEpubLoading(true)
+    try {
+      // Fetch a fresh CSRF token
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include' })
+      const csrfJson = await csrfRes.json()
+      const csrf = csrfJson.csrfToken || csrfJson.token
+      const res = await fetch('/api/ebook-maker/generate-epub', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrf || '',
+        },
+        body: JSON.stringify({ cover, introduction, chapters, conclusion, settings: {} }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || `EPUB request failed (${res.status})`)
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = (cover.title || 'ebook').replace(/[^\w\-]+/g, '_') + '.epub'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast({ title: 'EPUB ready', description: 'Your ebook has been downloaded.' })
+    } catch (e) {
+      toast({ title: 'EPUB failed', description: e.message, variant: 'destructive' })
+    } finally {
+      setEpubLoading(false)
+    }
+  }
+
+  // Sprint 3: Series Generator — turn one book idea into a 3-7 book KDP series
+  const generateSeries = async () => {
+    const seed = (seriesSeed || topic).trim()
+    if (!seed) {
+      toast({ title: 'Missing seed', description: 'Enter a book idea to plan a series around.', variant: 'destructive' })
+      return
+    }
+    setSeriesLoading(true)
+    setSeriesResult(null)
+    try {
+      const csrfRes = await fetch('/api/csrf', { credentials: 'include' })
+      const csrfJson = await csrfRes.json()
+      const csrf = csrfJson.csrfToken || csrfJson.token
+      const res = await fetch('/api/ebook-maker/generate-series', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf || '' },
+        body: JSON.stringify({ seedTopic: seed, audience: targetAudience || 'general readers', tone: 'informative', genre, seriesSize }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.error || 'Series generation failed')
+      setSeriesResult(data)
+      toast({ title: 'Series ready', description: `${data.books.length} books planned.` })
+    } catch (e) {
+      toast({ title: 'Series failed', description: e.message, variant: 'destructive' })
+    } finally {
+      setSeriesLoading(false)
+    }
+  }
+
+  // Pre-fill the main outline flow from a selected book in the series
+  const applySeriesBook = (book) => {
+    setTopic(book.title + (book.subtitle ? ` — ${book.subtitle}` : ''))
+    setChapterCount(Math.min(20, Math.max(3, (book.chapters || []).length || 5)))
+    setShowSeriesPanel(false)
+    toast({ title: 'Loaded from series', description: `You are now planning: ${book.title}` })
+  }
+
   // Add new chapter
   const addChapter = () => {
     setChapters([...chapters, {
@@ -1165,6 +1255,82 @@ export default function EbookMakerPage() {
             <CardDescription>Enter your topic and AI will create a detailed outline</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Sprint 3 — Series Generator */}
+            <div className="rounded-lg border bg-gradient-to-br from-amber-50 to-orange-50 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-orange-600" />
+                    Plan a KDP Series (3–7 books)
+                  </div>
+                  <div className="text-xs text-muted-foreground">Turn one idea into a full KDP series with shared branding &amp; a bundle-friendly naming pattern.</div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowSeriesPanel(v => !v)}>
+                  {showSeriesPanel ? 'Hide' : 'Open Series Planner'}
+                </Button>
+              </div>
+              {showSeriesPanel && (
+                <div className="mt-4 space-y-3">
+                  <div className="grid md:grid-cols-4 gap-3">
+                    <div className="md:col-span-3">
+                      <Label>Seed book idea</Label>
+                      <Input
+                        placeholder="e.g., Mindful Journaling for Anxious Professionals"
+                        value={seriesSeed}
+                        onChange={(e) => setSeriesSeed(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Books in series</Label>
+                      <Input
+                        type="number"
+                        min={3}
+                        max={7}
+                        value={seriesSize}
+                        onChange={(e) => setSeriesSize(Number(e.target.value) || 5)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={generateSeries} disabled={seriesLoading}>
+                      {seriesLoading ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Planning series…</>
+                      ) : (
+                        <><Sparkles className="mr-2 h-4 w-4" /> Generate series plan</>
+                      )}
+                    </Button>
+                  </div>
+                  {seriesResult && (
+                    <div className="mt-3 rounded-lg bg-white/70 border p-3 space-y-3">
+                      {seriesResult.seriesBrand && (
+                        <div className="text-xs space-y-1">
+                          <div><span className="font-semibold">Series:</span> {seriesResult.seriesBrand.seriesName}</div>
+                          {seriesResult.seriesBrand.brandPromise && <div><span className="font-semibold">Promise:</span> {seriesResult.seriesBrand.brandPromise}</div>}
+                          {seriesResult.seriesBrand.coverConcept && <div><span className="font-semibold">Cover concept:</span> {seriesResult.seriesBrand.coverConcept}</div>}
+                        </div>
+                      )}
+                      <div className="grid md:grid-cols-2 gap-2">
+                        {seriesResult.books.map((b) => (
+                          <div key={b.position} className="rounded-md border p-3 bg-background">
+                            <div className="text-sm font-semibold">Book {b.position}: {b.title}</div>
+                            {b.subtitle && <div className="text-xs text-muted-foreground">{b.subtitle}</div>}
+                            {b.hook && <div className="text-xs mt-1 italic">“{b.hook}”</div>}
+                            <ul className="text-xs mt-2 space-y-0.5 list-disc list-inside text-muted-foreground">
+                              {(b.chapters || []).slice(0, 4).map((c, i) => <li key={i}>{c}</li>)}
+                              {b.chapters && b.chapters.length > 4 && <li>…</li>}
+                            </ul>
+                            <Button size="sm" variant="secondary" className="mt-2 w-full" onClick={() => applySeriesBook(b)}>
+                              Start with this book
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label>Ebook Topic / Title Idea</Label>
               <Input
@@ -1884,6 +2050,20 @@ export default function EbookMakerPage() {
                   Download PDF
                 </Button>
               </a>
+              <Button
+                size="lg"
+                variant="outline"
+                className="mt-4 ml-3"
+                onClick={downloadEpub}
+                disabled={epubLoading}
+              >
+                {epubLoading ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Preparing EPUB…</>
+                ) : (
+                  <><Download className="mr-2 h-5 w-5" /> Download EPUB</>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">EPUB works on Kindle, Apple Books, Kobo &amp; other e-readers.</p>
             </div>
 
             <div className="flex gap-2">

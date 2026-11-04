@@ -10,3 +10,6 @@ test_result.md
 tests
 memory
 .emergent
+
+# Cloudflare Worker wrapper, not part of the app image
+cloudflare

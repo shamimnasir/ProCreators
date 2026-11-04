@@ -227,7 +227,14 @@ IMPORTANT: Return ONLY valid JSON array, no markdown.`
       holiday: ['A decorated Christmas tree with presents', 'A jack-o-lantern with autumn leaves', 'Easter eggs in a basket'],
       patterns: ['Abstract swirls and circles pattern', 'Geometric shapes tessellation', 'Doodle pattern with various objects'],
       characters: ['A cute kawaii cat with big eyes', 'A chibi princess character', 'Adorable baby animals playing'],
-      vehicles: ['A racing car on a track', 'A steam train going through mountains', 'A helicopter flying over city']
+      vehicles: ['A racing car on a track', 'A steam train going through mountains', 'A helicopter flying over city'],
+      // Sprint 3 additions
+      kpop: ['A stylish K-pop idol singing into a microphone on a light-strewn stage', 'A group of chibi K-pop idols in matching stage outfits striking iconic poses', 'A K-pop idol holding a lightstick surrounded by fan hearts and stars'],
+      dinosaur: ['A friendly T-Rex roaring in a lush prehistoric jungle', 'A Triceratops family grazing near a bubbling volcano', 'A long-necked Brachiosaurus reaching for tall palm leaves'],
+      insect: ['A detailed butterfly with symmetrical patterned wings resting on a flower', 'A curious ladybug crawling on a giant leaf with water droplets', 'A dragonfly hovering above a pond with reeds and ripples'],
+      mermaid: ['A graceful mermaid resting on an ocean rock with flowing hair and starfish', 'A young merboy playing with dolphins near an underwater castle', 'A mermaid mother and child swimming through a bright coral garden'],
+      fairycore: ['A tiny fairy sitting on a giant mushroom with fireflies at dusk', 'A cozy cottage in a mossy forest with hanging ivy and wildflowers', 'A woodland spirit with butterfly wings tending to magical plants'],
+      anime: ['A determined anime hero with wind-blown hair and a glowing sword', 'A cheerful chibi schoolgirl with big sparkling eyes and a bento box', 'A magical girl casting a spell surrounded by ribbons and stars']
     }
     
     const examples = themeExamples[theme] || themeExamples.animals

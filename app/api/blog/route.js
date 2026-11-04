@@ -1,90 +1,10 @@
 // Public Blog API - Fetch published posts for the blog page
 import { NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
+import { DEFAULT_POSTS } from '@/lib/default-blog-posts'
 
 const COLLECTION_NAME = 'blog_posts'
 
-// Default posts if database is empty
-const DEFAULT_POSTS = [
-  {
-    postId: 'default-1',
-    slug: '10-tips-viral-content',
-    title: '10 Tips for Creating Viral Social Media Content',
-    excerpt: 'Learn the secrets to creating content that gets shared thousands of times across social media platforms.',
-    content: '',
-    category: 'Content Strategy',
-    author: 'ProCreators Team',
-    featured: true,
-    readTime: '5 min read',
-    publishedAt: new Date('2025-12-04'),
-    isPublished: true
-  },
-  {
-    postId: 'default-2',
-    slug: 'ai-revolutionizing-content',
-    title: 'How AI is Revolutionizing Content Creation',
-    excerpt: 'Discover how artificial intelligence is changing the game for creators, marketers, and businesses.',
-    content: '',
-    category: 'AI Technology',
-    author: 'ProCreators Team',
-    featured: false,
-    readTime: '7 min read',
-    publishedAt: new Date('2025-12-03'),
-    isPublished: true
-  },
-  {
-    postId: 'default-3',
-    slug: 'beginner-guide-thread-writing',
-    title: 'Beginner Guide to Thread Writing',
-    excerpt: 'Master the art of Twitter threads that capture attention and drive engagement.',
-    content: '',
-    category: 'Tutorials',
-    author: 'ProCreators Team',
-    featured: false,
-    readTime: '4 min read',
-    publishedAt: new Date('2025-12-02'),
-    isPublished: true
-  },
-  {
-    postId: 'default-4',
-    slug: 'ai-image-generation-tips',
-    title: 'Best Practices for AI Image Generation',
-    excerpt: 'Tips and tricks for getting the best results from AI image generation tools.',
-    content: '',
-    category: 'Design',
-    author: 'ProCreators Team',
-    featured: false,
-    readTime: '6 min read',
-    publishedAt: new Date('2025-12-01'),
-    isPublished: true
-  },
-  {
-    postId: 'default-5',
-    slug: 'content-calendar-framework',
-    title: 'Building a Content Calendar That Works',
-    excerpt: 'Plan, organize, and execute your content strategy with a proven framework.',
-    content: '',
-    category: 'Content Strategy',
-    author: 'ProCreators Team',
-    featured: false,
-    readTime: '5 min read',
-    publishedAt: new Date('2025-11-30'),
-    isPublished: true
-  },
-  {
-    postId: 'default-6',
-    slug: 'future-of-video-content',
-    title: 'The Future of Video Content Creation',
-    excerpt: 'What to expect in the next generation of video creation tools and platforms.',
-    content: '',
-    category: 'Video',
-    author: 'ProCreators Team',
-    featured: false,
-    readTime: '8 min read',
-    publishedAt: new Date('2025-11-29'),
-    isPublished: true
-  }
-]
 
 export async function GET(request) {
   try {

@@ -53,6 +53,70 @@ const JOURNAL_TYPES = {
     name: 'Travel Journal',
     prompts: ['Places visited today', 'People I met', 'Food I tried', 'Memorable moments'],
     sections: ['Trip Overview', 'Daily Adventures', 'Photos & Memories', 'Tips']
+  },
+  // Sprint 3 — Therapeutic Modes -----------------------------------------
+  // These modes use clinically-informed prompt scaffolding. Content is
+  // supportive/reflective, NOT medical advice. The AI system prompt is
+  // instructed to include a wellness disclaimer.
+  'adhd': {
+    name: 'ADHD Focus Journal',
+    prompts: [
+      'Today\'s ONE priority (just one)',
+      'Brain dump: everything on my mind right now',
+      'What did I actually finish today?',
+      'What distracted me most and why?',
+      'Small win I can celebrate',
+      'Tomorrow\'s FIRST 15-minute task'
+    ],
+    sections: [
+      'Morning Anchor (priority + medication check-in)',
+      'Time-Blocked Focus Sprints',
+      'Distraction Log',
+      'Wins & Dopamine Deposits',
+      'Evening Wind-Down Checklist'
+    ],
+    modeContext: 'Executive-function scaffolding for adults with ADHD. Emphasize externalized memory, tiny wins, hyperfocus tracking, medication and sleep check-ins, and non-judgmental language. Provide short, chunked prompts (never long paragraphs). Include a Distraction Log and a Dopamine Deposits section on most days.'
+  },
+  'cbt': {
+    name: 'CBT Thought Journal',
+    prompts: [
+      'Situation: What happened? (facts only)',
+      'Automatic thought: What went through my mind?',
+      'Emotion + intensity (0-100)',
+      'Cognitive distortion I might be using',
+      'Evidence FOR this thought',
+      'Evidence AGAINST this thought',
+      'Balanced / alternative thought',
+      'How I feel now (0-100)'
+    ],
+    sections: [
+      'Daily Thought Record (5-column CBT worksheet)',
+      'Cognitive Distortions Cheat Sheet',
+      'Behavioral Activation Tracker',
+      'Values Compass',
+      'Weekly Review'
+    ],
+    modeContext: 'Standard CBT thought-record structure (Beck / Padesky). Include the classic 5–7 column thought record on each daily page, a reference page listing the 10 core cognitive distortions with brief examples, and a Behavioral Activation tracker for mood-boosting activities. Reflective, evidence-based, non-clinical language. Always include a note reminding the user this is a self-help journal, not a substitute for therapy.'
+  },
+  'postpartum': {
+    name: 'Postpartum Wellness Journal',
+    prompts: [
+      'How I slept last night (hours + quality 1-10)',
+      'How I\'m feeling emotionally today',
+      'One small thing I did for me',
+      'What I need help with',
+      'A moment I want to remember with baby',
+      'A gentle reminder to myself'
+    ],
+    sections: [
+      'Daily Check-In (mood + sleep + nutrition + support)',
+      'Baby & Me Log (feeds, naps, milestones)',
+      'Body Recovery Notes',
+      'Mental-Health Screening (Edinburgh-style weekly check-in)',
+      'Gratitude & Small Wins',
+      'When to Reach Out (warning signs page)'
+    ],
+    modeContext: 'Compassionate postpartum mental-wellness journal for new mothers in the first year after birth. Include gentle prompts for mood, sleep, feeding, body recovery, and self-compassion. Include a weekly Edinburgh Postnatal Depression Scale (EPDS)-style self check-in and a "When to Reach Out" resource page listing warning signs and reminders to contact a provider. Language should be warm, non-judgmental, and always affirm that asking for help is a strength.'
   }
 }
 
@@ -61,23 +125,26 @@ async function generateJournalPrompts(journalType, pageCount, customTheme) {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
     const config = JOURNAL_TYPES[journalType] || JOURNAL_TYPES['gratitude']
+    const isTherapeutic = ['adhd', 'cbt', 'postpartum'].includes(journalType)
     
     const prompt = `Generate content for a ${config.name}${customTheme ? ` with theme: ${customTheme}` : ''}.
-
+${config.modeContext ? `\nMode context (follow strictly): ${config.modeContext}\n` : ''}
 I need ${pageCount} unique journaling prompts and questions that are:
 - Thought-provoking and introspective
 - Suitable for daily reflection
 - Varied in depth (some quick, some deep)
+${isTherapeutic ? `- Use compassionate, non-judgmental, plain-English language\n- NEVER prescribe medications, dosages, or diagnose conditions\n- Prompts should be short (one line each) and easy to answer even on a tough day` : ''}
 
 Also generate:
 - 5 inspirational quotes related to ${journalType}
 - 3 weekly reflection questions
 - A brief introduction paragraph for the journal
+${isTherapeutic ? '- A short wellness disclaimer (2 sentences) reminding the user this journal is a self-help tool, not medical advice or a substitute for professional support' : ''}
 
 Format as JSON:
 {
   "title": "...",
-  "introduction": "...",
+  "introduction": "...",${isTherapeutic ? '\n  "disclaimer": "...",' : ''}
   "dailyPrompts": ["prompt1", "prompt2", ...],
   "weeklyPrompts": ["...", "...", "..."],
   "quotes": ["quote1", "quote2", ...]
