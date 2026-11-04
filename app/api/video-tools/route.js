@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { writeFile, readFile, unlink, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import { randomUUID } from 'crypto'
 import { existsSync } from 'fs'
+import { runMedia, safeExt, seconds, MediaInputError } from '@/lib/media-exec'
+import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 
-const execAsync = promisify(exec)
 
 // Ensure tmp directory exists
 const ensureTmpDir = async () => {
@@ -20,9 +19,7 @@ const ensureTmpDir = async () => {
 // Get video duration using ffprobe
 const getVideoDuration = async (filePath) => {
   try {
-    const { stdout } = await execAsync(
-      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`
-    )
+    const { stdout } = await runMedia('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', filePath])
     return parseFloat(stdout.trim())
   } catch (error) {
     console.error('FFprobe error:', error)
@@ -33,9 +30,7 @@ const getVideoDuration = async (filePath) => {
 // Get video info using ffprobe
 const getVideoInfo = async (filePath) => {
   try {
-    const { stdout } = await execAsync(
-      `ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,codec_name -show_entries format=duration,size,bit_rate -of json "${filePath}"`
-    )
+    const { stdout } = await runMedia('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,r_frame_rate,codec_name', '-show_entries', 'format=duration,size,bit_rate', '-of', 'json', filePath])
     return JSON.parse(stdout)
   } catch (error) {
     console.error('FFprobe error:', error)
@@ -44,6 +39,11 @@ const getVideoInfo = async (filePath) => {
 }
 
 export async function POST(request) {
+  // SECURITY: CPU-heavy media processing; require a signed-in user
+  if (!(await getAuthenticatedUserId(request))) {
+    return NextResponse.json({ success: false, error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
   const tmpDir = await ensureTmpDir()
   const tempFiles = []
   
@@ -59,7 +59,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await videoFile.arrayBuffer())
-      const ext = videoFile.name.split('.').pop() || 'mp4'
+      const ext = safeExt(videoFile.name, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'], 'mp4')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       tempFiles.push(inputPath)
       await writeFile(inputPath, buffer)
@@ -78,15 +78,15 @@ export async function POST(request) {
     } else if (action === 'trim') {
       // Trim video
       const videoFile = formData.get('video')
-      const startTime = parseFloat(formData.get('startTime') || '0')
-      const endTime = parseFloat(formData.get('endTime') || '0')
+      const startTime = seconds(formData.get('startTime') || '0', 'startTime')
+      const endTime = seconds(formData.get('endTime') || '0', 'endTime')
       
       if (!videoFile) {
         return NextResponse.json({ success: false, error: 'No video file provided' }, { status: 400 })
       }
       
       const buffer = Buffer.from(await videoFile.arrayBuffer())
-      const ext = videoFile.name.split('.').pop() || 'mp4'
+      const ext = safeExt(videoFile.name, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'], 'mp4')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       const outputPath = join(tmpDir, `${randomUUID()}.mp4`)
       tempFiles.push(inputPath, outputPath)
@@ -100,9 +100,7 @@ export async function POST(request) {
       }
       
       // Use fast copy for simple trim, re-encode for accuracy
-      const ffmpegCmd = `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${duration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${outputPath}"`
-      
-      await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-ss', startTime, '-i', inputPath, '-t', duration, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', outputPath])
       
       const outputBuffer = await readFile(outputPath)
       const base64Video = outputBuffer.toString('base64')
@@ -124,13 +122,17 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'Video and clips data required' }, { status: 400 })
       }
       
-      const clips = JSON.parse(clipsJson)
-      if (!Array.isArray(clips) || clips.length === 0) {
+      const rawClips = JSON.parse(clipsJson)
+      if (!Array.isArray(rawClips) || rawClips.length === 0 || rawClips.length > 20) {
         return NextResponse.json({ success: false, error: 'No clips defined' }, { status: 400 })
+      }
+      const clips = rawClips.map((c) => ({ start: seconds(c?.start, 'clip start'), end: seconds(c?.end, 'clip end') }))
+      if (clips.some((c) => c.end <= c.start)) {
+        return NextResponse.json({ success: false, error: 'Invalid clip range' }, { status: 400 })
       }
       
       const buffer = Buffer.from(await videoFile.arrayBuffer())
-      const ext = videoFile.name.split('.').pop() || 'mp4'
+      const ext = safeExt(videoFile.name, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'], 'mp4')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       tempFiles.push(inputPath)
       await writeFile(inputPath, buffer)
@@ -143,9 +145,7 @@ export async function POST(request) {
         tempFiles.push(clipOutputPath)
         
         const duration = clip.end - clip.start
-        const ffmpegCmd = `ffmpeg -y -ss ${clip.start} -i "${inputPath}" -t ${duration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${clipOutputPath}"`
-        
-        await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+        await runMedia('ffmpeg', ['-y', '-ss', clip.start, '-i', inputPath, '-t', duration, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', clipOutputPath])
         
         const clipBuffer = await readFile(clipOutputPath)
         results.push({
@@ -179,7 +179,7 @@ export async function POST(request) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         const buffer = Buffer.from(await file.arrayBuffer())
-        const ext = file.name.split('.').pop() || 'mp4'
+        const ext = safeExt(file.name, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'], 'mp4')
         const path = join(tmpDir, `${randomUUID()}_input${i}.${ext}`)
         inputPaths.push(path)
         tempFiles.push(path)
@@ -193,9 +193,7 @@ export async function POST(request) {
         tempFiles.push(scaledPath)
         
         // Scale to 1080p, pad if necessary, normalize audio
-        const scaleCmd = `ffmpeg -y -i "${inputPaths[i]}" -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,setsar=1" -c:v libx264 -preset fast -crf 23 -r 30 -c:a aac -b:a 128k -ar 44100 -ac 2 "${scaledPath}"`
-        
-        await execAsync(scaleCmd, { maxBuffer: 100 * 1024 * 1024 })
+        await runMedia('ffmpeg', ['-y', '-i', inputPaths[i], '-vf', 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,setsar=1', '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-r', '30', '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-ac', '2', scaledPath])
       }
       
       // Create concat file
@@ -208,9 +206,7 @@ export async function POST(request) {
       tempFiles.push(outputPath)
       
       // Merge using concat demuxer
-      const mergeCmd = `ffmpeg -y -f concat -safe 0 -i "${concatFile}" -c copy "${outputPath}"`
-      
-      await execAsync(mergeCmd, { maxBuffer: 200 * 1024 * 1024 })
+      await runMedia('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concatFile, '-c', 'copy', outputPath], { maxBuffer: 200 * 1024 * 1024 })
       
       const outputBuffer = await readFile(outputPath)
       const duration = await getVideoDuration(outputPath)
@@ -237,7 +233,7 @@ export async function POST(request) {
       }
       
       const buffer = Buffer.from(await videoFile.arrayBuffer())
-      const ext = videoFile.name.split('.').pop() || 'mp4'
+      const ext = safeExt(videoFile.name, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'], 'mp4')
       const inputPath = join(tmpDir, `${randomUUID()}.${ext}`)
       tempFiles.push(inputPath)
       await writeFile(inputPath, buffer)
@@ -252,9 +248,7 @@ export async function POST(request) {
         const partOutputPath = join(tmpDir, `${randomUUID()}_part${i + 1}.mp4`)
         tempFiles.push(partOutputPath)
         
-        const ffmpegCmd = `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${partDuration} -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k "${partOutputPath}"`
-        
-        await execAsync(ffmpegCmd, { maxBuffer: 100 * 1024 * 1024 })
+        await runMedia('ffmpeg', ['-y', '-ss', startTime, '-i', inputPath, '-t', partDuration, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', partOutputPath])
         
         const partBuffer = await readFile(partOutputPath)
         results.push({
@@ -277,9 +271,13 @@ export async function POST(request) {
     }
     
   } catch (error) {
+    if (error instanceof MediaInputError || error instanceof SyntaxError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+    }
     console.error('[Video Tools] Error:', error)
+    // Don't return ffmpeg/internal error text to the client
     return NextResponse.json(
-      { success: false, error: error.message || 'Video processing failed' },
+      { success: false, error: 'Video processing failed' },
       { status: 500 }
     )
   } finally {

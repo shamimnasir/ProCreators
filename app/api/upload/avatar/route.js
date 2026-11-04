@@ -5,7 +5,15 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { requireAuth } from '@/lib/auth-middleware'
-import { sanitizeFilename } from '@/lib/sanitize'
+
+// Identify JPEG/PNG/GIF/WebP by magic bytes; anything else is rejected
+function detectImageExt(buf) {
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg'
+  if (buf.length >= 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'png'
+  if (buf.length >= 6 && /^GIF8[79]a$/.test(buf.subarray(0, 6).toString('latin1'))) return 'gif'
+  if (buf.length >= 12 && buf.subarray(0, 4).toString('latin1') === 'RIFF' && buf.subarray(8, 12).toString('latin1') === 'WEBP') return 'webp'
+  return null
+}
 
 export async function POST(request) {
   try {
@@ -43,15 +51,18 @@ export async function POST(request) {
       // Directory might already exist
     }
     
-    // Generate unique filename - SECURITY: Sanitize extension
-    const originalExt = file.name.split('.').pop()
-    const ext = sanitizeFilename(originalExt).substring(0, 4) // Limit extension length
-    const filename = `${userId.substring(0, 36)}-${uuidv4()}.${ext}`
+    // SECURITY: the client controls file.type and file.name (an SVG sent as image/png would be
+    // served same-origin as image/svg+xml = stored XSS). Take the type from the file's bytes.
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const ext = detectImageExt(buffer)
+    if (!ext) {
+      return NextResponse.json({ success: false, error: 'Invalid file type' }, { status: 400 })
+    }
+    const filename = `${String(userId).replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 36)}-${uuidv4()}.${ext}`
     const filepath = path.join(uploadsDir, filename)
     
     // Save file
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
     await writeFile(filepath, buffer)
     
     // URL to access the file

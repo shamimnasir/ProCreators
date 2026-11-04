@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { resolvePublicPath } from '@/lib/public-path'
+import { safeFetch, UnsafeUrlError } from '@/lib/safe-fetch'
 import { getAuthenticatedUserId } from '@/lib/auth-middleware'
 import { writeFile, unlink, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
@@ -106,15 +108,16 @@ export async function POST(request) {
           let imageBuffer
           if (video.url.startsWith('/')) {
             // Local cached image - read from file system
-            const localPath = join(process.cwd(), 'public', video.url)
+            const localPath = resolvePublicPath(video.url)
+            if (!localPath) throw new Error('Invalid media path')
             const fs = require('fs')
             if (!fs.existsSync(localPath)) {
-              throw new Error(`Local image not found: ${localPath}`)
+              throw new Error('Local image not found')
             }
             imageBuffer = fs.readFileSync(localPath)
           } else {
             // External URL - fetch it
-            const response = await fetch(video.url)
+            const response = await safeFetch(video.url)
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}`)
             }
@@ -141,7 +144,10 @@ export async function POST(request) {
             const orderInfo = videoOrder[i]
             const textOverlay = orderInfo?.textOverlay
             if (textOverlay && textOverlay.text) {
-              const text = textOverlay.text.replace(/'/g, "\\'").replace(/:/g, "\\:")
+              // SECURITY: never splice user text into the filtergraph (a quote or comma could add
+              // filters, e.g. drawtext=textfile=/app/.env). Write it to a server-named file instead.
+              const textPath = `${videoPath}.txt`
+              require('fs').writeFileSync(textPath, String(textOverlay.text).slice(0, 300))
               const position = textOverlay.position || 'top'
               const color = textOverlay.color || 'yellow'
               const fontSize = 68 // Preview resolution (720p)
@@ -166,7 +172,7 @@ export async function POST(request) {
               const config = colorConfig[color] || colorConfig.yellow
               
               // VIRAL STYLE: Bold colored box
-              filterComplex += `,drawtext=text='${text}':fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
+              filterComplex += `,drawtext=textfile='${textPath}':expansion=none:fontsize=${fontSize}:fontcolor=${config.fontcolor}:x=(w-text_w)/2:y=${yPosition}:box=1:boxcolor=${config.boxcolor}:boxborderw=25`
               
             }
             
@@ -194,7 +200,8 @@ export async function POST(request) {
           // Handle regular video URL or local UGC video
           if (video.url.startsWith('/')) {
             // Local cached video (UGC) - copy from filesystem
-            const localPath = join(process.cwd(), 'public', video.url)
+            const localPath = resolvePublicPath(video.url)
+            if (!localPath) throw new Error('Invalid media path')
             const fs = require('fs')
             if (!fs.existsSync(localPath)) {
               throw new Error(`Local UGC video not found: ${localPath}`)
@@ -204,7 +211,7 @@ export async function POST(request) {
             videoFiles.push(videoPath)
           } else {
             // External stock video - download it
-            const response = await fetch(video.url, {
+            const response = await safeFetch(video.url, {
               headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; VideoComposer/1.0)'
               }

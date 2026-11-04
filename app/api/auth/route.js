@@ -140,7 +140,8 @@ export async function POST(request) {
       case 'verify': {
         const { token } = body
         
-        if (!token) {
+        // SECURITY: must be a string, or {"$ne": null} would match any user's token
+        if (typeof token !== 'string' || !token) {
           return NextResponse.json({ success: false, error: 'Verification token required' }, { status: 400 })
         }
         
@@ -329,7 +330,8 @@ export async function POST(request) {
       case 'reset_password': {
         const { token, newPassword } = body
         
-        if (!token || !newPassword) {
+        // SECURITY: must be strings, or {"$ne": null} would match any user with a live reset token
+        if (typeof token !== 'string' || !token || typeof newPassword !== 'string' || !newPassword) {
           return NextResponse.json({ success: false, error: 'Token and new password required' }, { status: 400 })
         }
         

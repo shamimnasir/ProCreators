@@ -141,7 +141,8 @@ export async function POST(request) {
           await endGeneration(userId)
         }
         
-        const result = await refundCredits(transactionId, reason || 'Generation failed')
+        // SECURITY: only the caller's own pending transaction, and only once (atomic in refundCredits)
+        const result = await refundCredits(String(transactionId), typeof reason === 'string' ? reason : 'Generation failed', { userId })
         return NextResponse.json(result)
       }
       
@@ -156,7 +157,7 @@ export async function POST(request) {
           await endGeneration(userId)
         }
         
-        const result = await completeTransaction(transactionId)
+        const result = await completeTransaction(String(transactionId), { userId })
         return NextResponse.json(result)
       }
       
@@ -176,7 +177,7 @@ export async function POST(request) {
     
   } catch (error) {
     console.error('Credit operation error:', error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Credit operation failed' }, { status: 500 })
   }
 }
 

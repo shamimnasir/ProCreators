@@ -2,9 +2,15 @@ import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { unlink } from 'fs/promises'
 import { existsSync } from 'fs'
-import { join } from 'path'
+import { isAuthorizedCron } from '@/lib/cron-auth'
+import { resolvePublicPath } from '@/lib/public-path'
+import { GENERATED_DIRS } from '@/lib/generated-dirs'
 
 export async function POST(request) {
+  // SECURITY: scheduled job only (was callable by anyone)
+  if (!isAuthorizedCron(request)) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const libraryCollection = await getCollection('library')
     const now = new Date()
@@ -17,8 +23,9 @@ export async function POST(request) {
     // Delete associated files
     for (const item of expiredItems) {
       if (item.filePath) {
-        const fullPath = join('/app/public', item.filePath)
-        if (existsSync(fullPath)) {
+        // SECURITY: only delete files inside the generated-content directories
+        const fullPath = resolvePublicPath(item.filePath, { allowedDirs: GENERATED_DIRS })
+        if (fullPath && existsSync(fullPath)) {
           try {
             await unlink(fullPath)
             } catch (fileError) {

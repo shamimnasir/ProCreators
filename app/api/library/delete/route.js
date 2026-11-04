@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getCollection } from '@/lib/mongodb'
 import { unlink } from 'fs/promises'
 import { existsSync } from 'fs'
-import { join } from 'path'
+import { resolvePublicPath } from '@/lib/public-path'
+import { GENERATED_DIRS } from '@/lib/generated-dirs'
 import { requireAuth } from '@/lib/auth-middleware'
 import { verifyCsrf } from '@/lib/csrf-verify'
 import { buildUserDelete } from '@/lib/tenant-isolation'
@@ -27,7 +28,7 @@ export async function DELETE(request) {
     const body = await request.json()
     const { id } = body
     
-    if (!id) {
+    if (!id || typeof id !== 'string') {
       return NextResponse.json(
         { success: false, error: 'Item ID is required' },
         { status: 400 }
@@ -57,8 +58,9 @@ export async function DELETE(request) {
 
     // Delete the associated file if it exists
     if (item.filePath) {
-      const fullPath = join('/app/public', item.filePath)
-      if (existsSync(fullPath)) {
+      // SECURITY: only delete files inside the generated-content directories
+      const fullPath = resolvePublicPath(item.filePath, { allowedDirs: GENERATED_DIRS })
+      if (fullPath && existsSync(fullPath)) {
         try {
           await unlink(fullPath)
         } catch (fileError) {

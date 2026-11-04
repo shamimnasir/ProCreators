@@ -128,9 +128,9 @@ export async function proxy(request) {
   // Allowlist is built from:
   //  - request host (same-origin)
   //  - process.env.NEXT_PUBLIC_BASE_URL (configured preview)
-  //  - process.env.CORS_ORIGINS (comma-separated, or "*" to allow ALL origins)
-  //  - procreators.io, www.procreators.io (production custom domain)
-  //  - localhost (dev)
+  //  - process.env.CORS_ORIGINS (comma-separated exact origins; '*' is ignored)
+    //  - procreators.io, www.procreators.io (production custom domain)
+  //  - localhost (development only)
   let allowedOrigin = null
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
@@ -140,10 +140,9 @@ export async function proxy(request) {
       const corsEnv = (process.env.CORS_ORIGINS || '').trim()
       let isAllowed = false
 
-      if (corsEnv === '*') {
-        // permissive mode
-        isAllowed = true
-      } else {
+      // SECURITY: '*' is not honoured. Allowed origins get credentialed CORS (cookies), so a
+      // wildcard would let any website act as the signed-in user. List exact origins instead.
+      {
         try {
           const originHost = new URL(origin).host
           const allowedHosts = new Set([host])
@@ -160,12 +159,15 @@ export async function proxy(request) {
             }
           }
 
+          // (Shared-hosting wildcards such as *.emergentagent.com were removed: anyone can host a
+          // page there. The app's own host is always allowed above as same-origin.)
+
           const TRUSTED_DOMAINS = ['procreators.io', 'www.procreators.io']
           if (TRUSTED_DOMAINS.includes(originHost)) {
             allowedHosts.add(originHost)
           }
 
-          if (originHost === 'localhost:3000' || originHost.startsWith('localhost:') || originHost.startsWith('127.0.0.1')) {
+          if (process.env.NODE_ENV !== 'production' && (originHost.startsWith('localhost:') || originHost.startsWith('127.0.0.1'))) {
             allowedHosts.add(originHost)
           }
 

@@ -62,6 +62,8 @@ export async function GET(request, { params }) {
 
   const headers = {
     'Content-Type': mimeType,
+    // Defense in depth for user-uploaded content: an SVG can carry script, so never let it run
+    ...(mimeType.startsWith('image/svg') ? { 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox" } : {}),
     'Accept-Ranges': 'bytes',
     'X-Content-Type-Options': 'nosniff',
     'Cache-Control': 'public, max-age=3600',
