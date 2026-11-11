@@ -219,6 +219,10 @@ credentials.json
 # Keep the committed template (must come after the .env.* rules above)
 !.env.example
 
+# Testing memory (contains admin credentials — do not deploy)
+memory/test_credentials.md
+.next/standalone/
+
 # Generated user output and uploads: kept on disk / in the deployment volume, never committed.
 # Shipped assets (public/fonts, public/music, public/video-editor, public/favicon.svg) stay tracked.
 public/activity-books/

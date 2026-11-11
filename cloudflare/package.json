@@ -1,0 +1,13 @@
+{
+    "name": "procreators-cloudflare",
+    "private": true,
+    "description": "Worker that runs the ProCreators Docker image on Cloudflare Containers",
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail"
+    },
+    "devDependencies": {
+        "@cloudflare/containers": "0.3.7",
+        "wrangler": "4.154.0"
+    }
+}

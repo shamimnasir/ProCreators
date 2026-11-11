@@ -58,8 +58,12 @@ export function Footer() {
   ]
 
   const resourceLinks = [
-    { label: 'Documentation', link: '/docs' },
     { label: 'Blog', link: '/blog' },
+    { label: 'Free KDP Niche Guide', link: '/blog/free-kdp-niche-research-guide-2026' },
+    { label: 'How to Publish Your First Ebook', link: '/blog/publish-first-ebook-amazon-kdp-7-days' },
+    { label: 'Amazon KDP Requirements Guide', link: '/blog/amazon-kdp-requirements-guide-2026' },
+    { label: 'Top-Selling Etsy Products', link: '/blog/best-selling-digital-products-etsy-2026' },
+    { label: 'Contact / Support', link: '/contact' },
     { label: 'FAQ', link: '/faq' },
   ]
 
