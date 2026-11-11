@@ -218,3 +218,25 @@ credentials.json
 
 # Keep the committed template (must come after the .env.* rules above)
 !.env.example
+
+# Generated user output and uploads: kept on disk / in the deployment volume, never committed.
+# Shipped assets (public/fonts, public/music, public/video-editor, public/favicon.svg) stay tracked.
+public/activity-books/
+public/checklists/
+public/coloring-books/
+public/ebooks/
+public/flashcards/
+public/generated/
+public/guides/
+public/journals/
+public/library/
+public/music-cache/
+public/notion-templates/
+public/planners/
+public/presentations/
+public/quizzes/
+public/recipe-books/
+public/storybooks/
+public/worksheets/
+public/ai-video-uploads/
+public/uploads/
